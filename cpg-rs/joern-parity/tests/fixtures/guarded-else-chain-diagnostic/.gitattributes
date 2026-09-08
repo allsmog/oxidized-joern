@@ -1,0 +1,6 @@
+# Retain complete oracle and diagnostic whitespace.
+*.txt -whitespace
+*.diff -whitespace
+*.stdout -whitespace
+*.stderr -whitespace
+*.log -whitespace

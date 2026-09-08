@@ -4,6 +4,48 @@ Single source of truth across iterations. Update in the same commit as the work.
 
 ## Current state
 
+- **Eighth measured Astra batch (2026-09-08 UTC).** Shared kept-branch
+  traversal now covers function-body statement emission, phantom discovery,
+  declaration shadows and typedef context. Existing `undef` readers accept
+  whitespace after `#`; inactive function headers retain macro/type snapshots
+  without activating their bodies. All **460 workspace tests** and unchanged
+  **308/308** committed and fresh Joern v4.0.555 comparisons pass, together
+  with 17 checker tests, formatting, strict Clippy, the 73-dependency audit,
+  native release/archive checks and repeated resource/update checks.
+  Official real-project acceptance also passes. Cache shape is **19**. The new family
+  retains **34 complete references: 9→30 exact**; all 30 exact projects are
+  fully gated and four complete diagnostics remain. Independent replay gains
+  623 raw matching records and loses one ordinal coincidence; the underlying
+  parameter-to-exit fact remains. Earlier candidate failures are retained,
+  and the inactive duplicate's location now matches Joern line 8.
+  All three actual zlib `snprintf` calls and their proper stub are restored.
+  Whole-project exact method ASTs improve **149→160 zlib / 1,431→1,434 Lua**;
+  strict primary methods **32→42 / 510→513**, bodies **40→42 / 537→540**, with
+  no formerly exact method or body lost. All 61 tracked earlier repair facts
+  and prior stubs remain. Raw matching-line losses **1,501/509** are retained
+  and reviewed with complete source-occurrence context; they are not hidden
+  by the exact-method totals. A separate two-project diagnostic preserves the
+  runtime else-chain split by `#endif`: no earlier correct CFG/RD occurrence
+  fact is lost, but five facts involving the new first branch remain missing.
+  Its ordinary exact control is replayed only, not a new production gate.
+  A provisional fixedtables CODE-regression claim was disproven by direct
+  comparison; all four identifier records were already wrong in the seventh
+  build and retain identical bytes. Failed checks and corrections remain.
+  Repeated builds pass at **6.53/6.47 seconds zlib / 5.84/5.87 seconds Lua**,
+  with peak build RSS **488.80/458.31 MiB** under unchanged ceilings.
+  Clean/update equivalence passes for **26/61** files. Exactly eight reviewed
+  manifest fields change: node counts and graph/edge/export hashes; all input,
+  license, exclusion, budget and zero-finding SARIF contracts remain unchanged.
+  See the [eighth report](../docs/conformance/astra-eighth-batch-2026-09-08.md),
+  [complete counters](../docs/conformance/astra-eighth-batch-metrics.json), and
+  [acceptance receipt](../docs/conformance/astra-eighth-batch-acceptance.json).
+  Full project and product parity remain incomplete. Next: one shared
+  source-order body-macro snapshot pass. Seventeen fresh complete projects,
+  two currently exact, pin macro effects across statements, C scopes, later
+  functions and includes. Keep recovery contexts and typedef scopes separate;
+  body-include lowering, cross-directive runtime chains, CODE transport and
+  broader parser/schema/query/non-C gaps remain explicit.
+
 - **Seventh measured Astra batch (2026-09-08 UTC).** Complete METHOD
   FULL_NAME values retain spaces in macro signatures and supplied filenames.
   Prefix collisions no longer attach CFG/ReachingDef origins to unrelated

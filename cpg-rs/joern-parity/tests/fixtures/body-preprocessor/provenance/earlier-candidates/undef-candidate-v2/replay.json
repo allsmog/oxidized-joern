@@ -1,0 +1,86 @@
+{
+  "binary": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/.local/body-preprocessor/candidate-v2/joern-parity",
+    "sha256": "ec0e9a2b864438d0c543c6c814f9824bc0f5820a47ee9f9f44ed8a946d6b82f7"
+  },
+  "cases": [
+    {
+      "case": "header_spaced_undef",
+      "group": "undef-boundaries",
+      "exitCode": 0,
+      "exact": false,
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/.local/body-preprocessor/candidate-v2/joern-parity",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/.local/body-preprocessor/undef-boundaries/input/header_spaced_undef/api.h",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/.local/body-preprocessor/undef-boundaries/input/header_spaced_undef/main.c"
+      ],
+      "seconds": 0.010802374992636032,
+      "inputHashes": {
+        "api.h": "6c686dcdd3f90c301989a4ac9103932d8822f2e92867542b894bcce8451ec515",
+        "main.c": "6cd550aa5afc505d95318f9a086ec54e89ca2846c03fa60836367c9d544683b2"
+      },
+      "expectedSha256": "9801f6edc6fcfcf169c2f527a96d315b16e5f64584cdd0b08a9fd6b6495b1287",
+      "actualSha256": "0d3297911a6e2ceae5572a208f4aa852857bff262cdbe7abe10881dbeb82a51a",
+      "diffSha256": "0cb19a86ed140d91f9b2a90732912a7ebe314c8bef0037ef1973531f10e54746",
+      "canonicalLinesIncludingSeparators": 152,
+      "nonemptySelectedRecords": 147
+    },
+    {
+      "case": "plain_undef",
+      "group": "undef-boundaries",
+      "exitCode": 0,
+      "exact": true,
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/.local/body-preprocessor/candidate-v2/joern-parity",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/.local/body-preprocessor/undef-boundaries/input/plain_undef/main.c"
+      ],
+      "seconds": 0.0037773750082124025,
+      "inputHashes": {
+        "main.c": "1beb332996059084858d26452f389b0b6bb43936e58dbae76136ccda191a9eed"
+      },
+      "expectedSha256": "659f0bb0e1fb0dbb672bcf80b3a15e6939529e1a87e66683d008d8aa07366148",
+      "actualSha256": "659f0bb0e1fb0dbb672bcf80b3a15e6939529e1a87e66683d008d8aa07366148",
+      "diffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "canonicalLinesIncludingSeparators": 135,
+      "nonemptySelectedRecords": 131
+    },
+    {
+      "case": "spaced_undef",
+      "group": "undef-boundaries",
+      "exitCode": 0,
+      "exact": false,
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/.local/body-preprocessor/candidate-v2/joern-parity",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/.local/body-preprocessor/undef-boundaries/input/spaced_undef/main.c"
+      ],
+      "seconds": 0.003958458008128218,
+      "inputHashes": {
+        "main.c": "0c0e092748ee2161ff7f6d727867d909bce54a29c1146508a324f3a5260bbd1b"
+      },
+      "expectedSha256": "659f0bb0e1fb0dbb672bcf80b3a15e6939529e1a87e66683d008d8aa07366148",
+      "actualSha256": "dcf4eb998baa1667a7fd720b83407a41e87f2290c35b912c24aba375797d785e",
+      "diffSha256": "c356c3dbca6c3214e04fbf80f514ab7480aa07059d2b335bf9db8c629d0dad02",
+      "canonicalLinesIncludingSeparators": 135,
+      "nonemptySelectedRecords": 131
+    },
+    {
+      "case": "tab_undef",
+      "group": "undef-boundaries",
+      "exitCode": 0,
+      "exact": false,
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/.local/body-preprocessor/candidate-v2/joern-parity",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/.local/body-preprocessor/undef-boundaries/input/tab_undef/main.c"
+      ],
+      "seconds": 0.0042457499948795885,
+      "inputHashes": {
+        "main.c": "132d7e84c61e3c1bf1023eceb01d450f0befb4ae62ea3a18cbee0c7c06ca2dce"
+      },
+      "expectedSha256": "659f0bb0e1fb0dbb672bcf80b3a15e6939529e1a87e66683d008d8aa07366148",
+      "actualSha256": "dcf4eb998baa1667a7fd720b83407a41e87f2290c35b912c24aba375797d785e",
+      "diffSha256": "c356c3dbca6c3214e04fbf80f514ab7480aa07059d2b335bf9db8c629d0dad02",
+      "canonicalLinesIncludingSeparators": 135,
+      "nonemptySelectedRecords": 131
+    }
+  ]
+}

@@ -1,0 +1,69 @@
+{
+  "command": [
+    "/Users/shayaunnejad/vibe-code/joern-oxidized/.local/astra-sprint/oracle/runtime/joern-cli/joern",
+    "--script",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/eighth-body-review/undef-token/oracle.sc",
+    "--param",
+    "inputPath=/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/eighth-body-review/undef-token/input"
+  ],
+  "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/eighth-body-review/undef-token/oracle-workspace",
+  "javaHome": "/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home",
+  "scriptSha256": "56431f14868678e64f9eb41026b44f1d3d7738404d28d2db62711b520c98c742",
+  "inputHashes": {
+    "comment_between": {
+      "main.c": "b75a240ce6afbdc7d996db32dee403769ada08efb4e4886756fa7335f394a3e0"
+    },
+    "spliced_keyword": {
+      "main.c": "64949cfc5597ab390ce0164d9dd05f5e6bb129e7182bf4cf3fcd70cc6470d2d4"
+    },
+    "formfeed_space": {
+      "main.c": "8f4f8b90713b9b1e132839032ef7f43f9a46d83d2d67b350f7da06b9f2df5ba5"
+    },
+    "unknown_directive": {
+      "main.c": "4029c4ca8dfaa837ba36f426a0a27aaf40f7c192d30f338af5234e64c04e4958"
+    },
+    "trailing_comment": {
+      "main.c": "69583b98f750cf97abab1877b1ed787fe13605d0fe3a8dc0b5397c4b24fdc1aa"
+    }
+  },
+  "joernVersion": "4.0.555",
+  "archiveSha256": "12989883d6b5aeacc97b2dc0ecc4e2951bf50e48cb244f8c8f333d11a8be0c7e",
+  "timeoutSeconds": 180,
+  "pid": 34132,
+  "exitCode": 0,
+  "wallSeconds": 9.132881164550781,
+  "rawStdoutSha256": "b62a3325e9c6c1a4bdfc7cb50e8b5957a125ba876169e2dc7d46da4cdb957e50",
+  "rawStderrSha256": "f88d1386637ad4d5c4322098d76a99b32cd2505d2fd870bf13a662234e2a4d73",
+  "projects": [
+    {
+      "case": "comment_between",
+      "canonicalLinesIncludingSeparators": 100,
+      "nonemptySelectedRecords": 97,
+      "expectedSha256": "ea434dcbfbaea4fd56a7c0e37fb256679ed9d7bdfdd9c54a4ded12ccc9a7d32b"
+    },
+    {
+      "case": "formfeed_space",
+      "canonicalLinesIncludingSeparators": 100,
+      "nonemptySelectedRecords": 97,
+      "expectedSha256": "ea434dcbfbaea4fd56a7c0e37fb256679ed9d7bdfdd9c54a4ded12ccc9a7d32b"
+    },
+    {
+      "case": "spliced_keyword",
+      "canonicalLinesIncludingSeparators": 100,
+      "nonemptySelectedRecords": 97,
+      "expectedSha256": "ea434dcbfbaea4fd56a7c0e37fb256679ed9d7bdfdd9c54a4ded12ccc9a7d32b"
+    },
+    {
+      "case": "trailing_comment",
+      "canonicalLinesIncludingSeparators": 100,
+      "nonemptySelectedRecords": 97,
+      "expectedSha256": "ea434dcbfbaea4fd56a7c0e37fb256679ed9d7bdfdd9c54a4ded12ccc9a7d32b"
+    },
+    {
+      "case": "unknown_directive",
+      "canonicalLinesIncludingSeparators": 101,
+      "nonemptySelectedRecords": 98,
+      "expectedSha256": "a9904a40a5961b61dd48027fd43d8fca49ca3eb22d5df8f3589c3dda4d9bb8a8"
+    }
+  ]
+}

@@ -1,0 +1,84 @@
+{
+  "binary": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/.local/body-preprocessor/candidate-v3/joern-parity",
+    "sha256": "2597039339170dc43598561ca12fdf2d3eb078bdb6ff3f14b8eac7b9e4b5e086"
+  },
+  "cases": [
+    {
+      "case": "inactive_header_directives",
+      "group": "inactive-header",
+      "exitCode": 0,
+      "exact": false,
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/.local/body-preprocessor/candidate-v3/joern-parity",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/.local/body-preprocessor/inactive-header/input/inactive_header_directives/main.c"
+      ],
+      "seconds": 0.009046958002727479,
+      "inputHashes": {
+        "main.c": "fddfae80f877a0801b1db4fdfc1df1b3390ad28c08d6e42974494c0518a7af49"
+      },
+      "expectedSha256": "f8148674f925e0fffca171de0d08310427442fd01efba6d0ddf8bb853497f0fe",
+      "actualSha256": "038e8fad9f991a76416d0308617847d705a8da2bc67f67fe36ea440e873f0288",
+      "diffSha256": "d524a6cefb34e3bfdce2a466c5c75f3d8b31677773ecc22b2987113c72abc9aa",
+      "canonicalLinesIncludingSeparators": 86,
+      "nonemptySelectedRecords": 83
+    },
+    {
+      "case": "inactive_header_source_order",
+      "group": "inactive-header",
+      "exitCode": 0,
+      "exact": false,
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/.local/body-preprocessor/candidate-v3/joern-parity",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/.local/body-preprocessor/inactive-header/input/inactive_header_source_order/main.c"
+      ],
+      "seconds": 0.004316124992328696,
+      "inputHashes": {
+        "main.c": "18c471e241733aab7ec39e3f4d72f55dcbadd5c37efb5e3d0cbd6410231d064a"
+      },
+      "expectedSha256": "bedb2b0ef2d6d6eb373d002420206a57fd18e6848627957bd0f6bb21c990b538",
+      "actualSha256": "8e670e0e9daceccb57756b0dfae8de36bd4b285c35cec2780133a4c0dd0c087a",
+      "diffSha256": "f4ccc9fbfbf1d88c226dc3cde567490e735af105253519c5afaf1383a316164f",
+      "canonicalLinesIncludingSeparators": 125,
+      "nonemptySelectedRecords": 121
+    },
+    {
+      "case": "inactive_macro_prefix",
+      "group": "inactive-header",
+      "exitCode": 0,
+      "exact": false,
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/.local/body-preprocessor/candidate-v3/joern-parity",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/.local/body-preprocessor/inactive-header/input/inactive_macro_prefix/main.c"
+      ],
+      "seconds": 0.004417959004058503,
+      "inputHashes": {
+        "main.c": "912ee86625e132c2d0192e011fb8dd5ff6fd4e6d32ddc3ba5c994793371f5a80"
+      },
+      "expectedSha256": "eb9390869c8baa0f1a77a42f1fe4e4b79b497ca5ff525c709b1927e89e087e07",
+      "actualSha256": "c57a8ee79db0d8a6e526226fdbeb9a30ab424a41899393129cafe327245ad4da",
+      "diffSha256": "179fecad3eccd9070dd399babe41076254a716d31c18c0acced0129088a0e7ba",
+      "canonicalLinesIncludingSeparators": 92,
+      "nonemptySelectedRecords": 89
+    },
+    {
+      "case": "inactive_macro_return",
+      "group": "inactive-header",
+      "exitCode": 0,
+      "exact": false,
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/.local/body-preprocessor/candidate-v3/joern-parity",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/.local/body-preprocessor/inactive-header/input/inactive_macro_return/main.c"
+      ],
+      "seconds": 0.0034909590031020343,
+      "inputHashes": {
+        "main.c": "0c184c5c719ca715bc2b57710c8c8d97650af96960a1934cba4638e467cb8e25"
+      },
+      "expectedSha256": "0871dd6ab84beaa2864b6c20068e1a36dc4a78e191a3764f8730582aad886c6f",
+      "actualSha256": "038e8fad9f991a76416d0308617847d705a8da2bc67f67fe36ea440e873f0288",
+      "diffSha256": "83230b242ef39a439da6277f19f0027591c70c6ff35a89fc4d7e172f28c88656",
+      "canonicalLinesIncludingSeparators": 91,
+      "nonemptySelectedRecords": 88
+    }
+  ]
+}

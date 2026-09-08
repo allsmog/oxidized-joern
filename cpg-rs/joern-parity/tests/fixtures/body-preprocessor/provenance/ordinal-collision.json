@@ -1,0 +1,80 @@
+{
+  "status": "ONE_RAW_MATCHING_LINE_LOST_WITH_DIFFERENT_ENDPOINT_KINDS",
+  "rawLine": "FLOWS|REACHING_DEF[x] choose#1 -> choose#5",
+  "baseline": {
+    "source": {
+      "address": "choose#1",
+      "record": "METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1",
+      "ancestors": [
+        "choose#0"
+      ]
+    },
+    "target": {
+      "address": "choose#5",
+      "record": "METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3",
+      "ancestors": [
+        "choose#0"
+      ]
+    }
+  },
+  "joernSameRawAddress": {
+    "source": {
+      "address": "choose#1",
+      "record": "METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1",
+      "ancestors": [
+        "choose#0"
+      ]
+    },
+    "target": {
+      "address": "choose#5",
+      "record": "IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1",
+      "ancestors": [
+        "choose#0",
+        "choose#3",
+        "choose#4"
+      ]
+    }
+  },
+  "candidateSameRawAddress": {
+    "source": {
+      "address": "choose#1",
+      "record": "METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1",
+      "ancestors": [
+        "choose#0"
+      ]
+    },
+    "target": {
+      "address": "choose#5",
+      "record": "LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=1",
+      "ancestors": [
+        "choose#0",
+        "choose#3",
+        "choose#4"
+      ]
+    }
+  },
+  "retainedSourceOccurrence": {
+    "line": "FLOWS|REACHING_DEF[x] choose#1 -> choose#6",
+    "candidateTarget": {
+      "address": "choose#6",
+      "record": "METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3",
+      "ancestors": [
+        "choose#0"
+      ]
+    },
+    "joernTarget": {
+      "address": "choose#6",
+      "record": "METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3",
+      "ancestors": [
+        "choose#0"
+      ]
+    }
+  },
+  "classification": "The baseline target is METHOD_RETURN; the coincident live address identifies the return expression IDENTIFIER x. The candidate preserves the parameter-to-METHOD_RETURN fact at #6. Body-local #define remains unsupported, so the complete candidate still incorrectly emits return 0, and its full diagnostic is retained. This does not claim raw-record loss is zero.",
+  "bindings": {
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/.local/body-preprocessor/primary/input/local_definition/main.c": "5e4b9f11c86743b408483ceb47c5e1dc078c6b493018ec57095f58b6cbd7dd78",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/.local/body-preprocessor/all24-baseline/local_definition/actual.txt": "6f90a14d2f9b8efee1464dc09df9a61ffa811cf6c4cea56e9b2a6647a90e1dfe",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/.local/body-preprocessor/all28-candidate-v4/local_definition/actual.txt": "22483368954c812bf6ffd898471efe2311ac2bc0ac9d2b72430dd4fe92ea3b8f",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/.local/body-preprocessor/primary/input/local_definition/expected.txt": "1e3dca8eea1a14311a33a386f3f15e73d72d9a3241ca9daadfa884f8f46ed790"
+  }
+}

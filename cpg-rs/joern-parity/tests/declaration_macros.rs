@@ -124,9 +124,9 @@ fn multiline_empty_prefix_and_conditional_duplicates_keep_separate_source_ranges
     let cpg = project.cpg;
     for (full, method_line, parameter_line, return_line) in [
         ("same", 3, 3, Some(4)),
-        // Preserved baseline raw-prefix anchoring: Joern reports line 8 for
-        // this inactive method/exit. This assertion is not location parity.
-        ("same<duplicate>0", 7, 8, None),
+        // Inactive headers retain the macro context too. The empty prefix is
+        // removed, matching line 8 in provenance/review-conditional-live.stdout.
+        ("same<duplicate>0", 8, 8, None),
         ("same<duplicate>1", 13, 13, Some(14)),
     ] {
         let method = cpg

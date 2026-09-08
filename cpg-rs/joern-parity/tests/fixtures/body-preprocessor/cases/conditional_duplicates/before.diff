@@ -1,0 +1,79 @@
+--- joern
++++ before
+@@ -18,11 +18,11 @@
+       RETURN CODE=return x; ORDER=1
+         IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1
+     METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+-  METHOD NAME=same CODE=int same(int x) {\n  return x + 1;\n} FULL_NAME=same<duplicate>0 SIGNATURE=int(int) ORDER=1
++  METHOD NAME=same CODE=API\nint same(int x) {\n  return x + 1;\n} FULL_NAME=same<duplicate>0 SIGNATURE=API(int) ORDER=1
+     METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+     METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+     BLOCK CODE={\n  return x + 1;\n} TYPE_FULL_NAME=void ORDER=2
+-    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
++    METHOD_RETURN CODE=RET TYPE_FULL_NAME=API ORDER=3
+   METHOD NAME=same CODE=int same(int x) {\n  return x + 2;\n} FULL_NAME=same<duplicate>1 SIGNATURE=int(int) ORDER=1
+     METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+     METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+@@ -46,11 +46,11 @@
+       IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+ 
+-METHOD NAME=same CODE=int same(int x) {\n  return x + 1;\n} FULL_NAME=same<duplicate>0 SIGNATURE=int(int) ORDER=1
++METHOD NAME=same CODE=API\nint same(int x) {\n  return x + 1;\n} FULL_NAME=same<duplicate>0 SIGNATURE=API(int) ORDER=1
+   METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+   METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+   BLOCK CODE={\n  return x + 1;\n} TYPE_FULL_NAME=void ORDER=2
+-  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
++  METHOD_RETURN CODE=RET TYPE_FULL_NAME=API ORDER=3
+ 
+ METHOD NAME=same CODE=int same(int x) {\n  return x + 2;\n} FULL_NAME=same<duplicate>1 SIGNATURE=int(int) ORDER=1
+   METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+@@ -71,6 +71,7 @@
+ NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=locations.c:<global> FILENAME=locations.c ORDER=1
+ NODES|NAMESPACE NAME=<global>
+ NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
++NODES|TYPE_DECL NAME=API FULL_NAME=API CODE=API IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE_DECL NAME=<global> FULL_NAME=locations.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=locations.c:<global> FILENAME=locations.c ORDER=1
+ NODES|TYPE_DECL NAME=same FULL_NAME=same CODE=same AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=locations.c:<global> FILENAME=locations.c ORDER=1
+@@ -78,6 +79,7 @@
+ NODES|TYPE_DECL NAME=same FULL_NAME=same<duplicate>1 CODE=same AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=locations.c:<global> FILENAME=locations.c ORDER=1
+ NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
++NODES|TYPE NAME=API FULL_NAME=API TYPE_DECL_FULL_NAME=API
+ NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+ NODES|TYPE NAME=same FULL_NAME=same TYPE_DECL_FULL_NAME=same
+ NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+@@ -109,6 +111,7 @@
+ EDGES|CONTAINS D:locations.c:<global> -> locations.c:<global>#0
+ EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+ EDGES|CONTAINS F:<includes> -> D:ANY
++EDGES|CONTAINS F:<includes> -> D:API
+ EDGES|CONTAINS F:<includes> -> D:int
+ EDGES|CONTAINS F:<includes> -> D:void
+ EDGES|CONTAINS F:locations.c -> D:locations.c:<global>
+@@ -149,7 +152,7 @@
+ EDGES|EVAL_TYPE same<duplicate>0#1 -> T:int
+ EDGES|EVAL_TYPE same<duplicate>0#2 -> T:int
+ EDGES|EVAL_TYPE same<duplicate>0#3 -> T:void
+-EDGES|EVAL_TYPE same<duplicate>0#4 -> T:int
++EDGES|EVAL_TYPE same<duplicate>0#4 -> T:API
+ EDGES|EVAL_TYPE same<duplicate>1#1 -> T:int
+ EDGES|EVAL_TYPE same<duplicate>1#2 -> T:int
+ EDGES|EVAL_TYPE same<duplicate>1#3 -> T:void
+@@ -166,6 +169,7 @@
+ EDGES|REF NB:<includes>:<global> -> NS:<global>
+ EDGES|REF NB:locations.c:<global> -> NS:<global>
+ EDGES|REF T:ANY -> D:ANY
++EDGES|REF T:API -> D:API
+ EDGES|REF T:int -> D:int
+ EDGES|REF T:same -> D:same
+ EDGES|REF T:void -> D:void
+@@ -176,6 +180,7 @@
+ EDGES|REF same<duplicate>1#6 -> same<duplicate>1#1
+ EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+ EDGES|SOURCE_FILE D:ANY -> F:<includes>
++EDGES|SOURCE_FILE D:API -> F:<includes>
+ EDGES|SOURCE_FILE D:int -> F:<includes>
+ EDGES|SOURCE_FILE D:locations.c:<global> -> F:locations.c
+ EDGES|SOURCE_FILE D:same -> F:locations.c

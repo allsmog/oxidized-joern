@@ -1,0 +1,97 @@
+--- joern
++++ candidate-v1-results
+@@ -6,7 +6,6 @@
+   METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+   METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+   BLOCK CODE={\n#if 0\n int value = 0;\n#endif\n return value;\n} TYPE_FULL_NAME=void ORDER=2
+-    LOCAL NAME=value CODE=<global> value TYPE_FULL_NAME=int ORDER=0
+     RETURN CODE=return value; ORDER=1
+       IDENTIFIER NAME=value CODE=<global> value TYPE_FULL_NAME=int ORDER=1
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+@@ -16,7 +15,6 @@
+     METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+     METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+     BLOCK CODE={\n#if 0\n int value = 0;\n#endif\n return value;\n} TYPE_FULL_NAME=void ORDER=2
+-      LOCAL NAME=value CODE=<global> value TYPE_FULL_NAME=int ORDER=0
+       RETURN CODE=return value; ORDER=1
+         IDENTIFIER NAME=value CODE=<global> value TYPE_FULL_NAME=int ORDER=1
+     METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+@@ -42,13 +40,13 @@
+ NODES|TYPE NAME=f FULL_NAME=f TYPE_DECL_FULL_NAME=f
+ NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+ NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+-EDGES|ARGUMENT f#5 -> f#6
++EDGES|ARGUMENT f#4 -> f#5
+ EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+-EDGES|CFG f#0 -> f#6
+-EDGES|CFG f#5 -> f#7
+-EDGES|CFG f#6 -> f#5
+-EDGES|CFG main.c:<global>#0 -> main.c:<global>#11
+-EDGES|CFG main.c:<global>#11 -> main.c:<global>#12
++EDGES|CFG f#0 -> f#5
++EDGES|CFG f#4 -> f#6
++EDGES|CFG f#5 -> f#4
++EDGES|CFG main.c:<global>#0 -> main.c:<global>#10
++EDGES|CFG main.c:<global>#10 -> main.c:<global>#11
+ EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+ EDGES|CONTAINS D:main.c:<global> -> D:f
+ EDGES|CONTAINS D:main.c:<global> -> main.c:<global>#0
+@@ -58,23 +56,22 @@
+ EDGES|CONTAINS F:<includes> -> D:void
+ EDGES|CONTAINS F:main.c -> D:main.c:<global>
+ EDGES|CONTAINS f#0 -> f#3
++EDGES|CONTAINS f#0 -> f#4
+ EDGES|CONTAINS f#0 -> f#5
+-EDGES|CONTAINS f#0 -> f#6
+ EDGES|CONTAINS main.c:<global>#0 -> f#0
+-EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#11
+-EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#9
++EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#10
++EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#8
+ EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+ EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+ EDGES|EVAL_TYPE f#1 -> T:void
+ EDGES|EVAL_TYPE f#2 -> T:void
+ EDGES|EVAL_TYPE f#3 -> T:void
+-EDGES|EVAL_TYPE f#4 -> T:int
++EDGES|EVAL_TYPE f#5 -> T:int
+ EDGES|EVAL_TYPE f#6 -> T:int
+-EDGES|EVAL_TYPE f#7 -> T:int
+-EDGES|EVAL_TYPE main.c:<global>#10 -> T:int
+-EDGES|EVAL_TYPE main.c:<global>#11 -> T:f
+-EDGES|EVAL_TYPE main.c:<global>#12 -> T:ANY
+-EDGES|EVAL_TYPE main.c:<global>#9 -> T:ANY
++EDGES|EVAL_TYPE main.c:<global>#10 -> T:f
++EDGES|EVAL_TYPE main.c:<global>#11 -> T:ANY
++EDGES|EVAL_TYPE main.c:<global>#8 -> T:ANY
++EDGES|EVAL_TYPE main.c:<global>#9 -> T:int
+ EDGES|PARAMETER_LINK f#1 -> f#2
+ EDGES|REF NB:<global> -> NS:<global>
+ EDGES|REF NB:<includes>:<global> -> NS:<global>
+@@ -83,8 +80,7 @@
+ EDGES|REF T:f -> D:f
+ EDGES|REF T:int -> D:int
+ EDGES|REF T:void -> D:void
+-EDGES|REF f#6 -> f#4
+-EDGES|REF main.c:<global>#11 -> f#0
++EDGES|REF main.c:<global>#10 -> f#0
+ EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+ EDGES|SOURCE_FILE D:ANY -> F:<includes>
+ EDGES|SOURCE_FILE D:f -> F:main.c
+@@ -96,11 +92,11 @@
+ EDGES|SOURCE_FILE NB:main.c:<global> -> F:main.c
+ EDGES|SOURCE_FILE f#0 -> F:main.c
+ EDGES|SOURCE_FILE main.c:<global>#0 -> F:main.c
+-FLOWS|REACHING_DEF[<RET>] f#5 -> f#7
+-FLOWS|REACHING_DEF[<global> value] f#6 -> f#5
++FLOWS|REACHING_DEF[<RET>] f#4 -> f#6
++FLOWS|REACHING_DEF[<global> value] f#5 -> f#4
+ FLOWS|REACHING_DEF[] f#0 -> f#1
++FLOWS|REACHING_DEF[] f#0 -> f#4
+ FLOWS|REACHING_DEF[] f#0 -> f#5
+-FLOWS|REACHING_DEF[] f#0 -> f#6
+ FLOWS|REACHING_DEF[] f#1 -> f#2
+-FLOWS|REACHING_DEF[] f#1 -> f#7
+-FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#11
++FLOWS|REACHING_DEF[] f#1 -> f#6
++FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#10

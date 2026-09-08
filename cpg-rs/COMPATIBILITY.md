@@ -107,8 +107,24 @@ changing AST, node or flow records. Property-like text in CODE and filenames
 still exposes separate transport limitations, including five retained importer
 abort cases. Neither complete real-project projection is exact.
 
+The [eighth batch](../docs/conformance/astra-eighth-batch-2026-09-08.md)
+extends selected function-body preprocessor branches across statement emission,
+phantom discovery, declaration shadows and typedef context. It also recognizes
+spaced `undef` directives and retains inactive function-header snapshots.
+Thirty of 34 complete new fixture projects are exact and fully gated; four
+complete diagnostics remain. All three real zlib `snprintf` calls and the
+proper stub are restored. Whole-project exact method ASTs improve to 160 on
+zlib and 1,434 on Lua, with no formerly exact method or primary body lost.
+A separate complete diagnostic pins runtime `else`/`if` chains crossing an
+`#endif`: the newly emitted first branch remains incompletely connected.
+Its ordinary exact control was replayed, not added as a production gate.
+Supplied body includes remain incompletely lowered; the `fixedtables` array
+and identifier type/CODE gaps predate this batch. Both full project graphs
+still differ from Joern.
+
 Confirmed remaining C gaps include broader include/build-definition context,
-function-like macros in preprocessor conditions, block-level directives,
+function-like macros in preprocessor conditions, body-local macro updates,
+body includes and runtime control chains split by preprocessor directives,
 variadics, stringification, token pasting, unbraced multi-statement replacements,
 unpinned initializer and field-designator forms, tagged and alias type
 resolution, nested macro expansion and recovery-context behavior, and further

@@ -1,0 +1,55 @@
+METHOD NAME=gzdopen CODE=gzFile ZEXPORT gzdopen(int fd, const char *mode) {\n    char *path;         /* identifier for error messages */\n    gzFile gz;\n\n    if (fd == -1 || (path = (char *)malloc(7 + 3 * sizeof(int))) == NULL)\n        return NULL;\n#if !defined(NO_snprintf) && !defined(NO_vsnprintf)\n    (void)snprintf(path, 7 + 3 * sizeof(int), "<fd:%d>", fd);\n#else\n    sprintf(path, "<fd:%d>", fd);   /* for debugging */\n#endif\n    gz = gz_open(path, fd, mode);\n    free(path);\n    return gz;\n} FULL_NAME=gzdopen SIGNATURE=gzFile(int,char*) ORDER=1
+  METHOD_PARAMETER_IN NAME=fd CODE=int fd TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=fd CODE=int fd TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_IN NAME=mode CODE=const char *mode TYPE_FULL_NAME=char* ORDER=2
+  METHOD_PARAMETER_OUT NAME=mode CODE=const char *mode TYPE_FULL_NAME=char* ORDER=2
+  BLOCK CODE={\n    char *path;         /* identifier for error messages */\n    gzFile gz;\n\n    if (fd == -1 || (path = (char *)malloc(7 + 3 * sizeof(int))) == NULL)\n        return NULL;\n#if !defined(NO_snprintf) && !defined(NO_vsnprintf)\n    (void)snprintf(path, 7 + 3 * sizeof(int), "<fd:%d>", fd);\n#else\n    sprintf(path, "<fd:%d>", fd);   /* for debugging */\n#endif\n    gz = gz_open(path, fd, mode);\n    free(path);\n    return gz;\n} TYPE_FULL_NAME=void ORDER=3
+    LOCAL NAME=int CODE=int TYPE_FULL_NAME=int ORDER=0
+    LOCAL NAME=NULL CODE=<unknown> NULL TYPE_FULL_NAME=ANY ORDER=0
+    LOCAL NAME=path CODE=char *path TYPE_FULL_NAME=char* ORDER=1
+    LOCAL NAME=gz CODE=gzFile gz TYPE_FULL_NAME=gzFile ORDER=2
+    CONTROL_STRUCTURE CODE=if (fd == -1 || (path = (char *)malloc(7 + 3 * sizeof(int))) == NULL)\n        return NULL; ORDER=3
+      CALL NAME=<operator>.logicalOr CODE=fd == -1 || (path = (char *)malloc(7 + 3 * sizeof(int))) == NULL TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.logicalOr ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+        CALL NAME=<operator>.equals CODE=fd == -1 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.equals ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=fd CODE=fd TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+          CALL NAME=<operator>.minus CODE=-1 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.minus ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+            LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+        CALL NAME=<operator>.equals CODE=(path = (char *)malloc(7 + 3 * sizeof(int))) == NULL TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.equals ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+          CALL NAME=<operator>.assignment CODE=path = (char *)malloc(7 + 3 * sizeof(int)) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+            IDENTIFIER NAME=path CODE=path TYPE_FULL_NAME=char* ORDER=1 ARGUMENT_INDEX=1
+            CALL NAME=<operator>.cast CODE=(char *)malloc(7 + 3 * sizeof(int)) TYPE_FULL_NAME=char METHOD_FULL_NAME=<operator>.cast ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+              TYPE_REF CODE=char * TYPE_FULL_NAME=char ORDER=1 ARGUMENT_INDEX=1
+              CALL NAME=malloc CODE=malloc(7 + 3 * sizeof(int)) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=malloc ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+                CALL NAME=<operator>.addition CODE=7 + 3 * sizeof(int) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                  LITERAL CODE=7 TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+                  CALL NAME=<operator>.multiplication CODE=3 * sizeof(int) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.multiplication ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+                    LITERAL CODE=3 TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+                    CALL NAME=<operator>.sizeOf CODE=sizeof(int) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.sizeOf ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+                      IDENTIFIER NAME=int CODE=int TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+          IDENTIFIER NAME=NULL CODE=<unknown> NULL TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+      BLOCK TYPE_FULL_NAME=ANY ORDER=2
+        RETURN CODE=return NULL; ORDER=1
+          IDENTIFIER NAME=NULL CODE=<unknown> NULL TYPE_FULL_NAME=ANY ORDER=1
+    CALL NAME=<operator>.cast CODE=(void)snprintf(path, 7 + 3 * sizeof(int), "<fd:%d>", fd) TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.cast ORDER=4 DISPATCH_TYPE=STATIC_DISPATCH
+      TYPE_REF CODE=void TYPE_FULL_NAME=void ORDER=1 ARGUMENT_INDEX=1
+      CALL NAME=snprintf CODE=snprintf(path, 7 + 3 * sizeof(int), "<fd:%d>", fd) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=snprintf ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=path CODE=path TYPE_FULL_NAME=char* ORDER=1 ARGUMENT_INDEX=1
+        CALL NAME=<operator>.addition CODE=7 + 3 * sizeof(int) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+          LITERAL CODE=7 TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+          CALL NAME=<operator>.multiplication CODE=3 * sizeof(int) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.multiplication ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+            LITERAL CODE=3 TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+            CALL NAME=<operator>.sizeOf CODE=sizeof(int) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.sizeOf ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+              IDENTIFIER NAME=int CODE=int TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+        LITERAL CODE="<fd:%d>" TYPE_FULL_NAME=char* ORDER=3 ARGUMENT_INDEX=3
+        IDENTIFIER NAME=fd CODE=fd TYPE_FULL_NAME=int ORDER=4 ARGUMENT_INDEX=4
+    CALL NAME=<operator>.assignment CODE=gz = gz_open(path, fd, mode) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=5 DISPATCH_TYPE=STATIC_DISPATCH
+      IDENTIFIER NAME=gz CODE=gz TYPE_FULL_NAME=gzFile ORDER=1 ARGUMENT_INDEX=1
+      CALL NAME=gz_open CODE=gz_open(path, fd, mode) TYPE_FULL_NAME=gzFile_s* METHOD_FULL_NAME=gz_open ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=path CODE=path TYPE_FULL_NAME=char* ORDER=1 ARGUMENT_INDEX=1
+        IDENTIFIER NAME=fd CODE=fd TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+        IDENTIFIER NAME=mode CODE=mode TYPE_FULL_NAME=char* ORDER=3 ARGUMENT_INDEX=3
+    CALL NAME=free CODE=free(path) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=free ORDER=6 DISPATCH_TYPE=STATIC_DISPATCH
+      IDENTIFIER NAME=path CODE=path TYPE_FULL_NAME=char* ORDER=1 ARGUMENT_INDEX=1
+    RETURN CODE=return gz; ORDER=7
+      IDENTIFIER NAME=gz CODE=gz TYPE_FULL_NAME=gzFile ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=gzFile ORDER=4

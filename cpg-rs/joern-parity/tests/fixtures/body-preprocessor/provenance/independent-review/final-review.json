@@ -1,0 +1,1564 @@
+{
+  "status": "PASS_BOUNDED_SOURCE_AND_COMPLETE_FIXTURE_REVIEW",
+  "source": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/eighth-body-review/frozen-v4/exact.rs",
+    "sha256": "8b132fab7d079a97e774b10d5b1f14c1a1df4f093ef8f437ebfcaadfdde33b3b"
+  },
+  "binary": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/eighth-body-review/frozen-v4/joern-parity",
+    "sha256": "575397f4a349231a559641e6ca12e76ed4fc42e6e1bc77e8ffeb12cb30f48b4a"
+  },
+  "baselineSource": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/seventh-batch/final-real-differential/bin/source/cpg-rs/cpg-lang-c/src/exact.rs",
+    "sha256": "652e7331fb55ca41d8f0697e3274cc42ed82681ba0ade993a33f0a9fac6bc12b"
+  },
+  "baselineBinary": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/seventh-batch/final-real-differential/bin/joern-parity",
+    "sha256": "d4503d37b2a7a37df7c3d58520fea9d943530bce323bd1909032f102e9640f8b"
+  },
+  "sourcePatch": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/.local/body-preprocessor/source-v4.patch",
+    "sha256": "70b6e80832561c76a60e6709fcfcef3fdcd810ad7f11b157b5de9af58612f031"
+  },
+  "metadata": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/measurement.json",
+    "sha256": "1a4ad3fed9e92745419163559e04ea62e11f83b2093f26d3ff6dfc3783ab21be"
+  },
+  "readme": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/README.md",
+    "sha256": "b2c17df26ffff97186d2ef5d965adff1e7d72661202b963da223920447f71401"
+  },
+  "productionTest": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/body_preprocessor.rs",
+    "sha256": "ed5345653b0df501199d54e6279231154d483bc371875ba955339006507859e1"
+  },
+  "locationTest": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/declaration_macros.rs",
+    "sha256": "ccf46995a0b6214318bce7180347eac027956fd20293aa05d5e7bf26efdd097c"
+  },
+  "cases": 34,
+  "baselineExact": 9,
+  "candidateExact": 30,
+  "exactGates": 30,
+  "canonicalLinesIncludingSeparators": 4371,
+  "nonemptySelectedRecords": 4247,
+  "formerlyExactGraphsLost": 0,
+  "rawPreviouslyMatchingSelectedRecordsLost": [
+    {
+      "case": "local_definition",
+      "record": "FLOWS|REACHING_DEF[x] choose#1 -> choose#5"
+    }
+  ],
+  "rawMatchingRecordsGained": 623,
+  "rawExtractionAllReferencesExact": true,
+  "provenanceHashesVerified": 411,
+  "protectedSourceChecks": {
+    "importerByteIdentical": true,
+    "DNodeParserCfgRdAndCaptureTailByteIdentical": true
+  },
+  "sourceReview": [
+    {
+      "line": 7759,
+      "finding": "kept_preproc_children uses immutable function-entry snapshots and existing evaluator; no source-state mutation; only selected branch children pass to statements, phantom discovery, declaration discovery and existing type-site traversal."
+    },
+    {
+      "line": 4919,
+      "finding": "Inactive function headers receive snapshots at their node; this arm does not recurse into bodies or apply directives, so inactive declaration typing is repaired without activating bodies."
+    },
+    {
+      "line": 5326,
+      "finding": "Shared undef token accepts trim whitespace only when directive node and exact undef token match; unknown undefine negative control remains unchanged. Comments/splices/form-feed parser boundaries remain full diagnostics."
+    }
+  ],
+  "independentReceipts": [
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/eighth-body-review/v4-replay.json",
+      "sha256": "d7ba6565dce6edc5c45709c884bd30bd913b0ad49e348ad3e47b8c476faa778d"
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/eighth-body-review/ordinal-collision-review.json",
+      "sha256": "60173ade59572a28a49f4bc755f7562702ebab5eb36478291a0519e8d8f20113"
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/eighth-body-review/location-review.json",
+      "sha256": "1efdc58bda828506ce74af20b4dded5aa8efa361fb62bee447911dc2072b7465"
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/eighth-body-review/undef-token-review.json",
+      "sha256": "efacf2ef6a6e76211a974611c775571c3d39caa2037e3e668f4656838d978de1"
+    }
+  ],
+  "independentFocusedTests": [
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/eighth-body-review/body-tests-final.log",
+      "sha256": "31f5bc274bec7daca1935d20274bc078760b4103cfcc93262e09911a174040ec"
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/eighth-body-review/location-tests-final.log",
+      "sha256": "1e5298165453297534102bc81d73086c9966cc3a6d905cd7e9e6b4fe48deda53"
+    }
+  ],
+  "focusedTestExecutables": [
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/target/debug/deps/body_preprocessor-9871f30e9e9a18a1",
+      "sha256": "b9736555e86c8f967d5a4663e79fefcbd85f352af7098618fa0c58689489c0ea"
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/target/debug/deps/declaration_macros-55c28d9b973576aa",
+      "sha256": "2fab2bc2a8e8336a09f389593572ea3042af53a5e2f9bc20644fd7f50b546c18"
+    }
+  ],
+  "testScope": "Current executables independently ran two body tests covering all30 exact gates and four declaration/location tests. Each of the34 cases also independently replayed against frozen baseline and candidate binaries. No broad build or whole producer was run by this review.",
+  "savedPreviewClaimsReview": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/eighth-body-review/preview-claims-review.json",
+    "sha256": "1a3040cf954084146afa6075ea18d0265588b6ad295984e4c39b1a3d4742ae2f"
+  },
+  "limits": [
+    "The complete body-local define diagnostic selects return0 where Joern selects returnx; it is not repaired. The single raw matching flow loss is an endpoint ordinal coincidence, not zero raw losses.",
+    "Comment-separated, form-feed and spliced-keyword undef controls remain byte-identical to the accepted baseline and nonexact.",
+    "Line3/8/13 assertion scope is supported by live metadata; no complete column-number parity claim.",
+    "Whole-project preview measurements remain implementer evidence pending separate root frozen integration and acceptance. No full-port claim."
+  ],
+  "casesReviewed": [
+    {
+      "case": "definition_positions",
+      "baselineExact": false,
+      "candidateExact": true,
+      "rawMatchingRecordsLost": 0,
+      "rawMatchingRecordsGained": 49,
+      "sourceHashes": {
+        "main.c": "8bb6c0b3916762e657623faf2ce4cea40fced3e366c82d0bbebb66498238e700"
+      },
+      "reference": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/cases/definition_positions/expected.txt",
+        "sha256": "8380ae6c3c15cdbe20c19e3ebff46e7d66a88a72c990137890691e449759d7c6"
+      },
+      "baseline": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/cases/definition_positions/before.txt",
+        "sha256": "ea8226616aebfcb46a1e9b02e95fb22bd1a8bb9cd8d33ce4440f0a7bca6925a1"
+      },
+      "candidate": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/cases/definition_positions/actual.txt",
+        "sha256": "8380ae6c3c15cdbe20c19e3ebff46e7d66a88a72c990137890691e449759d7c6"
+      }
+    },
+    {
+      "case": "if_elif",
+      "baselineExact": false,
+      "candidateExact": true,
+      "rawMatchingRecordsLost": 0,
+      "rawMatchingRecordsGained": 26,
+      "sourceHashes": {
+        "main.c": "07781c94f401da35277c33f0ced73a38e911a0125dae699bb34ffd82261cdec4"
+      },
+      "reference": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/cases/if_elif/expected.txt",
+        "sha256": "d831ba07436a4888c7e2c1456ff8ef1070dbb9efb8978418a96009cd38fa5932"
+      },
+      "baseline": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/cases/if_elif/before.txt",
+        "sha256": "06707a73930a42faa7db747d9ddf51630297d6f903f448e6b4f972b7ba0aec90"
+      },
+      "candidate": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/cases/if_elif/actual.txt",
+        "sha256": "d831ba07436a4888c7e2c1456ff8ef1070dbb9efb8978418a96009cd38fa5932"
+      }
+    },
+    {
+      "case": "if_else",
+      "baselineExact": false,
+      "candidateExact": true,
+      "rawMatchingRecordsLost": 0,
+      "rawMatchingRecordsGained": 37,
+      "sourceHashes": {
+        "main.c": "9fc848d24c97a5ccd496c2294342153c7345011cb53e0ece1961f4e9876415a6"
+      },
+      "reference": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/cases/if_else/expected.txt",
+        "sha256": "bc57bfb048cac94035c629a217d383e94b5f80eda65941b2e7db3736e173979d"
+      },
+      "baseline": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/cases/if_else/before.txt",
+        "sha256": "27359d805f55672e020867b11afc86cfb5da75154916a56665af6c2f5d9c1a14"
+      },
+      "candidate": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/cases/if_else/actual.txt",
+        "sha256": "bc57bfb048cac94035c629a217d383e94b5f80eda65941b2e7db3736e173979d"
+      }
+    },
+    {
+      "case": "if_true",
+      "baselineExact": false,
+      "candidateExact": true,
+      "rawMatchingRecordsLost": 0,
+      "rawMatchingRecordsGained": 27,
+      "sourceHashes": {
+        "main.c": "af784933662453a75dd2e732436217ac3162ce4f19d9ee33105e5ab1bcaed4f9"
+      },
+      "reference": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/cases/if_true/expected.txt",
+        "sha256": "5bed152671144ca63cd94614bd3fac522e26006ea129c9fee29be2e7053deaec"
+      },
+      "baseline": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/cases/if_true/before.txt",
+        "sha256": "c2801ef45b3b45db0f87836e5ddb5235cdd6ed10203f1750ddd279bd44b73e2b"
+      },
+      "candidate": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/cases/if_true/actual.txt",
+        "sha256": "5bed152671144ca63cd94614bd3fac522e26006ea129c9fee29be2e7053deaec"
+      }
+    },
+    {
+      "case": "ifndef_control",
+      "baselineExact": true,
+      "candidateExact": true,
+      "rawMatchingRecordsLost": 0,
+      "rawMatchingRecordsGained": 0,
+      "sourceHashes": {
+        "main.c": "cafdc75e151334d5218d34ce4fe85b2ccc849b276fc49afcf16192da06dd2010"
+      },
+      "reference": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/cases/ifndef_control/expected.txt",
+        "sha256": "aaa6ab7f120cb1ff5a98bbd5c21249e42aca602abd379754bceeccba6de1a14d"
+      },
+      "baseline": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/cases/ifndef_control/before.txt",
+        "sha256": "aaa6ab7f120cb1ff5a98bbd5c21249e42aca602abd379754bceeccba6de1a14d"
+      },
+      "candidate": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/cases/ifndef_control/actual.txt",
+        "sha256": "aaa6ab7f120cb1ff5a98bbd5c21249e42aca602abd379754bceeccba6de1a14d"
+      }
+    },
+    {
+      "case": "inactive_call_only",
+      "baselineExact": true,
+      "candidateExact": true,
+      "rawMatchingRecordsLost": 0,
+      "rawMatchingRecordsGained": 0,
+      "sourceHashes": {
+        "main.c": "d187eb9745e9286cc53ee74259fde170dcdabe88c07b93dabab363374166b233"
+      },
+      "reference": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/cases/inactive_call_only/expected.txt",
+        "sha256": "ba71844b939dcc052857acf01381c3136522f513d58a7859c5a0024655b6c2ce"
+      },
+      "baseline": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/cases/inactive_call_only/before.txt",
+        "sha256": "ba71844b939dcc052857acf01381c3136522f513d58a7859c5a0024655b6c2ce"
+      },
+      "candidate": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/cases/inactive_call_only/actual.txt",
+        "sha256": "ba71844b939dcc052857acf01381c3136522f513d58a7859c5a0024655b6c2ce"
+      }
+    },
+    {
+      "case": "inactive_phantoms",
+      "baselineExact": false,
+      "candidateExact": true,
+      "rawMatchingRecordsLost": 0,
+      "rawMatchingRecordsGained": 25,
+      "sourceHashes": {
+        "main.c": "646bc353b45ebd8a04297df6038efaff132695b1d17a0b8ca1f26b5d1fc53c2f"
+      },
+      "reference": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/cases/inactive_phantoms/expected.txt",
+        "sha256": "48de61d459fd75fcedbdc7b99f738e898300db55186dfb5b051eedd5ad60343a"
+      },
+      "baseline": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/cases/inactive_phantoms/before.txt",
+        "sha256": "c0d88f7cd916935c29f1f1cf9850752cc0ade628e946d4a2a70f0224058f17be"
+      },
+      "candidate": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/cases/inactive_phantoms/actual.txt",
+        "sha256": "48de61d459fd75fcedbdc7b99f738e898300db55186dfb5b051eedd5ad60343a"
+      }
+    },
+    {
+      "case": "local_definition",
+      "baselineExact": false,
+      "candidateExact": false,
+      "rawMatchingRecordsLost": 1,
+      "rawMatchingRecordsGained": 17,
+      "sourceHashes": {
+        "main.c": "5e4b9f11c86743b408483ceb47c5e1dc078c6b493018ec57095f58b6cbd7dd78"
+      },
+      "reference": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/cases/local_definition/expected.txt",
+        "sha256": "1e3dca8eea1a14311a33a386f3f15e73d72d9a3241ca9daadfa884f8f46ed790"
+      },
+      "baseline": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/cases/local_definition/before.txt",
+        "sha256": "6f90a14d2f9b8efee1464dc09df9a61ffa811cf6c4cea56e9b2a6647a90e1dfe"
+      },
+      "candidate": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/cases/local_definition/actual.txt",
+        "sha256": "22483368954c812bf6ffd898471efe2311ac2bc0ac9d2b72430dd4fe92ea3b8f"
+      }
+    },
+    {
+      "case": "plain_call_control",
+      "baselineExact": true,
+      "candidateExact": true,
+      "rawMatchingRecordsLost": 0,
+      "rawMatchingRecordsGained": 0,
+      "sourceHashes": {
+        "main.c": "eac74b391f5eab7cfa411720d6a3f6522b115ec5806b0c64c17dc959f2eeddb5"
+      },
+      "reference": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/cases/plain_call_control/expected.txt",
+        "sha256": "323e0879f4641beefcdae6d050f6e6d234a164aed4de73f4ee90b27458f4a328"
+      },
+      "baseline": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/cases/plain_call_control/before.txt",
+        "sha256": "323e0879f4641beefcdae6d050f6e6d234a164aed4de73f4ee90b27458f4a328"
+      },
+      "candidate": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/cases/plain_call_control/actual.txt",
+        "sha256": "323e0879f4641beefcdae6d050f6e6d234a164aed4de73f4ee90b27458f4a328"
+      }
+    },
+    {
+      "case": "snprintf_defined",
+      "baselineExact": false,
+      "candidateExact": true,
+      "rawMatchingRecordsLost": 0,
+      "rawMatchingRecordsGained": 150,
+      "sourceHashes": {
+        "main.c": "f8998c5d56cc86c8df76bef9d5031db968790c0322e96c1a7359341bff622338"
+      },
+      "reference": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/cases/snprintf_defined/expected.txt",
+        "sha256": "a9a8a97c19b0fc5d9073275825472736705bf829924cf86bcfa5ba3deaf55e0c"
+      },
+      "baseline": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/cases/snprintf_defined/before.txt",
+        "sha256": "67c1995c8aa262633e95675c06a0bc673ea7fabef504d3f405cc0ffa1559ec25"
+      },
+      "candidate": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/cases/snprintf_defined/actual.txt",
+        "sha256": "a9a8a97c19b0fc5d9073275825472736705bf829924cf86bcfa5ba3deaf55e0c"
+      }
+    },
+    {
+      "case": "builtin_body_condition",
+      "baselineExact": false,
+      "candidateExact": true,
+      "rawMatchingRecordsLost": 0,
+      "rawMatchingRecordsGained": 23,
+      "sourceHashes": {
+        "main.c": "78d50d31b5cde40bbf62fd052eb2de87000571761b39bbd3590fdd0cdf3a572f"
+      },
+      "reference": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/cases/builtin_body_condition/expected.txt",
+        "sha256": "8026f38ba1c1d3b5ff298556b61cab296e3da3c5760b734212c6a90e1f070e96"
+      },
+      "baseline": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/cases/builtin_body_condition/before.txt",
+        "sha256": "4cd4da88c94222edd81500af66013d3161d52e98e41118dd145c5d3b099a0cb9"
+      },
+      "candidate": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/cases/builtin_body_condition/actual.txt",
+        "sha256": "8026f38ba1c1d3b5ff298556b61cab296e3da3c5760b734212c6a90e1f070e96"
+      }
+    },
+    {
+      "case": "header_positions",
+      "baselineExact": false,
+      "candidateExact": true,
+      "rawMatchingRecordsLost": 0,
+      "rawMatchingRecordsGained": 41,
+      "sourceHashes": {
+        "api.h": "7d406f17bc190d8bc555a2d3d3e3c4eea926d3427db073ca8e8ef62cab1fb32e",
+        "main.c": "4955f959d035ba6ff448fff77ee6234dee17e7c59ed9217004166c0660f3e67b"
+      },
+      "reference": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/cases/header_positions/expected.txt",
+        "sha256": "d722c9aee18923d96d0831825aa1143189366a95f9a592825adf8368da006b70"
+      },
+      "baseline": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/cases/header_positions/before.txt",
+        "sha256": "cb6b2308963ed692a5705f8d7ec9be1ff3dcb5f2f94bbf5c3db95cd16de5de92"
+      },
+      "candidate": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/cases/header_positions/actual.txt",
+        "sha256": "d722c9aee18923d96d0831825aa1143189366a95f9a592825adf8368da006b70"
+      }
+    },
+    {
+      "case": "ifdef_elif",
+      "baselineExact": false,
+      "candidateExact": true,
+      "rawMatchingRecordsLost": 0,
+      "rawMatchingRecordsGained": 26,
+      "sourceHashes": {
+        "main.c": "616c882e8d76400502ce5d56913917a59b63acf6dc81ba4dddb737663205c22f"
+      },
+      "reference": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/cases/ifdef_elif/expected.txt",
+        "sha256": "7863db95e6f041ee3af56ed1e729156e0bb23c1871ec06006a5b91d72cd1887f"
+      },
+      "baseline": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/cases/ifdef_elif/before.txt",
+        "sha256": "197039074e92630079907c7afa164faff04472287490948ca130f37ae24d6865"
+      },
+      "candidate": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/cases/ifdef_elif/actual.txt",
+        "sha256": "7863db95e6f041ee3af56ed1e729156e0bb23c1871ec06006a5b91d72cd1887f"
+      }
+    },
+    {
+      "case": "inactive_local_shadow",
+      "baselineExact": false,
+      "candidateExact": true,
+      "rawMatchingRecordsLost": 0,
+      "rawMatchingRecordsGained": 24,
+      "sourceHashes": {
+        "main.c": "c16c5e2ce03b3f5805a5a0e0f7d05b1a3fc22a976cbe9ac85f79c01ec24fc34d"
+      },
+      "reference": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/cases/inactive_local_shadow/expected.txt",
+        "sha256": "702c77a35359992a8837efdf318f3e862eb5c1bf705e0097aa5b562907fc08ca"
+      },
+      "baseline": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/cases/inactive_local_shadow/before.txt",
+        "sha256": "d651ba09f504054fca179a0d0de4956760535a5838481eab5665d4e8bb77d1c3"
+      },
+      "candidate": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/cases/inactive_local_shadow/actual.txt",
+        "sha256": "702c77a35359992a8837efdf318f3e862eb5c1bf705e0097aa5b562907fc08ca"
+      }
+    },
+    {
+      "case": "inactive_typedef_shadow",
+      "baselineExact": true,
+      "candidateExact": true,
+      "rawMatchingRecordsLost": 0,
+      "rawMatchingRecordsGained": 0,
+      "sourceHashes": {
+        "main.c": "0ca71f2c8f28c1f8a9ab7e4759f4800408270eeb3c037e120d594feda913ba27"
+      },
+      "reference": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/cases/inactive_typedef_shadow/expected.txt",
+        "sha256": "5c844c628852390eac456c215448e4d8ae257d3668af1f1d4e79ba214b8ff424"
+      },
+      "baseline": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/cases/inactive_typedef_shadow/before.txt",
+        "sha256": "5c844c628852390eac456c215448e4d8ae257d3668af1f1d4e79ba214b8ff424"
+      },
+      "candidate": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/cases/inactive_typedef_shadow/actual.txt",
+        "sha256": "5c844c628852390eac456c215448e4d8ae257d3668af1f1d4e79ba214b8ff424"
+      }
+    },
+    {
+      "case": "nested_conditionals",
+      "baselineExact": false,
+      "candidateExact": true,
+      "rawMatchingRecordsLost": 0,
+      "rawMatchingRecordsGained": 23,
+      "sourceHashes": {
+        "main.c": "89c43a5bac71789387e1f1277061bdf9f34ab9fcbba046a3b6a6e5841cc694ef"
+      },
+      "reference": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/cases/nested_conditionals/expected.txt",
+        "sha256": "e15069e2ba96a4e0a8a9c85b598c286674bd625cea206fcbb8a366eb4622e5e0"
+      },
+      "baseline": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/cases/nested_conditionals/before.txt",
+        "sha256": "e9f647aa1be6cac09fd438e436b490217a3b263105524b76d63b038f1d3af3c4"
+      },
+      "candidate": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/cases/nested_conditionals/actual.txt",
+        "sha256": "e15069e2ba96a4e0a8a9c85b598c286674bd625cea206fcbb8a366eb4622e5e0"
+      }
+    },
+    {
+      "case": "header_spaced_undef",
+      "baselineExact": true,
+      "candidateExact": true,
+      "rawMatchingRecordsLost": 0,
+      "rawMatchingRecordsGained": 0,
+      "sourceHashes": {
+        "api.h": "6c686dcdd3f90c301989a4ac9103932d8822f2e92867542b894bcce8451ec515",
+        "main.c": "6cd550aa5afc505d95318f9a086ec54e89ca2846c03fa60836367c9d544683b2"
+      },
+      "reference": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/cases/header_spaced_undef/expected.txt",
+        "sha256": "9801f6edc6fcfcf169c2f527a96d315b16e5f64584cdd0b08a9fd6b6495b1287"
+      },
+      "baseline": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/cases/header_spaced_undef/before.txt",
+        "sha256": "9801f6edc6fcfcf169c2f527a96d315b16e5f64584cdd0b08a9fd6b6495b1287"
+      },
+      "candidate": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/cases/header_spaced_undef/actual.txt",
+        "sha256": "9801f6edc6fcfcf169c2f527a96d315b16e5f64584cdd0b08a9fd6b6495b1287"
+      }
+    },
+    {
+      "case": "plain_undef",
+      "baselineExact": true,
+      "candidateExact": true,
+      "rawMatchingRecordsLost": 0,
+      "rawMatchingRecordsGained": 0,
+      "sourceHashes": {
+        "main.c": "1beb332996059084858d26452f389b0b6bb43936e58dbae76136ccda191a9eed"
+      },
+      "reference": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/cases/plain_undef/expected.txt",
+        "sha256": "659f0bb0e1fb0dbb672bcf80b3a15e6939529e1a87e66683d008d8aa07366148"
+      },
+      "baseline": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/cases/plain_undef/before.txt",
+        "sha256": "659f0bb0e1fb0dbb672bcf80b3a15e6939529e1a87e66683d008d8aa07366148"
+      },
+      "candidate": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/cases/plain_undef/actual.txt",
+        "sha256": "659f0bb0e1fb0dbb672bcf80b3a15e6939529e1a87e66683d008d8aa07366148"
+      }
+    },
+    {
+      "case": "spaced_undef",
+      "baselineExact": true,
+      "candidateExact": true,
+      "rawMatchingRecordsLost": 0,
+      "rawMatchingRecordsGained": 0,
+      "sourceHashes": {
+        "main.c": "0c0e092748ee2161ff7f6d727867d909bce54a29c1146508a324f3a5260bbd1b"
+      },
+      "reference": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/cases/spaced_undef/expected.txt",
+        "sha256": "659f0bb0e1fb0dbb672bcf80b3a15e6939529e1a87e66683d008d8aa07366148"
+      },
+      "baseline": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/cases/spaced_undef/before.txt",
+        "sha256": "659f0bb0e1fb0dbb672bcf80b3a15e6939529e1a87e66683d008d8aa07366148"
+      },
+      "candidate": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/cases/spaced_undef/actual.txt",
+        "sha256": "659f0bb0e1fb0dbb672bcf80b3a15e6939529e1a87e66683d008d8aa07366148"
+      }
+    },
+    {
+      "case": "tab_undef",
+      "baselineExact": true,
+      "candidateExact": true,
+      "rawMatchingRecordsLost": 0,
+      "rawMatchingRecordsGained": 0,
+      "sourceHashes": {
+        "main.c": "132d7e84c61e3c1bf1023eceb01d450f0befb4ae62ea3a18cbee0c7c06ca2dce"
+      },
+      "reference": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/cases/tab_undef/expected.txt",
+        "sha256": "659f0bb0e1fb0dbb672bcf80b3a15e6939529e1a87e66683d008d8aa07366148"
+      },
+      "baseline": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/cases/tab_undef/before.txt",
+        "sha256": "659f0bb0e1fb0dbb672bcf80b3a15e6939529e1a87e66683d008d8aa07366148"
+      },
+      "candidate": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/cases/tab_undef/actual.txt",
+        "sha256": "659f0bb0e1fb0dbb672bcf80b3a15e6939529e1a87e66683d008d8aa07366148"
+      }
+    },
+    {
+      "case": "define_after_undef",
+      "baselineExact": false,
+      "candidateExact": true,
+      "rawMatchingRecordsLost": 0,
+      "rawMatchingRecordsGained": 26,
+      "sourceHashes": {
+        "main.c": "44e131b96a87cb2aca19fa419c755c3b31bb16c7750dfa97b249574f2eaf9aa0"
+      },
+      "reference": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/cases/define_after_undef/expected.txt",
+        "sha256": "3cd20d02402cf2348391acb6a302f337aec9b177db60fa3f2acb21ac7fea01d4"
+      },
+      "baseline": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/cases/define_after_undef/before.txt",
+        "sha256": "a528aef5c8ce07ed94385c59d40a03f43bf70d6cf4450ecdcef97c29e390b468"
+      },
+      "candidate": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/cases/define_after_undef/actual.txt",
+        "sha256": "3cd20d02402cf2348391acb6a302f337aec9b177db60fa3f2acb21ac7fea01d4"
+      }
+    },
+    {
+      "case": "inactive_undef",
+      "baselineExact": false,
+      "candidateExact": true,
+      "rawMatchingRecordsLost": 0,
+      "rawMatchingRecordsGained": 26,
+      "sourceHashes": {
+        "main.c": "9c38e9046da79dde887b2f1c47f47f256a58365987ee26f9f7376ea8e6883763"
+      },
+      "reference": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/cases/inactive_undef/expected.txt",
+        "sha256": "3cd20d02402cf2348391acb6a302f337aec9b177db60fa3f2acb21ac7fea01d4"
+      },
+      "baseline": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/cases/inactive_undef/before.txt",
+        "sha256": "a528aef5c8ce07ed94385c59d40a03f43bf70d6cf4450ecdcef97c29e390b468"
+      },
+      "candidate": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/cases/inactive_undef/actual.txt",
+        "sha256": "3cd20d02402cf2348391acb6a302f337aec9b177db60fa3f2acb21ac7fea01d4"
+      }
+    },
+    {
+      "case": "undef_source_order",
+      "baselineExact": false,
+      "candidateExact": true,
+      "rawMatchingRecordsLost": 0,
+      "rawMatchingRecordsGained": 31,
+      "sourceHashes": {
+        "main.c": "b34b9d1c0db93087f16e8a2107a41750cd70ad924222ce70d8333af5664cf0a8"
+      },
+      "reference": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/cases/undef_source_order/expected.txt",
+        "sha256": "3e64cdcb4b74c368130b7d33d0e37c0f39e0587890b4666a4e960f8099ab7abf"
+      },
+      "baseline": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/cases/undef_source_order/before.txt",
+        "sha256": "5d40a056c6d1ce64c1116979070363124eac2dccd2bc7538f2e06d03fcaaa390"
+      },
+      "candidate": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/cases/undef_source_order/actual.txt",
+        "sha256": "3e64cdcb4b74c368130b7d33d0e37c0f39e0587890b4666a4e960f8099ab7abf"
+      }
+    },
+    {
+      "case": "unknown_undef",
+      "baselineExact": false,
+      "candidateExact": true,
+      "rawMatchingRecordsLost": 0,
+      "rawMatchingRecordsGained": 26,
+      "sourceHashes": {
+        "main.c": "4b27520666285da880ed887309314b220e60641deb88415c5a79717ecdc66e81"
+      },
+      "reference": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/cases/unknown_undef/expected.txt",
+        "sha256": "3cd20d02402cf2348391acb6a302f337aec9b177db60fa3f2acb21ac7fea01d4"
+      },
+      "baseline": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/cases/unknown_undef/before.txt",
+        "sha256": "a528aef5c8ce07ed94385c59d40a03f43bf70d6cf4450ecdcef97c29e390b468"
+      },
+      "candidate": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/cases/unknown_undef/actual.txt",
+        "sha256": "3cd20d02402cf2348391acb6a302f337aec9b177db60fa3f2acb21ac7fea01d4"
+      }
+    },
+    {
+      "case": "inactive_header_directives",
+      "baselineExact": false,
+      "candidateExact": true,
+      "rawMatchingRecordsLost": 0,
+      "rawMatchingRecordsGained": 5,
+      "sourceHashes": {
+        "main.c": "fddfae80f877a0801b1db4fdfc1df1b3390ad28c08d6e42974494c0518a7af49"
+      },
+      "reference": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/cases/inactive_header_directives/expected.txt",
+        "sha256": "f8148674f925e0fffca171de0d08310427442fd01efba6d0ddf8bb853497f0fe"
+      },
+      "baseline": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/cases/inactive_header_directives/before.txt",
+        "sha256": "038e8fad9f991a76416d0308617847d705a8da2bc67f67fe36ea440e873f0288"
+      },
+      "candidate": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/cases/inactive_header_directives/actual.txt",
+        "sha256": "f8148674f925e0fffca171de0d08310427442fd01efba6d0ddf8bb853497f0fe"
+      }
+    },
+    {
+      "case": "inactive_header_source_order",
+      "baselineExact": false,
+      "candidateExact": true,
+      "rawMatchingRecordsLost": 0,
+      "rawMatchingRecordsGained": 15,
+      "sourceHashes": {
+        "main.c": "18c471e241733aab7ec39e3f4d72f55dcbadd5c37efb5e3d0cbd6410231d064a"
+      },
+      "reference": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/cases/inactive_header_source_order/expected.txt",
+        "sha256": "bedb2b0ef2d6d6eb373d002420206a57fd18e6848627957bd0f6bb21c990b538"
+      },
+      "baseline": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/cases/inactive_header_source_order/before.txt",
+        "sha256": "8e670e0e9daceccb57756b0dfae8de36bd4b285c35cec2780133a4c0dd0c087a"
+      },
+      "candidate": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/cases/inactive_header_source_order/actual.txt",
+        "sha256": "bedb2b0ef2d6d6eb373d002420206a57fd18e6848627957bd0f6bb21c990b538"
+      }
+    },
+    {
+      "case": "inactive_macro_prefix",
+      "baselineExact": false,
+      "candidateExact": true,
+      "rawMatchingRecordsLost": 0,
+      "rawMatchingRecordsGained": 5,
+      "sourceHashes": {
+        "main.c": "912ee86625e132c2d0192e011fb8dd5ff6fd4e6d32ddc3ba5c994793371f5a80"
+      },
+      "reference": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/cases/inactive_macro_prefix/expected.txt",
+        "sha256": "eb9390869c8baa0f1a77a42f1fe4e4b79b497ca5ff525c709b1927e89e087e07"
+      },
+      "baseline": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/cases/inactive_macro_prefix/before.txt",
+        "sha256": "c57a8ee79db0d8a6e526226fdbeb9a30ab424a41899393129cafe327245ad4da"
+      },
+      "candidate": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/cases/inactive_macro_prefix/actual.txt",
+        "sha256": "eb9390869c8baa0f1a77a42f1fe4e4b79b497ca5ff525c709b1927e89e087e07"
+      }
+    },
+    {
+      "case": "inactive_macro_return",
+      "baselineExact": false,
+      "candidateExact": true,
+      "rawMatchingRecordsLost": 0,
+      "rawMatchingRecordsGained": 10,
+      "sourceHashes": {
+        "main.c": "0c184c5c719ca715bc2b57710c8c8d97650af96960a1934cba4638e467cb8e25"
+      },
+      "reference": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/cases/inactive_macro_return/expected.txt",
+        "sha256": "0871dd6ab84beaa2864b6c20068e1a36dc4a78e191a3764f8730582aad886c6f"
+      },
+      "baseline": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/cases/inactive_macro_return/before.txt",
+        "sha256": "038e8fad9f991a76416d0308617847d705a8da2bc67f67fe36ea440e873f0288"
+      },
+      "candidate": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/cases/inactive_macro_return/actual.txt",
+        "sha256": "0871dd6ab84beaa2864b6c20068e1a36dc4a78e191a3764f8730582aad886c6f"
+      }
+    },
+    {
+      "case": "conditional_duplicates",
+      "baselineExact": false,
+      "candidateExact": true,
+      "rawMatchingRecordsLost": 0,
+      "rawMatchingRecordsGained": 5,
+      "sourceHashes": {
+        "locations.c": "dc9a677f1553fdcf7188329042e1d3691249cab9bcd9fbb93ca7a2f0e6077377"
+      },
+      "reference": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/cases/conditional_duplicates/expected.txt",
+        "sha256": "ccb274b0aac243a9ccd4d61de4fe5a1d25c9950341837d47b85d694a0fe82055"
+      },
+      "baseline": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/cases/conditional_duplicates/before.txt",
+        "sha256": "f02331cfe1f30f961acb9fa1a802ff068b31420f786a928dcb140f36ed80f71d"
+      },
+      "candidate": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/cases/conditional_duplicates/actual.txt",
+        "sha256": "ccb274b0aac243a9ccd4d61de4fe5a1d25c9950341837d47b85d694a0fe82055"
+      }
+    },
+    {
+      "case": "comment_between",
+      "baselineExact": false,
+      "candidateExact": false,
+      "rawMatchingRecordsLost": 0,
+      "rawMatchingRecordsGained": 0,
+      "sourceHashes": {
+        "main.c": "b75a240ce6afbdc7d996db32dee403769ada08efb4e4886756fa7335f394a3e0"
+      },
+      "reference": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/cases/comment_between/expected.txt",
+        "sha256": "ea434dcbfbaea4fd56a7c0e37fb256679ed9d7bdfdd9c54a4ded12ccc9a7d32b"
+      },
+      "baseline": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/cases/comment_between/before.txt",
+        "sha256": "a83cafc3067a43136a30e5211698a749cb4c47cbbe5a2cb0c7d951036515a447"
+      },
+      "candidate": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/cases/comment_between/actual.txt",
+        "sha256": "a83cafc3067a43136a30e5211698a749cb4c47cbbe5a2cb0c7d951036515a447"
+      }
+    },
+    {
+      "case": "formfeed_space",
+      "baselineExact": false,
+      "candidateExact": false,
+      "rawMatchingRecordsLost": 0,
+      "rawMatchingRecordsGained": 0,
+      "sourceHashes": {
+        "main.c": "8f4f8b90713b9b1e132839032ef7f43f9a46d83d2d67b350f7da06b9f2df5ba5"
+      },
+      "reference": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/cases/formfeed_space/expected.txt",
+        "sha256": "ea434dcbfbaea4fd56a7c0e37fb256679ed9d7bdfdd9c54a4ded12ccc9a7d32b"
+      },
+      "baseline": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/cases/formfeed_space/before.txt",
+        "sha256": "a83cafc3067a43136a30e5211698a749cb4c47cbbe5a2cb0c7d951036515a447"
+      },
+      "candidate": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/cases/formfeed_space/actual.txt",
+        "sha256": "a83cafc3067a43136a30e5211698a749cb4c47cbbe5a2cb0c7d951036515a447"
+      }
+    },
+    {
+      "case": "spliced_keyword",
+      "baselineExact": false,
+      "candidateExact": false,
+      "rawMatchingRecordsLost": 0,
+      "rawMatchingRecordsGained": 0,
+      "sourceHashes": {
+        "main.c": "64949cfc5597ab390ce0164d9dd05f5e6bb129e7182bf4cf3fcd70cc6470d2d4"
+      },
+      "reference": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/cases/spliced_keyword/expected.txt",
+        "sha256": "ea434dcbfbaea4fd56a7c0e37fb256679ed9d7bdfdd9c54a4ded12ccc9a7d32b"
+      },
+      "baseline": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/cases/spliced_keyword/before.txt",
+        "sha256": "a9904a40a5961b61dd48027fd43d8fca49ca3eb22d5df8f3589c3dda4d9bb8a8"
+      },
+      "candidate": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/cases/spliced_keyword/actual.txt",
+        "sha256": "a9904a40a5961b61dd48027fd43d8fca49ca3eb22d5df8f3589c3dda4d9bb8a8"
+      }
+    },
+    {
+      "case": "trailing_comment",
+      "baselineExact": false,
+      "candidateExact": true,
+      "rawMatchingRecordsLost": 0,
+      "rawMatchingRecordsGained": 6,
+      "sourceHashes": {
+        "main.c": "69583b98f750cf97abab1877b1ed787fe13605d0fe3a8dc0b5397c4b24fdc1aa"
+      },
+      "reference": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/cases/trailing_comment/expected.txt",
+        "sha256": "ea434dcbfbaea4fd56a7c0e37fb256679ed9d7bdfdd9c54a4ded12ccc9a7d32b"
+      },
+      "baseline": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/cases/trailing_comment/before.txt",
+        "sha256": "a9904a40a5961b61dd48027fd43d8fca49ca3eb22d5df8f3589c3dda4d9bb8a8"
+      },
+      "candidate": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/cases/trailing_comment/actual.txt",
+        "sha256": "ea434dcbfbaea4fd56a7c0e37fb256679ed9d7bdfdd9c54a4ded12ccc9a7d32b"
+      }
+    },
+    {
+      "case": "unknown_directive",
+      "baselineExact": true,
+      "candidateExact": true,
+      "rawMatchingRecordsLost": 0,
+      "rawMatchingRecordsGained": 0,
+      "sourceHashes": {
+        "main.c": "4029c4ca8dfaa837ba36f426a0a27aaf40f7c192d30f338af5234e64c04e4958"
+      },
+      "reference": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/cases/unknown_directive/expected.txt",
+        "sha256": "a9904a40a5961b61dd48027fd43d8fca49ca3eb22d5df8f3589c3dda4d9bb8a8"
+      },
+      "baseline": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/cases/unknown_directive/before.txt",
+        "sha256": "a9904a40a5961b61dd48027fd43d8fca49ca3eb22d5df8f3589c3dda4d9bb8a8"
+      },
+      "candidate": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/cases/unknown_directive/actual.txt",
+        "sha256": "a9904a40a5961b61dd48027fd43d8fca49ca3eb22d5df8f3589c3dda4d9bb8a8"
+      }
+    }
+  ],
+  "portableInventory": {
+    ".gitattributes": "f41a4b7f6f1cfad43675e69e7b4e2b2e866e4c44f11fba27d4769cf47c1e289f",
+    "README.md": "b2c17df26ffff97186d2ef5d965adff1e7d72661202b963da223920447f71401",
+    "cases/builtin_body_condition/actual.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/builtin_body_condition/actual.txt": "8026f38ba1c1d3b5ff298556b61cab296e3da3c5760b734212c6a90e1f070e96",
+    "cases/builtin_body_condition/before.diff": "6b706b4aee8a6c040710ada2298af38765d0059bbc713f55f23219a58776465d",
+    "cases/builtin_body_condition/before.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/builtin_body_condition/before.txt": "4cd4da88c94222edd81500af66013d3161d52e98e41118dd145c5d3b099a0cb9",
+    "cases/builtin_body_condition/complete.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/builtin_body_condition/expected.txt": "8026f38ba1c1d3b5ff298556b61cab296e3da3c5760b734212c6a90e1f070e96",
+    "cases/builtin_body_condition/main.c": "78d50d31b5cde40bbf62fd052eb2de87000571761b39bbd3590fdd0cdf3a572f",
+    "cases/comment_between/actual.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/comment_between/actual.txt": "a83cafc3067a43136a30e5211698a749cb4c47cbbe5a2cb0c7d951036515a447",
+    "cases/comment_between/before.diff": "9c3127c2d9f50689f2e319b202268395dc1b5c992e80a31f926adfc6f441f0c7",
+    "cases/comment_between/before.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/comment_between/before.txt": "a83cafc3067a43136a30e5211698a749cb4c47cbbe5a2cb0c7d951036515a447",
+    "cases/comment_between/complete.diff": "e67eb2d65d4acc2036a637d943da16bc78ce21eeb009839669da737c687181eb",
+    "cases/comment_between/expected.txt": "ea434dcbfbaea4fd56a7c0e37fb256679ed9d7bdfdd9c54a4ded12ccc9a7d32b",
+    "cases/comment_between/main.c": "b75a240ce6afbdc7d996db32dee403769ada08efb4e4886756fa7335f394a3e0",
+    "cases/conditional_duplicates/actual.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/conditional_duplicates/actual.txt": "ccb274b0aac243a9ccd4d61de4fe5a1d25c9950341837d47b85d694a0fe82055",
+    "cases/conditional_duplicates/before.diff": "4d0fb93a78ac4265466bccce1bfe19e58702b07d38e2e42b83e9fdc853de0954",
+    "cases/conditional_duplicates/before.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/conditional_duplicates/before.txt": "f02331cfe1f30f961acb9fa1a802ff068b31420f786a928dcb140f36ed80f71d",
+    "cases/conditional_duplicates/complete.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/conditional_duplicates/expected.txt": "ccb274b0aac243a9ccd4d61de4fe5a1d25c9950341837d47b85d694a0fe82055",
+    "cases/conditional_duplicates/locations.c": "dc9a677f1553fdcf7188329042e1d3691249cab9bcd9fbb93ca7a2f0e6077377",
+    "cases/define_after_undef/actual.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/define_after_undef/actual.txt": "3cd20d02402cf2348391acb6a302f337aec9b177db60fa3f2acb21ac7fea01d4",
+    "cases/define_after_undef/before.diff": "bea37c9832c425223e88e32101b43baf67bdb1db5e6187961ded3e8bf0148d41",
+    "cases/define_after_undef/before.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/define_after_undef/before.txt": "a528aef5c8ce07ed94385c59d40a03f43bf70d6cf4450ecdcef97c29e390b468",
+    "cases/define_after_undef/complete.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/define_after_undef/expected.txt": "3cd20d02402cf2348391acb6a302f337aec9b177db60fa3f2acb21ac7fea01d4",
+    "cases/define_after_undef/main.c": "44e131b96a87cb2aca19fa419c755c3b31bb16c7750dfa97b249574f2eaf9aa0",
+    "cases/definition_positions/actual.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/definition_positions/actual.txt": "8380ae6c3c15cdbe20c19e3ebff46e7d66a88a72c990137890691e449759d7c6",
+    "cases/definition_positions/before.diff": "135772b7bee746cbb122ac8877443e2c8e6dfdf420e64ea98de65d9ed8c8af5e",
+    "cases/definition_positions/before.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/definition_positions/before.txt": "ea8226616aebfcb46a1e9b02e95fb22bd1a8bb9cd8d33ce4440f0a7bca6925a1",
+    "cases/definition_positions/complete.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/definition_positions/expected.txt": "8380ae6c3c15cdbe20c19e3ebff46e7d66a88a72c990137890691e449759d7c6",
+    "cases/definition_positions/main.c": "8bb6c0b3916762e657623faf2ce4cea40fced3e366c82d0bbebb66498238e700",
+    "cases/formfeed_space/actual.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/formfeed_space/actual.txt": "a83cafc3067a43136a30e5211698a749cb4c47cbbe5a2cb0c7d951036515a447",
+    "cases/formfeed_space/before.diff": "9c3127c2d9f50689f2e319b202268395dc1b5c992e80a31f926adfc6f441f0c7",
+    "cases/formfeed_space/before.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/formfeed_space/before.txt": "a83cafc3067a43136a30e5211698a749cb4c47cbbe5a2cb0c7d951036515a447",
+    "cases/formfeed_space/complete.diff": "e67eb2d65d4acc2036a637d943da16bc78ce21eeb009839669da737c687181eb",
+    "cases/formfeed_space/expected.txt": "ea434dcbfbaea4fd56a7c0e37fb256679ed9d7bdfdd9c54a4ded12ccc9a7d32b",
+    "cases/formfeed_space/main.c": "8f4f8b90713b9b1e132839032ef7f43f9a46d83d2d67b350f7da06b9f2df5ba5",
+    "cases/header_positions/actual.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/header_positions/actual.txt": "d722c9aee18923d96d0831825aa1143189366a95f9a592825adf8368da006b70",
+    "cases/header_positions/api.h": "7d406f17bc190d8bc555a2d3d3e3c4eea926d3427db073ca8e8ef62cab1fb32e",
+    "cases/header_positions/before.diff": "e30c69c3ddb372567b3a8ccfceff2d88966fadb41d0cec58400de7bb70b7d2d5",
+    "cases/header_positions/before.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/header_positions/before.txt": "cb6b2308963ed692a5705f8d7ec9be1ff3dcb5f2f94bbf5c3db95cd16de5de92",
+    "cases/header_positions/complete.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/header_positions/expected.txt": "d722c9aee18923d96d0831825aa1143189366a95f9a592825adf8368da006b70",
+    "cases/header_positions/main.c": "4955f959d035ba6ff448fff77ee6234dee17e7c59ed9217004166c0660f3e67b",
+    "cases/header_spaced_undef/actual.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/header_spaced_undef/actual.txt": "9801f6edc6fcfcf169c2f527a96d315b16e5f64584cdd0b08a9fd6b6495b1287",
+    "cases/header_spaced_undef/api.h": "6c686dcdd3f90c301989a4ac9103932d8822f2e92867542b894bcce8451ec515",
+    "cases/header_spaced_undef/before.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/header_spaced_undef/before.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/header_spaced_undef/before.txt": "9801f6edc6fcfcf169c2f527a96d315b16e5f64584cdd0b08a9fd6b6495b1287",
+    "cases/header_spaced_undef/complete.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/header_spaced_undef/expected.txt": "9801f6edc6fcfcf169c2f527a96d315b16e5f64584cdd0b08a9fd6b6495b1287",
+    "cases/header_spaced_undef/main.c": "6cd550aa5afc505d95318f9a086ec54e89ca2846c03fa60836367c9d544683b2",
+    "cases/if_elif/actual.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/if_elif/actual.txt": "d831ba07436a4888c7e2c1456ff8ef1070dbb9efb8978418a96009cd38fa5932",
+    "cases/if_elif/before.diff": "1bb37eff547d18bdcde7c0db22b24f5fcb0ee9cc2229bf5479de177569d8688d",
+    "cases/if_elif/before.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/if_elif/before.txt": "06707a73930a42faa7db747d9ddf51630297d6f903f448e6b4f972b7ba0aec90",
+    "cases/if_elif/complete.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/if_elif/expected.txt": "d831ba07436a4888c7e2c1456ff8ef1070dbb9efb8978418a96009cd38fa5932",
+    "cases/if_elif/main.c": "07781c94f401da35277c33f0ced73a38e911a0125dae699bb34ffd82261cdec4",
+    "cases/if_else/actual.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/if_else/actual.txt": "bc57bfb048cac94035c629a217d383e94b5f80eda65941b2e7db3736e173979d",
+    "cases/if_else/before.diff": "53fd6679fa2711386765bfd2463f7c29f35f37785ddf1099c8c5ef0a7d4803a1",
+    "cases/if_else/before.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/if_else/before.txt": "27359d805f55672e020867b11afc86cfb5da75154916a56665af6c2f5d9c1a14",
+    "cases/if_else/complete.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/if_else/expected.txt": "bc57bfb048cac94035c629a217d383e94b5f80eda65941b2e7db3736e173979d",
+    "cases/if_else/main.c": "9fc848d24c97a5ccd496c2294342153c7345011cb53e0ece1961f4e9876415a6",
+    "cases/if_true/actual.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/if_true/actual.txt": "5bed152671144ca63cd94614bd3fac522e26006ea129c9fee29be2e7053deaec",
+    "cases/if_true/before.diff": "04209d6d997dc28ade4c9455dc30a0ab35d8b25264ccdd14d364ba19b67f01d3",
+    "cases/if_true/before.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/if_true/before.txt": "c2801ef45b3b45db0f87836e5ddb5235cdd6ed10203f1750ddd279bd44b73e2b",
+    "cases/if_true/complete.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/if_true/expected.txt": "5bed152671144ca63cd94614bd3fac522e26006ea129c9fee29be2e7053deaec",
+    "cases/if_true/main.c": "af784933662453a75dd2e732436217ac3162ce4f19d9ee33105e5ab1bcaed4f9",
+    "cases/ifdef_elif/actual.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/ifdef_elif/actual.txt": "7863db95e6f041ee3af56ed1e729156e0bb23c1871ec06006a5b91d72cd1887f",
+    "cases/ifdef_elif/before.diff": "474f978486a168f19c4599d2773a9bf30f5f2cf935312620c47fe333b77574de",
+    "cases/ifdef_elif/before.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/ifdef_elif/before.txt": "197039074e92630079907c7afa164faff04472287490948ca130f37ae24d6865",
+    "cases/ifdef_elif/complete.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/ifdef_elif/expected.txt": "7863db95e6f041ee3af56ed1e729156e0bb23c1871ec06006a5b91d72cd1887f",
+    "cases/ifdef_elif/main.c": "616c882e8d76400502ce5d56913917a59b63acf6dc81ba4dddb737663205c22f",
+    "cases/ifndef_control/actual.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/ifndef_control/actual.txt": "aaa6ab7f120cb1ff5a98bbd5c21249e42aca602abd379754bceeccba6de1a14d",
+    "cases/ifndef_control/before.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/ifndef_control/before.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/ifndef_control/before.txt": "aaa6ab7f120cb1ff5a98bbd5c21249e42aca602abd379754bceeccba6de1a14d",
+    "cases/ifndef_control/complete.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/ifndef_control/expected.txt": "aaa6ab7f120cb1ff5a98bbd5c21249e42aca602abd379754bceeccba6de1a14d",
+    "cases/ifndef_control/main.c": "cafdc75e151334d5218d34ce4fe85b2ccc849b276fc49afcf16192da06dd2010",
+    "cases/inactive_call_only/actual.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/inactive_call_only/actual.txt": "ba71844b939dcc052857acf01381c3136522f513d58a7859c5a0024655b6c2ce",
+    "cases/inactive_call_only/before.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/inactive_call_only/before.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/inactive_call_only/before.txt": "ba71844b939dcc052857acf01381c3136522f513d58a7859c5a0024655b6c2ce",
+    "cases/inactive_call_only/complete.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/inactive_call_only/expected.txt": "ba71844b939dcc052857acf01381c3136522f513d58a7859c5a0024655b6c2ce",
+    "cases/inactive_call_only/main.c": "d187eb9745e9286cc53ee74259fde170dcdabe88c07b93dabab363374166b233",
+    "cases/inactive_header_directives/actual.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/inactive_header_directives/actual.txt": "f8148674f925e0fffca171de0d08310427442fd01efba6d0ddf8bb853497f0fe",
+    "cases/inactive_header_directives/before.diff": "ea907db990ce4ffc9043e68a68248606d955fb15b9f18413d0671df5e210faf2",
+    "cases/inactive_header_directives/before.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/inactive_header_directives/before.txt": "038e8fad9f991a76416d0308617847d705a8da2bc67f67fe36ea440e873f0288",
+    "cases/inactive_header_directives/complete.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/inactive_header_directives/expected.txt": "f8148674f925e0fffca171de0d08310427442fd01efba6d0ddf8bb853497f0fe",
+    "cases/inactive_header_directives/main.c": "fddfae80f877a0801b1db4fdfc1df1b3390ad28c08d6e42974494c0518a7af49",
+    "cases/inactive_header_source_order/actual.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/inactive_header_source_order/actual.txt": "bedb2b0ef2d6d6eb373d002420206a57fd18e6848627957bd0f6bb21c990b538",
+    "cases/inactive_header_source_order/before.diff": "308605dc77c9cd76d4b9186495fd0292c1cb3990d2a28a4f504d63c510c8f185",
+    "cases/inactive_header_source_order/before.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/inactive_header_source_order/before.txt": "8e670e0e9daceccb57756b0dfae8de36bd4b285c35cec2780133a4c0dd0c087a",
+    "cases/inactive_header_source_order/complete.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/inactive_header_source_order/expected.txt": "bedb2b0ef2d6d6eb373d002420206a57fd18e6848627957bd0f6bb21c990b538",
+    "cases/inactive_header_source_order/main.c": "18c471e241733aab7ec39e3f4d72f55dcbadd5c37efb5e3d0cbd6410231d064a",
+    "cases/inactive_local_shadow/actual.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/inactive_local_shadow/actual.txt": "702c77a35359992a8837efdf318f3e862eb5c1bf705e0097aa5b562907fc08ca",
+    "cases/inactive_local_shadow/before.diff": "e635597cf2079f8f7603fe3a76de10cfa729000351ae4fe1052f1eb02ed5f551",
+    "cases/inactive_local_shadow/before.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/inactive_local_shadow/before.txt": "d651ba09f504054fca179a0d0de4956760535a5838481eab5665d4e8bb77d1c3",
+    "cases/inactive_local_shadow/complete.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/inactive_local_shadow/expected.txt": "702c77a35359992a8837efdf318f3e862eb5c1bf705e0097aa5b562907fc08ca",
+    "cases/inactive_local_shadow/main.c": "c16c5e2ce03b3f5805a5a0e0f7d05b1a3fc22a976cbe9ac85f79c01ec24fc34d",
+    "cases/inactive_macro_prefix/actual.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/inactive_macro_prefix/actual.txt": "eb9390869c8baa0f1a77a42f1fe4e4b79b497ca5ff525c709b1927e89e087e07",
+    "cases/inactive_macro_prefix/before.diff": "3bdb50519fb8c6a7c4b5bfe6981ef532152c649724e74ed89cb25eee94eb5b9e",
+    "cases/inactive_macro_prefix/before.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/inactive_macro_prefix/before.txt": "c57a8ee79db0d8a6e526226fdbeb9a30ab424a41899393129cafe327245ad4da",
+    "cases/inactive_macro_prefix/complete.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/inactive_macro_prefix/expected.txt": "eb9390869c8baa0f1a77a42f1fe4e4b79b497ca5ff525c709b1927e89e087e07",
+    "cases/inactive_macro_prefix/main.c": "912ee86625e132c2d0192e011fb8dd5ff6fd4e6d32ddc3ba5c994793371f5a80",
+    "cases/inactive_macro_return/actual.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/inactive_macro_return/actual.txt": "0871dd6ab84beaa2864b6c20068e1a36dc4a78e191a3764f8730582aad886c6f",
+    "cases/inactive_macro_return/before.diff": "47abb6a794cc238878b77e57de24107266a3f8f66af396124f67bb3860b17550",
+    "cases/inactive_macro_return/before.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/inactive_macro_return/before.txt": "038e8fad9f991a76416d0308617847d705a8da2bc67f67fe36ea440e873f0288",
+    "cases/inactive_macro_return/complete.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/inactive_macro_return/expected.txt": "0871dd6ab84beaa2864b6c20068e1a36dc4a78e191a3764f8730582aad886c6f",
+    "cases/inactive_macro_return/main.c": "0c184c5c719ca715bc2b57710c8c8d97650af96960a1934cba4638e467cb8e25",
+    "cases/inactive_phantoms/actual.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/inactive_phantoms/actual.txt": "48de61d459fd75fcedbdc7b99f738e898300db55186dfb5b051eedd5ad60343a",
+    "cases/inactive_phantoms/before.diff": "78e45ffe8d8d608eb0fe57eec893ca8b565f6c1d3ac61d1c675a4183f5a93a7a",
+    "cases/inactive_phantoms/before.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/inactive_phantoms/before.txt": "c0d88f7cd916935c29f1f1cf9850752cc0ade628e946d4a2a70f0224058f17be",
+    "cases/inactive_phantoms/complete.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/inactive_phantoms/expected.txt": "48de61d459fd75fcedbdc7b99f738e898300db55186dfb5b051eedd5ad60343a",
+    "cases/inactive_phantoms/main.c": "646bc353b45ebd8a04297df6038efaff132695b1d17a0b8ca1f26b5d1fc53c2f",
+    "cases/inactive_typedef_shadow/actual.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/inactive_typedef_shadow/actual.txt": "5c844c628852390eac456c215448e4d8ae257d3668af1f1d4e79ba214b8ff424",
+    "cases/inactive_typedef_shadow/before.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/inactive_typedef_shadow/before.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/inactive_typedef_shadow/before.txt": "5c844c628852390eac456c215448e4d8ae257d3668af1f1d4e79ba214b8ff424",
+    "cases/inactive_typedef_shadow/complete.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/inactive_typedef_shadow/expected.txt": "5c844c628852390eac456c215448e4d8ae257d3668af1f1d4e79ba214b8ff424",
+    "cases/inactive_typedef_shadow/main.c": "0ca71f2c8f28c1f8a9ab7e4759f4800408270eeb3c037e120d594feda913ba27",
+    "cases/inactive_undef/actual.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/inactive_undef/actual.txt": "3cd20d02402cf2348391acb6a302f337aec9b177db60fa3f2acb21ac7fea01d4",
+    "cases/inactive_undef/before.diff": "bea37c9832c425223e88e32101b43baf67bdb1db5e6187961ded3e8bf0148d41",
+    "cases/inactive_undef/before.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/inactive_undef/before.txt": "a528aef5c8ce07ed94385c59d40a03f43bf70d6cf4450ecdcef97c29e390b468",
+    "cases/inactive_undef/complete.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/inactive_undef/expected.txt": "3cd20d02402cf2348391acb6a302f337aec9b177db60fa3f2acb21ac7fea01d4",
+    "cases/inactive_undef/main.c": "9c38e9046da79dde887b2f1c47f47f256a58365987ee26f9f7376ea8e6883763",
+    "cases/local_definition/actual.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/local_definition/actual.txt": "22483368954c812bf6ffd898471efe2311ac2bc0ac9d2b72430dd4fe92ea3b8f",
+    "cases/local_definition/before.diff": "a67583a4746f70012ef06cf352a1f3cff1d67c62d07577afd0a656a220ce4995",
+    "cases/local_definition/before.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/local_definition/before.txt": "6f90a14d2f9b8efee1464dc09df9a61ffa811cf6c4cea56e9b2a6647a90e1dfe",
+    "cases/local_definition/complete.diff": "9848d43343cf07e2d297db53094cd26d32842b9c2f02b2b1a376dcca5df95896",
+    "cases/local_definition/expected.txt": "1e3dca8eea1a14311a33a386f3f15e73d72d9a3241ca9daadfa884f8f46ed790",
+    "cases/local_definition/main.c": "5e4b9f11c86743b408483ceb47c5e1dc078c6b493018ec57095f58b6cbd7dd78",
+    "cases/nested_conditionals/actual.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/nested_conditionals/actual.txt": "e15069e2ba96a4e0a8a9c85b598c286674bd625cea206fcbb8a366eb4622e5e0",
+    "cases/nested_conditionals/before.diff": "e86f143a23ce96037c018774189b1d37615e027d1bf2f435f5a6fec1419ea38f",
+    "cases/nested_conditionals/before.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/nested_conditionals/before.txt": "e9f647aa1be6cac09fd438e436b490217a3b263105524b76d63b038f1d3af3c4",
+    "cases/nested_conditionals/complete.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/nested_conditionals/expected.txt": "e15069e2ba96a4e0a8a9c85b598c286674bd625cea206fcbb8a366eb4622e5e0",
+    "cases/nested_conditionals/main.c": "89c43a5bac71789387e1f1277061bdf9f34ab9fcbba046a3b6a6e5841cc694ef",
+    "cases/plain_call_control/actual.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/plain_call_control/actual.txt": "323e0879f4641beefcdae6d050f6e6d234a164aed4de73f4ee90b27458f4a328",
+    "cases/plain_call_control/before.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/plain_call_control/before.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/plain_call_control/before.txt": "323e0879f4641beefcdae6d050f6e6d234a164aed4de73f4ee90b27458f4a328",
+    "cases/plain_call_control/complete.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/plain_call_control/expected.txt": "323e0879f4641beefcdae6d050f6e6d234a164aed4de73f4ee90b27458f4a328",
+    "cases/plain_call_control/main.c": "eac74b391f5eab7cfa411720d6a3f6522b115ec5806b0c64c17dc959f2eeddb5",
+    "cases/plain_undef/actual.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/plain_undef/actual.txt": "659f0bb0e1fb0dbb672bcf80b3a15e6939529e1a87e66683d008d8aa07366148",
+    "cases/plain_undef/before.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/plain_undef/before.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/plain_undef/before.txt": "659f0bb0e1fb0dbb672bcf80b3a15e6939529e1a87e66683d008d8aa07366148",
+    "cases/plain_undef/complete.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/plain_undef/expected.txt": "659f0bb0e1fb0dbb672bcf80b3a15e6939529e1a87e66683d008d8aa07366148",
+    "cases/plain_undef/main.c": "1beb332996059084858d26452f389b0b6bb43936e58dbae76136ccda191a9eed",
+    "cases/snprintf_defined/actual.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/snprintf_defined/actual.txt": "a9a8a97c19b0fc5d9073275825472736705bf829924cf86bcfa5ba3deaf55e0c",
+    "cases/snprintf_defined/before.diff": "0a08c24445827721f6b719b2a2b310fed3cd91b046be7cc886237346e2b9b381",
+    "cases/snprintf_defined/before.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/snprintf_defined/before.txt": "67c1995c8aa262633e95675c06a0bc673ea7fabef504d3f405cc0ffa1559ec25",
+    "cases/snprintf_defined/complete.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/snprintf_defined/expected.txt": "a9a8a97c19b0fc5d9073275825472736705bf829924cf86bcfa5ba3deaf55e0c",
+    "cases/snprintf_defined/main.c": "f8998c5d56cc86c8df76bef9d5031db968790c0322e96c1a7359341bff622338",
+    "cases/spaced_undef/actual.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/spaced_undef/actual.txt": "659f0bb0e1fb0dbb672bcf80b3a15e6939529e1a87e66683d008d8aa07366148",
+    "cases/spaced_undef/before.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/spaced_undef/before.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/spaced_undef/before.txt": "659f0bb0e1fb0dbb672bcf80b3a15e6939529e1a87e66683d008d8aa07366148",
+    "cases/spaced_undef/complete.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/spaced_undef/expected.txt": "659f0bb0e1fb0dbb672bcf80b3a15e6939529e1a87e66683d008d8aa07366148",
+    "cases/spaced_undef/main.c": "0c0e092748ee2161ff7f6d727867d909bce54a29c1146508a324f3a5260bbd1b",
+    "cases/spliced_keyword/actual.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/spliced_keyword/actual.txt": "a9904a40a5961b61dd48027fd43d8fca49ca3eb22d5df8f3589c3dda4d9bb8a8",
+    "cases/spliced_keyword/before.diff": "14fd5bb886c33f3109959cc26c2041bab71963e60a14aca85142c264470598a1",
+    "cases/spliced_keyword/before.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/spliced_keyword/before.txt": "a9904a40a5961b61dd48027fd43d8fca49ca3eb22d5df8f3589c3dda4d9bb8a8",
+    "cases/spliced_keyword/complete.diff": "6205c5244706c08bcb26e39dd57ce56a5d22445a3f16c711b240f8625f44f742",
+    "cases/spliced_keyword/expected.txt": "ea434dcbfbaea4fd56a7c0e37fb256679ed9d7bdfdd9c54a4ded12ccc9a7d32b",
+    "cases/spliced_keyword/main.c": "64949cfc5597ab390ce0164d9dd05f5e6bb129e7182bf4cf3fcd70cc6470d2d4",
+    "cases/tab_undef/actual.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/tab_undef/actual.txt": "659f0bb0e1fb0dbb672bcf80b3a15e6939529e1a87e66683d008d8aa07366148",
+    "cases/tab_undef/before.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/tab_undef/before.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/tab_undef/before.txt": "659f0bb0e1fb0dbb672bcf80b3a15e6939529e1a87e66683d008d8aa07366148",
+    "cases/tab_undef/complete.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/tab_undef/expected.txt": "659f0bb0e1fb0dbb672bcf80b3a15e6939529e1a87e66683d008d8aa07366148",
+    "cases/tab_undef/main.c": "132d7e84c61e3c1bf1023eceb01d450f0befb4ae62ea3a18cbee0c7c06ca2dce",
+    "cases/trailing_comment/actual.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/trailing_comment/actual.txt": "ea434dcbfbaea4fd56a7c0e37fb256679ed9d7bdfdd9c54a4ded12ccc9a7d32b",
+    "cases/trailing_comment/before.diff": "14fd5bb886c33f3109959cc26c2041bab71963e60a14aca85142c264470598a1",
+    "cases/trailing_comment/before.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/trailing_comment/before.txt": "a9904a40a5961b61dd48027fd43d8fca49ca3eb22d5df8f3589c3dda4d9bb8a8",
+    "cases/trailing_comment/complete.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/trailing_comment/expected.txt": "ea434dcbfbaea4fd56a7c0e37fb256679ed9d7bdfdd9c54a4ded12ccc9a7d32b",
+    "cases/trailing_comment/main.c": "69583b98f750cf97abab1877b1ed787fe13605d0fe3a8dc0b5397c4b24fdc1aa",
+    "cases/undef_source_order/actual.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/undef_source_order/actual.txt": "3e64cdcb4b74c368130b7d33d0e37c0f39e0587890b4666a4e960f8099ab7abf",
+    "cases/undef_source_order/before.diff": "9368595532b8aca96de0e1dcb3c9de5236e621f8577bb5d15a96cc43922e7f1b",
+    "cases/undef_source_order/before.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/undef_source_order/before.txt": "5d40a056c6d1ce64c1116979070363124eac2dccd2bc7538f2e06d03fcaaa390",
+    "cases/undef_source_order/complete.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/undef_source_order/expected.txt": "3e64cdcb4b74c368130b7d33d0e37c0f39e0587890b4666a4e960f8099ab7abf",
+    "cases/undef_source_order/main.c": "b34b9d1c0db93087f16e8a2107a41750cd70ad924222ce70d8333af5664cf0a8",
+    "cases/unknown_directive/actual.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/unknown_directive/actual.txt": "a9904a40a5961b61dd48027fd43d8fca49ca3eb22d5df8f3589c3dda4d9bb8a8",
+    "cases/unknown_directive/before.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/unknown_directive/before.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/unknown_directive/before.txt": "a9904a40a5961b61dd48027fd43d8fca49ca3eb22d5df8f3589c3dda4d9bb8a8",
+    "cases/unknown_directive/complete.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/unknown_directive/expected.txt": "a9904a40a5961b61dd48027fd43d8fca49ca3eb22d5df8f3589c3dda4d9bb8a8",
+    "cases/unknown_directive/main.c": "4029c4ca8dfaa837ba36f426a0a27aaf40f7c192d30f338af5234e64c04e4958",
+    "cases/unknown_undef/actual.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/unknown_undef/actual.txt": "3cd20d02402cf2348391acb6a302f337aec9b177db60fa3f2acb21ac7fea01d4",
+    "cases/unknown_undef/before.diff": "bea37c9832c425223e88e32101b43baf67bdb1db5e6187961ded3e8bf0148d41",
+    "cases/unknown_undef/before.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/unknown_undef/before.txt": "a528aef5c8ce07ed94385c59d40a03f43bf70d6cf4450ecdcef97c29e390b468",
+    "cases/unknown_undef/complete.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cases/unknown_undef/expected.txt": "3cd20d02402cf2348391acb6a302f337aec9b177db60fa3f2acb21ac7fea01d4",
+    "cases/unknown_undef/main.c": "4b27520666285da880ed887309314b220e60641deb88415c5a79717ecdc66e81",
+    "measurement.json": "1a4ad3fed9e92745419163559e04ea62e11f83b2093f26d3ff6dfc3783ab21be",
+    "provenance/boundaries/cases.json": "0c0b9a4ada94fad5a29c36a926f72cbb4711b8b0423a3eb22579bc91cbb8bcb8",
+    "provenance/boundaries/live-run.json": "e116a0f4c10165b00325402a3f4be94ed607133f4e6f955934ee48e74ed8c5d2",
+    "provenance/boundaries/live.stderr": "6128c311b763a48d55d26806059fd4cb30817b36369596e522ccad2227d24e10",
+    "provenance/boundaries/live.stdout": "e543bc2cc33a267e8ac42bb18aabce95b5cfe6ac3380aeea93eadb7d6263bd24",
+    "provenance/boundaries/oracle.sc": "56431f14868678e64f9eb41026b44f1d3d7738404d28d2db62711b520c98c742",
+    "provenance/earlier-candidates/all24-candidate-v3/builtin_body_condition/actual.txt": "8026f38ba1c1d3b5ff298556b61cab296e3da3c5760b734212c6a90e1f070e96",
+    "provenance/earlier-candidates/all24-candidate-v3/builtin_body_condition/complete.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/all24-candidate-v3/builtin_body_condition/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/all24-candidate-v3/define_after_undef/actual.txt": "3cd20d02402cf2348391acb6a302f337aec9b177db60fa3f2acb21ac7fea01d4",
+    "provenance/earlier-candidates/all24-candidate-v3/define_after_undef/complete.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/all24-candidate-v3/define_after_undef/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/all24-candidate-v3/definition_positions/actual.txt": "8380ae6c3c15cdbe20c19e3ebff46e7d66a88a72c990137890691e449759d7c6",
+    "provenance/earlier-candidates/all24-candidate-v3/definition_positions/complete.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/all24-candidate-v3/definition_positions/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/all24-candidate-v3/header_positions/actual.txt": "d722c9aee18923d96d0831825aa1143189366a95f9a592825adf8368da006b70",
+    "provenance/earlier-candidates/all24-candidate-v3/header_positions/complete.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/all24-candidate-v3/header_positions/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/all24-candidate-v3/header_spaced_undef/actual.txt": "9801f6edc6fcfcf169c2f527a96d315b16e5f64584cdd0b08a9fd6b6495b1287",
+    "provenance/earlier-candidates/all24-candidate-v3/header_spaced_undef/complete.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/all24-candidate-v3/header_spaced_undef/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/all24-candidate-v3/if_elif/actual.txt": "d831ba07436a4888c7e2c1456ff8ef1070dbb9efb8978418a96009cd38fa5932",
+    "provenance/earlier-candidates/all24-candidate-v3/if_elif/complete.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/all24-candidate-v3/if_elif/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/all24-candidate-v3/if_else/actual.txt": "bc57bfb048cac94035c629a217d383e94b5f80eda65941b2e7db3736e173979d",
+    "provenance/earlier-candidates/all24-candidate-v3/if_else/complete.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/all24-candidate-v3/if_else/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/all24-candidate-v3/if_true/actual.txt": "5bed152671144ca63cd94614bd3fac522e26006ea129c9fee29be2e7053deaec",
+    "provenance/earlier-candidates/all24-candidate-v3/if_true/complete.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/all24-candidate-v3/if_true/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/all24-candidate-v3/ifdef_elif/actual.txt": "7863db95e6f041ee3af56ed1e729156e0bb23c1871ec06006a5b91d72cd1887f",
+    "provenance/earlier-candidates/all24-candidate-v3/ifdef_elif/complete.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/all24-candidate-v3/ifdef_elif/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/all24-candidate-v3/ifndef_control/actual.txt": "aaa6ab7f120cb1ff5a98bbd5c21249e42aca602abd379754bceeccba6de1a14d",
+    "provenance/earlier-candidates/all24-candidate-v3/ifndef_control/complete.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/all24-candidate-v3/ifndef_control/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/all24-candidate-v3/inactive_call_only/actual.txt": "ba71844b939dcc052857acf01381c3136522f513d58a7859c5a0024655b6c2ce",
+    "provenance/earlier-candidates/all24-candidate-v3/inactive_call_only/complete.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/all24-candidate-v3/inactive_call_only/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/all24-candidate-v3/inactive_local_shadow/actual.txt": "702c77a35359992a8837efdf318f3e862eb5c1bf705e0097aa5b562907fc08ca",
+    "provenance/earlier-candidates/all24-candidate-v3/inactive_local_shadow/complete.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/all24-candidate-v3/inactive_local_shadow/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/all24-candidate-v3/inactive_phantoms/actual.txt": "48de61d459fd75fcedbdc7b99f738e898300db55186dfb5b051eedd5ad60343a",
+    "provenance/earlier-candidates/all24-candidate-v3/inactive_phantoms/complete.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/all24-candidate-v3/inactive_phantoms/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/all24-candidate-v3/inactive_typedef_shadow/actual.txt": "5c844c628852390eac456c215448e4d8ae257d3668af1f1d4e79ba214b8ff424",
+    "provenance/earlier-candidates/all24-candidate-v3/inactive_typedef_shadow/complete.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/all24-candidate-v3/inactive_typedef_shadow/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/all24-candidate-v3/inactive_undef/actual.txt": "3cd20d02402cf2348391acb6a302f337aec9b177db60fa3f2acb21ac7fea01d4",
+    "provenance/earlier-candidates/all24-candidate-v3/inactive_undef/complete.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/all24-candidate-v3/inactive_undef/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/all24-candidate-v3/local_definition/actual.txt": "22483368954c812bf6ffd898471efe2311ac2bc0ac9d2b72430dd4fe92ea3b8f",
+    "provenance/earlier-candidates/all24-candidate-v3/local_definition/complete.diff": "a3b3a94a8738a81ea81b402106baf4341069c52c34379afb4a34a55dd924d397",
+    "provenance/earlier-candidates/all24-candidate-v3/local_definition/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/all24-candidate-v3/nested_conditionals/actual.txt": "e15069e2ba96a4e0a8a9c85b598c286674bd625cea206fcbb8a366eb4622e5e0",
+    "provenance/earlier-candidates/all24-candidate-v3/nested_conditionals/complete.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/all24-candidate-v3/nested_conditionals/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/all24-candidate-v3/plain_call_control/actual.txt": "323e0879f4641beefcdae6d050f6e6d234a164aed4de73f4ee90b27458f4a328",
+    "provenance/earlier-candidates/all24-candidate-v3/plain_call_control/complete.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/all24-candidate-v3/plain_call_control/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/all24-candidate-v3/plain_undef/actual.txt": "659f0bb0e1fb0dbb672bcf80b3a15e6939529e1a87e66683d008d8aa07366148",
+    "provenance/earlier-candidates/all24-candidate-v3/plain_undef/complete.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/all24-candidate-v3/plain_undef/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/all24-candidate-v3/replay.json": "fa96a3369a8b2e669253f4a392c338669559fc50974b0fb01ed5d19d6b135052",
+    "provenance/earlier-candidates/all24-candidate-v3/snprintf_defined/actual.txt": "a9a8a97c19b0fc5d9073275825472736705bf829924cf86bcfa5ba3deaf55e0c",
+    "provenance/earlier-candidates/all24-candidate-v3/snprintf_defined/complete.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/all24-candidate-v3/snprintf_defined/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/all24-candidate-v3/spaced_undef/actual.txt": "659f0bb0e1fb0dbb672bcf80b3a15e6939529e1a87e66683d008d8aa07366148",
+    "provenance/earlier-candidates/all24-candidate-v3/spaced_undef/complete.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/all24-candidate-v3/spaced_undef/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/all24-candidate-v3/tab_undef/actual.txt": "659f0bb0e1fb0dbb672bcf80b3a15e6939529e1a87e66683d008d8aa07366148",
+    "provenance/earlier-candidates/all24-candidate-v3/tab_undef/complete.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/all24-candidate-v3/tab_undef/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/all24-candidate-v3/undef_source_order/actual.txt": "3e64cdcb4b74c368130b7d33d0e37c0f39e0587890b4666a4e960f8099ab7abf",
+    "provenance/earlier-candidates/all24-candidate-v3/undef_source_order/complete.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/all24-candidate-v3/undef_source_order/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/all24-candidate-v3/unknown_undef/actual.txt": "3cd20d02402cf2348391acb6a302f337aec9b177db60fa3f2acb21ac7fea01d4",
+    "provenance/earlier-candidates/all24-candidate-v3/unknown_undef/complete.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/all24-candidate-v3/unknown_undef/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/candidate-v1-results/builtin_body_condition/actual.txt": "8026f38ba1c1d3b5ff298556b61cab296e3da3c5760b734212c6a90e1f070e96",
+    "provenance/earlier-candidates/candidate-v1-results/builtin_body_condition/complete.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/candidate-v1-results/builtin_body_condition/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/candidate-v1-results/definition_positions/actual.txt": "8380ae6c3c15cdbe20c19e3ebff46e7d66a88a72c990137890691e449759d7c6",
+    "provenance/earlier-candidates/candidate-v1-results/definition_positions/complete.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/candidate-v1-results/definition_positions/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/candidate-v1-results/header_positions/actual.txt": "d722c9aee18923d96d0831825aa1143189366a95f9a592825adf8368da006b70",
+    "provenance/earlier-candidates/candidate-v1-results/header_positions/complete.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/candidate-v1-results/header_positions/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/candidate-v1-results/if_elif/actual.txt": "d831ba07436a4888c7e2c1456ff8ef1070dbb9efb8978418a96009cd38fa5932",
+    "provenance/earlier-candidates/candidate-v1-results/if_elif/complete.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/candidate-v1-results/if_elif/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/candidate-v1-results/if_else/actual.txt": "bc57bfb048cac94035c629a217d383e94b5f80eda65941b2e7db3736e173979d",
+    "provenance/earlier-candidates/candidate-v1-results/if_else/complete.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/candidate-v1-results/if_else/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/candidate-v1-results/if_true/actual.txt": "5bed152671144ca63cd94614bd3fac522e26006ea129c9fee29be2e7053deaec",
+    "provenance/earlier-candidates/candidate-v1-results/if_true/complete.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/candidate-v1-results/if_true/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/candidate-v1-results/ifdef_elif/actual.txt": "7863db95e6f041ee3af56ed1e729156e0bb23c1871ec06006a5b91d72cd1887f",
+    "provenance/earlier-candidates/candidate-v1-results/ifdef_elif/complete.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/candidate-v1-results/ifdef_elif/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/candidate-v1-results/ifndef_control/actual.txt": "aaa6ab7f120cb1ff5a98bbd5c21249e42aca602abd379754bceeccba6de1a14d",
+    "provenance/earlier-candidates/candidate-v1-results/ifndef_control/complete.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/candidate-v1-results/ifndef_control/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/candidate-v1-results/inactive_call_only/actual.txt": "ba71844b939dcc052857acf01381c3136522f513d58a7859c5a0024655b6c2ce",
+    "provenance/earlier-candidates/candidate-v1-results/inactive_call_only/complete.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/candidate-v1-results/inactive_call_only/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/candidate-v1-results/inactive_local_shadow/actual.txt": "d651ba09f504054fca179a0d0de4956760535a5838481eab5665d4e8bb77d1c3",
+    "provenance/earlier-candidates/candidate-v1-results/inactive_local_shadow/complete.diff": "4a32da577b90287007dbf00d88714eabae9a218a3cda1d41aef2bd3267cef56f",
+    "provenance/earlier-candidates/candidate-v1-results/inactive_local_shadow/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/candidate-v1-results/inactive_phantoms/actual.txt": "48de61d459fd75fcedbdc7b99f738e898300db55186dfb5b051eedd5ad60343a",
+    "provenance/earlier-candidates/candidate-v1-results/inactive_phantoms/complete.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/candidate-v1-results/inactive_phantoms/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/candidate-v1-results/inactive_typedef_shadow/actual.txt": "5c844c628852390eac456c215448e4d8ae257d3668af1f1d4e79ba214b8ff424",
+    "provenance/earlier-candidates/candidate-v1-results/inactive_typedef_shadow/complete.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/candidate-v1-results/inactive_typedef_shadow/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/candidate-v1-results/local_definition/actual.txt": "22483368954c812bf6ffd898471efe2311ac2bc0ac9d2b72430dd4fe92ea3b8f",
+    "provenance/earlier-candidates/candidate-v1-results/local_definition/complete.diff": "e0582aa13c8b45c790f9c8a7e6b9a73bf2d5a82e9305b002df73396da35e41b0",
+    "provenance/earlier-candidates/candidate-v1-results/local_definition/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/candidate-v1-results/nested_conditionals/actual.txt": "e15069e2ba96a4e0a8a9c85b598c286674bd625cea206fcbb8a366eb4622e5e0",
+    "provenance/earlier-candidates/candidate-v1-results/nested_conditionals/complete.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/candidate-v1-results/nested_conditionals/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/candidate-v1-results/plain_call_control/actual.txt": "323e0879f4641beefcdae6d050f6e6d234a164aed4de73f4ee90b27458f4a328",
+    "provenance/earlier-candidates/candidate-v1-results/plain_call_control/complete.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/candidate-v1-results/plain_call_control/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/candidate-v1-results/replay.json": "51358cb3206e8dcfbc8b1f3e32bc81faae3f6e44f59c78048035cf99de602752",
+    "provenance/earlier-candidates/candidate-v1-results/snprintf_defined/actual.txt": "a9a8a97c19b0fc5d9073275825472736705bf829924cf86bcfa5ba3deaf55e0c",
+    "provenance/earlier-candidates/candidate-v1-results/snprintf_defined/complete.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/candidate-v1-results/snprintf_defined/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/candidate-v2-results/builtin_body_condition/actual.txt": "8026f38ba1c1d3b5ff298556b61cab296e3da3c5760b734212c6a90e1f070e96",
+    "provenance/earlier-candidates/candidate-v2-results/builtin_body_condition/complete.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/candidate-v2-results/builtin_body_condition/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/candidate-v2-results/definition_positions/actual.txt": "8380ae6c3c15cdbe20c19e3ebff46e7d66a88a72c990137890691e449759d7c6",
+    "provenance/earlier-candidates/candidate-v2-results/definition_positions/complete.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/candidate-v2-results/definition_positions/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/candidate-v2-results/fact-retention.json": "89a661886161a19d4fcff4f44fe72c0d19397103f91f0c1dfb1506408dad0818",
+    "provenance/earlier-candidates/candidate-v2-results/header_positions/actual.txt": "d722c9aee18923d96d0831825aa1143189366a95f9a592825adf8368da006b70",
+    "provenance/earlier-candidates/candidate-v2-results/header_positions/complete.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/candidate-v2-results/header_positions/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/candidate-v2-results/if_elif/actual.txt": "d831ba07436a4888c7e2c1456ff8ef1070dbb9efb8978418a96009cd38fa5932",
+    "provenance/earlier-candidates/candidate-v2-results/if_elif/complete.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/candidate-v2-results/if_elif/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/candidate-v2-results/if_else/actual.txt": "bc57bfb048cac94035c629a217d383e94b5f80eda65941b2e7db3736e173979d",
+    "provenance/earlier-candidates/candidate-v2-results/if_else/complete.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/candidate-v2-results/if_else/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/candidate-v2-results/if_true/actual.txt": "5bed152671144ca63cd94614bd3fac522e26006ea129c9fee29be2e7053deaec",
+    "provenance/earlier-candidates/candidate-v2-results/if_true/complete.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/candidate-v2-results/if_true/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/candidate-v2-results/ifdef_elif/actual.txt": "7863db95e6f041ee3af56ed1e729156e0bb23c1871ec06006a5b91d72cd1887f",
+    "provenance/earlier-candidates/candidate-v2-results/ifdef_elif/complete.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/candidate-v2-results/ifdef_elif/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/candidate-v2-results/ifndef_control/actual.txt": "aaa6ab7f120cb1ff5a98bbd5c21249e42aca602abd379754bceeccba6de1a14d",
+    "provenance/earlier-candidates/candidate-v2-results/ifndef_control/complete.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/candidate-v2-results/ifndef_control/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/candidate-v2-results/inactive_call_only/actual.txt": "ba71844b939dcc052857acf01381c3136522f513d58a7859c5a0024655b6c2ce",
+    "provenance/earlier-candidates/candidate-v2-results/inactive_call_only/complete.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/candidate-v2-results/inactive_call_only/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/candidate-v2-results/inactive_local_shadow/actual.txt": "702c77a35359992a8837efdf318f3e862eb5c1bf705e0097aa5b562907fc08ca",
+    "provenance/earlier-candidates/candidate-v2-results/inactive_local_shadow/complete.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/candidate-v2-results/inactive_local_shadow/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/candidate-v2-results/inactive_phantoms/actual.txt": "48de61d459fd75fcedbdc7b99f738e898300db55186dfb5b051eedd5ad60343a",
+    "provenance/earlier-candidates/candidate-v2-results/inactive_phantoms/complete.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/candidate-v2-results/inactive_phantoms/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/candidate-v2-results/inactive_typedef_shadow/actual.txt": "5c844c628852390eac456c215448e4d8ae257d3668af1f1d4e79ba214b8ff424",
+    "provenance/earlier-candidates/candidate-v2-results/inactive_typedef_shadow/complete.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/candidate-v2-results/inactive_typedef_shadow/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/candidate-v2-results/local_definition/actual.txt": "22483368954c812bf6ffd898471efe2311ac2bc0ac9d2b72430dd4fe92ea3b8f",
+    "provenance/earlier-candidates/candidate-v2-results/local_definition/complete.diff": "249333d93bc30998d588c7a1aa7e6bed8050520b1f53022ed7bf6617dc13f212",
+    "provenance/earlier-candidates/candidate-v2-results/local_definition/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/candidate-v2-results/nested_conditionals/actual.txt": "e15069e2ba96a4e0a8a9c85b598c286674bd625cea206fcbb8a366eb4622e5e0",
+    "provenance/earlier-candidates/candidate-v2-results/nested_conditionals/complete.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/candidate-v2-results/nested_conditionals/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/candidate-v2-results/plain_call_control/actual.txt": "323e0879f4641beefcdae6d050f6e6d234a164aed4de73f4ee90b27458f4a328",
+    "provenance/earlier-candidates/candidate-v2-results/plain_call_control/complete.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/candidate-v2-results/plain_call_control/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/candidate-v2-results/replay.json": "ad06c56671394497f799758a41770945f80ff464ccd4d0f3753d9651b6b129be",
+    "provenance/earlier-candidates/candidate-v2-results/snprintf_defined/actual.txt": "a9a8a97c19b0fc5d9073275825472736705bf829924cf86bcfa5ba3deaf55e0c",
+    "provenance/earlier-candidates/candidate-v2-results/snprintf_defined/complete.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/candidate-v2-results/snprintf_defined/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/inactive-header-v3/inactive_header_directives/actual.txt": "038e8fad9f991a76416d0308617847d705a8da2bc67f67fe36ea440e873f0288",
+    "provenance/earlier-candidates/inactive-header-v3/inactive_header_directives/complete.diff": "d524a6cefb34e3bfdce2a466c5c75f3d8b31677773ecc22b2987113c72abc9aa",
+    "provenance/earlier-candidates/inactive-header-v3/inactive_header_directives/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/inactive-header-v3/inactive_header_source_order/actual.txt": "8e670e0e9daceccb57756b0dfae8de36bd4b285c35cec2780133a4c0dd0c087a",
+    "provenance/earlier-candidates/inactive-header-v3/inactive_header_source_order/complete.diff": "f4ccc9fbfbf1d88c226dc3cde567490e735af105253519c5afaf1383a316164f",
+    "provenance/earlier-candidates/inactive-header-v3/inactive_header_source_order/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/inactive-header-v3/inactive_macro_prefix/actual.txt": "c57a8ee79db0d8a6e526226fdbeb9a30ab424a41899393129cafe327245ad4da",
+    "provenance/earlier-candidates/inactive-header-v3/inactive_macro_prefix/complete.diff": "179fecad3eccd9070dd399babe41076254a716d31c18c0acced0129088a0e7ba",
+    "provenance/earlier-candidates/inactive-header-v3/inactive_macro_prefix/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/inactive-header-v3/inactive_macro_return/actual.txt": "038e8fad9f991a76416d0308617847d705a8da2bc67f67fe36ea440e873f0288",
+    "provenance/earlier-candidates/inactive-header-v3/inactive_macro_return/complete.diff": "83230b242ef39a439da6277f19f0027591c70c6ff35a89fc4d7e172f28c88656",
+    "provenance/earlier-candidates/inactive-header-v3/inactive_macro_return/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/inactive-header-v3/replay.json": "9c28a03a3e525331f4db3256246a07023139e03e6207e59108d5561d6d762102",
+    "provenance/earlier-candidates/undef-candidate-v2/header_spaced_undef/actual.txt": "0d3297911a6e2ceae5572a208f4aa852857bff262cdbe7abe10881dbeb82a51a",
+    "provenance/earlier-candidates/undef-candidate-v2/header_spaced_undef/complete.diff": "0cb19a86ed140d91f9b2a90732912a7ebe314c8bef0037ef1973531f10e54746",
+    "provenance/earlier-candidates/undef-candidate-v2/header_spaced_undef/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/undef-candidate-v2/plain_undef/actual.txt": "659f0bb0e1fb0dbb672bcf80b3a15e6939529e1a87e66683d008d8aa07366148",
+    "provenance/earlier-candidates/undef-candidate-v2/plain_undef/complete.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/undef-candidate-v2/plain_undef/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/undef-candidate-v2/replay.json": "62d86deb86290d92aba4a666842d9d124938d682a9e38fd345e74c879b8a62c5",
+    "provenance/earlier-candidates/undef-candidate-v2/spaced_undef/actual.txt": "dcf4eb998baa1667a7fd720b83407a41e87f2290c35b912c24aba375797d785e",
+    "provenance/earlier-candidates/undef-candidate-v2/spaced_undef/complete.diff": "c356c3dbca6c3214e04fbf80f514ab7480aa07059d2b335bf9db8c629d0dad02",
+    "provenance/earlier-candidates/undef-candidate-v2/spaced_undef/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/earlier-candidates/undef-candidate-v2/tab_undef/actual.txt": "dcf4eb998baa1667a7fd720b83407a41e87f2290c35b912c24aba375797d785e",
+    "provenance/earlier-candidates/undef-candidate-v2/tab_undef/complete.diff": "c356c3dbca6c3214e04fbf80f514ab7480aa07059d2b335bf9db8c629d0dad02",
+    "provenance/earlier-candidates/undef-candidate-v2/tab_undef/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/inactive-header/cases.json": "4b6ddd2a8b2486d62c4cf599952e3ecb42963f2ef4207b44093c6493bbcc66fb",
+    "provenance/inactive-header/live-run.json": "1bac8be3cadeab0c4de28c271499541cbf76818e21982c8605e907589f6a85a7",
+    "provenance/inactive-header/live.stderr": "315b3b13267de7fb885521cbc0fabb92dda8bda41d2ddc843ca1b8822530a895",
+    "provenance/inactive-header/live.stdout": "eb6f1f8505f5ef216d4c67d727057fd87fa7cf9c16f247a1b52ace33d2666374",
+    "provenance/inactive-header/oracle.sc": "56431f14868678e64f9eb41026b44f1d3d7738404d28d2db62711b520c98c742",
+    "provenance/independent-undef/baseline/comment_between/actual.txt": "a83cafc3067a43136a30e5211698a749cb4c47cbbe5a2cb0c7d951036515a447",
+    "provenance/independent-undef/baseline/comment_between/complete.diff": "c765aa79920eb3a15391f6759249843402f2a0dff8e30e6f55221861a7dde62f",
+    "provenance/independent-undef/baseline/comment_between/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/independent-undef/baseline/formfeed_space/actual.txt": "a83cafc3067a43136a30e5211698a749cb4c47cbbe5a2cb0c7d951036515a447",
+    "provenance/independent-undef/baseline/formfeed_space/complete.diff": "c765aa79920eb3a15391f6759249843402f2a0dff8e30e6f55221861a7dde62f",
+    "provenance/independent-undef/baseline/formfeed_space/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/independent-undef/baseline/replay.json": "2fb8f3a92f9ea0bcd35fbbe85cc5c0a7e46d5ac79b03c0a3fb98b2529233835a",
+    "provenance/independent-undef/baseline/spliced_keyword/actual.txt": "a9904a40a5961b61dd48027fd43d8fca49ca3eb22d5df8f3589c3dda4d9bb8a8",
+    "provenance/independent-undef/baseline/spliced_keyword/complete.diff": "880ff8849d164348b999c8acdc927c5154b5ae6c824acbca3b54a1ac207d2fd3",
+    "provenance/independent-undef/baseline/spliced_keyword/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/independent-undef/baseline/trailing_comment/actual.txt": "a9904a40a5961b61dd48027fd43d8fca49ca3eb22d5df8f3589c3dda4d9bb8a8",
+    "provenance/independent-undef/baseline/trailing_comment/complete.diff": "880ff8849d164348b999c8acdc927c5154b5ae6c824acbca3b54a1ac207d2fd3",
+    "provenance/independent-undef/baseline/trailing_comment/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/independent-undef/baseline/unknown_directive/actual.txt": "a9904a40a5961b61dd48027fd43d8fca49ca3eb22d5df8f3589c3dda4d9bb8a8",
+    "provenance/independent-undef/baseline/unknown_directive/complete.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/independent-undef/baseline/unknown_directive/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/independent-undef/baseline-replay.log": "5d67725e3c641f762e75914a1ffbbd08345aa823cbfd58dedc25c88e9172cd13",
+    "provenance/independent-undef/candidate-v4/comment_between/actual.txt": "a83cafc3067a43136a30e5211698a749cb4c47cbbe5a2cb0c7d951036515a447",
+    "provenance/independent-undef/candidate-v4/comment_between/complete.diff": "6249e367e29d5d10ed5744a315f57361db4a3bf5d3a93b601eb90f0035b64b81",
+    "provenance/independent-undef/candidate-v4/comment_between/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/independent-undef/candidate-v4/formfeed_space/actual.txt": "a83cafc3067a43136a30e5211698a749cb4c47cbbe5a2cb0c7d951036515a447",
+    "provenance/independent-undef/candidate-v4/formfeed_space/complete.diff": "6249e367e29d5d10ed5744a315f57361db4a3bf5d3a93b601eb90f0035b64b81",
+    "provenance/independent-undef/candidate-v4/formfeed_space/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/independent-undef/candidate-v4/replay.json": "619cee87eea53b2a1147b6e1cdaaa5d6c6d7c7490acc02c10dfe7319eb5a7fab",
+    "provenance/independent-undef/candidate-v4/spliced_keyword/actual.txt": "a9904a40a5961b61dd48027fd43d8fca49ca3eb22d5df8f3589c3dda4d9bb8a8",
+    "provenance/independent-undef/candidate-v4/spliced_keyword/complete.diff": "1c9bca704a8301d936eabb4da3abee6d43c56648290eea6c481613141bbedb6b",
+    "provenance/independent-undef/candidate-v4/spliced_keyword/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/independent-undef/candidate-v4/trailing_comment/actual.txt": "ea434dcbfbaea4fd56a7c0e37fb256679ed9d7bdfdd9c54a4ded12ccc9a7d32b",
+    "provenance/independent-undef/candidate-v4/trailing_comment/complete.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/independent-undef/candidate-v4/trailing_comment/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/independent-undef/candidate-v4/unknown_directive/actual.txt": "a9904a40a5961b61dd48027fd43d8fca49ca3eb22d5df8f3589c3dda4d9bb8a8",
+    "provenance/independent-undef/candidate-v4/unknown_directive/complete.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/independent-undef/candidate-v4/unknown_directive/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/independent-undef/candidate-v4-replay.log": "35cdfc37823bbf8b6be8ac112a28ccb4263a98005859a269e11f47d255792a75",
+    "provenance/independent-undef/cases.json": "601e983719c971254825394d23b38775112576375224426794007e3aab03ca13",
+    "provenance/independent-undef/live-run.json": "4a58e5dcc6e32f5cc39a04d4f127111482a9bb8b8142d4eaa2af6a83d24d5b6c",
+    "provenance/independent-undef/live.stderr": "f88d1386637ad4d5c4322098d76a99b32cd2505d2fd870bf13a662234e2a4d73",
+    "provenance/independent-undef/live.stdout": "b62a3325e9c6c1a4bdfc7cb50e8b5957a125ba876169e2dc7d46da4cdb957e50",
+    "provenance/independent-undef/oracle.sc": "56431f14868678e64f9eb41026b44f1d3d7738404d28d2db62711b520c98c742",
+    "provenance/independent-undef/replay.py": "fc04e10fc7ade459621fc604933e1cfd261e310d734970360927c53412ce07a7",
+    "provenance/independent-undef/retention.json": "966e88612ac1b184eac05fcd0cd38e7ad04e7ab96eaa396232e962df306e4b21",
+    "provenance/independent-undef/run_oracle.py": "e94c87d7f75e80dfaf92d4c88af310d63bdd83217adc26a91cdf4ba45cb8fa27",
+    "provenance/location-improvement/binding.json": "82f25d33deef503debc1cb4c9925eb721eff269d35e0e60cf66ea215d85c1c1d",
+    "provenance/location-improvement/live.stdout": "e0b96ff88c60de934cca9ba41c457d7bd942ce743ed379aed916598b154c58ff",
+    "provenance/ordinal-collision.json": "9fc46894aa5efdb13eacb1a9880cf9faf8ea42448ac00eaf3a40aefa9b3db2bc",
+    "provenance/package-verification.json": "6ac4903d97ab564f6ee8edd24ebab45366ffa7021e19137c11cf0e610a4be1e3",
+    "provenance/primary/NEXT.md": "19d73a4b131351a3a0178855b34484aa99765eba44f329fe4375e6ef97a82729",
+    "provenance/primary/cases.json": "0f508f99cfad59f7394815048e1e1c22a181c4bc83fa6cfa22fc40451fa764f2",
+    "provenance/primary/live-run.json": "0bbc03c931b190d005faab1cea423e45672c9fda9634c88f06e8b47f58b776df",
+    "provenance/primary/live.stderr": "547f686b0b8ffbba1ea0f45d48e8cbdc267874ac20aafb23cb6e58468b960279",
+    "provenance/primary/live.stdout": "7e89aa04b929d73de83b6fda644f8370a8595052d5022c5316adab7b81fffecd",
+    "provenance/primary/next-unit.json": "080be8f1a4885735e95f964175e9a90a38ab15b549a47b879aadbaccfa0f15d2",
+    "provenance/primary/oracle.sc": "56431f14868678e64f9eb41026b44f1d3d7738404d28d2db62711b520c98c742",
+    "provenance/undef-boundaries/cases.json": "1bf969b7ef9761cadae1950b1d5c15ec2e373d69269d7f7cd6e66510da2fda1d",
+    "provenance/undef-boundaries/live-run.json": "430c48dee7ccd0877cc6273b09f1bc47d9d83ff32c406c8c0c6a8efe1fe197a5",
+    "provenance/undef-boundaries/live.stderr": "a3763d0655a4ea0a238d3135f9d85340b5828ff1307cd42a6f468fdd94e07210",
+    "provenance/undef-boundaries/live.stdout": "0acf4c771918871a3e1c024976f469e6d7b8d2da5b36f94e34cf6e9e5168fa10",
+    "provenance/undef-boundaries/oracle.sc": "56431f14868678e64f9eb41026b44f1d3d7738404d28d2db62711b520c98c742",
+    "provenance/undef-controls/cases.json": "7e14c9ad2b0eef6af02cbdc68b4b6361a9f1447a7c3f19feb5525552535d1fa8",
+    "provenance/undef-controls/live-run.json": "0eb7702a8cadad8f143ad1a77d7c3cce1c30baee3a13bf9161879c161f77e7c7",
+    "provenance/undef-controls/live.stderr": "523682dfa9dcf18a006256a206d56badf96950c757f00279fb5af0c49ee178a6",
+    "provenance/undef-controls/live.stdout": "10d5f1c87211bc57a9374024b6ee76651cf45e38e2c7e455cc419a176722411f",
+    "provenance/undef-controls/oracle.sc": "56431f14868678e64f9eb41026b44f1d3d7738404d28d2db62711b520c98c742",
+    "provenance/v1/build.log": "f24f8e911375735b49a57e2be4d279e8da061871b55e8c6db8946408cfb68107",
+    "provenance/v1/source-binary-binding.json": "d5b156ff10719da250eabe8f4e23165ebf9ceecfab97311efed0c222c03f1ed8",
+    "provenance/v2/bindings.json": "9a49cdb5f77ad6908389013e62a402e6077533b53f22471256c872cec2cd559b",
+    "provenance/v2/build.log": "fd12cfb9d4a044a3fbe14d241227ebaa012f28b33acd1cfa250f59f562c73589",
+    "provenance/v2/source-binary-binding.json": "2be0279498f01931f1858d9e0b5d4bc7ee206a822714cd7a187eea76ad9f6684",
+    "provenance/v3/bindings.json": "29ef2d20d68da796c77cacf81f5739f3366881086f5fd4885fe58bc5e008e4c5",
+    "provenance/v3/build.log": "78a1542af79844ff51779fc8b27528dd9717235c84d6482c3a03e15da2fa4576",
+    "provenance/v3/source-binary-binding.json": "dc45e49f5a6c187a0fbcac776a5ced15e222ab136221d91c0b6028d10ebb6e9a",
+    "provenance/v4/bindings.json": "87dda9e406c0cad2b7b250257c9d20a178589f2068ae411ed7a586fc9aacf9fc",
+    "provenance/v4/build.log": "f251f1cfb40a54a63f421b7a283550df3a093545854008992f8e7afcae62fbbd",
+    "provenance/v4/source-binary-binding.json": "d11daa9630012e3cb13d56ace24c276089e6fc99a36a3f2c26741e36042c3ec0",
+    "provenance/validation/clippy-v4-final.log": "e95959b4f562ecc51bb60af140d2dbb1d228fad826f46428582fe978cfec63ce",
+    "provenance/validation/clippy-v4.log": "8f7a7e7b6f88665143f62737170ff417fe84c3582b70ada288f49f8d39f9ac6b",
+    "provenance/validation/fmt-v4-expanded.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/validation/fmt-v4-final.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/validation/fmt-v4.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/validation/focused-v4-expanded.log": "fcbb0f1801d406fbf3ba1d996b6206953b016bf1ab834008e110b45788d0745c",
+    "provenance/validation/focused-v4-final.log": "732f8709061d724cd640264b21fd43373e980565d04652b172f4120e06f737da",
+    "provenance/validation/main308-live-v4.log": "715e0c188ca0e7a744ace60c9fa451649f34143022f2a1a163bd46303772dd68",
+    "provenance/validation/main308-v4.log": "c105179d62065e9cbf9f398ff94754c29ec03add1206db7dff281cb4c07b6be6",
+    "provenance/validation/tests-v2.log": "ea62a11c58edf5e1458b5101c38e77822f2b61aa36e8140b2a9a34f1717d0030",
+    "provenance/validation/tests-v3.log": "bb433e3e8370e5f5656f68bdee80820fa53ed6d2609e41a7aa2f1f5e5e28664c",
+    "provenance/validation/tests-v4-corrected.log": "885edb6ea17b107e49dc0f9c317c1352eb9aff82b934f2a82d1a91e64d351f46",
+    "provenance/validation/tests-v4-final.log": "7e263a5a057f75979f20b67d53e3ceaad8a2e52126e139c492231bfde39b82de",
+    "provenance/validation/tests-v4.log": "0c677fb557c58caa1af9522fccc3c600a49092d3c59ac66a3cc55510a1cb5fe4",
+    "provenance/whole-lua-v4/luaH_realasize-before.txt": "1b00e4cd6b87c76dc0a2678b452ce19b99493325a5dd6364839cffeb72ed3a76",
+    "provenance/whole-lua-v4/luaH_realasize-candidate.txt": "b8b7ac25db4ef63ee761e18819bdeb444bed6d7027b2c34febdfe3ca72681dcb",
+    "provenance/whole-lua-v4/luaH_realasize-joern.txt": "b8b7ac25db4ef63ee761e18819bdeb444bed6d7027b2c34febdfe3ca72681dcb",
+    "provenance/whole-lua-v4/luaH_realasize.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/whole-lua-v4/luaT_callorderTM-before.txt": "29cbab5d74760a3f308f73c955c84ee8b5febda1fde8d726fc8f5faa47432318",
+    "provenance/whole-lua-v4/luaT_callorderTM-candidate.txt": "5def2f59e8cb009cb9d211061dbefcba39fcba1ddc3698f3dca2c5fe310eb15a",
+    "provenance/whole-lua-v4/luaT_callorderTM-joern.txt": "5def2f59e8cb009cb9d211061dbefcba39fcba1ddc3698f3dca2c5fe310eb15a",
+    "provenance/whole-lua-v4/luaT_callorderTM.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/whole-lua-v4/method-review.json": "7597639c1ce782fbaa08a9f9c6c066435ad3b690058923f5e9c66f1f2851d69b",
+    "provenance/whole-lua-v4/run.json": "4b4e718698739e3a0ae94e9210cb3366a5037beb7477565fdb321ebb3a46b544",
+    "provenance/whole-lua-v4/setfield-before.txt": "0f4e2d4ca5b66e01203d915979d8e096f462131302b9135e1f8de72238f7be89",
+    "provenance/whole-lua-v4/setfield-candidate.txt": "1ae1f540d815dafb605c9cc12fe5c4b095e1c628466011e1669d2cf1507aa3ab",
+    "provenance/whole-lua-v4/setfield-joern.txt": "1ae1f540d815dafb605c9cc12fe5c4b095e1c628466011e1669d2cf1507aa3ab",
+    "provenance/whole-lua-v4/setfield.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/whole-zlib-v2/byte_swap-before.txt": "e0d5ab7c6c0c11ad340dcbbeb57533f71146fe1427887fde80fdeb6f7fe9cacc",
+    "provenance/whole-zlib-v2/byte_swap-candidate.txt": "47b0bca51bfc9405597194d06974cbaa3284f96dc9336bb9142eff460a954208",
+    "provenance/whole-zlib-v2/byte_swap.diff": "01a99252a10e0a955d2666b817a75c5d4d638c33cea32b0175cdf5854d423ae6",
+    "provenance/whole-zlib-v2/gz_error-before.txt": "4711a7fba87d44f6779ba917443afcb18c7534d60f75c90eeb078c0587c988ef",
+    "provenance/whole-zlib-v2/gz_error-candidate.txt": "9dc64c84f6539cd0ed15e7b328416275338d740f17998f567047594ad322b206",
+    "provenance/whole-zlib-v2/gz_error-joern.txt": "e008d83edaf21a7ad5cd6b109e422ce1e5b80aa6ea5c6e101f9d2be1ee765048",
+    "provenance/whole-zlib-v2/gz_error.diff": "1755b2f0c22c8070579f5eecb2f0aefe9d452b5781c346cf282f090e0e6a5c87",
+    "provenance/whole-zlib-v2/gz_open-before.txt": "79c659fca4ba74a7999e4011abba076c45cc21eaa2cce0b796d4141ecce02607",
+    "provenance/whole-zlib-v2/gz_open-candidate.txt": "c627191565d7e04a212253aef92c32700bc5ba598b64b65577fe196f976f9b62",
+    "provenance/whole-zlib-v2/gz_open-joern.txt": "709d7b5beda33338af94b769995aa00dcff75ee4fba99acc7153740bd3c4bb04",
+    "provenance/whole-zlib-v2/gz_open.diff": "3053b12af372112eede10503d46b81f0e5d67fdc95a77663b12e093e867afe95",
+    "provenance/whole-zlib-v2/gzdopen-before.txt": "931855929bd6bb1b387473d8e472d83fe4d14ed06523a28fa75296c6ef4fa913",
+    "provenance/whole-zlib-v2/gzdopen-candidate.txt": "d58e5bd15a716ef560f63105e70bf520023c3d8a312c87b46a5aade455fb84ff",
+    "provenance/whole-zlib-v2/gzdopen-joern.txt": "156f706912fb263e6a8fa29b5d5e60ddd3f2302356613d600c79a4ab09c5c494",
+    "provenance/whole-zlib-v2/gzdopen.diff": "1924cf70c049350fda8b6c3a3fa8dabbc7548f00808ca90aeb003fc671b301ca",
+    "provenance/whole-zlib-v2/method-review.json": "e95edbb54d46e58991cc42c1ed948c87fda65f7e83c32d9d9fac86fb0e5eac48",
+    "provenance/whole-zlib-v2/run.json": "b50793c21a720dd60f1ae3fc14e8640c9a042ec6bcdb66ef1f33b6c62dc6f0d4",
+    "provenance/whole-zlib-v3/byte_swap-before.txt": "e0d5ab7c6c0c11ad340dcbbeb57533f71146fe1427887fde80fdeb6f7fe9cacc",
+    "provenance/whole-zlib-v3/byte_swap-candidate.txt": "f086d6582e8ffd81392b4101696729e693f1bf4b3af70b9dd6afcadeeabf9687",
+    "provenance/whole-zlib-v3/byte_swap-joern.txt": "e0d5ab7c6c0c11ad340dcbbeb57533f71146fe1427887fde80fdeb6f7fe9cacc",
+    "provenance/whole-zlib-v3/byte_swap.diff": "4af0be61c4b42487cc0a11b875f70e2e8accd7fb2bdcbe6fed4faa5dff00754b",
+    "provenance/whole-zlib-v3/gz_error-before.txt": "4711a7fba87d44f6779ba917443afcb18c7534d60f75c90eeb078c0587c988ef",
+    "provenance/whole-zlib-v3/gz_error-candidate.txt": "9dc64c84f6539cd0ed15e7b328416275338d740f17998f567047594ad322b206",
+    "provenance/whole-zlib-v3/gz_error-joern.txt": "e008d83edaf21a7ad5cd6b109e422ce1e5b80aa6ea5c6e101f9d2be1ee765048",
+    "provenance/whole-zlib-v3/gz_error.diff": "1755b2f0c22c8070579f5eecb2f0aefe9d452b5781c346cf282f090e0e6a5c87",
+    "provenance/whole-zlib-v3/gz_open-before.txt": "79c659fca4ba74a7999e4011abba076c45cc21eaa2cce0b796d4141ecce02607",
+    "provenance/whole-zlib-v3/gz_open-candidate.txt": "c627191565d7e04a212253aef92c32700bc5ba598b64b65577fe196f976f9b62",
+    "provenance/whole-zlib-v3/gz_open-joern.txt": "709d7b5beda33338af94b769995aa00dcff75ee4fba99acc7153740bd3c4bb04",
+    "provenance/whole-zlib-v3/gz_open.diff": "3053b12af372112eede10503d46b81f0e5d67fdc95a77663b12e093e867afe95",
+    "provenance/whole-zlib-v3/gzdopen-before.txt": "931855929bd6bb1b387473d8e472d83fe4d14ed06523a28fa75296c6ef4fa913",
+    "provenance/whole-zlib-v3/gzdopen-candidate.txt": "d58e5bd15a716ef560f63105e70bf520023c3d8a312c87b46a5aade455fb84ff",
+    "provenance/whole-zlib-v3/gzdopen-joern.txt": "156f706912fb263e6a8fa29b5d5e60ddd3f2302356613d600c79a4ab09c5c494",
+    "provenance/whole-zlib-v3/gzdopen.diff": "1924cf70c049350fda8b6c3a3fa8dabbc7548f00808ca90aeb003fc671b301ca",
+    "provenance/whole-zlib-v3/method-review.json": "518b94c6165f86c80b8ba69945a8ee0586cdef9a52eb343e5c6d93b0937eee75",
+    "provenance/whole-zlib-v3/run.json": "ed2007ef1c44d82d43299caf24c3a7f7a5e4c50cedb79b677d483318644e40da",
+    "provenance/whole-zlib-v3/snprintf-before.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/whole-zlib-v3/snprintf-candidate.txt": "e1b88a789494e2e3730f7991ea2be15ac2b003a7d2858caddbe4d772470bd17a",
+    "provenance/whole-zlib-v3/snprintf-joern.txt": "e1b88a789494e2e3730f7991ea2be15ac2b003a7d2858caddbe4d772470bd17a",
+    "provenance/whole-zlib-v3/snprintf.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/whole-zlib-v4/braid-before.txt": "f5a30132301bb7fe13b20b7eca736d656d56f974c91aaa2e900b9e7f32f3efe8",
+    "provenance/whole-zlib-v4/braid-candidate.txt": "956c9cf91a07fb7d93441b0c2d0b9760a931147701032cf4b662806b73a13b79",
+    "provenance/whole-zlib-v4/braid-joern.txt": "956c9cf91a07fb7d93441b0c2d0b9760a931147701032cf4b662806b73a13b79",
+    "provenance/whole-zlib-v4/braid.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/whole-zlib-v4/byte_swap-before.txt": "e0d5ab7c6c0c11ad340dcbbeb57533f71146fe1427887fde80fdeb6f7fe9cacc",
+    "provenance/whole-zlib-v4/byte_swap-candidate.txt": "e0d5ab7c6c0c11ad340dcbbeb57533f71146fe1427887fde80fdeb6f7fe9cacc",
+    "provenance/whole-zlib-v4/byte_swap-joern.txt": "e0d5ab7c6c0c11ad340dcbbeb57533f71146fe1427887fde80fdeb6f7fe9cacc",
+    "provenance/whole-zlib-v4/byte_swap.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/whole-zlib-v4/crc_word-before.txt": "6d7082ec56b8c0d6c47689668a00b5565b3e531d9873330c4caf003d39daf48f",
+    "provenance/whole-zlib-v4/crc_word-candidate.txt": "ef555213ac2726e9f88e618daff46af761f68ff68e0256284c739e26ae31076a",
+    "provenance/whole-zlib-v4/crc_word-joern.txt": "ef555213ac2726e9f88e618daff46af761f68ff68e0256284c739e26ae31076a",
+    "provenance/whole-zlib-v4/crc_word.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/whole-zlib-v4/crc_word_big-before.txt": "0f5e2a2848bfe5d94161777bb95f2aec2b31b820146888d63dc27eeaf037eb31",
+    "provenance/whole-zlib-v4/crc_word_big-candidate.txt": "9e5b6756026ac5fae968b3404c97d6167f533278ebe98e3d11b94a18bc5c5b38",
+    "provenance/whole-zlib-v4/crc_word_big-joern.txt": "9e5b6756026ac5fae968b3404c97d6167f533278ebe98e3d11b94a18bc5c5b38",
+    "provenance/whole-zlib-v4/crc_word_big.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/whole-zlib-v4/gz_error-before.txt": "4711a7fba87d44f6779ba917443afcb18c7534d60f75c90eeb078c0587c988ef",
+    "provenance/whole-zlib-v4/gz_error-candidate.txt": "9dc64c84f6539cd0ed15e7b328416275338d740f17998f567047594ad322b206",
+    "provenance/whole-zlib-v4/gz_error-joern.txt": "e008d83edaf21a7ad5cd6b109e422ce1e5b80aa6ea5c6e101f9d2be1ee765048",
+    "provenance/whole-zlib-v4/gz_error.diff": "1755b2f0c22c8070579f5eecb2f0aefe9d452b5781c346cf282f090e0e6a5c87",
+    "provenance/whole-zlib-v4/gz_open-before.txt": "79c659fca4ba74a7999e4011abba076c45cc21eaa2cce0b796d4141ecce02607",
+    "provenance/whole-zlib-v4/gz_open-candidate.txt": "c627191565d7e04a212253aef92c32700bc5ba598b64b65577fe196f976f9b62",
+    "provenance/whole-zlib-v4/gz_open-joern.txt": "709d7b5beda33338af94b769995aa00dcff75ee4fba99acc7153740bd3c4bb04",
+    "provenance/whole-zlib-v4/gz_open.diff": "3053b12af372112eede10503d46b81f0e5d67fdc95a77663b12e093e867afe95",
+    "provenance/whole-zlib-v4/gzdopen-before.txt": "931855929bd6bb1b387473d8e472d83fe4d14ed06523a28fa75296c6ef4fa913",
+    "provenance/whole-zlib-v4/gzdopen-candidate.txt": "d58e5bd15a716ef560f63105e70bf520023c3d8a312c87b46a5aade455fb84ff",
+    "provenance/whole-zlib-v4/gzdopen-joern.txt": "156f706912fb263e6a8fa29b5d5e60ddd3f2302356613d600c79a4ab09c5c494",
+    "provenance/whole-zlib-v4/gzdopen.diff": "1924cf70c049350fda8b6c3a3fa8dabbc7548f00808ca90aeb003fc671b301ca",
+    "provenance/whole-zlib-v4/method-review.json": "fd50522f5e2ed147dc63486dc13443b715a38b3c4d9a82fadcb9715adaeac32a",
+    "provenance/whole-zlib-v4/once-before.txt": "1a530208b7f5259d470c9c2d3fa230bdf83de5bba0ac2c765692d914cfbe0dce",
+    "provenance/whole-zlib-v4/once-candidate.txt": "7060e779b4d09eacc5ad192d80e4479c096a62d157972539ad4804896a7f4d7e",
+    "provenance/whole-zlib-v4/once-joern.txt": "7060e779b4d09eacc5ad192d80e4479c096a62d157972539ad4804896a7f4d7e",
+    "provenance/whole-zlib-v4/once.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/whole-zlib-v4/once<duplicate>0-before.txt": "27786f62bc3a2fe5cbd64742568251b5b2e6b3f92bb6095004a21f61a5f28794",
+    "provenance/whole-zlib-v4/once<duplicate>0-candidate.txt": "66f38e68717f0bae2c8e6cd3893dccb5b88bcbd5c7b0bf70c6b4bc08353f7482",
+    "provenance/whole-zlib-v4/once<duplicate>0-joern.txt": "66f38e68717f0bae2c8e6cd3893dccb5b88bcbd5c7b0bf70c6b4bc08353f7482",
+    "provenance/whole-zlib-v4/once<duplicate>0.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/whole-zlib-v4/run.json": "ec3c55660bbb0fbf1b0162248de07f7c1ccbf88b0de823ee2ac6852831ded32d",
+    "provenance/whole-zlib-v4/send_bits-before.txt": "9b3aba073a3635a367e9be9b652437bce5047258ce030bbe6409662e65ddf11e",
+    "provenance/whole-zlib-v4/send_bits-candidate.txt": "241fd9addf591e1cdd0aa3bd6fb32335c35435856972473207fec29207893677",
+    "provenance/whole-zlib-v4/send_bits-joern.txt": "241fd9addf591e1cdd0aa3bd6fb32335c35435856972473207fec29207893677",
+    "provenance/whole-zlib-v4/send_bits.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/whole-zlib-v4/snprintf-before.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/whole-zlib-v4/snprintf-candidate.txt": "e1b88a789494e2e3730f7991ea2be15ac2b003a7d2858caddbe4d772470bd17a",
+    "provenance/whole-zlib-v4/snprintf-joern.txt": "e1b88a789494e2e3730f7991ea2be15ac2b003a7d2858caddbe4d772470bd17a",
+    "provenance/whole-zlib-v4/snprintf.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/whole-zlib-v4/test_and_set-before.txt": "62954486c4aab2db62c457bf4f06cf9103323b7fe2f204015f8ab05006359536",
+    "provenance/whole-zlib-v4/test_and_set-candidate.txt": "469ad4bee3ec4ca596d2874532e48bd4135252fa162038548d7073ed9edced0a",
+    "provenance/whole-zlib-v4/test_and_set-joern.txt": "469ad4bee3ec4ca596d2874532e48bd4135252fa162038548d7073ed9edced0a",
+    "provenance/whole-zlib-v4/test_and_set.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/whole-zlib-v4/write_table-before.txt": "b5c78aa2326f3adedd8bfcb7307f6590bc7c034ace15bcf2806cd7a341be3b20",
+    "provenance/whole-zlib-v4/write_table-candidate.txt": "e52e8fa37df1d9fc9bda0c1b00146cfb379642a816da350cf7d283ddcf339e4f",
+    "provenance/whole-zlib-v4/write_table-joern.txt": "e52e8fa37df1d9fc9bda0c1b00146cfb379642a816da350cf7d283ddcf339e4f",
+    "provenance/whole-zlib-v4/write_table.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/whole-zlib-v4/write_table32hi-before.txt": "22dbf4edaf4e1523cce449e141953d162c4fe1b05f6315ed182dc637f6cabd5f",
+    "provenance/whole-zlib-v4/write_table32hi-candidate.txt": "65e50ae30bc1ad2de8f35c04c88c050a8ee2ca3349ceca57b9d78fa8585e30d3",
+    "provenance/whole-zlib-v4/write_table32hi-joern.txt": "65e50ae30bc1ad2de8f35c04c88c050a8ee2ca3349ceca57b9d78fa8585e30d3",
+    "provenance/whole-zlib-v4/write_table32hi.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/whole-zlib-v4/write_table64-before.txt": "377972dc9415216eff184c499c77b0365ac9535d8d85ae211e022ac2383ff775",
+    "provenance/whole-zlib-v4/write_table64-candidate.txt": "4e91ec94ad64d52a2a9b7ff82871b9de22178ffc7452c3917f8b983f6bc5039a",
+    "provenance/whole-zlib-v4/write_table64-joern.txt": "4e91ec94ad64d52a2a9b7ff82871b9de22178ffc7452c3917f8b983f6bc5039a",
+    "provenance/whole-zlib-v4/write_table64.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "comment_between": {
+    "main.c": "#define ENABLE 1\n# /* gap */ undef ENABLE\nint choose(int x){\n#ifdef ENABLE\nreturn x;\n#else\nreturn 0;\n#endif\n}\n"
+  },
+  "spliced_keyword": {
+    "main.c": "#define ENABLE 1\n# un\\\ndef ENABLE\nint choose(int x){\n#ifdef ENABLE\nreturn x;\n#else\nreturn 0;\n#endif\n}\n"
+  },
+  "formfeed_space": {
+    "main.c": "#define ENABLE 1\n#\fundef ENABLE\nint choose(int x){\n#ifdef ENABLE\nreturn x;\n#else\nreturn 0;\n#endif\n}\n"
+  },
+  "unknown_directive": {
+    "main.c": "#define ENABLE 1\n# undefine ENABLE\nint choose(int x){\n#ifdef ENABLE\nreturn x;\n#else\nreturn 0;\n#endif\n}\n"
+  },
+  "trailing_comment": {
+    "main.c": "#define ENABLE 1\n#  undef ENABLE /* trailing */\nint choose(int x){\n#ifdef ENABLE\nreturn x;\n#else\nreturn 0;\n#endif\n}\n"
+  }
+}

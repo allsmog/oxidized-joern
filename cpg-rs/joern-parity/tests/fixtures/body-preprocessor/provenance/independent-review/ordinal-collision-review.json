@@ -1,0 +1,347 @@
+{
+  "status": "RAW_LOSS_RETAINED_ADDRESS_COINCIDENCE",
+  "source": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/.local/body-preprocessor/primary/input/local_definition/main.c",
+    "sha256": "5e4b9f11c86743b408483ceb47c5e1dc078c6b493018ec57095f58b6cbd7dd78"
+  },
+  "producerSource": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/eighth-body-review/frozen-v4/exact.rs",
+    "sha256": "8b132fab7d079a97e774b10d5b1f14c1a1df4f093ef8f437ebfcaadfdde33b3b"
+  },
+  "producerBinary": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/eighth-body-review/frozen-v4/joern-parity",
+    "sha256": "575397f4a349231a559641e6ca12e76ed4fc42e6e1bc77e8ffeb12cb30f48b4a"
+  },
+  "baselineBinary": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/seventh-batch/final-real-differential/bin/joern-parity",
+    "sha256": "d4503d37b2a7a37df7c3d58520fea9d943530bce323bd1909032f102e9640f8b"
+  },
+  "graphs": {
+    "joern": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/.local/body-preprocessor/primary/input/local_definition/expected.txt",
+      "sha256": "1e3dca8eea1a14311a33a386f3f15e73d72d9a3241ca9daadfa884f8f46ed790"
+    },
+    "baseline": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/eighth-body-review/v4-replay/local_definition/baseline.txt",
+      "sha256": "6f90a14d2f9b8efee1464dc09df9a61ffa811cf6c4cea56e9b2a6647a90e1dfe"
+    },
+    "candidate": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/eighth-body-review/v4-replay/local_definition/candidate.txt",
+      "sha256": "22483368954c812bf6ffd898471efe2311ac2bc0ac9d2b72430dd4fe92ea3b8f"
+    }
+  },
+  "rawPreviouslyMatchingRecordLost": "FLOWS|REACHING_DEF[x] choose#1 -> choose#5",
+  "rawMatchingLossCount": 1,
+  "entireMethodTrees": {
+    "joern": [
+      {
+        "ordinal": 0,
+        "depth": 0,
+        "record": "METHOD NAME=choose CODE=int choose(int x) {\\n#define BODY_FLAG 1\\n#if BODY_FLAG\\n    return x;\\n#else\\n    return 0;\\n#endif\\n} FULL_NAME=choose SIGNATURE=int(int) ORDER=1",
+        "parentOrdinal": null,
+        "ancestorOrdinals": []
+      },
+      {
+        "ordinal": 1,
+        "depth": 1,
+        "record": "METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1",
+        "parentOrdinal": 0,
+        "ancestorOrdinals": [
+          0
+        ]
+      },
+      {
+        "ordinal": 2,
+        "depth": 1,
+        "record": "METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1",
+        "parentOrdinal": 0,
+        "ancestorOrdinals": [
+          0
+        ]
+      },
+      {
+        "ordinal": 3,
+        "depth": 1,
+        "record": "BLOCK CODE={\\n#define BODY_FLAG 1\\n#if BODY_FLAG\\n    return x;\\n#else\\n    return 0;\\n#endif\\n} TYPE_FULL_NAME=void ORDER=2",
+        "parentOrdinal": 0,
+        "ancestorOrdinals": [
+          0
+        ]
+      },
+      {
+        "ordinal": 4,
+        "depth": 2,
+        "record": "RETURN CODE=return x; ORDER=1",
+        "parentOrdinal": 3,
+        "ancestorOrdinals": [
+          0,
+          3
+        ]
+      },
+      {
+        "ordinal": 5,
+        "depth": 3,
+        "record": "IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1",
+        "parentOrdinal": 4,
+        "ancestorOrdinals": [
+          0,
+          3,
+          4
+        ]
+      },
+      {
+        "ordinal": 6,
+        "depth": 1,
+        "record": "METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3",
+        "parentOrdinal": 0,
+        "ancestorOrdinals": [
+          0
+        ]
+      }
+    ],
+    "baseline": [
+      {
+        "ordinal": 0,
+        "depth": 0,
+        "record": "METHOD NAME=choose CODE=int choose(int x) {\\n#define BODY_FLAG 1\\n#if BODY_FLAG\\n    return x;\\n#else\\n    return 0;\\n#endif\\n} FULL_NAME=choose SIGNATURE=int(int) ORDER=1",
+        "parentOrdinal": null,
+        "ancestorOrdinals": []
+      },
+      {
+        "ordinal": 1,
+        "depth": 1,
+        "record": "METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1",
+        "parentOrdinal": 0,
+        "ancestorOrdinals": [
+          0
+        ]
+      },
+      {
+        "ordinal": 2,
+        "depth": 1,
+        "record": "METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1",
+        "parentOrdinal": 0,
+        "ancestorOrdinals": [
+          0
+        ]
+      },
+      {
+        "ordinal": 3,
+        "depth": 1,
+        "record": "BLOCK CODE={\\n#define BODY_FLAG 1\\n#if BODY_FLAG\\n    return x;\\n#else\\n    return 0;\\n#endif\\n} TYPE_FULL_NAME=void ORDER=2",
+        "parentOrdinal": 0,
+        "ancestorOrdinals": [
+          0
+        ]
+      },
+      {
+        "ordinal": 4,
+        "depth": 2,
+        "record": "LOCAL NAME=BODY_FLAG CODE=<unknown> BODY_FLAG TYPE_FULL_NAME=ANY ORDER=0",
+        "parentOrdinal": 3,
+        "ancestorOrdinals": [
+          0,
+          3
+        ]
+      },
+      {
+        "ordinal": 5,
+        "depth": 1,
+        "record": "METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3",
+        "parentOrdinal": 0,
+        "ancestorOrdinals": [
+          0
+        ]
+      }
+    ],
+    "candidate": [
+      {
+        "ordinal": 0,
+        "depth": 0,
+        "record": "METHOD NAME=choose CODE=int choose(int x) {\\n#define BODY_FLAG 1\\n#if BODY_FLAG\\n    return x;\\n#else\\n    return 0;\\n#endif\\n} FULL_NAME=choose SIGNATURE=int(int) ORDER=1",
+        "parentOrdinal": null,
+        "ancestorOrdinals": []
+      },
+      {
+        "ordinal": 1,
+        "depth": 1,
+        "record": "METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1",
+        "parentOrdinal": 0,
+        "ancestorOrdinals": [
+          0
+        ]
+      },
+      {
+        "ordinal": 2,
+        "depth": 1,
+        "record": "METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1",
+        "parentOrdinal": 0,
+        "ancestorOrdinals": [
+          0
+        ]
+      },
+      {
+        "ordinal": 3,
+        "depth": 1,
+        "record": "BLOCK CODE={\\n#define BODY_FLAG 1\\n#if BODY_FLAG\\n    return x;\\n#else\\n    return 0;\\n#endif\\n} TYPE_FULL_NAME=void ORDER=2",
+        "parentOrdinal": 0,
+        "ancestorOrdinals": [
+          0
+        ]
+      },
+      {
+        "ordinal": 4,
+        "depth": 2,
+        "record": "RETURN CODE=return 0; ORDER=1",
+        "parentOrdinal": 3,
+        "ancestorOrdinals": [
+          0,
+          3
+        ]
+      },
+      {
+        "ordinal": 5,
+        "depth": 3,
+        "record": "LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=1",
+        "parentOrdinal": 4,
+        "ancestorOrdinals": [
+          0,
+          3,
+          4
+        ]
+      },
+      {
+        "ordinal": 6,
+        "depth": 1,
+        "record": "METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3",
+        "parentOrdinal": 0,
+        "ancestorOrdinals": [
+          0
+        ]
+      }
+    ]
+  },
+  "semanticParameterToReturnPreserved": [
+    {
+      "version": "joern",
+      "relation": "FLOWS|REACHING_DEF[x] choose#1 -> choose#6",
+      "source": {
+        "ordinal": 1,
+        "depth": 1,
+        "record": "METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1",
+        "parentOrdinal": 0,
+        "ancestorOrdinals": [
+          0
+        ]
+      },
+      "target": {
+        "ordinal": 6,
+        "depth": 1,
+        "record": "METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3",
+        "parentOrdinal": 0,
+        "ancestorOrdinals": [
+          0
+        ]
+      },
+      "sourceAncestors": [
+        {
+          "ordinal": 0,
+          "depth": 0,
+          "record": "METHOD NAME=choose CODE=int choose(int x) {\\n#define BODY_FLAG 1\\n#if BODY_FLAG\\n    return x;\\n#else\\n    return 0;\\n#endif\\n} FULL_NAME=choose SIGNATURE=int(int) ORDER=1",
+          "parentOrdinal": null,
+          "ancestorOrdinals": []
+        }
+      ],
+      "targetAncestors": [
+        {
+          "ordinal": 0,
+          "depth": 0,
+          "record": "METHOD NAME=choose CODE=int choose(int x) {\\n#define BODY_FLAG 1\\n#if BODY_FLAG\\n    return x;\\n#else\\n    return 0;\\n#endif\\n} FULL_NAME=choose SIGNATURE=int(int) ORDER=1",
+          "parentOrdinal": null,
+          "ancestorOrdinals": []
+        }
+      ]
+    },
+    {
+      "version": "baseline",
+      "relation": "FLOWS|REACHING_DEF[x] choose#1 -> choose#5",
+      "source": {
+        "ordinal": 1,
+        "depth": 1,
+        "record": "METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1",
+        "parentOrdinal": 0,
+        "ancestorOrdinals": [
+          0
+        ]
+      },
+      "target": {
+        "ordinal": 5,
+        "depth": 1,
+        "record": "METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3",
+        "parentOrdinal": 0,
+        "ancestorOrdinals": [
+          0
+        ]
+      },
+      "sourceAncestors": [
+        {
+          "ordinal": 0,
+          "depth": 0,
+          "record": "METHOD NAME=choose CODE=int choose(int x) {\\n#define BODY_FLAG 1\\n#if BODY_FLAG\\n    return x;\\n#else\\n    return 0;\\n#endif\\n} FULL_NAME=choose SIGNATURE=int(int) ORDER=1",
+          "parentOrdinal": null,
+          "ancestorOrdinals": []
+        }
+      ],
+      "targetAncestors": [
+        {
+          "ordinal": 0,
+          "depth": 0,
+          "record": "METHOD NAME=choose CODE=int choose(int x) {\\n#define BODY_FLAG 1\\n#if BODY_FLAG\\n    return x;\\n#else\\n    return 0;\\n#endif\\n} FULL_NAME=choose SIGNATURE=int(int) ORDER=1",
+          "parentOrdinal": null,
+          "ancestorOrdinals": []
+        }
+      ]
+    },
+    {
+      "version": "candidate",
+      "relation": "FLOWS|REACHING_DEF[x] choose#1 -> choose#6",
+      "source": {
+        "ordinal": 1,
+        "depth": 1,
+        "record": "METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1",
+        "parentOrdinal": 0,
+        "ancestorOrdinals": [
+          0
+        ]
+      },
+      "target": {
+        "ordinal": 6,
+        "depth": 1,
+        "record": "METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3",
+        "parentOrdinal": 0,
+        "ancestorOrdinals": [
+          0
+        ]
+      },
+      "sourceAncestors": [
+        {
+          "ordinal": 0,
+          "depth": 0,
+          "record": "METHOD NAME=choose CODE=int choose(int x) {\\n#define BODY_FLAG 1\\n#if BODY_FLAG\\n    return x;\\n#else\\n    return 0;\\n#endif\\n} FULL_NAME=choose SIGNATURE=int(int) ORDER=1",
+          "parentOrdinal": null,
+          "ancestorOrdinals": []
+        }
+      ],
+      "targetAncestors": [
+        {
+          "ordinal": 0,
+          "depth": 0,
+          "record": "METHOD NAME=choose CODE=int choose(int x) {\\n#define BODY_FLAG 1\\n#if BODY_FLAG\\n    return x;\\n#else\\n    return 0;\\n#endif\\n} FULL_NAME=choose SIGNATURE=int(int) ORDER=1",
+          "parentOrdinal": null,
+          "ancestorOrdinals": []
+        }
+      ]
+    }
+  ],
+  "classification": "The formerly matching raw address ended at baseline METHOD_RETURN, Joern IDENTIFIER x, and candidate LITERAL 0. It never represented a previously present baseline identifier-use flow. The source-occurrence parameter-to-METHOD_RETURN relation survives at candidate ordinal6. The complete method remains nonexact because body-local #define does not update the function-entry macro snapshot; baseline also omitted the active return x body. No claim of zero raw loss or full semantic parity."
+}

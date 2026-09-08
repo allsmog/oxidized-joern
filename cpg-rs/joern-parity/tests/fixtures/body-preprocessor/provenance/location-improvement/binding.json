@@ -1,0 +1,14 @@
+{
+  "sourceSha256": "dc9a677f1553fdcf7188329042e1d3691249cab9bcd9fbb93ca7a2f0e6077377",
+  "rawSha256": "e0b96ff88c60de934cca9ba41c457d7bd942ce743ed379aed916598b154c58ff",
+  "referenceSha256": "ccb274b0aac243a9ccd4d61de4fe5a1d25c9950341837d47b85d694a0fe82055",
+  "locationRecords": [
+    "LOC|locations.c:<global>#8 METHOD NAME=same CODE=int same(int x) {\\n  return x + 1;\\n} LINE_NUMBER=8 COLUMN_NUMBER=1",
+    "LOC|same<duplicate>0#3 BLOCK CODE={\\n  return x + 1;\\n} LINE_NUMBER=8 COLUMN_NUMBER=17",
+    "LOC|same<duplicate>0#1 METHOD_PARAMETER_IN NAME=x CODE=int x LINE_NUMBER=8 COLUMN_NUMBER=10",
+    "LOC|same<duplicate>0#2 METHOD_PARAMETER_OUT NAME=x CODE=int x LINE_NUMBER=8 COLUMN_NUMBER=10",
+    "LOC|same<duplicate>0#4 METHOD_RETURN CODE=RET LINE_NUMBER=8 COLUMN_NUMBER=1"
+  ],
+  "sourceTest": "cpg-rs/joern-parity/tests/declaration_macros.rs:117",
+  "oldFailedLog": ".local/body-preprocessor/tests-v4.log"
+}

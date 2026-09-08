@@ -1,0 +1,321 @@
+{
+  "status": "CONFIRMED_BOUNDED_NEXT_FRONTEND_UNIT",
+  "reviewer": "analysis_scope",
+  "readOnlyProduction": true,
+  "createdAtUtc": "2026-09-08T17:27:16.415122+00:00",
+  "acceptedSixthSourceCommit": "e38bf19a044629e9ea6fc67248d249fb7b0321be",
+  "acceptedSixthDocCheckpoint": "a548752b84fc1f24a50022784b6ef500b773ea91",
+  "baselineSource": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/sixth-batch/final-real-differential-v3/bin/source/cpg-lang-c/src/exact.rs",
+    "sha256": "c79d93566b3ac603b5d2c40e68bc58b03f43db0ab91a7c4c8b4b6c0d2fd71c43"
+  },
+  "baselineBinary": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/sixth-batch/final-real-differential-v3/bin/joern-parity",
+    "sha256": "abdc28f2f60033b8be3687f1d83f7a4a069e9b2407794b33d267fc73c19bbe29"
+  },
+  "sourceBindings": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/sixth-batch/final-real-differential-v3/bin/source-bindings.json",
+    "sha256": "9b5960388ad98b2b8fc0f2dfc4a6ca934d74cdae49a0722aad719391663171b8"
+  },
+  "wholeSource": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/live-real-differential/zlib-1.3.1-core-full/input/gzlib.c",
+    "sha256": "042c2be8ec67ad525a2812e508de7381c6766dde903acf5ae6ac4fa6b541946d"
+  },
+  "wholeSourceOccurrences": [
+    {
+      "method": "gz_open",
+      "source": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/live-real-differential/zlib-1.3.1-core-full/input/gzlib.c",
+      "guardLine": 203,
+      "callLine": 204,
+      "guardCode": "#if !defined(NO_snprintf) && !defined(NO_vsnprintf)",
+      "callSourceFirstLine": "(void)snprintf(state->path, len + 1, \"%s\", (const char *)path);",
+      "oracleAddress": "gz_open#267"
+    },
+    {
+      "method": "gzdopen",
+      "source": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/live-real-differential/zlib-1.3.1-core-full/input/gzlib.c",
+      "guardLine": 276,
+      "callLine": 277,
+      "guardCode": "#if !defined(NO_snprintf) && !defined(NO_vsnprintf)",
+      "callSourceFirstLine": "(void)snprintf(path, 7 + 3 * sizeof(int), \"<fd:%d>\", fd);",
+      "oracleAddress": "gzdopen#34"
+    },
+    {
+      "method": "gz_error",
+      "source": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/live-real-differential/zlib-1.3.1-core-full/input/gzlib.c",
+      "guardLine": 556,
+      "callLine": 557,
+      "guardCode": "#if !defined(NO_snprintf) && !defined(NO_vsnprintf)",
+      "callSourceFirstLine": "(void)snprintf(state->msg, strlen(state->path) + strlen(msg) + 3,",
+      "oracleAddress": "gz_error#107"
+    }
+  ],
+  "wholeComparisonPriorReceipt": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-whole-review/v3/zlib-1.3.1-core-full/snprintf-source-occurrences.json",
+    "sha256": "4fed73dcbfd075d6f79f1375ab6b900421b501cb64861cb16634e6e26f56faf9"
+  },
+  "liveRun": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/body-preproc-next/live-run.json",
+    "sha256": "0bbc03c931b190d005faab1cea423e45672c9fda9634c88f06e8b47f58b776df"
+  },
+  "replay": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/body-preproc-next/replay.json",
+    "sha256": "f48bfd34a4ff945b9df1cfcaab799b5e1ca37eb20d43578d85dd4d5f87adcca9"
+  },
+  "script": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/body-preproc-next/probe.py",
+    "sha256": "25c8d5dc162249ee3383522ad86d88000c3b48459db5081973e2ae2a636ed9c4"
+  },
+  "totals": {
+    "freshFullProjects": 10,
+    "completeExactBaseline": 3,
+    "completeNonexactBaseline": 7,
+    "canonicalLinesIncludingSeparators": 1534,
+    "nonemptySelectedRecords": 1495
+  },
+  "findings": [
+    {
+      "title": "Active block-level #if/#elif statements are silently omitted",
+      "severity": "high compiler correctness",
+      "confidence": "high; source plus fresh complete pinned graphs",
+      "sourceLocations": [
+        "cpg-rs/cpg-lang-c/src/exact.rs:3072",
+        "cpg-rs/cpg-lang-c/src/exact.rs:3084",
+        "cpg-rs/cpg-lang-c/src/exact.rs:3134",
+        "cpg-rs/cpg-lang-c/src/exact.rs:3377"
+      ],
+      "cause": "emit_block_contents dispatches each immediate child through emit_stmt. emit_stmt explicitly supports only preproc_ifdef; preproc_if falls through the empty default arm, dropping every selected statement and alternative. The condition is not even evaluated on this path.",
+      "runtime": "if_true keeps return0 while dropping the active returnx; original snprintf_defined input omits cast, snprintf call, all arguments and external stub. plain_call_control and ifndef_control are complete exact, isolating directive dispatch rather than call/cast/type lowering.",
+      "affectedRealMethods": [
+        "gz_open",
+        "gzdopen",
+        "gz_error"
+      ]
+    },
+    {
+      "title": "Phantom collection traverses inactive #if branches and condition identifiers",
+      "severity": "medium compiler correctness",
+      "confidence": "high; source plus fresh complete pinned graphs",
+      "sourceLocations": [
+        "cpg-rs/cpg-lang-c/src/exact.rs:2780",
+        "cpg-rs/cpg-lang-c/src/exact.rs:2995",
+        "cpg-rs/cpg-lang-c/src/exact.rs:3026"
+      ],
+      "cause": "walk_phantoms special-cases only preproc_ifdef; preproc_if falls through generic child traversal. Consequently both alternatives and defined-expression identifier names are visited.",
+      "runtime": "inactive_phantoms inserts bogus discarded LOCAL alongside selected; snprintf_defined inserts bogus NO_snprintf and NO_vsnprintf LOCALs. A branch-dispatch-only fix would leave these complete graph differences."
+    }
+  ],
+  "smallestNextUnit": {
+    "description": "Use consistent kept-branch traversal for block-level #if/#elif/#else and #ifdef/#ifndef in statement emission and phantom collection, with the invocation/method source-position macro environment. Reuse existing object-value preproc_condition behavior and explicit alternative traversal already used in typedef/file context. Skip directive condition/name nodes as executable expressions.",
+    "reuseAnchors": [
+      "exact.rs:1219 collect_type_sites branch selection",
+      "exact.rs:5022 body_macro_context branch selection",
+      "exact.rs:7811 preproc_condition"
+    ],
+    "scope": [
+      "C frontend statement selection and phantom collection only.",
+      "Do not edit oracle/checker projection, reference facts or solver to compensate for absent AST nodes.",
+      "No implementation was attempted in this review. Function-like macro evaluation inside #if is outside this reduction."
+    ],
+    "acceptance": [
+      "Full graphs for if_true, if_else, if_elif, snprintf_defined, inactive_phantoms and definition_positions become exact, without filtering any section.",
+      "Preserve full exact plain_call_control, ifndef_control and inactive_call_only; inactive discarded_call must not grow a call/stub.",
+      "Preserve source-position FLAG redefinition: before returnsx and after returns0; keep conditional directive identifiers out of LOCAL.",
+      "Keep local_definition full reference/diff as a distinct diagnostic unless body-local macro state is independently implemented and verified. Do not claim it solved by just adding dispatch.",
+      "Run unchanged main308 and all existing full fixture gates. Replay unchanged whole zlib source, verify the three original snprintf source occurrences and a live-derived correct stub, and retain complete full-method/project differences.",
+      "Retain absence of the wrong inactive gzprintf<duplicate>0 23-argument call. Correct restored snprintf stub must derive from the actual calls, not recover the accidental old scaffold by count matching.",
+      "Recheck full real-project output/source retention and existing memory budgets because restored branches add legitimate AST/CFG/RD work."
+    ]
+  },
+  "separateStateDiagnostic": {
+    "case": "local_definition",
+    "source": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/body-preproc-next/input/local_definition/main.c",
+    "reason": "Body-local #define requires state propagation separate from the missing preproc_if emit dispatch. Existing body_macro_context collects function entry snapshots, and collect_type_sites receives an immutable macro map. This is retained as a complete diagnostic, not asserted repaired.",
+    "completeReference": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/body-preproc-next/input/local_definition/expected.txt",
+      "sha256": "1e3dca8eea1a14311a33a386f3f15e73d72d9a3241ca9daadfa884f8f46ed790"
+    },
+    "completeDifference": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/body-preproc-next/input/local_definition/complete.diff",
+      "sha256": "1ca7f8abeb940b0498c301d8af56c258438997c17ebb15df34e6489c6f0b091a"
+    }
+  },
+  "distinctionFromPreviousStubRemoval": "The three Joern calls are active gzlib.c occurrences absent before and after the sixth repair. The fifth sole snprintf call was a different, wrongly active gzprintf<duplicate>0 occurrence in gzwrite.c with23actual arguments. Its removal is preserved and does not explain away the three true missing calls.",
+  "projects": {
+    "definition_positions": {
+      "case": "definition_positions",
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/sixth-batch/final-real-differential-v3/bin/joern-parity",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/body-preproc-next/input/definition_positions/main.c"
+      ],
+      "exitCode": 0,
+      "seconds": 0.009498084007645957,
+      "exact": false,
+      "canonicalLines": 149,
+      "nonemptySelectedRecords": 145,
+      "sourceSha256": "8bb6c0b3916762e657623faf2ce4cea40fced3e366c82d0bbebb66498238e700",
+      "expectedSha256": "8380ae6c3c15cdbe20c19e3ebff46e7d66a88a72c990137890691e449759d7c6",
+      "actualSha256": "ea8226616aebfcb46a1e9b02e95fb22bd1a8bb9cd8d33ce4440f0a7bca6925a1",
+      "diffSha256": "ac775e066b08a08fe5f66e9055ffae85109c057f7730a42c218239fdfdc241fb",
+      "diffLines": 137
+    },
+    "if_elif": {
+      "case": "if_elif",
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/sixth-batch/final-real-differential-v3/bin/joern-parity",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/body-preproc-next/input/if_elif/main.c"
+      ],
+      "exitCode": 0,
+      "seconds": 0.00621395799680613,
+      "exact": false,
+      "canonicalLines": 101,
+      "nonemptySelectedRecords": 98,
+      "sourceSha256": "07781c94f401da35277c33f0ced73a38e911a0125dae699bb34ffd82261cdec4",
+      "expectedSha256": "d831ba07436a4888c7e2c1456ff8ef1070dbb9efb8978418a96009cd38fa5932",
+      "actualSha256": "06707a73930a42faa7db747d9ddf51630297d6f903f448e6b4f972b7ba0aec90",
+      "diffSha256": "7a2257aab229adbd915349055709416884d1523dc5440b18e4b582bc93dbf5f9",
+      "diffLines": 88
+    },
+    "if_else": {
+      "case": "if_else",
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/sixth-batch/final-real-differential-v3/bin/joern-parity",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/body-preproc-next/input/if_else/main.c"
+      ],
+      "exitCode": 0,
+      "seconds": 0.004003416994237341,
+      "exact": false,
+      "canonicalLines": 147,
+      "nonemptySelectedRecords": 142,
+      "sourceSha256": "9fc848d24c97a5ccd496c2294342153c7345011cb53e0ece1961f4e9876415a6",
+      "expectedSha256": "bc57bfb048cac94035c629a217d383e94b5f80eda65941b2e7db3736e173979d",
+      "actualSha256": "27359d805f55672e020867b11afc86cfb5da75154916a56665af6c2f5d9c1a14",
+      "diffSha256": "89079b0eb86a82f99d4e33b62239fd094819583102121921234cef31360e961e",
+      "diffLines": 111
+    },
+    "if_true": {
+      "case": "if_true",
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/sixth-batch/final-real-differential-v3/bin/joern-parity",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/body-preproc-next/input/if_true/main.c"
+      ],
+      "exitCode": 0,
+      "seconds": 0.003456999998888932,
+      "exact": false,
+      "canonicalLines": 111,
+      "nonemptySelectedRecords": 108,
+      "sourceSha256": "af784933662453a75dd2e732436217ac3162ce4f19d9ee33105e5ab1bcaed4f9",
+      "expectedSha256": "5bed152671144ca63cd94614bd3fac522e26006ea129c9fee29be2e7053deaec",
+      "actualSha256": "c2801ef45b3b45db0f87836e5ddb5235cdd6ed10203f1750ddd279bd44b73e2b",
+      "diffSha256": "6a6d5af1490c24ad23cdf443db1d768a0efc343fb95104e10a5c5c3fb95f7593",
+      "diffLines": 100
+    },
+    "ifndef_control": {
+      "case": "ifndef_control",
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/sixth-batch/final-real-differential-v3/bin/joern-parity",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/body-preproc-next/input/ifndef_control/main.c"
+      ],
+      "exitCode": 0,
+      "seconds": 0.0037035419954918325,
+      "exact": true,
+      "canonicalLines": 240,
+      "nonemptySelectedRecords": 235,
+      "sourceSha256": "cafdc75e151334d5218d34ce4fe85b2ccc849b276fc49afcf16192da06dd2010",
+      "expectedSha256": "aaa6ab7f120cb1ff5a98bbd5c21249e42aca602abd379754bceeccba6de1a14d",
+      "actualSha256": "aaa6ab7f120cb1ff5a98bbd5c21249e42aca602abd379754bceeccba6de1a14d",
+      "diffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "diffLines": 0
+    },
+    "inactive_call_only": {
+      "case": "inactive_call_only",
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/sixth-batch/final-real-differential-v3/bin/joern-parity",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/body-preproc-next/input/inactive_call_only/main.c"
+      ],
+      "exitCode": 0,
+      "seconds": 0.0031574590102536604,
+      "exact": true,
+      "canonicalLines": 101,
+      "nonemptySelectedRecords": 98,
+      "sourceSha256": "d187eb9745e9286cc53ee74259fde170dcdabe88c07b93dabab363374166b233",
+      "expectedSha256": "ba71844b939dcc052857acf01381c3136522f513d58a7859c5a0024655b6c2ce",
+      "actualSha256": "ba71844b939dcc052857acf01381c3136522f513d58a7859c5a0024655b6c2ce",
+      "diffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "diffLines": 0
+    },
+    "inactive_phantoms": {
+      "case": "inactive_phantoms",
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/sixth-batch/final-real-differential-v3/bin/joern-parity",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/body-preproc-next/input/inactive_phantoms/main.c"
+      ],
+      "exitCode": 0,
+      "seconds": 0.0031100000051083043,
+      "exact": false,
+      "canonicalLines": 104,
+      "nonemptySelectedRecords": 101,
+      "sourceSha256": "646bc353b45ebd8a04297df6038efaff132695b1d17a0b8ca1f26b5d1fc53c2f",
+      "expectedSha256": "48de61d459fd75fcedbdc7b99f738e898300db55186dfb5b051eedd5ad60343a",
+      "actualSha256": "c0d88f7cd916935c29f1f1cf9850752cc0ade628e946d4a2a70f0224058f17be",
+      "diffSha256": "030056f9aeb5e2af1a14548b0d59f51b5a7a71b576ad9cf64762c616e7505d81",
+      "diffLines": 91
+    },
+    "local_definition": {
+      "case": "local_definition",
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/sixth-batch/final-real-differential-v3/bin/joern-parity",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/body-preproc-next/input/local_definition/main.c"
+      ],
+      "exitCode": 0,
+      "seconds": 0.0032514170015929267,
+      "exact": false,
+      "canonicalLines": 101,
+      "nonemptySelectedRecords": 98,
+      "sourceSha256": "5e4b9f11c86743b408483ceb47c5e1dc078c6b493018ec57095f58b6cbd7dd78",
+      "expectedSha256": "1e3dca8eea1a14311a33a386f3f15e73d72d9a3241ca9daadfa884f8f46ed790",
+      "actualSha256": "6f90a14d2f9b8efee1464dc09df9a61ffa811cf6c4cea56e9b2a6647a90e1dfe",
+      "diffSha256": "1ca7f8abeb940b0498c301d8af56c258438997c17ebb15df34e6489c6f0b091a",
+      "diffLines": 88
+    },
+    "plain_call_control": {
+      "case": "plain_call_control",
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/sixth-batch/final-real-differential-v3/bin/joern-parity",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/body-preproc-next/input/plain_call_control/main.c"
+      ],
+      "exitCode": 0,
+      "seconds": 0.003667999990284443,
+      "exact": true,
+      "canonicalLines": 240,
+      "nonemptySelectedRecords": 235,
+      "sourceSha256": "eac74b391f5eab7cfa411720d6a3f6522b115ec5806b0c64c17dc959f2eeddb5",
+      "expectedSha256": "323e0879f4641beefcdae6d050f6e6d234a164aed4de73f4ee90b27458f4a328",
+      "actualSha256": "323e0879f4641beefcdae6d050f6e6d234a164aed4de73f4ee90b27458f4a328",
+      "diffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "diffLines": 0
+    },
+    "snprintf_defined": {
+      "case": "snprintf_defined",
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/sixth-batch/final-real-differential-v3/bin/joern-parity",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/body-preproc-next/input/snprintf_defined/main.c"
+      ],
+      "exitCode": 0,
+      "seconds": 0.0034435000125085935,
+      "exact": false,
+      "canonicalLines": 240,
+      "nonemptySelectedRecords": 235,
+      "sourceSha256": "f8998c5d56cc86c8df76bef9d5031db968790c0322e96c1a7359341bff622338",
+      "expectedSha256": "a9a8a97c19b0fc5d9073275825472736705bf829924cf86bcfa5ba3deaf55e0c",
+      "actualSha256": "67c1995c8aa262633e95675c06a0bc673ea7fabef504d3f405cc0ffa1559ec25",
+      "diffSha256": "f82e4f7b9b2ddabd69e8de8a78f7ef2b3500ee878c33824b25f415440bb68224",
+      "diffLines": 236
+    }
+  },
+  "limits": [
+    "Fresh selected canonical graph projection only; all AST/NODES/EDGES/FLOWS records retained.",
+    "No proposed source patch, scanner run, broad parser audit, new package gate or full-project rerun in this review.",
+    "Existing whole-project references and scope remain nonexact."
+  ]
+}

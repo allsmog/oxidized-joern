@@ -1,0 +1,126 @@
+{
+  "status": "PASS",
+  "targets": {
+    "readme": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/README.md",
+      "sha256": "b2c17df26ffff97186d2ef5d965adff1e7d72661202b963da223920447f71401"
+    },
+    "measurement": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/measurement.json",
+      "sha256": "1a4ad3fed9e92745419163559e04ea62e11f83b2093f26d3ff6dfc3783ab21be"
+    },
+    "sourceReview": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/eighth-body-review/final-review.json",
+      "sha256": "9098d1ecb7404ab8e942d0682e00740e1cbcb3eeb662cae320d4670efc55d862"
+    }
+  },
+  "skill": {
+    "path": "/Users/shayaunnejad/liminal-ops-workflow/plugins/liminal-flows/skills/verify-deliverable/SKILL.md",
+    "sha256": "6ba35c4dbdbcf0406ceac7ef1ef2182d189ad9a48d5741d58d8f07c7e0316aef"
+  },
+  "impliedContract": "Parent requested a bounded independently reviewed C body-preprocessor repair with complete unfiltered pinned references, honest remaining diagnostics and no root/source edits by reviewer. This is a candidate package review, not final integrated acceptance.",
+  "scores": [
+    {
+      "criterion": "Grounding",
+      "score": 2,
+      "receipt": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/eighth-body-review/final-review.json",
+        "sha256": "9098d1ecb7404ab8e942d0682e00740e1cbcb3eeb662cae320d4670efc55d862"
+      },
+      "reason": "Source, all34 inputs/raw references/full outputs, complete differences and411 provenance hashes independently verified. Saved whole preview counters and targeted calls independently recomputed."
+    },
+    {
+      "criterion": "Contract",
+      "score": 2,
+      "reason": "Inferred contract: bounded branch/directive/header repair, complete unchanged live references, production assertions, explicit failures and limitations. The source patch and package fulfill that scope."
+    },
+    {
+      "criterion": "Register",
+      "score": 2,
+      "reason": "No banned status, PPA-number label, product jargon leak or misleading slogan found. Technical names refer to code/graph concepts and the diagnostics explain their limits."
+    },
+    {
+      "criterion": "Veracity",
+      "score": 2,
+      "reason": "The README labels whole results preview, preserves earlier failed byte_swap candidates, calls out one raw matching loss, and does not claim full-port or whole-projection parity."
+    },
+    {
+      "criterion": "Gates",
+      "score": 2,
+      "reason": "No root edits, changed acceptance expectations, oracle filtering, protected solver/importer changes or publication occurred in this independent review. Source/gates are bound; final root whole/resource acceptance remains separate."
+    },
+    {
+      "criterion": "Usefulness",
+      "score": 2,
+      "reason": "A concrete cargo test command,30 exact cases and four retained diagnostic families give the next implementer reproducible acceptance and bounded follow-up work."
+    }
+  ],
+  "fiveWeakestClaims": [
+    {
+      "claim": "The compiler now uses one kept-branch traversal for statement emission, pending\nreference discovery, declaration shadow discovery, and typedef context.",
+      "readmeLine": 3,
+      "receipt": {
+        "source": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/eighth-body-review/frozen-v4/exact.rs",
+          "sha256": "8b132fab7d079a97e774b10d5b1f14c1a1df4f093ef8f437ebfcaadfdde33b3b"
+        },
+        "lines": [
+          1221,
+          2654,
+          2969,
+          3087,
+          7497,
+          7759
+        ]
+      },
+      "finding": "All four call sites invoke the shared helper; the previous type-site branch selection was factored without changing its evaluation or traversal order."
+    },
+    {
+      "claim": "with no formerly exact graph lost. All 30 exact projects are production gates.",
+      "readmeLine": 12,
+      "receipt": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/eighth-body-review/final-review.json",
+        "sha256": "9098d1ecb7404ab8e942d0682e00740e1cbcb3eeb662cae320d4670efc55d862"
+      },
+      "finding": "All34 full references independently replayed. Exact cases9\u219230; all30 names occur in the production equality loop, independently executed in the final focused binary."
+    },
+    {
+      "claim": "The unchanged zlib input restores all three live `snprintf` call records in\n`gz_open`, `gzdopen`, and `gz_error`, plus the proper stub.",
+      "readmeLine": 27,
+      "receipt": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/eighth-body-review/preview-claims-review.json",
+        "sha256": "1a3040cf954084146afa6075ea18d0265588b6ad295984e4c39b1a3d4742ae2f"
+      },
+      "finding": "Saved input/output bindings verified; each candidate method has the exact single live CALL record missing from baseline, and the entire snprintf stub is exact. These three containing method ASTs remain nonexact, consistent with the report boundary."
+    },
+    {
+      "claim": "The inactive conditional duplicate's METHOD and METHOD_RETURN now report line 8,\nmatching the retained live LOC records.",
+      "readmeLine": 35,
+      "receipt": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/eighth-body-review/location-review.json",
+        "sha256": "1efdc58bda828506ce74af20b4dded5aa8efa361fb62bee447911dc2072b7465"
+      },
+      "finding": "Retained raw LOC records show METHOD/parameter/METHOD_RETURN line8; current independent four-test replay validates source lines3/8/13. No column-number parity claim."
+    },
+    {
+      "claim": "The final source passes 333 C/frontend/analysis/parity tests, strict Clippy and\nformat checks, and all 308 committed and fresh live main comparison blocks.",
+      "readmeLine": 52,
+      "receipt": {
+        "root": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/body-preprocessor/provenance/validation",
+        "logs": {
+          "tests-v4-final.log": "7e263a5a057f75979f20b67d53e3ceaad8a2e52126e139c492231bfde39b82de",
+          "clippy-v4-final.log": "e95959b4f562ecc51bb60af140d2dbb1d228fad826f46428582fe978cfec63ce",
+          "fmt-v4-expanded.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "main308-v4.log": "c105179d62065e9cbf9f398ff94754c29ec03add1206db7dff281cb4c07b6be6",
+          "main308-live-v4.log": "715e0c188ca0e7a744ace60c9fa451649f34143022f2a1a163bd46303772dd68"
+        }
+      },
+      "finding": "333 passing tests across50 result groups, no failures/ignored/filtered; Clippy finished successfully, fmt empty success log bound by producer evidence, both main logs end308/308. Independent focused tests add6 passing checks, not an additional full-suite count."
+    }
+  ],
+  "requiredFixes": [],
+  "strongestReceipt": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/eighth-body-review/final-review.json",
+    "sha256": "9098d1ecb7404ab8e942d0682e00740e1cbcb3eeb662cae320d4670efc55d862"
+  }
+}

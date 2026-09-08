@@ -1,0 +1,9 @@
+METHOD NAME=write_table32hi CODE=local void write_table32hi(FILE *out, const z_word_t FAR *table, int k) {\n    int n;\n\n    for (n = 0; n < k; n++)\n        fprintf(out, "%s0x%08lx%s", n == 0 || n % 5 ? "" : "    ",\n                (unsigned long)(table[n] >> 32),\n                n == k - 1 ? "" : (n % 5 == 4 ? ",\n" : ", "));\n} FULL_NAME=write_table32hi SIGNATURE=void(FILE*,z_word_t*,int) ORDER=1
+  METHOD_PARAMETER_IN NAME=out CODE=FILE *out TYPE_FULL_NAME=FILE* ORDER=1
+  METHOD_PARAMETER_OUT NAME=out CODE=FILE *out TYPE_FULL_NAME=FILE* ORDER=1
+  METHOD_PARAMETER_IN NAME=table CODE=const z_word_t FAR *table TYPE_FULL_NAME=z_word_t* ORDER=2
+  METHOD_PARAMETER_OUT NAME=table CODE=const z_word_t FAR *table TYPE_FULL_NAME=z_word_t* ORDER=2
+  METHOD_PARAMETER_IN NAME=k CODE=int k TYPE_FULL_NAME=int ORDER=3
+  METHOD_PARAMETER_OUT NAME=k CODE=int k TYPE_FULL_NAME=int ORDER=3
+  BLOCK CODE={\n    int n;\n\n    for (n = 0; n < k; n++)\n        fprintf(out, "%s0x%08lx%s", n == 0 || n % 5 ? "" : "    ",\n                (unsigned long)(table[n] >> 32),\n                n == k - 1 ? "" : (n % 5 == 4 ? ",\n" : ", "));\n} TYPE_FULL_NAME=void ORDER=4
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=5

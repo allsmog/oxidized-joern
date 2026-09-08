@@ -1,0 +1,240 @@
+METHOD NAME=<global> CODE=<global> FULL_NAME=<includes>:<global> ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.cast FULL_NAME=<operator>.cast ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1
+  METHOD NAME=render CODE=void render(char *p, int n) {\n#ifndef NO_snprintf\n    (void)snprintf(p, n, "%d", n);\n#else\n    sprintf(p, "%d", n);\n#endif\n} FULL_NAME=render SIGNATURE=void(char*,int) ORDER=1
+    METHOD_PARAMETER_IN NAME=p CODE=char *p TYPE_FULL_NAME=char* ORDER=1
+    METHOD_PARAMETER_OUT NAME=p CODE=char *p TYPE_FULL_NAME=char* ORDER=1
+    METHOD_PARAMETER_IN NAME=n CODE=int n TYPE_FULL_NAME=int ORDER=2
+    METHOD_PARAMETER_OUT NAME=n CODE=int n TYPE_FULL_NAME=int ORDER=2
+    BLOCK CODE={\n#ifndef NO_snprintf\n    (void)snprintf(p, n, "%d", n);\n#else\n    sprintf(p, "%d", n);\n#endif\n} TYPE_FULL_NAME=void ORDER=3
+      CALL NAME=<operator>.cast CODE=(void)snprintf(p, n, "%d", n) TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.cast ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+        TYPE_REF CODE=void TYPE_FULL_NAME=void ORDER=1 ARGUMENT_INDEX=1
+        CALL NAME=snprintf CODE=snprintf(p, n, "%d", n) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=snprintf ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=p CODE=p TYPE_FULL_NAME=char* ORDER=1 ARGUMENT_INDEX=1
+          IDENTIFIER NAME=n CODE=n TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+          LITERAL CODE="%d" TYPE_FULL_NAME=char* ORDER=3 ARGUMENT_INDEX=3
+          IDENTIFIER NAME=n CODE=n TYPE_FULL_NAME=int ORDER=4 ARGUMENT_INDEX=4
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=4
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+    METHOD_REF CODE=render TYPE_FULL_NAME=render METHOD_FULL_NAME=render ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=render CODE=void render(char *p, int n) {\n#ifndef NO_snprintf\n    (void)snprintf(p, n, "%d", n);\n#else\n    sprintf(p, "%d", n);\n#endif\n} FULL_NAME=render SIGNATURE=void(char*,int) ORDER=1
+  METHOD_PARAMETER_IN NAME=p CODE=char *p TYPE_FULL_NAME=char* ORDER=1
+  METHOD_PARAMETER_OUT NAME=p CODE=char *p TYPE_FULL_NAME=char* ORDER=1
+  METHOD_PARAMETER_IN NAME=n CODE=int n TYPE_FULL_NAME=int ORDER=2
+  METHOD_PARAMETER_OUT NAME=n CODE=int n TYPE_FULL_NAME=int ORDER=2
+  BLOCK CODE={\n#ifndef NO_snprintf\n    (void)snprintf(p, n, "%d", n);\n#else\n    sprintf(p, "%d", n);\n#endif\n} TYPE_FULL_NAME=void ORDER=3
+    CALL NAME=<operator>.cast CODE=(void)snprintf(p, n, "%d", n) TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.cast ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+      TYPE_REF CODE=void TYPE_FULL_NAME=void ORDER=1 ARGUMENT_INDEX=1
+      CALL NAME=snprintf CODE=snprintf(p, n, "%d", n) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=snprintf ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=p CODE=p TYPE_FULL_NAME=char* ORDER=1 ARGUMENT_INDEX=1
+        IDENTIFIER NAME=n CODE=n TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+        LITERAL CODE="%d" TYPE_FULL_NAME=char* ORDER=3 ARGUMENT_INDEX=3
+        IDENTIFIER NAME=n CODE=n TYPE_FULL_NAME=int ORDER=4 ARGUMENT_INDEX=4
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=4
+
+METHOD NAME=snprintf FULL_NAME=snprintf ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_IN NAME=p3 CODE=p3 TYPE_FULL_NAME=ANY ORDER=3
+  METHOD_PARAMETER_OUT NAME=p3 CODE=p3 TYPE_FULL_NAME=ANY ORDER=3
+  METHOD_PARAMETER_IN NAME=p4 CODE=p4 TYPE_FULL_NAME=ANY ORDER=4
+  METHOD_PARAMETER_OUT NAME=p4 CODE=p4 TYPE_FULL_NAME=ANY ORDER=4
+
+NODES|META_DATA LANGUAGE=NEWC
+NODES|FILE NAME=<includes> ORDER=1
+NODES|FILE NAME=<unknown> ORDER=0
+NODES|FILE NAME=main.c ORDER=0
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<global> FILENAME=<unknown> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<includes>:<global> FILENAME=<includes> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|NAMESPACE NAME=<global>
+NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=char* FULL_NAME=char* CODE=char* IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=<global> FULL_NAME=main.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=render FULL_NAME=render CODE=render AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+NODES|TYPE NAME=char* FULL_NAME=char* TYPE_DECL_FULL_NAME=char*
+NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+NODES|TYPE NAME=render FULL_NAME=render TYPE_DECL_FULL_NAME=render
+NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+EDGES|ARGUMENT render#6 -> render#7
+EDGES|ARGUMENT render#6 -> render#8
+EDGES|ARGUMENT render#8 -> render#10
+EDGES|ARGUMENT render#8 -> render#11
+EDGES|ARGUMENT render#8 -> render#12
+EDGES|ARGUMENT render#8 -> render#9
+EDGES|CALL render#6 -> <operator>.cast#0
+EDGES|CALL render#8 -> snprintf#0
+EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+EDGES|CFG <operator>.cast#0 -> <operator>.cast#5
+EDGES|CFG main.c:<global>#0 -> main.c:<global>#16
+EDGES|CFG main.c:<global>#1 -> render#7
+EDGES|CFG main.c:<global>#16 -> main.c:<global>#17
+EDGES|CFG render#10 -> render#11
+EDGES|CFG render#11 -> render#12
+EDGES|CFG render#12 -> render#8
+EDGES|CFG render#6 -> render#13
+EDGES|CFG render#7 -> render#9
+EDGES|CFG render#8 -> render#6
+EDGES|CFG render#9 -> render#10
+EDGES|CFG snprintf#0 -> snprintf#5
+EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+EDGES|CONTAINS <operator>.cast#0 -> <operator>.cast#2
+EDGES|CONTAINS D:main.c:<global> -> D:render
+EDGES|CONTAINS D:main.c:<global> -> main.c:<global>#0
+EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+EDGES|CONTAINS F:<includes> -> D:ANY
+EDGES|CONTAINS F:<includes> -> D:char*
+EDGES|CONTAINS F:<includes> -> D:int
+EDGES|CONTAINS F:<includes> -> D:void
+EDGES|CONTAINS F:main.c -> D:main.c:<global>
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#1
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#15
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#16
+EDGES|CONTAINS main.c:<global>#1 -> render#10
+EDGES|CONTAINS main.c:<global>#1 -> render#11
+EDGES|CONTAINS main.c:<global>#1 -> render#12
+EDGES|CONTAINS main.c:<global>#1 -> render#5
+EDGES|CONTAINS main.c:<global>#1 -> render#6
+EDGES|CONTAINS main.c:<global>#1 -> render#7
+EDGES|CONTAINS main.c:<global>#1 -> render#8
+EDGES|CONTAINS main.c:<global>#1 -> render#9
+EDGES|CONTAINS snprintf#0 -> snprintf#2
+EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.cast#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.cast#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.cast#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.cast#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.cast#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.cast#6 -> T:ANY
+EDGES|EVAL_TYPE main.c:<global>#15 -> T:ANY
+EDGES|EVAL_TYPE main.c:<global>#16 -> T:render
+EDGES|EVAL_TYPE main.c:<global>#17 -> T:ANY
+EDGES|EVAL_TYPE render#1 -> T:char*
+EDGES|EVAL_TYPE render#10 -> T:int
+EDGES|EVAL_TYPE render#11 -> T:char*
+EDGES|EVAL_TYPE render#12 -> T:int
+EDGES|EVAL_TYPE render#13 -> T:void
+EDGES|EVAL_TYPE render#2 -> T:char*
+EDGES|EVAL_TYPE render#3 -> T:int
+EDGES|EVAL_TYPE render#4 -> T:int
+EDGES|EVAL_TYPE render#5 -> T:void
+EDGES|EVAL_TYPE render#6 -> T:void
+EDGES|EVAL_TYPE render#7 -> T:void
+EDGES|EVAL_TYPE render#8 -> T:ANY
+EDGES|EVAL_TYPE render#9 -> T:char*
+EDGES|EVAL_TYPE snprintf#1 -> T:ANY
+EDGES|EVAL_TYPE snprintf#10 -> T:ANY
+EDGES|EVAL_TYPE snprintf#2 -> T:ANY
+EDGES|EVAL_TYPE snprintf#3 -> T:ANY
+EDGES|EVAL_TYPE snprintf#4 -> T:ANY
+EDGES|EVAL_TYPE snprintf#5 -> T:ANY
+EDGES|EVAL_TYPE snprintf#6 -> T:ANY
+EDGES|EVAL_TYPE snprintf#7 -> T:ANY
+EDGES|EVAL_TYPE snprintf#8 -> T:ANY
+EDGES|EVAL_TYPE snprintf#9 -> T:ANY
+EDGES|PARAMETER_LINK <operator>.cast#1 -> <operator>.cast#3
+EDGES|PARAMETER_LINK <operator>.cast#4 -> <operator>.cast#6
+EDGES|PARAMETER_LINK render#1 -> render#2
+EDGES|PARAMETER_LINK render#3 -> render#4
+EDGES|PARAMETER_LINK snprintf#1 -> snprintf#3
+EDGES|PARAMETER_LINK snprintf#4 -> snprintf#6
+EDGES|PARAMETER_LINK snprintf#7 -> snprintf#8
+EDGES|PARAMETER_LINK snprintf#9 -> snprintf#10
+EDGES|REF NB:<global> -> NS:<global>
+EDGES|REF NB:<includes>:<global> -> NS:<global>
+EDGES|REF NB:main.c:<global> -> NS:<global>
+EDGES|REF T:ANY -> D:ANY
+EDGES|REF T:char* -> D:char*
+EDGES|REF T:int -> D:int
+EDGES|REF T:render -> D:render
+EDGES|REF T:void -> D:void
+EDGES|REF main.c:<global>#16 -> main.c:<global>#1
+EDGES|REF render#10 -> render#3
+EDGES|REF render#12 -> render#3
+EDGES|REF render#9 -> render#1
+EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+EDGES|SOURCE_FILE D:ANY -> F:<includes>
+EDGES|SOURCE_FILE D:char* -> F:<includes>
+EDGES|SOURCE_FILE D:int -> F:<includes>
+EDGES|SOURCE_FILE D:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE D:render -> F:main.c
+EDGES|SOURCE_FILE D:void -> F:<includes>
+EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
+EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>
+EDGES|SOURCE_FILE NB:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#0 -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#1 -> F:main.c
+FLOWS|REACHING_DEF["%d"] render#11 -> render#10
+FLOWS|REACHING_DEF["%d"] render#11 -> render#12
+FLOWS|REACHING_DEF["%d"] render#11 -> render#8
+FLOWS|REACHING_DEF["%d"] render#11 -> render#9
+FLOWS|REACHING_DEF[(void)snprintf(p, n, "%d", n)] render#6 -> render#13
+FLOWS|REACHING_DEF[] <operator>.cast#0 -> <operator>.cast#1
+FLOWS|REACHING_DEF[] <operator>.cast#0 -> <operator>.cast#4
+FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#16
+FLOWS|REACHING_DEF[] main.c:<global>#1 -> render#1
+FLOWS|REACHING_DEF[] main.c:<global>#1 -> render#10
+FLOWS|REACHING_DEF[] main.c:<global>#1 -> render#11
+FLOWS|REACHING_DEF[] main.c:<global>#1 -> render#12
+FLOWS|REACHING_DEF[] main.c:<global>#1 -> render#3
+FLOWS|REACHING_DEF[] main.c:<global>#1 -> render#7
+FLOWS|REACHING_DEF[] main.c:<global>#1 -> render#9
+FLOWS|REACHING_DEF[] snprintf#0 -> snprintf#1
+FLOWS|REACHING_DEF[] snprintf#0 -> snprintf#4
+FLOWS|REACHING_DEF[] snprintf#0 -> snprintf#7
+FLOWS|REACHING_DEF[] snprintf#0 -> snprintf#9
+FLOWS|REACHING_DEF[n] render#10 -> render#12
+FLOWS|REACHING_DEF[n] render#10 -> render#13
+FLOWS|REACHING_DEF[n] render#10 -> render#4
+FLOWS|REACHING_DEF[n] render#10 -> render#8
+FLOWS|REACHING_DEF[n] render#10 -> render#9
+FLOWS|REACHING_DEF[n] render#12 -> render#10
+FLOWS|REACHING_DEF[n] render#12 -> render#13
+FLOWS|REACHING_DEF[n] render#12 -> render#4
+FLOWS|REACHING_DEF[n] render#12 -> render#8
+FLOWS|REACHING_DEF[n] render#12 -> render#9
+FLOWS|REACHING_DEF[n] render#3 -> render#10
+FLOWS|REACHING_DEF[n] render#3 -> render#12
+FLOWS|REACHING_DEF[n] render#3 -> render#4
+FLOWS|REACHING_DEF[p1] <operator>.cast#1 -> <operator>.cast#3
+FLOWS|REACHING_DEF[p1] <operator>.cast#1 -> <operator>.cast#5
+FLOWS|REACHING_DEF[p1] snprintf#1 -> snprintf#3
+FLOWS|REACHING_DEF[p1] snprintf#1 -> snprintf#5
+FLOWS|REACHING_DEF[p2] <operator>.cast#4 -> <operator>.cast#5
+FLOWS|REACHING_DEF[p2] <operator>.cast#4 -> <operator>.cast#6
+FLOWS|REACHING_DEF[p2] snprintf#4 -> snprintf#5
+FLOWS|REACHING_DEF[p2] snprintf#4 -> snprintf#6
+FLOWS|REACHING_DEF[p3] snprintf#7 -> snprintf#5
+FLOWS|REACHING_DEF[p3] snprintf#7 -> snprintf#8
+FLOWS|REACHING_DEF[p4] snprintf#9 -> snprintf#10
+FLOWS|REACHING_DEF[p4] snprintf#9 -> snprintf#5
+FLOWS|REACHING_DEF[p] render#1 -> render#2
+FLOWS|REACHING_DEF[p] render#1 -> render#9
+FLOWS|REACHING_DEF[p] render#9 -> render#10
+FLOWS|REACHING_DEF[p] render#9 -> render#12
+FLOWS|REACHING_DEF[p] render#9 -> render#13
+FLOWS|REACHING_DEF[p] render#9 -> render#2
+FLOWS|REACHING_DEF[p] render#9 -> render#8
+FLOWS|REACHING_DEF[snprintf(p, n, "%d", n)] render#8 -> render#13
+FLOWS|REACHING_DEF[snprintf(p, n, "%d", n)] render#8 -> render#6
+FLOWS|REACHING_DEF[void] render#7 -> render#6

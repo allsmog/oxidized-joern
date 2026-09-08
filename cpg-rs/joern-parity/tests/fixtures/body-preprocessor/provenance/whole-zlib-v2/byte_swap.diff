@@ -1,0 +1,31 @@
+--- 
++++ 
+@@ -2,4 +2,28 @@
+   METHOD_PARAMETER_IN NAME=word CODE=z_word_t word TYPE_FULL_NAME=z_word_t ORDER=1
+   METHOD_PARAMETER_OUT NAME=word CODE=z_word_t word TYPE_FULL_NAME=z_word_t ORDER=1
+   BLOCK CODE={\n#  if W == 8\n    return\n        (word & 0xff00000000000000) >> 56 |\n        (word & 0xff000000000000) >> 40 |\n        (word & 0xff0000000000) >> 24 |\n        (word & 0xff00000000) >> 8 |\n        (word & 0xff000000) << 8 |\n        (word & 0xff0000) << 24 |\n        (word & 0xff00) << 40 |\n        (word & 0xff) << 56;\n#  else   /* W == 4 */\n    return\n        (word & 0xff000000) >> 24 |\n        (word & 0xff0000) >> 8 |\n        (word & 0xff00) << 8 |\n        (word & 0xff) << 24;\n#  endif\n} TYPE_FULL_NAME=void ORDER=2
++    RETURN CODE=return\n        (word & 0xff000000) >> 24 |\n        (word & 0xff0000) >> 8 |\n        (word & 0xff00) << 8 |\n        (word & 0xff) << 24; ORDER=1
++      CALL NAME=<operator>.or CODE=(word & 0xff000000) >> 24 |\n        (word & 0xff0000) >> 8 |\n        (word & 0xff00) << 8 |\n        (word & 0xff) << 24 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.or ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
++        CALL NAME=<operator>.or CODE=(word & 0xff000000) >> 24 |\n        (word & 0xff0000) >> 8 |\n        (word & 0xff00) << 8 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.or ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
++          CALL NAME=<operator>.or CODE=(word & 0xff000000) >> 24 |\n        (word & 0xff0000) >> 8 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.or ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
++            CALL NAME=<operator>.arithmeticShiftRight CODE=(word & 0xff000000) >> 24 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.arithmeticShiftRight ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
++              CALL NAME=<operator>.and CODE=word & 0xff000000 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.and ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
++                IDENTIFIER NAME=word CODE=word TYPE_FULL_NAME=z_word_t ORDER=1 ARGUMENT_INDEX=1
++                LITERAL CODE=0xff000000 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
++              LITERAL CODE=24 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
++            CALL NAME=<operator>.arithmeticShiftRight CODE=(word & 0xff0000) >> 8 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.arithmeticShiftRight ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
++              CALL NAME=<operator>.and CODE=word & 0xff0000 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.and ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
++                IDENTIFIER NAME=word CODE=word TYPE_FULL_NAME=z_word_t ORDER=1 ARGUMENT_INDEX=1
++                LITERAL CODE=0xff0000 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
++              LITERAL CODE=8 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
++          CALL NAME=<operator>.shiftLeft CODE=(word & 0xff00) << 8 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.shiftLeft ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
++            CALL NAME=<operator>.and CODE=word & 0xff00 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.and ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
++              IDENTIFIER NAME=word CODE=word TYPE_FULL_NAME=z_word_t ORDER=1 ARGUMENT_INDEX=1
++              LITERAL CODE=0xff00 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
++            LITERAL CODE=8 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
++        CALL NAME=<operator>.shiftLeft CODE=(word & 0xff) << 24 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.shiftLeft ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
++          CALL NAME=<operator>.and CODE=word & 0xff TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.and ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
++            IDENTIFIER NAME=word CODE=word TYPE_FULL_NAME=z_word_t ORDER=1 ARGUMENT_INDEX=1
++            LITERAL CODE=0xff TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
++          LITERAL CODE=24 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=z_word_t ORDER=3
