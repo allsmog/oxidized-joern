@@ -4252,7 +4252,11 @@ fn reaching_def_flows(block: &str, text: &str) -> Vec<(String, String, String)> 
             .children
             .iter()
             .copied()
-            .filter(|&k| arena[k].has_arg && arena[k].label != "FIELD_IDENTIFIER")
+            .filter(|&k| {
+                arena[k].has_arg
+                    && arena[k].label != "FIELD_IDENTIFIER"
+                    && !(arena[c].inlined && arena[k].label == "BLOCK")
+            })
             .collect();
         v.sort_by_key(|&k| arena[k].arg_index);
         v
@@ -4531,9 +4535,11 @@ fn reaching_def_flows(block: &str, text: &str) -> Vec<(String, String, String)> 
     // 1. addEdgesFromEntryNode: a ddg node whose usedIncomingDefs are all empty
     // (no reaching def is actually used) gets method -> node, var "". This
     // includes `return 0` (literal, no reaching def) but not `return SQR(n)`
-    // (the call is a reaching def). Non-INLINED calls with arguments do not
-    // get an entry edge; zero-argument calls and INLINED macro calls do (when their
-    // args carry no reaching def). isValidEdge in push drops write-only targets.
+    // (the call is a reaching def). Calls with arguments have a nonempty
+    // UsageAnalyzer use map even when those arguments use no incoming defs.
+    // Zero-argument calls get an entry edge; an INLINED expansion BLOCK has
+    // no ARGUMENT edge and therefore does not count as an argument here.
+    // isValidEdge in push drops write-only targets.
     // `i` is a node id, not just an arena index: it keys `own`, `assign_lhs`,
     // `is_ddg` and `used_incoming` as well.
     #[allow(clippy::needless_range_loop)]
@@ -4541,7 +4547,7 @@ fn reaching_def_flows(block: &str, text: &str) -> Vec<(String, String, String)> 
         if i == 0 || !own.contains(&i) || !is_ddg(i) || assign_lhs.contains(&i) {
             continue;
         }
-        if arena[i].label == "CALL" && !arena[i].inlined && !args_of(i).is_empty() {
+        if arena[i].label == "CALL" && !args_of(i).is_empty() {
             continue;
         }
         if used_incoming(i).iter().all(|(_, ds)| ds.is_empty()) {

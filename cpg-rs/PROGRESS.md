@@ -13,6 +13,9 @@ Single source of truth across iterations. Update in the same commit as the work.
   tests cover callable declarations, scope restoration, and source lines.
   Synthetic condition literals no longer consume later source tokens.
   The current workspace passes 334 tests and strict Clippy; cache shape is13.
+  INLINED constant macros now follow actual ARGUMENT edges for entry-flow
+  generation: expansion BLOCKs are excluded, and a call with literal
+  arguments does not acquire a spurious method-entry dependency.
   Work remains in progress: the new direct scanner path exposed a Lua scan
   performance regression (baseline same-graph scan ~0.52s, candidate >120s),
   now under repair. Conditional compilation is being implemented and reviewed
