@@ -225,7 +225,8 @@ pins it, so a regression shows up as a diff.
 - **External declarations** (`corpus/external_functions.c`,
   `corpus/external_declarations.c`, `corpus/prototype_a.c`,
   `corpus/prototype_b.c`): unused prototypes remain external METHOD scaffolds;
-  repeated declarations coalesce and a definition supersedes its prototype.
+  repeated ordinary declarations coalesce and a matching ordinary definition
+  supersedes its prototype.
   Unnamed parameters keep empty names and pair IN/OUT by position. A `(void)`
   declaration retains a void parameter. Variadic signatures contain `...`,
   while the synthetic `<param>N` parameter takes the preceding parameter's
@@ -245,3 +246,29 @@ pins it, so a regression shows up as a diff.
   declaration exists in the AST. Verified against the pinned runtime's
   MethodMethods and OptimizedReachingDefTransferFunction bytecode and live
   reaching-definition output.
+- **Conditional translation-unit declarations**
+  (`corpus/conditional_top_level.c`, `corpus/conditional_prototypes.c`): both
+  active and inactive declarations retain scaffolding. Inactive function
+  bodies retain BLOCK CODE without executable children. Macro definitions and
+  `#undef` apply in source order; each method keeps the macro environment at
+  its position. Repeated same-file definitions receive distinct identities.
+- **INLINED reaching-definition entry edges** (`corpus/macros.c` and the
+  `corpus/conditional_macro_order.c` fixture): expansion BLOCKs carry ARGUMENT_INDEX but have
+  no ARGUMENT edge. They are excluded from the call's actual argument set.
+  A call with arguments does not get a method-entry dependency merely because
+  its arguments are literals; a zero-argument macro can retain that dependency.
+- **File-scope sized arrays**
+  (`tests/fixtures/array-declarations/arrays.c`): uninitialized globals emit
+  an `<operator>.arrayInitializer` with dimension arguments. Local arrays
+  retain the assignment and `<operator>.alloc` form, including its type
+  operand. Global dimensions must not enlarge the local allocation stub's
+  arity. Explicit initializers have separate, incompletely matched behavior.
+- **Parenthesized declarations and typedefs** (`corpus/mixed_prototypes.c`,
+  `corpus/parenthesized_prototypes.c`, `corpus/parenthesized_definitions.c`,
+  `corpus/typedef_shapes.c`): parenthesized functions retain unresolved
+  namespace identities. An ordinary call can therefore require a separate
+  stub. Mixed declarations classify each declarator independently; ordinary
+  typedef aliases survive even beside function typedefs that produce no
+  alias node. Supplied quoted relative headers contribute ordered macro
+  definitions and removals for declaration spelling. These cached header
+  effects do not implement caller-conditioned header preprocessing.

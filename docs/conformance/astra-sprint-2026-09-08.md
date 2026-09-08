@@ -1,5 +1,8 @@
 # First measured Astra parity batch
 
+This is a historical checkpoint. The [second batch](astra-second-batch-2026-09-08.md)
+records subsequent fixes and broader whole-project comparisons.
+
 This batch closes two demonstrated C bugs and strengthens the differential
 checker. It establishes a reproducible live Joern baseline; it does not
 establish full Joern compatibility or a reliable completion date for that

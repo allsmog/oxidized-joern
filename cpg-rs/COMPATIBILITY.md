@@ -1,7 +1,7 @@
 # Compatibility and release contract
 
-Oxidized Joern `0.1.x` is production-ready for the C workflows explicitly
-listed below. It is not a drop-in replacement for every Joern frontend,
+Oxidized Joern `0.1.x` has a bounded production-preview contract for the C
+workflows listed below. It is not a drop-in replacement for every Joern frontend,
 CPGQL, the Scala console, plugins, or Joern's binary graph format.
 
 Status meanings:
@@ -16,7 +16,7 @@ Status meanings:
 
 | Language | Build and query | Save/load | Flow and scan | Incremental update | Evidence | Status |
 |---|---|---|---|---|---|---|
-| C | Yes | Yes | Yes, including SARIF | Yes; correctness-first full-project rebuild | 103/103 Joern v4.0.555 graph blocks; 1,552/1,552 ReachingDef facts; canonical outcome suite; pinned zlib 1.3.1 and Lua 5.4.7 | **Production preview** |
+| C | Yes | Yes | Yes, including SARIF | Yes; correctness-first full-project rebuild | 297/297 Joern v4.0.555 graph blocks; 3,587/3,587 ReachingDef facts; canonical outcome suite; pinned zlib 1.3.1 and Lua 5.4.7 | **Production preview** |
 | C++ | Yes | Yes | Yes | Generic frontend | Shared schema, summary/taint, and persistence acceptance | Experimental |
 | Go | Yes | Yes | Yes | File-local incremental path | Shared acceptance plus cross-file edit/invalidation tests | Experimental |
 | Java | Yes | Yes | Yes | File-local incremental path | Shared acceptance plus cross-file edit/invalidation tests | Experimental |
@@ -50,17 +50,20 @@ program has already been compared with Joern. Complex preprocessor behavior,
 include/type resolution, aliasing, and points-to precision remain areas where a
 new construct can require another fixture and implementation slice.
 
-The [2026-09-08 measured sprint](../docs/conformance/astra-sprint-2026-09-08.md)
-records the live-oracle provenance and the specific syntax and return-flow
-gaps closed by the current corpus expansion.
+The [first measured sprint](../docs/conformance/astra-sprint-2026-09-08.md)
+records the initial syntax and return-flow repairs. The
+[second batch](../docs/conformance/astra-second-batch-2026-09-08.md) extends
+direct findings, conditions and loops, callable declarations and lexical
+scope, and source-ordered preprocessing. Its whole-project comparisons retain
+substantial differences on zlib and Lua; exact small fixtures do not establish
+whole-language parity.
 
-Confirmed remaining C gaps include missed direct source-to-sink findings
-after an optional safe overwrite, scalar-condition normalization, and
-external function/prototype classification. The return-summary fix does not
-yet replace the statement-based generator of direct findings. Source
-locations also use approximate enclosing locations for some transformed
-nodes. These limits are detailed with follow-up acceptance criteria in that
-report.
+Confirmed remaining C gaps include header/build-definition context,
+function-like macros in preprocessor conditions, unsigned/long literal types,
+static modifiers, and macro expansion-wrapper types. Condition expansion has
+explicit work/depth bounds. Source locations also use approximate enclosing
+locations for some transformed nodes. The measured reports distinguish
+tested behavior from these remaining limits.
 
 ## Deliberate incompatibilities
 
@@ -78,6 +81,6 @@ the supported integration surfaces.
 ## Release-blocking gates
 
 Every release must pass the locked Rust workspace tests, formatting, Clippy,
-dependency audit, 103/103 committed C parity, canonical C scanner outcomes, the
+dependency audit, 297/297 committed C parity, canonical C scanner outcomes, the
 all-language acceptance test, pinned zlib/Lua acceptance, and packaged binary
 and container tests. The zlib/Lua suite also runs nightly.

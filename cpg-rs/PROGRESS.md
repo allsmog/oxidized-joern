@@ -4,25 +4,25 @@ Single source of truth across iterations. Update in the same commit as the work.
 
 ## Current state
 
-- **Second Astra batch in integration (2026-09-08 UTC).** The combined
-  prototype, function-pointer, lexical-scope, and loop corpus passes a fresh
-  strict live check: **201/201 blocks**, including **2,992 ReachingDef facts**.
-  Canonical direct finding generation follows method-local dependency paths;
-  its committed 26-outcome live-Joern fixture improves from 12 baseline
-  matches to 26 matches, with the negative cases retained. Nine public graph
-  tests cover callable declarations, scope restoration, and source lines.
-  Synthetic condition literals no longer consume later source tokens.
-  The current workspace passes 334 tests and strict Clippy; cache shape is13.
-  INLINED constant macros now follow actual ARGUMENT edges for entry-flow
-  generation: expansion BLOCKs are excluded, and a call with literal
-  arguments does not acquire a spurious method-entry dependency.
-  Work remains in progress: the new direct scanner path exposed a Lua scan
-  performance regression (baseline same-graph scan ~0.52s, candidate >120s),
-  now under repair. Conditional compilation is being implemented and reviewed
-  separately. Real-project hashes have not yet been refreshed for this batch;
-  do not treat the integrated changes as release-validated yet.
+- **Second measured Astra batch (2026-09-08 UTC).** The expanded C corpus
+  passes **297/297** committed and fresh live Joern v4.0.555 comparisons,
+  including **3,587 ReachingDef facts**, at `c5ea712db`. Direct findings match
+  all 26 retained live outcomes, up from 12. Callable declarations, lexical
+  scope, conditions and loops, source-ordered preprocessing, typedefs,
+  parenthesized declarations, and file-scope array dimensions have new pins.
+  All **357 workspace tests**, formatting, strict Clippy, the dependency
+  audit, and native release acceptance pass. Cache shape remains version 13.
+  Per-query dependency-graph and contextual sink caches repaired the Lua scan
+  regression; the original two walkers and their order are preserved.
+  Whole-project exact AST blocks improve from **66 to 93 on zlib** and
+  **237 to 417 on Lua**, with zero formerly exact block regressions.
+  Both whole-project projections still differ substantially from Joern.
+  Pinned real-project manifest acceptance and the extracted native macOS ARM64
+  archive also pass with unchanged inputs and budgets. See the
+  [second batch report](../docs/conformance/astra-second-batch-2026-09-08.md)
+  and [complete counters](../docs/conformance/astra-second-batch-metrics.json).
 
-- **Measured C parity expansion (2026-09-08 UTC).** The
+- **First batch: measured C parity expansion (2026-09-08 UTC).** The
   `CFrontend`/`Project`/`standard_pipeline` path passes 103/103 committed and
   live Joern v4.0.555 comparison blocks, including 1,552/1,552 ReachingDef
   facts. Braceless `if` consequences now survive graph construction, and
