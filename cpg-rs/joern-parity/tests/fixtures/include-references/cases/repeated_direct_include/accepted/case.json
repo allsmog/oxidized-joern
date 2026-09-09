@@ -1,0 +1,125 @@
+{
+  "case": "repeated_direct_include",
+  "commands": {
+    "canonical": {
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/twelfth-batch/lint-corrected/final-real-differential/bin/joern-parity",
+        "--production",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/thirteenth-batch/accepted-capture-v1/repeated_direct_include/input/main.c",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/thirteenth-batch/accepted-capture-v1/repeated_direct_include/input/repeat.h"
+      ],
+      "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/thirteenth-batch/accepted-capture-v1/repeated_direct_include",
+      "exitCode": 0,
+      "error": null,
+      "timedOut": false,
+      "seconds": 0.005117082997458056,
+      "stdout": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/thirteenth-batch/accepted-capture-v1/repeated_direct_include/canonical.stdout",
+        "bytes": 7590,
+        "sha256": "0a04058fa847b05e1f00fb81c24c2c003ce044cbb26e36952a71a7fb01f54c92",
+        "error": null
+      },
+      "stderr": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/thirteenth-batch/accepted-capture-v1/repeated_direct_include/canonical.stderr",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "error": null
+      }
+    },
+    "supplement": {
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/twelfth-batch/lint-corrected/final-real-differential/bin/joern-parity",
+        "--production-supplemental",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/thirteenth-batch/accepted-capture-v1/repeated_direct_include/input/main.c",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/thirteenth-batch/accepted-capture-v1/repeated_direct_include/input/repeat.h"
+      ],
+      "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/thirteenth-batch/accepted-capture-v1/repeated_direct_include",
+      "exitCode": 0,
+      "error": null,
+      "timedOut": false,
+      "seconds": 0.005517624987987801,
+      "stdout": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/thirteenth-batch/accepted-capture-v1/repeated_direct_include/supplement.stdout",
+        "bytes": 28493,
+        "sha256": "01275003029af753c86c801a41918336fab15761b68f94fa1c944e9c98a130db",
+        "error": null
+      },
+      "stderr": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/thirteenth-batch/accepted-capture-v1/repeated_direct_include/supplement.stderr",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "error": null
+      }
+    },
+    "persist": {
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/twelfth-batch/lint-corrected/final-real-differential/bin/cpg",
+        "build",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/thirteenth-batch/accepted-capture-v1/repeated_direct_include/input",
+        "--lang",
+        "c",
+        "-o",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/thirteenth-batch/accepted-capture-v1/repeated_direct_include/accepted-v2.cpg"
+      ],
+      "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/thirteenth-batch/accepted-capture-v1/repeated_direct_include",
+      "exitCode": 0,
+      "error": null,
+      "timedOut": false,
+      "seconds": 0.019747958023799583,
+      "stdout": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/thirteenth-batch/accepted-capture-v1/repeated_direct_include/persist.stdout",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "error": null
+      },
+      "stderr": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/thirteenth-batch/accepted-capture-v1/repeated_direct_include/persist.stderr",
+        "bytes": 305,
+        "sha256": "c532ef02114321dcf8f9c458aff821da831ed9165f8729bb4973ff4cefd99372",
+        "error": null
+      }
+    },
+    "reopened": {
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/twelfth-batch/lint-corrected/final-real-differential/bin/joern-parity",
+        "--supplemental-cpg",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/thirteenth-batch/accepted-capture-v1/repeated_direct_include/accepted-v2.cpg"
+      ],
+      "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/thirteenth-batch/accepted-capture-v1/repeated_direct_include",
+      "exitCode": 0,
+      "error": null,
+      "timedOut": false,
+      "seconds": 0.005327875027433038,
+      "stdout": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/thirteenth-batch/accepted-capture-v1/repeated_direct_include/reopened.stdout",
+        "bytes": 28493,
+        "sha256": "01275003029af753c86c801a41918336fab15761b68f94fa1c944e9c98a130db",
+        "error": null
+      },
+      "stderr": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/thirteenth-batch/accepted-capture-v1/repeated_direct_include/reopened.stderr",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "error": null
+      }
+    }
+  },
+  "errors": [],
+  "sources": {
+    "main.c": "3a71231efb0ec5721cab22fa6230610cfaf13582dc37dc24dcc7011bab0a5776",
+    "repeat.h": "9de56527b206dea4b2c43ea0f85460c08fefe041a230b547590a44b4d3373cc4"
+  },
+  "savedGraph": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/thirteenth-batch/accepted-capture-v1/repeated_direct_include/accepted-v2.cpg",
+    "bytes": 2994,
+    "sha256": "f2d13864df2a49f410e40155e8dd52b4a078c4049a17a2d916bf7d943452ba67",
+    "error": null
+  },
+  "actualVersionTwoHeader": true,
+  "completeSupplementSurvivesReopen": true,
+  "sourceInventoryAfter": {
+    "main.c": "3a71231efb0ec5721cab22fa6230610cfaf13582dc37dc24dcc7011bab0a5776",
+    "repeat.h": "9de56527b206dea4b2c43ea0f85460c08fefe041a230b547590a44b4d3373cc4"
+  },
+  "complete": true
+}

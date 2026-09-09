@@ -1,0 +1,333 @@
+{
+  "status": "PREPARED_INPUT_SCOPE_ONLY_NOT_RELEASED",
+  "projects": 6,
+  "sourceFiles": 11,
+  "reusedProjects": 4,
+  "newInputProjects": 2,
+  "inputHashes": {
+    "duplicate_supplied_macro_local/a.c": "1451c2a021da1bec7b92bea600133bc4c30a4666c184ce9a64006669035e207e",
+    "duplicate_supplied_macro_local/api.h": "1204017a881a23dd38815832b040f76d3b37ee3355e4f2c1ead9d3e3a4b17db1",
+    "duplicate_supplied_macro_local/b.c": "df59ac123d32a8c86f1161077f35046e09b2862fdc48b0ce7d66cb6181713d64",
+    "inactive_body_include/inactive.h": "e6be797d4b0e670eb494b4dd9050eb1042f56b832f8218b2a8905b2ab1ac5d7d",
+    "inactive_body_include/main.c": "6f9fc5b3121682bbce24044f2bedfc75774968c616951955ea4f0c0bb9ba76a6",
+    "repeated_direct_include/main.c": "3a71231efb0ec5721cab22fa6230610cfaf13582dc37dc24dcc7011bab0a5776",
+    "repeated_direct_include/repeat.h": "9de56527b206dea4b2c43ea0f85460c08fefe041a230b547590a44b4d3373cc4",
+    "tiny_fixedtables_include/fixed.h": "3039380a12e6dba1fb44314f13292d1b5ec6744aa80eff5599566a29ea94ea86",
+    "tiny_fixedtables_include/main.c": "7203039d3be732abfb9abaad7177eaa77efa51d6e9fa58d58733346eb6cb4dda",
+    "tiny_fixedtables_inline/main.c": "8af2a0a9531deec50f16e8c125de4000c0636b443b11628e232bb9e9413d2a6f",
+    "unresolved_include_pair/main.c": "e428ca556a8c267b57c83f04a79a5a1fbc257bb8566ef433ffa1b9f9c4c65fb0"
+  },
+  "cases": [
+    {
+      "name": "duplicate_supplied_macro_local",
+      "coverage": [
+        "direct file-scope include",
+        "same header in two caller files"
+      ],
+      "questionsExpectedUnknown": [
+        "Are two separate import/dependency pairs retained for the two physical include occurrences despite identical header names and dependency properties?",
+        "Do physical caller namespace ownership, import properties, CODE/line/column/order and every incident edge reproduce the already admitted full observation?"
+      ],
+      "files": {
+        "a.c": "1451c2a021da1bec7b92bea600133bc4c30a4666c184ce9a64006669035e207e",
+        "api.h": "1204017a881a23dd38815832b040f76d3b37ee3355e4f2c1ead9d3e3a4b17db1",
+        "b.c": "df59ac123d32a8c86f1161077f35046e09b2862fdc48b0ce7d66cb6181713d64"
+      },
+      "freshCanonicalExpected": null,
+      "freshSupplementExpected": null,
+      "provenance": {
+        "kind": "byte-identical reuse",
+        "sourceRoot": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/fixedtables-identity-runner-v3/runs/first-complete-eight-identity-reference-batch/snapshot/input/duplicate_supplied_macro_local",
+        "sourceFiles": {
+          "a.c": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/fixedtables-identity-runner-v3/runs/first-complete-eight-identity-reference-batch/snapshot/input/duplicate_supplied_macro_local/a.c",
+            "sha256": "1451c2a021da1bec7b92bea600133bc4c30a4666c184ce9a64006669035e207e",
+            "bytes": 112
+          },
+          "api.h": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/fixedtables-identity-runner-v3/runs/first-complete-eight-identity-reference-batch/snapshot/input/duplicate_supplied_macro_local/api.h",
+            "sha256": "1204017a881a23dd38815832b040f76d3b37ee3355e4f2c1ead9d3e3a4b17db1",
+            "bytes": 21
+          },
+          "b.c": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/fixedtables-identity-runner-v3/runs/first-complete-eight-identity-reference-batch/snapshot/input/duplicate_supplied_macro_local/b.c",
+            "sha256": "df59ac123d32a8c86f1161077f35046e09b2862fdc48b0ce7d66cb6181713d64",
+            "bytes": 116
+          }
+        },
+        "historicalCanonicalReference": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/fixedtables-identity-runner-v3/runs/first-complete-eight-identity-reference-batch/expected/duplicate_supplied_macro_local/expected.txt",
+          "sha256": "f6fbe553c410856221e2a39fcdeb700d4ebfd5e8e79b7c0259a6d30ad42e32ac",
+          "bytes": 19160
+        },
+        "historicalCanonicalRun": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/fixedtables-identity-runner-v3/runs/first-complete-eight-identity-reference-batch/run.json",
+          "sha256": "f724eac537e98ab8c28b5f8ef54e1333b5cddf9366b8f690b7fb3661abf2c3b6",
+          "bytes": 1420783
+        },
+        "historicalSupplementAvailable": true
+      }
+    },
+    {
+      "name": "tiny_fixedtables_include",
+      "coverage": [
+        "body include"
+      ],
+      "questionsExpectedUnknown": [
+        "Does the body include remain attached to the caller global NAMESPACE_BLOCK in the fresh full graph?",
+        "Are import metadata and the included array declarations both preserved, without equating their source locations or scopes?"
+      ],
+      "files": {
+        "fixed.h": "3039380a12e6dba1fb44314f13292d1b5ec6744aa80eff5599566a29ea94ea86",
+        "main.c": "7203039d3be732abfb9abaad7177eaa77efa51d6e9fa58d58733346eb6cb4dda"
+      },
+      "freshCanonicalExpected": null,
+      "freshSupplementExpected": null,
+      "provenance": {
+        "kind": "byte-identical reuse",
+        "sourceRoot": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-runner-v3/runs/first-complete-primitive-member-reference-batch/snapshot/input/tiny_fixedtables_include",
+        "sourceFiles": {
+          "fixed.h": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-runner-v3/runs/first-complete-primitive-member-reference-batch/snapshot/input/tiny_fixedtables_include/fixed.h",
+            "sha256": "3039380a12e6dba1fb44314f13292d1b5ec6744aa80eff5599566a29ea94ea86",
+            "bytes": 98
+          },
+          "main.c": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-runner-v3/runs/first-complete-primitive-member-reference-batch/snapshot/input/tiny_fixedtables_include/main.c",
+            "sha256": "7203039d3be732abfb9abaad7177eaa77efa51d6e9fa58d58733346eb6cb4dda",
+            "bytes": 254
+          }
+        },
+        "historicalCanonicalReference": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-runner-v3/runs/first-complete-primitive-member-reference-batch/expected/tiny_fixedtables_include/expected.txt",
+          "sha256": "fc4a1360d6f10152edb364c346a47ae73d2df2460fe5ef12da2d2e79cbb7dd3f",
+          "bytes": 48334
+        },
+        "historicalCanonicalRun": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-runner-v3/runs/first-complete-primitive-member-reference-batch/run.json",
+          "sha256": "aeef8f13e1f03f46daec5df5d6c8ac9fba026ff71334dc3f59d8d50e3386033f",
+          "bytes": 1425568
+        },
+        "historicalSupplementAvailable": true
+      }
+    },
+    {
+      "name": "tiny_fixedtables_inline",
+      "coverage": [
+        "inline/no-include control"
+      ],
+      "questionsExpectedUnknown": [
+        "Does the fresh full graph retain the existing complete canonical projection and no include-reference nodes/edges?"
+      ],
+      "files": {
+        "main.c": "8af2a0a9531deec50f16e8c125de4000c0636b443b11628e232bb9e9413d2a6f"
+      },
+      "freshCanonicalExpected": null,
+      "freshSupplementExpected": null,
+      "provenance": {
+        "kind": "byte-identical reuse",
+        "sourceRoot": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-runner-v3/runs/first-complete-primitive-member-reference-batch/snapshot/input/tiny_fixedtables_inline",
+        "sourceFiles": {
+          "main.c": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-runner-v3/runs/first-complete-primitive-member-reference-batch/snapshot/input/tiny_fixedtables_inline/main.c",
+            "sha256": "8af2a0a9531deec50f16e8c125de4000c0636b443b11628e232bb9e9413d2a6f",
+            "bytes": 333
+          }
+        },
+        "historicalCanonicalReference": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-runner-v3/runs/first-complete-primitive-member-reference-batch/expected/tiny_fixedtables_inline/expected.txt",
+          "sha256": "6d613c7085ab54541cc1d9fa83494748e33fe70bfc5c541ee39f12aa8046cadd",
+          "bytes": 38652
+        },
+        "historicalCanonicalRun": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-runner-v3/runs/first-complete-primitive-member-reference-batch/run.json",
+          "sha256": "aeef8f13e1f03f46daec5df5d6c8ac9fba026ff71334dc3f59d8d50e3386033f",
+          "bytes": 1425568
+        },
+        "historicalSupplementAvailable": true
+      }
+    },
+    {
+      "name": "inactive_body_include",
+      "coverage": [
+        "inactive include in body",
+        "include inside inactive function",
+        "no macro/declaration leakage control"
+      ],
+      "questionsExpectedUnknown": [
+        "Which of the two lexically present inactive include directives appear in the CDT include inventory and full import/dependency graph?",
+        "How are their AST parent, source coordinates, CODE and order represented relative to active source declarations?",
+        "Does import inventory coexist with the preserved inactive declaration/macro behavior, without LEAK changing active branches?"
+      ],
+      "files": {
+        "inactive.h": "e6be797d4b0e670eb494b4dd9050eb1042f56b832f8218b2a8905b2ab1ac5d7d",
+        "main.c": "6f9fc5b3121682bbce24044f2bedfc75774968c616951955ea4f0c0bb9ba76a6"
+      },
+      "freshCanonicalExpected": null,
+      "freshSupplementExpected": null,
+      "provenance": {
+        "kind": "byte-identical reuse",
+        "sourceRoot": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-include-diagnosis-v4/runs/first-complete-reference-batch/snapshot/input/inactive_body_include",
+        "sourceFiles": {
+          "inactive.h": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-include-diagnosis-v4/runs/first-complete-reference-batch/snapshot/input/inactive_body_include/inactive.h",
+            "sha256": "e6be797d4b0e670eb494b4dd9050eb1042f56b832f8218b2a8905b2ab1ac5d7d",
+            "bytes": 32
+          },
+          "main.c": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-include-diagnosis-v4/runs/first-complete-reference-batch/snapshot/input/inactive_body_include/main.c",
+            "sha256": "6f9fc5b3121682bbce24044f2bedfc75774968c616951955ea4f0c0bb9ba76a6",
+            "bytes": 302
+          }
+        },
+        "historicalCanonicalReference": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-include-diagnosis-v4/runs/first-complete-reference-batch/expected/inactive_body_include/expected.txt",
+          "sha256": "dee62aa4096c4c46c16ebb0a91c5906c1f6786a8b5483d6508ad2837a6a80f3e",
+          "bytes": 16102
+        },
+        "historicalCanonicalRun": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-include-diagnosis-v4/runs/first-complete-reference-batch/run.json",
+          "sha256": "2063ce773a6072d9993e0159d906ec4b94ae8c319e327d01ae5217bc841e7f53",
+          "bytes": 3402752
+        },
+        "historicalSupplementAvailable": false
+      }
+    },
+    {
+      "name": "repeated_direct_include",
+      "coverage": [
+        "repeated direct file-scope include",
+        "header guard"
+      ],
+      "questionsExpectedUnknown": [
+        "Are both directives represented separately when the second header body is guarded out?",
+        "Are dependency nodes distinct or shared, and how do exact properties, namespace AST order, IMPORTS endpoints and multiplicity appear?",
+        "Does the full expression graph retain the first header macro effect without a second body expansion?"
+      ],
+      "files": {
+        "main.c": "3a71231efb0ec5721cab22fa6230610cfaf13582dc37dc24dcc7011bab0a5776",
+        "repeat.h": "9de56527b206dea4b2c43ea0f85460c08fefe041a230b547590a44b4d3373cc4"
+      },
+      "freshCanonicalExpected": null,
+      "freshSupplementExpected": null,
+      "provenance": {
+        "kind": "new proposed input",
+        "historicalCanonicalReference": null,
+        "historicalSupplementAvailable": false
+      }
+    },
+    {
+      "name": "unresolved_include_pair",
+      "coverage": [
+        "quoted unresolved include candidate",
+        "system unresolved include candidate"
+      ],
+      "questionsExpectedUnknown": [
+        "With no supplied header files, does the pinned parser leave both include requests unresolved?",
+        "Does each missing quoted/system include still produce import/dependency records, and what are their exact CODE/name/properties/locations/edges and ordering?",
+        "Are there diagnostics, external fallback content or failure statuses that prevent a complete reference? Retain them; do not substitute guessed empty graphs."
+      ],
+      "files": {
+        "main.c": "e428ca556a8c267b57c83f04a79a5a1fbc257bb8566ef433ffa1b9f9c4c65fb0"
+      },
+      "freshCanonicalExpected": null,
+      "freshSupplementExpected": null,
+      "provenance": {
+        "kind": "new proposed input",
+        "historicalCanonicalReference": null,
+        "historicalSupplementAvailable": false
+      }
+    }
+  ],
+  "sourceTexts": {
+    "duplicate_supplied_macro_local": {
+      "a.c": "#include \"api.h\"\nlocal int helper(int value) { return value; }\nint entry_a(int value) { return helper(value); }\n",
+      "api.h": "#define local static\n",
+      "b.c": "#include \"api.h\"\nlocal int helper(int value) { return value + 1; }\nint entry_b(int value) { return helper(value); }\n"
+    },
+    "tiny_fixedtables_include": {
+      "fixed.h": "static const Code lenfix[2] = {{1, 2, 3}, {4, 5, 6}};\nstatic const Code distfix[1] = {{7, 8, 9}};\n",
+      "main.c": "typedef struct Entry {\n unsigned char op;\n unsigned char bits;\n unsigned short value;\n} Code;\nstruct State { const Code *len; const Code *dist; };\nvoid fixedtables(struct State *state) {\n#include \"fixed.h\"\n state->len = lenfix;\n state->dist = distfix;\n}\n"
+    },
+    "tiny_fixedtables_inline": {
+      "main.c": "typedef struct Entry {\n unsigned char op;\n unsigned char bits;\n unsigned short value;\n} Code;\nstruct State { const Code *len; const Code *dist; };\nvoid fixedtables(struct State *state) {\nstatic const Code lenfix[2] = {{1, 2, 3}, {4, 5, 6}};\nstatic const Code distfix[1] = {{7, 8, 9}};\n state->len = lenfix;\n state->dist = distfix;\n}\n"
+    },
+    "inactive_body_include": {
+      "inactive.h": "#define LEAK 1\nint leaked = 99;\n",
+      "main.c": "int choose(int x) {\n#if 0\n#include \"inactive.h\"\n int included;\n#else\n int included = x;\n#endif\n#ifdef LEAK\n return leaked;\n#else\n return included;\n#endif\n}\n#if 0\nint ignored(void) {\n#include \"inactive.h\"\n return leaked;\n}\n#endif\nint later(int x) {\n#ifdef LEAK\n return leaked;\n#else\n return x;\n#endif\n}\n"
+    },
+    "repeated_direct_include": {
+      "main.c": "#include \"repeat.h\"\n#include \"repeat.h\"\nint entry(void) { return INCLUDED_VALUE; }\n",
+      "repeat.h": "#ifndef REPEAT_H\n#define REPEAT_H\n#define INCLUDED_VALUE 7\n#endif\n"
+    },
+    "unresolved_include_pair": {
+      "main.c": "#include \"missing-local.h\"\n#include <missing-system.h>\nint entry(void) { return 0; }\n"
+    }
+  },
+  "scope": "Direct caller include-reference nodes/properties/edges. No parser semantics change, source implementation, new expected graph, or producer.",
+  "historicalAnchors": "Four exact-source canonical references are available for full-byte comparison after fresh generation; they are historical evidence, not newly generated outputs. Three also have admitted complete saved-CPG supplements.",
+  "upstream": {
+    "tag": "v4.0.555",
+    "commit": "d95237aeaf3d12cb4e63336def3a4d9d7315dfb4",
+    "files": {
+      "AstCreatorHelper.scala": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/joern-parity/tests/fixtures/body-macro-state/provenance/upstream/AstCreatorHelper.scala",
+        "sha256": "1c3514cb3e006b8c8bf1bb6b5cee072969416a8c94353d185a5ebacbe00e92f2",
+        "bytes": 10106
+      },
+      "AstCreator.scala": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/joern-parity/tests/fixtures/body-macro-state/provenance/upstream/AstCreator.scala",
+        "sha256": "b90c7804a6ab74326f67da35124da0873c32be1340e6006f8a3d47720bc0141c",
+        "bytes": 5617
+      },
+      "tag-resolution.txt": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/joern-parity/tests/fixtures/body-macro-state/provenance/upstream/tag-resolution.txt",
+        "sha256": "4eac817e8c5787d33c3170707c5796799bf09db19cfe7e1894c99f51280f0f47",
+        "bytes": 123
+      }
+    },
+    "observedRule": "AstCreatorHelper.scala179-189 builds import/dependency pairs from getIncludeDirectives filtered only by physical caller file; AstCreator.scala70-74 places them before the translation-unit declaration AST. Whether each inactive/unresolved directive reaches that inventory remains an observation question."
+  },
+  "unchangedProducersToReuse": {
+    "canonicalOracle": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/fixedtables-identity-runner-v3/oracle.sc",
+      "sha256": "56431f14868678e64f9eb41026b44f1d3d7738404d28d2db62711b520c98c742",
+      "bytes": 4709
+    },
+    "canonicalRunnerPredecessor": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/fixedtables-identity-runner-v3/run-oracle.py",
+      "sha256": "a8f2c2008e3b2ca9ea07beca19ab80bc464733a2fed69edc994c77fae20f542a",
+      "bytes": 34716
+    },
+    "historicalRuntimeInventory": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/fixedtables-identity-runner-v3/runtime-bindings.json",
+      "sha256": "b15a360470551d7153f9b5db986950ed48168b27deb80455353814b69bd3814d",
+      "bytes": 413557
+    },
+    "supplementalObserverScala": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/twelfth-identity-observer-v2/observer.sc",
+      "sha256": "e3ee970b53369f1308fab1f20f81d256ffd31559722d77239379538bee9487a7",
+      "bytes": 7784
+    },
+    "supplementalDriverPredecessor": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/twelfth-identity-observer-v2/run-observer.py",
+      "sha256": "6108cccac5df8bac77ae55de97484464f70b6cb185bcfe4c6eac1788b099d41a",
+      "bytes": 22166
+    }
+  },
+  "futureAdmission": {
+    "acceptedTwelfthCommit": null,
+    "acceptedTwelfthDocumentationCommit": null,
+    "parentExecutionRelease": null,
+    "currentFrozenSourceForLaterAdmission": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/twelfth-batch/lint-corrected/final-real-differential/bin/source-bindings.json",
+      "sha256": "33f4740b78f60a142a615b1a07b2a2ea448ed7955e9464395e72fe6a8af91dda",
+      "bytes": 2121168
+    },
+    "runtimeMustBeReattestedBeforeAndAfter": true,
+    "historicalRuntimeInventoryIsNotFreshAttestation": true
+  },
+  "newExpectedGraphs": 0,
+  "producerRuns": 0,
+  "productionSourceOrTestEdits": false
+}

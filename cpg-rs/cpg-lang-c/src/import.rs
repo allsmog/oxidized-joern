@@ -270,6 +270,33 @@ pub(crate) fn graph_from_canonical_dump_with_metadata(
         cpg.add_edge(type_decl, node, EdgeKind::Binds);
         cpg.add_edge(node, method, EdgeKind::Ref);
     }
+    for include in &metadata.include_references {
+        let namespace =
+            raw_to_node[resolve_address(&address_to_raw, &format!("NB:{}:<global>", include.file))];
+        assert_eq!(cpg.kind_of(namespace), NodeKind::NamespaceBlock);
+        let file = cpg.file_of(namespace);
+        // Each directive has its own dependency, including equal header names
+        // in one or more callers. Internal file partitions are not FILENAME
+        // properties or SOURCE_FILE edges on these nodes.
+        let dependency = cpg.add_node(NodeKind::Dependency, file);
+        let name = cpg.intern(&include.name);
+        cpg.set_name(dependency, name);
+        cpg.set_dependency_group_id(dependency, name);
+        let version = cpg.intern("include");
+        cpg.set_version(dependency, version);
+        cpg.clear_order_property(dependency);
+
+        let import = cpg.add_node(NodeKind::Import, file);
+        let code = cpg.intern(&include.code);
+        cpg.set_code(import, code);
+        cpg.set_imported_entity(import, name);
+        cpg.set_imported_as(import, name);
+        cpg.set_line(import, include.line);
+        cpg.set_column_number(import, include.column);
+        cpg.set_order_property(import, include.order);
+        cpg.add_edge(namespace, import, EdgeKind::Ast);
+        cpg.add_edge(import, dependency, EdgeKind::Imports);
+    }
     let mut modifier_lines = Vec::new();
     for modifier in &metadata.modifiers {
         let node = raw_to_node[resolve_address(&address_to_raw, &modifier.address)];
@@ -369,7 +396,7 @@ pub fn canonical_dump(cpg: &Cpg) -> String {
 
     let mut scaffolding: Vec<NodeId> = cpg
         .nodes()
-        .filter(|&node| cpg.kind_of(node) != NodeKind::Binding)
+        .filter(|&node| !omitted_by_canonical_oracle(cpg.kind_of(node)))
         .filter(|node| !ast_nodes.contains(node) || cpg.kind_of(*node) == NodeKind::TypeDecl)
         .collect();
     scaffolding.sort_by_key(|&node| scaffolding_key(cpg, node));
@@ -387,8 +414,8 @@ pub fn canonical_dump(cpg: &Cpg) -> String {
     let mut seen_flow_pairs = HashSet::new();
     for source in cpg.nodes() {
         for edge in cpg.out(source) {
-            if cpg.kind_of(source) == NodeKind::Binding
-                || cpg.kind_of(edge.other) == NodeKind::Binding
+            if omitted_by_canonical_oracle(cpg.kind_of(source))
+                || omitted_by_canonical_oracle(cpg.kind_of(edge.other))
             {
                 continue;
             }
@@ -443,6 +470,16 @@ pub fn canonical_dump(cpg: &Cpg) -> String {
         out.push('\n');
     }
     out
+}
+
+/// The unchanged Joern canonical oracle selects neither bindings nor include
+/// nodes. Their complete properties and edges are checked by the supplemental
+/// graph observations instead; they remain in the production/saved graph.
+fn omitted_by_canonical_oracle(kind: NodeKind) -> bool {
+    matches!(
+        kind,
+        NodeKind::Binding | NodeKind::Import | NodeKind::Dependency
+    )
 }
 
 fn scaffolding_key(cpg: &Cpg, node: NodeId) -> (u8, String, u32) {
@@ -675,6 +712,8 @@ fn canonical_node_name(kind: NodeKind) -> &'static str {
         NodeKind::Modifier => "MODIFIER",
         NodeKind::Unknown => "UNKNOWN",
         NodeKind::Binding => "BINDING",
+        NodeKind::Import => "IMPORT",
+        NodeKind::Dependency => "DEPENDENCY",
     }
 }
 
@@ -699,7 +738,8 @@ fn canonical_edge_name(kind: EdgeKind) -> &'static str {
         | EdgeKind::Ddg
         | EdgeKind::Receiver
         | EdgeKind::ReachingDef
-        | EdgeKind::Binds => {
+        | EdgeKind::Binds
+        | EdgeKind::Imports => {
             unreachable!("filtered before canonical edge rendering")
         }
     }

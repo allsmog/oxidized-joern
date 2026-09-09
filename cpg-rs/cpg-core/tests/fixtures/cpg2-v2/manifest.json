@@ -1,0 +1,36 @@
+{
+  "origin": "Actual accepted afe23fc4b CPG2 version 2 writer; six existing root captures, copied without running a producer.",
+  "runSha256": "e6e3ba3647a49f4a55a3fbbb832ff4538cd167d0cb144370058bf38fe2fbb983",
+  "files": {
+    "duplicate_supplied_macro_local/accepted-v2.cpg": {
+      "sha256": "0c9843ddd4b6ab6b4f8f025efbd07f8d3dbbc6f6c1b5e79c7eaeae9d9d02256a",
+      "bytes": 6178,
+      "original": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/thirteenth-batch/accepted-capture-v1/duplicate_supplied_macro_local/accepted-v2.cpg"
+    },
+    "tiny_fixedtables_include/accepted-v2.cpg": {
+      "sha256": "7766fac53d772c9e4ed7b4b67f37390e30e23e41a24c24ff4095efffdf012217",
+      "bytes": 11535,
+      "original": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/thirteenth-batch/accepted-capture-v1/tiny_fixedtables_include/accepted-v2.cpg"
+    },
+    "tiny_fixedtables_inline/accepted-v2.cpg": {
+      "sha256": "2822310f129d13ddf1fbf7411f1d288378d9573bc8c28fbc3a3a4823be7ea005",
+      "bytes": 9706,
+      "original": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/thirteenth-batch/accepted-capture-v1/tiny_fixedtables_inline/accepted-v2.cpg"
+    },
+    "inactive_body_include/accepted-v2.cpg": {
+      "sha256": "5f0443ddfd688298b36557af34c34f64d3024a871e149470f163ac095dba5bb7",
+      "bytes": 5557,
+      "original": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/thirteenth-batch/accepted-capture-v1/inactive_body_include/accepted-v2.cpg"
+    },
+    "repeated_direct_include/accepted-v2.cpg": {
+      "sha256": "f2d13864df2a49f410e40155e8dd52b4a078c4049a17a2d916bf7d943452ba67",
+      "bytes": 2994,
+      "original": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/thirteenth-batch/accepted-capture-v1/repeated_direct_include/accepted-v2.cpg"
+    },
+    "unresolved_include_pair/accepted-v2.cpg": {
+      "sha256": "68e1dbba66084f512e307fe0ecf349efe5e38b5c3999d0341dbc043a9c50f0c0",
+      "bytes": 2160,
+      "original": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/thirteenth-batch/accepted-capture-v1/unresolved_include_pair/accepted-v2.cpg"
+    }
+  }
+}

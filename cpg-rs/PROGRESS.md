@@ -4,6 +4,45 @@ Single source of truth across iterations. Update in the same commit as the work.
 
 ## Current state
 
+- **Thirteenth measured Astra batch (2026-09-09 UTC).** Production C graphs
+  retain the observed per-include IMPORT/DEPENDENCY pairs and caller namespace
+  relationships. Cache shape is **24**; CPG2 version **3** stores four optional
+  strings, signed column and explicit unknown/absent/present ORDER. Readers
+  retain CPG2 v1/v2 and legacy CPG1; actual old-writer fixtures are gated.
+  Supplemental schema **2** represents the new properties and missingness.
+  Public CLI JSON export still emits only code/file/id/kind/line/name.
+  Six complete canonical references remain **6/6 exact**, with no canonical
+  gain or loss. All **24 capture commands** pass; complete Rust snapshots are
+  byte-identical before save and after reopen. All nine observed include pairs
+  match their properties, absence and complete incident-edge occurrences.
+  All **511 old nodes /1,807 edges** remain, with exactly **18 nodes /18 edges**
+  added. Full snapshots remain nonidentical: **529/1,825 Rust nodes/edges versus
+  530/2,285 Joern**. The separate macro Binding gap belongs to
+  repeated_direct_include; other raw properties and relationships remain open.
+  Complete whole zlib/Lua stdout is byte-identical to accepted twelfth output,
+  so all canonical counts remain unchanged: exact METHOD ASTs **160/410 and
+  1,442/2,274**, including stubs, with zero gains/losses. Saved sixth Joern
+  references are explicitly reused; neither full whole projection is exact.
+  The twelfth 245-unique continuity corpus was not replayed as a new run here.
+  All **490 workspace tests /82 groups**, **308 committed /308 fresh live**
+  comparisons, formatting, strict Clippy, locked release, 17 checker tests,
+  73-dependency audit, native macOS ARM64 release/archive and official real-
+  project acceptance pass. Final **151 Rust/Cargo /11,821 other fixture files**
+  are bound. The old v2-header assertion failure and its sole **2→3** repair
+  remain recorded; release executable bytes stay identical across that repair.
+  Two repeated builds pass at **3.18/2.80 seconds zlib /6.17/6.17 seconds Lua**,
+  maximum build RSS **495.91/478.86 MiB**, under unchanged ceilings. Clean/update
+  equivalence passes for **26/61 files**, with separate update RSS
+  **651.50/736.09 MiB**. Exactly eight node/hash expectations change; all input,
+  license, exclusion, budget and SARIF contracts remain fixed. Original 13 dirty
+  files remain unchanged under the final preservation inventory.
+  See the [thirteenth report](../docs/conformance/astra-thirteenth-batch-2026-09-09.md),
+  [counters](../docs/conformance/astra-thirteenth-batch-metrics.json), and
+  [acceptance](../docs/conformance/astra-thirteenth-batch-acceptance.json).
+  Full port parity remains incomplete. Next: observe and represent the separate
+  external macro Binding using the reviewed, unrun four-project plan; broader
+  C graphs, include search, CPGQL/console/plugins and non-C parity remain open.
+
 - **Twelfth measured Astra batch (2026-09-09 UTC).** Duplicate C function
   identities and call fixups now follow the pinned Joern behavior. Production
   graphs retain bindings, modifier properties and physical METHOD_REF lines.

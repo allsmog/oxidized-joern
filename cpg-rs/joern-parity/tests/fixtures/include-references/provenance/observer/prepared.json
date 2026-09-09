@@ -1,0 +1,130 @@
+{
+  "schemaVersion": 1,
+  "status": "PREPARED_SAVED_CPG_OBSERVER_PARENT_RELEASE_REQUIRED",
+  "baseRunner": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/include-reference-runner-v1/run-oracle.py",
+    "sha256": "ef9ace020572eb554a58d813af361c41b9d48531d671efe02394bbf3e21bbeee",
+    "bytes": 35671
+  },
+  "basePrepared": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/include-reference-runner-v1/prepared.json",
+    "sha256": "1bb29f024e0017de19299e15ef80cb82df964dd05986bd79a61efc6aa52b716b",
+    "bytes": 450093
+  },
+  "canonicalOracle": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/include-reference-runner-v1/oracle.sc",
+    "sha256": "56431f14868678e64f9eb41026b44f1d3d7738404d28d2db62711b520c98c742",
+    "bytes": 4709
+  },
+  "historicalObservation": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/twelfth-identity-observer-v2/runs/first-complete-eleven-identity-saved-cpg-observation/run.json",
+    "sha256": "5faa77644bbcb55c734afb6a68ed2e5260784fa564ab518315dad38cd0a88ed3",
+    "bytes": 1311857
+  },
+  "newCases": [
+    "duplicate_supplied_macro_local",
+    "inactive_body_include",
+    "repeated_direct_include",
+    "tiny_fixedtables_include",
+    "tiny_fixedtables_inline",
+    "unresolved_include_pair"
+  ],
+  "retainedCases": [],
+  "anchorCases": [
+    "duplicate_supplied_macro_local",
+    "tiny_fixedtables_include",
+    "tiny_fixedtables_inline"
+  ],
+  "checkpointAdmission": {
+    "repository": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint",
+    "sourceCommit": "afe23fc4bedbbf6b669f2bd6dfed0f0af141ecfc",
+    "documentationCommit": "afe23fc4bedbbf6b669f2bd6dfed0f0af141ecfc",
+    "acceptanceRepositoryPath": "docs/conformance/astra-twelfth-batch-acceptance.json",
+    "requiredDocumentationPaths": [
+      "docs/conformance/astra-twelfth-batch-2026-09-09.md",
+      "docs/conformance/astra-twelfth-batch-metrics.json",
+      "cpg-rs/PROGRESS.md"
+    ],
+    "acceptance": {
+      "repositoryPath": "docs/conformance/astra-twelfth-batch-acceptance.json",
+      "sha256": "7ddd8ddd9ff9bfa37439a99260d4f8a04e3f23706eee7e64a9bd9ea74273c749"
+    },
+    "documentationBlobs": [
+      {
+        "repositoryPath": "docs/conformance/astra-twelfth-batch-2026-09-09.md",
+        "sha256": "d86db8ffa1a85a2f2f87cb3692b6bfe596f6b2fc11b7362d582d2ed284af5f09"
+      },
+      {
+        "repositoryPath": "docs/conformance/astra-twelfth-batch-metrics.json",
+        "sha256": "7114f9e78897cd97093954d0955e494af1cef5cd53ba4347de1ddd52c90f41d0"
+      },
+      {
+        "repositoryPath": "cpg-rs/PROGRESS.md",
+        "sha256": "9ee0254a916011271191c2d355e1e13279f0d5e2dff1e192839f79241344a370"
+      }
+    ],
+    "frozenBuild": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/twelfth-batch/lint-corrected/final-real-differential/bin/source-bindings.json",
+      "sha256": "33f4740b78f60a142a615b1a07b2a2ea448ed7955e9464395e72fe6a8af91dda",
+      "bytes": 2121168
+    },
+    "closeout": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/twelfth-batch/closeout.json",
+      "sha256": "3e5b304e0ae451b8260d06cb1d6040020adc3588696a6fd4325d45ef967021f9"
+    },
+    "gates": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/twelfth-batch/lint-corrected/final/gates.json",
+      "sha256": "724d83b09ae597fd33988361e93301c0789d4c8d4ecd0b87809fc24e663c6828"
+    }
+  },
+  "canonicalProjectionUnchanged": true,
+  "noProducerExecution": true,
+  "storageApi": "io.shiftleft.codepropertygraph.generated.Cpg.withStorage(copiedPath, false)",
+  "noDefaultOverlays": true,
+  "sourceFileCount": 11,
+  "newSourceCaseCount": 2,
+  "reusedSourceCaseCount": 4,
+  "historicalSupplementAnchorCount": 3,
+  "predecessor": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/twelfth-identity-observer-v2/prepared.json",
+    "sha256": "92ac4df4f35d3ab1ec5196e5ca129f54d5783ba0ddcc8a30aa1865cb18578812",
+    "bytes": 7092
+  },
+  "sourcePreparationFreeze": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/include-reference-preparation-v1/freeze.json",
+    "sha256": "fe1cd4e56d58e4d7872e51be0a800e7b26c1f6a988b802b806282ff50f6117e3",
+    "bytes": 3023
+  },
+  "files": [
+    {
+      "path": "README.md",
+      "sha256": "c6a953871d2f0876c868ca32b2905c88e19edcbc934576d4fb2165f4d738decd",
+      "bytes": 2931
+    },
+    {
+      "path": "derive.py",
+      "sha256": "4820aa409e7d3482ebaea789f53de23c91951c3d9ec15145b5ae03af6d1133cd",
+      "bytes": 10779
+    },
+    {
+      "path": "observer-release.template.json",
+      "sha256": "918e1cfe101096a3699157afd589cd44b3c075022b8b3757715d0322f3507de4",
+      "bytes": 1208
+    },
+    {
+      "path": "observer.sc",
+      "sha256": "e3ee970b53369f1308fab1f20f81d256ffd31559722d77239379538bee9487a7",
+      "bytes": 7784
+    },
+    {
+      "path": "run-observer.py",
+      "sha256": "a25c8f59b4cb59ff15ea280b19f09ebab96525ac44592fb23c43d08d4b4b018f",
+      "bytes": 29237
+    },
+    {
+      "path": "v2-to-include-v1.patch",
+      "sha256": "8bdacb41c68064080d2d1db7f9567bd63c997f22278f8401e9fe971cf4155f4e",
+      "bytes": 17138
+    }
+  ]
+}

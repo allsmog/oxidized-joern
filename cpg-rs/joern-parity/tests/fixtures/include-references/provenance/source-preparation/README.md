@@ -1,0 +1,25 @@
+Six projects are proposed to observe C include-reference graphs. This directory contains exact proposed C/header bytes and open questions, with **no producer run, new expected graph, implementation, or execution release**. [preparation.json](preparation.json) contains the complete source texts, hashes, historical references, coverage and expected-unknown questions.
+
+| Project | Source files | Origin | Purpose |
+|---|---:|---|---|
+| duplicate_supplied_macro_local | 3 | Unchanged observed fixture | Direct includes; the same header in two files |
+| tiny_fixedtables_include | 2 | Unchanged observed fixture | Body include; compare import ownership with included declarations |
+| tiny_fixedtables_inline | 1 | Unchanged observed fixture | Inline/no-include control |
+| inactive_body_include | 2 | Unchanged earlier canonical fixture | Inactive body and inactive-function includes; macro leakage control |
+| repeated_direct_include | 2 | New proposed input | Two file-scope includes of one guarded macro header |
+| unresolved_include_pair | 1 | New proposed input | Quoted and system header requests, with no supplied headers |
+
+The four reused projects retain their existing names and exact bytes. Their historical complete canonical references can serve as four anchors after fresh generation. The first three also have admitted complete saved-CPG observations. The repeated and unresolved projects have no expected outputs. The earlier fixture named `unresolved_header_controls` is deliberately not reused as a missing-header control: its quoted basename resolved to a supplied decoy. The new pair supplies neither header; whether the pinned parser leaves both unresolved remains a recorded question.
+
+The pinned [include builder](upstream/AstCreatorHelper.scala) creates import/dependency pairs from the translation unit’s include inventory after filtering nodes originating in other files. [AstCreator.scala](upstream/AstCreator.scala) places the resulting import ASTs under the global namespace before the translation-unit declaration AST. This motivates separate observation of import collection and selected declaration effects; it does not establish the answers for inactive, repeated or missing headers.
+
+The next execution should reuse the existing two-stage observation route, with only corpus/admission bookkeeping changed:
+
+1. After the parent’s twelfth checkpoint is committed, bind its actual source/documentation commits and frozen release receipt. Adapt the reviewed canonical runner to these six projects, eleven source files and four historical full-byte anchors. Keep the canonical oracle byte-identical (`56431f14…`), default parser settings, overlays and language selection unchanged. Do not add include-search paths, defines, code rewrites, declaration filters or fabricated expected files. Reattest the distributed Joern/JDK trees, launch commands and environment before and after the parent-released run; the historical runtime inventory is only a baseline.
+2. Generate one fresh complete canonical batch with pinned Joern 4.0.555. Preserve raw stdout/stderr, every case/status, complete LF-only extraction and the produced workspace files. Compare each of the four anchors byte-for-byte. A difference or failure stays visible and held for review; it must not be normalized away or replaced by an empty graph.
+3. For each successfully admitted fresh case, inventory and compare its saved `cpg.bin` and `cpg.bin.tmp`. Use newly copied, hash-bound stores with the unchanged observer Scala (`e3ee970b…`) and explicit `Cpg.withStorage(copy, false)`. Do not rerun parsing, call import helpers or apply overlays during observation. Require full canonical reproduction equal to that case’s newly admitted canonical output before admitting its complete typed node/edge snapshot. Preserve duplicate edges, IDs, property missingness, numeric types and all physical coordinates actually present. A missing, unequal or unstable store remains held; do not guess which file contains the right graph.
+4. Bind all six source sets, complete canonical outputs, raw supplements, runtime inventories and before/after observations. Only then derive include-reference assertions from the actual graphs. Parent review and execution release remain required; this preparation is not either release.
+
+The existing saved-graph route has already been exercised successfully for the preceding eleven observations. Its success/byte-stability receipts do not assert descendant-process-group closure; the parent checks producer completion before observation. An unchanged full canonical projection alone does not prove full include-reference fidelity, which is why the complete supplementary snapshots remain required.
+
+Preparation stops here. No new runner implementation or general include-resolution policy is proposed. Future implementation decisions should follow the observed per-occurrence properties, global namespace ownership, source locations and IMPORTS endpoints, while keeping existing declaration and macro behavior intact.

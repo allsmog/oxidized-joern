@@ -149,7 +149,7 @@ fn observed_bindings_modifiers_and_references_survive_pipeline_and_storage() {
         assert_eq!(stored_metadata(&cpg), expected, "{name}");
         let canonical = cpg_lang_c::import::canonical_dump(&cpg);
         let bytes = cpg.to_bytes();
-        assert_eq!(&bytes[..6], b"CPG2\x02\x00");
+        assert_eq!(&bytes[..6], b"CPG2\x03\x00");
         let reopened = Cpg::from_bytes(&bytes).unwrap();
         assert_eq!(stored_metadata(&reopened), expected, "{name}: reopened");
         assert_eq!(

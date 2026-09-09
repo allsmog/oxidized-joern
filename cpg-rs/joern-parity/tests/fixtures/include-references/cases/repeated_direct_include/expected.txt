@@ -1,0 +1,139 @@
+METHOD NAME=<global> CODE=<global> FULL_NAME=<includes>:<global> ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=entry CODE=int entry(void) { return INCLUDED_VALUE; } FULL_NAME=entry SIGNATURE=int(void) ORDER=1
+  METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  BLOCK CODE={ return INCLUDED_VALUE; } TYPE_FULL_NAME=void ORDER=2
+    RETURN CODE=return INCLUDED_VALUE; ORDER=1
+      CALL NAME=INCLUDED_VALUE CODE=INCLUDED_VALUE TYPE_FULL_NAME=int METHOD_FULL_NAME=repeat.h:INCLUDED_VALUE:int(0) SIGNATURE=int(0) ORDER=1 DISPATCH_TYPE=INLINED
+        BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+          LITERAL CODE=7 TYPE_FULL_NAME=int ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+
+METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1
+  METHOD NAME=entry CODE=int entry(void) { return INCLUDED_VALUE; } FULL_NAME=entry SIGNATURE=int(void) ORDER=1
+    METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    BLOCK CODE={ return INCLUDED_VALUE; } TYPE_FULL_NAME=void ORDER=2
+      RETURN CODE=return INCLUDED_VALUE; ORDER=1
+        CALL NAME=INCLUDED_VALUE CODE=INCLUDED_VALUE TYPE_FULL_NAME=int METHOD_FULL_NAME=repeat.h:INCLUDED_VALUE:int(0) SIGNATURE=int(0) ORDER=1 DISPATCH_TYPE=INLINED
+          BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+            LITERAL CODE=7 TYPE_FULL_NAME=int ORDER=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+    METHOD_REF CODE=entry TYPE_FULL_NAME=entry METHOD_FULL_NAME=entry ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<global> CODE=<global> FULL_NAME=repeat.h:<global> ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=INCLUDED_VALUE CODE=#define INCLUDED_VALUE 7 FULL_NAME=repeat.h:INCLUDED_VALUE:int(0) SIGNATURE=int(0) ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=2
+
+NODES|META_DATA LANGUAGE=NEWC
+NODES|FILE NAME=<includes> ORDER=1
+NODES|FILE NAME=<unknown> ORDER=0
+NODES|FILE NAME=main.c ORDER=0
+NODES|FILE NAME=repeat.h ORDER=0
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<global> FILENAME=<unknown> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<includes>:<global> FILENAME=<includes> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=repeat.h:<global> FILENAME=repeat.h ORDER=1
+NODES|NAMESPACE NAME=<global>
+NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=entry FULL_NAME=entry CODE=entry AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=<global> FULL_NAME=main.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=3
+NODES|TYPE_DECL NAME=<global> FULL_NAME=repeat.h:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=repeat.h:<global> FILENAME=repeat.h ORDER=1
+NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+NODES|TYPE NAME=entry FULL_NAME=entry TYPE_DECL_FULL_NAME=entry
+NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+EDGES|ARGUMENT entry#4 -> entry#5
+EDGES|CALL entry#5 -> repeat.h:INCLUDED_VALUE:int(0)#0
+EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+EDGES|CFG entry#0 -> entry#5
+EDGES|CFG entry#4 -> entry#8
+EDGES|CFG entry#5 -> entry#4
+EDGES|CFG entry#5 -> entry#7
+EDGES|CFG entry#7 -> entry#4
+EDGES|CFG main.c:<global>#0 -> main.c:<global>#11
+EDGES|CFG main.c:<global>#11 -> main.c:<global>#12
+EDGES|CFG repeat.h:<global>#0 -> repeat.h:<global>#2
+EDGES|CFG repeat.h:INCLUDED_VALUE:int(0)#0 -> repeat.h:INCLUDED_VALUE:int(0)#2
+EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+EDGES|CONTAINS D:main.c:<global> -> D:entry
+EDGES|CONTAINS D:main.c:<global> -> main.c:<global>#0
+EDGES|CONTAINS D:main.c:<global> -> repeat.h:INCLUDED_VALUE:int(0)#0
+EDGES|CONTAINS D:repeat.h:<global> -> repeat.h:<global>#0
+EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+EDGES|CONTAINS F:<includes> -> D:ANY
+EDGES|CONTAINS F:<includes> -> D:int
+EDGES|CONTAINS F:<includes> -> D:void
+EDGES|CONTAINS F:main.c -> D:main.c:<global>
+EDGES|CONTAINS F:repeat.h -> D:repeat.h:<global>
+EDGES|CONTAINS entry#0 -> entry#3
+EDGES|CONTAINS entry#0 -> entry#4
+EDGES|CONTAINS entry#0 -> entry#5
+EDGES|CONTAINS entry#0 -> entry#6
+EDGES|CONTAINS entry#0 -> entry#7
+EDGES|CONTAINS main.c:<global>#0 -> entry#0
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#10
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#11
+EDGES|CONTAINS repeat.h:<global>#0 -> repeat.h:<global>#1
+EDGES|CONTAINS repeat.h:INCLUDED_VALUE:int(0)#0 -> repeat.h:INCLUDED_VALUE:int(0)#1
+EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+EDGES|EVAL_TYPE entry#1 -> T:void
+EDGES|EVAL_TYPE entry#2 -> T:void
+EDGES|EVAL_TYPE entry#3 -> T:void
+EDGES|EVAL_TYPE entry#5 -> T:int
+EDGES|EVAL_TYPE entry#6 -> T:ANY
+EDGES|EVAL_TYPE entry#7 -> T:int
+EDGES|EVAL_TYPE entry#8 -> T:int
+EDGES|EVAL_TYPE main.c:<global>#10 -> T:ANY
+EDGES|EVAL_TYPE main.c:<global>#11 -> T:entry
+EDGES|EVAL_TYPE main.c:<global>#12 -> T:ANY
+EDGES|EVAL_TYPE repeat.h:<global>#1 -> T:ANY
+EDGES|EVAL_TYPE repeat.h:<global>#2 -> T:ANY
+EDGES|EVAL_TYPE repeat.h:INCLUDED_VALUE:int(0)#1 -> T:ANY
+EDGES|EVAL_TYPE repeat.h:INCLUDED_VALUE:int(0)#2 -> T:int
+EDGES|PARAMETER_LINK entry#1 -> entry#2
+EDGES|REF NB:<global> -> NS:<global>
+EDGES|REF NB:<includes>:<global> -> NS:<global>
+EDGES|REF NB:main.c:<global> -> NS:<global>
+EDGES|REF NB:repeat.h:<global> -> NS:<global>
+EDGES|REF T:ANY -> D:ANY
+EDGES|REF T:entry -> D:entry
+EDGES|REF T:int -> D:int
+EDGES|REF T:void -> D:void
+EDGES|REF main.c:<global>#11 -> entry#0
+EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+EDGES|SOURCE_FILE D:ANY -> F:<includes>
+EDGES|SOURCE_FILE D:entry -> F:main.c
+EDGES|SOURCE_FILE D:int -> F:<includes>
+EDGES|SOURCE_FILE D:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE D:repeat.h:<global> -> F:repeat.h
+EDGES|SOURCE_FILE D:void -> F:<includes>
+EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
+EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>
+EDGES|SOURCE_FILE NB:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE NB:repeat.h:<global> -> F:repeat.h
+EDGES|SOURCE_FILE entry#0 -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#0 -> F:main.c
+EDGES|SOURCE_FILE repeat.h:<global>#0 -> F:repeat.h
+EDGES|SOURCE_FILE repeat.h:INCLUDED_VALUE:int(0)#0 -> F:main.c
+FLOWS|REACHING_DEF[<RET>] entry#4 -> entry#8
+FLOWS|REACHING_DEF[INCLUDED_VALUE] entry#5 -> entry#4
+FLOWS|REACHING_DEF[INCLUDED_VALUE] entry#5 -> entry#8
+FLOWS|REACHING_DEF[] entry#0 -> entry#1
+FLOWS|REACHING_DEF[] entry#0 -> entry#5
+FLOWS|REACHING_DEF[] entry#0 -> entry#7
+FLOWS|REACHING_DEF[] entry#1 -> entry#2
+FLOWS|REACHING_DEF[] entry#1 -> entry#8
+FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#11

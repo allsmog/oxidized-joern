@@ -1,0 +1,160 @@
+{
+  "cases": [
+    {
+      "case": "duplicate_supplied_macro_local",
+      "group": "new",
+      "originalCpg": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/include-reference-runner-v1/runs/first-complete-six-include-reference-batch/workspace/workspace/duplicate_supplied_macro_local/cpg.bin",
+      "originalWorkingCpg": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/include-reference-runner-v1/runs/first-complete-six-include-reference-batch/workspace/workspace/duplicate_supplied_macro_local/cpg.bin.tmp",
+      "projectMetadata": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/include-reference-runner-v1/runs/first-complete-six-include-reference-batch/workspace/workspace/duplicate_supplied_macro_local/project.json",
+      "cpgSha256": "1ac08ba56c4432872d88956c2992b18866ce48c95bbc82e59df530fe913cd3a6",
+      "reference": {
+        "case": "duplicate_supplied_macro_local",
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/include-reference-runner-v1/runs/first-complete-six-include-reference-batch/expected/duplicate_supplied_macro_local/expected.txt",
+        "kind": "file",
+        "sha256": "f6fbe553c410856221e2a39fcdeb700d4ebfd5e8e79b7c0259a6d30ad42e32ac",
+        "bytes": 19160,
+        "canonicalLinesIncludingSeparators": 342,
+        "nonemptySelectedRecords": 333,
+        "sectionsSeen": [
+          "AST",
+          "EDGES",
+          "FLOWS",
+          "NODES"
+        ],
+        "completeReference": true
+      },
+      "canonicalRunSha256": "d91a5e412fb4d7ba848ff10a357f9d5c77b1407403913ca4bff9c2fe9af7e495",
+      "copiedCpg": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/thirteenth-include-observer-v1/runs/first-complete-six-include-saved-cpg-observation/snapshot/cpg/duplicate_supplied_macro_local/cpg.bin"
+    },
+    {
+      "case": "inactive_body_include",
+      "group": "new",
+      "originalCpg": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/include-reference-runner-v1/runs/first-complete-six-include-reference-batch/workspace/workspace/inactive_body_include/cpg.bin",
+      "originalWorkingCpg": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/include-reference-runner-v1/runs/first-complete-six-include-reference-batch/workspace/workspace/inactive_body_include/cpg.bin.tmp",
+      "projectMetadata": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/include-reference-runner-v1/runs/first-complete-six-include-reference-batch/workspace/workspace/inactive_body_include/project.json",
+      "cpgSha256": "6879757de7418f8ddeffd74bef9939ec8f86145822bebf2b848295d6b8311f85",
+      "reference": {
+        "case": "inactive_body_include",
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/include-reference-runner-v1/runs/first-complete-six-include-reference-batch/expected/inactive_body_include/expected.txt",
+        "kind": "file",
+        "sha256": "dee62aa4096c4c46c16ebb0a91c5906c1f6786a8b5483d6508ad2837a6a80f3e",
+        "bytes": 16102,
+        "canonicalLinesIncludingSeparators": 280,
+        "nonemptySelectedRecords": 273,
+        "sectionsSeen": [
+          "AST",
+          "EDGES",
+          "FLOWS",
+          "NODES"
+        ],
+        "completeReference": true
+      },
+      "canonicalRunSha256": "d91a5e412fb4d7ba848ff10a357f9d5c77b1407403913ca4bff9c2fe9af7e495",
+      "copiedCpg": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/thirteenth-include-observer-v1/runs/first-complete-six-include-saved-cpg-observation/snapshot/cpg/inactive_body_include/cpg.bin"
+    },
+    {
+      "case": "repeated_direct_include",
+      "group": "new",
+      "originalCpg": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/include-reference-runner-v1/runs/first-complete-six-include-reference-batch/workspace/workspace/repeated_direct_include/cpg.bin",
+      "originalWorkingCpg": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/include-reference-runner-v1/runs/first-complete-six-include-reference-batch/workspace/workspace/repeated_direct_include/cpg.bin.tmp",
+      "projectMetadata": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/include-reference-runner-v1/runs/first-complete-six-include-reference-batch/workspace/workspace/repeated_direct_include/project.json",
+      "cpgSha256": "4314b851061900480085e3222c48d476d5a0fc9be159b9d506e2d63cc4fc45da",
+      "reference": {
+        "case": "repeated_direct_include",
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/include-reference-runner-v1/runs/first-complete-six-include-reference-batch/expected/repeated_direct_include/expected.txt",
+        "kind": "file",
+        "sha256": "0a04058fa847b05e1f00fb81c24c2c003ce044cbb26e36952a71a7fb01f54c92",
+        "bytes": 7590,
+        "canonicalLinesIncludingSeparators": 139,
+        "nonemptySelectedRecords": 134,
+        "sectionsSeen": [
+          "AST",
+          "EDGES",
+          "FLOWS",
+          "NODES"
+        ],
+        "completeReference": true
+      },
+      "canonicalRunSha256": "d91a5e412fb4d7ba848ff10a357f9d5c77b1407403913ca4bff9c2fe9af7e495",
+      "copiedCpg": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/thirteenth-include-observer-v1/runs/first-complete-six-include-saved-cpg-observation/snapshot/cpg/repeated_direct_include/cpg.bin"
+    },
+    {
+      "case": "tiny_fixedtables_include",
+      "group": "new",
+      "originalCpg": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/include-reference-runner-v1/runs/first-complete-six-include-reference-batch/workspace/workspace/tiny_fixedtables_include/cpg.bin",
+      "originalWorkingCpg": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/include-reference-runner-v1/runs/first-complete-six-include-reference-batch/workspace/workspace/tiny_fixedtables_include/cpg.bin.tmp",
+      "projectMetadata": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/include-reference-runner-v1/runs/first-complete-six-include-reference-batch/workspace/workspace/tiny_fixedtables_include/project.json",
+      "cpgSha256": "41d02a81c14a8eb94bb65789e2f9eb4f8abf4e0d10192d3b07ca0a8c669dc2ef",
+      "reference": {
+        "case": "tiny_fixedtables_include",
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/include-reference-runner-v1/runs/first-complete-six-include-reference-batch/expected/tiny_fixedtables_include/expected.txt",
+        "kind": "file",
+        "sha256": "fc4a1360d6f10152edb364c346a47ae73d2df2460fe5ef12da2d2e79cbb7dd3f",
+        "bytes": 48334,
+        "canonicalLinesIncludingSeparators": 734,
+        "nonemptySelectedRecords": 726,
+        "sectionsSeen": [
+          "AST",
+          "EDGES",
+          "FLOWS",
+          "NODES"
+        ],
+        "completeReference": true
+      },
+      "canonicalRunSha256": "d91a5e412fb4d7ba848ff10a357f9d5c77b1407403913ca4bff9c2fe9af7e495",
+      "copiedCpg": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/thirteenth-include-observer-v1/runs/first-complete-six-include-saved-cpg-observation/snapshot/cpg/tiny_fixedtables_include/cpg.bin"
+    },
+    {
+      "case": "tiny_fixedtables_inline",
+      "group": "new",
+      "originalCpg": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/include-reference-runner-v1/runs/first-complete-six-include-reference-batch/workspace/workspace/tiny_fixedtables_inline/cpg.bin",
+      "originalWorkingCpg": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/include-reference-runner-v1/runs/first-complete-six-include-reference-batch/workspace/workspace/tiny_fixedtables_inline/cpg.bin.tmp",
+      "projectMetadata": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/include-reference-runner-v1/runs/first-complete-six-include-reference-batch/workspace/workspace/tiny_fixedtables_inline/project.json",
+      "cpgSha256": "cdb5a54d99f1c95540e2cac9f636b0adf3c9a262e964c76eaf8300579f99d8c2",
+      "reference": {
+        "case": "tiny_fixedtables_inline",
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/include-reference-runner-v1/runs/first-complete-six-include-reference-batch/expected/tiny_fixedtables_inline/expected.txt",
+        "kind": "file",
+        "sha256": "6d613c7085ab54541cc1d9fa83494748e33fe70bfc5c541ee39f12aa8046cadd",
+        "bytes": 38652,
+        "canonicalLinesIncludingSeparators": 580,
+        "nonemptySelectedRecords": 573,
+        "sectionsSeen": [
+          "AST",
+          "EDGES",
+          "FLOWS",
+          "NODES"
+        ],
+        "completeReference": true
+      },
+      "canonicalRunSha256": "d91a5e412fb4d7ba848ff10a357f9d5c77b1407403913ca4bff9c2fe9af7e495",
+      "copiedCpg": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/thirteenth-include-observer-v1/runs/first-complete-six-include-saved-cpg-observation/snapshot/cpg/tiny_fixedtables_inline/cpg.bin"
+    },
+    {
+      "case": "unresolved_include_pair",
+      "group": "new",
+      "originalCpg": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/include-reference-runner-v1/runs/first-complete-six-include-reference-batch/workspace/workspace/unresolved_include_pair/cpg.bin",
+      "originalWorkingCpg": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/include-reference-runner-v1/runs/first-complete-six-include-reference-batch/workspace/workspace/unresolved_include_pair/cpg.bin.tmp",
+      "projectMetadata": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/include-reference-runner-v1/runs/first-complete-six-include-reference-batch/workspace/workspace/unresolved_include_pair/project.json",
+      "cpgSha256": "56e10b335f5bf253a73e7b9b796bd092961c501d6ad8932b0ef1a32b4f5f146b",
+      "reference": {
+        "case": "unresolved_include_pair",
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/include-reference-runner-v1/runs/first-complete-six-include-reference-batch/expected/unresolved_include_pair/expected.txt",
+        "kind": "file",
+        "sha256": "aaca7320a42a9432b7ed1880511c209a59f49f875eded120eae4f88781b58390",
+        "bytes": 5148,
+        "canonicalLinesIncludingSeparators": 100,
+        "nonemptySelectedRecords": 97,
+        "sectionsSeen": [
+          "AST",
+          "EDGES",
+          "FLOWS",
+          "NODES"
+        ],
+        "completeReference": true
+      },
+      "canonicalRunSha256": "d91a5e412fb4d7ba848ff10a357f9d5c77b1407403913ca4bff9c2fe9af7e495",
+      "copiedCpg": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/thirteenth-include-observer-v1/runs/first-complete-six-include-saved-cpg-observation/snapshot/cpg/unresolved_include_pair/cpg.bin"
+    }
+  ]
+}

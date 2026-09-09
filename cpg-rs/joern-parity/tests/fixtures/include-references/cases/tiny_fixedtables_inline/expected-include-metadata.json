@@ -1,0 +1,9 @@
+{
+  "absenceBridge": "Every observed Import/Dependency property is retained. Omitted properties remain omitted; ORDER requires explicit Absent or Present, never Unknown.",
+  "edgePayloadBoundary": "All observed incident payloads are null; Rust payload storage is unsupported. The gate compares every incident edge kind, endpoint and occurrence, not payload storage.",
+  "globalOrderBoundary": "The existing owner global TYPE_DECL dense ORDER value is compared separately. No claim is made that its Joern ORDER presence is stored.",
+  "integerBridge": "Exact integer values: observed Java Integer is checked in i32 domain; nonnegative LINE_NUMBER is represented by Rust u32. Java class names remain only in the untouched raw reference.",
+  "ownerGlobalTypeDeclOrders": [],
+  "pairs": [],
+  "schemaVersion": 1
+}

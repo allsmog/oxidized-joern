@@ -1,0 +1,3532 @@
+{
+  "cases": {
+    "duplicate_supplied_macro_local": {
+      "canonical": {
+        "addedNonempty": 0,
+        "removedNonempty": 0,
+        "completeBytesEqual": true
+      },
+      "counts": {
+        "joernNodes": 91,
+        "joernEdges": 350,
+        "acceptedRustNodes": 87,
+        "acceptedRustEdges": 276,
+        "imports": 2,
+        "dependencies": 2
+      },
+      "completeIncludeNodes": [
+        {
+          "id": "51539607552",
+          "label": "DEPENDENCY",
+          "properties": {
+            "DEPENDENCY_GROUP_ID": {
+              "kind": "string",
+              "value": "api.h"
+            },
+            "NAME": {
+              "kind": "string",
+              "value": "api.h"
+            },
+            "VERSION": {
+              "kind": "string",
+              "value": "include"
+            }
+          }
+        },
+        {
+          "id": "51539607553",
+          "label": "DEPENDENCY",
+          "properties": {
+            "DEPENDENCY_GROUP_ID": {
+              "kind": "string",
+              "value": "api.h"
+            },
+            "NAME": {
+              "kind": "string",
+              "value": "api.h"
+            },
+            "VERSION": {
+              "kind": "string",
+              "value": "include"
+            }
+          }
+        },
+        {
+          "id": "73014444032",
+          "label": "IMPORT",
+          "properties": {
+            "CODE": {
+              "kind": "string",
+              "value": "#include \"api.h\""
+            },
+            "COLUMN_NUMBER": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "1"
+            },
+            "IMPORTED_AS": {
+              "kind": "string",
+              "value": "api.h"
+            },
+            "IMPORTED_ENTITY": {
+              "kind": "string",
+              "value": "api.h"
+            },
+            "LINE_NUMBER": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "1"
+            },
+            "ORDER": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "1"
+            }
+          }
+        },
+        {
+          "id": "73014444033",
+          "label": "IMPORT",
+          "properties": {
+            "CODE": {
+              "kind": "string",
+              "value": "#include \"api.h\""
+            },
+            "COLUMN_NUMBER": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "1"
+            },
+            "IMPORTED_AS": {
+              "kind": "string",
+              "value": "api.h"
+            },
+            "IMPORTED_ENTITY": {
+              "kind": "string",
+              "value": "api.h"
+            },
+            "LINE_NUMBER": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "1"
+            },
+            "ORDER": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "1"
+            }
+          }
+        }
+      ],
+      "allIncidentEdges": [
+        {
+          "source": "73014444032",
+          "destination": "51539607552",
+          "label": "IMPORTS",
+          "property": {
+            "kind": "null"
+          }
+        },
+        {
+          "source": "73014444033",
+          "destination": "51539607553",
+          "label": "IMPORTS",
+          "property": {
+            "kind": "null"
+          }
+        },
+        {
+          "source": "137438953473",
+          "destination": "73014444032",
+          "label": "AST",
+          "property": {
+            "kind": "null"
+          }
+        },
+        {
+          "source": "137438953474",
+          "destination": "73014444033",
+          "label": "AST",
+          "property": {
+            "kind": "null"
+          }
+        }
+      ],
+      "allIncidentEndpoints": [
+        {
+          "id": "137438953473",
+          "label": "NAMESPACE_BLOCK",
+          "properties": {
+            "FILENAME": {
+              "kind": "string",
+              "value": "a.c"
+            },
+            "FULL_NAME": {
+              "kind": "string",
+              "value": "a.c:<global>"
+            },
+            "NAME": {
+              "kind": "string",
+              "value": "<global>"
+            },
+            "ORDER": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "1"
+            }
+          }
+        },
+        {
+          "id": "137438953474",
+          "label": "NAMESPACE_BLOCK",
+          "properties": {
+            "FILENAME": {
+              "kind": "string",
+              "value": "b.c"
+            },
+            "FULL_NAME": {
+              "kind": "string",
+              "value": "b.c:<global>"
+            },
+            "NAME": {
+              "kind": "string",
+              "value": "<global>"
+            },
+            "ORDER": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "1"
+            }
+          }
+        },
+        {
+          "id": "51539607552",
+          "label": "DEPENDENCY",
+          "properties": {
+            "DEPENDENCY_GROUP_ID": {
+              "kind": "string",
+              "value": "api.h"
+            },
+            "NAME": {
+              "kind": "string",
+              "value": "api.h"
+            },
+            "VERSION": {
+              "kind": "string",
+              "value": "include"
+            }
+          }
+        },
+        {
+          "id": "51539607553",
+          "label": "DEPENDENCY",
+          "properties": {
+            "DEPENDENCY_GROUP_ID": {
+              "kind": "string",
+              "value": "api.h"
+            },
+            "NAME": {
+              "kind": "string",
+              "value": "api.h"
+            },
+            "VERSION": {
+              "kind": "string",
+              "value": "include"
+            }
+          }
+        },
+        {
+          "id": "73014444032",
+          "label": "IMPORT",
+          "properties": {
+            "CODE": {
+              "kind": "string",
+              "value": "#include \"api.h\""
+            },
+            "COLUMN_NUMBER": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "1"
+            },
+            "IMPORTED_AS": {
+              "kind": "string",
+              "value": "api.h"
+            },
+            "IMPORTED_ENTITY": {
+              "kind": "string",
+              "value": "api.h"
+            },
+            "LINE_NUMBER": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "1"
+            },
+            "ORDER": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "1"
+            }
+          }
+        },
+        {
+          "id": "73014444033",
+          "label": "IMPORT",
+          "properties": {
+            "CODE": {
+              "kind": "string",
+              "value": "#include \"api.h\""
+            },
+            "COLUMN_NUMBER": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "1"
+            },
+            "IMPORTED_AS": {
+              "kind": "string",
+              "value": "api.h"
+            },
+            "IMPORTED_ENTITY": {
+              "kind": "string",
+              "value": "api.h"
+            },
+            "LINE_NUMBER": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "1"
+            },
+            "ORDER": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "1"
+            }
+          }
+        }
+      ],
+      "occurrences": [
+        {
+          "import": {
+            "id": "73014444032",
+            "label": "IMPORT",
+            "properties": {
+              "CODE": {
+                "kind": "string",
+                "value": "#include \"api.h\""
+              },
+              "COLUMN_NUMBER": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "1"
+              },
+              "IMPORTED_AS": {
+                "kind": "string",
+                "value": "api.h"
+              },
+              "IMPORTED_ENTITY": {
+                "kind": "string",
+                "value": "api.h"
+              },
+              "LINE_NUMBER": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "1"
+              },
+              "ORDER": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "1"
+              }
+            }
+          },
+          "astParents": [
+            {
+              "edge": {
+                "source": "137438953473",
+                "destination": "73014444032",
+                "label": "AST",
+                "property": {
+                  "kind": "null"
+                }
+              },
+              "node": {
+                "id": "137438953473",
+                "label": "NAMESPACE_BLOCK",
+                "properties": {
+                  "FILENAME": {
+                    "kind": "string",
+                    "value": "a.c"
+                  },
+                  "FULL_NAME": {
+                    "kind": "string",
+                    "value": "a.c:<global>"
+                  },
+                  "NAME": {
+                    "kind": "string",
+                    "value": "<global>"
+                  },
+                  "ORDER": {
+                    "kind": "number",
+                    "class": "java.lang.Integer",
+                    "value": "1"
+                  }
+                }
+              }
+            }
+          ],
+          "dependencies": [
+            {
+              "edge": {
+                "source": "73014444032",
+                "destination": "51539607552",
+                "label": "IMPORTS",
+                "property": {
+                  "kind": "null"
+                }
+              },
+              "node": {
+                "id": "51539607552",
+                "label": "DEPENDENCY",
+                "properties": {
+                  "DEPENDENCY_GROUP_ID": {
+                    "kind": "string",
+                    "value": "api.h"
+                  },
+                  "NAME": {
+                    "kind": "string",
+                    "value": "api.h"
+                  },
+                  "VERSION": {
+                    "kind": "string",
+                    "value": "include"
+                  }
+                }
+              }
+            }
+          ],
+          "parentCompleteAstChildren": [
+            {
+              "edge": {
+                "source": "137438953473",
+                "destination": "167503724546",
+                "label": "AST",
+                "property": {
+                  "kind": "null"
+                }
+              },
+              "node": {
+                "id": "167503724546",
+                "label": "TYPE_DECL",
+                "properties": {
+                  "AST_PARENT_FULL_NAME": {
+                    "kind": "string",
+                    "value": "a.c:<global>"
+                  },
+                  "AST_PARENT_TYPE": {
+                    "kind": "string",
+                    "value": "NAMESPACE_BLOCK"
+                  },
+                  "CODE": {
+                    "kind": "string",
+                    "value": "<global>"
+                  },
+                  "COLUMN_NUMBER": {
+                    "kind": "number",
+                    "class": "java.lang.Integer",
+                    "value": "1"
+                  },
+                  "FILENAME": {
+                    "kind": "string",
+                    "value": "a.c"
+                  },
+                  "FULL_NAME": {
+                    "kind": "string",
+                    "value": "a.c:<global>"
+                  },
+                  "LINE_NUMBER": {
+                    "kind": "number",
+                    "class": "java.lang.Integer",
+                    "value": "1"
+                  },
+                  "NAME": {
+                    "kind": "string",
+                    "value": "<global>"
+                  },
+                  "ORDER": {
+                    "kind": "number",
+                    "class": "java.lang.Integer",
+                    "value": "2"
+                  }
+                }
+              }
+            },
+            {
+              "edge": {
+                "source": "137438953473",
+                "destination": "73014444032",
+                "label": "AST",
+                "property": {
+                  "kind": "null"
+                }
+              },
+              "node": {
+                "id": "73014444032",
+                "label": "IMPORT",
+                "properties": {
+                  "CODE": {
+                    "kind": "string",
+                    "value": "#include \"api.h\""
+                  },
+                  "COLUMN_NUMBER": {
+                    "kind": "number",
+                    "class": "java.lang.Integer",
+                    "value": "1"
+                  },
+                  "IMPORTED_AS": {
+                    "kind": "string",
+                    "value": "api.h"
+                  },
+                  "IMPORTED_ENTITY": {
+                    "kind": "string",
+                    "value": "api.h"
+                  },
+                  "LINE_NUMBER": {
+                    "kind": "number",
+                    "class": "java.lang.Integer",
+                    "value": "1"
+                  },
+                  "ORDER": {
+                    "kind": "number",
+                    "class": "java.lang.Integer",
+                    "value": "1"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "import": {
+            "id": "73014444033",
+            "label": "IMPORT",
+            "properties": {
+              "CODE": {
+                "kind": "string",
+                "value": "#include \"api.h\""
+              },
+              "COLUMN_NUMBER": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "1"
+              },
+              "IMPORTED_AS": {
+                "kind": "string",
+                "value": "api.h"
+              },
+              "IMPORTED_ENTITY": {
+                "kind": "string",
+                "value": "api.h"
+              },
+              "LINE_NUMBER": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "1"
+              },
+              "ORDER": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "1"
+              }
+            }
+          },
+          "astParents": [
+            {
+              "edge": {
+                "source": "137438953474",
+                "destination": "73014444033",
+                "label": "AST",
+                "property": {
+                  "kind": "null"
+                }
+              },
+              "node": {
+                "id": "137438953474",
+                "label": "NAMESPACE_BLOCK",
+                "properties": {
+                  "FILENAME": {
+                    "kind": "string",
+                    "value": "b.c"
+                  },
+                  "FULL_NAME": {
+                    "kind": "string",
+                    "value": "b.c:<global>"
+                  },
+                  "NAME": {
+                    "kind": "string",
+                    "value": "<global>"
+                  },
+                  "ORDER": {
+                    "kind": "number",
+                    "class": "java.lang.Integer",
+                    "value": "1"
+                  }
+                }
+              }
+            }
+          ],
+          "dependencies": [
+            {
+              "edge": {
+                "source": "73014444033",
+                "destination": "51539607553",
+                "label": "IMPORTS",
+                "property": {
+                  "kind": "null"
+                }
+              },
+              "node": {
+                "id": "51539607553",
+                "label": "DEPENDENCY",
+                "properties": {
+                  "DEPENDENCY_GROUP_ID": {
+                    "kind": "string",
+                    "value": "api.h"
+                  },
+                  "NAME": {
+                    "kind": "string",
+                    "value": "api.h"
+                  },
+                  "VERSION": {
+                    "kind": "string",
+                    "value": "include"
+                  }
+                }
+              }
+            }
+          ],
+          "parentCompleteAstChildren": [
+            {
+              "edge": {
+                "source": "137438953474",
+                "destination": "167503724549",
+                "label": "AST",
+                "property": {
+                  "kind": "null"
+                }
+              },
+              "node": {
+                "id": "167503724549",
+                "label": "TYPE_DECL",
+                "properties": {
+                  "AST_PARENT_FULL_NAME": {
+                    "kind": "string",
+                    "value": "b.c:<global>"
+                  },
+                  "AST_PARENT_TYPE": {
+                    "kind": "string",
+                    "value": "NAMESPACE_BLOCK"
+                  },
+                  "CODE": {
+                    "kind": "string",
+                    "value": "<global>"
+                  },
+                  "COLUMN_NUMBER": {
+                    "kind": "number",
+                    "class": "java.lang.Integer",
+                    "value": "1"
+                  },
+                  "FILENAME": {
+                    "kind": "string",
+                    "value": "b.c"
+                  },
+                  "FULL_NAME": {
+                    "kind": "string",
+                    "value": "b.c:<global>"
+                  },
+                  "LINE_NUMBER": {
+                    "kind": "number",
+                    "class": "java.lang.Integer",
+                    "value": "1"
+                  },
+                  "NAME": {
+                    "kind": "string",
+                    "value": "<global>"
+                  },
+                  "ORDER": {
+                    "kind": "number",
+                    "class": "java.lang.Integer",
+                    "value": "2"
+                  }
+                }
+              }
+            },
+            {
+              "edge": {
+                "source": "137438953474",
+                "destination": "73014444033",
+                "label": "AST",
+                "property": {
+                  "kind": "null"
+                }
+              },
+              "node": {
+                "id": "73014444033",
+                "label": "IMPORT",
+                "properties": {
+                  "CODE": {
+                    "kind": "string",
+                    "value": "#include \"api.h\""
+                  },
+                  "COLUMN_NUMBER": {
+                    "kind": "number",
+                    "class": "java.lang.Integer",
+                    "value": "1"
+                  },
+                  "IMPORTED_AS": {
+                    "kind": "string",
+                    "value": "api.h"
+                  },
+                  "IMPORTED_ENTITY": {
+                    "kind": "string",
+                    "value": "api.h"
+                  },
+                  "LINE_NUMBER": {
+                    "kind": "number",
+                    "class": "java.lang.Integer",
+                    "value": "1"
+                  },
+                  "ORDER": {
+                    "kind": "number",
+                    "class": "java.lang.Integer",
+                    "value": "1"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "acceptedRustIncludeNodes": [],
+      "sourceFiles": {
+        "duplicate_supplied_macro_local/a.c": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/include-reference-runner-v1/runs/first-complete-six-include-reference-batch/snapshot/input/duplicate_supplied_macro_local/a.c",
+          "sha256": "1451c2a021da1bec7b92bea600133bc4c30a4666c184ce9a64006669035e207e",
+          "bytes": 112
+        },
+        "duplicate_supplied_macro_local/api.h": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/include-reference-runner-v1/runs/first-complete-six-include-reference-batch/snapshot/input/duplicate_supplied_macro_local/api.h",
+          "sha256": "1204017a881a23dd38815832b040f76d3b37ee3355e4f2c1ead9d3e3a4b17db1",
+          "bytes": 21
+        },
+        "duplicate_supplied_macro_local/b.c": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/include-reference-runner-v1/runs/first-complete-six-include-reference-batch/snapshot/input/duplicate_supplied_macro_local/b.c",
+          "sha256": "df59ac123d32a8c86f1161077f35046e09b2862fdc48b0ce7d66cb6181713d64",
+          "bytes": 116
+        }
+      }
+    },
+    "inactive_body_include": {
+      "canonical": {
+        "addedNonempty": 0,
+        "removedNonempty": 0,
+        "completeBytesEqual": true
+      },
+      "counts": {
+        "joernNodes": 77,
+        "joernEdges": 288,
+        "acceptedRustNodes": 73,
+        "acceptedRustEdges": 228,
+        "imports": 2,
+        "dependencies": 2
+      },
+      "completeIncludeNodes": [
+        {
+          "id": "51539607552",
+          "label": "DEPENDENCY",
+          "properties": {
+            "DEPENDENCY_GROUP_ID": {
+              "kind": "string",
+              "value": "inactive.h"
+            },
+            "NAME": {
+              "kind": "string",
+              "value": "inactive.h"
+            },
+            "VERSION": {
+              "kind": "string",
+              "value": "include"
+            }
+          }
+        },
+        {
+          "id": "51539607553",
+          "label": "DEPENDENCY",
+          "properties": {
+            "DEPENDENCY_GROUP_ID": {
+              "kind": "string",
+              "value": "inactive.h"
+            },
+            "NAME": {
+              "kind": "string",
+              "value": "inactive.h"
+            },
+            "VERSION": {
+              "kind": "string",
+              "value": "include"
+            }
+          }
+        },
+        {
+          "id": "73014444032",
+          "label": "IMPORT",
+          "properties": {
+            "CODE": {
+              "kind": "string",
+              "value": "#include \"inactive.h\""
+            },
+            "COLUMN_NUMBER": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "1"
+            },
+            "IMPORTED_AS": {
+              "kind": "string",
+              "value": "inactive.h"
+            },
+            "IMPORTED_ENTITY": {
+              "kind": "string",
+              "value": "inactive.h"
+            },
+            "LINE_NUMBER": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "3"
+            },
+            "ORDER": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "1"
+            }
+          }
+        },
+        {
+          "id": "73014444033",
+          "label": "IMPORT",
+          "properties": {
+            "CODE": {
+              "kind": "string",
+              "value": "#include \"inactive.h\""
+            },
+            "COLUMN_NUMBER": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "1"
+            },
+            "IMPORTED_AS": {
+              "kind": "string",
+              "value": "inactive.h"
+            },
+            "IMPORTED_ENTITY": {
+              "kind": "string",
+              "value": "inactive.h"
+            },
+            "LINE_NUMBER": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "16"
+            },
+            "ORDER": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "2"
+            }
+          }
+        }
+      ],
+      "allIncidentEdges": [
+        {
+          "source": "73014444032",
+          "destination": "51539607552",
+          "label": "IMPORTS",
+          "property": {
+            "kind": "null"
+          }
+        },
+        {
+          "source": "73014444033",
+          "destination": "51539607553",
+          "label": "IMPORTS",
+          "property": {
+            "kind": "null"
+          }
+        },
+        {
+          "source": "137438953473",
+          "destination": "73014444032",
+          "label": "AST",
+          "property": {
+            "kind": "null"
+          }
+        },
+        {
+          "source": "137438953473",
+          "destination": "73014444033",
+          "label": "AST",
+          "property": {
+            "kind": "null"
+          }
+        }
+      ],
+      "allIncidentEndpoints": [
+        {
+          "id": "137438953473",
+          "label": "NAMESPACE_BLOCK",
+          "properties": {
+            "FILENAME": {
+              "kind": "string",
+              "value": "main.c"
+            },
+            "FULL_NAME": {
+              "kind": "string",
+              "value": "main.c:<global>"
+            },
+            "NAME": {
+              "kind": "string",
+              "value": "<global>"
+            },
+            "ORDER": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "1"
+            }
+          }
+        },
+        {
+          "id": "51539607552",
+          "label": "DEPENDENCY",
+          "properties": {
+            "DEPENDENCY_GROUP_ID": {
+              "kind": "string",
+              "value": "inactive.h"
+            },
+            "NAME": {
+              "kind": "string",
+              "value": "inactive.h"
+            },
+            "VERSION": {
+              "kind": "string",
+              "value": "include"
+            }
+          }
+        },
+        {
+          "id": "51539607553",
+          "label": "DEPENDENCY",
+          "properties": {
+            "DEPENDENCY_GROUP_ID": {
+              "kind": "string",
+              "value": "inactive.h"
+            },
+            "NAME": {
+              "kind": "string",
+              "value": "inactive.h"
+            },
+            "VERSION": {
+              "kind": "string",
+              "value": "include"
+            }
+          }
+        },
+        {
+          "id": "73014444032",
+          "label": "IMPORT",
+          "properties": {
+            "CODE": {
+              "kind": "string",
+              "value": "#include \"inactive.h\""
+            },
+            "COLUMN_NUMBER": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "1"
+            },
+            "IMPORTED_AS": {
+              "kind": "string",
+              "value": "inactive.h"
+            },
+            "IMPORTED_ENTITY": {
+              "kind": "string",
+              "value": "inactive.h"
+            },
+            "LINE_NUMBER": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "3"
+            },
+            "ORDER": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "1"
+            }
+          }
+        },
+        {
+          "id": "73014444033",
+          "label": "IMPORT",
+          "properties": {
+            "CODE": {
+              "kind": "string",
+              "value": "#include \"inactive.h\""
+            },
+            "COLUMN_NUMBER": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "1"
+            },
+            "IMPORTED_AS": {
+              "kind": "string",
+              "value": "inactive.h"
+            },
+            "IMPORTED_ENTITY": {
+              "kind": "string",
+              "value": "inactive.h"
+            },
+            "LINE_NUMBER": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "16"
+            },
+            "ORDER": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "2"
+            }
+          }
+        }
+      ],
+      "occurrences": [
+        {
+          "import": {
+            "id": "73014444032",
+            "label": "IMPORT",
+            "properties": {
+              "CODE": {
+                "kind": "string",
+                "value": "#include \"inactive.h\""
+              },
+              "COLUMN_NUMBER": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "1"
+              },
+              "IMPORTED_AS": {
+                "kind": "string",
+                "value": "inactive.h"
+              },
+              "IMPORTED_ENTITY": {
+                "kind": "string",
+                "value": "inactive.h"
+              },
+              "LINE_NUMBER": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "3"
+              },
+              "ORDER": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "1"
+              }
+            }
+          },
+          "astParents": [
+            {
+              "edge": {
+                "source": "137438953473",
+                "destination": "73014444032",
+                "label": "AST",
+                "property": {
+                  "kind": "null"
+                }
+              },
+              "node": {
+                "id": "137438953473",
+                "label": "NAMESPACE_BLOCK",
+                "properties": {
+                  "FILENAME": {
+                    "kind": "string",
+                    "value": "main.c"
+                  },
+                  "FULL_NAME": {
+                    "kind": "string",
+                    "value": "main.c:<global>"
+                  },
+                  "NAME": {
+                    "kind": "string",
+                    "value": "<global>"
+                  },
+                  "ORDER": {
+                    "kind": "number",
+                    "class": "java.lang.Integer",
+                    "value": "1"
+                  }
+                }
+              }
+            }
+          ],
+          "dependencies": [
+            {
+              "edge": {
+                "source": "73014444032",
+                "destination": "51539607552",
+                "label": "IMPORTS",
+                "property": {
+                  "kind": "null"
+                }
+              },
+              "node": {
+                "id": "51539607552",
+                "label": "DEPENDENCY",
+                "properties": {
+                  "DEPENDENCY_GROUP_ID": {
+                    "kind": "string",
+                    "value": "inactive.h"
+                  },
+                  "NAME": {
+                    "kind": "string",
+                    "value": "inactive.h"
+                  },
+                  "VERSION": {
+                    "kind": "string",
+                    "value": "include"
+                  }
+                }
+              }
+            }
+          ],
+          "parentCompleteAstChildren": [
+            {
+              "edge": {
+                "source": "137438953473",
+                "destination": "167503724547",
+                "label": "AST",
+                "property": {
+                  "kind": "null"
+                }
+              },
+              "node": {
+                "id": "167503724547",
+                "label": "TYPE_DECL",
+                "properties": {
+                  "AST_PARENT_FULL_NAME": {
+                    "kind": "string",
+                    "value": "main.c:<global>"
+                  },
+                  "AST_PARENT_TYPE": {
+                    "kind": "string",
+                    "value": "NAMESPACE_BLOCK"
+                  },
+                  "CODE": {
+                    "kind": "string",
+                    "value": "<global>"
+                  },
+                  "COLUMN_NUMBER": {
+                    "kind": "number",
+                    "class": "java.lang.Integer",
+                    "value": "1"
+                  },
+                  "FILENAME": {
+                    "kind": "string",
+                    "value": "main.c"
+                  },
+                  "FULL_NAME": {
+                    "kind": "string",
+                    "value": "main.c:<global>"
+                  },
+                  "LINE_NUMBER": {
+                    "kind": "number",
+                    "class": "java.lang.Integer",
+                    "value": "1"
+                  },
+                  "NAME": {
+                    "kind": "string",
+                    "value": "<global>"
+                  },
+                  "ORDER": {
+                    "kind": "number",
+                    "class": "java.lang.Integer",
+                    "value": "3"
+                  }
+                }
+              }
+            },
+            {
+              "edge": {
+                "source": "137438953473",
+                "destination": "73014444032",
+                "label": "AST",
+                "property": {
+                  "kind": "null"
+                }
+              },
+              "node": {
+                "id": "73014444032",
+                "label": "IMPORT",
+                "properties": {
+                  "CODE": {
+                    "kind": "string",
+                    "value": "#include \"inactive.h\""
+                  },
+                  "COLUMN_NUMBER": {
+                    "kind": "number",
+                    "class": "java.lang.Integer",
+                    "value": "1"
+                  },
+                  "IMPORTED_AS": {
+                    "kind": "string",
+                    "value": "inactive.h"
+                  },
+                  "IMPORTED_ENTITY": {
+                    "kind": "string",
+                    "value": "inactive.h"
+                  },
+                  "LINE_NUMBER": {
+                    "kind": "number",
+                    "class": "java.lang.Integer",
+                    "value": "3"
+                  },
+                  "ORDER": {
+                    "kind": "number",
+                    "class": "java.lang.Integer",
+                    "value": "1"
+                  }
+                }
+              }
+            },
+            {
+              "edge": {
+                "source": "137438953473",
+                "destination": "73014444033",
+                "label": "AST",
+                "property": {
+                  "kind": "null"
+                }
+              },
+              "node": {
+                "id": "73014444033",
+                "label": "IMPORT",
+                "properties": {
+                  "CODE": {
+                    "kind": "string",
+                    "value": "#include \"inactive.h\""
+                  },
+                  "COLUMN_NUMBER": {
+                    "kind": "number",
+                    "class": "java.lang.Integer",
+                    "value": "1"
+                  },
+                  "IMPORTED_AS": {
+                    "kind": "string",
+                    "value": "inactive.h"
+                  },
+                  "IMPORTED_ENTITY": {
+                    "kind": "string",
+                    "value": "inactive.h"
+                  },
+                  "LINE_NUMBER": {
+                    "kind": "number",
+                    "class": "java.lang.Integer",
+                    "value": "16"
+                  },
+                  "ORDER": {
+                    "kind": "number",
+                    "class": "java.lang.Integer",
+                    "value": "2"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "import": {
+            "id": "73014444033",
+            "label": "IMPORT",
+            "properties": {
+              "CODE": {
+                "kind": "string",
+                "value": "#include \"inactive.h\""
+              },
+              "COLUMN_NUMBER": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "1"
+              },
+              "IMPORTED_AS": {
+                "kind": "string",
+                "value": "inactive.h"
+              },
+              "IMPORTED_ENTITY": {
+                "kind": "string",
+                "value": "inactive.h"
+              },
+              "LINE_NUMBER": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "16"
+              },
+              "ORDER": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "2"
+              }
+            }
+          },
+          "astParents": [
+            {
+              "edge": {
+                "source": "137438953473",
+                "destination": "73014444033",
+                "label": "AST",
+                "property": {
+                  "kind": "null"
+                }
+              },
+              "node": {
+                "id": "137438953473",
+                "label": "NAMESPACE_BLOCK",
+                "properties": {
+                  "FILENAME": {
+                    "kind": "string",
+                    "value": "main.c"
+                  },
+                  "FULL_NAME": {
+                    "kind": "string",
+                    "value": "main.c:<global>"
+                  },
+                  "NAME": {
+                    "kind": "string",
+                    "value": "<global>"
+                  },
+                  "ORDER": {
+                    "kind": "number",
+                    "class": "java.lang.Integer",
+                    "value": "1"
+                  }
+                }
+              }
+            }
+          ],
+          "dependencies": [
+            {
+              "edge": {
+                "source": "73014444033",
+                "destination": "51539607553",
+                "label": "IMPORTS",
+                "property": {
+                  "kind": "null"
+                }
+              },
+              "node": {
+                "id": "51539607553",
+                "label": "DEPENDENCY",
+                "properties": {
+                  "DEPENDENCY_GROUP_ID": {
+                    "kind": "string",
+                    "value": "inactive.h"
+                  },
+                  "NAME": {
+                    "kind": "string",
+                    "value": "inactive.h"
+                  },
+                  "VERSION": {
+                    "kind": "string",
+                    "value": "include"
+                  }
+                }
+              }
+            }
+          ],
+          "parentCompleteAstChildren": [
+            {
+              "edge": {
+                "source": "137438953473",
+                "destination": "167503724547",
+                "label": "AST",
+                "property": {
+                  "kind": "null"
+                }
+              },
+              "node": {
+                "id": "167503724547",
+                "label": "TYPE_DECL",
+                "properties": {
+                  "AST_PARENT_FULL_NAME": {
+                    "kind": "string",
+                    "value": "main.c:<global>"
+                  },
+                  "AST_PARENT_TYPE": {
+                    "kind": "string",
+                    "value": "NAMESPACE_BLOCK"
+                  },
+                  "CODE": {
+                    "kind": "string",
+                    "value": "<global>"
+                  },
+                  "COLUMN_NUMBER": {
+                    "kind": "number",
+                    "class": "java.lang.Integer",
+                    "value": "1"
+                  },
+                  "FILENAME": {
+                    "kind": "string",
+                    "value": "main.c"
+                  },
+                  "FULL_NAME": {
+                    "kind": "string",
+                    "value": "main.c:<global>"
+                  },
+                  "LINE_NUMBER": {
+                    "kind": "number",
+                    "class": "java.lang.Integer",
+                    "value": "1"
+                  },
+                  "NAME": {
+                    "kind": "string",
+                    "value": "<global>"
+                  },
+                  "ORDER": {
+                    "kind": "number",
+                    "class": "java.lang.Integer",
+                    "value": "3"
+                  }
+                }
+              }
+            },
+            {
+              "edge": {
+                "source": "137438953473",
+                "destination": "73014444032",
+                "label": "AST",
+                "property": {
+                  "kind": "null"
+                }
+              },
+              "node": {
+                "id": "73014444032",
+                "label": "IMPORT",
+                "properties": {
+                  "CODE": {
+                    "kind": "string",
+                    "value": "#include \"inactive.h\""
+                  },
+                  "COLUMN_NUMBER": {
+                    "kind": "number",
+                    "class": "java.lang.Integer",
+                    "value": "1"
+                  },
+                  "IMPORTED_AS": {
+                    "kind": "string",
+                    "value": "inactive.h"
+                  },
+                  "IMPORTED_ENTITY": {
+                    "kind": "string",
+                    "value": "inactive.h"
+                  },
+                  "LINE_NUMBER": {
+                    "kind": "number",
+                    "class": "java.lang.Integer",
+                    "value": "3"
+                  },
+                  "ORDER": {
+                    "kind": "number",
+                    "class": "java.lang.Integer",
+                    "value": "1"
+                  }
+                }
+              }
+            },
+            {
+              "edge": {
+                "source": "137438953473",
+                "destination": "73014444033",
+                "label": "AST",
+                "property": {
+                  "kind": "null"
+                }
+              },
+              "node": {
+                "id": "73014444033",
+                "label": "IMPORT",
+                "properties": {
+                  "CODE": {
+                    "kind": "string",
+                    "value": "#include \"inactive.h\""
+                  },
+                  "COLUMN_NUMBER": {
+                    "kind": "number",
+                    "class": "java.lang.Integer",
+                    "value": "1"
+                  },
+                  "IMPORTED_AS": {
+                    "kind": "string",
+                    "value": "inactive.h"
+                  },
+                  "IMPORTED_ENTITY": {
+                    "kind": "string",
+                    "value": "inactive.h"
+                  },
+                  "LINE_NUMBER": {
+                    "kind": "number",
+                    "class": "java.lang.Integer",
+                    "value": "16"
+                  },
+                  "ORDER": {
+                    "kind": "number",
+                    "class": "java.lang.Integer",
+                    "value": "2"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "acceptedRustIncludeNodes": [],
+      "sourceFiles": {
+        "inactive_body_include/inactive.h": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/include-reference-runner-v1/runs/first-complete-six-include-reference-batch/snapshot/input/inactive_body_include/inactive.h",
+          "sha256": "e6be797d4b0e670eb494b4dd9050eb1042f56b832f8218b2a8905b2ab1ac5d7d",
+          "bytes": 32
+        },
+        "inactive_body_include/main.c": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/include-reference-runner-v1/runs/first-complete-six-include-reference-batch/snapshot/input/inactive_body_include/main.c",
+          "sha256": "6f9fc5b3121682bbce24044f2bedfc75774968c616951955ea4f0c0bb9ba76a6",
+          "bytes": 302
+        }
+      }
+    },
+    "repeated_direct_include": {
+      "canonical": {
+        "addedNonempty": 0,
+        "removedNonempty": 0,
+        "completeBytesEqual": true
+      },
+      "counts": {
+        "joernNodes": 48,
+        "joernEdges": 142,
+        "acceptedRustNodes": 43,
+        "acceptedRustEdges": 103,
+        "imports": 2,
+        "dependencies": 2
+      },
+      "completeIncludeNodes": [
+        {
+          "id": "51539607552",
+          "label": "DEPENDENCY",
+          "properties": {
+            "DEPENDENCY_GROUP_ID": {
+              "kind": "string",
+              "value": "repeat.h"
+            },
+            "NAME": {
+              "kind": "string",
+              "value": "repeat.h"
+            },
+            "VERSION": {
+              "kind": "string",
+              "value": "include"
+            }
+          }
+        },
+        {
+          "id": "51539607553",
+          "label": "DEPENDENCY",
+          "properties": {
+            "DEPENDENCY_GROUP_ID": {
+              "kind": "string",
+              "value": "repeat.h"
+            },
+            "NAME": {
+              "kind": "string",
+              "value": "repeat.h"
+            },
+            "VERSION": {
+              "kind": "string",
+              "value": "include"
+            }
+          }
+        },
+        {
+          "id": "73014444032",
+          "label": "IMPORT",
+          "properties": {
+            "CODE": {
+              "kind": "string",
+              "value": "#include \"repeat.h\""
+            },
+            "COLUMN_NUMBER": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "1"
+            },
+            "IMPORTED_AS": {
+              "kind": "string",
+              "value": "repeat.h"
+            },
+            "IMPORTED_ENTITY": {
+              "kind": "string",
+              "value": "repeat.h"
+            },
+            "LINE_NUMBER": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "1"
+            },
+            "ORDER": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "1"
+            }
+          }
+        },
+        {
+          "id": "73014444033",
+          "label": "IMPORT",
+          "properties": {
+            "CODE": {
+              "kind": "string",
+              "value": "#include \"repeat.h\""
+            },
+            "COLUMN_NUMBER": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "1"
+            },
+            "IMPORTED_AS": {
+              "kind": "string",
+              "value": "repeat.h"
+            },
+            "IMPORTED_ENTITY": {
+              "kind": "string",
+              "value": "repeat.h"
+            },
+            "LINE_NUMBER": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "2"
+            },
+            "ORDER": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "2"
+            }
+          }
+        }
+      ],
+      "allIncidentEdges": [
+        {
+          "source": "73014444032",
+          "destination": "51539607552",
+          "label": "IMPORTS",
+          "property": {
+            "kind": "null"
+          }
+        },
+        {
+          "source": "73014444033",
+          "destination": "51539607553",
+          "label": "IMPORTS",
+          "property": {
+            "kind": "null"
+          }
+        },
+        {
+          "source": "137438953473",
+          "destination": "73014444032",
+          "label": "AST",
+          "property": {
+            "kind": "null"
+          }
+        },
+        {
+          "source": "137438953473",
+          "destination": "73014444033",
+          "label": "AST",
+          "property": {
+            "kind": "null"
+          }
+        }
+      ],
+      "allIncidentEndpoints": [
+        {
+          "id": "137438953473",
+          "label": "NAMESPACE_BLOCK",
+          "properties": {
+            "FILENAME": {
+              "kind": "string",
+              "value": "main.c"
+            },
+            "FULL_NAME": {
+              "kind": "string",
+              "value": "main.c:<global>"
+            },
+            "NAME": {
+              "kind": "string",
+              "value": "<global>"
+            },
+            "ORDER": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "1"
+            }
+          }
+        },
+        {
+          "id": "51539607552",
+          "label": "DEPENDENCY",
+          "properties": {
+            "DEPENDENCY_GROUP_ID": {
+              "kind": "string",
+              "value": "repeat.h"
+            },
+            "NAME": {
+              "kind": "string",
+              "value": "repeat.h"
+            },
+            "VERSION": {
+              "kind": "string",
+              "value": "include"
+            }
+          }
+        },
+        {
+          "id": "51539607553",
+          "label": "DEPENDENCY",
+          "properties": {
+            "DEPENDENCY_GROUP_ID": {
+              "kind": "string",
+              "value": "repeat.h"
+            },
+            "NAME": {
+              "kind": "string",
+              "value": "repeat.h"
+            },
+            "VERSION": {
+              "kind": "string",
+              "value": "include"
+            }
+          }
+        },
+        {
+          "id": "73014444032",
+          "label": "IMPORT",
+          "properties": {
+            "CODE": {
+              "kind": "string",
+              "value": "#include \"repeat.h\""
+            },
+            "COLUMN_NUMBER": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "1"
+            },
+            "IMPORTED_AS": {
+              "kind": "string",
+              "value": "repeat.h"
+            },
+            "IMPORTED_ENTITY": {
+              "kind": "string",
+              "value": "repeat.h"
+            },
+            "LINE_NUMBER": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "1"
+            },
+            "ORDER": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "1"
+            }
+          }
+        },
+        {
+          "id": "73014444033",
+          "label": "IMPORT",
+          "properties": {
+            "CODE": {
+              "kind": "string",
+              "value": "#include \"repeat.h\""
+            },
+            "COLUMN_NUMBER": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "1"
+            },
+            "IMPORTED_AS": {
+              "kind": "string",
+              "value": "repeat.h"
+            },
+            "IMPORTED_ENTITY": {
+              "kind": "string",
+              "value": "repeat.h"
+            },
+            "LINE_NUMBER": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "2"
+            },
+            "ORDER": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "2"
+            }
+          }
+        }
+      ],
+      "occurrences": [
+        {
+          "import": {
+            "id": "73014444032",
+            "label": "IMPORT",
+            "properties": {
+              "CODE": {
+                "kind": "string",
+                "value": "#include \"repeat.h\""
+              },
+              "COLUMN_NUMBER": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "1"
+              },
+              "IMPORTED_AS": {
+                "kind": "string",
+                "value": "repeat.h"
+              },
+              "IMPORTED_ENTITY": {
+                "kind": "string",
+                "value": "repeat.h"
+              },
+              "LINE_NUMBER": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "1"
+              },
+              "ORDER": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "1"
+              }
+            }
+          },
+          "astParents": [
+            {
+              "edge": {
+                "source": "137438953473",
+                "destination": "73014444032",
+                "label": "AST",
+                "property": {
+                  "kind": "null"
+                }
+              },
+              "node": {
+                "id": "137438953473",
+                "label": "NAMESPACE_BLOCK",
+                "properties": {
+                  "FILENAME": {
+                    "kind": "string",
+                    "value": "main.c"
+                  },
+                  "FULL_NAME": {
+                    "kind": "string",
+                    "value": "main.c:<global>"
+                  },
+                  "NAME": {
+                    "kind": "string",
+                    "value": "<global>"
+                  },
+                  "ORDER": {
+                    "kind": "number",
+                    "class": "java.lang.Integer",
+                    "value": "1"
+                  }
+                }
+              }
+            }
+          ],
+          "dependencies": [
+            {
+              "edge": {
+                "source": "73014444032",
+                "destination": "51539607552",
+                "label": "IMPORTS",
+                "property": {
+                  "kind": "null"
+                }
+              },
+              "node": {
+                "id": "51539607552",
+                "label": "DEPENDENCY",
+                "properties": {
+                  "DEPENDENCY_GROUP_ID": {
+                    "kind": "string",
+                    "value": "repeat.h"
+                  },
+                  "NAME": {
+                    "kind": "string",
+                    "value": "repeat.h"
+                  },
+                  "VERSION": {
+                    "kind": "string",
+                    "value": "include"
+                  }
+                }
+              }
+            }
+          ],
+          "parentCompleteAstChildren": [
+            {
+              "edge": {
+                "source": "137438953473",
+                "destination": "167503724545",
+                "label": "AST",
+                "property": {
+                  "kind": "null"
+                }
+              },
+              "node": {
+                "id": "167503724545",
+                "label": "TYPE_DECL",
+                "properties": {
+                  "AST_PARENT_FULL_NAME": {
+                    "kind": "string",
+                    "value": "main.c:<global>"
+                  },
+                  "AST_PARENT_TYPE": {
+                    "kind": "string",
+                    "value": "NAMESPACE_BLOCK"
+                  },
+                  "CODE": {
+                    "kind": "string",
+                    "value": "<global>"
+                  },
+                  "COLUMN_NUMBER": {
+                    "kind": "number",
+                    "class": "java.lang.Integer",
+                    "value": "1"
+                  },
+                  "FILENAME": {
+                    "kind": "string",
+                    "value": "main.c"
+                  },
+                  "FULL_NAME": {
+                    "kind": "string",
+                    "value": "main.c:<global>"
+                  },
+                  "LINE_NUMBER": {
+                    "kind": "number",
+                    "class": "java.lang.Integer",
+                    "value": "1"
+                  },
+                  "NAME": {
+                    "kind": "string",
+                    "value": "<global>"
+                  },
+                  "ORDER": {
+                    "kind": "number",
+                    "class": "java.lang.Integer",
+                    "value": "3"
+                  }
+                }
+              }
+            },
+            {
+              "edge": {
+                "source": "137438953473",
+                "destination": "73014444032",
+                "label": "AST",
+                "property": {
+                  "kind": "null"
+                }
+              },
+              "node": {
+                "id": "73014444032",
+                "label": "IMPORT",
+                "properties": {
+                  "CODE": {
+                    "kind": "string",
+                    "value": "#include \"repeat.h\""
+                  },
+                  "COLUMN_NUMBER": {
+                    "kind": "number",
+                    "class": "java.lang.Integer",
+                    "value": "1"
+                  },
+                  "IMPORTED_AS": {
+                    "kind": "string",
+                    "value": "repeat.h"
+                  },
+                  "IMPORTED_ENTITY": {
+                    "kind": "string",
+                    "value": "repeat.h"
+                  },
+                  "LINE_NUMBER": {
+                    "kind": "number",
+                    "class": "java.lang.Integer",
+                    "value": "1"
+                  },
+                  "ORDER": {
+                    "kind": "number",
+                    "class": "java.lang.Integer",
+                    "value": "1"
+                  }
+                }
+              }
+            },
+            {
+              "edge": {
+                "source": "137438953473",
+                "destination": "73014444033",
+                "label": "AST",
+                "property": {
+                  "kind": "null"
+                }
+              },
+              "node": {
+                "id": "73014444033",
+                "label": "IMPORT",
+                "properties": {
+                  "CODE": {
+                    "kind": "string",
+                    "value": "#include \"repeat.h\""
+                  },
+                  "COLUMN_NUMBER": {
+                    "kind": "number",
+                    "class": "java.lang.Integer",
+                    "value": "1"
+                  },
+                  "IMPORTED_AS": {
+                    "kind": "string",
+                    "value": "repeat.h"
+                  },
+                  "IMPORTED_ENTITY": {
+                    "kind": "string",
+                    "value": "repeat.h"
+                  },
+                  "LINE_NUMBER": {
+                    "kind": "number",
+                    "class": "java.lang.Integer",
+                    "value": "2"
+                  },
+                  "ORDER": {
+                    "kind": "number",
+                    "class": "java.lang.Integer",
+                    "value": "2"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "import": {
+            "id": "73014444033",
+            "label": "IMPORT",
+            "properties": {
+              "CODE": {
+                "kind": "string",
+                "value": "#include \"repeat.h\""
+              },
+              "COLUMN_NUMBER": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "1"
+              },
+              "IMPORTED_AS": {
+                "kind": "string",
+                "value": "repeat.h"
+              },
+              "IMPORTED_ENTITY": {
+                "kind": "string",
+                "value": "repeat.h"
+              },
+              "LINE_NUMBER": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "2"
+              },
+              "ORDER": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "2"
+              }
+            }
+          },
+          "astParents": [
+            {
+              "edge": {
+                "source": "137438953473",
+                "destination": "73014444033",
+                "label": "AST",
+                "property": {
+                  "kind": "null"
+                }
+              },
+              "node": {
+                "id": "137438953473",
+                "label": "NAMESPACE_BLOCK",
+                "properties": {
+                  "FILENAME": {
+                    "kind": "string",
+                    "value": "main.c"
+                  },
+                  "FULL_NAME": {
+                    "kind": "string",
+                    "value": "main.c:<global>"
+                  },
+                  "NAME": {
+                    "kind": "string",
+                    "value": "<global>"
+                  },
+                  "ORDER": {
+                    "kind": "number",
+                    "class": "java.lang.Integer",
+                    "value": "1"
+                  }
+                }
+              }
+            }
+          ],
+          "dependencies": [
+            {
+              "edge": {
+                "source": "73014444033",
+                "destination": "51539607553",
+                "label": "IMPORTS",
+                "property": {
+                  "kind": "null"
+                }
+              },
+              "node": {
+                "id": "51539607553",
+                "label": "DEPENDENCY",
+                "properties": {
+                  "DEPENDENCY_GROUP_ID": {
+                    "kind": "string",
+                    "value": "repeat.h"
+                  },
+                  "NAME": {
+                    "kind": "string",
+                    "value": "repeat.h"
+                  },
+                  "VERSION": {
+                    "kind": "string",
+                    "value": "include"
+                  }
+                }
+              }
+            }
+          ],
+          "parentCompleteAstChildren": [
+            {
+              "edge": {
+                "source": "137438953473",
+                "destination": "167503724545",
+                "label": "AST",
+                "property": {
+                  "kind": "null"
+                }
+              },
+              "node": {
+                "id": "167503724545",
+                "label": "TYPE_DECL",
+                "properties": {
+                  "AST_PARENT_FULL_NAME": {
+                    "kind": "string",
+                    "value": "main.c:<global>"
+                  },
+                  "AST_PARENT_TYPE": {
+                    "kind": "string",
+                    "value": "NAMESPACE_BLOCK"
+                  },
+                  "CODE": {
+                    "kind": "string",
+                    "value": "<global>"
+                  },
+                  "COLUMN_NUMBER": {
+                    "kind": "number",
+                    "class": "java.lang.Integer",
+                    "value": "1"
+                  },
+                  "FILENAME": {
+                    "kind": "string",
+                    "value": "main.c"
+                  },
+                  "FULL_NAME": {
+                    "kind": "string",
+                    "value": "main.c:<global>"
+                  },
+                  "LINE_NUMBER": {
+                    "kind": "number",
+                    "class": "java.lang.Integer",
+                    "value": "1"
+                  },
+                  "NAME": {
+                    "kind": "string",
+                    "value": "<global>"
+                  },
+                  "ORDER": {
+                    "kind": "number",
+                    "class": "java.lang.Integer",
+                    "value": "3"
+                  }
+                }
+              }
+            },
+            {
+              "edge": {
+                "source": "137438953473",
+                "destination": "73014444032",
+                "label": "AST",
+                "property": {
+                  "kind": "null"
+                }
+              },
+              "node": {
+                "id": "73014444032",
+                "label": "IMPORT",
+                "properties": {
+                  "CODE": {
+                    "kind": "string",
+                    "value": "#include \"repeat.h\""
+                  },
+                  "COLUMN_NUMBER": {
+                    "kind": "number",
+                    "class": "java.lang.Integer",
+                    "value": "1"
+                  },
+                  "IMPORTED_AS": {
+                    "kind": "string",
+                    "value": "repeat.h"
+                  },
+                  "IMPORTED_ENTITY": {
+                    "kind": "string",
+                    "value": "repeat.h"
+                  },
+                  "LINE_NUMBER": {
+                    "kind": "number",
+                    "class": "java.lang.Integer",
+                    "value": "1"
+                  },
+                  "ORDER": {
+                    "kind": "number",
+                    "class": "java.lang.Integer",
+                    "value": "1"
+                  }
+                }
+              }
+            },
+            {
+              "edge": {
+                "source": "137438953473",
+                "destination": "73014444033",
+                "label": "AST",
+                "property": {
+                  "kind": "null"
+                }
+              },
+              "node": {
+                "id": "73014444033",
+                "label": "IMPORT",
+                "properties": {
+                  "CODE": {
+                    "kind": "string",
+                    "value": "#include \"repeat.h\""
+                  },
+                  "COLUMN_NUMBER": {
+                    "kind": "number",
+                    "class": "java.lang.Integer",
+                    "value": "1"
+                  },
+                  "IMPORTED_AS": {
+                    "kind": "string",
+                    "value": "repeat.h"
+                  },
+                  "IMPORTED_ENTITY": {
+                    "kind": "string",
+                    "value": "repeat.h"
+                  },
+                  "LINE_NUMBER": {
+                    "kind": "number",
+                    "class": "java.lang.Integer",
+                    "value": "2"
+                  },
+                  "ORDER": {
+                    "kind": "number",
+                    "class": "java.lang.Integer",
+                    "value": "2"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "acceptedRustIncludeNodes": [],
+      "sourceFiles": {
+        "repeated_direct_include/main.c": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/include-reference-runner-v1/runs/first-complete-six-include-reference-batch/snapshot/input/repeated_direct_include/main.c",
+          "sha256": "3a71231efb0ec5721cab22fa6230610cfaf13582dc37dc24dcc7011bab0a5776",
+          "bytes": 83
+        },
+        "repeated_direct_include/repeat.h": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/include-reference-runner-v1/runs/first-complete-six-include-reference-batch/snapshot/input/repeated_direct_include/repeat.h",
+          "sha256": "9de56527b206dea4b2c43ea0f85460c08fefe041a230b547590a44b4d3373cc4",
+          "bytes": 66
+        }
+      }
+    },
+    "tiny_fixedtables_include": {
+      "canonical": {
+        "addedNonempty": 0,
+        "removedNonempty": 0,
+        "completeBytesEqual": true
+      },
+      "counts": {
+        "joernNodes": 153,
+        "joernEdges": 799,
+        "acceptedRustNodes": 151,
+        "acceptedRustEdges": 638,
+        "imports": 1,
+        "dependencies": 1
+      },
+      "completeIncludeNodes": [
+        {
+          "id": "51539607552",
+          "label": "DEPENDENCY",
+          "properties": {
+            "DEPENDENCY_GROUP_ID": {
+              "kind": "string",
+              "value": "fixed.h"
+            },
+            "NAME": {
+              "kind": "string",
+              "value": "fixed.h"
+            },
+            "VERSION": {
+              "kind": "string",
+              "value": "include"
+            }
+          }
+        },
+        {
+          "id": "73014444032",
+          "label": "IMPORT",
+          "properties": {
+            "CODE": {
+              "kind": "string",
+              "value": "#include \"fixed.h\""
+            },
+            "COLUMN_NUMBER": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "1"
+            },
+            "IMPORTED_AS": {
+              "kind": "string",
+              "value": "fixed.h"
+            },
+            "IMPORTED_ENTITY": {
+              "kind": "string",
+              "value": "fixed.h"
+            },
+            "LINE_NUMBER": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "8"
+            },
+            "ORDER": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "1"
+            }
+          }
+        }
+      ],
+      "allIncidentEdges": [
+        {
+          "source": "73014444032",
+          "destination": "51539607552",
+          "label": "IMPORTS",
+          "property": {
+            "kind": "null"
+          }
+        },
+        {
+          "source": "137438953473",
+          "destination": "73014444032",
+          "label": "AST",
+          "property": {
+            "kind": "null"
+          }
+        }
+      ],
+      "allIncidentEndpoints": [
+        {
+          "id": "137438953473",
+          "label": "NAMESPACE_BLOCK",
+          "properties": {
+            "FILENAME": {
+              "kind": "string",
+              "value": "main.c"
+            },
+            "FULL_NAME": {
+              "kind": "string",
+              "value": "main.c:<global>"
+            },
+            "NAME": {
+              "kind": "string",
+              "value": "<global>"
+            },
+            "ORDER": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "1"
+            }
+          }
+        },
+        {
+          "id": "51539607552",
+          "label": "DEPENDENCY",
+          "properties": {
+            "DEPENDENCY_GROUP_ID": {
+              "kind": "string",
+              "value": "fixed.h"
+            },
+            "NAME": {
+              "kind": "string",
+              "value": "fixed.h"
+            },
+            "VERSION": {
+              "kind": "string",
+              "value": "include"
+            }
+          }
+        },
+        {
+          "id": "73014444032",
+          "label": "IMPORT",
+          "properties": {
+            "CODE": {
+              "kind": "string",
+              "value": "#include \"fixed.h\""
+            },
+            "COLUMN_NUMBER": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "1"
+            },
+            "IMPORTED_AS": {
+              "kind": "string",
+              "value": "fixed.h"
+            },
+            "IMPORTED_ENTITY": {
+              "kind": "string",
+              "value": "fixed.h"
+            },
+            "LINE_NUMBER": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "8"
+            },
+            "ORDER": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "1"
+            }
+          }
+        }
+      ],
+      "occurrences": [
+        {
+          "import": {
+            "id": "73014444032",
+            "label": "IMPORT",
+            "properties": {
+              "CODE": {
+                "kind": "string",
+                "value": "#include \"fixed.h\""
+              },
+              "COLUMN_NUMBER": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "1"
+              },
+              "IMPORTED_AS": {
+                "kind": "string",
+                "value": "fixed.h"
+              },
+              "IMPORTED_ENTITY": {
+                "kind": "string",
+                "value": "fixed.h"
+              },
+              "LINE_NUMBER": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "8"
+              },
+              "ORDER": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "1"
+              }
+            }
+          },
+          "astParents": [
+            {
+              "edge": {
+                "source": "137438953473",
+                "destination": "73014444032",
+                "label": "AST",
+                "property": {
+                  "kind": "null"
+                }
+              },
+              "node": {
+                "id": "137438953473",
+                "label": "NAMESPACE_BLOCK",
+                "properties": {
+                  "FILENAME": {
+                    "kind": "string",
+                    "value": "main.c"
+                  },
+                  "FULL_NAME": {
+                    "kind": "string",
+                    "value": "main.c:<global>"
+                  },
+                  "NAME": {
+                    "kind": "string",
+                    "value": "<global>"
+                  },
+                  "ORDER": {
+                    "kind": "number",
+                    "class": "java.lang.Integer",
+                    "value": "1"
+                  }
+                }
+              }
+            }
+          ],
+          "dependencies": [
+            {
+              "edge": {
+                "source": "73014444032",
+                "destination": "51539607552",
+                "label": "IMPORTS",
+                "property": {
+                  "kind": "null"
+                }
+              },
+              "node": {
+                "id": "51539607552",
+                "label": "DEPENDENCY",
+                "properties": {
+                  "DEPENDENCY_GROUP_ID": {
+                    "kind": "string",
+                    "value": "fixed.h"
+                  },
+                  "NAME": {
+                    "kind": "string",
+                    "value": "fixed.h"
+                  },
+                  "VERSION": {
+                    "kind": "string",
+                    "value": "include"
+                  }
+                }
+              }
+            }
+          ],
+          "parentCompleteAstChildren": [
+            {
+              "edge": {
+                "source": "137438953473",
+                "destination": "167503724548",
+                "label": "AST",
+                "property": {
+                  "kind": "null"
+                }
+              },
+              "node": {
+                "id": "167503724548",
+                "label": "TYPE_DECL",
+                "properties": {
+                  "AST_PARENT_FULL_NAME": {
+                    "kind": "string",
+                    "value": "main.c:<global>"
+                  },
+                  "AST_PARENT_TYPE": {
+                    "kind": "string",
+                    "value": "NAMESPACE_BLOCK"
+                  },
+                  "CODE": {
+                    "kind": "string",
+                    "value": "<global>"
+                  },
+                  "COLUMN_NUMBER": {
+                    "kind": "number",
+                    "class": "java.lang.Integer",
+                    "value": "1"
+                  },
+                  "FILENAME": {
+                    "kind": "string",
+                    "value": "main.c"
+                  },
+                  "FULL_NAME": {
+                    "kind": "string",
+                    "value": "main.c:<global>"
+                  },
+                  "LINE_NUMBER": {
+                    "kind": "number",
+                    "class": "java.lang.Integer",
+                    "value": "1"
+                  },
+                  "NAME": {
+                    "kind": "string",
+                    "value": "<global>"
+                  },
+                  "ORDER": {
+                    "kind": "number",
+                    "class": "java.lang.Integer",
+                    "value": "2"
+                  }
+                }
+              }
+            },
+            {
+              "edge": {
+                "source": "137438953473",
+                "destination": "73014444032",
+                "label": "AST",
+                "property": {
+                  "kind": "null"
+                }
+              },
+              "node": {
+                "id": "73014444032",
+                "label": "IMPORT",
+                "properties": {
+                  "CODE": {
+                    "kind": "string",
+                    "value": "#include \"fixed.h\""
+                  },
+                  "COLUMN_NUMBER": {
+                    "kind": "number",
+                    "class": "java.lang.Integer",
+                    "value": "1"
+                  },
+                  "IMPORTED_AS": {
+                    "kind": "string",
+                    "value": "fixed.h"
+                  },
+                  "IMPORTED_ENTITY": {
+                    "kind": "string",
+                    "value": "fixed.h"
+                  },
+                  "LINE_NUMBER": {
+                    "kind": "number",
+                    "class": "java.lang.Integer",
+                    "value": "8"
+                  },
+                  "ORDER": {
+                    "kind": "number",
+                    "class": "java.lang.Integer",
+                    "value": "1"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "acceptedRustIncludeNodes": [],
+      "sourceFiles": {
+        "tiny_fixedtables_include/fixed.h": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/include-reference-runner-v1/runs/first-complete-six-include-reference-batch/snapshot/input/tiny_fixedtables_include/fixed.h",
+          "sha256": "3039380a12e6dba1fb44314f13292d1b5ec6744aa80eff5599566a29ea94ea86",
+          "bytes": 98
+        },
+        "tiny_fixedtables_include/main.c": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/include-reference-runner-v1/runs/first-complete-six-include-reference-batch/snapshot/input/tiny_fixedtables_include/main.c",
+          "sha256": "7203039d3be732abfb9abaad7177eaa77efa51d6e9fa58d58733346eb6cb4dda",
+          "bytes": 254
+        }
+      }
+    },
+    "tiny_fixedtables_inline": {
+      "canonical": {
+        "addedNonempty": 0,
+        "removedNonempty": 0,
+        "completeBytesEqual": true
+      },
+      "counts": {
+        "joernNodes": 125,
+        "joernEdges": 607,
+        "acceptedRustNodes": 125,
+        "acceptedRustEdges": 489,
+        "imports": 0,
+        "dependencies": 0
+      },
+      "completeIncludeNodes": [],
+      "allIncidentEdges": [],
+      "allIncidentEndpoints": [],
+      "occurrences": [],
+      "acceptedRustIncludeNodes": [],
+      "sourceFiles": {
+        "tiny_fixedtables_inline/main.c": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/include-reference-runner-v1/runs/first-complete-six-include-reference-batch/snapshot/input/tiny_fixedtables_inline/main.c",
+          "sha256": "8af2a0a9531deec50f16e8c125de4000c0636b443b11628e232bb9e9413d2a6f",
+          "bytes": 333
+        }
+      }
+    },
+    "unresolved_include_pair": {
+      "canonical": {
+        "addedNonempty": 0,
+        "removedNonempty": 0,
+        "completeBytesEqual": true
+      },
+      "counts": {
+        "joernNodes": 36,
+        "joernEdges": 99,
+        "acceptedRustNodes": 32,
+        "acceptedRustEdges": 73,
+        "imports": 2,
+        "dependencies": 2
+      },
+      "completeIncludeNodes": [
+        {
+          "id": "51539607552",
+          "label": "DEPENDENCY",
+          "properties": {
+            "DEPENDENCY_GROUP_ID": {
+              "kind": "string",
+              "value": "missing-local.h"
+            },
+            "NAME": {
+              "kind": "string",
+              "value": "missing-local.h"
+            },
+            "VERSION": {
+              "kind": "string",
+              "value": "include"
+            }
+          }
+        },
+        {
+          "id": "51539607553",
+          "label": "DEPENDENCY",
+          "properties": {
+            "DEPENDENCY_GROUP_ID": {
+              "kind": "string",
+              "value": "missing-system.h"
+            },
+            "NAME": {
+              "kind": "string",
+              "value": "missing-system.h"
+            },
+            "VERSION": {
+              "kind": "string",
+              "value": "include"
+            }
+          }
+        },
+        {
+          "id": "73014444032",
+          "label": "IMPORT",
+          "properties": {
+            "CODE": {
+              "kind": "string",
+              "value": "#include \"missing-local.h\""
+            },
+            "COLUMN_NUMBER": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "1"
+            },
+            "IMPORTED_AS": {
+              "kind": "string",
+              "value": "missing-local.h"
+            },
+            "IMPORTED_ENTITY": {
+              "kind": "string",
+              "value": "missing-local.h"
+            },
+            "LINE_NUMBER": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "1"
+            },
+            "ORDER": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "1"
+            }
+          }
+        },
+        {
+          "id": "73014444033",
+          "label": "IMPORT",
+          "properties": {
+            "CODE": {
+              "kind": "string",
+              "value": "#include <missing-system.h>"
+            },
+            "COLUMN_NUMBER": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "1"
+            },
+            "IMPORTED_AS": {
+              "kind": "string",
+              "value": "missing-system.h"
+            },
+            "IMPORTED_ENTITY": {
+              "kind": "string",
+              "value": "missing-system.h"
+            },
+            "LINE_NUMBER": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "2"
+            },
+            "ORDER": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "2"
+            }
+          }
+        }
+      ],
+      "allIncidentEdges": [
+        {
+          "source": "73014444032",
+          "destination": "51539607552",
+          "label": "IMPORTS",
+          "property": {
+            "kind": "null"
+          }
+        },
+        {
+          "source": "73014444033",
+          "destination": "51539607553",
+          "label": "IMPORTS",
+          "property": {
+            "kind": "null"
+          }
+        },
+        {
+          "source": "137438953473",
+          "destination": "73014444032",
+          "label": "AST",
+          "property": {
+            "kind": "null"
+          }
+        },
+        {
+          "source": "137438953473",
+          "destination": "73014444033",
+          "label": "AST",
+          "property": {
+            "kind": "null"
+          }
+        }
+      ],
+      "allIncidentEndpoints": [
+        {
+          "id": "137438953473",
+          "label": "NAMESPACE_BLOCK",
+          "properties": {
+            "FILENAME": {
+              "kind": "string",
+              "value": "main.c"
+            },
+            "FULL_NAME": {
+              "kind": "string",
+              "value": "main.c:<global>"
+            },
+            "NAME": {
+              "kind": "string",
+              "value": "<global>"
+            },
+            "ORDER": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "1"
+            }
+          }
+        },
+        {
+          "id": "51539607552",
+          "label": "DEPENDENCY",
+          "properties": {
+            "DEPENDENCY_GROUP_ID": {
+              "kind": "string",
+              "value": "missing-local.h"
+            },
+            "NAME": {
+              "kind": "string",
+              "value": "missing-local.h"
+            },
+            "VERSION": {
+              "kind": "string",
+              "value": "include"
+            }
+          }
+        },
+        {
+          "id": "51539607553",
+          "label": "DEPENDENCY",
+          "properties": {
+            "DEPENDENCY_GROUP_ID": {
+              "kind": "string",
+              "value": "missing-system.h"
+            },
+            "NAME": {
+              "kind": "string",
+              "value": "missing-system.h"
+            },
+            "VERSION": {
+              "kind": "string",
+              "value": "include"
+            }
+          }
+        },
+        {
+          "id": "73014444032",
+          "label": "IMPORT",
+          "properties": {
+            "CODE": {
+              "kind": "string",
+              "value": "#include \"missing-local.h\""
+            },
+            "COLUMN_NUMBER": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "1"
+            },
+            "IMPORTED_AS": {
+              "kind": "string",
+              "value": "missing-local.h"
+            },
+            "IMPORTED_ENTITY": {
+              "kind": "string",
+              "value": "missing-local.h"
+            },
+            "LINE_NUMBER": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "1"
+            },
+            "ORDER": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "1"
+            }
+          }
+        },
+        {
+          "id": "73014444033",
+          "label": "IMPORT",
+          "properties": {
+            "CODE": {
+              "kind": "string",
+              "value": "#include <missing-system.h>"
+            },
+            "COLUMN_NUMBER": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "1"
+            },
+            "IMPORTED_AS": {
+              "kind": "string",
+              "value": "missing-system.h"
+            },
+            "IMPORTED_ENTITY": {
+              "kind": "string",
+              "value": "missing-system.h"
+            },
+            "LINE_NUMBER": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "2"
+            },
+            "ORDER": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "2"
+            }
+          }
+        }
+      ],
+      "occurrences": [
+        {
+          "import": {
+            "id": "73014444032",
+            "label": "IMPORT",
+            "properties": {
+              "CODE": {
+                "kind": "string",
+                "value": "#include \"missing-local.h\""
+              },
+              "COLUMN_NUMBER": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "1"
+              },
+              "IMPORTED_AS": {
+                "kind": "string",
+                "value": "missing-local.h"
+              },
+              "IMPORTED_ENTITY": {
+                "kind": "string",
+                "value": "missing-local.h"
+              },
+              "LINE_NUMBER": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "1"
+              },
+              "ORDER": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "1"
+              }
+            }
+          },
+          "astParents": [
+            {
+              "edge": {
+                "source": "137438953473",
+                "destination": "73014444032",
+                "label": "AST",
+                "property": {
+                  "kind": "null"
+                }
+              },
+              "node": {
+                "id": "137438953473",
+                "label": "NAMESPACE_BLOCK",
+                "properties": {
+                  "FILENAME": {
+                    "kind": "string",
+                    "value": "main.c"
+                  },
+                  "FULL_NAME": {
+                    "kind": "string",
+                    "value": "main.c:<global>"
+                  },
+                  "NAME": {
+                    "kind": "string",
+                    "value": "<global>"
+                  },
+                  "ORDER": {
+                    "kind": "number",
+                    "class": "java.lang.Integer",
+                    "value": "1"
+                  }
+                }
+              }
+            }
+          ],
+          "dependencies": [
+            {
+              "edge": {
+                "source": "73014444032",
+                "destination": "51539607552",
+                "label": "IMPORTS",
+                "property": {
+                  "kind": "null"
+                }
+              },
+              "node": {
+                "id": "51539607552",
+                "label": "DEPENDENCY",
+                "properties": {
+                  "DEPENDENCY_GROUP_ID": {
+                    "kind": "string",
+                    "value": "missing-local.h"
+                  },
+                  "NAME": {
+                    "kind": "string",
+                    "value": "missing-local.h"
+                  },
+                  "VERSION": {
+                    "kind": "string",
+                    "value": "include"
+                  }
+                }
+              }
+            }
+          ],
+          "parentCompleteAstChildren": [
+            {
+              "edge": {
+                "source": "137438953473",
+                "destination": "167503724545",
+                "label": "AST",
+                "property": {
+                  "kind": "null"
+                }
+              },
+              "node": {
+                "id": "167503724545",
+                "label": "TYPE_DECL",
+                "properties": {
+                  "AST_PARENT_FULL_NAME": {
+                    "kind": "string",
+                    "value": "main.c:<global>"
+                  },
+                  "AST_PARENT_TYPE": {
+                    "kind": "string",
+                    "value": "NAMESPACE_BLOCK"
+                  },
+                  "CODE": {
+                    "kind": "string",
+                    "value": "<global>"
+                  },
+                  "COLUMN_NUMBER": {
+                    "kind": "number",
+                    "class": "java.lang.Integer",
+                    "value": "1"
+                  },
+                  "FILENAME": {
+                    "kind": "string",
+                    "value": "main.c"
+                  },
+                  "FULL_NAME": {
+                    "kind": "string",
+                    "value": "main.c:<global>"
+                  },
+                  "LINE_NUMBER": {
+                    "kind": "number",
+                    "class": "java.lang.Integer",
+                    "value": "1"
+                  },
+                  "NAME": {
+                    "kind": "string",
+                    "value": "<global>"
+                  },
+                  "ORDER": {
+                    "kind": "number",
+                    "class": "java.lang.Integer",
+                    "value": "3"
+                  }
+                }
+              }
+            },
+            {
+              "edge": {
+                "source": "137438953473",
+                "destination": "73014444032",
+                "label": "AST",
+                "property": {
+                  "kind": "null"
+                }
+              },
+              "node": {
+                "id": "73014444032",
+                "label": "IMPORT",
+                "properties": {
+                  "CODE": {
+                    "kind": "string",
+                    "value": "#include \"missing-local.h\""
+                  },
+                  "COLUMN_NUMBER": {
+                    "kind": "number",
+                    "class": "java.lang.Integer",
+                    "value": "1"
+                  },
+                  "IMPORTED_AS": {
+                    "kind": "string",
+                    "value": "missing-local.h"
+                  },
+                  "IMPORTED_ENTITY": {
+                    "kind": "string",
+                    "value": "missing-local.h"
+                  },
+                  "LINE_NUMBER": {
+                    "kind": "number",
+                    "class": "java.lang.Integer",
+                    "value": "1"
+                  },
+                  "ORDER": {
+                    "kind": "number",
+                    "class": "java.lang.Integer",
+                    "value": "1"
+                  }
+                }
+              }
+            },
+            {
+              "edge": {
+                "source": "137438953473",
+                "destination": "73014444033",
+                "label": "AST",
+                "property": {
+                  "kind": "null"
+                }
+              },
+              "node": {
+                "id": "73014444033",
+                "label": "IMPORT",
+                "properties": {
+                  "CODE": {
+                    "kind": "string",
+                    "value": "#include <missing-system.h>"
+                  },
+                  "COLUMN_NUMBER": {
+                    "kind": "number",
+                    "class": "java.lang.Integer",
+                    "value": "1"
+                  },
+                  "IMPORTED_AS": {
+                    "kind": "string",
+                    "value": "missing-system.h"
+                  },
+                  "IMPORTED_ENTITY": {
+                    "kind": "string",
+                    "value": "missing-system.h"
+                  },
+                  "LINE_NUMBER": {
+                    "kind": "number",
+                    "class": "java.lang.Integer",
+                    "value": "2"
+                  },
+                  "ORDER": {
+                    "kind": "number",
+                    "class": "java.lang.Integer",
+                    "value": "2"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "import": {
+            "id": "73014444033",
+            "label": "IMPORT",
+            "properties": {
+              "CODE": {
+                "kind": "string",
+                "value": "#include <missing-system.h>"
+              },
+              "COLUMN_NUMBER": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "1"
+              },
+              "IMPORTED_AS": {
+                "kind": "string",
+                "value": "missing-system.h"
+              },
+              "IMPORTED_ENTITY": {
+                "kind": "string",
+                "value": "missing-system.h"
+              },
+              "LINE_NUMBER": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "2"
+              },
+              "ORDER": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "2"
+              }
+            }
+          },
+          "astParents": [
+            {
+              "edge": {
+                "source": "137438953473",
+                "destination": "73014444033",
+                "label": "AST",
+                "property": {
+                  "kind": "null"
+                }
+              },
+              "node": {
+                "id": "137438953473",
+                "label": "NAMESPACE_BLOCK",
+                "properties": {
+                  "FILENAME": {
+                    "kind": "string",
+                    "value": "main.c"
+                  },
+                  "FULL_NAME": {
+                    "kind": "string",
+                    "value": "main.c:<global>"
+                  },
+                  "NAME": {
+                    "kind": "string",
+                    "value": "<global>"
+                  },
+                  "ORDER": {
+                    "kind": "number",
+                    "class": "java.lang.Integer",
+                    "value": "1"
+                  }
+                }
+              }
+            }
+          ],
+          "dependencies": [
+            {
+              "edge": {
+                "source": "73014444033",
+                "destination": "51539607553",
+                "label": "IMPORTS",
+                "property": {
+                  "kind": "null"
+                }
+              },
+              "node": {
+                "id": "51539607553",
+                "label": "DEPENDENCY",
+                "properties": {
+                  "DEPENDENCY_GROUP_ID": {
+                    "kind": "string",
+                    "value": "missing-system.h"
+                  },
+                  "NAME": {
+                    "kind": "string",
+                    "value": "missing-system.h"
+                  },
+                  "VERSION": {
+                    "kind": "string",
+                    "value": "include"
+                  }
+                }
+              }
+            }
+          ],
+          "parentCompleteAstChildren": [
+            {
+              "edge": {
+                "source": "137438953473",
+                "destination": "167503724545",
+                "label": "AST",
+                "property": {
+                  "kind": "null"
+                }
+              },
+              "node": {
+                "id": "167503724545",
+                "label": "TYPE_DECL",
+                "properties": {
+                  "AST_PARENT_FULL_NAME": {
+                    "kind": "string",
+                    "value": "main.c:<global>"
+                  },
+                  "AST_PARENT_TYPE": {
+                    "kind": "string",
+                    "value": "NAMESPACE_BLOCK"
+                  },
+                  "CODE": {
+                    "kind": "string",
+                    "value": "<global>"
+                  },
+                  "COLUMN_NUMBER": {
+                    "kind": "number",
+                    "class": "java.lang.Integer",
+                    "value": "1"
+                  },
+                  "FILENAME": {
+                    "kind": "string",
+                    "value": "main.c"
+                  },
+                  "FULL_NAME": {
+                    "kind": "string",
+                    "value": "main.c:<global>"
+                  },
+                  "LINE_NUMBER": {
+                    "kind": "number",
+                    "class": "java.lang.Integer",
+                    "value": "1"
+                  },
+                  "NAME": {
+                    "kind": "string",
+                    "value": "<global>"
+                  },
+                  "ORDER": {
+                    "kind": "number",
+                    "class": "java.lang.Integer",
+                    "value": "3"
+                  }
+                }
+              }
+            },
+            {
+              "edge": {
+                "source": "137438953473",
+                "destination": "73014444032",
+                "label": "AST",
+                "property": {
+                  "kind": "null"
+                }
+              },
+              "node": {
+                "id": "73014444032",
+                "label": "IMPORT",
+                "properties": {
+                  "CODE": {
+                    "kind": "string",
+                    "value": "#include \"missing-local.h\""
+                  },
+                  "COLUMN_NUMBER": {
+                    "kind": "number",
+                    "class": "java.lang.Integer",
+                    "value": "1"
+                  },
+                  "IMPORTED_AS": {
+                    "kind": "string",
+                    "value": "missing-local.h"
+                  },
+                  "IMPORTED_ENTITY": {
+                    "kind": "string",
+                    "value": "missing-local.h"
+                  },
+                  "LINE_NUMBER": {
+                    "kind": "number",
+                    "class": "java.lang.Integer",
+                    "value": "1"
+                  },
+                  "ORDER": {
+                    "kind": "number",
+                    "class": "java.lang.Integer",
+                    "value": "1"
+                  }
+                }
+              }
+            },
+            {
+              "edge": {
+                "source": "137438953473",
+                "destination": "73014444033",
+                "label": "AST",
+                "property": {
+                  "kind": "null"
+                }
+              },
+              "node": {
+                "id": "73014444033",
+                "label": "IMPORT",
+                "properties": {
+                  "CODE": {
+                    "kind": "string",
+                    "value": "#include <missing-system.h>"
+                  },
+                  "COLUMN_NUMBER": {
+                    "kind": "number",
+                    "class": "java.lang.Integer",
+                    "value": "1"
+                  },
+                  "IMPORTED_AS": {
+                    "kind": "string",
+                    "value": "missing-system.h"
+                  },
+                  "IMPORTED_ENTITY": {
+                    "kind": "string",
+                    "value": "missing-system.h"
+                  },
+                  "LINE_NUMBER": {
+                    "kind": "number",
+                    "class": "java.lang.Integer",
+                    "value": "2"
+                  },
+                  "ORDER": {
+                    "kind": "number",
+                    "class": "java.lang.Integer",
+                    "value": "2"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "acceptedRustIncludeNodes": [],
+      "sourceFiles": {
+        "unresolved_include_pair/main.c": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/include-reference-runner-v1/runs/first-complete-six-include-reference-batch/snapshot/input/unresolved_include_pair/main.c",
+          "sha256": "e428ca556a8c267b57c83f04a79a5a1fbc257bb8566ef433ffa1b9f9c4c65fb0",
+          "bytes": 85
+        }
+      }
+    }
+  },
+  "aggregateCounts": {
+    "joernNodes": 530,
+    "joernEdges": 2285,
+    "acceptedRustNodes": 511,
+    "acceptedRustEdges": 1807,
+    "imports": 9,
+    "dependencies": 9
+  },
+  "historicalFullRowComparisons": {
+    "duplicate_supplied_macro_local": {
+      "rawBytesEqual": false,
+      "idSensitiveFullRowMultisetEqual": false,
+      "idFreeNodeContentMultisetEqual": false,
+      "idFreeEndpointContentMultisetEqual": true,
+      "counts": {
+        "historicalNodes": 91,
+        "freshNodes": 91,
+        "historicalEdges": 350,
+        "freshEdges": 350
+      },
+      "idFreeComparisonIsNotGraphIsomorphismProof": true,
+      "noPropertyOrPathNormalization": true,
+      "differencesRequireReviewNotGuessedReplacement": true,
+      "ambiguousHistoricalGroups": 15,
+      "ambiguousFreshGroups": 15
+    },
+    "tiny_fixedtables_include": {
+      "rawBytesEqual": false,
+      "idSensitiveFullRowMultisetEqual": false,
+      "idFreeNodeContentMultisetEqual": false,
+      "idFreeEndpointContentMultisetEqual": true,
+      "counts": {
+        "historicalNodes": 153,
+        "freshNodes": 153,
+        "historicalEdges": 799,
+        "freshEdges": 799
+      },
+      "idFreeComparisonIsNotGraphIsomorphismProof": true,
+      "noPropertyOrPathNormalization": true,
+      "differencesRequireReviewNotGuessedReplacement": true,
+      "ambiguousHistoricalGroups": 12,
+      "ambiguousFreshGroups": 12
+    },
+    "tiny_fixedtables_inline": {
+      "rawBytesEqual": false,
+      "idSensitiveFullRowMultisetEqual": false,
+      "idFreeNodeContentMultisetEqual": false,
+      "idFreeEndpointContentMultisetEqual": true,
+      "counts": {
+        "historicalNodes": 125,
+        "freshNodes": 125,
+        "historicalEdges": 607,
+        "freshEdges": 607
+      },
+      "idFreeComparisonIsNotGraphIsomorphismProof": true,
+      "noPropertyOrPathNormalization": true,
+      "differencesRequireReviewNotGuessedReplacement": true,
+      "ambiguousHistoricalGroups": 8,
+      "ambiguousFreshGroups": 8
+    }
+  },
+  "observationsOnly": true,
+  "canonicalEqualityDoesNotImplySupplementParity": true
+}

@@ -1,5 +1,5 @@
 use cpg_core::persist::ByteReader;
-use cpg_core::{Cpg, NodeKind};
+use cpg_core::{Cpg, NodeKind, OrderProperty};
 
 #[test]
 fn accepted_version_one_graphs_upgrade_without_changing_existing_payload() {
@@ -30,7 +30,7 @@ fn accepted_version_one_graphs_upgrade_without_changing_existing_payload() {
             "{name}"
         );
         let upgraded = graph.to_bytes();
-        assert_eq!(&upgraded[..6], b"CPG2\x02\x00", "{name}");
+        assert_eq!(&upgraded[..6], b"CPG2\x03\x00", "{name}");
         // Check preserved checksum configuration and authoritative-layer flags.
         assert_eq!(&upgraded[6..12], &old[6..12], "{name}");
 
@@ -45,6 +45,22 @@ fn accepted_version_one_graphs_upgrade_without_changing_existing_payload() {
         // the new modifier column. The fixed old writer payload is the oracle.
         let modifier_start = ENVELOPE + reader.position() + node_count * (1 + 4 + 5 * 4);
         let modifier_end = modifier_start + node_count * 4;
+        // Version 3 appends four absent symbols, an absent column tag and an
+        // unknown ORDER tag for every old node. The version 2 prefix remains.
+        let extension_start = upgraded.len() - node_count * 18;
+        assert_eq!(extension_start, old.len() + node_count * 4, "{name}");
+        assert!(
+            upgraded[extension_start..extension_start + node_count * 16]
+                .iter()
+                .all(|&b| b == 255),
+            "{name}"
+        );
+        assert!(
+            upgraded[extension_start + node_count * 16..]
+                .iter()
+                .all(|&b| b == 0),
+            "{name}"
+        );
         assert!(
             upgraded[modifier_start..modifier_end]
                 .iter()
@@ -53,7 +69,7 @@ fn accepted_version_one_graphs_upgrade_without_changing_existing_payload() {
         );
         let without_new_column = [
             &upgraded[ENVELOPE..modifier_start],
-            &upgraded[modifier_end..],
+            &upgraded[modifier_end..extension_start],
         ]
         .concat();
         assert_eq!(
@@ -63,5 +79,8 @@ fn accepted_version_one_graphs_upgrade_without_changing_existing_payload() {
         );
         let reopened = Cpg::from_bytes(&upgraded).unwrap();
         assert_eq!(reopened.to_bytes(), upgraded, "{name}: second reopen");
+        assert!(reopened
+            .nodes()
+            .all(|n| reopened.order_property_of(n) == OrderProperty::Unknown));
     }
 }
