@@ -1,0 +1,160 @@
+METHOD NAME=<global> CODE=<global> FULL_NAME=<includes>:<global> ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.arrayInitializer FULL_NAME=<operator>.arrayInitializer ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.unknown FULL_NAME=<operator>.unknown ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<clinit> CODE=<clinit> FULL_NAME=RN.<clinit>:RN() ORDER=2
+  BLOCK ORDER=1
+    CALL NAME=<operator>.arrayInitializer CODE=buff[2 /* plus */ + 1] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.arrayInitializer ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+      CALL NAME=<operator>.unknown CODE=2 /* plus */ + 1 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.unknown ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+        LITERAL CODE=2 TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+        LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+  MODIFIER ORDER=2
+  MODIFIER ORDER=3
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=RN ORDER=4
+
+METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1
+  TYPE_DECL NAME=RN CODE=typedef struct { char buff[2 /* plus */ + 1]; } FULL_NAME=RN ORDER=1
+    MEMBER NAME=buff CODE=buff[2 /* plus */ + 1] TYPE_FULL_NAME=char[2/*plus*/+1] ORDER=1
+    METHOD NAME=<clinit> CODE=<clinit> FULL_NAME=RN.<clinit>:RN() ORDER=2
+      BLOCK ORDER=1
+        CALL NAME=<operator>.arrayInitializer CODE=buff[2 /* plus */ + 1] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.arrayInitializer ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+          CALL NAME=<operator>.unknown CODE=2 /* plus */ + 1 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.unknown ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+            LITERAL CODE=2 TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+            LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+      MODIFIER ORDER=2
+      MODIFIER ORDER=3
+      METHOD_RETURN CODE=RET TYPE_FULL_NAME=RN ORDER=4
+  LOCAL NAME=RN CODE=typedef struct { char buff[2 /* plus */ + 1]; } RN TYPE_FULL_NAME=struct ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+    TYPE_REF CODE=typedef struct { char buff[2 /* plus */ + 1]; } TYPE_FULL_NAME=RN ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+NODES|META_DATA LANGUAGE=NEWC
+NODES|FILE NAME=<includes> ORDER=1
+NODES|FILE NAME=<unknown> ORDER=0
+NODES|FILE NAME=main.c ORDER=0
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<global> FILENAME=<unknown> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<includes>:<global> FILENAME=<includes> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|NAMESPACE NAME=<global>
+NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=RN FULL_NAME=RN CODE=typedef struct { char buff[2 /* plus */ + 1]; } AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=char[2/*plus*/+1] FULL_NAME=char[2/*plus*/+1] CODE=char[2/*plus*/+1] IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=<global> FULL_NAME=main.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=struct FULL_NAME=struct CODE=struct IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+NODES|TYPE NAME=RN FULL_NAME=RN TYPE_DECL_FULL_NAME=RN
+NODES|TYPE NAME=char[2/*plus*/+1] FULL_NAME=char[2/*plus*/+1] TYPE_DECL_FULL_NAME=char[2/*plus*/+1]
+NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+NODES|TYPE NAME=struct FULL_NAME=struct TYPE_DECL_FULL_NAME=struct
+EDGES|ARGUMENT RN.<clinit>:RN()#2 -> RN.<clinit>:RN()#3
+EDGES|ARGUMENT RN.<clinit>:RN()#3 -> RN.<clinit>:RN()#4
+EDGES|ARGUMENT RN.<clinit>:RN()#3 -> RN.<clinit>:RN()#5
+EDGES|CALL RN.<clinit>:RN()#2 -> <operator>.arrayInitializer#0
+EDGES|CALL RN.<clinit>:RN()#3 -> <operator>.unknown#0
+EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+EDGES|CFG <operator>.arrayInitializer#0 -> <operator>.arrayInitializer#4
+EDGES|CFG <operator>.unknown#0 -> <operator>.unknown#5
+EDGES|CFG RN.<clinit>:RN()#0 -> RN.<clinit>:RN()#4
+EDGES|CFG RN.<clinit>:RN()#2 -> RN.<clinit>:RN()#8
+EDGES|CFG RN.<clinit>:RN()#3 -> RN.<clinit>:RN()#2
+EDGES|CFG RN.<clinit>:RN()#4 -> RN.<clinit>:RN()#5
+EDGES|CFG RN.<clinit>:RN()#5 -> RN.<clinit>:RN()#3
+EDGES|CFG main.c:<global>#0 -> main.c:<global>#14
+EDGES|CFG main.c:<global>#14 -> main.c:<global>#15
+EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+EDGES|CONTAINS <operator>.arrayInitializer#0 -> <operator>.arrayInitializer#2
+EDGES|CONTAINS <operator>.unknown#0 -> <operator>.unknown#2
+EDGES|CONTAINS D:main.c:<global> -> main.c:<global>#0
+EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+EDGES|CONTAINS F:<includes> -> D:ANY
+EDGES|CONTAINS F:<includes> -> D:char[2/*plus*/+1]
+EDGES|CONTAINS F:<includes> -> D:int
+EDGES|CONTAINS F:<includes> -> D:struct
+EDGES|CONTAINS F:main.c -> D:main.c:<global>
+EDGES|CONTAINS RN.<clinit>:RN()#0 -> RN.<clinit>:RN()#1
+EDGES|CONTAINS RN.<clinit>:RN()#0 -> RN.<clinit>:RN()#2
+EDGES|CONTAINS RN.<clinit>:RN()#0 -> RN.<clinit>:RN()#3
+EDGES|CONTAINS RN.<clinit>:RN()#0 -> RN.<clinit>:RN()#4
+EDGES|CONTAINS RN.<clinit>:RN()#0 -> RN.<clinit>:RN()#5
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#1
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#13
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#14
+EDGES|CONTAINS main.c:<global>#1 -> RN.<clinit>:RN()#0
+EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.arrayInitializer#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.arrayInitializer#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.arrayInitializer#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.arrayInitializer#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.unknown#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.unknown#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.unknown#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.unknown#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.unknown#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.unknown#6 -> T:ANY
+EDGES|EVAL_TYPE RN.<clinit>:RN()#2 -> T:ANY
+EDGES|EVAL_TYPE RN.<clinit>:RN()#3 -> T:ANY
+EDGES|EVAL_TYPE RN.<clinit>:RN()#4 -> T:int
+EDGES|EVAL_TYPE RN.<clinit>:RN()#5 -> T:int
+EDGES|EVAL_TYPE RN.<clinit>:RN()#8 -> T:RN
+EDGES|EVAL_TYPE main.c:<global>#12 -> T:struct
+EDGES|EVAL_TYPE main.c:<global>#13 -> T:ANY
+EDGES|EVAL_TYPE main.c:<global>#14 -> T:RN
+EDGES|EVAL_TYPE main.c:<global>#15 -> T:ANY
+EDGES|EVAL_TYPE main.c:<global>#2 -> T:char[2/*plus*/+1]
+EDGES|PARAMETER_LINK <operator>.arrayInitializer#1 -> <operator>.arrayInitializer#3
+EDGES|PARAMETER_LINK <operator>.unknown#1 -> <operator>.unknown#3
+EDGES|PARAMETER_LINK <operator>.unknown#4 -> <operator>.unknown#6
+EDGES|REF NB:<global> -> NS:<global>
+EDGES|REF NB:<includes>:<global> -> NS:<global>
+EDGES|REF NB:main.c:<global> -> NS:<global>
+EDGES|REF T:ANY -> D:ANY
+EDGES|REF T:RN -> main.c:<global>#1
+EDGES|REF T:char[2/*plus*/+1] -> D:char[2/*plus*/+1]
+EDGES|REF T:int -> D:int
+EDGES|REF T:struct -> D:struct
+EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+EDGES|SOURCE_FILE D:ANY -> F:<includes>
+EDGES|SOURCE_FILE D:char[2/*plus*/+1] -> F:<includes>
+EDGES|SOURCE_FILE D:int -> F:<includes>
+EDGES|SOURCE_FILE D:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE D:struct -> F:<includes>
+EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
+EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>
+EDGES|SOURCE_FILE NB:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE RN.<clinit>:RN()#0 -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#0 -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#1 -> F:main.c
+FLOWS|REACHING_DEF[1] RN.<clinit>:RN()#5 -> RN.<clinit>:RN()#3
+FLOWS|REACHING_DEF[2 /* plus */ + 1] RN.<clinit>:RN()#3 -> RN.<clinit>:RN()#2
+FLOWS|REACHING_DEF[2 /* plus */ + 1] RN.<clinit>:RN()#3 -> RN.<clinit>:RN()#8
+FLOWS|REACHING_DEF[2] RN.<clinit>:RN()#4 -> RN.<clinit>:RN()#3
+FLOWS|REACHING_DEF[] <operator>.arrayInitializer#0 -> <operator>.arrayInitializer#1
+FLOWS|REACHING_DEF[] <operator>.unknown#0 -> <operator>.unknown#1
+FLOWS|REACHING_DEF[] <operator>.unknown#0 -> <operator>.unknown#4
+FLOWS|REACHING_DEF[] RN.<clinit>:RN()#0 -> RN.<clinit>:RN()#4
+FLOWS|REACHING_DEF[] RN.<clinit>:RN()#0 -> RN.<clinit>:RN()#5
+FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#14
+FLOWS|REACHING_DEF[buff[2 /* plus */ + 1]] RN.<clinit>:RN()#2 -> RN.<clinit>:RN()#8
+FLOWS|REACHING_DEF[p1] <operator>.arrayInitializer#1 -> <operator>.arrayInitializer#3
+FLOWS|REACHING_DEF[p1] <operator>.arrayInitializer#1 -> <operator>.arrayInitializer#4
+FLOWS|REACHING_DEF[p1] <operator>.unknown#1 -> <operator>.unknown#3
+FLOWS|REACHING_DEF[p1] <operator>.unknown#1 -> <operator>.unknown#5
+FLOWS|REACHING_DEF[p2] <operator>.unknown#4 -> <operator>.unknown#5
+FLOWS|REACHING_DEF[p2] <operator>.unknown#4 -> <operator>.unknown#6

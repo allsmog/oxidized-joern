@@ -109,6 +109,33 @@ pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
                     struct_decls.push((tag, esc(text(f, b)), u.file.clone()));
                 }
                 "type_definition" => {
+                    if let Some(aggregate) = typedef_aggregate(f) {
+                        let name = aggregate_name(aggregate, b);
+                        used_types.insert(name.clone());
+                        struct_decls.push((
+                            name.clone(),
+                            aggregate_code(aggregate, b),
+                            u.file.clone(),
+                        ));
+                        if aggregate.child_by_field_name("name").is_some() {
+                            for alias in typedef_declarators(f) {
+                                used_types.insert(typedef_alias_name(alias, b));
+                                let suffix = decl_suffix(alias, b);
+                                let prefix = if array_dimensions(alias).is_empty() {
+                                    ""
+                                } else {
+                                    "typedef"
+                                };
+                                used_types.insert(format!("{prefix}{name}{suffix}"));
+                                struct_decls.push((
+                                    aggregate_alias_full_name(aggregate, alias, b),
+                                    esc(text(f, b)),
+                                    u.file.clone(),
+                                ));
+                            }
+                        }
+                        continue;
+                    }
                     let aliases = typedef_declarators(f);
                     for alias in &aliases {
                         let tag = text(*alias, b).to_string();
@@ -413,6 +440,7 @@ pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
         // Standalone dump per user method, plus one per struct <clinit>.
         for f in translation_unit_items(root, b) {
             ctx.macros = macro_states.get(&f.id()).cloned().unwrap_or_default();
+            let aggregate = typedef_aggregate(f).unwrap_or(f);
             match f.kind() {
                 "function_definition" => {
                     if let Some((name, _, _)) = fn_header(f, b) {
@@ -427,15 +455,14 @@ pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
                         dumps.push((full, std::mem::take(&mut ctx.out)));
                     }
                 }
-                "struct_specifier" | "union_specifier" | "enum_specifier" if needs_clinit(f, b) => {
-                    let tag = f
-                        .child_by_field_name("name")
-                        .map(|x| text(x, b).to_string())
-                        .unwrap_or_default();
-                    let members = count_members(f);
+                "struct_specifier" | "union_specifier" | "enum_specifier" | "type_definition"
+                    if needs_clinit(aggregate, b) =>
+                {
+                    let tag = aggregate_name(aggregate, b);
+                    let members = count_members(aggregate);
                     let key = format!("{tag}.<clinit>:{tag}()");
                     ctx.begin_block(&key);
-                    ctx.emit_clinit(f, b, 0, members + 1);
+                    ctx.emit_clinit(aggregate, b, 0, members + 1);
                     ctx.edge("SOURCE_FILE", format!("M:{key}"), format!("F:{}", u.file));
                     dumps.push((key, std::mem::take(&mut ctx.out)));
                 }
@@ -584,8 +611,9 @@ pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
             .and_then(|line| line.rsplit_once(" ORDER="))
             .and_then(|(_, order)| order.split_whitespace().next())
             .unwrap_or("1");
+        let name = tag.split("<duplicate>").next().unwrap_or(tag);
         tds.push((tag.clone(), format!(
-            "NODES|TYPE_DECL NAME={tag} FULL_NAME={tag} CODE={code} AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME={file} ORDER={order}\n"
+            "NODES|TYPE_DECL NAME={name} FULL_NAME={tag} CODE={code} AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME={file} ORDER={order}\n"
         )));
     }
     for (name, file) in &fn_decls {
@@ -1415,6 +1443,52 @@ impl Ctx<'_> {
                 {
                     self.emit_type_decl(n, b, 1);
                 }
+                "type_definition" if typedef_aggregate(n).is_some() => {
+                    let aggregate = typedef_aggregate(n).unwrap();
+                    self.emit_type_decl(aggregate, b, 1);
+                    for alias in typedef_declarators(n) {
+                        let name = typedef_alias_name(alias, b);
+                        if aggregate.child_by_field_name("name").is_some() {
+                            self.line(
+                                1,
+                                "TYPE_DECL",
+                                P {
+                                    name: Some(name.clone()),
+                                    code: Some(esc(text(n, b))),
+                                    full: Some(aggregate_alias_full_name(aggregate, alias, b)),
+                                    order: Some(1),
+                                    ..Default::default()
+                                },
+                            );
+                        } else {
+                            let keyword = if !array_dimensions(alias).is_empty() {
+                                "typedef"
+                            } else if aggregate.kind() == "union_specifier" {
+                                "union"
+                            } else {
+                                "struct"
+                            };
+                            self.line(
+                                1,
+                                "LOCAL",
+                                P {
+                                    name: Some(name),
+                                    code: Some(format!(
+                                        "{} {}",
+                                        text(n, b)[..aggregate.end_byte() - n.start_byte()]
+                                            .split_whitespace()
+                                            .collect::<Vec<_>>()
+                                            .join(" "),
+                                        esc(text(alias, b))
+                                    )),
+                                    tfn: Some(format!("{keyword}{}", decl_suffix(alias, b))),
+                                    order: Some(1),
+                                    ..Default::default()
+                                },
+                            );
+                        }
+                    }
+                }
                 "function_definition" => {
                     self.emit_method(n, b, 1, active_methods.contains(&n.id()));
                 }
@@ -1456,6 +1530,46 @@ impl Ctx<'_> {
                         },
                     );
                     slot += 1;
+                }
+                "type_definition" if typedef_aggregate(n).is_some() => {
+                    let aggregate = typedef_aggregate(n).unwrap();
+                    self.line(
+                        2,
+                        "TYPE_REF",
+                        P {
+                            code: Some(aggregate_code(aggregate, b)),
+                            tfn: Some(aggregate_name(aggregate, b)),
+                            order: Some(slot),
+                            ..Default::default()
+                        },
+                    );
+                    slot += 1;
+                    for alias in typedef_declarators(n) {
+                        let dimensions = array_dimensions(alias);
+                        if dimensions.is_empty() {
+                            continue;
+                        }
+                        let sizes: Vec<_> = dimensions.into_iter().flatten().collect();
+                        self.note_call("<operator>.arrayInitializer", sizes.len());
+                        self.line(
+                            2,
+                            "CALL",
+                            P {
+                                name: Some("<operator>.arrayInitializer".into()),
+                                code: Some(esc(text(alias, b))),
+                                tfn: Some("ANY".into()),
+                                mfn: Some("<operator>.arrayInitializer".into()),
+                                order: Some(slot),
+                                dispatch: Some("STATIC_DISPATCH".into()),
+                                ..Default::default()
+                            },
+                        );
+                        for (i, size) in sizes.into_iter().enumerate() {
+                            let index = (i + 1) as i64;
+                            self.emit_expr(size, b, 3, index, Some(index));
+                        }
+                        slot += 1;
+                    }
                 }
                 "type_definition" => {
                     // Each ordinary alias keeps the complete statement CODE.
@@ -1539,16 +1653,13 @@ impl Ctx<'_> {
     /// sized array, a `<clinit>` method follows the members to host the
     /// `<operator>.arrayInitializer` calls.
     fn emit_type_decl(&mut self, n: Node, b: &[u8], depth: usize) {
-        let name = n
-            .child_by_field_name("name")
-            .map(|x| text(x, b).to_string())
-            .unwrap_or_default();
+        let name = aggregate_name(n, b);
         self.line(
             depth,
             "TYPE_DECL",
             P {
                 name: Some(name.clone()),
-                code: Some(esc(text(n, b))),
+                code: Some(aggregate_code(n, b)),
                 full: Some(name.clone()),
                 order: Some(1),
                 ..Default::default()
@@ -1604,7 +1715,7 @@ impl Ctx<'_> {
                         P {
                             name: Some(mname),
                             code: Some(text(d, b).to_string()),
-                            tfn: Some(format!("{ty}{}", decl_suffix(d, b))),
+                            tfn: Some(format!("{ty}{}", member_decl_suffix(d, b, &self.macros))),
                             order: Some(order),
                             ..Default::default()
                         },
@@ -1623,10 +1734,7 @@ impl Ctx<'_> {
     /// `<operator>.arrayInitializer` call per sized array, two bare MODIFIERs,
     /// and a METHOD_RETURN typed as the struct.
     fn emit_clinit(&mut self, n: Node, b: &[u8], depth: usize, order: i64) {
-        let tag = n
-            .child_by_field_name("name")
-            .map(|x| text(x, b).to_string())
-            .unwrap_or_default();
+        let tag = aggregate_name(n, b);
         self.line(
             depth,
             "METHOD",
@@ -1716,8 +1824,9 @@ impl Ctx<'_> {
                 }
                 for d in named_children(f) {
                     if d.kind() == "array_declarator" {
-                        if let Some(sz) = d.child_by_field_name("size") {
-                            self.note_call("<operator>.arrayInitializer", 1);
+                        let sizes: Vec<_> = array_dimensions(d).into_iter().flatten().collect();
+                        if !sizes.is_empty() {
+                            self.note_call("<operator>.arrayInitializer", sizes.len());
                             self.line(
                                 depth + 2,
                                 "CALL",
@@ -1731,7 +1840,10 @@ impl Ctx<'_> {
                                     ..Default::default()
                                 },
                             );
-                            self.emit_expr(sz, b, depth + 3, 1, Some(1));
+                            for (i, size) in sizes.into_iter().enumerate() {
+                                let index = (i + 1) as i64;
+                                self.emit_expr(size, b, depth + 3, index, Some(index));
+                            }
                             co += 1;
                         }
                     }
@@ -3918,6 +4030,7 @@ fn body_macro_context<'tree>(
                         node.kind(),
                         "function_definition"
                             | "declaration"
+                            | "type_definition"
                             | "struct_specifier"
                             | "union_specifier"
                             | "enum_specifier"
@@ -4456,6 +4569,59 @@ fn decl_suffix(n: Node, b: &[u8]) -> String {
     parts.concat()
 }
 
+/// Array members use TypeNameProvider's nodeSignature dimension spelling:
+/// an entire macro invocation expands, while a surrounding source expression
+/// retains its spelling. cleanType then removes whitespace, including within
+/// comments. The macro snapshot belongs to the aggregate's source position.
+fn member_decl_suffix(n: Node, b: &[u8], macros: &HashMap<String, MacroDef>) -> String {
+    let mut parts = Vec::new();
+    let mut cur = n;
+    loop {
+        match cur.kind() {
+            "pointer_declarator" | "abstract_pointer_declarator" => parts.push("*".into()),
+            "array_declarator" | "abstract_array_declarator" => {
+                let size = cur
+                    .child_by_field_name("size")
+                    .map(|size| {
+                        let whole_macro = match size.kind() {
+                            "identifier" => macros
+                                .get(text(size, b))
+                                .is_some_and(|m| m.params.is_none()),
+                            "call_expression" => size
+                                .child_by_field_name("function")
+                                .and_then(|function| macros.get(text(function, b)))
+                                .is_some_and(|m| m.params.is_some()),
+                            _ => false,
+                        };
+                        let spelling = if whole_macro {
+                            expand_body_expression(
+                                text(size, b),
+                                macros,
+                                &mut HashSet::new(),
+                                &mut 65_536,
+                            )
+                        } else {
+                            text(size, b).to_string()
+                        };
+                        spelling
+                            .chars()
+                            .filter(|c| !c.is_whitespace())
+                            .collect::<String>()
+                    })
+                    .unwrap_or_default();
+                parts.push(format!("[{size}]"));
+            }
+            _ => break,
+        }
+        match cur.child_by_field_name("declarator") {
+            Some(child) => cur = child,
+            None => break,
+        }
+    }
+    parts.reverse();
+    parts.concat()
+}
+
 /// Object declarators use CDT's binding spelling; parameter/member renderers
 /// retain their distinct suffix ordering. A nested declarator contributes its
 /// pointer shape but not inner array dimensions (`*(*p[3])[2]` -> `*(*)[2]`).
@@ -4813,15 +4979,72 @@ fn flatten_comma<'t>(n: Node<'t>, out: &mut Vec<Node<'t>>) {
     }
 }
 
+// A typedef aggregate owns one body; its tag (or first anonymous alias)
+// names that body independently of the alias declarations which follow it.
+fn typedef_aggregate(node: Node) -> Option<Node> {
+    if node.kind() != "type_definition" {
+        return None;
+    }
+    node.child_by_field_name("type").filter(|n| {
+        matches!(n.kind(), "struct_specifier" | "union_specifier")
+            && n.child_by_field_name("body").is_some()
+    })
+}
+
+fn typedef_alias_name(node: Node, bytes: &[u8]) -> String {
+    if matches!(node.kind(), "identifier" | "type_identifier") {
+        text(node, bytes).to_string()
+    } else {
+        node.child_by_field_name("declarator")
+            .map(|child| typedef_alias_name(child, bytes))
+            .unwrap_or_default()
+    }
+}
+
+fn aggregate_name(node: Node, bytes: &[u8]) -> String {
+    node.child_by_field_name("name")
+        .map(|name| text(name, bytes).to_string())
+        .or_else(|| {
+            node.parent()
+                .filter(|parent| typedef_aggregate(*parent) == Some(node))
+                .and_then(|parent| typedef_declarators(parent).first().copied())
+                .map(|alias| typedef_alias_name(alias, bytes))
+        })
+        .unwrap_or_default()
+}
+
+// A named body and its same-spelled typedef alias are distinct TYPE_DECLs.
+// Joern's duplicate suffix belongs to the alias, while TYPE references retain
+// the original aggregate name.
+fn aggregate_alias_full_name(aggregate: Node, alias: Node, bytes: &[u8]) -> String {
+    let name = typedef_alias_name(alias, bytes);
+    if aggregate
+        .child_by_field_name("name")
+        .is_some_and(|tag| text(tag, bytes) == name)
+    {
+        format!("{name}<duplicate>0")
+    } else {
+        name
+    }
+}
+
+fn aggregate_code(node: Node, bytes: &[u8]) -> String {
+    let start = node
+        .parent()
+        .filter(|parent| typedef_aggregate(*parent) == Some(node))
+        .map_or(node.start_byte(), |parent| parent.start_byte());
+    esc(std::str::from_utf8(&bytes[start..node.end_byte()]).unwrap_or(""))
+}
+
 fn needs_clinit(n: Node, _b: &[u8]) -> bool {
     let Some(body) = n.child_by_field_name("body") else {
         return false;
     };
     named_children(body).iter().any(|f| {
         (f.kind() == "field_declaration"
-            && named_children(*f)
-                .iter()
-                .any(|d| d.kind() == "array_declarator" && d.child_by_field_name("size").is_some()))
+            && named_children(*f).iter().any(|d| {
+                d.kind() == "array_declarator" && array_dimensions(*d).iter().any(Option::is_some)
+            }))
             || (f.kind() == "enumerator" && f.child_by_field_name("value").is_some())
     })
 }

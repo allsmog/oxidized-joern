@@ -1,0 +1,118 @@
+METHOD NAME=<global> CODE=<global> FULL_NAME=<includes>:<global> ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.arrayInitializer FULL_NAME=<operator>.arrayInitializer ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<clinit> CODE=<clinit> FULL_NAME=Tag.<clinit>:Tag() ORDER=2
+  BLOCK ORDER=1
+    CALL NAME=<operator>.arrayInitializer CODE=buff[4] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.arrayInitializer ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+      LITERAL CODE=4 TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+  MODIFIER ORDER=2
+  MODIFIER ORDER=3
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=Tag ORDER=4
+
+METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1
+  TYPE_DECL NAME=Tag CODE=struct Tag { char buff[4]; } FULL_NAME=Tag ORDER=1
+    MEMBER NAME=buff CODE=buff[4] TYPE_FULL_NAME=char[4] ORDER=1
+    METHOD NAME=<clinit> CODE=<clinit> FULL_NAME=Tag.<clinit>:Tag() ORDER=2
+      BLOCK ORDER=1
+        CALL NAME=<operator>.arrayInitializer CODE=buff[4] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.arrayInitializer ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+          LITERAL CODE=4 TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+      MODIFIER ORDER=2
+      MODIFIER ORDER=3
+      METHOD_RETURN CODE=RET TYPE_FULL_NAME=Tag ORDER=4
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+    TYPE_REF CODE=struct Tag { char buff[4]; } TYPE_FULL_NAME=Tag ORDER=1
+    TYPE_DECL NAME=Alias CODE=typedef struct Tag Alias; FULL_NAME=Alias ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+NODES|META_DATA LANGUAGE=NEWC
+NODES|FILE NAME=<includes> ORDER=1
+NODES|FILE NAME=<unknown> ORDER=0
+NODES|FILE NAME=main.c ORDER=0
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<global> FILENAME=<unknown> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<includes>:<global> FILENAME=<includes> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|NAMESPACE NAME=<global>
+NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=Alias FULL_NAME=Alias CODE=typedef struct Tag Alias; AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=main.c ORDER=2
+NODES|TYPE_DECL NAME=Tag FULL_NAME=Tag CODE=struct Tag { char buff[4]; } AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=char[4] FULL_NAME=char[4] CODE=char[4] IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=<global> FULL_NAME=main.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+NODES|TYPE NAME=Alias FULL_NAME=Alias TYPE_DECL_FULL_NAME=Alias
+NODES|TYPE NAME=Tag FULL_NAME=Tag TYPE_DECL_FULL_NAME=Tag
+NODES|TYPE NAME=char[4] FULL_NAME=char[4] TYPE_DECL_FULL_NAME=char[4]
+NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+EDGES|ARGUMENT Tag.<clinit>:Tag()#2 -> Tag.<clinit>:Tag()#3
+EDGES|CALL Tag.<clinit>:Tag()#2 -> <operator>.arrayInitializer#0
+EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+EDGES|CFG <operator>.arrayInitializer#0 -> <operator>.arrayInitializer#4
+EDGES|CFG Tag.<clinit>:Tag()#0 -> Tag.<clinit>:Tag()#3
+EDGES|CFG Tag.<clinit>:Tag()#2 -> Tag.<clinit>:Tag()#6
+EDGES|CFG Tag.<clinit>:Tag()#3 -> Tag.<clinit>:Tag()#2
+EDGES|CFG main.c:<global>#0 -> main.c:<global>#11
+EDGES|CFG main.c:<global>#11 -> main.c:<global>#13
+EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+EDGES|CONTAINS <operator>.arrayInitializer#0 -> <operator>.arrayInitializer#2
+EDGES|CONTAINS D:main.c:<global> -> main.c:<global>#0
+EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+EDGES|CONTAINS F:<includes> -> D:ANY
+EDGES|CONTAINS F:<includes> -> D:char[4]
+EDGES|CONTAINS F:<includes> -> D:int
+EDGES|CONTAINS F:main.c -> D:main.c:<global>
+EDGES|CONTAINS Tag.<clinit>:Tag()#0 -> Tag.<clinit>:Tag()#1
+EDGES|CONTAINS Tag.<clinit>:Tag()#0 -> Tag.<clinit>:Tag()#2
+EDGES|CONTAINS Tag.<clinit>:Tag()#0 -> Tag.<clinit>:Tag()#3
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#1
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#10
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#11
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#12
+EDGES|CONTAINS main.c:<global>#1 -> Tag.<clinit>:Tag()#0
+EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.arrayInitializer#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.arrayInitializer#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.arrayInitializer#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.arrayInitializer#4 -> T:ANY
+EDGES|EVAL_TYPE Tag.<clinit>:Tag()#2 -> T:ANY
+EDGES|EVAL_TYPE Tag.<clinit>:Tag()#3 -> T:int
+EDGES|EVAL_TYPE Tag.<clinit>:Tag()#6 -> T:Tag
+EDGES|EVAL_TYPE main.c:<global>#10 -> T:ANY
+EDGES|EVAL_TYPE main.c:<global>#11 -> T:Tag
+EDGES|EVAL_TYPE main.c:<global>#13 -> T:ANY
+EDGES|EVAL_TYPE main.c:<global>#2 -> T:char[4]
+EDGES|PARAMETER_LINK <operator>.arrayInitializer#1 -> <operator>.arrayInitializer#3
+EDGES|REF NB:<global> -> NS:<global>
+EDGES|REF NB:<includes>:<global> -> NS:<global>
+EDGES|REF NB:main.c:<global> -> NS:<global>
+EDGES|REF T:ANY -> D:ANY
+EDGES|REF T:Alias -> main.c:<global>#12
+EDGES|REF T:Tag -> main.c:<global>#1
+EDGES|REF T:char[4] -> D:char[4]
+EDGES|REF T:int -> D:int
+EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+EDGES|SOURCE_FILE D:ANY -> F:<includes>
+EDGES|SOURCE_FILE D:char[4] -> F:<includes>
+EDGES|SOURCE_FILE D:int -> F:<includes>
+EDGES|SOURCE_FILE D:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
+EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>
+EDGES|SOURCE_FILE NB:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE Tag.<clinit>:Tag()#0 -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#0 -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#1 -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#12 -> F:main.c
+FLOWS|REACHING_DEF[4] Tag.<clinit>:Tag()#3 -> Tag.<clinit>:Tag()#2
+FLOWS|REACHING_DEF[] <operator>.arrayInitializer#0 -> <operator>.arrayInitializer#1
+FLOWS|REACHING_DEF[] Tag.<clinit>:Tag()#0 -> Tag.<clinit>:Tag()#3
+FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#11
+FLOWS|REACHING_DEF[buff[4]] Tag.<clinit>:Tag()#2 -> Tag.<clinit>:Tag()#6
+FLOWS|REACHING_DEF[p1] <operator>.arrayInitializer#1 -> <operator>.arrayInitializer#3
+FLOWS|REACHING_DEF[p1] <operator>.arrayInitializer#1 -> <operator>.arrayInitializer#4
