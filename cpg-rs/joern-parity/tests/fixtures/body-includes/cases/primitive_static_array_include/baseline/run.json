@@ -1,0 +1,17 @@
+{
+  "case": "primitive_static_array_include",
+  "command": [
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/ninth-batch/reviewed-final-real-differential/bin/joern-parity",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/tenth-batch/frozen-baseline-v1/input/primitive_static_array_include/main.c",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/tenth-batch/frozen-baseline-v1/input/primitive_static_array_include/table.h"
+  ],
+  "inputHashes": {
+    "main.c": "ef12857b61998de6a68ac326cb8005363a62cf1d35e93da452c63700bc6e71ff",
+    "table.h": "01722e7790931e4dffd1479a5bca2487679e42b6ea367e58798b1a37977aca51"
+  },
+  "error": null,
+  "exitCode": 0,
+  "seconds": 0.01132508399314247,
+  "actualSha256": "5cf358788ddb5b9a516fa01dc203241b1f9f0c276739df9febd3ba0f18e0b7fd",
+  "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

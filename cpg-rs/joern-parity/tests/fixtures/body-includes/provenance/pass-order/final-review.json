@@ -1,0 +1,28 @@
+{
+  "status": "PINNED_SOURCE_AND_LIVE_OWNERSHIP_EXPLANATION_CONFIRMED",
+  "bindings": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/tenth-body-include-v1-review/pass-order/bindings.json",
+    "sha256": "512db0aaac209908db0b019339357e2c28c3ee9976b7ee7c608f5da5794eadeb",
+    "bytes": 3913
+  },
+  "review": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/tenth-body-include-v1-review/pass-order/review.md",
+    "sha256": "0d526e7dbae8f6b6725faa994f24618085891442401b5881e7a4c2615043ccd5",
+    "bytes": 4694
+  },
+  "liveHeaderCompetitors": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/tenth-body-include-v1-review/pass-order/live-header-competitors.json",
+    "sha256": "153b207abfec0425f4d6da12cc9b7d27d91fa8c4d4958ea441779392fd08914f",
+    "bytes": 4550
+  },
+  "heldV1Receipt": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/tenth-body-include-v1-review/final-review.json",
+    "sha256": "8f5a7f636ad71b0e6e7e056b4d1ce19169845322c2449eb715158e786dbfed02",
+    "bytes": 1592
+  },
+  "constructionAndMergeVerified": true,
+  "headerCompetitionAssertions": 3,
+  "noGraphProducersBuildsOrSourceEdits": true,
+  "conclusion": "A generated .h header-pass MethodInfo wins a duplicate full name over source-pass MethodInfo; otherwise source-pass metadata survives. Physical use/definition filename alone is not the rule.",
+  "limit": "Within-pass parallel file ordering remains outside this bounded proof."
+}

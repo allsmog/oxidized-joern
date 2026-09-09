@@ -1,0 +1,27 @@
+   Compiling cpg-lang-c v0.1.1 (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/cpg-rs/cpg-lang-c)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.44s
+     Running unittests src/lib.rs (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/target/debug/deps/cpg_lang_c-e293d013aa4baa36)
+
+running 1 test
+test import::tests::included_initializer_uses_header_lines_without_consuming_caller_calls ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 19 filtered out; finished in 0.02s
+
+     Running tests/control_truth.rs (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/target/debug/deps/control_truth-fe1bec09db258763)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 5 filtered out; finished in 0.00s
+
+     Running tests/declaration_shapes.rs (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/target/debug/deps/declaration_shapes-94230ce591648e98)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 6 filtered out; finished in 0.00s
+
+     Running tests/method_address_definitions.rs (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/target/debug/deps/method_address_definitions-fc3b57016bfadfda)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 3 filtered out; finished in 0.00s
+

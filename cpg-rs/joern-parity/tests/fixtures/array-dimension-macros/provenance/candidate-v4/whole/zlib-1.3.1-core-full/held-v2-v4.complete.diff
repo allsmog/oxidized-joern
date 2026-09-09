@@ -1,0 +1,249 @@
+--- held-v2 complete records with multiplicity
++++ V4 complete records with multiplicity
+-AST|                            IDENTIFIER NAME=static_ltree CODE=<global> static_ltree TYPE_FULL_NAME=local[(256+1+29)+2] ORDER=1 ARGUMENT_INDEX=1
+-AST|                          IDENTIFIER NAME=static_ltree CODE=<global> static_ltree TYPE_FULL_NAME=local[(256+1+29)+2] ORDER=1 ARGUMENT_INDEX=1
+-AST|                        IDENTIFIER NAME=_length_code CODE=<global> _length_code TYPE_FULL_NAME=uch[258-3+1] ORDER=1 ARGUMENT_INDEX=1
+-AST|                        IDENTIFIER NAME=static_ltree CODE=<global> static_ltree TYPE_FULL_NAME=local[(256+1+29)+2] ORDER=1 ARGUMENT_INDEX=1
+-AST|                      IDENTIFIER NAME=_length_code CODE=<global> _length_code TYPE_FULL_NAME=uch[258-3+1] ORDER=1 ARGUMENT_INDEX=1
+-AST|                      IDENTIFIER NAME=count CODE=count TYPE_FULL_NAME=shortunsigned[15+1] ORDER=1 ARGUMENT_INDEX=1
+-AST|                      IDENTIFIER NAME=static_ltree CODE=<global> static_ltree TYPE_FULL_NAME=local[(256+1+29)+2] ORDER=1 ARGUMENT_INDEX=1
+-AST|                    IDENTIFIER NAME=count CODE=count TYPE_FULL_NAME=shortunsigned[15+1] ORDER=1 ARGUMENT_INDEX=1
+-AST|                    IDENTIFIER NAME=next_code CODE=next_code TYPE_FULL_NAME=ush[15+1] ORDER=1 ARGUMENT_INDEX=1
+-AST|                    IDENTIFIER NAME=offs CODE=offs TYPE_FULL_NAME=shortunsigned[15+1] ORDER=1 ARGUMENT_INDEX=1
+-AST|                  IDENTIFIER NAME=count CODE=count TYPE_FULL_NAME=shortunsigned[15+1] ORDER=1 ARGUMENT_INDEX=1
+-AST|                  IDENTIFIER NAME=next_code CODE=next_code TYPE_FULL_NAME=ush[15+1] ORDER=1 ARGUMENT_INDEX=1
+-AST|                  IDENTIFIER NAME=offs CODE=offs TYPE_FULL_NAME=shortunsigned[15+1] ORDER=1 ARGUMENT_INDEX=1
+-AST|                  IDENTIFIER NAME=static_ltree CODE=<global> static_ltree TYPE_FULL_NAME=local[(256+1+29)+2] ORDER=1 ARGUMENT_INDEX=1
+-AST|                IDENTIFIER NAME=count CODE=count TYPE_FULL_NAME=shortunsigned[15+1] ORDER=1 ARGUMENT_INDEX=1
+-AST|                IDENTIFIER NAME=static_ltree CODE=<global> static_ltree TYPE_FULL_NAME=local[(256+1+29)+2] ORDER=1 ARGUMENT_INDEX=1
+-AST|              IDENTIFIER NAME=count CODE=count TYPE_FULL_NAME=shortunsigned[15+1] ORDER=1 ARGUMENT_INDEX=1
+-AST|              IDENTIFIER NAME=count CODE=count TYPE_FULL_NAME=shortunsigned[15+1] ORDER=1 ARGUMENT_INDEX=1
+-AST|              IDENTIFIER NAME=count CODE=count TYPE_FULL_NAME=shortunsigned[15+1] ORDER=1 ARGUMENT_INDEX=1
+-AST|              IDENTIFIER NAME=count CODE=count TYPE_FULL_NAME=shortunsigned[15+1] ORDER=1 ARGUMENT_INDEX=1
+-AST|              IDENTIFIER NAME=next_code CODE=next_code TYPE_FULL_NAME=ush[15+1] ORDER=1 ARGUMENT_INDEX=1
+-AST|              IDENTIFIER NAME=offs CODE=offs TYPE_FULL_NAME=shortunsigned[15+1] ORDER=1 ARGUMENT_INDEX=1
+-AST|            IDENTIFIER NAME=count CODE=count TYPE_FULL_NAME=shortunsigned[15+1] ORDER=1 ARGUMENT_INDEX=1
+-AST|            IDENTIFIER NAME=count CODE=count TYPE_FULL_NAME=shortunsigned[15+1] ORDER=1 ARGUMENT_INDEX=1
+-AST|            IDENTIFIER NAME=count CODE=count TYPE_FULL_NAME=shortunsigned[15+1] ORDER=1 ARGUMENT_INDEX=1
+-AST|            IDENTIFIER NAME=count CODE=count TYPE_FULL_NAME=shortunsigned[15+1] ORDER=1 ARGUMENT_INDEX=1
+-AST|            IDENTIFIER NAME=count CODE=count TYPE_FULL_NAME=shortunsigned[15+1] ORDER=1 ARGUMENT_INDEX=1
+-AST|            IDENTIFIER NAME=count CODE=count TYPE_FULL_NAME=shortunsigned[15+1] ORDER=1 ARGUMENT_INDEX=1
+-AST|            IDENTIFIER NAME=next_code CODE=next_code TYPE_FULL_NAME=ush[15+1] ORDER=1 ARGUMENT_INDEX=1
+-AST|            IDENTIFIER NAME=offs CODE=offs TYPE_FULL_NAME=shortunsigned[15+1] ORDER=1 ARGUMENT_INDEX=1
+-AST|            IDENTIFIER NAME=offs CODE=offs TYPE_FULL_NAME=shortunsigned[15+1] ORDER=1 ARGUMENT_INDEX=1
+-AST|          IDENTIFIER NAME=count CODE=count TYPE_FULL_NAME=shortunsigned[15+1] ORDER=1 ARGUMENT_INDEX=1
+-AST|          IDENTIFIER NAME=count CODE=count TYPE_FULL_NAME=shortunsigned[15+1] ORDER=1 ARGUMENT_INDEX=1
+-AST|          IDENTIFIER NAME=offs CODE=offs TYPE_FULL_NAME=shortunsigned[15+1] ORDER=1 ARGUMENT_INDEX=1
+-AST|          IDENTIFIER NAME=offs CODE=offs TYPE_FULL_NAME=shortunsigned[15+1] ORDER=1 ARGUMENT_INDEX=1
+-AST|          IDENTIFIER NAME=shortunsigned[15+1] CODE=shortunsigned[15+1] TYPE_FULL_NAME=shortunsigned[15+1] ORDER=1 ARGUMENT_INDEX=1
+-AST|          IDENTIFIER NAME=shortunsigned[15+1] CODE=shortunsigned[15+1] TYPE_FULL_NAME=shortunsigned[15+1] ORDER=1 ARGUMENT_INDEX=1
+-AST|          IDENTIFIER NAME=ush[15+1] CODE=ush[15+1] TYPE_FULL_NAME=ush[15+1] ORDER=1 ARGUMENT_INDEX=1
+-AST|        CALL NAME=<operator>.alloc CODE=count[MAXBITS+1] TYPE_FULL_NAME=shortunsigned[15+1] METHOD_FULL_NAME=<operator>.alloc ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+-AST|        CALL NAME=<operator>.alloc CODE=next_code[MAX_BITS+1] TYPE_FULL_NAME=ush[15+1] METHOD_FULL_NAME=<operator>.alloc ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+-AST|        CALL NAME=<operator>.alloc CODE=offs[MAXBITS+1] TYPE_FULL_NAME=shortunsigned[15+1] METHOD_FULL_NAME=<operator>.alloc ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+-AST|        IDENTIFIER NAME=count CODE=count TYPE_FULL_NAME=shortunsigned[15+1] ORDER=1 ARGUMENT_INDEX=1
+-AST|        IDENTIFIER NAME=next_code CODE=next_code TYPE_FULL_NAME=ush[15+1] ORDER=1 ARGUMENT_INDEX=1
+-AST|        IDENTIFIER NAME=offs CODE=offs TYPE_FULL_NAME=shortunsigned[15+1] ORDER=1 ARGUMENT_INDEX=1
+-AST|        IDENTIFIER NAME=offs CODE=offs TYPE_FULL_NAME=shortunsigned[15+1] ORDER=1 ARGUMENT_INDEX=1
+-AST|        IDENTIFIER NAME=shortunsigned[15+1] CODE=shortunsigned[15+1] TYPE_FULL_NAME=shortunsigned[15+1] ORDER=1 ARGUMENT_INDEX=1
+-AST|        IDENTIFIER NAME=shortunsigned[15+1] CODE=shortunsigned[15+1] TYPE_FULL_NAME=shortunsigned[15+1] ORDER=1 ARGUMENT_INDEX=1
+-AST|        IDENTIFIER NAME=static_ltree CODE=static_ltree TYPE_FULL_NAME=local[(256+1+29)+2] ORDER=1 ARGUMENT_INDEX=1
+-AST|        IDENTIFIER NAME=ush[15+1] CODE=ush[15+1] TYPE_FULL_NAME=ush[15+1] ORDER=1 ARGUMENT_INDEX=1
+-AST|      CALL NAME=<operator>.alloc CODE=count[MAXBITS+1] TYPE_FULL_NAME=shortunsigned[15+1] METHOD_FULL_NAME=<operator>.alloc ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+-AST|      CALL NAME=<operator>.alloc CODE=next_code[MAX_BITS+1] TYPE_FULL_NAME=ush[15+1] METHOD_FULL_NAME=<operator>.alloc ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+-AST|      CALL NAME=<operator>.alloc CODE=offs[MAXBITS+1] TYPE_FULL_NAME=shortunsigned[15+1] METHOD_FULL_NAME=<operator>.alloc ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+-AST|      IDENTIFIER NAME=count CODE=count TYPE_FULL_NAME=shortunsigned[15+1] ORDER=1 ARGUMENT_INDEX=1
+-AST|      IDENTIFIER NAME=next_code CODE=next_code TYPE_FULL_NAME=ush[15+1] ORDER=1 ARGUMENT_INDEX=1
+-AST|      IDENTIFIER NAME=offs CODE=offs TYPE_FULL_NAME=shortunsigned[15+1] ORDER=1 ARGUMENT_INDEX=1
+-AST|      LOCAL NAME=_length_code CODE=<global> _length_code TYPE_FULL_NAME=uch[258-3+1] ORDER=0
+-AST|      LOCAL NAME=count CODE=unsigned short count[MAXBITS+1] TYPE_FULL_NAME=shortunsigned[15+1] ORDER=20
+-AST|      LOCAL NAME=next_code CODE=ush next_code[MAX_BITS+1] TYPE_FULL_NAME=ush[15+1] ORDER=1
+-AST|      LOCAL NAME=offs CODE=unsigned short offs[MAXBITS+1] TYPE_FULL_NAME=shortunsigned[15+1] ORDER=22
+-AST|      LOCAL NAME=static_ltree CODE=<global> static_ltree TYPE_FULL_NAME=local[(256+1+29)+2] ORDER=0
+-AST|    LOCAL NAME=_length_code CODE=<global> _length_code TYPE_FULL_NAME=uch[258-3+1] ORDER=0
+-AST|    LOCAL NAME=_length_code CODE=uch _length_code[MAX_MATCH-MIN_MATCH+1] TYPE_FULL_NAME=uch[258-3+1] ORDER=15
+-AST|    LOCAL NAME=count CODE=unsigned short count[MAXBITS+1] TYPE_FULL_NAME=shortunsigned[15+1] ORDER=20
+-AST|    LOCAL NAME=next_code CODE=ush next_code[MAX_BITS+1] TYPE_FULL_NAME=ush[15+1] ORDER=1
+-AST|    LOCAL NAME=offs CODE=unsigned short offs[MAXBITS+1] TYPE_FULL_NAME=shortunsigned[15+1] ORDER=22
+-AST|    LOCAL NAME=static_ltree CODE=<global> static_ltree TYPE_FULL_NAME=local[(256+1+29)+2] ORDER=0
+-AST|    LOCAL NAME=static_ltree CODE=local static_ltree[L_CODES+2] TYPE_FULL_NAME=local[(256+1+29)+2] ORDER=9
+-EDGES|CONTAINS F:<includes> -> D:local[(256+1+29)+2]
+-EDGES|CONTAINS F:<includes> -> D:shortunsigned[15+1]
+-EDGES|CONTAINS F:<includes> -> D:uch[258-3+1]
+-EDGES|CONTAINS F:<includes> -> D:ush[15+1]
+-EDGES|EVAL_TYPE _tr_align#133 -> T:local[(256+1+29)+2]
+-EDGES|EVAL_TYPE _tr_align#156 -> T:local[(256+1+29)+2]
+-EDGES|EVAL_TYPE _tr_align#244 -> T:local[(256+1+29)+2]
+-EDGES|EVAL_TYPE _tr_align#4 -> T:local[(256+1+29)+2]
+-EDGES|EVAL_TYPE compress_block#13 -> T:uch[258-3+1]
+-EDGES|EVAL_TYPE compress_block#209 -> T:uch[258-3+1]
+-EDGES|EVAL_TYPE gen_codes#10 -> T:ush[15+1]
+-EDGES|EVAL_TYPE gen_codes#11 -> T:ush[15+1]
+-EDGES|EVAL_TYPE gen_codes#12 -> T:ush[15+1]
+-EDGES|EVAL_TYPE gen_codes#49 -> T:ush[15+1]
+-EDGES|EVAL_TYPE gen_codes#8 -> T:ush[15+1]
+-EDGES|EVAL_TYPE gen_codes#97 -> T:ush[15+1]
+-EDGES|EVAL_TYPE inflate_table#231 -> T:shortunsigned[15+1]
+-EDGES|EVAL_TYPE inflate_table#245 -> T:shortunsigned[15+1]
+-EDGES|EVAL_TYPE inflate_table#267 -> T:shortunsigned[15+1]
+-EDGES|EVAL_TYPE inflate_table#336 -> T:shortunsigned[15+1]
+-EDGES|EVAL_TYPE inflate_table#36 -> T:shortunsigned[15+1]
+-EDGES|EVAL_TYPE inflate_table#370 -> T:shortunsigned[15+1]
+-EDGES|EVAL_TYPE inflate_table#38 -> T:shortunsigned[15+1]
+-EDGES|EVAL_TYPE inflate_table#39 -> T:shortunsigned[15+1]
+-EDGES|EVAL_TYPE inflate_table#398 -> T:shortunsigned[15+1]
+-EDGES|EVAL_TYPE inflate_table#40 -> T:shortunsigned[15+1]
+-EDGES|EVAL_TYPE inflate_table#414 -> T:shortunsigned[15+1]
+-EDGES|EVAL_TYPE inflate_table#420 -> T:shortunsigned[15+1]
+-EDGES|EVAL_TYPE inflate_table#423 -> T:shortunsigned[15+1]
+-EDGES|EVAL_TYPE inflate_table#446 -> T:shortunsigned[15+1]
+-EDGES|EVAL_TYPE inflate_table#46 -> T:shortunsigned[15+1]
+-EDGES|EVAL_TYPE inflate_table#48 -> T:shortunsigned[15+1]
+-EDGES|EVAL_TYPE inflate_table#49 -> T:shortunsigned[15+1]
+-EDGES|EVAL_TYPE inflate_table#50 -> T:shortunsigned[15+1]
+-EDGES|EVAL_TYPE inflate_table#701 -> T:shortunsigned[15+1]
+-EDGES|EVAL_TYPE inflate_table#762 -> T:shortunsigned[15+1]
+-EDGES|EVAL_TYPE trees.c:<global>#5283 -> T:local[(256+1+29)+2]
+-EDGES|EVAL_TYPE trees.c:<global>#5304 -> T:uch[258-3+1]
+-EDGES|EVAL_TYPE trees.c:<global>#5331 -> T:local[(256+1+29)+2]
+-EDGES|REF T:local[(256+1+29)+2] -> D:local[(256+1+29)+2]
+-EDGES|REF T:shortunsigned[15+1] -> D:shortunsigned[15+1]
+-EDGES|REF T:uch[258-3+1] -> D:uch[258-3+1]
+-EDGES|REF T:ush[15+1] -> D:ush[15+1]
+-EDGES|SOURCE_FILE D:local[(256+1+29)+2] -> F:<includes>
+-EDGES|SOURCE_FILE D:shortunsigned[15+1] -> F:<includes>
+-EDGES|SOURCE_FILE D:uch[258-3+1] -> F:<includes>
+-EDGES|SOURCE_FILE D:ush[15+1] -> F:<includes>
+-FLOWS|REACHING_DEF[shortunsigned[15+1]] inflate_table#40 -> inflate_table#39
+-FLOWS|REACHING_DEF[shortunsigned[15+1]] inflate_table#40 -> inflate_table#41
+-FLOWS|REACHING_DEF[shortunsigned[15+1]] inflate_table#40 -> inflate_table#50
+-FLOWS|REACHING_DEF[shortunsigned[15+1]] inflate_table#50 -> inflate_table#49
+-FLOWS|REACHING_DEF[shortunsigned[15+1]] inflate_table#50 -> inflate_table#51
+-FLOWS|REACHING_DEF[shortunsigned[15+1]] inflate_table#50 -> inflate_table#886
+-FLOWS|REACHING_DEF[ush[15+1]] gen_codes#12 -> gen_codes#102
+-FLOWS|REACHING_DEF[ush[15+1]] gen_codes#12 -> gen_codes#11
+-FLOWS|REACHING_DEF[ush[15+1]] gen_codes#12 -> gen_codes#13
+-NODES|TYPE NAME=local[(256+1+29)+2] FULL_NAME=local[(256+1+29)+2] TYPE_DECL_FULL_NAME=local[(256+1+29)+2]
+-NODES|TYPE NAME=shortunsigned[15+1] FULL_NAME=shortunsigned[15+1] TYPE_DECL_FULL_NAME=shortunsigned[15+1]
+-NODES|TYPE NAME=uch[258-3+1] FULL_NAME=uch[258-3+1] TYPE_DECL_FULL_NAME=uch[258-3+1]
+-NODES|TYPE NAME=ush[15+1] FULL_NAME=ush[15+1] TYPE_DECL_FULL_NAME=ush[15+1]
+-NODES|TYPE_DECL NAME=local[(256+1+29)+2] FULL_NAME=local[(256+1+29)+2] CODE=local[(256+1+29)+2] IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+-NODES|TYPE_DECL NAME=shortunsigned[15+1] FULL_NAME=shortunsigned[15+1] CODE=shortunsigned[15+1] IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+-NODES|TYPE_DECL NAME=uch[258-3+1] FULL_NAME=uch[258-3+1] CODE=uch[258-3+1] IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+-NODES|TYPE_DECL NAME=ush[15+1] FULL_NAME=ush[15+1] CODE=ush[15+1] IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
++AST|                            IDENTIFIER NAME=static_ltree CODE=<global> static_ltree TYPE_FULL_NAME=local[L_CODES+2] ORDER=1 ARGUMENT_INDEX=1
++AST|                          IDENTIFIER NAME=static_ltree CODE=<global> static_ltree TYPE_FULL_NAME=local[L_CODES+2] ORDER=1 ARGUMENT_INDEX=1
++AST|                        IDENTIFIER NAME=_length_code CODE=<global> _length_code TYPE_FULL_NAME=uch[MAX_MATCH-MIN_MATCH+1] ORDER=1 ARGUMENT_INDEX=1
++AST|                        IDENTIFIER NAME=static_ltree CODE=<global> static_ltree TYPE_FULL_NAME=local[L_CODES+2] ORDER=1 ARGUMENT_INDEX=1
++AST|                      IDENTIFIER NAME=_length_code CODE=<global> _length_code TYPE_FULL_NAME=uch[MAX_MATCH-MIN_MATCH+1] ORDER=1 ARGUMENT_INDEX=1
++AST|                      IDENTIFIER NAME=count CODE=count TYPE_FULL_NAME=shortunsigned[MAXBITS+1] ORDER=1 ARGUMENT_INDEX=1
++AST|                      IDENTIFIER NAME=static_ltree CODE=<global> static_ltree TYPE_FULL_NAME=local[L_CODES+2] ORDER=1 ARGUMENT_INDEX=1
++AST|                    IDENTIFIER NAME=count CODE=count TYPE_FULL_NAME=shortunsigned[MAXBITS+1] ORDER=1 ARGUMENT_INDEX=1
++AST|                    IDENTIFIER NAME=next_code CODE=next_code TYPE_FULL_NAME=ush[MAX_BITS+1] ORDER=1 ARGUMENT_INDEX=1
++AST|                    IDENTIFIER NAME=offs CODE=offs TYPE_FULL_NAME=shortunsigned[MAXBITS+1] ORDER=1 ARGUMENT_INDEX=1
++AST|                  IDENTIFIER NAME=count CODE=count TYPE_FULL_NAME=shortunsigned[MAXBITS+1] ORDER=1 ARGUMENT_INDEX=1
++AST|                  IDENTIFIER NAME=next_code CODE=next_code TYPE_FULL_NAME=ush[MAX_BITS+1] ORDER=1 ARGUMENT_INDEX=1
++AST|                  IDENTIFIER NAME=offs CODE=offs TYPE_FULL_NAME=shortunsigned[MAXBITS+1] ORDER=1 ARGUMENT_INDEX=1
++AST|                  IDENTIFIER NAME=static_ltree CODE=<global> static_ltree TYPE_FULL_NAME=local[L_CODES+2] ORDER=1 ARGUMENT_INDEX=1
++AST|                IDENTIFIER NAME=count CODE=count TYPE_FULL_NAME=shortunsigned[MAXBITS+1] ORDER=1 ARGUMENT_INDEX=1
++AST|                IDENTIFIER NAME=static_ltree CODE=<global> static_ltree TYPE_FULL_NAME=local[L_CODES+2] ORDER=1 ARGUMENT_INDEX=1
++AST|              IDENTIFIER NAME=count CODE=count TYPE_FULL_NAME=shortunsigned[MAXBITS+1] ORDER=1 ARGUMENT_INDEX=1
++AST|              IDENTIFIER NAME=count CODE=count TYPE_FULL_NAME=shortunsigned[MAXBITS+1] ORDER=1 ARGUMENT_INDEX=1
++AST|              IDENTIFIER NAME=count CODE=count TYPE_FULL_NAME=shortunsigned[MAXBITS+1] ORDER=1 ARGUMENT_INDEX=1
++AST|              IDENTIFIER NAME=count CODE=count TYPE_FULL_NAME=shortunsigned[MAXBITS+1] ORDER=1 ARGUMENT_INDEX=1
++AST|              IDENTIFIER NAME=next_code CODE=next_code TYPE_FULL_NAME=ush[MAX_BITS+1] ORDER=1 ARGUMENT_INDEX=1
++AST|              IDENTIFIER NAME=offs CODE=offs TYPE_FULL_NAME=shortunsigned[MAXBITS+1] ORDER=1 ARGUMENT_INDEX=1
++AST|            IDENTIFIER NAME=count CODE=count TYPE_FULL_NAME=shortunsigned[MAXBITS+1] ORDER=1 ARGUMENT_INDEX=1
++AST|            IDENTIFIER NAME=count CODE=count TYPE_FULL_NAME=shortunsigned[MAXBITS+1] ORDER=1 ARGUMENT_INDEX=1
++AST|            IDENTIFIER NAME=count CODE=count TYPE_FULL_NAME=shortunsigned[MAXBITS+1] ORDER=1 ARGUMENT_INDEX=1
++AST|            IDENTIFIER NAME=count CODE=count TYPE_FULL_NAME=shortunsigned[MAXBITS+1] ORDER=1 ARGUMENT_INDEX=1
++AST|            IDENTIFIER NAME=count CODE=count TYPE_FULL_NAME=shortunsigned[MAXBITS+1] ORDER=1 ARGUMENT_INDEX=1
++AST|            IDENTIFIER NAME=count CODE=count TYPE_FULL_NAME=shortunsigned[MAXBITS+1] ORDER=1 ARGUMENT_INDEX=1
++AST|            IDENTIFIER NAME=next_code CODE=next_code TYPE_FULL_NAME=ush[MAX_BITS+1] ORDER=1 ARGUMENT_INDEX=1
++AST|            IDENTIFIER NAME=offs CODE=offs TYPE_FULL_NAME=shortunsigned[MAXBITS+1] ORDER=1 ARGUMENT_INDEX=1
++AST|            IDENTIFIER NAME=offs CODE=offs TYPE_FULL_NAME=shortunsigned[MAXBITS+1] ORDER=1 ARGUMENT_INDEX=1
++AST|          IDENTIFIER NAME=count CODE=count TYPE_FULL_NAME=shortunsigned[MAXBITS+1] ORDER=1 ARGUMENT_INDEX=1
++AST|          IDENTIFIER NAME=count CODE=count TYPE_FULL_NAME=shortunsigned[MAXBITS+1] ORDER=1 ARGUMENT_INDEX=1
++AST|          IDENTIFIER NAME=offs CODE=offs TYPE_FULL_NAME=shortunsigned[MAXBITS+1] ORDER=1 ARGUMENT_INDEX=1
++AST|          IDENTIFIER NAME=offs CODE=offs TYPE_FULL_NAME=shortunsigned[MAXBITS+1] ORDER=1 ARGUMENT_INDEX=1
++AST|          IDENTIFIER NAME=shortunsigned[MAXBITS+1] CODE=shortunsigned[MAXBITS+1] TYPE_FULL_NAME=shortunsigned[MAXBITS+1] ORDER=1 ARGUMENT_INDEX=1
++AST|          IDENTIFIER NAME=shortunsigned[MAXBITS+1] CODE=shortunsigned[MAXBITS+1] TYPE_FULL_NAME=shortunsigned[MAXBITS+1] ORDER=1 ARGUMENT_INDEX=1
++AST|          IDENTIFIER NAME=ush[MAX_BITS+1] CODE=ush[MAX_BITS+1] TYPE_FULL_NAME=ush[MAX_BITS+1] ORDER=1 ARGUMENT_INDEX=1
++AST|        CALL NAME=<operator>.alloc CODE=count[MAXBITS+1] TYPE_FULL_NAME=shortunsigned[MAXBITS+1] METHOD_FULL_NAME=<operator>.alloc ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
++AST|        CALL NAME=<operator>.alloc CODE=next_code[MAX_BITS+1] TYPE_FULL_NAME=ush[MAX_BITS+1] METHOD_FULL_NAME=<operator>.alloc ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
++AST|        CALL NAME=<operator>.alloc CODE=offs[MAXBITS+1] TYPE_FULL_NAME=shortunsigned[MAXBITS+1] METHOD_FULL_NAME=<operator>.alloc ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
++AST|        IDENTIFIER NAME=count CODE=count TYPE_FULL_NAME=shortunsigned[MAXBITS+1] ORDER=1 ARGUMENT_INDEX=1
++AST|        IDENTIFIER NAME=next_code CODE=next_code TYPE_FULL_NAME=ush[MAX_BITS+1] ORDER=1 ARGUMENT_INDEX=1
++AST|        IDENTIFIER NAME=offs CODE=offs TYPE_FULL_NAME=shortunsigned[MAXBITS+1] ORDER=1 ARGUMENT_INDEX=1
++AST|        IDENTIFIER NAME=offs CODE=offs TYPE_FULL_NAME=shortunsigned[MAXBITS+1] ORDER=1 ARGUMENT_INDEX=1
++AST|        IDENTIFIER NAME=shortunsigned[MAXBITS+1] CODE=shortunsigned[MAXBITS+1] TYPE_FULL_NAME=shortunsigned[MAXBITS+1] ORDER=1 ARGUMENT_INDEX=1
++AST|        IDENTIFIER NAME=shortunsigned[MAXBITS+1] CODE=shortunsigned[MAXBITS+1] TYPE_FULL_NAME=shortunsigned[MAXBITS+1] ORDER=1 ARGUMENT_INDEX=1
++AST|        IDENTIFIER NAME=static_ltree CODE=static_ltree TYPE_FULL_NAME=local[L_CODES+2] ORDER=1 ARGUMENT_INDEX=1
++AST|        IDENTIFIER NAME=ush[MAX_BITS+1] CODE=ush[MAX_BITS+1] TYPE_FULL_NAME=ush[MAX_BITS+1] ORDER=1 ARGUMENT_INDEX=1
++AST|      CALL NAME=<operator>.alloc CODE=count[MAXBITS+1] TYPE_FULL_NAME=shortunsigned[MAXBITS+1] METHOD_FULL_NAME=<operator>.alloc ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
++AST|      CALL NAME=<operator>.alloc CODE=next_code[MAX_BITS+1] TYPE_FULL_NAME=ush[MAX_BITS+1] METHOD_FULL_NAME=<operator>.alloc ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
++AST|      CALL NAME=<operator>.alloc CODE=offs[MAXBITS+1] TYPE_FULL_NAME=shortunsigned[MAXBITS+1] METHOD_FULL_NAME=<operator>.alloc ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
++AST|      IDENTIFIER NAME=count CODE=count TYPE_FULL_NAME=shortunsigned[MAXBITS+1] ORDER=1 ARGUMENT_INDEX=1
++AST|      IDENTIFIER NAME=next_code CODE=next_code TYPE_FULL_NAME=ush[MAX_BITS+1] ORDER=1 ARGUMENT_INDEX=1
++AST|      IDENTIFIER NAME=offs CODE=offs TYPE_FULL_NAME=shortunsigned[MAXBITS+1] ORDER=1 ARGUMENT_INDEX=1
++AST|      LOCAL NAME=_length_code CODE=<global> _length_code TYPE_FULL_NAME=uch[MAX_MATCH-MIN_MATCH+1] ORDER=0
++AST|      LOCAL NAME=count CODE=unsigned short count[MAXBITS+1] TYPE_FULL_NAME=shortunsigned[MAXBITS+1] ORDER=20
++AST|      LOCAL NAME=next_code CODE=ush next_code[MAX_BITS+1] TYPE_FULL_NAME=ush[MAX_BITS+1] ORDER=1
++AST|      LOCAL NAME=offs CODE=unsigned short offs[MAXBITS+1] TYPE_FULL_NAME=shortunsigned[MAXBITS+1] ORDER=22
++AST|      LOCAL NAME=static_ltree CODE=<global> static_ltree TYPE_FULL_NAME=local[L_CODES+2] ORDER=0
++AST|    LOCAL NAME=_length_code CODE=<global> _length_code TYPE_FULL_NAME=uch[MAX_MATCH-MIN_MATCH+1] ORDER=0
++AST|    LOCAL NAME=_length_code CODE=uch _length_code[MAX_MATCH-MIN_MATCH+1] TYPE_FULL_NAME=uch[MAX_MATCH-MIN_MATCH+1] ORDER=15
++AST|    LOCAL NAME=count CODE=unsigned short count[MAXBITS+1] TYPE_FULL_NAME=shortunsigned[MAXBITS+1] ORDER=20
++AST|    LOCAL NAME=next_code CODE=ush next_code[MAX_BITS+1] TYPE_FULL_NAME=ush[MAX_BITS+1] ORDER=1
++AST|    LOCAL NAME=offs CODE=unsigned short offs[MAXBITS+1] TYPE_FULL_NAME=shortunsigned[MAXBITS+1] ORDER=22
++AST|    LOCAL NAME=static_ltree CODE=<global> static_ltree TYPE_FULL_NAME=local[L_CODES+2] ORDER=0
++AST|    LOCAL NAME=static_ltree CODE=local static_ltree[L_CODES+2] TYPE_FULL_NAME=local[L_CODES+2] ORDER=9
++EDGES|CONTAINS F:<includes> -> D:shortunsigned[MAXBITS+1]
++EDGES|EVAL_TYPE _tr_align#133 -> T:local[L_CODES+2]
++EDGES|EVAL_TYPE _tr_align#156 -> T:local[L_CODES+2]
++EDGES|EVAL_TYPE _tr_align#244 -> T:local[L_CODES+2]
++EDGES|EVAL_TYPE _tr_align#4 -> T:local[L_CODES+2]
++EDGES|EVAL_TYPE compress_block#13 -> T:uch[MAX_MATCH-MIN_MATCH+1]
++EDGES|EVAL_TYPE compress_block#209 -> T:uch[MAX_MATCH-MIN_MATCH+1]
++EDGES|EVAL_TYPE gen_codes#10 -> T:ush[MAX_BITS+1]
++EDGES|EVAL_TYPE gen_codes#11 -> T:ush[MAX_BITS+1]
++EDGES|EVAL_TYPE gen_codes#12 -> T:ush[MAX_BITS+1]
++EDGES|EVAL_TYPE gen_codes#49 -> T:ush[MAX_BITS+1]
++EDGES|EVAL_TYPE gen_codes#8 -> T:ush[MAX_BITS+1]
++EDGES|EVAL_TYPE gen_codes#97 -> T:ush[MAX_BITS+1]
++EDGES|EVAL_TYPE inflate_table#231 -> T:shortunsigned[MAXBITS+1]
++EDGES|EVAL_TYPE inflate_table#245 -> T:shortunsigned[MAXBITS+1]
++EDGES|EVAL_TYPE inflate_table#267 -> T:shortunsigned[MAXBITS+1]
++EDGES|EVAL_TYPE inflate_table#336 -> T:shortunsigned[MAXBITS+1]
++EDGES|EVAL_TYPE inflate_table#36 -> T:shortunsigned[MAXBITS+1]
++EDGES|EVAL_TYPE inflate_table#370 -> T:shortunsigned[MAXBITS+1]
++EDGES|EVAL_TYPE inflate_table#38 -> T:shortunsigned[MAXBITS+1]
++EDGES|EVAL_TYPE inflate_table#39 -> T:shortunsigned[MAXBITS+1]
++EDGES|EVAL_TYPE inflate_table#398 -> T:shortunsigned[MAXBITS+1]
++EDGES|EVAL_TYPE inflate_table#40 -> T:shortunsigned[MAXBITS+1]
++EDGES|EVAL_TYPE inflate_table#414 -> T:shortunsigned[MAXBITS+1]
++EDGES|EVAL_TYPE inflate_table#420 -> T:shortunsigned[MAXBITS+1]
++EDGES|EVAL_TYPE inflate_table#423 -> T:shortunsigned[MAXBITS+1]
++EDGES|EVAL_TYPE inflate_table#446 -> T:shortunsigned[MAXBITS+1]
++EDGES|EVAL_TYPE inflate_table#46 -> T:shortunsigned[MAXBITS+1]
++EDGES|EVAL_TYPE inflate_table#48 -> T:shortunsigned[MAXBITS+1]
++EDGES|EVAL_TYPE inflate_table#49 -> T:shortunsigned[MAXBITS+1]
++EDGES|EVAL_TYPE inflate_table#50 -> T:shortunsigned[MAXBITS+1]
++EDGES|EVAL_TYPE inflate_table#701 -> T:shortunsigned[MAXBITS+1]
++EDGES|EVAL_TYPE inflate_table#762 -> T:shortunsigned[MAXBITS+1]
++EDGES|EVAL_TYPE trees.c:<global>#5283 -> T:local[L_CODES+2]
++EDGES|EVAL_TYPE trees.c:<global>#5304 -> T:uch[MAX_MATCH-MIN_MATCH+1]
++EDGES|EVAL_TYPE trees.c:<global>#5331 -> T:local[L_CODES+2]
++EDGES|REF T:shortunsigned[MAXBITS+1] -> D:shortunsigned[MAXBITS+1]
++EDGES|SOURCE_FILE D:shortunsigned[MAXBITS+1] -> F:<includes>
++FLOWS|REACHING_DEF[shortunsigned[MAXBITS+1]] inflate_table#40 -> inflate_table#39
++FLOWS|REACHING_DEF[shortunsigned[MAXBITS+1]] inflate_table#40 -> inflate_table#41
++FLOWS|REACHING_DEF[shortunsigned[MAXBITS+1]] inflate_table#40 -> inflate_table#50
++FLOWS|REACHING_DEF[shortunsigned[MAXBITS+1]] inflate_table#50 -> inflate_table#49
++FLOWS|REACHING_DEF[shortunsigned[MAXBITS+1]] inflate_table#50 -> inflate_table#51
++FLOWS|REACHING_DEF[shortunsigned[MAXBITS+1]] inflate_table#50 -> inflate_table#886
++FLOWS|REACHING_DEF[ush[MAX_BITS+1]] gen_codes#12 -> gen_codes#102
++FLOWS|REACHING_DEF[ush[MAX_BITS+1]] gen_codes#12 -> gen_codes#11
++FLOWS|REACHING_DEF[ush[MAX_BITS+1]] gen_codes#12 -> gen_codes#13
++NODES|TYPE NAME=shortunsigned[MAXBITS+1] FULL_NAME=shortunsigned[MAXBITS+1] TYPE_DECL_FULL_NAME=shortunsigned[MAXBITS+1]
++NODES|TYPE_DECL NAME=shortunsigned[MAXBITS+1] FULL_NAME=shortunsigned[MAXBITS+1] CODE=shortunsigned[MAXBITS+1] IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>

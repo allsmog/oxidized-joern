@@ -57,6 +57,23 @@ pub fn read_sources_from_paths(paths: &[String]) -> std::io::Result<Vec<(String,
 }
 
 pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
+    canonical_dump_sources_with_origins(sources).0
+}
+
+/// Included declarations keep the caller AST ownership while their line
+/// coordinates come from the original header span. This internal side channel
+/// does not change the canonical projection or add graph file properties.
+pub(crate) struct IncludedSourceOrigin {
+    pub block: String,
+    pub nodes: std::ops::Range<usize>,
+    pub file: String,
+    pub span: std::ops::Range<usize>,
+}
+
+pub(crate) fn canonical_dump_sources_with_origins(
+    sources: &[(String, String)],
+) -> (String, Vec<IncludedSourceOrigin>) {
+    let mut included_origins = Vec::new();
     let mut parser = Parser::new();
     parser
         .set_language(&tree_sitter_c::LANGUAGE.into())
@@ -80,7 +97,7 @@ pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
     let mut raw_fn_decls: Vec<(String, String, usize)> = Vec::new(); // (name, file, node id)
     let mut parenthesized_definitions = HashSet::new();
     let mut struct_decls: Vec<(String, String, String)> = Vec::new(); // (tag, code, file)
-    let mut type_alias_full_names: HashMap<usize, String> = HashMap::new();
+    let mut type_alias_full_names: HashMap<(usize, usize, usize), String> = HashMap::new();
     let mut used_types: std::collections::BTreeSet<String> = std::collections::BTreeSet::new();
     for u in &units {
         let b = u.src.as_bytes();
@@ -142,7 +159,8 @@ pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
                         let tag = type_binding_name(*alias, b);
                         used_types.insert(tag.clone());
                         used_types.insert(typedef_underlying_type(f, *alias, b));
-                        type_alias_full_names.insert(alias.id(), tag.clone());
+                        type_alias_full_names
+                            .insert((u.tree.root_node().id(), 0, alias.id()), tag.clone());
                         struct_decls.push((tag, esc(text(f, b)), u.file.clone()));
                     }
                 }
@@ -205,12 +223,17 @@ pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
         let declarations = translation_unit_items(root, bytes)
             .into_iter()
             .filter(|node| node.kind() != "function_definition" || active.contains(&node.id()))
-            .flat_map(|node| prototype_declarations(node, bytes, &context.body_macro_sites));
-        for declaration in declarations {
+            .flat_map(|node| prototype_declarations(node, bytes, &context.body_macro_sites, 0));
+        for (declaration, source_view) in declarations {
+            let bytes = context.body_macro_sites.bytes_for(source_view, bytes);
             let macros = context
                 .macro_states
                 .get(&declaration.id())
-                .or_else(|| context.body_macro_sites.at(declaration, bytes))
+                .or_else(|| {
+                    context
+                        .body_macro_sites
+                        .at_view(source_view, declaration, bytes)
+                })
                 .cloned()
                 .unwrap_or_default();
             let declaration_macros = macros
@@ -308,10 +331,14 @@ pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
     let include_counts: HashMap<String, usize> = units
         .iter()
         .map(|u| {
-            let n = translation_unit_items(u.tree.root_node(), u.src.as_bytes())
-                .iter()
-                .filter(|f| f.kind() == "preproc_include")
-                .count();
+            let mut pending = vec![u.tree.root_node()];
+            let mut n = 0;
+            while let Some(node) = pending.pop() {
+                if node.kind() == "preproc_include" {
+                    n += 1;
+                }
+                pending.extend(translation_unit_children(node, u.src.as_bytes()));
+            }
             (u.file.clone(), n)
         })
         .collect();
@@ -337,6 +364,7 @@ pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
                 typedef_states.get(&item.id()).cloned().unwrap_or_default(),
                 macro_states.get(&item.id()).unwrap_or(macros),
                 Some(body_macro_sites),
+                0,
             ));
         }
         let active_methods: HashSet<usize> = active_items
@@ -422,7 +450,7 @@ pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
                             if !is_function_declaration(decl) {
                                 let name = innermost_id(decl, b);
                                 if !name.is_empty() {
-                                    globals.insert(name, declared_object_type(f, decl, b));
+                                    globals.insert(name, declared_object_type(f, decl, b, &macros));
                                 }
                             }
                         }
@@ -454,6 +482,8 @@ pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
             macros: macros.clone(),
             macro_states,
             body_macro_sites,
+            source_view: 0,
+            included_origins: &mut included_origins,
             macro_uses: Vec::new(),
             macro_use_ids: HashMap::new(),
             last_mfn_span: None,
@@ -559,6 +589,8 @@ pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
         macros: Arc::new(HashMap::new()),
         macro_states: &empty_macro_states,
         body_macro_sites: &empty_body_macro_sites,
+        source_view: 0,
+        included_origins: &mut included_origins,
         macro_uses: Vec::new(),
         macro_use_ids: HashMap::new(),
         last_mfn_span: None,
@@ -898,7 +930,7 @@ pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
     for l in flow_lines {
         out.push_str(&format!("FLOWS|{l}\n"));
     }
-    out
+    (out, included_origins)
 }
 
 fn count_members(n: Node) -> i64 {
@@ -935,7 +967,7 @@ struct MacroDef {
 
 type MacroState = Arc<HashMap<String, MacroDef>>;
 type TypeNameState = Arc<HashSet<String>>;
-type TypeSites = HashMap<usize, TypeNameState>;
+type TypeSites = HashMap<(usize, usize), TypeNameState>;
 
 #[derive(Clone, PartialEq, Eq)]
 struct MacroMetadata {
@@ -946,6 +978,7 @@ struct MacroMetadata {
 
 struct MacroUse {
     offset: usize,
+    include_order: Vec<usize>,
     metadata: MacroMetadata,
     arity: usize,
     ret: String,
@@ -957,7 +990,7 @@ struct MacroUse {
 /// their separate header snapshots. Temporary parse trees have their own bytes and never use these
 /// offsets. Unchanged stretches share one Arc rather than a map per AST node.
 #[derive(Default)]
-struct BodyMacroSites {
+struct BodyMacroSites<'tree> {
     source: usize,
     tree: usize,
     len: usize,
@@ -965,6 +998,19 @@ struct BodyMacroSites {
     bodies: Vec<(usize, usize)>,
     definitions: Vec<MacroMetadata>,
     expansions: Vec<(usize, usize)>,
+    includes: HashMap<(usize, usize), usize>,
+    headers: Vec<IncludedBodyView<'tree>>,
+}
+
+/// One executed include occurrence, borrowing the supplied original tree. A
+/// nested occurrence is reached through its parent view plus include node ID.
+struct IncludedBodyView<'tree> {
+    root: Node<'tree>,
+    bytes: &'tree [u8],
+    file: &'tree str,
+    include_order: Vec<usize>,
+    items: Vec<Node<'tree>>,
+    changes: Vec<(usize, MacroState)>,
 }
 
 /// An object callee that resolves to an ordinary function expands only the
@@ -1023,7 +1069,7 @@ fn collect_macro_expansions(
     }
 }
 
-impl BodyMacroSites {
+impl<'tree> BodyMacroSites<'tree> {
     fn new(root: Node, bytes: &[u8]) -> Self {
         Self {
             source: bytes.as_ptr() as usize,
@@ -1033,7 +1079,82 @@ impl BodyMacroSites {
             bodies: Vec::new(),
             definitions: Vec::new(),
             expansions: Vec::new(),
+            includes: HashMap::new(),
+            headers: Vec::new(),
         }
+    }
+
+    fn bytes_for<'a>(&'a self, view: usize, caller: &'a [u8]) -> &'a [u8] {
+        if view == 0 {
+            caller
+        } else {
+            self.headers[view - 1].bytes
+        }
+    }
+
+    fn owns_view_node(&self, view: usize, mut node: Node) -> bool {
+        while let Some(parent) = node.parent() {
+            node = parent;
+        }
+        node.id()
+            == if view == 0 {
+                self.tree
+            } else {
+                self.headers[view - 1].root.id()
+            }
+    }
+
+    fn included(
+        &self,
+        view: usize,
+        node: Node,
+        bytes: &[u8],
+    ) -> Option<(usize, &IncludedBodyView<'tree>)> {
+        let target = *self.includes.get(&(view, node.id()))?;
+        if !self.owns_view_node(view, node) {
+            return None;
+        }
+        let owned = if view == 0 {
+            self.owns(bytes)
+        } else {
+            let source = self.headers[view - 1].bytes;
+            source.as_ptr() == bytes.as_ptr() && source.len() == bytes.len()
+        };
+        if !owned {
+            return None;
+        }
+        Some((target, &self.headers[target - 1]))
+    }
+
+    fn record_view(&mut self, view: usize, bytes: &[u8], offset: usize, macros: &MacroState) {
+        if view == 0 {
+            self.record(bytes, offset, macros);
+        } else {
+            let changes = &mut self.headers[view - 1].changes;
+            if changes
+                .last()
+                .is_none_or(|(_, prior)| !Arc::ptr_eq(prior, macros))
+            {
+                changes.push((offset, macros.clone()));
+            }
+        }
+    }
+
+    fn at_view(&self, view: usize, node: Node, bytes: &[u8]) -> Option<&MacroState> {
+        if view == 0 {
+            return self.at(node, bytes);
+        }
+        let header = &self.headers[view - 1];
+        if header.bytes.as_ptr() != bytes.as_ptr()
+            || header.bytes.len() != bytes.len()
+            || !self.owns_view_node(view, node)
+        {
+            return None;
+        }
+        let index = header
+            .changes
+            .partition_point(|(offset, _)| *offset <= node.start_byte());
+        index.checked_sub(1).map(|index| &header.changes[index].1)
     }
 
     fn expansion(&mut self, offset: usize, name: &str, definition: &MacroDef) {
@@ -1051,13 +1172,6 @@ impl BodyMacroSites {
                 self.definitions.len() - 1
             });
         self.expansions.push((offset, index));
-    }
-
-    fn owns_node(&self, mut node: Node) -> bool {
-        while let Some(parent) = node.parent() {
-            node = parent;
-        }
-        node.id() == self.tree
     }
 
     fn owns(&self, bytes: &[u8]) -> bool {
@@ -1138,9 +1252,11 @@ struct Ctx<'a> {
     enumerators: &'a Vec<String>,
     macros: MacroState,
     macro_states: &'a HashMap<usize, MacroState>,
-    body_macro_sites: &'a BodyMacroSites,
+    body_macro_sites: &'a BodyMacroSites<'a>,
+    source_view: usize,
+    included_origins: &'a mut Vec<IncludedSourceOrigin>,
     macro_uses: Vec<MacroUse>,
-    macro_use_ids: HashMap<(usize, String, usize, String), usize>,
+    macro_use_ids: HashMap<(usize, usize, String, usize, String), usize>,
     last_mfn_span: Option<std::ops::Range<usize>>,
     last_call_edge: Option<usize>,
     dump_index: usize,
@@ -1153,7 +1269,7 @@ struct Ctx<'a> {
     macro_expansion_root: Option<usize>,
     recovering_expression: bool,
     recovered_bindings: HashSet<String>,
-    recovery_candidates: HashMap<usize, bool>,
+    recovery_candidates: HashMap<(usize, usize), bool>,
     /// Original source spelling for expressions introduced by a field-token macro.
     field_macro_codes: HashMap<usize, String>,
     /// First pure replacement expression can own the macro wrapper in CDT.
@@ -1173,7 +1289,7 @@ struct Ctx<'a> {
     stubs: &'a mut HashMap<String, usize>,
     types: &'a mut std::collections::BTreeSet<String>,
     type_declarations: &'a mut Vec<(String, String, String)>,
-    type_alias_full_names: &'a mut HashMap<usize, String>,
+    type_alias_full_names: &'a mut HashMap<(usize, usize, usize), String>,
     out: String,
     // --- edge layer (M4) ---
     // Current dump block name and 0-based line index within it; every node's
@@ -1334,6 +1450,7 @@ fn collect_type_sites(
     initial: TypeNameState,
     macros: &MacroState,
     macro_sites: Option<&BodyMacroSites>,
+    source_view: usize,
 ) -> TypeSites {
     fn shadow(types: &mut TypeNameState, name: &str) {
         if types.contains(name) {
@@ -1347,15 +1464,24 @@ fn collect_type_sites(
         sites: &mut TypeSites,
         macros: &MacroState,
         macro_sites: Option<&BodyMacroSites>,
+        source_view: usize,
     ) {
         let macros = macro_sites
-            .and_then(|sites| sites.at(node, bytes))
+            .and_then(|sites| sites.at_view(source_view, node, bytes))
             .unwrap_or(macros);
         if matches!(
             node.kind(),
             "call_expression" | "sizeof_expression" | "identifier" | "field_expression"
         ) {
-            sites.insert(node.id(), types.clone());
+            sites.insert((source_view, node.id()), types.clone());
+        }
+        if let Some((view, header)) =
+            macro_sites.and_then(|sites| sites.included(source_view, node, bytes))
+        {
+            for item in &header.items {
+                visit(*item, header.bytes, types, sites, macros, macro_sites, view);
+            }
+            return;
         }
         match node.kind() {
             "function_definition" => {
@@ -1373,24 +1499,40 @@ fn collect_type_sites(
                     }
                 }
                 if let Some(body) = node.child_by_field_name("body") {
-                    visit(body, bytes, &mut inner, sites, macros, macro_sites);
+                    visit(
+                        body,
+                        bytes,
+                        &mut inner,
+                        sites,
+                        macros,
+                        macro_sites,
+                        source_view,
+                    );
                 }
             }
             "compound_statement" | "for_statement" => {
                 let mut inner = types.clone();
                 for child in named_children(node) {
-                    visit(child, bytes, &mut inner, sites, macros, macro_sites);
+                    visit(
+                        child,
+                        bytes,
+                        &mut inner,
+                        sites,
+                        macros,
+                        macro_sites,
+                        source_view,
+                    );
                 }
             }
             "preproc_if" | "preproc_ifdef" | "preproc_elif" | "preproc_elifdef"
             | "preproc_else" => {
                 for child in kept_preproc_children(node, bytes, macros) {
-                    visit(child, bytes, types, sites, macros, macro_sites);
+                    visit(child, bytes, types, sites, macros, macro_sites, source_view);
                 }
             }
             "enumerator" => {
                 for child in named_children(node) {
-                    visit(child, bytes, types, sites, macros, macro_sites);
+                    visit(child, bytes, types, sites, macros, macro_sites, source_view);
                 }
                 if let Some(name) = node.child_by_field_name("name") {
                     shadow(types, text(name, bytes));
@@ -1398,7 +1540,7 @@ fn collect_type_sites(
             }
             "type_definition" => {
                 for child in named_children(node) {
-                    visit(child, bytes, types, sites, macros, macro_sites);
+                    visit(child, bytes, types, sites, macros, macro_sites, source_view);
                 }
                 for name in valid_type_definition_names(node, bytes, macros) {
                     Arc::make_mut(types).insert(name);
@@ -1416,21 +1558,21 @@ fn collect_type_sites(
                             .child_by_field_name("declarator")
                             .filter(|_| child.kind() == "init_declarator")
                             .unwrap_or(child);
-                        visit(decl, bytes, types, sites, macros, macro_sites);
+                        visit(decl, bytes, types, sites, macros, macro_sites, source_view);
                         shadow(types, &type_binding_name(decl, bytes));
                         if child.kind() == "init_declarator" {
                             if let Some(value) = child.child_by_field_name("value") {
-                                visit(value, bytes, types, sites, macros, macro_sites);
+                                visit(value, bytes, types, sites, macros, macro_sites, source_view);
                             }
                         }
                     } else {
-                        visit(child, bytes, types, sites, macros, macro_sites);
+                        visit(child, bytes, types, sites, macros, macro_sites, source_view);
                     }
                 }
             }
             _ => {
                 for child in named_children(node) {
-                    visit(child, bytes, types, sites, macros, macro_sites);
+                    visit(child, bytes, types, sites, macros, macro_sites, source_view);
                 }
             }
         }
@@ -1443,14 +1585,56 @@ fn collect_type_sites(
         &mut sites,
         macros,
         macro_sites,
+        source_view,
     );
     sites
 }
 
 impl Ctx<'_> {
+    /// C2Cpg merges the source-pass declarations into the later .h pass.
+    /// Select the complete MethodInfo together: a generated header-pass entry
+    /// wins over a source-pass entry, and each class keeps its first entry.
+    fn register_macro_method(
+        &mut self,
+        full: &str,
+        name: &str,
+        directive: &str,
+        arity: usize,
+        ret: &str,
+    ) {
+        let header_pass = |file: &str| {
+            file.get(file.len().saturating_sub(2)..)
+                .is_some_and(|suffix| suffix.eq_ignore_ascii_case(".h"))
+        };
+        let replace = self
+            .macro_method_files
+            .get(full)
+            .is_none_or(|prior| header_pass(&self.file) && !header_pass(prior));
+        if replace {
+            self.macro_method_files
+                .insert(full.to_string(), self.file.clone());
+            self.used_macros.insert(
+                full.to_string(),
+                (
+                    name.to_string(),
+                    directive.to_string(),
+                    arity,
+                    ret.to_string(),
+                ),
+            );
+        }
+    }
+
     fn resolve_macro_metadata(&mut self, dumps: &mut [(String, String)]) {
         let mut uses = std::mem::take(&mut self.macro_uses);
-        uses.sort_by_key(|use_| use_.offset);
+        // Uses follow C source traversal across include occurrences. Only the
+        // separate pinned expansion queue sorts file-local offsets alone.
+        uses.sort_by(|a, b| {
+            a.include_order
+                .iter()
+                .chain(std::iter::once(&a.offset))
+                .cmp(b.include_order.iter().chain(std::iter::once(&b.offset)))
+        });
         let mut cursor = 0;
         let mut replacements: HashMap<usize, Vec<(std::ops::Range<usize>, String)>> =
             HashMap::new();
@@ -1471,17 +1655,13 @@ impl Ctx<'_> {
                 "{}:{}:{}({})",
                 metadata.file, metadata.name, use_.ret, use_.arity
             );
-            self.macro_method_files
-                .entry(full.clone())
-                .or_insert_with(|| self.file.clone());
-            self.used_macros.entry(full.clone()).or_insert_with(|| {
-                (
-                    metadata.name.clone(),
-                    metadata.directive.clone(),
-                    use_.arity,
-                    use_.ret.clone(),
-                )
-            });
+            self.register_macro_method(
+                &full,
+                &metadata.name,
+                &metadata.directive,
+                use_.arity,
+                &use_.ret,
+            );
             for (block, span, edge) in use_.placements {
                 replacements
                     .entry(block)
@@ -1511,12 +1691,12 @@ impl Ctx<'_> {
         {
             return None;
         }
-        self.body_macro_sites.at(node, bytes)
+        self.body_macro_sites.at_view(self.source_view, node, bytes)
     }
 
     fn typedefs_at(&self, node: Node) -> TypeNameState {
         self.type_sites
-            .get(&node.id())
+            .get(&(self.source_view, node.id()))
             .cloned()
             .unwrap_or_else(|| self.default_typedefs.clone())
     }
@@ -1527,7 +1707,14 @@ impl Ctx<'_> {
         bytes: &[u8],
         types: TypeNameState,
     ) -> (TypeSites, TypeNameState) {
-        let sites = collect_type_sites(root, bytes, types.clone(), &self.macros, None);
+        let sites = collect_type_sites(
+            root,
+            bytes,
+            types.clone(),
+            &self.macros,
+            None,
+            self.source_view,
+        );
         (
             std::mem::replace(&mut self.type_sites, sites),
             std::mem::replace(&mut self.default_typedefs, types),
@@ -1593,7 +1780,11 @@ impl Ctx<'_> {
                     },
                 );
             } else {
-                let full = if let Some(full) = self.type_alias_full_names.get(&alias.id()) {
+                let full = if let Some(full) = self.type_alias_full_names.get(&(
+                    self.body_macro_sites.tree,
+                    self.source_view,
+                    alias.id(),
+                )) {
                     full.clone()
                 } else {
                     let count = self
@@ -1603,16 +1794,57 @@ impl Ctx<'_> {
                             full.split("<duplicate>").next() == Some(name.as_str())
                         })
                         .count();
-                    let full = if count == 0 {
+                    let next = if count == 0 {
                         name.clone()
                     } else {
                         format!("{name}<duplicate>{}", count - 1)
                     };
-                    self.type_alias_full_names.insert(alias.id(), full.clone());
+                    // The project registry reserves standalone header aliases
+                    // before body emission. An earlier include occurrence uses
+                    // that first identity; advance only the still-unemitted
+                    // reservation for this exact physical header declarator.
+                    let reserved = (self.source_view > 0)
+                        .then(|| {
+                            (
+                                self.body_macro_sites.headers[self.source_view - 1]
+                                    .root
+                                    .id(),
+                                0,
+                                alias.id(),
+                            )
+                        })
+                        .and_then(|key| {
+                            let full = self.type_alias_full_names.get(&key)?.clone();
+                            (!self.placements.contains_key(&format!("TD:{full}")))
+                                .then_some((key, full))
+                        });
+                    let full = if let Some((key, full)) = reserved {
+                        if let Some(entry) = self
+                            .type_declarations
+                            .iter_mut()
+                            .find(|entry| entry.0 == full)
+                        {
+                            entry.0 = next.clone();
+                        }
+                        self.type_alias_full_names.insert(key, next);
+                        full
+                    } else {
+                        next
+                    };
+                    self.type_alias_full_names.insert(
+                        (self.body_macro_sites.tree, self.source_view, alias.id()),
+                        full.clone(),
+                    );
                     self.type_declarations.push((
                         full.clone(),
                         esc(text(node, bytes)),
-                        self.file.clone(),
+                        if self.source_view == 0 {
+                            self.file.clone()
+                        } else {
+                            self.body_macro_sites.headers[self.source_view - 1]
+                                .file
+                                .to_string()
+                        },
                     ));
                     full
                 };
@@ -2296,13 +2528,18 @@ impl Ctx<'_> {
                     // produce Joern alias nodes or consume a global slot.
                     for alias in typedef_declarators(n) {
                         let name = type_binding_name(alias, b);
+                        let full = self
+                            .type_alias_full_names
+                            .get(&(self.body_macro_sites.tree, 0, alias.id()))
+                            .cloned()
+                            .unwrap_or_else(|| name.clone());
                         self.line(
                             2,
                             "TYPE_DECL",
                             P {
                                 name: Some(name.clone()),
                                 code: Some(esc(text(n, b))),
-                                full: Some(name),
+                                full: Some(full),
                                 order: Some(slot),
                                 ..Default::default()
                             },
@@ -2640,17 +2877,9 @@ impl Ctx<'_> {
             expansion_type(&expansion, &self.symbols, self.globals)
         };
         let full = format!("{defining_file}:{name}:{ret}({})", params.len());
-        let source_owned = self.body_macro_sites.owns_node(site);
+        let source_owned = self.body_macro_sites.owns_view_node(self.source_view, site);
         if !source_owned {
-            self.macro_method_files
-                .entry(full.clone())
-                .or_insert_with(|| self.file.clone());
-            self.used_macros.entry(full.clone()).or_insert((
-                name.to_string(),
-                directive.clone(),
-                params.len(),
-                ret.clone(),
-            ));
+            self.register_macro_method(&full, name, &directive, params.len(), &ret);
         }
         self.line(
             depth,
@@ -2668,10 +2897,23 @@ impl Ctx<'_> {
             },
         );
         if source_owned {
-            let key = (site.id(), name.to_string(), params.len(), ret.clone());
+            let key = (
+                self.source_view,
+                site.id(),
+                name.to_string(),
+                params.len(),
+                ret.clone(),
+            );
             let index = *self.macro_use_ids.entry(key).or_insert_with(|| {
                 self.macro_uses.push(MacroUse {
                     offset: site.start_byte(),
+                    include_order: if self.source_view == 0 {
+                        Vec::new()
+                    } else {
+                        self.body_macro_sites.headers[self.source_view - 1]
+                            .include_order
+                            .clone()
+                    },
                     metadata: MacroMetadata {
                         name: name.to_string(),
                         directive,
@@ -2936,6 +3178,7 @@ impl Ctx<'_> {
             b,
             &self.macros,
             Some(self.body_macro_sites),
+            self.source_view,
             &mut shadowed,
         );
         let mut seen = Vec::new();
@@ -2959,7 +3202,7 @@ impl Ctx<'_> {
         if self.macros.is_empty() || self.macro_expansion_code.is_some() {
             return false;
         }
-        if let Some(&recovery) = self.recovery_candidates.get(&node.id()) {
+        if let Some(&recovery) = self.recovery_candidates.get(&(self.source_view, node.id())) {
             return recovery;
         }
         let mut pending = vec![node];
@@ -3013,7 +3256,8 @@ impl Ctx<'_> {
         } else {
             false
         };
-        self.recovery_candidates.insert(node.id(), recovery);
+        self.recovery_candidates
+            .insert((self.source_view, node.id()), recovery);
         recovery
     }
 
@@ -3034,6 +3278,15 @@ impl Ctx<'_> {
         let previous_macros = self.macros.clone();
         let mut stack = vec![body];
         while let Some(n) = stack.pop() {
+            let views = self.body_macro_sites;
+            if let Some((view, header)) = views.included(self.source_view, n, b) {
+                let previous_view = std::mem::replace(&mut self.source_view, view);
+                for item in &header.items {
+                    self.walk_phantoms(*item, header.bytes, shadowed, seen);
+                }
+                self.source_view = previous_view;
+                continue;
+            }
             if let Some(macros) = self.source_macros_at(n, b).cloned() {
                 self.macros = macros;
             }
@@ -3126,6 +3379,7 @@ impl Ctx<'_> {
                         source.as_bytes(),
                         &self.macros,
                         None,
+                        self.source_view,
                         &mut expansion_shadowed,
                     );
                     let previous_types =
@@ -3324,6 +3578,26 @@ impl Ctx<'_> {
 
     /// A block-level statement. `order` is the running 1-based child position.
     fn emit_stmt(&mut self, n: Node, b: &[u8], order: &mut i64, depth: usize) {
+        let views = self.body_macro_sites;
+        if let Some((view, header)) = views.included(self.source_view, n, b) {
+            let previous_view = std::mem::replace(&mut self.source_view, view);
+            for item in &header.items {
+                let start = self.line_no;
+                self.emit_stmt(*item, header.bytes, order, depth);
+                // A nested include records its own physical spans. Only direct
+                // header declarations contribute new roots at this occurrence.
+                if item.kind() != "preproc_include" && start < self.line_no {
+                    self.included_origins.push(IncludedSourceOrigin {
+                        block: self.block.clone(),
+                        nodes: start..self.line_no,
+                        file: header.file.to_string(),
+                        span: item.byte_range(),
+                    });
+                }
+            }
+            self.source_view = previous_view;
+            return;
+        }
         let previous = self
             .source_macros_at(n, b)
             .cloned()
@@ -3940,7 +4214,7 @@ impl Ctx<'_> {
                 continue;
             }
             let name = innermost_id(decl, b);
-            let full_ty = declared_object_type(n, decl, b);
+            let full_ty = declared_object_type(n, decl, b, &self.macros);
             let function_pointer = find_function_declarator(decl).is_some();
             self.method_functions.remove(&name);
             self.method_call_types.remove(&name);
@@ -5210,7 +5484,7 @@ struct BodyMacroContext<'tree> {
     items: Vec<Node<'tree>>,
     macros: MacroState,
     macro_states: HashMap<usize, MacroState>,
-    body_macro_sites: BodyMacroSites,
+    body_macro_sites: BodyMacroSites<'tree>,
     header_declarations: Vec<HeaderDeclaration>,
     typedef_states: HashMap<usize, TypeNameState>,
 }
@@ -5222,9 +5496,9 @@ struct HeaderDeclaration {
 
 fn body_macro_context<'tree>(
     root: Node<'tree>,
-    bytes: &[u8],
-    file: &str,
-    units: &[SourceUnit],
+    bytes: &'tree [u8],
+    file: &'tree str,
+    units: &'tree [SourceUnit],
 ) -> BodyMacroContext<'tree> {
     // CDT retains file-scope declarations from inactive branches. They use
     // the macro environment at that source position, while inactive directives
@@ -5269,9 +5543,9 @@ fn body_macro_context<'tree>(
     #[allow(clippy::too_many_arguments)]
     fn collect<'tree>(
         node: Node<'tree>,
-        bytes: &[u8],
-        file: &str,
-        units: &[SourceUnit],
+        bytes: &'tree [u8],
+        file: &'tree str,
+        units: &'tree [SourceUnit],
         visiting: &mut HashSet<String>,
         once: &mut HashSet<String>,
         macros: &mut MacroState,
@@ -5283,9 +5557,14 @@ fn body_macro_context<'tree>(
         type_bindings: &mut HashMap<String, String>,
         capture: bool,
         in_body: bool,
-        body_sites: &mut BodyMacroSites,
+        body_sites: &mut BodyMacroSites<'tree>,
         in_expansion: bool,
+        source_view: usize,
+        header_top: bool,
     ) {
+        if source_view != 0 {
+            body_sites.record_view(source_view, bytes, node.start_byte(), macros);
+        }
         match node.kind() {
             "preproc_if" | "preproc_ifdef" | "preproc_elif" | "preproc_elifdef"
             | "preproc_else" => {
@@ -5340,6 +5619,8 @@ fn body_macro_context<'tree>(
                                 in_body,
                                 body_sites,
                                 in_expansion,
+                                source_view,
+                                header_top,
                             );
                         }
                     }
@@ -5389,11 +5670,27 @@ fn body_macro_context<'tree>(
                             in_body,
                             body_sites,
                             in_expansion,
+                            source_view,
+                            header_top,
                         );
                     }
                 }
             }
             _ => {
+                if source_view != 0
+                    && header_top
+                    && matches!(
+                        node.kind(),
+                        "declaration"
+                            | "type_definition"
+                            | "struct_specifier"
+                            | "union_specifier"
+                            | "enum_specifier"
+                            | "preproc_include"
+                    )
+                {
+                    body_sites.headers[source_view - 1].items.push(node);
+                }
                 let outer_expansion = !in_expansion
                     && node
                         .child_by_field_name("function")
@@ -5452,6 +5749,27 @@ fn body_macro_context<'tree>(
                         }) {
                             let mut header_items = Vec::new();
                             let mut header_states = HashMap::new();
+                            let header_view = if in_body {
+                                let mut include_order = if source_view == 0 {
+                                    Vec::new()
+                                } else {
+                                    body_sites.headers[source_view - 1].include_order.clone()
+                                };
+                                include_order.push(node.start_byte());
+                                body_sites.headers.push(IncludedBodyView {
+                                    root: unit.tree.root_node(),
+                                    bytes: unit.src.as_bytes(),
+                                    file: &unit.file,
+                                    include_order,
+                                    items: Vec::new(),
+                                    changes: vec![(0, macros.clone())],
+                                });
+                                let view = body_sites.headers.len();
+                                body_sites.includes.insert((source_view, node.id()), view);
+                                view
+                            } else {
+                                source_view
+                            };
                             for child in translation_unit_children(
                                 unit.tree.root_node(),
                                 unit.src.as_bytes(),
@@ -5474,6 +5792,8 @@ fn body_macro_context<'tree>(
                                     in_body,
                                     body_sites,
                                     in_expansion,
+                                    header_view,
+                                    in_body,
                                 );
                             }
                         }
@@ -5519,6 +5839,8 @@ fn body_macro_context<'tree>(
                             true,
                             body_sites,
                             in_expansion,
+                            source_view,
+                            header_top,
                         );
                     }
                 } else if in_body
@@ -5543,11 +5865,13 @@ fn body_macro_context<'tree>(
                             true,
                             body_sites,
                             in_expansion || outer_expansion,
+                            source_view,
+                            false,
                         );
                     }
                 }
                 if in_body {
-                    body_sites.record(bytes, node.end_byte(), macros);
+                    body_sites.record_view(source_view, bytes, node.end_byte(), macros);
                 }
             }
         }
@@ -5580,6 +5904,8 @@ fn body_macro_context<'tree>(
             true,
             false,
             &mut body_macro_sites,
+            false,
+            0,
             false,
         );
     }
@@ -5768,7 +6094,7 @@ fn is_function_declaration(decl: Node) -> bool {
             .is_some_and(|name| name.kind() == "identifier")
 }
 
-fn declared_object_type(declaration: Node, decl: Node, b: &[u8]) -> String {
+fn declared_object_type(declaration: Node, decl: Node, b: &[u8], macros: &MacroState) -> String {
     let base = declaration_type(declaration, b, TypeRole::Declaration);
     if let Some(fd) = find_function_declarator(decl) {
         if let Some(pointer) = fd.child_by_field_name("declarator") {
@@ -5810,25 +6136,33 @@ fn declared_object_type(declaration: Node, decl: Node, b: &[u8]) -> String {
             }
         }
     }
-    format!("{base}{}", object_decl_suffix(decl, b, false))
+    format!("{base}{}", object_decl_suffix(decl, b, false, macros))
 }
 
 fn prototype_declarations<'a>(
     root: Node<'a>,
-    b: &[u8],
-    macro_sites: &BodyMacroSites,
-) -> Vec<Node<'a>> {
-    if !prototype_headers(root, b).is_empty() {
-        return vec![root];
+    b: &'a [u8],
+    macro_sites: &BodyMacroSites<'a>,
+    source_view: usize,
+) -> Vec<(Node<'a>, usize)> {
+    if let Some((view, header)) = macro_sites.included(source_view, root, b) {
+        return header
+            .items
+            .iter()
+            .flat_map(|node| prototype_declarations(*node, header.bytes, macro_sites, view))
+            .collect();
     }
-    // File-scope inactive declarations remain in the pinned graph. Within an
-    // active body, prototypes follow the same selected branch as statements.
+    if !prototype_headers(root, b).is_empty() {
+        return vec![(root, source_view)];
+    }
+    // File-scope inactive declarations remain retained; active body prototypes
+    // use the recorded original-source macro state.
     let children = if matches!(
         root.kind(),
         "preproc_if" | "preproc_ifdef" | "preproc_elif" | "preproc_elifdef" | "preproc_else"
     ) {
         macro_sites
-            .at(root, b)
+            .at_view(source_view, root, b)
             .map(|macros| kept_preproc_children(root, b, macros))
             .unwrap_or_else(|| named_children(root))
     } else {
@@ -5836,7 +6170,7 @@ fn prototype_declarations<'a>(
     };
     children
         .into_iter()
-        .flat_map(|child| prototype_declarations(child, b, macro_sites))
+        .flat_map(|child| prototype_declarations(child, b, macro_sites, source_view))
         .collect()
 }
 
@@ -6010,7 +6344,7 @@ fn update_header_type_bindings(
         } else {
             format!(
                 "{base_type}{}",
-                object_decl_suffix(declarator, source.as_bytes(), false)
+                object_decl_suffix(declarator, source.as_bytes(), false, &MacroState::default())
             )
         };
         bindings.insert(name, ty);
@@ -6646,10 +6980,10 @@ fn member_decl_suffix(n: Node, b: &[u8], macros: &HashMap<String, MacroDef>) -> 
 /// Object declarators use CDT's binding spelling; parameter/member renderers
 /// retain their distinct suffix ordering. A nested declarator contributes its
 /// pointer shape but not inner array dimensions (`*(*p[3])[2]` -> `*(*)[2]`).
-fn object_decl_suffix(n: Node, b: &[u8], nested_name: bool) -> String {
+fn object_decl_suffix(n: Node, b: &[u8], nested_name: bool, macros: &MacroState) -> String {
     let nested = || {
         n.child_by_field_name("declarator")
-            .map(|d| object_decl_suffix(d, b, nested_name))
+            .map(|d| object_decl_suffix(d, b, nested_name, macros))
             .unwrap_or_default()
     };
     match n.kind() {
@@ -6657,7 +6991,21 @@ fn object_decl_suffix(n: Node, b: &[u8], nested_name: bool) -> String {
         "array_declarator" | "abstract_array_declarator" if !nested_name => {
             let size = n
                 .child_by_field_name("size")
-                .map(|sz| text(sz, b))
+                .map(|sz| {
+                    // CDT binding types expand a bare macro dimension, while
+                    // compound dimensions retain their original expression.
+                    if sz.kind() == "identifier" {
+                        expand_declaration_tokens(
+                            text(sz, b),
+                            macros,
+                            &mut HashSet::new(),
+                            &mut 65_536,
+                        )
+                        .unwrap_or_else(|| text(sz, b).to_string())
+                    } else {
+                        text(sz, b).to_string()
+                    }
+                })
                 .unwrap_or_default();
             format!("{}[{size}]", nested())
         }
@@ -6665,7 +7013,7 @@ fn object_decl_suffix(n: Node, b: &[u8], nested_name: bool) -> String {
         "parenthesized_declarator" | "abstract_parenthesized_declarator" => {
             let inner = n
                 .named_child(0)
-                .map(|d| object_decl_suffix(d, b, true))
+                .map(|d| object_decl_suffix(d, b, true, macros))
                 .unwrap_or_default();
             if inner.is_empty() {
                 inner
@@ -7904,17 +8252,24 @@ fn collect_decl_names(
     b: &[u8],
     macros: &MacroState,
     macro_sites: Option<&BodyMacroSites>,
+    source_view: usize,
     out: &mut Vec<String>,
 ) {
     let macros = macro_sites
-        .and_then(|sites| sites.at(n, b))
+        .and_then(|sites| sites.at_view(source_view, n, b))
         .unwrap_or(macros);
+    if let Some((view, header)) = macro_sites.and_then(|sites| sites.included(source_view, n, b)) {
+        for item in &header.items {
+            collect_decl_names(*item, header.bytes, macros, macro_sites, view, out);
+        }
+        return;
+    }
     if matches!(
         n.kind(),
         "preproc_if" | "preproc_ifdef" | "preproc_elif" | "preproc_elifdef" | "preproc_else"
     ) {
         for child in kept_preproc_children(n, b, macros) {
-            collect_decl_names(child, b, macros, macro_sites, out);
+            collect_decl_names(child, b, macros, macro_sites, source_view, out);
         }
         return;
     }
@@ -7927,7 +8282,7 @@ fn collect_decl_names(
         }
     }
     for c in named_children(n) {
-        collect_decl_names(c, b, macros, macro_sites, out);
+        collect_decl_names(c, b, macros, macro_sites, source_view, out);
     }
 }
 
@@ -10035,20 +10390,47 @@ fn rd_is_call_retval(arena: &[DNode], node: usize) -> bool {
         None => false,
     }
 }
+// PTF consumers ask only existential membership. Borrow its eligible indices
+// instead of allocating and sorting the full (i, i)/(i, -1) mapping per edge.
+// Keep negative indices and sibling index aliases; FIELD_IDENTIFIER and missing
+// ARGUMENT_INDEX children do not themselves contribute mappings.
+fn rd_passthrough_indices(arena: &[DNode], c: usize) -> impl Iterator<Item = i64> + '_ {
+    arena[c].children.iter().filter_map(|&child| {
+        let argument = &arena[child];
+        (argument.has_arg && argument.label != "FIELD_IDENTIFIER" && argument.arg_index != 0)
+            .then_some(argument.arg_index)
+    })
+}
 fn rd_is_used(arena: &[DNode], e: usize) -> bool {
-    match rd_in_call(arena, e).and_then(|c| rd_sem(arena, c)) {
+    let call = rd_in_call(arena, e);
+    if let Some(c) = call.filter(|&c| rd_passthrough_operator(&arena[c].name)) {
+        return rd_passthrough_indices(arena, c).any(|index| index == arena[e].arg_index);
+    }
+    match call.and_then(|c| rd_sem(arena, c)) {
         Some(m) => m.iter().any(|&(s, _)| s == arena[e].arg_index),
         None => true,
     }
 }
 fn rd_is_defined(arena: &[DNode], e: usize) -> bool {
-    match rd_in_call(arena, e).and_then(|c| rd_sem(arena, c)) {
+    let call = rd_in_call(arena, e);
+    if let Some(c) = call.filter(|&c| rd_passthrough_operator(&arena[c].name)) {
+        return rd_passthrough_indices(arena, c)
+            .any(|index| index == arena[e].arg_index || arena[e].arg_index == -1);
+    }
+    match call.and_then(|c| rd_sem(arena, c)) {
         Some(m) => m.iter().any(|&(_, d)| d == arena[e].arg_index),
         None => true,
     }
 }
 fn rd_has_flow(arena: &[DNode], parent: usize, child: usize) -> bool {
-    match rd_in_call(arena, parent).and_then(|c| rd_sem(arena, c)) {
+    let call = rd_in_call(arena, parent);
+    if let Some(c) = call.filter(|&c| rd_passthrough_operator(&arena[c].name)) {
+        let source = arena[parent].arg_index;
+        let target = arena[child].arg_index;
+        return (source == target || target == -1)
+            && rd_passthrough_indices(arena, c).any(|index| index == source);
+    }
+    match call.and_then(|c| rd_sem(arena, c)) {
         Some(m) => m.contains(&(arena[parent].arg_index, arena[child].arg_index)),
         None => true,
     }
@@ -10208,6 +10590,54 @@ mod rd_semantics_tests {
             }
             let empty = parse_dump_block(&format!("CALL NAME={operator} CODE={{}} ORDER=1"));
             assert!(!rd_is_call_retval(&empty, 0), "{operator}: empty call");
+        }
+    }
+
+    #[test]
+    fn borrowed_pass_through_predicates_preserve_filtered_and_duplicate_indices() {
+        let mut arena = parse_dump_block(
+            "CALL NAME=<operator>.arrayInitializer CODE={}\n\
+             \x20\x20LITERAL CODE=first\n\
+             \x20\x20LITERAL CODE=second\n\
+             \x20\x20FIELD_IDENTIFIER CODE=query ARGUMENT_INDEX=-3\n\
+             \x20\x20FIELD_IDENTIFIER CODE=query ARGUMENT_INDEX=-2\n\
+             \x20\x20FIELD_IDENTIFIER CODE=query ARGUMENT_INDEX=-1\n\
+             \x20\x20FIELD_IDENTIFIER CODE=query ARGUMENT_INDEX=0\n\
+             \x20\x20FIELD_IDENTIFIER CODE=query ARGUMENT_INDEX=1\n\
+             \x20\x20FIELD_IDENTIFIER CODE=query ARGUMENT_INDEX=2\n\
+             \x20\x20FIELD_IDENTIFIER CODE=query ARGUMENT_INDEX=3\n",
+        );
+        for first in 0..20 {
+            for second in 0..20 {
+                for (node, option) in [(1, first), (2, second)] {
+                    arena[node].arg_index = option / 4 - 2;
+                    arena[node].has_arg = option % 4 >= 2;
+                    arena[node].label = if option % 2 == 0 {
+                        "LITERAL".to_string()
+                    } else {
+                        "FIELD_IDENTIFIER".to_string()
+                    };
+                }
+                // Retain the original vector construction as the specification.
+                let mapping = rd_sem(&arena, 0).expect("PTF has explicit semantics");
+                for source in 3..arena.len() {
+                    let index = arena[source].arg_index;
+                    assert_eq!(
+                        rd_is_used(&arena, source),
+                        mapping.iter().any(|&(s, _)| s == index)
+                    );
+                    assert_eq!(
+                        rd_is_defined(&arena, source),
+                        mapping.iter().any(|&(_, d)| d == index)
+                    );
+                    for target in 3..arena.len() {
+                        assert_eq!(
+                            rd_has_flow(&arena, source, target),
+                            mapping.contains(&(index, arena[target].arg_index))
+                        );
+                    }
+                }
+            }
         }
     }
 

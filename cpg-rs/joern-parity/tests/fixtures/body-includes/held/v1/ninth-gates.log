@@ -1,0 +1,10 @@
+   Compiling joern-parity v0.1.1 (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/cpg-rs/joern-parity)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.18s
+     Running tests/body_macro_state.rs (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/target/debug/deps/body_macro_state-c0dc4c5f287440e0)
+
+running 2 tests
+test type_position_argument_events_preserve_complete_macro_methods ... ok
+test body_macro_state_matches_complete_isolated_live_graphs ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.22s
+

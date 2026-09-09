@@ -1,0 +1,18 @@
+{
+  "body_include_macro_only": {
+    "api.h": "#define FLAG 1\nint included;\n",
+    "main.c": "int choose(int x) {\n#include \"api.h\"\n#if FLAG\n return x;\n#else\n return 0;\n#endif\n}\n"
+  },
+  "bare_macro": {
+    "main.c": "#define N 3\nint macro_dimension(int index) {\n    int values[N];\n    values[0] = 7;\n    return values[index];\n}\nint literal_dimension(int index) {\n    int values[3];\n    values[0] = 7;\n    return values[index];\n}\n"
+  },
+  "binary_macro": {
+    "main.c": "#define N 3\nint macro_dimension(int index) {\n    int values[N+1];\n    values[0] = 7;\n    return values[index];\n}\nint literal_dimension(int index) {\n    int values[3+1];\n    values[0] = 7;\n    return values[index];\n}\n"
+  },
+  "parenthesized_macro": {
+    "main.c": "#define N 3\nint macro_dimension(int index) {\n    int values[(N+1)];\n    values[0] = 7;\n    return values[index];\n}\nint literal_dimension(int index) {\n    int values[(3+1)];\n    values[0] = 7;\n    return values[index];\n}\n"
+  },
+  "unary_macro": {
+    "main.c": "#define N 3\nint macro_dimension(int index) {\n    int values[+N];\n    values[0] = 7;\n    return values[index];\n}\nint literal_dimension(int index) {\n    int values[+3];\n    values[0] = 7;\n    return values[index];\n}\n"
+  }
+}

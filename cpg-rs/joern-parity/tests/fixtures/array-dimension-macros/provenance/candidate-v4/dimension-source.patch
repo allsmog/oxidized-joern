@@ -1,0 +1,23 @@
+--- a/cpg-rs/cpg-lang-c/src/exact.rs
++++ b/cpg-rs/cpg-lang-c/src/exact.rs
+@@ -6992,8 +6992,19 @@
+             let size = n
+                 .child_by_field_name("size")
+                 .map(|sz| {
+-                    expand_declaration_tokens(text(sz, b), macros, &mut HashSet::new(), &mut 65_536)
++                    // CDT binding types expand a bare macro dimension, while
++                    // compound dimensions retain their original expression.
++                    if sz.kind() == "identifier" {
++                        expand_declaration_tokens(
++                            text(sz, b),
++                            macros,
++                            &mut HashSet::new(),
++                            &mut 65_536,
++                        )
+                         .unwrap_or_else(|| text(sz, b).to_string())
++                    } else {
++                        text(sz, b).to_string()
++                    }
+                 })
+                 .unwrap_or_default();
+             format!("{}[{size}]", nested())

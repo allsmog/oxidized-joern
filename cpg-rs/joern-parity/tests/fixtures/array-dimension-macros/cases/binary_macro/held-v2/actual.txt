@@ -1,0 +1,520 @@
+METHOD NAME=<global> CODE=<global> FULL_NAME=<includes>:<global> ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.addition FULL_NAME=<operator>.addition ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.alloc FULL_NAME=<operator>.alloc ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.assignment FULL_NAME=<operator>.assignment ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.indirectIndexAccess FULL_NAME=<operator>.indirectIndexAccess ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=literal_dimension CODE=int literal_dimension(int index) {\n    int values[3+1];\n    values[0] = 7;\n    return values[index];\n} FULL_NAME=literal_dimension SIGNATURE=int(int) ORDER=1
+  METHOD_PARAMETER_IN NAME=index CODE=int index TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=index CODE=int index TYPE_FULL_NAME=int ORDER=1
+  BLOCK CODE={\n    int values[3+1];\n    values[0] = 7;\n    return values[index];\n} TYPE_FULL_NAME=void ORDER=2
+    LOCAL NAME=values CODE=int values[3+1] TYPE_FULL_NAME=int[3+1] ORDER=1
+    CALL NAME=<operator>.assignment CODE=values[3+1] TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+      IDENTIFIER NAME=values CODE=values TYPE_FULL_NAME=int[3+1] ORDER=1 ARGUMENT_INDEX=1
+      CALL NAME=<operator>.alloc CODE=values[3+1] TYPE_FULL_NAME=int[3+1] METHOD_FULL_NAME=<operator>.alloc ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=int[3+1] CODE=int[3+1] TYPE_FULL_NAME=int[3+1] ORDER=1 ARGUMENT_INDEX=1
+        CALL NAME=<operator>.addition CODE=3+1 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+          LITERAL CODE=3 TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+          LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+    CALL NAME=<operator>.assignment CODE=values[0] = 7 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH
+      CALL NAME=<operator>.indirectIndexAccess CODE=values[0] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectIndexAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=values CODE=values TYPE_FULL_NAME=int[3+1] ORDER=1 ARGUMENT_INDEX=1
+        LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+      LITERAL CODE=7 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+    RETURN CODE=return values[index]; ORDER=4
+      CALL NAME=<operator>.indirectIndexAccess CODE=values[index] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectIndexAccess ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=values CODE=values TYPE_FULL_NAME=int[3+1] ORDER=1 ARGUMENT_INDEX=1
+        IDENTIFIER NAME=index CODE=index TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+
+METHOD NAME=macro_dimension CODE=int macro_dimension(int index) {\n    int values[N+1];\n    values[0] = 7;\n    return values[index];\n} FULL_NAME=macro_dimension SIGNATURE=int(int) ORDER=1
+  METHOD_PARAMETER_IN NAME=index CODE=int index TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=index CODE=int index TYPE_FULL_NAME=int ORDER=1
+  BLOCK CODE={\n    int values[N+1];\n    values[0] = 7;\n    return values[index];\n} TYPE_FULL_NAME=void ORDER=2
+    LOCAL NAME=values CODE=int values[N+1] TYPE_FULL_NAME=int[3+1] ORDER=1
+    CALL NAME=<operator>.assignment CODE=values[N+1] TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+      IDENTIFIER NAME=values CODE=values TYPE_FULL_NAME=int[3+1] ORDER=1 ARGUMENT_INDEX=1
+      CALL NAME=<operator>.alloc CODE=values[N+1] TYPE_FULL_NAME=int[3+1] METHOD_FULL_NAME=<operator>.alloc ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=int[3+1] CODE=int[3+1] TYPE_FULL_NAME=int[3+1] ORDER=1 ARGUMENT_INDEX=1
+        CALL NAME=<operator>.addition CODE=N+1 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+          CALL NAME=N CODE=N TYPE_FULL_NAME=int METHOD_FULL_NAME=main.c:N:int(0) SIGNATURE=int(0) ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=INLINED
+            BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+              LITERAL CODE=3 TYPE_FULL_NAME=int ORDER=1
+          LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+    CALL NAME=<operator>.assignment CODE=values[0] = 7 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH
+      CALL NAME=<operator>.indirectIndexAccess CODE=values[0] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectIndexAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=values CODE=values TYPE_FULL_NAME=int[3+1] ORDER=1 ARGUMENT_INDEX=1
+        LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+      LITERAL CODE=7 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+    RETURN CODE=return values[index]; ORDER=4
+      CALL NAME=<operator>.indirectIndexAccess CODE=values[index] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectIndexAccess ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=values CODE=values TYPE_FULL_NAME=int[3+1] ORDER=1 ARGUMENT_INDEX=1
+        IDENTIFIER NAME=index CODE=index TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+
+METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1
+  METHOD NAME=macro_dimension CODE=int macro_dimension(int index) {\n    int values[N+1];\n    values[0] = 7;\n    return values[index];\n} FULL_NAME=macro_dimension SIGNATURE=int(int) ORDER=1
+    METHOD_PARAMETER_IN NAME=index CODE=int index TYPE_FULL_NAME=int ORDER=1
+    METHOD_PARAMETER_OUT NAME=index CODE=int index TYPE_FULL_NAME=int ORDER=1
+    BLOCK CODE={\n    int values[N+1];\n    values[0] = 7;\n    return values[index];\n} TYPE_FULL_NAME=void ORDER=2
+      LOCAL NAME=values CODE=int values[N+1] TYPE_FULL_NAME=int[3+1] ORDER=1
+      CALL NAME=<operator>.assignment CODE=values[N+1] TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=values CODE=values TYPE_FULL_NAME=int[3+1] ORDER=1 ARGUMENT_INDEX=1
+        CALL NAME=<operator>.alloc CODE=values[N+1] TYPE_FULL_NAME=int[3+1] METHOD_FULL_NAME=<operator>.alloc ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=int[3+1] CODE=int[3+1] TYPE_FULL_NAME=int[3+1] ORDER=1 ARGUMENT_INDEX=1
+          CALL NAME=<operator>.addition CODE=N+1 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+            CALL NAME=N CODE=N TYPE_FULL_NAME=int METHOD_FULL_NAME=main.c:N:int(0) SIGNATURE=int(0) ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=INLINED
+              BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+                LITERAL CODE=3 TYPE_FULL_NAME=int ORDER=1
+            LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+      CALL NAME=<operator>.assignment CODE=values[0] = 7 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH
+        CALL NAME=<operator>.indirectIndexAccess CODE=values[0] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectIndexAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=values CODE=values TYPE_FULL_NAME=int[3+1] ORDER=1 ARGUMENT_INDEX=1
+          LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+        LITERAL CODE=7 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+      RETURN CODE=return values[index]; ORDER=4
+        CALL NAME=<operator>.indirectIndexAccess CODE=values[index] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectIndexAccess ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=values CODE=values TYPE_FULL_NAME=int[3+1] ORDER=1 ARGUMENT_INDEX=1
+          IDENTIFIER NAME=index CODE=index TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+  METHOD NAME=literal_dimension CODE=int literal_dimension(int index) {\n    int values[3+1];\n    values[0] = 7;\n    return values[index];\n} FULL_NAME=literal_dimension SIGNATURE=int(int) ORDER=1
+    METHOD_PARAMETER_IN NAME=index CODE=int index TYPE_FULL_NAME=int ORDER=1
+    METHOD_PARAMETER_OUT NAME=index CODE=int index TYPE_FULL_NAME=int ORDER=1
+    BLOCK CODE={\n    int values[3+1];\n    values[0] = 7;\n    return values[index];\n} TYPE_FULL_NAME=void ORDER=2
+      LOCAL NAME=values CODE=int values[3+1] TYPE_FULL_NAME=int[3+1] ORDER=1
+      CALL NAME=<operator>.assignment CODE=values[3+1] TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=values CODE=values TYPE_FULL_NAME=int[3+1] ORDER=1 ARGUMENT_INDEX=1
+        CALL NAME=<operator>.alloc CODE=values[3+1] TYPE_FULL_NAME=int[3+1] METHOD_FULL_NAME=<operator>.alloc ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=int[3+1] CODE=int[3+1] TYPE_FULL_NAME=int[3+1] ORDER=1 ARGUMENT_INDEX=1
+          CALL NAME=<operator>.addition CODE=3+1 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+            LITERAL CODE=3 TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+            LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+      CALL NAME=<operator>.assignment CODE=values[0] = 7 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH
+        CALL NAME=<operator>.indirectIndexAccess CODE=values[0] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectIndexAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=values CODE=values TYPE_FULL_NAME=int[3+1] ORDER=1 ARGUMENT_INDEX=1
+          LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+        LITERAL CODE=7 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+      RETURN CODE=return values[index]; ORDER=4
+        CALL NAME=<operator>.indirectIndexAccess CODE=values[index] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectIndexAccess ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=values CODE=values TYPE_FULL_NAME=int[3+1] ORDER=1 ARGUMENT_INDEX=1
+          IDENTIFIER NAME=index CODE=index TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+    METHOD_REF CODE=macro_dimension TYPE_FULL_NAME=macro_dimension METHOD_FULL_NAME=macro_dimension ORDER=1
+    METHOD_REF CODE=literal_dimension TYPE_FULL_NAME=literal_dimension METHOD_FULL_NAME=literal_dimension ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=N CODE=#define N 3 FULL_NAME=main.c:N:int(0) SIGNATURE=int(0) ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=2
+
+NODES|META_DATA LANGUAGE=NEWC
+NODES|FILE NAME=<includes> ORDER=1
+NODES|FILE NAME=<unknown> ORDER=0
+NODES|FILE NAME=main.c ORDER=0
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<global> FILENAME=<unknown> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<includes>:<global> FILENAME=<includes> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|NAMESPACE NAME=<global>
+NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=int[3+1] FULL_NAME=int[3+1] CODE=int[3+1] IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=literal_dimension FULL_NAME=literal_dimension CODE=literal_dimension AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=macro_dimension FULL_NAME=macro_dimension CODE=macro_dimension AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=<global> FULL_NAME=main.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+NODES|TYPE NAME=int[3+1] FULL_NAME=int[3+1] TYPE_DECL_FULL_NAME=int[3+1]
+NODES|TYPE NAME=literal_dimension FULL_NAME=literal_dimension TYPE_DECL_FULL_NAME=literal_dimension
+NODES|TYPE NAME=macro_dimension FULL_NAME=macro_dimension TYPE_DECL_FULL_NAME=macro_dimension
+NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+EDGES|ARGUMENT literal_dimension#12 -> literal_dimension#13
+EDGES|ARGUMENT literal_dimension#12 -> literal_dimension#16
+EDGES|ARGUMENT literal_dimension#13 -> literal_dimension#14
+EDGES|ARGUMENT literal_dimension#13 -> literal_dimension#15
+EDGES|ARGUMENT literal_dimension#17 -> literal_dimension#18
+EDGES|ARGUMENT literal_dimension#18 -> literal_dimension#19
+EDGES|ARGUMENT literal_dimension#18 -> literal_dimension#20
+EDGES|ARGUMENT literal_dimension#5 -> literal_dimension#6
+EDGES|ARGUMENT literal_dimension#5 -> literal_dimension#7
+EDGES|ARGUMENT literal_dimension#7 -> literal_dimension#8
+EDGES|ARGUMENT literal_dimension#7 -> literal_dimension#9
+EDGES|ARGUMENT literal_dimension#9 -> literal_dimension#10
+EDGES|ARGUMENT literal_dimension#9 -> literal_dimension#11
+EDGES|ARGUMENT macro_dimension#14 -> macro_dimension#15
+EDGES|ARGUMENT macro_dimension#14 -> macro_dimension#18
+EDGES|ARGUMENT macro_dimension#15 -> macro_dimension#16
+EDGES|ARGUMENT macro_dimension#15 -> macro_dimension#17
+EDGES|ARGUMENT macro_dimension#19 -> macro_dimension#20
+EDGES|ARGUMENT macro_dimension#20 -> macro_dimension#21
+EDGES|ARGUMENT macro_dimension#20 -> macro_dimension#22
+EDGES|ARGUMENT macro_dimension#5 -> macro_dimension#6
+EDGES|ARGUMENT macro_dimension#5 -> macro_dimension#7
+EDGES|ARGUMENT macro_dimension#7 -> macro_dimension#8
+EDGES|ARGUMENT macro_dimension#7 -> macro_dimension#9
+EDGES|ARGUMENT macro_dimension#9 -> macro_dimension#10
+EDGES|ARGUMENT macro_dimension#9 -> macro_dimension#13
+EDGES|CALL literal_dimension#12 -> <operator>.assignment#0
+EDGES|CALL literal_dimension#13 -> <operator>.indirectIndexAccess#0
+EDGES|CALL literal_dimension#18 -> <operator>.indirectIndexAccess#0
+EDGES|CALL literal_dimension#5 -> <operator>.assignment#0
+EDGES|CALL literal_dimension#7 -> <operator>.alloc#0
+EDGES|CALL literal_dimension#9 -> <operator>.addition#0
+EDGES|CALL macro_dimension#10 -> main.c:N:int(0)#0
+EDGES|CALL macro_dimension#14 -> <operator>.assignment#0
+EDGES|CALL macro_dimension#15 -> <operator>.indirectIndexAccess#0
+EDGES|CALL macro_dimension#20 -> <operator>.indirectIndexAccess#0
+EDGES|CALL macro_dimension#5 -> <operator>.assignment#0
+EDGES|CALL macro_dimension#7 -> <operator>.alloc#0
+EDGES|CALL macro_dimension#9 -> <operator>.addition#0
+EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+EDGES|CFG <operator>.addition#0 -> <operator>.addition#5
+EDGES|CFG <operator>.alloc#0 -> <operator>.alloc#5
+EDGES|CFG <operator>.assignment#0 -> <operator>.assignment#5
+EDGES|CFG <operator>.indirectIndexAccess#0 -> <operator>.indirectIndexAccess#5
+EDGES|CFG literal_dimension#0 -> literal_dimension#6
+EDGES|CFG literal_dimension#10 -> literal_dimension#11
+EDGES|CFG literal_dimension#11 -> literal_dimension#9
+EDGES|CFG literal_dimension#12 -> literal_dimension#19
+EDGES|CFG literal_dimension#13 -> literal_dimension#16
+EDGES|CFG literal_dimension#14 -> literal_dimension#15
+EDGES|CFG literal_dimension#15 -> literal_dimension#13
+EDGES|CFG literal_dimension#16 -> literal_dimension#12
+EDGES|CFG literal_dimension#17 -> literal_dimension#21
+EDGES|CFG literal_dimension#18 -> literal_dimension#17
+EDGES|CFG literal_dimension#19 -> literal_dimension#20
+EDGES|CFG literal_dimension#20 -> literal_dimension#18
+EDGES|CFG literal_dimension#5 -> literal_dimension#14
+EDGES|CFG literal_dimension#6 -> literal_dimension#8
+EDGES|CFG literal_dimension#7 -> literal_dimension#5
+EDGES|CFG literal_dimension#8 -> literal_dimension#10
+EDGES|CFG literal_dimension#9 -> literal_dimension#7
+EDGES|CFG macro_dimension#0 -> macro_dimension#6
+EDGES|CFG macro_dimension#10 -> macro_dimension#12
+EDGES|CFG macro_dimension#10 -> macro_dimension#13
+EDGES|CFG macro_dimension#12 -> macro_dimension#13
+EDGES|CFG macro_dimension#13 -> macro_dimension#9
+EDGES|CFG macro_dimension#14 -> macro_dimension#21
+EDGES|CFG macro_dimension#15 -> macro_dimension#18
+EDGES|CFG macro_dimension#16 -> macro_dimension#17
+EDGES|CFG macro_dimension#17 -> macro_dimension#15
+EDGES|CFG macro_dimension#18 -> macro_dimension#14
+EDGES|CFG macro_dimension#19 -> macro_dimension#23
+EDGES|CFG macro_dimension#20 -> macro_dimension#19
+EDGES|CFG macro_dimension#21 -> macro_dimension#22
+EDGES|CFG macro_dimension#22 -> macro_dimension#20
+EDGES|CFG macro_dimension#5 -> macro_dimension#16
+EDGES|CFG macro_dimension#6 -> macro_dimension#8
+EDGES|CFG macro_dimension#7 -> macro_dimension#5
+EDGES|CFG macro_dimension#8 -> macro_dimension#10
+EDGES|CFG macro_dimension#9 -> macro_dimension#7
+EDGES|CFG main.c:<global>#0 -> main.c:<global>#48
+EDGES|CFG main.c:<global>#48 -> main.c:<global>#49
+EDGES|CFG main.c:<global>#49 -> main.c:<global>#50
+EDGES|CFG main.c:N:int(0)#0 -> main.c:N:int(0)#2
+EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+EDGES|CONTAINS <operator>.addition#0 -> <operator>.addition#2
+EDGES|CONTAINS <operator>.alloc#0 -> <operator>.alloc#2
+EDGES|CONTAINS <operator>.assignment#0 -> <operator>.assignment#2
+EDGES|CONTAINS <operator>.indirectIndexAccess#0 -> <operator>.indirectIndexAccess#2
+EDGES|CONTAINS D:main.c:<global> -> D:literal_dimension
+EDGES|CONTAINS D:main.c:<global> -> D:macro_dimension
+EDGES|CONTAINS D:main.c:<global> -> main.c:<global>#0
+EDGES|CONTAINS D:main.c:<global> -> main.c:N:int(0)#0
+EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+EDGES|CONTAINS F:<includes> -> D:ANY
+EDGES|CONTAINS F:<includes> -> D:int
+EDGES|CONTAINS F:<includes> -> D:int[3+1]
+EDGES|CONTAINS F:<includes> -> D:void
+EDGES|CONTAINS F:main.c -> D:main.c:<global>
+EDGES|CONTAINS literal_dimension#0 -> literal_dimension#10
+EDGES|CONTAINS literal_dimension#0 -> literal_dimension#11
+EDGES|CONTAINS literal_dimension#0 -> literal_dimension#12
+EDGES|CONTAINS literal_dimension#0 -> literal_dimension#13
+EDGES|CONTAINS literal_dimension#0 -> literal_dimension#14
+EDGES|CONTAINS literal_dimension#0 -> literal_dimension#15
+EDGES|CONTAINS literal_dimension#0 -> literal_dimension#16
+EDGES|CONTAINS literal_dimension#0 -> literal_dimension#17
+EDGES|CONTAINS literal_dimension#0 -> literal_dimension#18
+EDGES|CONTAINS literal_dimension#0 -> literal_dimension#19
+EDGES|CONTAINS literal_dimension#0 -> literal_dimension#20
+EDGES|CONTAINS literal_dimension#0 -> literal_dimension#3
+EDGES|CONTAINS literal_dimension#0 -> literal_dimension#5
+EDGES|CONTAINS literal_dimension#0 -> literal_dimension#6
+EDGES|CONTAINS literal_dimension#0 -> literal_dimension#7
+EDGES|CONTAINS literal_dimension#0 -> literal_dimension#8
+EDGES|CONTAINS literal_dimension#0 -> literal_dimension#9
+EDGES|CONTAINS macro_dimension#0 -> macro_dimension#10
+EDGES|CONTAINS macro_dimension#0 -> macro_dimension#11
+EDGES|CONTAINS macro_dimension#0 -> macro_dimension#12
+EDGES|CONTAINS macro_dimension#0 -> macro_dimension#13
+EDGES|CONTAINS macro_dimension#0 -> macro_dimension#14
+EDGES|CONTAINS macro_dimension#0 -> macro_dimension#15
+EDGES|CONTAINS macro_dimension#0 -> macro_dimension#16
+EDGES|CONTAINS macro_dimension#0 -> macro_dimension#17
+EDGES|CONTAINS macro_dimension#0 -> macro_dimension#18
+EDGES|CONTAINS macro_dimension#0 -> macro_dimension#19
+EDGES|CONTAINS macro_dimension#0 -> macro_dimension#20
+EDGES|CONTAINS macro_dimension#0 -> macro_dimension#21
+EDGES|CONTAINS macro_dimension#0 -> macro_dimension#22
+EDGES|CONTAINS macro_dimension#0 -> macro_dimension#3
+EDGES|CONTAINS macro_dimension#0 -> macro_dimension#5
+EDGES|CONTAINS macro_dimension#0 -> macro_dimension#6
+EDGES|CONTAINS macro_dimension#0 -> macro_dimension#7
+EDGES|CONTAINS macro_dimension#0 -> macro_dimension#8
+EDGES|CONTAINS macro_dimension#0 -> macro_dimension#9
+EDGES|CONTAINS main.c:<global>#0 -> literal_dimension#0
+EDGES|CONTAINS main.c:<global>#0 -> macro_dimension#0
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#47
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#48
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#49
+EDGES|CONTAINS main.c:N:int(0)#0 -> main.c:N:int(0)#1
+EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#6 -> T:ANY
+EDGES|EVAL_TYPE <operator>.alloc#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.alloc#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.alloc#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.alloc#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.alloc#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.alloc#6 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#6 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectIndexAccess#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectIndexAccess#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectIndexAccess#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectIndexAccess#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectIndexAccess#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectIndexAccess#6 -> T:ANY
+EDGES|EVAL_TYPE literal_dimension#1 -> T:int
+EDGES|EVAL_TYPE literal_dimension#10 -> T:int
+EDGES|EVAL_TYPE literal_dimension#11 -> T:int
+EDGES|EVAL_TYPE literal_dimension#12 -> T:ANY
+EDGES|EVAL_TYPE literal_dimension#13 -> T:ANY
+EDGES|EVAL_TYPE literal_dimension#14 -> T:int[3+1]
+EDGES|EVAL_TYPE literal_dimension#15 -> T:int
+EDGES|EVAL_TYPE literal_dimension#16 -> T:int
+EDGES|EVAL_TYPE literal_dimension#18 -> T:ANY
+EDGES|EVAL_TYPE literal_dimension#19 -> T:int[3+1]
+EDGES|EVAL_TYPE literal_dimension#2 -> T:int
+EDGES|EVAL_TYPE literal_dimension#20 -> T:int
+EDGES|EVAL_TYPE literal_dimension#21 -> T:int
+EDGES|EVAL_TYPE literal_dimension#3 -> T:void
+EDGES|EVAL_TYPE literal_dimension#4 -> T:int[3+1]
+EDGES|EVAL_TYPE literal_dimension#5 -> T:void
+EDGES|EVAL_TYPE literal_dimension#6 -> T:int[3+1]
+EDGES|EVAL_TYPE literal_dimension#7 -> T:int[3+1]
+EDGES|EVAL_TYPE literal_dimension#8 -> T:int[3+1]
+EDGES|EVAL_TYPE literal_dimension#9 -> T:ANY
+EDGES|EVAL_TYPE macro_dimension#1 -> T:int
+EDGES|EVAL_TYPE macro_dimension#10 -> T:int
+EDGES|EVAL_TYPE macro_dimension#11 -> T:ANY
+EDGES|EVAL_TYPE macro_dimension#12 -> T:int
+EDGES|EVAL_TYPE macro_dimension#13 -> T:int
+EDGES|EVAL_TYPE macro_dimension#14 -> T:ANY
+EDGES|EVAL_TYPE macro_dimension#15 -> T:ANY
+EDGES|EVAL_TYPE macro_dimension#16 -> T:int[3+1]
+EDGES|EVAL_TYPE macro_dimension#17 -> T:int
+EDGES|EVAL_TYPE macro_dimension#18 -> T:int
+EDGES|EVAL_TYPE macro_dimension#2 -> T:int
+EDGES|EVAL_TYPE macro_dimension#20 -> T:ANY
+EDGES|EVAL_TYPE macro_dimension#21 -> T:int[3+1]
+EDGES|EVAL_TYPE macro_dimension#22 -> T:int
+EDGES|EVAL_TYPE macro_dimension#23 -> T:int
+EDGES|EVAL_TYPE macro_dimension#3 -> T:void
+EDGES|EVAL_TYPE macro_dimension#4 -> T:int[3+1]
+EDGES|EVAL_TYPE macro_dimension#5 -> T:void
+EDGES|EVAL_TYPE macro_dimension#6 -> T:int[3+1]
+EDGES|EVAL_TYPE macro_dimension#7 -> T:int[3+1]
+EDGES|EVAL_TYPE macro_dimension#8 -> T:int[3+1]
+EDGES|EVAL_TYPE macro_dimension#9 -> T:ANY
+EDGES|EVAL_TYPE main.c:<global>#47 -> T:ANY
+EDGES|EVAL_TYPE main.c:<global>#48 -> T:macro_dimension
+EDGES|EVAL_TYPE main.c:<global>#49 -> T:literal_dimension
+EDGES|EVAL_TYPE main.c:<global>#50 -> T:ANY
+EDGES|EVAL_TYPE main.c:N:int(0)#1 -> T:ANY
+EDGES|EVAL_TYPE main.c:N:int(0)#2 -> T:int
+EDGES|PARAMETER_LINK <operator>.addition#1 -> <operator>.addition#3
+EDGES|PARAMETER_LINK <operator>.addition#4 -> <operator>.addition#6
+EDGES|PARAMETER_LINK <operator>.alloc#1 -> <operator>.alloc#3
+EDGES|PARAMETER_LINK <operator>.alloc#4 -> <operator>.alloc#6
+EDGES|PARAMETER_LINK <operator>.assignment#1 -> <operator>.assignment#3
+EDGES|PARAMETER_LINK <operator>.assignment#4 -> <operator>.assignment#6
+EDGES|PARAMETER_LINK <operator>.indirectIndexAccess#1 -> <operator>.indirectIndexAccess#3
+EDGES|PARAMETER_LINK <operator>.indirectIndexAccess#4 -> <operator>.indirectIndexAccess#6
+EDGES|PARAMETER_LINK literal_dimension#1 -> literal_dimension#2
+EDGES|PARAMETER_LINK macro_dimension#1 -> macro_dimension#2
+EDGES|REF NB:<global> -> NS:<global>
+EDGES|REF NB:<includes>:<global> -> NS:<global>
+EDGES|REF NB:main.c:<global> -> NS:<global>
+EDGES|REF T:ANY -> D:ANY
+EDGES|REF T:int -> D:int
+EDGES|REF T:int[3+1] -> D:int[3+1]
+EDGES|REF T:literal_dimension -> D:literal_dimension
+EDGES|REF T:macro_dimension -> D:macro_dimension
+EDGES|REF T:void -> D:void
+EDGES|REF literal_dimension#14 -> literal_dimension#4
+EDGES|REF literal_dimension#19 -> literal_dimension#4
+EDGES|REF literal_dimension#20 -> literal_dimension#1
+EDGES|REF literal_dimension#6 -> literal_dimension#4
+EDGES|REF macro_dimension#16 -> macro_dimension#4
+EDGES|REF macro_dimension#21 -> macro_dimension#4
+EDGES|REF macro_dimension#22 -> macro_dimension#1
+EDGES|REF macro_dimension#6 -> macro_dimension#4
+EDGES|REF main.c:<global>#48 -> macro_dimension#0
+EDGES|REF main.c:<global>#49 -> literal_dimension#0
+EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+EDGES|SOURCE_FILE D:ANY -> F:<includes>
+EDGES|SOURCE_FILE D:int -> F:<includes>
+EDGES|SOURCE_FILE D:int[3+1] -> F:<includes>
+EDGES|SOURCE_FILE D:literal_dimension -> F:main.c
+EDGES|SOURCE_FILE D:macro_dimension -> F:main.c
+EDGES|SOURCE_FILE D:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE D:void -> F:<includes>
+EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
+EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>
+EDGES|SOURCE_FILE NB:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE literal_dimension#0 -> F:main.c
+EDGES|SOURCE_FILE macro_dimension#0 -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#0 -> F:main.c
+EDGES|SOURCE_FILE main.c:N:int(0)#0 -> F:main.c
+FLOWS|REACHING_DEF[1] literal_dimension#11 -> literal_dimension#9
+FLOWS|REACHING_DEF[1] macro_dimension#13 -> macro_dimension#9
+FLOWS|REACHING_DEF[3+1] literal_dimension#9 -> literal_dimension#21
+FLOWS|REACHING_DEF[3+1] literal_dimension#9 -> literal_dimension#7
+FLOWS|REACHING_DEF[3] literal_dimension#10 -> literal_dimension#9
+FLOWS|REACHING_DEF[7] literal_dimension#16 -> literal_dimension#12
+FLOWS|REACHING_DEF[7] literal_dimension#16 -> literal_dimension#13
+FLOWS|REACHING_DEF[7] macro_dimension#18 -> macro_dimension#14
+FLOWS|REACHING_DEF[7] macro_dimension#18 -> macro_dimension#15
+FLOWS|REACHING_DEF[<RET>] literal_dimension#17 -> literal_dimension#21
+FLOWS|REACHING_DEF[<RET>] macro_dimension#19 -> macro_dimension#23
+FLOWS|REACHING_DEF[N+1] macro_dimension#9 -> macro_dimension#23
+FLOWS|REACHING_DEF[N+1] macro_dimension#9 -> macro_dimension#7
+FLOWS|REACHING_DEF[N] macro_dimension#10 -> macro_dimension#23
+FLOWS|REACHING_DEF[N] macro_dimension#10 -> macro_dimension#9
+FLOWS|REACHING_DEF[] <operator>.addition#0 -> <operator>.addition#1
+FLOWS|REACHING_DEF[] <operator>.addition#0 -> <operator>.addition#4
+FLOWS|REACHING_DEF[] <operator>.alloc#0 -> <operator>.alloc#1
+FLOWS|REACHING_DEF[] <operator>.alloc#0 -> <operator>.alloc#4
+FLOWS|REACHING_DEF[] <operator>.assignment#0 -> <operator>.assignment#1
+FLOWS|REACHING_DEF[] <operator>.assignment#0 -> <operator>.assignment#4
+FLOWS|REACHING_DEF[] <operator>.indirectIndexAccess#0 -> <operator>.indirectIndexAccess#1
+FLOWS|REACHING_DEF[] <operator>.indirectIndexAccess#0 -> <operator>.indirectIndexAccess#4
+FLOWS|REACHING_DEF[] literal_dimension#0 -> literal_dimension#1
+FLOWS|REACHING_DEF[] literal_dimension#0 -> literal_dimension#10
+FLOWS|REACHING_DEF[] literal_dimension#0 -> literal_dimension#11
+FLOWS|REACHING_DEF[] literal_dimension#0 -> literal_dimension#14
+FLOWS|REACHING_DEF[] literal_dimension#0 -> literal_dimension#15
+FLOWS|REACHING_DEF[] literal_dimension#0 -> literal_dimension#16
+FLOWS|REACHING_DEF[] literal_dimension#0 -> literal_dimension#19
+FLOWS|REACHING_DEF[] literal_dimension#0 -> literal_dimension#20
+FLOWS|REACHING_DEF[] literal_dimension#0 -> literal_dimension#8
+FLOWS|REACHING_DEF[] macro_dimension#0 -> macro_dimension#1
+FLOWS|REACHING_DEF[] macro_dimension#0 -> macro_dimension#10
+FLOWS|REACHING_DEF[] macro_dimension#0 -> macro_dimension#12
+FLOWS|REACHING_DEF[] macro_dimension#0 -> macro_dimension#13
+FLOWS|REACHING_DEF[] macro_dimension#0 -> macro_dimension#16
+FLOWS|REACHING_DEF[] macro_dimension#0 -> macro_dimension#17
+FLOWS|REACHING_DEF[] macro_dimension#0 -> macro_dimension#18
+FLOWS|REACHING_DEF[] macro_dimension#0 -> macro_dimension#21
+FLOWS|REACHING_DEF[] macro_dimension#0 -> macro_dimension#22
+FLOWS|REACHING_DEF[] macro_dimension#0 -> macro_dimension#8
+FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#48
+FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#49
+FLOWS|REACHING_DEF[index] literal_dimension#1 -> literal_dimension#2
+FLOWS|REACHING_DEF[index] literal_dimension#1 -> literal_dimension#20
+FLOWS|REACHING_DEF[index] literal_dimension#1 -> literal_dimension#21
+FLOWS|REACHING_DEF[index] macro_dimension#1 -> macro_dimension#2
+FLOWS|REACHING_DEF[index] macro_dimension#1 -> macro_dimension#22
+FLOWS|REACHING_DEF[index] macro_dimension#1 -> macro_dimension#23
+FLOWS|REACHING_DEF[int[3+1]] literal_dimension#8 -> literal_dimension#21
+FLOWS|REACHING_DEF[int[3+1]] literal_dimension#8 -> literal_dimension#7
+FLOWS|REACHING_DEF[int[3+1]] literal_dimension#8 -> literal_dimension#9
+FLOWS|REACHING_DEF[int[3+1]] macro_dimension#8 -> macro_dimension#23
+FLOWS|REACHING_DEF[int[3+1]] macro_dimension#8 -> macro_dimension#7
+FLOWS|REACHING_DEF[int[3+1]] macro_dimension#8 -> macro_dimension#9
+FLOWS|REACHING_DEF[p1] <operator>.addition#1 -> <operator>.addition#3
+FLOWS|REACHING_DEF[p1] <operator>.addition#1 -> <operator>.addition#5
+FLOWS|REACHING_DEF[p1] <operator>.alloc#1 -> <operator>.alloc#3
+FLOWS|REACHING_DEF[p1] <operator>.alloc#1 -> <operator>.alloc#5
+FLOWS|REACHING_DEF[p1] <operator>.assignment#1 -> <operator>.assignment#3
+FLOWS|REACHING_DEF[p1] <operator>.assignment#1 -> <operator>.assignment#5
+FLOWS|REACHING_DEF[p1] <operator>.indirectIndexAccess#1 -> <operator>.indirectIndexAccess#3
+FLOWS|REACHING_DEF[p1] <operator>.indirectIndexAccess#1 -> <operator>.indirectIndexAccess#5
+FLOWS|REACHING_DEF[p2] <operator>.addition#4 -> <operator>.addition#5
+FLOWS|REACHING_DEF[p2] <operator>.addition#4 -> <operator>.addition#6
+FLOWS|REACHING_DEF[p2] <operator>.alloc#4 -> <operator>.alloc#5
+FLOWS|REACHING_DEF[p2] <operator>.alloc#4 -> <operator>.alloc#6
+FLOWS|REACHING_DEF[p2] <operator>.assignment#4 -> <operator>.assignment#5
+FLOWS|REACHING_DEF[p2] <operator>.assignment#4 -> <operator>.assignment#6
+FLOWS|REACHING_DEF[p2] <operator>.indirectIndexAccess#4 -> <operator>.indirectIndexAccess#5
+FLOWS|REACHING_DEF[p2] <operator>.indirectIndexAccess#4 -> <operator>.indirectIndexAccess#6
+FLOWS|REACHING_DEF[values[0] = 7] literal_dimension#12 -> literal_dimension#21
+FLOWS|REACHING_DEF[values[0] = 7] macro_dimension#14 -> macro_dimension#23
+FLOWS|REACHING_DEF[values[0]] literal_dimension#13 -> literal_dimension#12
+FLOWS|REACHING_DEF[values[0]] literal_dimension#13 -> literal_dimension#19
+FLOWS|REACHING_DEF[values[0]] literal_dimension#13 -> literal_dimension#21
+FLOWS|REACHING_DEF[values[0]] macro_dimension#15 -> macro_dimension#14
+FLOWS|REACHING_DEF[values[0]] macro_dimension#15 -> macro_dimension#21
+FLOWS|REACHING_DEF[values[0]] macro_dimension#15 -> macro_dimension#23
+FLOWS|REACHING_DEF[values[3+1]] literal_dimension#5 -> literal_dimension#21
+FLOWS|REACHING_DEF[values[3+1]] literal_dimension#7 -> literal_dimension#21
+FLOWS|REACHING_DEF[values[3+1]] literal_dimension#7 -> literal_dimension#5
+FLOWS|REACHING_DEF[values[3+1]] literal_dimension#7 -> literal_dimension#6
+FLOWS|REACHING_DEF[values[N+1]] macro_dimension#5 -> macro_dimension#23
+FLOWS|REACHING_DEF[values[N+1]] macro_dimension#7 -> macro_dimension#23
+FLOWS|REACHING_DEF[values[N+1]] macro_dimension#7 -> macro_dimension#5
+FLOWS|REACHING_DEF[values[N+1]] macro_dimension#7 -> macro_dimension#6
+FLOWS|REACHING_DEF[values[index]] literal_dimension#18 -> literal_dimension#17
+FLOWS|REACHING_DEF[values[index]] macro_dimension#20 -> macro_dimension#19
+FLOWS|REACHING_DEF[values] literal_dimension#6 -> literal_dimension#14
+FLOWS|REACHING_DEF[values] literal_dimension#6 -> literal_dimension#18
+FLOWS|REACHING_DEF[values] literal_dimension#6 -> literal_dimension#19
+FLOWS|REACHING_DEF[values] literal_dimension#6 -> literal_dimension#21
+FLOWS|REACHING_DEF[values] literal_dimension#6 -> literal_dimension#5
+FLOWS|REACHING_DEF[values] macro_dimension#6 -> macro_dimension#16
+FLOWS|REACHING_DEF[values] macro_dimension#6 -> macro_dimension#20
+FLOWS|REACHING_DEF[values] macro_dimension#6 -> macro_dimension#21
+FLOWS|REACHING_DEF[values] macro_dimension#6 -> macro_dimension#23
+FLOWS|REACHING_DEF[values] macro_dimension#6 -> macro_dimension#5

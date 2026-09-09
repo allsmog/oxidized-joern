@@ -1,0 +1,15 @@
+{
+  "case": "unary_macro",
+  "command": [
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/frozen-v4-dimensions/joern-parity",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/array-v4-replay/unary_macro/input/main.c"
+  ],
+  "exitCode": 0,
+  "seconds": 0.011907167005119845,
+  "inputSha256": "a70cfaa22d1ca206e7ac909f1d4916f6db91985e813446b54e34c6abd6545db6",
+  "expectedSha256": "3968d5812b22f0b914b5e242870383827592ec8ae04772a0efd6a0643e899f26",
+  "actualSha256": "3968d5812b22f0b914b5e242870383827592ec8ae04772a0efd6a0643e899f26",
+  "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "diffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "exact": true
+}

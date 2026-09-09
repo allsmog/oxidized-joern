@@ -1,0 +1,19 @@
+{
+  "case": "nested_scope_typedef_macro",
+  "exitCode": 0,
+  "seconds": 0.021825167001225054,
+  "exact": true,
+  "command": [
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/frozen-v2/joern-parity",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/replay-v2/nested_scope_typedef_macro/input/main.c",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/replay-v2/nested_scope_typedef_macro/input/scope.h"
+  ],
+  "inputs": {
+    "main.c": "15477e5092143e0b32762327e15d6323a40786dc7444d23868fdb300c85a2b72",
+    "scope.h": "0180b80ae57402852b44fe3f0a26dc6d93a91123f1d0e869b0d4d339e9271bdd"
+  },
+  "expectedSha256": "e73d9af14f883513c4f5f343a0a0c84257d4e0d700186565927958f9c4bb66a1",
+  "actualSha256": "e73d9af14f883513c4f5f343a0a0c84257d4e0d700186565927958f9c4bb66a1",
+  "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "diffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

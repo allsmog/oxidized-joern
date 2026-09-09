@@ -1,0 +1,38 @@
+--- complete pinned Joern
++++ complete producer
+@@ -37,7 +37,7 @@
+   METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+   BLOCK CODE={\n {\n#include "scope.h"\n  x = (Local)(x) + inside;\n }\n return Local(x) + ESCAPED;\n} TYPE_FULL_NAME=void ORDER=2
+     BLOCK CODE={\n#include "scope.h"\n  x = (Local)(x) + inside;\n } TYPE_FULL_NAME=void ORDER=1
+-      TYPE_DECL NAME=Local CODE=typedef int Local; FULL_NAME=Local ORDER=1
++      TYPE_DECL NAME=Local CODE=typedef int Local; FULL_NAME=Local<duplicate>0 ORDER=1
+       LOCAL NAME=inside CODE=int inside TYPE_FULL_NAME=int ORDER=2
+       CALL NAME=<operator>.assignment CODE=inside = 1 TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH
+         IDENTIFIER NAME=inside CODE=inside TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+@@ -77,7 +77,7 @@
+     METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+     BLOCK CODE={\n {\n#include "scope.h"\n  x = (Local)(x) + inside;\n }\n return Local(x) + ESCAPED;\n} TYPE_FULL_NAME=void ORDER=2
+       BLOCK CODE={\n#include "scope.h"\n  x = (Local)(x) + inside;\n } TYPE_FULL_NAME=void ORDER=1
+-        TYPE_DECL NAME=Local CODE=typedef int Local; FULL_NAME=Local ORDER=1
++        TYPE_DECL NAME=Local CODE=typedef int Local; FULL_NAME=Local<duplicate>0 ORDER=1
+         LOCAL NAME=inside CODE=int inside TYPE_FULL_NAME=int ORDER=2
+         CALL NAME=<operator>.assignment CODE=inside = 1 TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH
+           IDENTIFIER NAME=inside CODE=inside TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+@@ -116,7 +116,7 @@
+ 
+ METHOD NAME=<global> CODE=<global> FULL_NAME=scope.h:<global> ORDER=1
+   BLOCK TYPE_FULL_NAME=ANY ORDER=1
+-    TYPE_DECL NAME=Local CODE=typedef int Local; FULL_NAME=Local<duplicate>0 ORDER=1
++    TYPE_DECL NAME=Local CODE=typedef int Local; FULL_NAME=Local ORDER=1
+     LOCAL NAME=inside CODE=int inside TYPE_FULL_NAME=int ORDER=2
+     CALL NAME=<operator>.assignment CODE=inside = 1 TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH
+       IDENTIFIER NAME=inside CODE=inside TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+@@ -359,7 +359,7 @@
+ EDGES|REF NB:main.c:<global> -> NS:<global>
+ EDGES|REF NB:scope.h:<global> -> NS:<global>
+ EDGES|REF T:ANY -> D:ANY
+-EDGES|REF T:Local -> choose#5
++EDGES|REF T:Local -> scope.h:<global>#2
+ EDGES|REF T:choose -> D:choose
+ EDGES|REF T:int -> D:int
+ EDGES|REF T:later -> D:later

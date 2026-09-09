@@ -1,0 +1,22 @@
+{
+  "status": "FROZEN_AFTER_SUCCESSFUL_BUILD_NO_SOURCE_DRIFT",
+  "createdUtc": "2026-09-08T22:18:12.529689+00:00",
+  "source": {
+    "cpg-rs/cpg-lang-c/src/exact.rs": "96207d5b7b7b3d4bbfa77c8b93f407132eb0d2525e7e8f7915ad784e167ad406",
+    "cpg-rs/cpg-lang-c/src/import.rs": "3fb6695576fe87e463b5e44160bcbe828321bf32149d67abcc2256eb88d11aba",
+    "cpg-rs/cpg-lang-c/src/lib.rs": "7dfc597adff695eddc36574f99739e274e1abba14d64f850620e5d4e9019a005",
+    "cpg-rs/joern-parity/src/main.rs": "f44d0a822a0f5319738a9c58a74817303bac0b0a7ebb9242ababdda8143b6d73",
+    "cpg-rs/Cargo.toml": "0c095573bd24459caa83a975c4fdec291e8b11bef92745576f935f5fd17f0d29",
+    "cpg-rs/Cargo.lock": "fa7eab41e0c072e6b33205997fd241e7d87b511f9fd91ceee6ee1fdc9a099a63"
+  },
+  "baseline": "1962cd7681b1d414c75e1c9c8de039b25b850228",
+  "notes": [
+    "first complete include-view candidate; unreviewed",
+    "source-location plumbing pending",
+    "full remaining diagnostics retained"
+  ],
+  "binarySha256": "2cfaa3551fe0ba0797cf5f52db65f7163b04b772db8c57409bf126d4c7454d7a",
+  "buildLogSha256": "afbc601b7728a34ce3327f5a93b5395038de3d6f363d34a501c0a2ac392a90f9",
+  "buildCommand": "CARGO_TARGET_DIR=/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/target cargo build -p joern-parity --manifest-path cpg-rs/Cargo.toml",
+  "buildExitCode": 0
+}

@@ -1,0 +1,22 @@
+{
+  "status": "PASS_STATIC_PREPARATION_ONLY_PARENT_RELEASE_REQUIRED",
+  "prepared": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/tenth-array-dimension-controls/prepared.json",
+    "sha256": "75117abb78dc7662784ad363fd114755249a39422561393ca0b6f741d8ba0cf1"
+  },
+  "projects": 5,
+  "newPairedProjects": 4,
+  "inputFiles": 6,
+  "fullFrozenFiles": 21,
+  "runnerSha256": "74cf3fc4f6f4b50ca1cc43f36b1f9f45428ab9a09900be16ff536c9e469b784d",
+  "oracleSha256": "56431f14868678e64f9eb41026b44f1d3d7738404d28d2db62711b520c98c742",
+  "runtimeSha256": "b15a360470551d7153f9b5db986950ed48168b27deb80455353814b69bd3814d",
+  "checks": [
+    "exact complete prepared file set and hash inventory",
+    "exact six source input file hashes",
+    "V4 runner/oracle/runtime byte equality",
+    "unchanged anchor source/reference bytes retained",
+    "four distinct paired dimension spellings",
+    "AST-loaded verify_prepared only; no runtime command, main, attempt, Joern or compiler invoked"
+  ]
+}

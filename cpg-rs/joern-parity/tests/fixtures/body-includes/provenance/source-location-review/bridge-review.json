@@ -1,0 +1,80 @@
+{
+  "status": "PASS_COMPLETE_CANONICAL_ORIGIN_BRIDGE",
+  "checks": 3687,
+  "counts": {
+    "body_include_macro_only": {
+      "AST_OCCURRENCES": 27,
+      "TYPE_DECL_RECORDS": 6,
+      "SOURCE_FILE_EDGES": 11,
+      "uniqueObservedSourceFileEdges": 10,
+      "canonicalLinesIncludingSeparators": 123,
+      "canonicalNonemptyRecords": 119
+    },
+    "included_call_origin": {
+      "AST_OCCURRENCES": 55,
+      "TYPE_DECL_RECORDS": 6,
+      "SOURCE_FILE_EDGES": 12,
+      "uniqueObservedSourceFileEdges": 11,
+      "canonicalLinesIncludingSeparators": 243,
+      "canonicalNonemptyRecords": 237
+    },
+    "inline_call_origin": {
+      "AST_OCCURRENCES": 47,
+      "TYPE_DECL_RECORDS": 5,
+      "SOURCE_FILE_EDGES": 10,
+      "uniqueObservedSourceFileEdges": 9,
+      "canonicalLinesIncludingSeparators": 194,
+      "canonicalNonemptyRecords": 189
+    }
+  },
+  "sourcePreparation": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/tenth-source-locations/prepared.json",
+    "sha256": "866abff46bf11dc2cc59bac0d6fd4bff6373e08c86b066d238737e4e4cb98d67",
+    "bytes": 1113352
+  },
+  "release": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/tenth-batch/body-include-origins-release.json",
+    "sha256": "ab2c84df9467b45a8d376885e3f8f49d73543633a534bb8912d511f10dbbd198",
+    "bytes": 2337
+  },
+  "producerReceipts": [
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/tenth-source-locations/runs/canonical-1/run.json",
+      "sha256": "aa05904c1a799af7f71e69cde7a660114cc9c793175fefddca195dcef0016825",
+      "bytes": 3374609
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/tenth-source-locations/runs/origins-1/run.json",
+      "sha256": "80a09f80033e1460fc394e5f03bf402ce0e001f12accdea70e1d704979d6523b",
+      "bytes": 2697944
+    }
+  ],
+  "oracle": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/tenth-source-locations/oracle.sc",
+    "sha256": "56431f14868678e64f9eb41026b44f1d3d7738404d28d2db62711b520c98c742",
+    "bytes": 4709
+  },
+  "rawOriginObserver": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/tenth-source-locations/origin-observation.sc",
+    "sha256": "90209759022b8ac784460c5e47c27159d9f52c1aa3bd0490f265f613cebaff95",
+    "bytes": 3557
+  },
+  "decodedBridge": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/tenth-source-location-review/all-decoded-and-bridged.json",
+    "sha256": "00418c08eb6a2fac3e12cc74a797c8fcc54551715abbe908fe07cafe08ea8b56",
+    "bytes": 344537
+  },
+  "focusedFacts": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/tenth-source-location-review/focused-source-positions.json",
+    "sha256": "c315848700b38661cf7afbacd9b24fd2981cb8d04be5e7f629f26b25fb582d81",
+    "bytes": 104641
+  },
+  "encoding": "Base64 decoded UTF-8 exactly; null only for ~ (missing); present empty strings retained. LF-only raw record splitting. Canonical comparison encoding is stored separately; raw values never trimmed or normalized.",
+  "projectionScope": "All 129 AST view occurrences and 17 TYPE_DECL observations match full canonical records. Every one of 33 observed direct SOURCE_FILE edge occurrences maps to a canonical edge. Canonical script selects and deduplicates its published edge labels; this does not assert full graph/source-property injectivity.",
+  "implementationScope": "No root/source/preparation/producer mutations. Optional accepted baseline runs are a separate receipt.",
+  "reviewScript": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/tenth-source-location-review/review.py",
+    "sha256": "3f080400f03b859e7be8ad4298bb920796b4f3f418d48d912abe8029c418db3b",
+    "bytes": 12759
+  }
+}

@@ -1,0 +1,11 @@
+   Compiling joern-parity v0.1.1 (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/cpg-rs/joern-parity)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.27s
+     Running tests/body_includes.rs (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/target/debug/deps/body_includes-142d95b57fef2f27)
+
+running 3 tests
+test generated_header_method_registration_preserves_both_macro_owners ... ok
+test included_arrays_preserve_complete_supported_method_subtrees ... ok
+test body_includes_match_complete_live_graphs ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s
+

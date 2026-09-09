@@ -1,0 +1,123 @@
+{
+  "status": "PASS_ALL5_COMPLETE_RAW_REFERENCES",
+  "run": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/tenth-array-dimension-controls/runs/first-complete-array-dimension-reference-batch/run.json",
+    "sha256": "72ae0ca16446071ea627caf918ab2d9ea9574125d6ac7c0385a1a03340e3c5a4",
+    "bytes": 3373417
+  },
+  "raw": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/tenth-array-dimension-controls/runs/first-complete-array-dimension-reference-batch/live.stdout",
+    "sha256": "bd82a7636e89c33094bcb34d2d1de3970ecb522ea1dd35d086539e335e2ec913",
+    "bytes": 184333
+  },
+  "rawStderr": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/tenth-array-dimension-controls/runs/first-complete-array-dimension-reference-batch/live.stderr",
+    "sha256": "6cb02a452cdee41c57a4dc84e50789bcc611d5cbaf3e0b68528d4bc5490d7c2e",
+    "bytes": 6196
+  },
+  "prepared": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/tenth-array-dimension-controls/prepared.json",
+    "sha256": "75117abb78dc7662784ad363fd114755249a39422561393ca0b6f741d8ba0cf1",
+    "bytes": 1112280
+  },
+  "release": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/tenth-batch/array-dimensions-release.json",
+    "sha256": "d17e5f104f5acadeaaf3c6ae270e54d0d72557976aa28fe1c05065aa2dfc98ee",
+    "bytes": 2059
+  },
+  "inputHashes": {
+    "bare_macro/main.c": "8afa523c658dcca3169bdde8ffd77954c6553e84f0a7cbdb5448868892318077",
+    "binary_macro/main.c": "8da3a68392558d8838fa8074c58022b9df57a98f2bf2ad32803e18b1c2931c74",
+    "body_include_macro_only/api.h": "39c6a0ef8f0732115cce55a2ccc6edaa9f16cd4f0d45fb43ed5e4fe0b6849ee3",
+    "body_include_macro_only/main.c": "18895073d0db98c33aa9c6aaa7924c07e99610f9efede43a31e34715d60319e5",
+    "parenthesized_macro/main.c": "7c3989e3ecc0f82ecc24e215daa162b45afe4f88971aac27240f357abaad1c45",
+    "unary_macro/main.c": "a70cfaa22d1ca206e7ac909f1d4916f6db91985e813446b54e34c6abd6545db6"
+  },
+  "allBeforeAfterBindingsEqual": true,
+  "runtimeSnapshotMatchesPrepared": true,
+  "anchorByteIdentical": true,
+  "completeCanonicalLines": 2135,
+  "nonemptyRecords": 2096,
+  "outputs": {
+    "bare_macro": {
+      "case": "bare_macro",
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/tenth-array-dimension-controls/runs/first-complete-array-dimension-reference-batch/expected/bare_macro/expected.txt",
+      "kind": "file",
+      "sha256": "d746557ebaab9b82965a2a20b8f25fd4fc2e5ba67895adcc280cce1cec439260",
+      "bytes": 30791,
+      "canonicalLinesIncludingSeparators": 461,
+      "nonemptySelectedRecords": 453,
+      "sectionsSeen": [
+        "AST",
+        "EDGES",
+        "FLOWS",
+        "NODES"
+      ],
+      "completeReference": true
+    },
+    "binary_macro": {
+      "case": "binary_macro",
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/tenth-array-dimension-controls/runs/first-complete-array-dimension-reference-batch/expected/binary_macro/expected.txt",
+      "kind": "file",
+      "sha256": "c561375e48835ef513e37e298c29e2067737854163f26512ab704f53eae6d224",
+      "bytes": 35209,
+      "canonicalLinesIncludingSeparators": 525,
+      "nonemptySelectedRecords": 516,
+      "sectionsSeen": [
+        "AST",
+        "EDGES",
+        "FLOWS",
+        "NODES"
+      ],
+      "completeReference": true
+    },
+    "body_include_macro_only": {
+      "case": "body_include_macro_only",
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/tenth-array-dimension-controls/runs/first-complete-array-dimension-reference-batch/expected/body_include_macro_only/expected.txt",
+      "kind": "file",
+      "sha256": "c158364df1717bdc80e6d94d22b9567689d8c7d8d8517a96eabc44b8a993f49a",
+      "bytes": 6675,
+      "canonicalLinesIncludingSeparators": 123,
+      "nonemptySelectedRecords": 119,
+      "sectionsSeen": [
+        "AST",
+        "EDGES",
+        "FLOWS",
+        "NODES"
+      ],
+      "completeReference": true
+    },
+    "parenthesized_macro": {
+      "case": "parenthesized_macro",
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/tenth-array-dimension-controls/runs/first-complete-array-dimension-reference-batch/expected/parenthesized_macro/expected.txt",
+      "kind": "file",
+      "sha256": "08130cca1e81cd61ac03c9a5c988bd7e108b4368b74ce598ca0fe1041152ae46",
+      "bytes": 35405,
+      "canonicalLinesIncludingSeparators": 525,
+      "nonemptySelectedRecords": 516,
+      "sectionsSeen": [
+        "AST",
+        "EDGES",
+        "FLOWS",
+        "NODES"
+      ],
+      "completeReference": true
+    },
+    "unary_macro": {
+      "case": "unary_macro",
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/tenth-array-dimension-controls/runs/first-complete-array-dimension-reference-batch/expected/unary_macro/expected.txt",
+      "kind": "file",
+      "sha256": "3968d5812b22f0b914b5e242870383827592ec8ae04772a0efd6a0643e899f26",
+      "bytes": 33531,
+      "canonicalLinesIncludingSeparators": 501,
+      "nonemptySelectedRecords": 492,
+      "sectionsSeen": [
+        "AST",
+        "EDGES",
+        "FLOWS",
+        "NODES"
+      ],
+      "completeReference": true
+    }
+  }
+}

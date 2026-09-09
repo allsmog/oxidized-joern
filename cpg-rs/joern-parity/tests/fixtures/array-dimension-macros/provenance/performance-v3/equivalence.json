@@ -1,0 +1,43 @@
+{
+  "status": "PASS_OFFLINE_BOUNDED_FORMULA_EQUIVALENCE",
+  "childLists": 8421,
+  "predicateChecks": 530523,
+  "listLengths": [
+    0,
+    1,
+    2,
+    3
+  ],
+  "childIndices": [
+    -2,
+    -1,
+    0,
+    1,
+    2
+  ],
+  "queries": [
+    -3,
+    -2,
+    -1,
+    0,
+    1,
+    2,
+    3
+  ],
+  "hasArgValues": [
+    false,
+    true
+  ],
+  "fieldIdentifierValues": [
+    false,
+    true
+  ],
+  "duplicateIndicesPreserved": true,
+  "testedFunctions": [
+    "used",
+    "defined",
+    "has_flow"
+  ],
+  "bound": "Exhaustive small-model equivalence to the current vector construction; no Rust implementation or graph producer executed. Mathematical formula extends to arbitrary finite lists because callers ask only existential membership.",
+  "scriptSha256": "595f2bf73d6af59d5959a4c26e61254414a2a5328601e9b02160e1a4c8c216d6"
+}

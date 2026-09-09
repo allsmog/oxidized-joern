@@ -285,3 +285,22 @@ pins it, so a regression shows up as a diff.
   parentheses; disabled recursive tokens remain ineligible. This bounded port
   retains a current-metadata fallback when no event matches and documents the
   remaining complete diagnostics; it does not claim full MacroHandler parity.
+
+### Included declarations and macro METHOD pass precedence
+
+The [complete body-include family](tests/fixtures/body-includes/README.md) pins
+that selected body-header declarations join the caller's lexical block, while
+local typedef TYPE_DECL file properties and expression line coordinates can
+refer to the physical header. Caller-file include directives consume dependency
+sibling positions even in the retained inactive/guard-skipped controls.
+
+Macro metadata uses still follow lexical include traversal, independently of
+the previously observed queue's stable file-local offset ordering. The final
+synthetic METHOD record is subject to c2cpg's source-pass then `.h`-pass merge:
+a generated header-pass record wins a duplicate full name, with first
+registration within each class. CODE and source/parent ownership are selected
+together. The repeated N fixture therefore retains one caller-owned macro
+method and one header-owned method; merely defining a macro in a header does
+not make its method header-owned. The complete repeated fixture still retains
+the earlier no-eligible-event/no-wrapper limitation. This is a bounded observed
+rule, not full MacroHandler, include-resolution or source-coordinate parity.
