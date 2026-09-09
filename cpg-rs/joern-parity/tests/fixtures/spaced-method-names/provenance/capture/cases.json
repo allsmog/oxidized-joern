@@ -1,0 +1,12 @@
+{
+  "spaced_global_capture": {
+    "capture space.c": "int global=5;\nint read_global(void){return global;}\n"
+  },
+  "spaced_duplicate_capture": {
+    "left side.c": "int left_global=5;\nstatic int read(void){return left_global;}\nint use_left(void){return read();}\n",
+    "right side.c": "int right_global=6;\nstatic int read(void){return right_global;}\nint use_right(void){return read();}\n"
+  },
+  "ordinary_address_not_capture": {
+    "address space.c": "int global=5;\nint read_global(void){return global;}\nvoid address(void){int global=7; int (*pointer)(void)=read_global;}\n"
+  }
+}

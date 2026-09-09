@@ -1,0 +1,22 @@
+--- joern
++++ before
+@@ -97,8 +97,8 @@
+ EDGES|CALL invoke#8 -> <operator>.addition#0
+ EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+ EDGES|CFG <operator>.addition#0 -> <operator>.addition#5
+-EDGES|CFG a b.h:<global>#0 -> a b.h:<global>#2
+-EDGES|CFG a b.h:VALUE:ANY(1)#0 -> a b.h:VALUE:ANY(1)#4
++EDGES|CFG a#0 -> a b.h:<global>#2
++EDGES|CFG a#0 -> a b.h:VALUE:ANY(1)#4
+ EDGES|CFG a#0 -> a#5
+ EDGES|CFG a#4 -> a#6
+ EDGES|CFG a#5 -> a#4
+@@ -220,7 +220,7 @@
+ FLOWS|REACHING_DEF[VALUE(x)] invoke#5 -> invoke#4
+ FLOWS|REACHING_DEF[] <operator>.addition#0 -> <operator>.addition#1
+ FLOWS|REACHING_DEF[] <operator>.addition#0 -> <operator>.addition#4
+-FLOWS|REACHING_DEF[] a b.h:VALUE:ANY(1)#0 -> a b.h:VALUE:ANY(1)#1
++FLOWS|REACHING_DEF[] a#0 -> a b.h:VALUE:ANY(1)#1
+ FLOWS|REACHING_DEF[] a#0 -> a#1
+ FLOWS|REACHING_DEF[] a#0 -> a#5
+ FLOWS|REACHING_DEF[] invoke#0 -> invoke#1

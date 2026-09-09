@@ -1,0 +1,335 @@
+METHOD NAME=<global> CODE=<global> FULL_NAME=<includes>:<global> ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.assignment FULL_NAME=<operator>.assignment ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<global> CODE=<global> FULL_NAME=left side.c:<global> ORDER=1
+  METHOD NAME=read CODE=static int read(void){return left_global;} FULL_NAME=left side.c:read SIGNATURE=int(void) ORDER=1
+    METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    BLOCK CODE={return left_global;} TYPE_FULL_NAME=void ORDER=2
+      LOCAL NAME=left_global CODE=<global> left_global TYPE_FULL_NAME=int ORDER=0
+      RETURN CODE=return left_global; ORDER=1
+        IDENTIFIER NAME=left_global CODE=<global> left_global TYPE_FULL_NAME=int ORDER=1
+    MODIFIER ORDER=3
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=4
+  METHOD NAME=use_left CODE=int use_left(void){return read();} FULL_NAME=use_left SIGNATURE=int(void) ORDER=1
+    METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    BLOCK CODE={return read();} TYPE_FULL_NAME=void ORDER=2
+      RETURN CODE=return read(); ORDER=1
+        CALL NAME=read CODE=read() TYPE_FULL_NAME=int METHOD_FULL_NAME=left side.c:read ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+    LOCAL NAME=left_global CODE=int left_global TYPE_FULL_NAME=int ORDER=1
+    CALL NAME=<operator>.assignment CODE=left_global=5 TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+      IDENTIFIER NAME=left_global CODE=left_global TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+      LITERAL CODE=5 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+    METHOD_REF CODE=read TYPE_FULL_NAME=left side.c:read METHOD_FULL_NAME=left side.c:read ORDER=3
+    METHOD_REF CODE=use_left TYPE_FULL_NAME=use_left METHOD_FULL_NAME=use_left ORDER=4
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=read CODE=static int read(void){return left_global;} FULL_NAME=left side.c:read SIGNATURE=int(void) ORDER=1
+  METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  BLOCK CODE={return left_global;} TYPE_FULL_NAME=void ORDER=2
+    LOCAL NAME=left_global CODE=<global> left_global TYPE_FULL_NAME=int ORDER=0
+    RETURN CODE=return left_global; ORDER=1
+      IDENTIFIER NAME=left_global CODE=<global> left_global TYPE_FULL_NAME=int ORDER=1
+  MODIFIER ORDER=3
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=4
+
+METHOD NAME=<global> CODE=<global> FULL_NAME=right side.c:<global> ORDER=1
+  METHOD NAME=read CODE=static int read(void){return right_global;} FULL_NAME=right side.c:read SIGNATURE=int(void) ORDER=1
+    METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    BLOCK CODE={return right_global;} TYPE_FULL_NAME=void ORDER=2
+      LOCAL NAME=right_global CODE=<global> right_global TYPE_FULL_NAME=int ORDER=0
+      RETURN CODE=return right_global; ORDER=1
+        IDENTIFIER NAME=right_global CODE=<global> right_global TYPE_FULL_NAME=int ORDER=1
+    MODIFIER ORDER=3
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=4
+  METHOD NAME=use_right CODE=int use_right(void){return read();} FULL_NAME=use_right SIGNATURE=int(void) ORDER=1
+    METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    BLOCK CODE={return read();} TYPE_FULL_NAME=void ORDER=2
+      RETURN CODE=return read(); ORDER=1
+        CALL NAME=read CODE=read() TYPE_FULL_NAME=int METHOD_FULL_NAME=right side.c:read ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+    LOCAL NAME=right_global CODE=int right_global TYPE_FULL_NAME=int ORDER=1
+    CALL NAME=<operator>.assignment CODE=right_global=6 TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+      IDENTIFIER NAME=right_global CODE=right_global TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+      LITERAL CODE=6 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+    METHOD_REF CODE=read TYPE_FULL_NAME=right side.c:read METHOD_FULL_NAME=right side.c:read ORDER=3
+    METHOD_REF CODE=use_right TYPE_FULL_NAME=use_right METHOD_FULL_NAME=use_right ORDER=4
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=read CODE=static int read(void){return right_global;} FULL_NAME=right side.c:read SIGNATURE=int(void) ORDER=1
+  METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  BLOCK CODE={return right_global;} TYPE_FULL_NAME=void ORDER=2
+    LOCAL NAME=right_global CODE=<global> right_global TYPE_FULL_NAME=int ORDER=0
+    RETURN CODE=return right_global; ORDER=1
+      IDENTIFIER NAME=right_global CODE=<global> right_global TYPE_FULL_NAME=int ORDER=1
+  MODIFIER ORDER=3
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=4
+
+METHOD NAME=use_left CODE=int use_left(void){return read();} FULL_NAME=use_left SIGNATURE=int(void) ORDER=1
+  METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  BLOCK CODE={return read();} TYPE_FULL_NAME=void ORDER=2
+    RETURN CODE=return read(); ORDER=1
+      CALL NAME=read CODE=read() TYPE_FULL_NAME=int METHOD_FULL_NAME=left side.c:read ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+
+METHOD NAME=use_right CODE=int use_right(void){return read();} FULL_NAME=use_right SIGNATURE=int(void) ORDER=1
+  METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  BLOCK CODE={return read();} TYPE_FULL_NAME=void ORDER=2
+    RETURN CODE=return read(); ORDER=1
+      CALL NAME=read CODE=read() TYPE_FULL_NAME=int METHOD_FULL_NAME=right side.c:read ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+
+NODES|META_DATA LANGUAGE=NEWC
+NODES|FILE NAME=<includes> ORDER=1
+NODES|FILE NAME=<unknown> ORDER=0
+NODES|FILE NAME=left side.c ORDER=0
+NODES|FILE NAME=right side.c ORDER=0
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<global> FILENAME=<unknown> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<includes>:<global> FILENAME=<includes> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=left side.c:<global> FILENAME=left side.c ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=right side.c:<global> FILENAME=right side.c ORDER=1
+NODES|NAMESPACE NAME=<global>
+NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=<global> FULL_NAME=left side.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=left side.c:<global> FILENAME=left side.c ORDER=1
+NODES|TYPE_DECL NAME=left side.c:read FULL_NAME=left side.c:read CODE=left side.c:read AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=left side.c:<global> FILENAME=left side.c ORDER=1
+NODES|TYPE_DECL NAME=<global> FULL_NAME=right side.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=right side.c:<global> FILENAME=right side.c ORDER=1
+NODES|TYPE_DECL NAME=right side.c:read FULL_NAME=right side.c:read CODE=right side.c:read AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=right side.c:<global> FILENAME=right side.c ORDER=1
+NODES|TYPE_DECL NAME=use_left FULL_NAME=use_left CODE=use_left AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=left side.c:<global> FILENAME=left side.c ORDER=1
+NODES|TYPE_DECL NAME=use_right FULL_NAME=use_right CODE=use_right AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=right side.c:<global> FILENAME=right side.c ORDER=1
+NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+NODES|TYPE NAME=left side.c:read FULL_NAME=left side.c:read TYPE_DECL_FULL_NAME=left side.c:read
+NODES|TYPE NAME=right side.c:read FULL_NAME=right side.c:read TYPE_DECL_FULL_NAME=right side.c:read
+NODES|TYPE NAME=use_left FULL_NAME=use_left TYPE_DECL_FULL_NAME=use_left
+NODES|TYPE NAME=use_right FULL_NAME=use_right TYPE_DECL_FULL_NAME=use_right
+NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+EDGES|ARGUMENT left side.c:<global>#19 -> left side.c:<global>#20
+EDGES|ARGUMENT left side.c:<global>#19 -> left side.c:<global>#21
+EDGES|ARGUMENT left side.c:read#5 -> left side.c:read#6
+EDGES|ARGUMENT right side.c:<global>#19 -> right side.c:<global>#20
+EDGES|ARGUMENT right side.c:<global>#19 -> right side.c:<global>#21
+EDGES|ARGUMENT right side.c:read#5 -> right side.c:read#6
+EDGES|ARGUMENT use_left#4 -> use_left#5
+EDGES|ARGUMENT use_right#4 -> use_right#5
+EDGES|CALL left side.c:<global>#19 -> <operator>.assignment#0
+EDGES|CALL right side.c:<global>#19 -> <operator>.assignment#0
+EDGES|CALL use_left#5 -> left side.c:<global>#1
+EDGES|CALL use_right#5 -> right side.c:<global>#1
+EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+EDGES|CFG <operator>.assignment#0 -> <operator>.assignment#5
+EDGES|CFG left side.c:<global>#10 -> use_left#5
+EDGES|CFG left side.c:<global>#19 -> left side.c:<global>#22
+EDGES|CFG left side.c:<global>#20 -> left side.c:<global>#21
+EDGES|CFG left side.c:<global>#21 -> left side.c:<global>#19
+EDGES|CFG left side.c:<global>#22 -> left side.c:<global>#23
+EDGES|CFG left side.c:<global>#23 -> left side.c:<global>#24
+EDGES|CFG left side.c:read#5 -> left side.c:read#8
+EDGES|CFG left side.c:read#6 -> left side.c:read#5
+EDGES|CFG right side.c:<global>#10 -> use_right#5
+EDGES|CFG right side.c:<global>#19 -> right side.c:<global>#22
+EDGES|CFG right side.c:<global>#20 -> right side.c:<global>#21
+EDGES|CFG right side.c:<global>#21 -> right side.c:<global>#19
+EDGES|CFG right side.c:<global>#22 -> right side.c:<global>#23
+EDGES|CFG right side.c:<global>#23 -> right side.c:<global>#24
+EDGES|CFG right side.c:read#5 -> right side.c:read#8
+EDGES|CFG right side.c:read#6 -> right side.c:read#5
+EDGES|CFG use_left#4 -> use_left#6
+EDGES|CFG use_left#5 -> use_left#4
+EDGES|CFG use_right#4 -> use_right#6
+EDGES|CFG use_right#5 -> use_right#4
+EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+EDGES|CONTAINS <operator>.assignment#0 -> <operator>.assignment#2
+EDGES|CONTAINS D:left side.c:<global> -> D:left side.c:read
+EDGES|CONTAINS D:left side.c:<global> -> D:use_left
+EDGES|CONTAINS D:left side.c:<global> -> left side.c:<global>#0
+EDGES|CONTAINS D:right side.c:<global> -> D:right side.c:read
+EDGES|CONTAINS D:right side.c:<global> -> D:use_right
+EDGES|CONTAINS D:right side.c:<global> -> right side.c:<global>#0
+EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+EDGES|CONTAINS F:<includes> -> D:ANY
+EDGES|CONTAINS F:<includes> -> D:int
+EDGES|CONTAINS F:<includes> -> D:left side.c:read
+EDGES|CONTAINS F:<includes> -> D:right side.c:read
+EDGES|CONTAINS F:<includes> -> D:void
+EDGES|CONTAINS F:left side.c -> D:left side.c:<global>
+EDGES|CONTAINS F:right side.c -> D:right side.c:<global>
+EDGES|CONTAINS left side.c:<global>#0 -> left side.c:<global>#1
+EDGES|CONTAINS left side.c:<global>#0 -> left side.c:<global>#10
+EDGES|CONTAINS left side.c:<global>#0 -> left side.c:<global>#17
+EDGES|CONTAINS left side.c:<global>#0 -> left side.c:<global>#19
+EDGES|CONTAINS left side.c:<global>#0 -> left side.c:<global>#20
+EDGES|CONTAINS left side.c:<global>#0 -> left side.c:<global>#21
+EDGES|CONTAINS left side.c:<global>#0 -> left side.c:<global>#22
+EDGES|CONTAINS left side.c:<global>#0 -> left side.c:<global>#23
+EDGES|CONTAINS left side.c:<global>#1 -> left side.c:read#3
+EDGES|CONTAINS left side.c:<global>#1 -> left side.c:read#5
+EDGES|CONTAINS left side.c:<global>#1 -> left side.c:read#6
+EDGES|CONTAINS left side.c:<global>#10 -> use_left#3
+EDGES|CONTAINS left side.c:<global>#10 -> use_left#4
+EDGES|CONTAINS left side.c:<global>#10 -> use_left#5
+EDGES|CONTAINS right side.c:<global>#0 -> right side.c:<global>#1
+EDGES|CONTAINS right side.c:<global>#0 -> right side.c:<global>#10
+EDGES|CONTAINS right side.c:<global>#0 -> right side.c:<global>#17
+EDGES|CONTAINS right side.c:<global>#0 -> right side.c:<global>#19
+EDGES|CONTAINS right side.c:<global>#0 -> right side.c:<global>#20
+EDGES|CONTAINS right side.c:<global>#0 -> right side.c:<global>#21
+EDGES|CONTAINS right side.c:<global>#0 -> right side.c:<global>#22
+EDGES|CONTAINS right side.c:<global>#0 -> right side.c:<global>#23
+EDGES|CONTAINS right side.c:<global>#1 -> right side.c:read#3
+EDGES|CONTAINS right side.c:<global>#1 -> right side.c:read#5
+EDGES|CONTAINS right side.c:<global>#1 -> right side.c:read#6
+EDGES|CONTAINS right side.c:<global>#10 -> use_right#3
+EDGES|CONTAINS right side.c:<global>#10 -> use_right#4
+EDGES|CONTAINS right side.c:<global>#10 -> use_right#5
+EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#6 -> T:ANY
+EDGES|EVAL_TYPE left side.c:<global>#17 -> T:ANY
+EDGES|EVAL_TYPE left side.c:<global>#18 -> T:int
+EDGES|EVAL_TYPE left side.c:<global>#19 -> T:void
+EDGES|EVAL_TYPE left side.c:<global>#20 -> T:int
+EDGES|EVAL_TYPE left side.c:<global>#21 -> T:int
+EDGES|EVAL_TYPE left side.c:<global>#22 -> T:left side.c:read
+EDGES|EVAL_TYPE left side.c:<global>#23 -> T:use_left
+EDGES|EVAL_TYPE left side.c:<global>#24 -> T:ANY
+EDGES|EVAL_TYPE left side.c:read#1 -> T:void
+EDGES|EVAL_TYPE left side.c:read#2 -> T:void
+EDGES|EVAL_TYPE left side.c:read#3 -> T:void
+EDGES|EVAL_TYPE left side.c:read#4 -> T:int
+EDGES|EVAL_TYPE left side.c:read#6 -> T:int
+EDGES|EVAL_TYPE left side.c:read#8 -> T:int
+EDGES|EVAL_TYPE right side.c:<global>#17 -> T:ANY
+EDGES|EVAL_TYPE right side.c:<global>#18 -> T:int
+EDGES|EVAL_TYPE right side.c:<global>#19 -> T:void
+EDGES|EVAL_TYPE right side.c:<global>#20 -> T:int
+EDGES|EVAL_TYPE right side.c:<global>#21 -> T:int
+EDGES|EVAL_TYPE right side.c:<global>#22 -> T:right side.c:read
+EDGES|EVAL_TYPE right side.c:<global>#23 -> T:use_right
+EDGES|EVAL_TYPE right side.c:<global>#24 -> T:ANY
+EDGES|EVAL_TYPE right side.c:read#1 -> T:void
+EDGES|EVAL_TYPE right side.c:read#2 -> T:void
+EDGES|EVAL_TYPE right side.c:read#3 -> T:void
+EDGES|EVAL_TYPE right side.c:read#4 -> T:int
+EDGES|EVAL_TYPE right side.c:read#6 -> T:int
+EDGES|EVAL_TYPE right side.c:read#8 -> T:int
+EDGES|EVAL_TYPE use_left#1 -> T:void
+EDGES|EVAL_TYPE use_left#2 -> T:void
+EDGES|EVAL_TYPE use_left#3 -> T:void
+EDGES|EVAL_TYPE use_left#5 -> T:int
+EDGES|EVAL_TYPE use_left#6 -> T:int
+EDGES|EVAL_TYPE use_right#1 -> T:void
+EDGES|EVAL_TYPE use_right#2 -> T:void
+EDGES|EVAL_TYPE use_right#3 -> T:void
+EDGES|EVAL_TYPE use_right#5 -> T:int
+EDGES|EVAL_TYPE use_right#6 -> T:int
+EDGES|PARAMETER_LINK <operator>.assignment#1 -> <operator>.assignment#3
+EDGES|PARAMETER_LINK <operator>.assignment#4 -> <operator>.assignment#6
+EDGES|PARAMETER_LINK left side.c:read#1 -> left side.c:read#2
+EDGES|PARAMETER_LINK right side.c:read#1 -> right side.c:read#2
+EDGES|PARAMETER_LINK use_left#1 -> use_left#2
+EDGES|PARAMETER_LINK use_right#1 -> use_right#2
+EDGES|REF NB:<global> -> NS:<global>
+EDGES|REF NB:<includes>:<global> -> NS:<global>
+EDGES|REF NB:left side.c:<global> -> NS:<global>
+EDGES|REF NB:right side.c:<global> -> NS:<global>
+EDGES|REF T:ANY -> D:ANY
+EDGES|REF T:int -> D:int
+EDGES|REF T:left side.c:read -> D:left side.c:read
+EDGES|REF T:right side.c:read -> D:right side.c:read
+EDGES|REF T:use_left -> D:use_left
+EDGES|REF T:use_right -> D:use_right
+EDGES|REF T:void -> D:void
+EDGES|REF left side.c:<global>#20 -> left side.c:<global>#18
+EDGES|REF left side.c:<global>#22 -> left side.c:<global>#1
+EDGES|REF left side.c:<global>#23 -> left side.c:<global>#10
+EDGES|REF left side.c:read#6 -> left side.c:read#4
+EDGES|REF right side.c:<global>#20 -> right side.c:<global>#18
+EDGES|REF right side.c:<global>#22 -> right side.c:<global>#1
+EDGES|REF right side.c:<global>#23 -> right side.c:<global>#10
+EDGES|REF right side.c:read#6 -> right side.c:read#4
+EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+EDGES|SOURCE_FILE D:ANY -> F:<includes>
+EDGES|SOURCE_FILE D:int -> F:<includes>
+EDGES|SOURCE_FILE D:left side.c:<global> -> F:left side.c
+EDGES|SOURCE_FILE D:left side.c:read -> F:<includes>
+EDGES|SOURCE_FILE D:left side.c:read -> F:left side.c
+EDGES|SOURCE_FILE D:right side.c:<global> -> F:right side.c
+EDGES|SOURCE_FILE D:right side.c:read -> F:<includes>
+EDGES|SOURCE_FILE D:right side.c:read -> F:right side.c
+EDGES|SOURCE_FILE D:use_left -> F:left side.c
+EDGES|SOURCE_FILE D:use_right -> F:right side.c
+EDGES|SOURCE_FILE D:void -> F:<includes>
+EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
+EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>
+EDGES|SOURCE_FILE NB:left side.c:<global> -> F:left side.c
+EDGES|SOURCE_FILE NB:right side.c:<global> -> F:right side.c
+EDGES|SOURCE_FILE left side.c:<global>#0 -> F:left side.c
+EDGES|SOURCE_FILE left side.c:<global>#1 -> F:left side.c
+EDGES|SOURCE_FILE left side.c:<global>#10 -> F:left side.c
+EDGES|SOURCE_FILE right side.c:<global>#0 -> F:right side.c
+EDGES|SOURCE_FILE right side.c:<global>#1 -> F:right side.c
+EDGES|SOURCE_FILE right side.c:<global>#10 -> F:right side.c
+FLOWS|REACHING_DEF[5] left side.c:<global>#21 -> left side.c:<global>#19
+FLOWS|REACHING_DEF[5] left side.c:<global>#21 -> left side.c:<global>#20
+FLOWS|REACHING_DEF[6] right side.c:<global>#21 -> right side.c:<global>#19
+FLOWS|REACHING_DEF[6] right side.c:<global>#21 -> right side.c:<global>#20
+FLOWS|REACHING_DEF[<RET>] left side.c:read#5 -> left side.c:read#8
+FLOWS|REACHING_DEF[<RET>] right side.c:read#5 -> right side.c:read#8
+FLOWS|REACHING_DEF[<RET>] use_left#4 -> use_left#6
+FLOWS|REACHING_DEF[<RET>] use_right#4 -> use_right#6
+FLOWS|REACHING_DEF[<global> left_global] left side.c:read#6 -> left side.c:read#5
+FLOWS|REACHING_DEF[<global> right_global] right side.c:read#6 -> right side.c:read#5
+FLOWS|REACHING_DEF[] <operator>.assignment#0 -> <operator>.assignment#1
+FLOWS|REACHING_DEF[] <operator>.assignment#0 -> <operator>.assignment#4
+FLOWS|REACHING_DEF[] left side.c:<global>#10 -> use_left#1
+FLOWS|REACHING_DEF[] left side.c:<global>#10 -> use_left#5
+FLOWS|REACHING_DEF[] left side.c:read#1 -> left side.c:read#2
+FLOWS|REACHING_DEF[] left side.c:read#1 -> left side.c:read#8
+FLOWS|REACHING_DEF[] right side.c:<global>#10 -> use_right#1
+FLOWS|REACHING_DEF[] right side.c:<global>#10 -> use_right#5
+FLOWS|REACHING_DEF[] right side.c:read#1 -> right side.c:read#2
+FLOWS|REACHING_DEF[] right side.c:read#1 -> right side.c:read#8
+FLOWS|REACHING_DEF[] use_left#1 -> use_left#2
+FLOWS|REACHING_DEF[] use_left#1 -> use_left#6
+FLOWS|REACHING_DEF[] use_right#1 -> use_right#2
+FLOWS|REACHING_DEF[] use_right#1 -> use_right#6
+FLOWS|REACHING_DEF[left_global=5] left side.c:<global>#19 -> left side.c:<global>#24
+FLOWS|REACHING_DEF[left_global] left side.c:<global>#20 -> left side.c:<global>#19
+FLOWS|REACHING_DEF[left_global] left side.c:<global>#20 -> left side.c:<global>#24
+FLOWS|REACHING_DEF[p1] <operator>.assignment#1 -> <operator>.assignment#3
+FLOWS|REACHING_DEF[p1] <operator>.assignment#1 -> <operator>.assignment#5
+FLOWS|REACHING_DEF[p2] <operator>.assignment#4 -> <operator>.assignment#5
+FLOWS|REACHING_DEF[p2] <operator>.assignment#4 -> <operator>.assignment#6
+FLOWS|REACHING_DEF[read()] use_left#5 -> use_left#4
+FLOWS|REACHING_DEF[read()] use_left#5 -> use_left#6
+FLOWS|REACHING_DEF[read()] use_right#5 -> use_right#4
+FLOWS|REACHING_DEF[read()] use_right#5 -> use_right#6
+FLOWS|REACHING_DEF[right_global=6] right side.c:<global>#19 -> right side.c:<global>#24
+FLOWS|REACHING_DEF[right_global] right side.c:<global>#20 -> right side.c:<global>#19
+FLOWS|REACHING_DEF[right_global] right side.c:<global>#20 -> right side.c:<global>#24

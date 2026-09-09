@@ -1,0 +1,222 @@
+{
+  "comparison": "Full selected-line Counter intersections with live oracle; multiplicities retained. These fixtures have unchanged AST ordinals.",
+  "cases": [
+    {
+      "name": "function_ulong",
+      "lostMatchingRecords": [],
+      "gainedMatchingRecords": [
+        "EDGES|CFG main.c:VALUE:unsigned longint(0)#0 -> main.c:VALUE:unsigned longint(0)#2"
+      ]
+    },
+    {
+      "name": "function_ulonglong",
+      "lostMatchingRecords": [],
+      "gainedMatchingRecords": [
+        "EDGES|CFG main.c:VALUE:unsigned longlongint(0)#0 -> main.c:VALUE:unsigned longlongint(0)#2"
+      ]
+    },
+    {
+      "name": "function_unsigned",
+      "lostMatchingRecords": [],
+      "gainedMatchingRecords": [
+        "EDGES|CFG main.c:VALUE:unsigned int(0)#0 -> main.c:VALUE:unsigned int(0)#2"
+      ]
+    },
+    {
+      "name": "object_ulong",
+      "lostMatchingRecords": [],
+      "gainedMatchingRecords": [
+        "EDGES|CFG main.c:VALUE:unsigned longint(0)#0 -> main.c:VALUE:unsigned longint(0)#2"
+      ]
+    },
+    {
+      "name": "object_ulonglong",
+      "lostMatchingRecords": [],
+      "gainedMatchingRecords": [
+        "EDGES|CFG main.c:VALUE:unsigned longlongint(0)#0 -> main.c:VALUE:unsigned longlongint(0)#2"
+      ]
+    },
+    {
+      "name": "object_unsigned",
+      "lostMatchingRecords": [],
+      "gainedMatchingRecords": [
+        "EDGES|CFG main.c:VALUE:unsigned int(0)#0 -> main.c:VALUE:unsigned int(0)#2"
+      ]
+    },
+    {
+      "name": "function_unsigned_arg",
+      "lostMatchingRecords": [],
+      "gainedMatchingRecords": [
+        "EDGES|CFG main.c:VALUE:unsigned int(1)#0 -> main.c:VALUE:unsigned int(1)#4",
+        "FLOWS|REACHING_DEF[] main.c:VALUE:unsigned int(1)#0 -> main.c:VALUE:unsigned int(1)#1"
+      ]
+    },
+    {
+      "name": "function_unsigned_long_long_mixed",
+      "lostMatchingRecords": [],
+      "gainedMatchingRecords": [
+        "EDGES|CFG main.c:VALUE:unsigned longlongint(0)#0 -> main.c:VALUE:unsigned longlongint(0)#2"
+      ]
+    },
+    {
+      "name": "negative_unsigned_control",
+      "lostMatchingRecords": [],
+      "gainedMatchingRecords": []
+    },
+    {
+      "name": "object_long_double_control",
+      "lostMatchingRecords": [],
+      "gainedMatchingRecords": []
+    },
+    {
+      "name": "object_unsigned_long_lower",
+      "lostMatchingRecords": [],
+      "gainedMatchingRecords": [
+        "EDGES|CFG main.c:VALUE:unsigned longint(0)#0 -> main.c:VALUE:unsigned longint(0)#2"
+      ]
+    },
+    {
+      "name": "object_unsigned_lower",
+      "lostMatchingRecords": [],
+      "gainedMatchingRecords": [
+        "EDGES|CFG main.c:VALUE:unsigned int(0)#0 -> main.c:VALUE:unsigned int(0)#2"
+      ]
+    },
+    {
+      "name": "ordinary_unsigned_returns",
+      "lostMatchingRecords": [],
+      "gainedMatchingRecords": []
+    },
+    {
+      "name": "spaced_header",
+      "lostMatchingRecords": [],
+      "gainedMatchingRecords": [
+        "EDGES|CFG a b.h:<global>#0 -> a b.h:<global>#2",
+        "EDGES|CFG a b.h:VALUE:int(0)#0 -> a b.h:VALUE:int(0)#2"
+      ]
+    },
+    {
+      "name": "code_marker",
+      "lostMatchingRecords": [],
+      "gainedMatchingRecords": [
+        "EDGES|CFG invoke#0 -> invoke#5",
+        "FLOWS|REACHING_DEF[] invoke#0 -> invoke#1",
+        "FLOWS|REACHING_DEF[] invoke#0 -> invoke#5"
+      ]
+    },
+    {
+      "name": "fullname_marker",
+      "lostMatchingRecords": [],
+      "gainedMatchingRecords": []
+    },
+    {
+      "name": "lowercase_marker_control",
+      "lostMatchingRecords": [],
+      "gainedMatchingRecords": [
+        "EDGES|CFG a value=name.h:<global>#0 -> a value=name.h:<global>#2",
+        "EDGES|CFG a value=name.h:VALUE:ANY(1)#0 -> a value=name.h:VALUE:ANY(1)#4",
+        "FLOWS|REACHING_DEF[] a value=name.h:VALUE:ANY(1)#0 -> a value=name.h:VALUE:ANY(1)#1"
+      ]
+    },
+    {
+      "name": "marker_in_macro_body",
+      "lostMatchingRecords": [],
+      "gainedMatchingRecords": [
+        "EDGES|CFG main.c:VALUE:ANY(1)#0 -> main.c:VALUE:ANY(1)#4",
+        "FLOWS|REACHING_DEF[] main.c:VALUE:ANY(1)#0 -> main.c:VALUE:ANY(1)#1"
+      ]
+    },
+    {
+      "name": "new_prefix_collision",
+      "lostMatchingRecords": [],
+      "gainedMatchingRecords": []
+    },
+    {
+      "name": "order_marker",
+      "lostMatchingRecords": [],
+      "gainedMatchingRecords": []
+    },
+    {
+      "name": "prefix_collision",
+      "lostMatchingRecords": [],
+      "gainedMatchingRecords": [
+        "EDGES|CFG a b.h:<global>#0 -> a b.h:<global>#2",
+        "EDGES|CFG a b.h:VALUE:ANY(1)#0 -> a b.h:VALUE:ANY(1)#4",
+        "FLOWS|REACHING_DEF[] a b.h:VALUE:ANY(1)#0 -> a b.h:VALUE:ANY(1)#1"
+      ]
+    },
+    {
+      "name": "quoted_code_marker",
+      "lostMatchingRecords": [],
+      "gainedMatchingRecords": [
+        "EDGES|CFG invoke#0 -> invoke#5",
+        "FLOWS|REACHING_DEF[] invoke#0 -> invoke#1",
+        "FLOWS|REACHING_DEF[] invoke#0 -> invoke#4",
+        "FLOWS|REACHING_DEF[] invoke#0 -> invoke#5"
+      ]
+    },
+    {
+      "name": "signature_marker",
+      "lostMatchingRecords": [],
+      "gainedMatchingRecords": []
+    },
+    {
+      "name": "underscore_marker",
+      "lostMatchingRecords": [],
+      "gainedMatchingRecords": []
+    },
+    {
+      "name": "ordinary_address_not_capture",
+      "lostMatchingRecords": [],
+      "gainedMatchingRecords": [
+        "EDGES|CFG address space.c:<global>#0 -> address space.c:<global>#25",
+        "FLOWS|REACHING_DEF[] address space.c:<global>#0 -> address space.c:<global>#26",
+        "FLOWS|REACHING_DEF[] address space.c:<global>#0 -> address space.c:<global>#27",
+        "FLOWS|REACHING_DEF[] address space.c:<global>#0 -> address space.c:<global>#28"
+      ]
+    },
+    {
+      "name": "spaced_duplicate_capture",
+      "lostMatchingRecords": [],
+      "gainedMatchingRecords": [
+        "EDGES|CFG left side.c:<global>#0 -> left side.c:<global>#20",
+        "EDGES|CFG right side.c:<global>#0 -> right side.c:<global>#20",
+        "FLOWS|REACHING_DEF[] left side.c:<global>#0 -> left side.c:<global>#21",
+        "FLOWS|REACHING_DEF[] left side.c:<global>#0 -> left side.c:<global>#22",
+        "FLOWS|REACHING_DEF[] left side.c:<global>#0 -> left side.c:<global>#23",
+        "FLOWS|REACHING_DEF[] right side.c:<global>#0 -> right side.c:<global>#21",
+        "FLOWS|REACHING_DEF[] right side.c:<global>#0 -> right side.c:<global>#22",
+        "FLOWS|REACHING_DEF[] right side.c:<global>#0 -> right side.c:<global>#23"
+      ]
+    },
+    {
+      "name": "spaced_global_capture",
+      "lostMatchingRecords": [],
+      "gainedMatchingRecords": [
+        "EDGES|CFG capture space.c:<global>#0 -> capture space.c:<global>#12",
+        "FLOWS|REACHING_DEF[] capture space.c:<global>#0 -> capture space.c:<global>#13",
+        "FLOWS|REACHING_DEF[] capture space.c:<global>#0 -> capture space.c:<global>#14"
+      ]
+    },
+    {
+      "name": "fullname_property_in_code",
+      "lostMatchingRecords": [],
+      "gainedMatchingRecords": []
+    },
+    {
+      "name": "self_comment",
+      "lostMatchingRecords": [],
+      "gainedMatchingRecords": []
+    },
+    {
+      "name": "self_literal",
+      "lostMatchingRecords": [],
+      "gainedMatchingRecords": []
+    },
+    {
+      "name": "self_order_comment",
+      "lostMatchingRecords": [],
+      "gainedMatchingRecords": []
+    }
+  ]
+}

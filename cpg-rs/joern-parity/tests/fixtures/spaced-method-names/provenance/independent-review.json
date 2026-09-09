@@ -1,0 +1,109 @@
+{
+  "status": "PASS_BOUNDED_FULL_NAME_REPAIR",
+  "reviewedAtUtc": "2026-09-08T17:34:56.773690+00:00",
+  "readOnlyProductionReview": true,
+  "baselineCommit": "e38bf19a044629e9ea6fc67248d249fb7b0321be",
+  "baselineSourceSha256": "c79d93566b3ac603b5d2c40e68bc58b03f43db0ab91a7c4c8b4b6c0d2fd71c43",
+  "candidateSource": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/seventh-fullname-review/frozen-final-652/exact.rs",
+    "sha256": "652e7331fb55ca41d8f0697e3274cc42ed82681ba0ade993a33f0a9fac6bc12b"
+  },
+  "candidateBinary": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/seventh-fullname-review/frozen-final-652/joern-parity",
+    "sha256": "39eb7dea31b3e9dfc8ece589d1fca835b5bc8308119a73001409dc913ec996aa"
+  },
+  "sourcePatch": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/seventh-fullname-review/frozen-final-652/source.patch",
+    "sha256": "05fc7068331f052decc7fe173c69aef9a7c9f2a28118ce1bb10bd8310de21c40"
+  },
+  "sourceScope": {
+    "onlyProductionChange": "DNode.full uses dedicated final-FULL_NAME marker reader with known following serialized property boundaries.",
+    "outsideHelperAndItsCallAndNewUnitTestsExactlyEqualsBaseline": true,
+    "codeParserSolverAndCaptureTraversalUnchanged": true,
+    "fullNameUseSitesReviewed": [
+      "CfgBuilder::addr",
+      "cfg entry origins",
+      "reaching-definition method origins",
+      "captured_identifier_flows nested METHOD_REF eligibility"
+    ]
+  },
+  "completeGraphVerification": {
+    "projects": 31,
+    "baselineExact": 3,
+    "candidateExact": 17,
+    "formerlyExactLost": 0,
+    "rawReferencesExactlyExtracted": 31,
+    "canonicalLinesIncludingSeparators": 5334,
+    "nonemptySelectedRecords": 5183,
+    "matchingStructuralRecordsGained": 23,
+    "matchingReachingDefRecordsGained": 20,
+    "matchingSelectedRecordsLost": 0,
+    "astAndNodeSectionsUnchanged": true,
+    "preexistingImporterAbortCases": 5,
+    "candidateImporterAbortCases": 5,
+    "completeDiagnosticsRetained": 14,
+    "receipt": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/seventh-fullname-review/package-final-frozen-replay/review.json",
+      "sha256": "75534f86a4a4a04b3d524c60e11118bb622d9778d8a40b31967aedbbe4f0c951"
+    }
+  },
+  "meaningfulBoundaries": {
+    "ordinaryPrefixCollision": "Three previously spurious ordinary-a origins now attach to the correct header/global/macro method; whole graph exact.",
+    "spacedGlobalCapture": "One missing CFG and two missing method-origin RD facts restored; existing global-capture facts preserved; whole graph exact.",
+    "selfMarkerRegression": "All ten formerly matching facts lost by first candidate restored; each complete CODE-marker diagnostic remains retained.",
+    "parserMatrix": "Known post-properties, end of line, missing/empty, METHOD_FULL_NAME-only negative, Unicode/spaces, non-schema key text and marker inside CODE independently tested."
+  },
+  "independentTests": {
+    "productionTestsPassed": 3,
+    "boundaryUnitTestsPassed": 1,
+    "productionReceipt": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/seventh-fullname-review/focused-tests.json",
+      "sha256": "b960b225b08b7579a1c9b43565740b8c411ca1f9a5d653faf2f0f2b8a763419a"
+    },
+    "unitReceipt": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/seventh-fullname-review/dump-property-tests-current.json",
+      "sha256": "9f963a72f212f3ffad73aaa5e00d74c7b33a1bc387756fd6bc527163157b088b"
+    },
+    "staleUnitAttempt": "Earlier e293 executable selected zero tests and is explicitly not counted; retained log and corrected 1bb binary replay are both recorded."
+  },
+  "portablePackage": {
+    "measurement": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-inactive-declarations/cpg-rs/joern-parity/tests/fixtures/spaced-method-names/measurement.json",
+      "sha256": "f47c38852ea3b016069fc892574d9e84ca0ea66a6fd923edd4a3ad276ae608d7"
+    },
+    "measurementSnapshot": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/seventh-fullname-review/package-final-frozen-replay/measurement-at-review.json",
+      "sha256": "f47c38852ea3b016069fc892574d9e84ca0ea66a6fd923edd4a3ad276ae608d7"
+    },
+    "testSnapshot": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/seventh-fullname-review/frozen-final-652/spaced_method_names.rs",
+      "sha256": "8759c60e101301908b28df22c60106132ca8323f95c07473c7c974453603f539"
+    },
+    "readmeSnapshot": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/seventh-fullname-review/frozen-final-652/README.md",
+      "sha256": "ddef90cd555e877fc07b09e7232c276dde3cac51e2d4894c88c61c64600f11e8"
+    }
+  },
+  "rejectedCandidateEvidence": {
+    "correctedReceipt": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/seventh-fullname-review/self-marker/introduced-regression-corrected.json",
+      "sha256": "5bfa1b2ed1b4193c8dbea2d7e2c195555e90ea867c2845820a5b5ea09f61460d"
+    },
+    "firstFailureReplay": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/seventh-fullname-review/self-marker/candidate-first/replay.json",
+      "sha256": "c021bd95d44169b1d0ae81fe3c33ff913442e800f90696f2a3eb1a7610e20100"
+    },
+    "independentReproduction": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/seventh-fullname-review/self-marker/candidate-first-verification/replay.json",
+      "sha256": "db7aca58ad704a1185db6684b7801a21ef0e3fd3f83c6e0abf3af6a296140b7b"
+    },
+    "correctionReason": "First blocker receipt sampled a mutable producer freeze path after it had been replaced. Original run receipt correctly bound 08ec; retained first source/binary were copied, rehashed and independently reproduced all four outputs. Original receipt is preserved unchanged and superseded by the explicit corrected binding."
+  },
+  "requiredFixes": [],
+  "limits": [
+    "Not full Joern parity and no whole-project acceptance inferred from this small case set.",
+    "The unescaped property transport remains noninjective for arbitrary marker text. Five header-marker inputs still abort exactly as on baseline.",
+    "Seven CODE-marker projects and two static-identity/function-pointer type cases remain complete nonexact diagnostics.",
+    "No source changes, oracle edits, manifest edits, broad builds or whole-project replays were performed by this reviewer."
+  ]
+}

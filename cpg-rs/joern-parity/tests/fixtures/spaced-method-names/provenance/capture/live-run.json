@@ -1,0 +1,52 @@
+{
+  "command": [
+    "/Users/shayaunnejad/vibe-code/joern-oxidized/.local/astra-sprint/oracle/runtime/joern-cli/joern",
+    "--script",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/seventh-fullname-review/capture-controls/oracle.sc",
+    "--param",
+    "inputPath=/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/seventh-fullname-review/capture-controls/input"
+  ],
+  "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/seventh-fullname-review/capture-controls/oracle-workspace",
+  "javaHome": "/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home",
+  "scriptSha256": "56431f14868678e64f9eb41026b44f1d3d7738404d28d2db62711b520c98c742",
+  "inputHashes": {
+    "spaced_global_capture": {
+      "capture space.c": "f6da5f100e306c2a70049b68b0bbdfc73212b9f8aa297e9f532b706d0e831f7a"
+    },
+    "spaced_duplicate_capture": {
+      "left side.c": "dd8ec1f434c20609eab9e2bc3b8257028a860f801984d2cb6f707cf3995a81b4",
+      "right side.c": "60e7c5a8c258a71d5dd5497a060571ba909baec0d5163cc2690168c49556bc12"
+    },
+    "ordinary_address_not_capture": {
+      "address space.c": "88f9477e55716633a4aa552521f3ad364f571dadc681f5774407644a4bc77348"
+    }
+  },
+  "joernVersion": "4.0.555",
+  "archiveSha256": "12989883d6b5aeacc97b2dc0ecc4e2951bf50e48cb244f8c8f333d11a8be0c7e",
+  "timeoutSeconds": 180,
+  "pid": 34904,
+  "exitCode": 0,
+  "wallSeconds": 5.482237815856934,
+  "rawStdoutSha256": "2d55b6bff8f01a3e8cba847adc2fc8da112c66ad964fbe697d3b44a902e081b1",
+  "rawStderrSha256": "51ed097b3725b10b040e4781eabb6efa09083e828288ab344fd529b6b11ef28e",
+  "projects": [
+    {
+      "case": "ordinary_address_not_capture",
+      "canonicalLinesIncludingSeparators": 249,
+      "nonemptySelectedRecords": 244,
+      "expectedSha256": "bf79a87dc688a46323438cca6b9a41308bc51fdd6eba12259cf1a534bb801259"
+    },
+    {
+      "case": "spaced_duplicate_capture",
+      "canonicalLinesIncludingSeparators": 346,
+      "nonemptySelectedRecords": 338,
+      "expectedSha256": "9e995b107c91f7e2fb2e0151ba97718c33a931176ae8cb23af46769633d92978"
+    },
+    {
+      "case": "spaced_global_capture",
+      "canonicalLinesIncludingSeparators": 153,
+      "nonemptySelectedRecords": 149,
+      "expectedSha256": "0c9351b95a82d30507272c81724426642529510f33357cdd8651286254c94113"
+    }
+  ]
+}
