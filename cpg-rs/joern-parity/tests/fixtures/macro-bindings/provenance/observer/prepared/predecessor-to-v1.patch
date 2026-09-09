@@ -1,0 +1,62 @@
+--- thirteenth/run-observer.py
++++ fourteenth/run-observer.py
+@@ -37,22 +37,28 @@
+     expected={r['path']:{'kind':'file','sha256':r['sha256'],'bytes':r['bytes']} for r in cfg['files']}
+     expected['prepared.json']=binding(root/'prepared.json')
+     require(own_inventory(root)==expected,'Complete observer preparation differs')
+-    for k in ['baseRunner','basePrepared','canonicalOracle','historicalObservation']:
++    for k in ['baseRunner','basePrepared','canonicalOracle','historicalObservation','sourcePreparationFreeze','acceptedCheckpointBinding']:
+         require_binding(cfg[k])
+     base=load_base(cfg); manifest,_=base.verify_prepared(Path(cfg['baseRunner']['path']).parent)
+     require(sha(Path(cfg['baseRunner']['path']).parent/'prepared.json')==cfg['basePrepared']['sha256'],'Canonical prepared mismatch')
+-    require(cfg['newCases']==manifest['cases'] and len(cfg['newCases'])==6,'Six fresh cases differ')
++    require(cfg['newCases']==manifest['cases'] and len(cfg['newCases'])==4,'Four fresh cases differ')
+     require(cfg['retainedCases']==[],'No historical CPG observation jobs permitted')
+-    require(cfg['anchorCases']==['duplicate_supplied_macro_local','tiny_fixedtables_include','tiny_fixedtables_inline'],'Three historical supplemental anchors differ')
++    require(cfg['anchorCases']==['repeated_direct_include'],'One historical supplemental anchor differs')
+     require(cfg['checkpointAdmission']==manifest['checkpointAdmission'],'Observer checkpoint differs')
+     require(cfg['canonicalOracle']['sha256']==manifest['oracle']['sha256']=='56431f14868678e64f9eb41026b44f1d3d7738404d28d2db62711b520c98c742','Canonical oracle changed')
++    checkpoint=read(cfg['acceptedCheckpointBinding']['path'])
++    require(checkpoint['acceptedCommit']==cfg['checkpointAdmission']['sourceCommit']==cfg['checkpointAdmission']['documentationCommit'],'Accepted source/document checkpoint differs')
++    require(checkpoint['inputPreparation']==cfg['sourcePreparationFreeze'],'Accepted source preparation differs')
++    for key in ['path','sha256']:
++        require(checkpoint['frozenBuild'][key]==cfg['checkpointAdmission']['frozenBuild'][key],'Accepted frozen build differs: '+key)
++    require(checkpoint['sourceFiles']==151 and checkpoint['fixtureFiles']==11821 and checkpoint['producerReleased'] is False,'Preparation-only checkpoint boundary differs')
+     verify_historical_anchors(cfg,base,manifest)
+     return cfg,base,manifest
+ 
+ def verify_observer_release(path, approved_sha, cfg, root):
+     require(isinstance(approved_sha,str) and DIGEST.fullmatch(approved_sha),'Exact parent-approved observer receipt SHA required')
+     require_binding({'path':str(path),'sha256':approved_sha}); rel=read(path)
+-    require(rel.get('schemaVersion')==1 and rel.get('status')=='PARENT_APPROVED_INCLUDE_REFERENCE_OBSERVER_RELEASE' and rel.get('observationHoldReleased') is True,'Observer hold remains active')
++    require(rel.get('schemaVersion')==1 and rel.get('status')=='PARENT_APPROVED_MACRO_BINDING_OBSERVER_RELEASE' and rel.get('observationHoldReleased') is True,'Observer hold remains active')
+     require(rel.get('preparedManifestSha256')==sha(root/'prepared.json'),'Observer release not for frozen preparation')
+     for k in ['sourceCommit','documentationCommit','frozenBuild']:
+         require(rel.get(k)==cfg['checkpointAdmission'][k],'Observer release checkpoint mismatch: '+k)
+@@ -103,7 +109,7 @@
+     require(rec.get('status')=='COMPLETE_ADMITTED_SAVED_CPG_OBSERVATION' and rec.get('admittedSupplement') is True and rec.get('exitCode')==0 and not rec.get('timedOut') and not rec.get('processError') and rec.get('holdReasons')==[],'Historical observation not admitted')
+     require(rec['before']==rec['after'] and rec['gitBefore']==rec['gitAfter'],'Historical observation was unstable')
+     for k in ['rawStdout','rawStderr']:require_binding(rec[k])
+-    names=[j['case'] for j in rec['jobs']];require(len(names)==len(set(names))==11,'Historical eleven-case inventory differs')
++    names=[j['case'] for j in rec['jobs']];require(len(names)==len(set(names))==6,'Historical six-case inventory differs')
+     raw=Path(rec['rawStdout']['path']).read_bytes();selected,_,complete=base.extract_selected(raw,names);extras=extract_supplement(raw,names);require(complete,'Historical canonical extraction incomplete')
+     outputs={r['case']:r for r in rec['outputs']};jobs={j['case']:j for j in rec['jobs']};require(set(outputs)==set(names) and len(outputs)==len(rec['outputs']),'Historical output inventory differs')
+     anchors={}
+@@ -217,7 +223,7 @@
+             require(newrec['parentApprovedReceiptSha256']==rel['canonicalRelease']['sha256'] and newrec['gitAfter']==git_before,'Canonical run release/checkpoint differs from approved observer input')
+             require(sha(Path(rel['canonicalRun']['path']).parent/'snapshot/checkpoint-release.json')==rel['canonicalRelease']['sha256'],'Canonical copied release differs')
+             anchors=verify_historical_anchors(cfg,base,manifest)
+-            jobs=newjobs;require(len({j['case'] for j in jobs})==6,'Six unique fresh observer jobs required')
++            jobs=newjobs;require(len({j['case'] for j in jobs})==4,'Four unique fresh observer jobs required')
+             reference_bytes={j['case']:Path(j['reference']['path']).read_bytes() for j in jobs}
+             originals=[Path(rel['canonicalRun']['path']).resolve().parent,Path(cfg['historicalObservation']['path']).resolve().parent]
+             copy_root=run/'snapshot';copy_root.mkdir()
+@@ -294,7 +300,7 @@
+         (folder/'complete-canonical.diff').write_bytes(diff)
+         if name in extras:(folder/'supplement.jsonl').write_bytes(extras[name]['rawJsonl']);(folder/'supplement.protocol').write_bytes(extras[name]['rawProtocol'])
+         outputs.append({'case':name,'group':j['group'],'canonicalByteIdentical':equality.get(name,False),'supplementAdmitted':admitted,'counts':{k:v for k,v in extras.get(name,{}).items() if k not in ('rawJsonl','rawProtocol')},'files':{p.name:binding(p) for p in sorted(folder.iterdir())}})
+-    receipt={'status':'COMPLETE_ADMITTED_SAVED_CPG_OBSERVATION' if admitted else 'HELD_NON_ADMITTED_OBSERVATION','admittedSupplement':admitted,'holdReasons':reasons,'seconds':time.monotonic()-started,**process,'command':command,'approvedObserverReleaseSha256':args.approved_receipt_sha256,'sourceConfigSha256':sha(root/'prepared.json') if (root/'prepared.json').exists() else None,'jobs':jobs,'before':before,'after':after,'gitBefore':git_before,'gitAfter':git_after,'rawStdout':{'path':str(run/'observer.stdout'),**binding(run/'observer.stdout')},'rawStderr':{'path':str(run/'observer.stderr'),**binding(run/'observer.stderr')},'outputs':outputs,'workspaceOutput':workspace_output,'newCaseCount':6,'retainedCaseCount':0,'historicalSupplementAnchorCount':3,'newSourceCaseCount':2,'reusedSourceCaseCount':4,'anchorComparisons':anchor_comparisons,'anchorComparisonFiles':anchor_files,'anchorDifferencesRequireSemanticReview':True,'noReparse':True,'noDefaultPassesOrOriginalStoreOpen':True,'descendantGroupClosureNotAsserted':True,'coordinateAndModifierMissingnessPreserved':True}
++    receipt={'status':'COMPLETE_ADMITTED_SAVED_CPG_OBSERVATION' if admitted else 'HELD_NON_ADMITTED_OBSERVATION','admittedSupplement':admitted,'holdReasons':reasons,'seconds':time.monotonic()-started,**process,'command':command,'approvedObserverReleaseSha256':args.approved_receipt_sha256,'sourceConfigSha256':sha(root/'prepared.json') if (root/'prepared.json').exists() else None,'jobs':jobs,'before':before,'after':after,'gitBefore':git_before,'gitAfter':git_after,'rawStdout':{'path':str(run/'observer.stdout'),**binding(run/'observer.stdout')},'rawStderr':{'path':str(run/'observer.stderr'),**binding(run/'observer.stderr')},'outputs':outputs,'workspaceOutput':workspace_output,'newCaseCount':4,'retainedCaseCount':0,'historicalSupplementAnchorCount':1,'newSourceCaseCount':3,'reusedSourceCaseCount':1,'anchorComparisons':anchor_comparisons,'anchorComparisonFiles':anchor_files,'anchorDifferencesRequireSemanticReview':True,'noReparse':True,'noDefaultPassesOrOriginalStoreOpen':True,'descendantGroupClosureNotAsserted':True,'coordinateAndModifierMissingnessPreserved':True}
+     write_json(run/'run.json',receipt);print(json.dumps({'status':receipt['status'],'path':str(run/'run.json'),'sha256':sha(run/'run.json')}));return 0 if admitted else 1
+ 
+ def main():

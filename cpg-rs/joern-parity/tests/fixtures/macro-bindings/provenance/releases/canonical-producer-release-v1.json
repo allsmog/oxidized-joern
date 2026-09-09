@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "status": "PARENT_APPROVED_MACRO_BINDING_CANONICAL_PRODUCER_RELEASE",
+  "producerHoldReleased": true,
+  "preparedManifestSha256": "a68c7dd0ebd1c2e8cfcca49c100b03564ae37f4ca3d8231f14fcb10e9c9dc239",
+  "repository": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint",
+  "sourceCommit": "a806866acc83ce9b40b69259fe9e430a3e818dd0",
+  "documentationCommit": "a806866acc83ce9b40b69259fe9e430a3e818dd0",
+  "acceptance": {
+    "repositoryPath": "docs/conformance/astra-thirteenth-batch-acceptance.json",
+    "sha256": "f00dccc7bdfd26d12aaac49f15adb77e88d7f184f60be4bda1a4650b45e4d9b1"
+  },
+  "documentationBlobs": [
+    {
+      "repositoryPath": "docs/conformance/astra-thirteenth-batch-2026-09-09.md",
+      "sha256": "5f63b78cef5a589ec49a6d23e7c7743bd84fbf2be536ca435d6cf6370e7b5d23"
+    },
+    {
+      "repositoryPath": "docs/conformance/astra-thirteenth-batch-metrics.json",
+      "sha256": "35388becaf04fd5a3ba680a480a3848dd4b6a417d4f44e44e99b82eb13e8457e"
+    },
+    {
+      "repositoryPath": "cpg-rs/PROGRESS.md",
+      "sha256": "1afa5babcf947c9dccf1918973aa7c05ab97e37a1739e84b51a88bd23d29c390"
+    }
+  ],
+  "frozenBuild": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/thirteenth-batch/final-release-v2/bin/source-bindings.json",
+    "sha256": "d339e070ad6dc154a344b8d1c07953fb6fd85e21c3cb79381286fc08847691e5",
+    "bytes": 2153885
+  },
+  "closeout": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/thirteenth-batch/closeout.json",
+    "sha256": "434d3ecdcbf7165213bb14f88b6b7cf63a8b424b12d070ae9a10bbf4eff393ce"
+  },
+  "gates": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/thirteenth-batch/final-v2/gates.json",
+    "sha256": "ee237314d54311c06fd9547b0afb90b30cd27c2c43adc47a354909aab2bde127"
+  },
+  "nextPreparationBinding": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/thirteenth-batch/next-macro-checkpoint-binding-v1.json",
+    "sha256": "b25f3fee8ceb6a35b7d2a71b5cc65b8be830288c3d4b476c972d18e15446342b"
+  },
+  "sourcePreparation": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-include-references/.local/macro-binding-input-preparation-v1/manifest.json",
+    "sha256": "3211e426c8f6c9ad06cf555ee1639f5096df641d2a094a333249c124dc13ef57",
+    "bytes": 1960
+  },
+  "note": "Root releases this exact four-case canonical reference attempt after root and independent helper review. Existing user authorization covers this local differential work. Supplemental observer has a separate execution receipt.",
+  "runName": "first-complete-four-macro-binding-reference-batch",
+  "reviewBindings": {
+    "root": "3fad34fed40b8b2e511584768ec611aba648d2e54d22cb06e3222fb49473196d",
+    "independent": "fc0b30af0423583119480d4f489ba22bd4ea588d19d457d4a0ad94ecd839f4b7"
+  }
+}

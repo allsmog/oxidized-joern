@@ -1,0 +1,55 @@
+{
+  "status": "LOCAL_CHECKPOINT_COMMITTED_AND_VERIFIED",
+  "atUtc": "2026-09-09T04:47:00.875437+00:00",
+  "commit": "a806866acc83ce9b40b69259fe9e430a3e818dd0",
+  "tree": "5b68b8deef7b4050734f04aba3f5b53934c74083",
+  "parent": "afe23fc4bedbbf6b669f2bd6dfed0f0af141ecfc",
+  "branch": "codex/astra-parity-sprint",
+  "workingTreeClean": true,
+  "changedFiles": 196,
+  "frozenBuild": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/thirteenth-batch/final-release-v2/bin/source-bindings.json",
+    "sha256": "d339e070ad6dc154a344b8d1c07953fb6fd85e21c3cb79381286fc08847691e5",
+    "bytes": 2153885
+  },
+  "finalGates": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/thirteenth-batch/final-v2/gates.json",
+    "sha256": "ee237314d54311c06fd9547b0afb90b30cd27c2c43adc47a354909aab2bde127",
+    "bytes": 4350
+  },
+  "documentReview": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/thirteenth-terminal-t8-v1/final-t8.json",
+    "sha256": "890601f2706397abb724aab94a229f8c15a07e4b4de9d7b16f7b8ef5e548b114",
+    "bytes": 12057
+  },
+  "commitRun": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/thirteenth-batch/commit-result.json",
+    "sha256": "95152f955c89b5cb0315069c029fd287077998e5dc8f97773f365127e0e8fc40",
+    "bytes": 350
+  },
+  "verifiedIndex": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/thirteenth-batch/index-precommit-v1.json",
+    "sha256": "d0a59a38bce51350cd4d7e4915b373d0203289690911a21543fd3e353dc4a0af",
+    "bytes": 35962
+  },
+  "exactCommitTreeMatchesReviewedIndex": true,
+  "currentSourceAndFixtureMapsEqualFrozenBuild": true,
+  "currentSourceFiles": 151,
+  "currentFixtureFiles": 11821,
+  "originalCheckout": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/thirteenth-batch/original-checkout-final.json",
+    "sha256": "b715c89905edf7b25fa1485db702966ac03439691fd54a8f6390c5ee8a93de1e",
+    "bytes": 2607
+  },
+  "originalCheckoutRecheckedAfterCommit": true,
+  "originalDirtyFilesPreserved": 13,
+  "nextPreparation": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/thirteenth-batch/next-macro-checkpoint-binding-v1.json",
+    "sha256": "b25f3fee8ceb6a35b7d2a71b5cc65b8be830288c3d4b476c972d18e15446342b",
+    "bytes": 1590
+  },
+  "pushed": false,
+  "merged": false,
+  "fullPortGoalComplete": false,
+  "remainingGoal": "Full Joern 1:1 remains active; next bounded step is observed macro Binding emission, with broader C graphs/properties/flow, query/console/plugins, Joern binary interoperability and non-C parity still open."
+}

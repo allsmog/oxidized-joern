@@ -252,23 +252,7 @@ pub(crate) fn graph_from_canonical_dump_with_metadata(
     // The canonical oracle omits these nodes/properties. Retain them from the
     // lowerer's typed metadata, without encoding invented canonical text.
     for binding in &metadata.bindings {
-        let method =
-            raw_to_node[resolve_address(&address_to_raw, &format!("M:{}", binding.full_name))];
-        let type_decl = raw_to_node[resolve_address(
-            &address_to_raw,
-            &format!("D:{}", binding.type_decl_full_name),
-        )];
-        let node = cpg.add_node(NodeKind::Binding, cpg.file_of(method));
-        let name = cpg.intern(&binding.name);
-        cpg.set_name(node, name);
-        let full = cpg.intern(&binding.full_name);
-        cpg.set_method_full_name(node, full);
-        if let Some(signature) = &binding.signature {
-            let signature = cpg.intern(signature);
-            cpg.set_signature(node, signature);
-        }
-        cpg.add_edge(type_decl, node, EdgeKind::Binds);
-        cpg.add_edge(node, method, EdgeKind::Ref);
+        add_binding(&mut cpg, binding, &address_to_raw, &raw_to_node);
     }
     for include in &metadata.include_references {
         let namespace =
@@ -296,6 +280,14 @@ pub(crate) fn graph_from_canonical_dump_with_metadata(
         cpg.set_order_property(import, include.order);
         cpg.add_edge(namespace, import, EdgeKind::Ast);
         cpg.add_edge(import, dependency, EdgeKind::Imports);
+    }
+    // Append finalized macro bindings after existing metadata nodes so ordinary
+    // bindings and include occurrences keep their allocation identities.
+    for binding in &metadata.macro_bindings {
+        let node = add_binding(&mut cpg, binding, &address_to_raw, &raw_to_node);
+        // The saved Joern macro bindings have no ORDER property. Older binding
+        // kinds retain their existing Unknown state; dense zero is not absence.
+        cpg.clear_order_property(node);
     }
     let mut modifier_lines = Vec::new();
     for modifier in &metadata.modifiers {
@@ -888,6 +880,29 @@ fn address_aliases(
         }
     }
     aliases
+}
+
+fn add_binding(
+    cpg: &mut Cpg,
+    binding: &crate::exact::FunctionBinding,
+    addresses: &HashMap<String, usize>,
+    raw_to_node: &[NodeId],
+) -> NodeId {
+    let method = raw_to_node[resolve_address(addresses, &format!("M:{}", binding.full_name))];
+    let type_decl =
+        raw_to_node[resolve_address(addresses, &format!("D:{}", binding.type_decl_full_name))];
+    let node = cpg.add_node(NodeKind::Binding, cpg.file_of(method));
+    let name = cpg.intern(&binding.name);
+    cpg.set_name(node, name);
+    let full = cpg.intern(&binding.full_name);
+    cpg.set_method_full_name(node, full);
+    if let Some(signature) = &binding.signature {
+        let signature = cpg.intern(signature);
+        cpg.set_signature(node, signature);
+    }
+    cpg.add_edge(type_decl, node, EdgeKind::Binds);
+    cpg.add_edge(node, method, EdgeKind::Ref);
+    node
 }
 
 fn resolve_address(addresses: &HashMap<String, usize>, address: &str) -> usize {

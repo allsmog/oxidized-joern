@@ -1,0 +1,70 @@
+{
+  "bindings": [
+    {
+      "binding": {
+        "METHOD_FULL_NAME": "entry",
+        "NAME": "entry",
+        "SIGNATURE": "int(void)"
+      },
+      "incidentEdges": [
+        [
+          "binding",
+          "REF",
+          "method"
+        ],
+        [
+          "owner",
+          "BINDS",
+          "binding"
+        ]
+      ],
+      "incomingCallCount": 0,
+      "macro": false,
+      "method": {
+        "CODE": "int entry(void) { return ADD(1, 2) + ADD(3, 4); }",
+        "FILENAME": "main.c",
+        "FULL_NAME": "entry",
+        "NAME": "entry",
+        "SIGNATURE": "int(void)"
+      },
+      "owner": {
+        "FILENAME": "main.c",
+        "FULL_NAME": "entry",
+        "NAME": "entry"
+      }
+    },
+    {
+      "binding": {
+        "METHOD_FULL_NAME": "main.c:ADD:ANY(2)",
+        "NAME": "ADD",
+        "SIGNATURE": "ANY(2)"
+      },
+      "incidentEdges": [
+        [
+          "binding",
+          "REF",
+          "method"
+        ],
+        [
+          "owner",
+          "BINDS",
+          "binding"
+        ]
+      ],
+      "incomingCallCount": 2,
+      "macro": true,
+      "method": {
+        "CODE": "#define ADD(x, y) ((x) + (y))",
+        "FILENAME": "main.c",
+        "FULL_NAME": "main.c:ADD:ANY(2)",
+        "NAME": "ADD",
+        "SIGNATURE": "ANY(2)"
+      },
+      "owner": {
+        "FILENAME": "main.c",
+        "FULL_NAME": "main.c:<global>",
+        "NAME": "<global>"
+      }
+    }
+  ]
+}

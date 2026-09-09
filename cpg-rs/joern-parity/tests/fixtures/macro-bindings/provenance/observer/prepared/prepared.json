@@ -1,0 +1,140 @@
+{
+  "schemaVersion": 1,
+  "status": "PREPARED_SAVED_CPG_OBSERVER_PARENT_RELEASE_REQUIRED",
+  "baseRunner": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/macro-binding-canonical-runner-v1/run-oracle.py",
+    "sha256": "f6ca540ff1f4e548ec50f2fdff61378f7f524ce69ff54978c8aa25925924db9c",
+    "bytes": 38362
+  },
+  "basePrepared": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/macro-binding-canonical-runner-v1/prepared.json",
+    "sha256": "a68c7dd0ebd1c2e8cfcca49c100b03564ae37f4ca3d8231f14fcb10e9c9dc239",
+    "bytes": 443985
+  },
+  "canonicalOracle": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/macro-binding-canonical-runner-v1/oracle.sc",
+    "sha256": "56431f14868678e64f9eb41026b44f1d3d7738404d28d2db62711b520c98c742",
+    "bytes": 4709
+  },
+  "historicalObservation": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/thirteenth-include-observer-v1/runs/first-complete-six-include-saved-cpg-observation/run.json",
+    "sha256": "a202d40d8f7f9bf363365fd0857c589c0a031c3a6340f17f7b08b63974c7ed06",
+    "bytes": 1177575
+  },
+  "newCases": [
+    "function_like_repeated_use",
+    "local_object_used_unused",
+    "repeated_direct_include",
+    "shared_header_two_callers"
+  ],
+  "retainedCases": [],
+  "anchorCases": [
+    "repeated_direct_include"
+  ],
+  "checkpointAdmission": {
+    "repository": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint",
+    "sourceCommit": "a806866acc83ce9b40b69259fe9e430a3e818dd0",
+    "documentationCommit": "a806866acc83ce9b40b69259fe9e430a3e818dd0",
+    "acceptanceRepositoryPath": "docs/conformance/astra-thirteenth-batch-acceptance.json",
+    "requiredDocumentationPaths": [
+      "docs/conformance/astra-thirteenth-batch-2026-09-09.md",
+      "docs/conformance/astra-thirteenth-batch-metrics.json",
+      "cpg-rs/PROGRESS.md"
+    ],
+    "acceptance": {
+      "repositoryPath": "docs/conformance/astra-thirteenth-batch-acceptance.json",
+      "sha256": "f00dccc7bdfd26d12aaac49f15adb77e88d7f184f60be4bda1a4650b45e4d9b1"
+    },
+    "documentationBlobs": [
+      {
+        "repositoryPath": "docs/conformance/astra-thirteenth-batch-2026-09-09.md",
+        "sha256": "5f63b78cef5a589ec49a6d23e7c7743bd84fbf2be536ca435d6cf6370e7b5d23"
+      },
+      {
+        "repositoryPath": "docs/conformance/astra-thirteenth-batch-metrics.json",
+        "sha256": "35388becaf04fd5a3ba680a480a3848dd4b6a417d4f44e44e99b82eb13e8457e"
+      },
+      {
+        "repositoryPath": "cpg-rs/PROGRESS.md",
+        "sha256": "1afa5babcf947c9dccf1918973aa7c05ab97e37a1739e84b51a88bd23d29c390"
+      }
+    ],
+    "frozenBuild": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/thirteenth-batch/final-release-v2/bin/source-bindings.json",
+      "sha256": "d339e070ad6dc154a344b8d1c07953fb6fd85e21c3cb79381286fc08847691e5",
+      "bytes": 2153885
+    },
+    "closeout": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/thirteenth-batch/closeout.json",
+      "sha256": "434d3ecdcbf7165213bb14f88b6b7cf63a8b424b12d070ae9a10bbf4eff393ce"
+    },
+    "gates": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/thirteenth-batch/final-v2/gates.json",
+      "sha256": "ee237314d54311c06fd9547b0afb90b30cd27c2c43adc47a354909aab2bde127"
+    },
+    "nextPreparationBinding": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/thirteenth-batch/next-macro-checkpoint-binding-v1.json",
+      "sha256": "b25f3fee8ceb6a35b7d2a71b5cc65b8be830288c3d4b476c972d18e15446342b"
+    },
+    "sourcePreparation": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-include-references/.local/macro-binding-input-preparation-v1/manifest.json",
+      "sha256": "3211e426c8f6c9ad06cf555ee1639f5096df641d2a094a333249c124dc13ef57",
+      "bytes": 1960
+    }
+  },
+  "canonicalProjectionUnchanged": true,
+  "noProducerExecution": true,
+  "storageApi": "io.shiftleft.codepropertygraph.generated.Cpg.withStorage(copiedPath, false)",
+  "noDefaultOverlays": true,
+  "sourceFileCount": 7,
+  "newSourceCaseCount": 3,
+  "reusedSourceCaseCount": 1,
+  "historicalSupplementAnchorCount": 1,
+  "predecessor": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/thirteenth-include-observer-v1/prepared.json",
+    "sha256": "966d385f172f5b7754135a72238f8a615c502fef328c5745164b572aedc69ef4",
+    "bytes": 5539
+  },
+  "sourcePreparationFreeze": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-include-references/.local/macro-binding-input-preparation-v1/manifest.json",
+    "sha256": "3211e426c8f6c9ad06cf555ee1639f5096df641d2a094a333249c124dc13ef57",
+    "bytes": 1960
+  },
+  "files": [
+    {
+      "path": "README.md",
+      "sha256": "ab87d2bbdd1866b62251aa4c317da68ca3f8ca34576464de5ba6cd86c8edf0c9",
+      "bytes": 3416
+    },
+    {
+      "path": "derive.py",
+      "sha256": "39c0b0a06549b8ce966627f15b6f8d4ddaf35836a88d2aa2e16e69501b69eeb8",
+      "bytes": 2947
+    },
+    {
+      "path": "observer-release.template.json",
+      "sha256": "60be53408b5a1a772862e40531976be4814e1523a94346c50dc7aa46f530ee19",
+      "bytes": 1193
+    },
+    {
+      "path": "observer.sc",
+      "sha256": "e3ee970b53369f1308fab1f20f81d256ffd31559722d77239379538bee9487a7",
+      "bytes": 7784
+    },
+    {
+      "path": "predecessor-to-v1.patch",
+      "sha256": "d82a002e509f3efcfdffbe00bbf815ed5b6c5d635ec41060aacd3b13596670a0",
+      "bytes": 8416
+    },
+    {
+      "path": "run-observer.py",
+      "sha256": "e58c798b239ced8fb207fc40c15a6b82c13aea7aa941356ebf46ad358a6e6a79",
+      "bytes": 29923
+    }
+  ],
+  "acceptedCheckpointBinding": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/thirteenth-batch/next-macro-checkpoint-binding-v1.json",
+    "sha256": "b25f3fee8ceb6a35b7d2a71b5cc65b8be830288c3d4b476c972d18e15446342b",
+    "bytes": 1590
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "status": "FROZEN_SOURCE_PREPARATION_NO_PRODUCER_RELEASE",
+  "files": {
+    "README.md": {
+      "bytes": 994,
+      "sha256": "aa714cd11dbc4f899e932bb6339adb86493778397288972dd11deb612bdde937"
+    },
+    "input/function_like_repeated_use/main.c": {
+      "bytes": 80,
+      "sha256": "d4c334dfece151a7e56d0b1088da29db077c2899502bb732db5d6608fac89a2c"
+    },
+    "input/local_object_used_unused/main.c": {
+      "bytes": 65,
+      "sha256": "fbbafbd5e4642d528b8b268702bd7ff457f384b6724b1f7ab0f8de690aa90998"
+    },
+    "input/repeated_direct_include/main.c": {
+      "bytes": 83,
+      "sha256": "3a71231efb0ec5721cab22fa6230610cfaf13582dc37dc24dcc7011bab0a5776"
+    },
+    "input/repeated_direct_include/repeat.h": {
+      "bytes": 66,
+      "sha256": "9de56527b206dea4b2c43ea0f85460c08fefe041a230b547590a44b4d3373cc4"
+    },
+    "input/shared_header_two_callers/a.c": {
+      "bytes": 54,
+      "sha256": "5bf72d819de6c04c8e22c5d581e5a286bae71f784277cbbd3df0ec7f8679d4de"
+    },
+    "input/shared_header_two_callers/shared.h": {
+      "bytes": 16,
+      "sha256": "b26369e647fb784e8d539541d1f5a281610c63341f0685c9d9072ec4c81b4ad9"
+    },
+    "input/shared_header_two_callers/z.c": {
+      "bytes": 55,
+      "sha256": "35ef18004ee8709ebfb7326caed0d1951fb9ecbe82059f0571dc26ccffac7fc1"
+    },
+    "prepare.py": {
+      "bytes": 3553,
+      "sha256": "b441f9854ad6cae08fa460b926ff77bb434ff930a471c9095bee2b2025c57f41"
+    },
+    "prepared.json": {
+      "bytes": 6721,
+      "sha256": "53c7fe6ef2eafedad546302f01238ba10d3759a227b5ccb1be22e82515efe887"
+    }
+  },
+  "preparedSha256": "53c7fe6ef2eafedad546302f01238ba10d3759a227b5ccb1be22e82515efe887",
+  "planManifestSha256": "ae8f1cbcce8ce5afcbd2c01ad9b9c2d58d829e96f2de4c547bc0fb659aaafc5e",
+  "independentPlanReviewSha256": "15f819387b121b8d82fe06d484672b5753bdd910d2c1c66359059384d2ee6e06",
+  "parentCommit": null,
+  "executionRelease": null,
+  "projects": 4,
+  "sourceFiles": 7,
+  "sourceBytes": 419
+}

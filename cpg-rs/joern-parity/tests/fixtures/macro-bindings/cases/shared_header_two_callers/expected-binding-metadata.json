@@ -1,0 +1,103 @@
+{
+  "bindings": [
+    {
+      "binding": {
+        "METHOD_FULL_NAME": "first",
+        "NAME": "first",
+        "SIGNATURE": "int(void)"
+      },
+      "incidentEdges": [
+        [
+          "binding",
+          "REF",
+          "method"
+        ],
+        [
+          "owner",
+          "BINDS",
+          "binding"
+        ]
+      ],
+      "incomingCallCount": 0,
+      "macro": false,
+      "method": {
+        "CODE": "int first(void) { return VALUE; }",
+        "FILENAME": "a.c",
+        "FULL_NAME": "first",
+        "NAME": "first",
+        "SIGNATURE": "int(void)"
+      },
+      "owner": {
+        "FILENAME": "a.c",
+        "FULL_NAME": "first",
+        "NAME": "first"
+      }
+    },
+    {
+      "binding": {
+        "METHOD_FULL_NAME": "second",
+        "NAME": "second",
+        "SIGNATURE": "int(void)"
+      },
+      "incidentEdges": [
+        [
+          "binding",
+          "REF",
+          "method"
+        ],
+        [
+          "owner",
+          "BINDS",
+          "binding"
+        ]
+      ],
+      "incomingCallCount": 0,
+      "macro": false,
+      "method": {
+        "CODE": "int second(void) { return VALUE; }",
+        "FILENAME": "z.c",
+        "FULL_NAME": "second",
+        "NAME": "second",
+        "SIGNATURE": "int(void)"
+      },
+      "owner": {
+        "FILENAME": "z.c",
+        "FULL_NAME": "second",
+        "NAME": "second"
+      }
+    },
+    {
+      "binding": {
+        "METHOD_FULL_NAME": "shared.h:VALUE:int(0)",
+        "NAME": "VALUE",
+        "SIGNATURE": "int(0)"
+      },
+      "incidentEdges": [
+        [
+          "binding",
+          "REF",
+          "method"
+        ],
+        [
+          "owner",
+          "BINDS",
+          "binding"
+        ]
+      ],
+      "incomingCallCount": 2,
+      "macro": true,
+      "method": {
+        "CODE": "#define VALUE 7",
+        "FILENAME": "a.c",
+        "FULL_NAME": "shared.h:VALUE:int(0)",
+        "NAME": "VALUE",
+        "SIGNATURE": "int(0)"
+      },
+      "owner": {
+        "FILENAME": "a.c",
+        "FULL_NAME": "a.c:<global>",
+        "NAME": "<global>"
+      }
+    }
+  ]
+}

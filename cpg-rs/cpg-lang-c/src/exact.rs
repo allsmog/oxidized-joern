@@ -74,6 +74,7 @@ pub(crate) struct IncludedSourceOrigin {
 #[derive(Default)]
 pub(crate) struct ExactMetadata {
     pub bindings: Vec<FunctionBinding>,
+    pub macro_bindings: Vec<FunctionBinding>,
     pub modifiers: Vec<ModifierMetadata>,
     pub reference_origins: Vec<MethodReferenceOrigin>,
     pub include_references: Vec<IncludeReference>,
@@ -744,6 +745,17 @@ pub(crate) fn canonical_dump_sources_with_metadata(
     for (full, (name, directive, nparams, ret)) in macro_methods {
         sctx.begin_block(&full);
         sctx.emit_macro_method(&full, &name, &directive, nparams, &ret);
+        let file = sctx
+            .macro_method_files
+            .get(&full)
+            .expect("finalized macro method must have an owning translation unit");
+        sctx.metadata.macro_bindings.push(FunctionBinding {
+            name,
+            full_name: full.clone(),
+            type_decl_full_name: format!("{file}:<global>"),
+            signature: Some(format!("{ret}({nparams})")),
+            source_start: None,
+        });
         dumps.push((full, std::mem::take(&mut sctx.out)));
     }
     sctx.begin_block("<includes>:<global>");

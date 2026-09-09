@@ -1,0 +1,61 @@
+{
+  "case": "function_like_repeated_use",
+  "actualProcess": {
+    "command": [
+      "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/thirteenth-batch/final-release-v2/bin/joern-parity",
+      "--production",
+      "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/fourteenth-batch/accepted-capture-v1/function_like_repeated_use/input/main.c"
+    ],
+    "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/fourteenth-batch/accepted-capture-v1/function_like_repeated_use",
+    "exitCode": 0,
+    "timedOut": false,
+    "error": null,
+    "seconds": 0.005091416998766363,
+    "stdout": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/fourteenth-batch/accepted-capture-v1/function_like_repeated_use/canonical.stdout",
+      "sha256": "a1712f218a74f3a667a693b54fc2769bf6c2653feb6ec73129c4d6ed0e2c8b9e",
+      "bytes": 13903,
+      "error": null
+    },
+    "stderr": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/fourteenth-batch/accepted-capture-v1/function_like_repeated_use/canonical.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "error": null
+    }
+  },
+  "sourceHashes": {
+    "main.c": "d4c334dfece151a7e56d0b1088da29db077c2899502bb732db5d6608fac89a2c"
+  },
+  "reference": {
+    "case": "function_like_repeated_use",
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/macro-binding-canonical-runner-v1/runs/first-complete-four-macro-binding-reference-batch/expected/function_like_repeated_use/expected.txt",
+    "kind": "file",
+    "sha256": "a1712f218a74f3a667a693b54fc2769bf6c2653feb6ec73129c4d6ed0e2c8b9e",
+    "bytes": 13903,
+    "canonicalLinesIncludingSeparators": 256,
+    "nonemptySelectedRecords": 251,
+    "sectionsSeen": [
+      "AST",
+      "EDGES",
+      "FLOWS",
+      "NODES"
+    ],
+    "completeReference": true
+  },
+  "byteIdentical": true,
+  "nonemptyLfRecordCounts": {
+    "joern": 251,
+    "rust": 251,
+    "matching": 251,
+    "joernOnly": 0,
+    "rustOnly": 0
+  },
+  "joernOnlyCompleteMultiset": [],
+  "rustOnlyCompleteMultiset": [],
+  "completeDiff": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/fourteenth-canonical-comparison-v1-results/function_like_repeated_use/complete.diff",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0
+  }
+}
