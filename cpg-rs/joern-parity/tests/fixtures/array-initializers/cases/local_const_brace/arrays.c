@@ -1,0 +1,1 @@
+void arrays(void) { const int value[2] = {1, 2}; }

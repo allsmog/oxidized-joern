@@ -1,0 +1,1 @@
+void arrays(void) { int value[2][2] = {[1][0] = 4}; }

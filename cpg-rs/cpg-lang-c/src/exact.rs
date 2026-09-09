@@ -2665,7 +2665,7 @@ impl Ctx<'_> {
         // of a primitive object's type (`unsigned char c = 0` registers
         // `unsigned`, as pinned by memcmp.c). A declaration without an explicit
         // initializer, including an array's implicit allocation, does not take
-        // that path. Check each declarator so an initialized function pointer
+        // that path. Check each declarator so an initialized nested pointer declarator
         // cannot register the base of an uninitialized ordinary neighbor.
         // Keep nonprimitive registration: tags also register their base via
         // independent paths (`struct Packet *p` still needs a Packet TYPE).
@@ -2675,7 +2675,11 @@ impl Ctx<'_> {
             .unwrap_or("ANY");
         let primitive = primitive_type(raw_type, TypeRole::Declaration).is_some();
         if items.iter().any(|item| {
-            (!primitive || item.init.is_some()) && find_function_declarator(item.decl).is_none()
+            if primitive {
+                item.init.is_some() && !nested_declarator_name(item.decl)
+            } else {
+                find_function_declarator(item.decl).is_none()
+            }
         }) {
             let registered = if primitive {
                 // CDT's extra decl-specifier registration uses the first word
@@ -2706,7 +2710,108 @@ impl Ctx<'_> {
         let depth = depth + usize::from(grouped);
         let mut group_order = 1;
         let order = if grouped { &mut group_order } else { order };
-        // Pass 2: initialiser assignments / alloc lowerings, in order.
+        // Pass 2: emit all array dimension/alloc lowerings before initializers.
+        for it in &items {
+            let dimensions = array_dimensions(it.decl);
+            let sizes: Vec<_> = dimensions.iter().flatten().copied().collect();
+            // Sized local arrays allocate before their explicit initializer.
+            // File-scope arrays only emit dimensions when no initializer exists,
+            // including an empty arrayInitializer for an unsized declaration.
+            if (file_scope && it.init.is_none() && !dimensions.is_empty())
+                || (!file_scope && dimensions.first().is_some_and(Option::is_some))
+            {
+                let ao = *order;
+                *order += 1;
+                // File-scope array declarations retain their dimensions in
+                // an arrayInitializer. Only block-scope arrays synthesize
+                // assignment -> alloc(type, dimensions); treating globals
+                // as allocations also inflates the project-wide alloc stub.
+                if file_scope {
+                    self.note_call("<operator>.arrayInitializer", sizes.len());
+                    self.line(
+                        depth,
+                        "CALL",
+                        P {
+                            name: Some("<operator>.arrayInitializer".into()),
+                            code: Some(esc(text(it.outer, b))),
+                            tfn: Some("ANY".into()),
+                            mfn: Some("<operator>.arrayInitializer".into()),
+                            order: Some(ao),
+                            dispatch: Some("STATIC_DISPATCH".into()),
+                            ..Default::default()
+                        },
+                    );
+                    for (i, size) in sizes.into_iter().enumerate() {
+                        let k = (i + 1) as i64;
+                        self.emit_expr(size, b, depth + 1, k, Some(k));
+                    }
+                    continue;
+                }
+                self.note_call("<operator>.assignment", 2);
+                self.note_call("<operator>.alloc", sizes.len() + 1);
+                self.line(
+                    depth,
+                    "CALL",
+                    P {
+                        name: Some("<operator>.assignment".into()),
+                        code: Some(esc(text(it.outer, b))),
+                        tfn: Some("void".into()),
+                        mfn: Some("<operator>.assignment".into()),
+                        order: Some(ao),
+                        arg: if grouped { Some(ao) } else { assign_arg },
+                        dispatch: Some("STATIC_DISPATCH".into()),
+                        ..Default::default()
+                    },
+                );
+                self.line(
+                    depth + 1,
+                    "IDENTIFIER",
+                    P {
+                        name: Some(it.name.clone()),
+                        code: Some(if nested_declarator_name(it.decl) {
+                            String::new()
+                        } else {
+                            it.name.clone()
+                        }),
+                        tfn: Some(it.full_ty.clone()),
+                        order: Some(1),
+                        arg: Some(1),
+                        ..Default::default()
+                    },
+                );
+                self.line(
+                    depth + 1,
+                    "CALL",
+                    P {
+                        name: Some("<operator>.alloc".into()),
+                        code: Some(esc(text(it.outer, b))),
+                        tfn: Some(it.full_ty.clone()),
+                        mfn: Some("<operator>.alloc".into()),
+                        order: Some(2),
+                        arg: Some(2),
+                        dispatch: Some("STATIC_DISPATCH".into()),
+                        ..Default::default()
+                    },
+                );
+                self.line(
+                    depth + 2,
+                    "IDENTIFIER",
+                    P {
+                        name: Some(it.full_ty.clone()),
+                        code: Some(it.full_ty.clone()),
+                        tfn: Some(it.full_ty.clone()),
+                        order: Some(1),
+                        arg: Some(1),
+                        ..Default::default()
+                    },
+                );
+                for (i, sz) in sizes.into_iter().enumerate() {
+                    let k = (i + 2) as i64;
+                    self.emit_expr(sz, b, depth + 2, k, Some(k));
+                }
+            }
+        }
+        // Pass 3: explicit initializers follow every declarator's allocation.
         for it in items {
             if let Some(v) = it.init {
                 let ao = *order;
@@ -2732,7 +2837,7 @@ impl Ctx<'_> {
                     "IDENTIFIER",
                     P {
                         name: Some(it.name.clone()),
-                        code: Some(if find_function_declarator(it.decl).is_some() {
+                        code: Some(if nested_declarator_name(it.decl) {
                             String::new()
                         } else {
                             it.name.clone()
@@ -2744,95 +2849,6 @@ impl Ctx<'_> {
                     },
                 );
                 self.emit_expr(v, b, depth + 1, 2, Some(2));
-                continue;
-            }
-            let sizes = array_sizes(it.decl);
-            if !sizes.is_empty() {
-                let ao = *order;
-                *order += 1;
-                // File-scope array declarations retain their dimensions in
-                // an arrayInitializer. Only block-scope arrays synthesize
-                // assignment -> alloc(type, dimensions); treating globals
-                // as allocations also inflates the project-wide alloc stub.
-                if file_scope {
-                    self.note_call("<operator>.arrayInitializer", sizes.len());
-                    self.line(
-                        depth,
-                        "CALL",
-                        P {
-                            name: Some("<operator>.arrayInitializer".into()),
-                            code: Some(esc(text(it.decl, b))),
-                            tfn: Some("ANY".into()),
-                            mfn: Some("<operator>.arrayInitializer".into()),
-                            order: Some(ao),
-                            dispatch: Some("STATIC_DISPATCH".into()),
-                            ..Default::default()
-                        },
-                    );
-                    for (i, size) in sizes.into_iter().enumerate() {
-                        let k = (i + 1) as i64;
-                        self.emit_expr(size, b, depth + 1, k, Some(k));
-                    }
-                    continue;
-                }
-                self.note_call("<operator>.assignment", 2);
-                self.note_call("<operator>.alloc", sizes.len() + 1);
-                self.line(
-                    depth,
-                    "CALL",
-                    P {
-                        name: Some("<operator>.assignment".into()),
-                        code: Some(esc(text(it.decl, b))),
-                        tfn: Some("void".into()),
-                        mfn: Some("<operator>.assignment".into()),
-                        order: Some(ao),
-                        arg: if grouped { Some(ao) } else { assign_arg },
-                        dispatch: Some("STATIC_DISPATCH".into()),
-                        ..Default::default()
-                    },
-                );
-                self.line(
-                    depth + 1,
-                    "IDENTIFIER",
-                    P {
-                        name: Some(it.name.clone()),
-                        code: Some(it.name),
-                        tfn: Some(it.full_ty.clone()),
-                        order: Some(1),
-                        arg: Some(1),
-                        ..Default::default()
-                    },
-                );
-                self.line(
-                    depth + 1,
-                    "CALL",
-                    P {
-                        name: Some("<operator>.alloc".into()),
-                        code: Some(esc(text(it.decl, b))),
-                        tfn: Some(it.full_ty.clone()),
-                        mfn: Some("<operator>.alloc".into()),
-                        order: Some(2),
-                        arg: Some(2),
-                        dispatch: Some("STATIC_DISPATCH".into()),
-                        ..Default::default()
-                    },
-                );
-                self.line(
-                    depth + 2,
-                    "IDENTIFIER",
-                    P {
-                        name: Some(it.full_ty.clone()),
-                        code: Some(it.full_ty.clone()),
-                        tfn: Some(it.full_ty),
-                        order: Some(1),
-                        arg: Some(1),
-                        ..Default::default()
-                    },
-                );
-                for (i, sz) in sizes.into_iter().enumerate() {
-                    let k = (i + 2) as i64;
-                    self.emit_expr(sz, b, depth + 2, k, Some(k));
-                }
             }
         }
         (self.line_no > initializer).then_some(initializer)
@@ -3285,7 +3301,80 @@ impl Ctx<'_> {
                     },
                 );
             }
-            "cast_expression" => {
+            "initializer_list" | "subscript_range_designator" => {
+                let elements: Vec<_> = named_children(n)
+                    .into_iter()
+                    .filter(|child| child.kind() != "comment")
+                    .collect();
+                self.note_call("<operator>.arrayInitializer", elements.len());
+                self.line(
+                    depth,
+                    "CALL",
+                    P {
+                        name: Some("<operator>.arrayInitializer".into()),
+                        code: Some(esc(text(n, b))),
+                        tfn: Some("ANY".into()),
+                        mfn: Some("<operator>.arrayInitializer".into()),
+                        order: Some(order),
+                        arg,
+                        dispatch: Some("STATIC_DISPATCH".into()),
+                        ..Default::default()
+                    },
+                );
+                for (index, element) in elements.into_iter().enumerate() {
+                    let position = (index + 1) as i64;
+                    self.emit_expr(element, b, depth + 1, position, Some(position));
+                }
+            }
+            "initializer_pair" => {
+                // CDT groups array designators in a synthetic block. Nested
+                // indices each assign the value independently in source order.
+                self.line(
+                    depth,
+                    "BLOCK",
+                    P {
+                        tfn: Some("ANY".into()),
+                        order: Some(order),
+                        arg,
+                        ..Default::default()
+                    },
+                );
+                let mut cursor = n.walk();
+                let designators: Vec<_> = n
+                    .children_by_field_name("designator", &mut cursor)
+                    .collect();
+                if let Some(value) = n.child_by_field_name("value") {
+                    for (index, designator) in designators.into_iter().enumerate() {
+                        let target = match designator.kind() {
+                            "subscript_designator" => designator.named_child(0),
+                            "subscript_range_designator" => Some(designator),
+                            _ => None,
+                        };
+                        let Some(target) = target else {
+                            continue;
+                        };
+                        let position = (index + 1) as i64;
+                        self.note_call("<operator>.assignment", 2);
+                        self.line(
+                            depth + 1,
+                            "CALL",
+                            P {
+                                name: Some("<operator>.assignment".into()),
+                                code: Some(esc(text(n, b))),
+                                tfn: Some("void".into()),
+                                mfn: Some("<operator>.assignment".into()),
+                                order: Some(position),
+                                arg: Some(position),
+                                dispatch: Some("STATIC_DISPATCH".into()),
+                                ..Default::default()
+                            },
+                        );
+                        self.emit_expr(target, b, depth + 2, 1, Some(1));
+                        self.emit_expr(value, b, depth + 2, 2, Some(2));
+                    }
+                }
+            }
+            "cast_expression" | "compound_literal_expression" => {
                 // `(T)e` → <operator>.cast. CDT quirk: the type is the BASE
                 // type only — `(char *)x` types as `char` — while the
                 // TYPE_REF CODE keeps the raw descriptor text (`char *`).
@@ -3672,7 +3761,7 @@ fn declared_object_type(declaration: Node, decl: Node, b: &[u8]) -> String {
             }
         }
     }
-    format!("{base}{}", decl_suffix(decl, b))
+    format!("{base}{}", object_decl_suffix(decl, b, false))
 }
 
 fn prototype_declarations<'a>(root: Node<'a>, b: &[u8]) -> Vec<Node<'a>> {
@@ -3874,15 +3963,60 @@ fn decl_suffix(n: Node, b: &[u8]) -> String {
     parts.concat()
 }
 
-/// Size expressions of a (possibly multi-dim) array declarator, source order.
-fn array_sizes<'t>(n: Node<'t>) -> Vec<Node<'t>> {
+/// Object declarators use CDT's binding spelling; parameter/member renderers
+/// retain their distinct suffix ordering. A nested declarator contributes its
+/// pointer shape but not inner array dimensions (`*(*p[3])[2]` -> `*(*)[2]`).
+fn object_decl_suffix(n: Node, b: &[u8], nested_name: bool) -> String {
+    let nested = || {
+        n.child_by_field_name("declarator")
+            .map(|d| object_decl_suffix(d, b, nested_name))
+            .unwrap_or_default()
+    };
+    match n.kind() {
+        "pointer_declarator" | "abstract_pointer_declarator" => format!("*{}", nested()),
+        "array_declarator" | "abstract_array_declarator" if !nested_name => {
+            let size = n
+                .child_by_field_name("size")
+                .map(|sz| text(sz, b))
+                .unwrap_or_default();
+            format!("{}[{size}]", nested())
+        }
+        "array_declarator" | "abstract_array_declarator" => nested(),
+        "parenthesized_declarator" | "abstract_parenthesized_declarator" => {
+            let inner = n
+                .named_child(0)
+                .map(|d| object_decl_suffix(d, b, true))
+                .unwrap_or_default();
+            if inner.is_empty() {
+                inner
+            } else {
+                format!("({inner})")
+            }
+        }
+        _ => String::new(),
+    }
+}
+
+/// CDT's nested declarator name has empty CODE on synthesized assignment LHSs.
+fn nested_declarator_name(mut n: Node) -> bool {
+    loop {
+        if n.kind() == "parenthesized_declarator" {
+            return true;
+        }
+        let Some(next) = n.child_by_field_name("declarator") else {
+            return false;
+        };
+        n = next;
+    }
+}
+
+/// Array dimensions in source order; an absent expression retains unsized [].
+fn array_dimensions<'t>(n: Node<'t>) -> Vec<Option<Node<'t>>> {
     let mut out = Vec::new();
     let mut cur = n;
     loop {
         if cur.kind() == "array_declarator" {
-            if let Some(sz) = cur.child_by_field_name("size") {
-                out.push(sz);
-            }
+            out.push(cur.child_by_field_name("size"));
         } else if cur.kind() != "pointer_declarator" {
             break;
         }
@@ -4809,6 +4943,7 @@ struct DNode {
     name: String,
     code1: String,
     fullcode: String,
+    has_code: bool,
     full: String,
     has_arg: bool,
     arg_index: i64,
@@ -4893,6 +5028,7 @@ fn parse_dump_block(text: &str) -> Vec<DNode> {
             name: grab(" NAME="),
             code1: grab(" CODE="),
             fullcode: extract_code(rest),
+            has_code: rest.contains(" CODE="),
             full: grab(" FULL_NAME="),
             has_arg: rest.contains(" ARGUMENT_INDEX="),
             arg_index,
@@ -4952,6 +5088,27 @@ impl CfgBuilder<'_> {
         (entry, pending)
     }
 
+    // A control construct must compose child edge lists in the pinned
+    // CfgCreator order. Detaching a child preserves that order independently
+    // of when the mutable AST builder visits it.
+    fn detached_build(
+        &mut self,
+        id: Option<usize>,
+    ) -> (Option<String>, Vec<String>, Vec<(String, String)>) {
+        let start = self.edges.len();
+        let (entry, fringe) = id.map(|id| self.build(id)).unwrap_or_default();
+        (entry, fringe, self.edges.split_off(start))
+    }
+
+    fn detached_seq(
+        &mut self,
+        ids: &[usize],
+    ) -> (Option<String>, Vec<String>, Vec<(String, String)>) {
+        let start = self.edges.len();
+        let (entry, fringe) = self.seq(ids);
+        (entry, fringe, self.edges.split_off(start))
+    }
+
     fn build(&mut self, id: usize) -> (Option<String>, Vec<String>) {
         let n = &self.arena[id];
         let me = self.addr(id);
@@ -4975,13 +5132,13 @@ impl CfgBuilder<'_> {
                     (e1, vec![me])
                 }
                 "<operator>.logicalAnd" | "<operator>.logicalOr" => {
-                    // Short-circuit: the lhs root branches to the rhs entry
-                    // and directly past it to the call node.
-                    let (e1, o1) = self.build(kids[0]);
-                    let (e2, o2) = self.build(kids[1]);
+                    let (e1, o1, left_edges) = self.detached_build(Some(kids[0]));
+                    let (e2, o2, right_edges) = self.detached_build(Some(kids[1]));
                     if let Some(e2) = &e2 {
                         self.connect(&o1, e2);
                     }
+                    self.edges.extend(left_edges);
+                    self.edges.extend(right_edges);
                     self.connect(&o1, &me);
                     self.connect(&o2, &me);
                     (e1, vec![me])
@@ -5028,9 +5185,9 @@ impl CfgBuilder<'_> {
             }
             "RETURN" => {
                 let (entry, outs) = self.seq(&kids);
-                self.connect(&outs, &me);
                 let mret = self.mret.clone();
                 self.edges.push((me.clone(), mret));
+                self.connect(&outs, &me);
                 (entry.or(Some(me)), vec![])
             }
             "CONTROL_STRUCTURE" => self.build_control(id, me, &kids),
@@ -5053,59 +5210,58 @@ impl CfgBuilder<'_> {
         let block_child = |b: &Self| kids.iter().copied().find(|&c| b.arena[c].label == "BLOCK");
         match kind.as_str() {
             "if" => {
-                let (ce, co) = self.build(kids[0]);
+                let (ce, co, condition_edges) = self.detached_build(kids.first().copied());
                 let then = block_child(self);
                 let els = kids.iter().copied().find(|&c| {
                     self.arena[c].label == "CONTROL_STRUCTURE" && self.arena[c].code1 == "else"
                 });
-                let mut outs = Vec::new();
-                if let Some(t) = then {
-                    let (te, to) = self.build(t);
-                    if let Some(te) = &te {
-                        self.connect(&co, te);
-                    }
-                    outs.extend(to);
-                }
-                if let Some(e) = els {
-                    let eb = self.arena[e]
+                let else_body = els.and_then(|e| {
+                    self.arena[e]
                         .children
                         .iter()
                         .copied()
-                        .find(|&c| self.arena[c].label == "BLOCK");
-                    if let Some(eb) = eb {
-                        let (ee, eo) = self.build(eb);
-                        if let Some(ee) = &ee {
-                            self.connect(&co, ee);
-                        }
-                        outs.extend(eo);
-                    }
-                } else {
-                    outs.extend(co);
+                        .find(|&c| self.arena[c].label == "BLOCK")
+                });
+                let (te, to, true_edges) = self.detached_build(then);
+                let (ee, eo, false_edges) = self.detached_build(else_body);
+                if let Some(target) = &te {
+                    self.connect(&co, target);
                 }
+                if let Some(target) = &ee {
+                    self.connect(&co, target);
+                }
+                self.edges.extend(condition_edges);
+                self.edges.extend(true_edges);
+                self.edges.extend(false_edges);
+                let outs = if te.is_none() && ee.is_none() {
+                    co
+                } else {
+                    let mut fringe = if te.is_some() { to } else { co.clone() };
+                    fringe.extend(if ee.is_some() { eo } else { co });
+                    fringe
+                };
                 (ce, outs)
             }
             "while" => {
                 self.breaks.push(Vec::new());
                 self.continues.push(Vec::new());
-                let (ce, co) = self.build(kids[0]);
+                let (ce, co, condition_edges) = self.detached_build(kids.first().copied());
                 let body = kids
                     .iter()
                     .copied()
                     .find(|&child| self.arena[child].order == 2);
-                if let Some(b) = body {
-                    let (be, bo) = self.build(b);
-                    if let Some(be) = &be {
-                        self.connect(&co, be);
-                    }
-                    if let Some(ce) = &ce {
-                        self.connect(&bo, ce);
-                    }
-                }
+                let (be, bo, body_edges) = self.detached_build(body);
                 let brs = self.breaks.pop().unwrap();
                 let conts = self.continues.pop().unwrap();
-                if let Some(ce) = &ce {
-                    self.connect(&conts, ce);
+                if let Some(target) = &be {
+                    self.connect(&co, target);
                 }
+                if let Some(target) = &ce {
+                    self.connect(&bo, target);
+                    self.connect(&conts, target);
+                }
+                self.edges.extend(condition_edges);
+                self.edges.extend(body_edges);
                 let mut outs = co;
                 outs.extend(brs);
                 (ce, outs)
@@ -5114,20 +5270,19 @@ impl CfgBuilder<'_> {
                 self.breaks.push(Vec::new());
                 self.continues.push(Vec::new());
                 let body = (kids.len() > 1).then(|| kids[0]);
-                let cond = kids.last().copied();
-                let (be, bo) = body.map(|b| self.build(b)).unwrap_or((None, vec![]));
-                let (ce, co) = cond.map(|c| self.build(c)).unwrap_or((None, vec![]));
-                if let Some(ce) = &ce {
-                    self.connect(&bo, ce);
+                let (be, bo, body_edges) = self.detached_build(body);
+                let (ce, co, condition_edges) = self.detached_build(kids.last().copied());
+                let brs = self.breaks.pop().unwrap();
+                let conts = self.continues.pop().unwrap();
+                if let Some(target) = &ce {
+                    self.connect(&conts, target);
+                    self.connect(&bo, target);
                 }
                 if let Some(target) = be.as_ref().or(ce.as_ref()) {
                     self.connect(&co, target);
                 }
-                let brs = self.breaks.pop().unwrap();
-                let conts = self.continues.pop().unwrap();
-                if let Some(ce) = &ce {
-                    self.connect(&conts, ce);
-                }
+                self.edges.extend(body_edges);
+                self.edges.extend(condition_edges);
                 let mut outs = co;
                 outs.extend(brs);
                 (be.or(ce), outs)
@@ -5160,26 +5315,31 @@ impl CfgBuilder<'_> {
                     .iter()
                     .copied()
                     .find(|&child| self.arena[child].order == condition_order + 2);
-                let (ie, io) = self.seq(&init_children);
-                let (ce, co) = cond.map(|c| self.build(c)).unwrap_or((None, vec![]));
-                let (ue, uo) = update.map(|u| self.build(u)).unwrap_or((None, vec![]));
-                let (be, bo) = body.map(|b| self.build(b)).unwrap_or((None, vec![]));
-                let loop_entry = ce.as_ref().or(be.as_ref()).or(ue.as_ref()).cloned();
-                let after_body = ue.as_ref().or(loop_entry.as_ref()).cloned();
-                if let Some(entry) = &loop_entry {
-                    self.connect(&io, entry);
-                    self.connect(&uo, entry);
-                }
-                if let Some(target) = be.as_ref().or(after_body.as_ref()) {
-                    self.connect(&co, target);
-                }
-                if let Some(target) = &after_body {
-                    self.connect(&bo, target);
-                }
+                let (ie, io, init_edges) = self.detached_seq(&init_children);
+                let (ce, co, condition_edges) = self.detached_build(cond);
+                let (ue, uo, update_edges) = self.detached_build(update);
+                let (be, bo, body_edges) = self.detached_build(body);
+                let inner_entry = be.as_ref().or(ue.as_ref());
+                let loop_entry = ce.as_ref().or(inner_entry).cloned();
+                let inner_fringe = if ue.is_some() { &uo } else { &bo };
                 let brs = self.breaks.pop().unwrap();
                 let conts = self.continues.pop().unwrap();
-                if let Some(target) = &after_body {
+                if let Some(target) = &loop_entry {
+                    self.connect(&io, target);
+                    self.connect(inner_fringe, target);
+                }
+                if let Some(target) = inner_entry.or(ce.as_ref()) {
+                    self.connect(&co, target);
+                }
+                if let Some(target) = ue.as_ref().or(loop_entry.as_ref()) {
                     self.connect(&conts, target);
+                }
+                self.edges.extend(init_edges);
+                self.edges.extend(condition_edges);
+                self.edges.extend(body_edges);
+                self.edges.extend(update_edges);
+                if let Some(target) = &ue {
+                    self.connect(&bo, target);
                 }
                 let mut outs = co;
                 outs.extend(brs);
@@ -5187,30 +5347,23 @@ impl CfgBuilder<'_> {
             }
             "switch" => {
                 self.breaks.push(Vec::new());
-                let (ce, co) = self.build(kids[0]);
-                let body = block_child(self);
-                let mut outs = Vec::new();
+                let (ce, co, condition_edges) = self.detached_build(kids.first().copied());
+                let bkids = block_child(self)
+                    .map(|b| self.arena[b].children.clone())
+                    .unwrap_or_default();
+                let (_, bo, body_edges) = self.detached_seq(&bkids);
                 let mut has_default = false;
-                if let Some(b) = body {
-                    let bkids = self.arena[b].children.clone();
-                    for &c in &bkids {
-                        if self.arena[c].label == "JUMP_TARGET" {
-                            let jt = self.addr(c);
-                            self.connect(&co, &jt);
-                            if self.arena[c].name == "default" {
-                                has_default = true;
-                            }
-                        }
+                for &c in &bkids {
+                    if self.arena[c].label == "JUMP_TARGET" {
+                        self.connect(&co, &self.addr(c));
+                        has_default |= self.arena[c].name == "default";
                     }
-                    // Natural chaining inside the body = fallthrough; the
-                    // dispatch edges above are the only entries.
-                    let (_, bo) = self.seq(&bkids);
-                    outs.extend(bo);
                 }
-                if !has_default {
-                    outs.extend(co.clone());
-                }
+                self.edges.extend(condition_edges);
+                self.edges.extend(body_edges);
+                let mut outs = if has_default { Vec::new() } else { co };
                 outs.extend(self.breaks.pop().unwrap());
+                outs.extend(bo);
                 (ce, outs)
             }
             "goto" => {
@@ -5448,13 +5601,6 @@ fn reaching_def_flows(block: &str, text: &str) -> Vec<(String, String, String)> 
     for &(source, target) in &cfg {
         successors[source].push(target);
     }
-    let mut reachable = HashSet::new();
-    let mut pending = vec![0];
-    while let Some(node) = pending.pop() {
-        if reachable.insert(node) {
-            pending.extend(successors[node].iter().copied());
-        }
-    }
     let method_addr = format!("M:{}", arena[0].full);
     let addr = |i: usize| -> String {
         if i == 0 {
@@ -5529,19 +5675,15 @@ fn reaching_def_flows(block: &str, text: &str) -> Vec<(String, String, String)> 
         .copied()
         .filter(|&k| arena[k].label == "METHOD_PARAMETER_IN")
         .collect();
-    let mut entry_gen: Vec<usize> = Vec::new();
     for &p in &params {
         def_var.insert(p, definition_key(p));
-        entry_gen.push(p);
+        gen.insert(p, vec![p]);
     }
-    // calls
-    // Reachable calls are processed by the call-site routines. ReachingDef's
-    // flow graph excludes disconnected CFG tails. GEN excludes field-access calls
-    // (Joern's defsForCalls.filterNot(isFieldAccess)): such a call defines no
-    // value of its own — it only becomes a def when it is itself an argument
-    // of a non-field-access parent (handled by the parent's gen below).
+    // GEN/KILL include method-contained calls even when their CFG nodes are
+    // unreachable. Their initial OUT is GEN, so a raw predecessor can supply
+    // definitions without ever receiving IN or call-site DDG processing.
     let calls: Vec<usize> = (0..n)
-        .filter(|&i| own.contains(&i) && reachable.contains(&i) && arena[i].label == "CALL")
+        .filter(|&i| own.contains(&i) && arena[i].label == "CALL")
         .collect();
     let gen_calls: Vec<usize> = calls
         .iter()
@@ -5639,72 +5781,148 @@ fn reaching_def_flows(block: &str, text: &str) -> Vec<(String, String, String)> 
         kill.insert(c, k);
     }
 
-    // --- dataflow fixpoint over the CFG ---
-    // Nodes that are part of this method's CFG (the reaching-def flow graph's
-    // node set). Used to tell an EXPRESSION block (comma operator — in the CFG)
-    // from a statement / INLINED-macro / stub body block (not in the CFG).
+    // --- ReachingDefFlowGraph and DataFlowSolver (Joern v4.0.555) ---
     let cfg_nodes: HashSet<usize> = cfg.iter().flat_map(|&(s, d)| [s, d]).collect();
-    let mut preds: Vec<Vec<usize>> = vec![Vec::new(); n];
-    for &(s, d) in &cfg {
-        if reachable.contains(&s) {
-            preds[d].push(s);
-        }
+    let exit = arena[0]
+        .children
+        .iter()
+        .copied()
+        .find(|&i| arena[i].label == "METHOD_RETURN");
+    let output_params: Vec<usize> = arena[0]
+        .children
+        .iter()
+        .copied()
+        .filter(|&i| arena[i].label == "METHOD_PARAMETER_OUT")
+        .collect();
+    let first_body = successors[0].first().copied();
+    let mut preds = vec![Vec::new(); n];
+    for &(source, target) in &cfg {
+        preds[target].push(source);
     }
-    // ReachingDefFlowGraph quirk (decompiled initPred): the FIRST body node's
-    // predecessor is the param-chain entry (method), REPLACING its CFG preds.
-    // When the loop condition is the first body node (no statements precede the
-    // loop, e.g. bsearch), this drops the loop back-edges into it — so loop-body
-    // defs don't flow back to the condition. The method node (0) points to the
-    // first body node.
-    for &(s, d) in &cfg {
-        if s == 0 {
-            preds[d] = vec![0];
-        }
-    }
-    let mut out: Vec<HashSet<usize>> = vec![HashSet::new(); n];
-    out[0] = entry_gen.iter().copied().collect();
-    let empty: Vec<usize> = Vec::new();
-    let mut changed = true;
-    while changed {
-        changed = false;
-        for i in 0..n {
-            let mut in_set: HashSet<usize> = HashSet::new();
-            for &p in &preds[i] {
-                in_set.extend(&out[p]);
-            }
-            let g = gen.get(&i).unwrap_or(&empty);
-            let k = kill.get(&i).unwrap_or(&empty);
-            let mut new_out: HashSet<usize> =
-                in_set.iter().copied().filter(|d| !k.contains(d)).collect();
-            new_out.extend(g.iter().copied());
-            if i == 0 {
-                new_out.extend(entry_gen.iter().copied());
-            }
-            if new_out != out[i] {
-                out[i] = new_out;
-                changed = true;
-            }
-        }
-    }
-    let in_of = |i: usize| -> HashSet<usize> {
-        let mut s = HashSet::new();
-        for &p in &preds[i] {
-            s.extend(&out[p]);
-        }
-        s
-    };
+    // ReachingDefFlowGraph selects the first incoming CFG edge. This is the
+    // CfgCreator composition order, not AST order or a reachability filter.
+    let last_actual = exit.and_then(|e| preds[e].first().copied());
 
-    // Joern's reaching-def runs over ReachingDefFlowGraph, not the raw CFG: the
-    // exit and the METHOD_PARAMETER_OUTs are fed by a param-out chain whose
-    // source is the single `lastActualCfgNode` (the earliest cfg-predecessor of
-    // METHOD_RETURN) — NOT the union of all returns. So a post-loop `return`
-    // never contributes its (bypass) param defs to the exit. For a
-    // single-return method this is identical to the union.
-    let exit_in: HashSet<usize> = (0..n)
-        .find(|&i| own.contains(&i) && arena[i].label == "METHOD_RETURN")
-        .and_then(|e| preds[e].iter().copied().filter(|&p| p < n).min())
-        .map(|la| out[la].clone())
-        .unwrap_or_default();
+    // Method.reversePostOrder traverses raw cfgNext, which excludes the
+    // METHOD_RETURN. Parameters and the exit are added explicitly afterward.
+    // Use an iterative DFS with suspended successor positions, as Joern's
+    // NodeOrdering does, rather than an AST-order fixed-point sweep.
+    let mut postorder = Vec::new();
+    let mut visited = vec![false; n];
+    let mut stack = vec![(0usize, 0usize)];
+    visited[0] = true;
+    while let Some((node, next_index)) = stack.last_mut() {
+        if *next_index < successors[*node].len() {
+            let next = successors[*node][*next_index];
+            *next_index += 1;
+            if Some(next) != exit && !visited[next] {
+                visited[next] = true;
+                stack.push((next, 0));
+            }
+        } else {
+            postorder.push(*node);
+            stack.pop();
+        }
+    }
+    let mut worklist = vec![0];
+    worklist.extend(params.iter().copied());
+    worklist.extend(postorder.into_iter().rev().filter(|&i| i != 0));
+    worklist.extend(output_params.iter().copied());
+    worklist.extend(exit);
+
+    // initPred and initSucc are intentionally asymmetric. A node whose only
+    // CFG successor is exit schedules the first output parameter instead;
+    // a loop condition with both body and exit successors still schedules
+    // exit directly. Output-parameter IN can therefore retain an earlier
+    // round even when the loop condition's OUT later changes.
+    let mut flow_successors = successors.clone();
+    for &i in &worklist {
+        if i == 0 {
+            flow_successors[i] = params
+                .first()
+                .copied()
+                .map_or_else(|| successors[i].clone(), |first| vec![first]);
+        } else if let Some(position) = params.iter().position(|&p| p == i) {
+            preds[i] = vec![position.checked_sub(1).map_or(0, |p| params[p])];
+            flow_successors[i] = params
+                .get(position + 1)
+                .copied()
+                .map_or_else(|| successors[0].clone(), |next| vec![next]);
+        } else if let Some(position) = output_params.iter().position(|&p| p == i) {
+            preds[i] = position
+                .checked_sub(1)
+                .map(|p| output_params[p])
+                .or(last_actual)
+                .into_iter()
+                .collect();
+            flow_successors[i] = output_params
+                .get(position + 1)
+                .copied()
+                .or(exit)
+                .into_iter()
+                .collect();
+        } else {
+            if Some(i) == first_body {
+                // This case precedes exit handling in initPred, including an
+                // empty method whose first CFG node is METHOD_RETURN.
+                preds[i] = vec![params.last().copied().unwrap_or(0)];
+            } else if Some(i) == exit {
+                preds[i] = output_params
+                    .last()
+                    .copied()
+                    .or(last_actual)
+                    .into_iter()
+                    .collect();
+            }
+            if arena[i].label == "RETURN"
+                || (successors[i].len() == 1 && successors[i].first().copied() == exit)
+            {
+                flow_successors[i] = output_params
+                    .first()
+                    .copied()
+                    .or(exit)
+                    .into_iter()
+                    .collect();
+            }
+        }
+    }
+
+    let mut out = vec![HashSet::<usize>::new(); n];
+    for (&node, generated) in &gen {
+        out[node].extend(generated.iter().copied());
+    }
+    let mut incoming: Vec<Option<HashSet<usize>>> = vec![None; n];
+    while !worklist.is_empty() {
+        let mut next_worklist = Vec::new();
+        let mut queued = vec![false; n];
+        for i in worklist {
+            let mut in_set = HashSet::new();
+            for &previous in &preds[i] {
+                in_set.extend(out[previous].iter().copied());
+            }
+            let mut next_out = in_set.clone();
+            if let Some(killed) = kill.get(&i) {
+                next_out.retain(|d| !killed.contains(d));
+            }
+            if let Some(generated) = gen.get(&i) {
+                next_out.extend(generated.iter().copied());
+            }
+            incoming[i] = Some(in_set);
+            if next_out != out[i] {
+                out[i] = next_out;
+                for &next in &flow_successors[i] {
+                    if !queued[next] {
+                        queued[next] = true;
+                        next_worklist.push(next);
+                    }
+                }
+            }
+        }
+        worklist = next_worklist;
+    }
+    // DDG routines read the saved IN solution, not unions recomputed from
+    // final predecessor OUT. Unscheduled nodes have no entry in this map.
+    let in_of = |i: usize| incoming[i].clone().unwrap_or_default();
 
     // isUsing(use, inElem) — faithful port of UsageAnalyzer.isUsing =
     // sameVariable || isContainer || isPart || isAlias. Joern compares
@@ -5716,20 +5934,15 @@ fn reaching_def_flows(block: &str, text: &str) -> Vec<(String, String, String)> 
     // Gate every candidate edge addEdge(from=s, to=d) through
     // isValidEdge(child=d, parent=s), exactly as DdgGenerator.addEdge does.
     let push = |var: String, s: usize, d: usize, flows: &mut Vec<(String, String, String)>| {
-        let in_flow_graph = |node| {
-            reachable.contains(&node)
-                || matches!(
-                    arena[node].label.as_str(),
-                    "METHOD_PARAMETER_IN" | "METHOD_PARAMETER_OUT" | "METHOD_RETURN"
-                )
-        };
-        if in_flow_graph(s) && in_flow_graph(d) && rd_valid_edge(&arena, d, s) {
+        if own.contains(&s)
+            && own.contains(&d)
+            && arena[s].label != "UNKNOWN"
+            && arena[d].label != "UNKNOWN"
+            && rd_valid_edge(&arena, d, s)
+        {
             flows.push((var, addr(s), addr(d)));
         }
     };
-
-    // method-return (exit) index
-    let exit = (0..n).find(|&i| own.contains(&i) && arena[i].label == "METHOD_RETURN");
 
     // isDdgNode: everything EXCEPT Method, ControlStructure, FieldIdentifier,
     // JumpTarget, MethodReturn. A BLOCK is a ddg node only when it is itself a
@@ -5791,7 +6004,12 @@ fn reaching_def_flows(block: &str, text: &str) -> Vec<(String, String, String)> 
     // `is_ddg` and `used_incoming` as well.
     #[allow(clippy::needless_range_loop)]
     for i in 0..n {
-        if i == 0 || !own.contains(&i) || !is_ddg(i) || assign_lhs.contains(&i) {
+        if i == 0
+            || incoming[i].is_none()
+            || !own.contains(&i)
+            || !is_ddg(i)
+            || assign_lhs.contains(&i)
+        {
             continue;
         }
         if arena[i].label == "CALL" && !args_of(i).is_empty() {
@@ -5802,8 +6020,8 @@ fn reaching_def_flows(block: &str, text: &str) -> Vec<(String, String, String)> 
         }
     }
 
-    // 2. call sites
-    for &c in &calls {
+    // 2. call sites: only nodes with a computed IN solution.
+    for &c in calls.iter().filter(|&&c| incoming[c].is_some()) {
         let g_set: Vec<usize> = gen.get(&c).cloned().unwrap_or_default();
         let is_gen_arg_node = |x: usize| g_set.contains(&x) && x != c;
         // first loop: reaching defs into each arg use (the assignment LHS is a
@@ -5888,7 +6106,7 @@ fn reaching_def_flows(block: &str, text: &str) -> Vec<(String, String, String)> 
 
     // 3. returns
     for i in 0..n {
-        if arena[i].label != "RETURN" || !own.contains(&i) {
+        if arena[i].label != "RETURN" || !own.contains(&i) || incoming[i].is_none() {
             continue;
         }
         for (u, ins) in used_incoming(i) {
@@ -5938,7 +6156,7 @@ fn reaching_def_flows(block: &str, text: &str) -> Vec<(String, String, String)> 
         // paramOut's own "use" is itself, so the match is isUsing(paramOut, d):
         // e.g. `*l` (indirection of l) is used by the paramOut of l, and `q.x`
         // (a write through q) by the paramOut of q.
-        let mut ds: Vec<usize> = exit_in
+        let mut ds: Vec<usize> = in_of(i)
             .iter()
             .copied()
             .filter(|&d| is_using(i, d))
@@ -5951,7 +6169,7 @@ fn reaching_def_flows(block: &str, text: &str) -> Vec<(String, String, String)> 
 
     // 5. exit node: every def in in(exit) -> exit
     if let Some(e) = exit {
-        let mut v: Vec<usize> = exit_in.iter().copied().collect();
+        let mut v: Vec<usize> = in_of(e).into_iter().collect();
         v.sort();
         for d in v {
             push(node_var(&arena[d]), d, e, &mut flows);
@@ -6048,7 +6266,14 @@ fn rd_node_str(arena: &[DNode], i: usize) -> Option<String> {
             Some(arena[i].name.clone())
         }
         "METHOD" | "METHOD_RETURN" | "CONTROL_STRUCTURE" | "JUMP_TARGET" => None,
-        _ => Some(arena[i].fullcode.clone()),
+        // propertiesMap omits an unset CODE, but Joern's Expression.code
+        // getter returns PropertyDefaults.Code ("<empty>"). An explicitly
+        // empty CODE remains empty, as for function-pointer initializers.
+        _ => Some(if arena[i].has_code {
+            arena[i].fullcode.clone()
+        } else {
+            "<empty>".to_string()
+        }),
     }
 }
 // call.argument with a given ARGUMENT_INDEX (argumentOption(idx)).
@@ -6166,15 +6391,39 @@ fn rd_is_expr(arena: &[DNode], node: usize) -> bool {
             | "TYPE_REF"
     )
 }
+// DefaultSemantics.operatorFlows uses an explicit PassThroughMapping for
+// these operators. Unlike absent semantics, it forbids cross-argument flow.
+fn rd_passthrough_operator(name: &str) -> bool {
+    matches!(
+        name,
+        "<operator>.modulo"
+            | "<operator>.arrayInitializer"
+            | "<operator>.tupleLiteral"
+            | "<operator>.dictLiteral"
+            | "<operator>.setLiteral"
+            | "<operator>.listLiteral"
+    )
+}
 fn rd_sem(arena: &[DNode], c: usize) -> Option<Vec<(i64, i64)>> {
-    if arena[c].label == "CALL" {
-        operator_semantics(&arena[c].name)
-    } else {
-        None
+    if arena[c].label != "CALL" {
+        return None;
     }
+    if rd_passthrough_operator(&arena[c].name) {
+        // PTF supports unbounded arity and excludes the receiver at index 0.
+        return Some(
+            rd_args(arena, c)
+                .into_iter()
+                .map(|argument| arena[argument].arg_index)
+                .filter(|&index| index != 0)
+                .flat_map(|index| [(index, index), (index, -1)])
+                .collect(),
+        );
+    }
+    operator_semantics(&arena[c].name)
 }
 fn rd_is_call_retval(arena: &[DNode], node: usize) -> bool {
-    if arena[node].label != "CALL" {
+    if arena[node].label != "CALL" || rd_passthrough_operator(&arena[node].name) {
+        // PassThroughMapping explicitly permits return flow even at arity 0.
         return false;
     }
     match rd_sem(arena, node) {
@@ -6270,5 +6519,66 @@ mod preproc_tests {
             "A"
         );
         assert!(budget > 0);
+    }
+}
+
+#[cfg(test)]
+mod rd_semantics_tests {
+    use super::*;
+
+    #[test]
+    fn pass_through_validation_uses_actual_arguments_without_sibling_flow() {
+        for operator in [
+            "<operator>.modulo",
+            "<operator>.arrayInitializer",
+            "<operator>.tupleLiteral",
+            "<operator>.dictLiteral",
+            "<operator>.setLiteral",
+            "<operator>.listLiteral",
+        ] {
+            let arena = parse_dump_block(&format!(
+                "CALL NAME={operator} CODE=initializer ORDER=1\n\
+                 \x20\x20LITERAL CODE=receiver ARGUMENT_INDEX=0 ORDER=0\n\
+                 \x20\x20LITERAL CODE=first ARGUMENT_INDEX=1 ORDER=1\n\
+                 \x20\x20LITERAL CODE=third ARGUMENT_INDEX=3 ORDER=3\n\
+                 \x20\x20LITERAL CODE=many ARGUMENT_INDEX=40 ORDER=40\n"
+            ));
+            assert!(!rd_is_used(&arena, 1), "{operator}: receiver is not input");
+            assert!(
+                !rd_is_defined(&arena, 1),
+                "{operator}: receiver is not output"
+            );
+            for argument in 2..arena.len() {
+                assert!(rd_is_used(&arena, argument), "{operator}: {argument}");
+                assert!(rd_is_defined(&arena, argument), "{operator}: {argument}");
+                assert!(rd_valid_edge(&arena, argument, argument));
+                assert!(rd_valid_edge(&arena, 0, argument));
+                for sibling in 2..arena.len() {
+                    if sibling != argument {
+                        assert!(!rd_valid_edge(&arena, sibling, argument));
+                    }
+                }
+            }
+            let empty = parse_dump_block(&format!("CALL NAME={operator} CODE={{}} ORDER=1"));
+            assert!(!rd_is_call_retval(&empty, 0), "{operator}: empty call");
+        }
+    }
+
+    #[test]
+    fn absent_expression_code_does_not_alias_explicit_empty_names() {
+        let arena = parse_dump_block(
+            "METHOD NAME=f FULL_NAME=f\n\
+             \x20\x20METHOD_PARAMETER_IN NAME= CODE=void ORDER=1\n\
+             \x20\x20BLOCK ORDER=2\n\
+             \x20\x20IDENTIFIER NAME= CODE= ARGUMENT_INDEX=1 ORDER=3\n\
+             \x20\x20BLOCK CODE= ORDER=4\n",
+        );
+        assert_eq!(rd_node_str(&arena, 2).as_deref(), Some("<empty>"));
+        assert!(!rd_is_using(&arena, 2, 1));
+        assert_eq!(rd_node_str(&arena, 3).as_deref(), Some(""));
+        assert!(rd_is_using(&arena, 3, 1));
+        assert_eq!(rd_node_str(&arena, 4).as_deref(), Some(""));
+        assert!(rd_is_using(&arena, 4, 1));
+        assert_eq!(rd_node_str(&arena, 0), None);
     }
 }

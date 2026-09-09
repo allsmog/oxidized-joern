@@ -1,0 +1,671 @@
+METHOD NAME=<global> CODE=<global> FULL_NAME=<includes>:<global> ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.arrayInitializer FULL_NAME=<operator>.arrayInitializer ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.assignment FULL_NAME=<operator>.assignment ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.cast FULL_NAME=<operator>.cast ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.indirectIndexAccess FULL_NAME=<operator>.indirectIndexAccess ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<global> CODE=<global> FULL_NAME=arrays.c:<global> ORDER=1
+  METHOD NAME=brace_entry CODE=void brace_entry(void) { int values[] = {source()}; sink(values[0]); } FULL_NAME=brace_entry SIGNATURE=void(void) ORDER=1
+    METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    BLOCK CODE={ int values[] = {source()}; sink(values[0]); } TYPE_FULL_NAME=void ORDER=2
+      LOCAL NAME=values CODE=int values[] TYPE_FULL_NAME=int[] ORDER=1
+      CALL NAME=<operator>.assignment CODE=values[] = {source()} TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=values CODE=values TYPE_FULL_NAME=int[] ORDER=1 ARGUMENT_INDEX=1
+        CALL NAME=<operator>.arrayInitializer CODE={source()} TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.arrayInitializer ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+          CALL NAME=source CODE=source() TYPE_FULL_NAME=int METHOD_FULL_NAME=source ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+      CALL NAME=sink CODE=sink(values[0]) TYPE_FULL_NAME=void METHOD_FULL_NAME=sink ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH
+        CALL NAME=<operator>.indirectIndexAccess CODE=values[0] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectIndexAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=values CODE=values TYPE_FULL_NAME=int[] ORDER=1 ARGUMENT_INDEX=1
+          LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+  METHOD NAME=scalar_entry CODE=void scalar_entry(void) { int value = {source()}; sink(value); } FULL_NAME=scalar_entry SIGNATURE=void(void) ORDER=1
+    METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    BLOCK CODE={ int value = {source()}; sink(value); } TYPE_FULL_NAME=void ORDER=2
+      LOCAL NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+      CALL NAME=<operator>.assignment CODE=value = {source()} TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+        CALL NAME=<operator>.arrayInitializer CODE={source()} TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.arrayInitializer ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+          CALL NAME=source CODE=source() TYPE_FULL_NAME=int METHOD_FULL_NAME=source ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+      CALL NAME=sink CODE=sink(value) TYPE_FULL_NAME=void METHOD_FULL_NAME=sink ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+  METHOD NAME=clean_entry CODE=void clean_entry(void) { int value = {0}; sink(value); } FULL_NAME=clean_entry SIGNATURE=void(void) ORDER=1
+    METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    BLOCK CODE={ int value = {0}; sink(value); } TYPE_FULL_NAME=void ORDER=2
+      LOCAL NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+      CALL NAME=<operator>.assignment CODE=value = {0} TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+        CALL NAME=<operator>.arrayInitializer CODE={0} TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.arrayInitializer ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+          LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+      CALL NAME=sink CODE=sink(value) TYPE_FULL_NAME=void METHOD_FULL_NAME=sink ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+  METHOD NAME=overwrite_entry CODE=void overwrite_entry(void) { int value = {source()}; value = 0; sink(value); } FULL_NAME=overwrite_entry SIGNATURE=void(void) ORDER=1
+    METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    BLOCK CODE={ int value = {source()}; value = 0; sink(value); } TYPE_FULL_NAME=void ORDER=2
+      LOCAL NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+      CALL NAME=<operator>.assignment CODE=value = {source()} TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+        CALL NAME=<operator>.arrayInitializer CODE={source()} TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.arrayInitializer ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+          CALL NAME=source CODE=source() TYPE_FULL_NAME=int METHOD_FULL_NAME=source ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+      CALL NAME=<operator>.assignment CODE=value = 0 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+        LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+      CALL NAME=sink CODE=sink(value) TYPE_FULL_NAME=void METHOD_FULL_NAME=sink ORDER=4 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+  METHOD NAME=compound_entry CODE=void compound_entry(void) { sink(((int[]){source()})[0]); } FULL_NAME=compound_entry SIGNATURE=void(void) ORDER=1
+    METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    BLOCK CODE={ sink(((int[]){source()})[0]); } TYPE_FULL_NAME=void ORDER=2
+      CALL NAME=sink CODE=sink(((int[]){source()})[0]) TYPE_FULL_NAME=void METHOD_FULL_NAME=sink ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+        CALL NAME=<operator>.indirectIndexAccess CODE=((int[]){source()})[0] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectIndexAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+          CALL NAME=<operator>.cast CODE=(int[]){source()} TYPE_FULL_NAME=int METHOD_FULL_NAME=<operator>.cast ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+            TYPE_REF CODE=int[] TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+            CALL NAME=<operator>.arrayInitializer CODE={source()} TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.arrayInitializer ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+              CALL NAME=source CODE=source() TYPE_FULL_NAME=int METHOD_FULL_NAME=source ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+          LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+    METHOD_REF CODE=brace_entry TYPE_FULL_NAME=brace_entry METHOD_FULL_NAME=brace_entry ORDER=1
+    METHOD_REF CODE=scalar_entry TYPE_FULL_NAME=scalar_entry METHOD_FULL_NAME=scalar_entry ORDER=2
+    METHOD_REF CODE=clean_entry TYPE_FULL_NAME=clean_entry METHOD_FULL_NAME=clean_entry ORDER=3
+    METHOD_REF CODE=overwrite_entry TYPE_FULL_NAME=overwrite_entry METHOD_FULL_NAME=overwrite_entry ORDER=4
+    METHOD_REF CODE=compound_entry TYPE_FULL_NAME=compound_entry METHOD_FULL_NAME=compound_entry ORDER=5
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=brace_entry CODE=void brace_entry(void) { int values[] = {source()}; sink(values[0]); } FULL_NAME=brace_entry SIGNATURE=void(void) ORDER=1
+  METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  BLOCK CODE={ int values[] = {source()}; sink(values[0]); } TYPE_FULL_NAME=void ORDER=2
+    LOCAL NAME=values CODE=int values[] TYPE_FULL_NAME=int[] ORDER=1
+    CALL NAME=<operator>.assignment CODE=values[] = {source()} TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+      IDENTIFIER NAME=values CODE=values TYPE_FULL_NAME=int[] ORDER=1 ARGUMENT_INDEX=1
+      CALL NAME=<operator>.arrayInitializer CODE={source()} TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.arrayInitializer ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+        CALL NAME=source CODE=source() TYPE_FULL_NAME=int METHOD_FULL_NAME=source ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+    CALL NAME=sink CODE=sink(values[0]) TYPE_FULL_NAME=void METHOD_FULL_NAME=sink ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH
+      CALL NAME=<operator>.indirectIndexAccess CODE=values[0] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectIndexAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=values CODE=values TYPE_FULL_NAME=int[] ORDER=1 ARGUMENT_INDEX=1
+        LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+
+METHOD NAME=clean_entry CODE=void clean_entry(void) { int value = {0}; sink(value); } FULL_NAME=clean_entry SIGNATURE=void(void) ORDER=1
+  METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  BLOCK CODE={ int value = {0}; sink(value); } TYPE_FULL_NAME=void ORDER=2
+    LOCAL NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+    CALL NAME=<operator>.assignment CODE=value = {0} TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+      IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+      CALL NAME=<operator>.arrayInitializer CODE={0} TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.arrayInitializer ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+        LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+    CALL NAME=sink CODE=sink(value) TYPE_FULL_NAME=void METHOD_FULL_NAME=sink ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH
+      IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+
+METHOD NAME=compound_entry CODE=void compound_entry(void) { sink(((int[]){source()})[0]); } FULL_NAME=compound_entry SIGNATURE=void(void) ORDER=1
+  METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  BLOCK CODE={ sink(((int[]){source()})[0]); } TYPE_FULL_NAME=void ORDER=2
+    CALL NAME=sink CODE=sink(((int[]){source()})[0]) TYPE_FULL_NAME=void METHOD_FULL_NAME=sink ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+      CALL NAME=<operator>.indirectIndexAccess CODE=((int[]){source()})[0] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectIndexAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+        CALL NAME=<operator>.cast CODE=(int[]){source()} TYPE_FULL_NAME=int METHOD_FULL_NAME=<operator>.cast ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+          TYPE_REF CODE=int[] TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+          CALL NAME=<operator>.arrayInitializer CODE={source()} TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.arrayInitializer ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+            CALL NAME=source CODE=source() TYPE_FULL_NAME=int METHOD_FULL_NAME=source ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+        LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+
+METHOD NAME=overwrite_entry CODE=void overwrite_entry(void) { int value = {source()}; value = 0; sink(value); } FULL_NAME=overwrite_entry SIGNATURE=void(void) ORDER=1
+  METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  BLOCK CODE={ int value = {source()}; value = 0; sink(value); } TYPE_FULL_NAME=void ORDER=2
+    LOCAL NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+    CALL NAME=<operator>.assignment CODE=value = {source()} TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+      IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+      CALL NAME=<operator>.arrayInitializer CODE={source()} TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.arrayInitializer ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+        CALL NAME=source CODE=source() TYPE_FULL_NAME=int METHOD_FULL_NAME=source ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+    CALL NAME=<operator>.assignment CODE=value = 0 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH
+      IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+      LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+    CALL NAME=sink CODE=sink(value) TYPE_FULL_NAME=void METHOD_FULL_NAME=sink ORDER=4 DISPATCH_TYPE=STATIC_DISPATCH
+      IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+
+METHOD NAME=scalar_entry CODE=void scalar_entry(void) { int value = {source()}; sink(value); } FULL_NAME=scalar_entry SIGNATURE=void(void) ORDER=1
+  METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  BLOCK CODE={ int value = {source()}; sink(value); } TYPE_FULL_NAME=void ORDER=2
+    LOCAL NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+    CALL NAME=<operator>.assignment CODE=value = {source()} TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+      IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+      CALL NAME=<operator>.arrayInitializer CODE={source()} TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.arrayInitializer ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+        CALL NAME=source CODE=source() TYPE_FULL_NAME=int METHOD_FULL_NAME=source ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+    CALL NAME=sink CODE=sink(value) TYPE_FULL_NAME=void METHOD_FULL_NAME=sink ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH
+      IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+
+METHOD NAME=sink CODE=void sink(int value); FULL_NAME=sink SIGNATURE=void(int) ORDER=1
+  METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+
+METHOD NAME=source CODE=int source(void); FULL_NAME=source SIGNATURE=int(void) ORDER=1
+  METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+
+NODES|META_DATA LANGUAGE=NEWC
+NODES|FILE NAME=<includes> ORDER=1
+NODES|FILE NAME=<unknown> ORDER=0
+NODES|FILE NAME=arrays.c ORDER=0
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<global> FILENAME=<unknown> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<includes>:<global> FILENAME=<includes> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=arrays.c:<global> FILENAME=arrays.c ORDER=1
+NODES|NAMESPACE NAME=<global>
+NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=<global> FULL_NAME=arrays.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=arrays.c:<global> FILENAME=arrays.c ORDER=1
+NODES|TYPE_DECL NAME=brace_entry FULL_NAME=brace_entry CODE=brace_entry AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=arrays.c:<global> FILENAME=arrays.c ORDER=1
+NODES|TYPE_DECL NAME=clean_entry FULL_NAME=clean_entry CODE=clean_entry AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=arrays.c:<global> FILENAME=arrays.c ORDER=1
+NODES|TYPE_DECL NAME=compound_entry FULL_NAME=compound_entry CODE=compound_entry AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=arrays.c:<global> FILENAME=arrays.c ORDER=1
+NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=int[] FULL_NAME=int[] CODE=int[] IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=overwrite_entry FULL_NAME=overwrite_entry CODE=overwrite_entry AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=arrays.c:<global> FILENAME=arrays.c ORDER=1
+NODES|TYPE_DECL NAME=scalar_entry FULL_NAME=scalar_entry CODE=scalar_entry AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=arrays.c:<global> FILENAME=arrays.c ORDER=1
+NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+NODES|TYPE NAME=brace_entry FULL_NAME=brace_entry TYPE_DECL_FULL_NAME=brace_entry
+NODES|TYPE NAME=clean_entry FULL_NAME=clean_entry TYPE_DECL_FULL_NAME=clean_entry
+NODES|TYPE NAME=compound_entry FULL_NAME=compound_entry TYPE_DECL_FULL_NAME=compound_entry
+NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+NODES|TYPE NAME=int[] FULL_NAME=int[] TYPE_DECL_FULL_NAME=int[]
+NODES|TYPE NAME=overwrite_entry FULL_NAME=overwrite_entry TYPE_DECL_FULL_NAME=overwrite_entry
+NODES|TYPE NAME=scalar_entry FULL_NAME=scalar_entry TYPE_DECL_FULL_NAME=scalar_entry
+NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+EDGES|ARGUMENT brace_entry#10 -> brace_entry#11
+EDGES|ARGUMENT brace_entry#10 -> brace_entry#12
+EDGES|ARGUMENT brace_entry#5 -> brace_entry#6
+EDGES|ARGUMENT brace_entry#5 -> brace_entry#7
+EDGES|ARGUMENT brace_entry#7 -> brace_entry#8
+EDGES|ARGUMENT brace_entry#9 -> brace_entry#10
+EDGES|ARGUMENT clean_entry#5 -> clean_entry#6
+EDGES|ARGUMENT clean_entry#5 -> clean_entry#7
+EDGES|ARGUMENT clean_entry#7 -> clean_entry#8
+EDGES|ARGUMENT clean_entry#9 -> clean_entry#10
+EDGES|ARGUMENT compound_entry#4 -> compound_entry#5
+EDGES|ARGUMENT compound_entry#5 -> compound_entry#10
+EDGES|ARGUMENT compound_entry#5 -> compound_entry#6
+EDGES|ARGUMENT compound_entry#6 -> compound_entry#7
+EDGES|ARGUMENT compound_entry#6 -> compound_entry#8
+EDGES|ARGUMENT compound_entry#8 -> compound_entry#9
+EDGES|ARGUMENT overwrite_entry#12 -> overwrite_entry#13
+EDGES|ARGUMENT overwrite_entry#5 -> overwrite_entry#6
+EDGES|ARGUMENT overwrite_entry#5 -> overwrite_entry#7
+EDGES|ARGUMENT overwrite_entry#7 -> overwrite_entry#8
+EDGES|ARGUMENT overwrite_entry#9 -> overwrite_entry#10
+EDGES|ARGUMENT overwrite_entry#9 -> overwrite_entry#11
+EDGES|ARGUMENT scalar_entry#5 -> scalar_entry#6
+EDGES|ARGUMENT scalar_entry#5 -> scalar_entry#7
+EDGES|ARGUMENT scalar_entry#7 -> scalar_entry#8
+EDGES|ARGUMENT scalar_entry#9 -> scalar_entry#10
+EDGES|CALL brace_entry#10 -> <operator>.indirectIndexAccess#0
+EDGES|CALL brace_entry#5 -> <operator>.assignment#0
+EDGES|CALL brace_entry#7 -> <operator>.arrayInitializer#0
+EDGES|CALL brace_entry#8 -> source#0
+EDGES|CALL brace_entry#9 -> sink#0
+EDGES|CALL clean_entry#5 -> <operator>.assignment#0
+EDGES|CALL clean_entry#7 -> <operator>.arrayInitializer#0
+EDGES|CALL clean_entry#9 -> sink#0
+EDGES|CALL compound_entry#4 -> sink#0
+EDGES|CALL compound_entry#5 -> <operator>.indirectIndexAccess#0
+EDGES|CALL compound_entry#6 -> <operator>.cast#0
+EDGES|CALL compound_entry#8 -> <operator>.arrayInitializer#0
+EDGES|CALL compound_entry#9 -> source#0
+EDGES|CALL overwrite_entry#12 -> sink#0
+EDGES|CALL overwrite_entry#5 -> <operator>.assignment#0
+EDGES|CALL overwrite_entry#7 -> <operator>.arrayInitializer#0
+EDGES|CALL overwrite_entry#8 -> source#0
+EDGES|CALL overwrite_entry#9 -> <operator>.assignment#0
+EDGES|CALL scalar_entry#5 -> <operator>.assignment#0
+EDGES|CALL scalar_entry#7 -> <operator>.arrayInitializer#0
+EDGES|CALL scalar_entry#8 -> source#0
+EDGES|CALL scalar_entry#9 -> sink#0
+EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+EDGES|CFG <operator>.arrayInitializer#0 -> <operator>.arrayInitializer#4
+EDGES|CFG <operator>.assignment#0 -> <operator>.assignment#5
+EDGES|CFG <operator>.cast#0 -> <operator>.cast#5
+EDGES|CFG <operator>.indirectIndexAccess#0 -> <operator>.indirectIndexAccess#5
+EDGES|CFG arrays.c:<global>#0 -> arrays.c:<global>#67
+EDGES|CFG arrays.c:<global>#1 -> brace_entry#6
+EDGES|CFG arrays.c:<global>#15 -> scalar_entry#6
+EDGES|CFG arrays.c:<global>#27 -> clean_entry#6
+EDGES|CFG arrays.c:<global>#39 -> overwrite_entry#6
+EDGES|CFG arrays.c:<global>#54 -> compound_entry#7
+EDGES|CFG arrays.c:<global>#67 -> arrays.c:<global>#68
+EDGES|CFG arrays.c:<global>#68 -> arrays.c:<global>#69
+EDGES|CFG arrays.c:<global>#69 -> arrays.c:<global>#70
+EDGES|CFG arrays.c:<global>#70 -> arrays.c:<global>#71
+EDGES|CFG arrays.c:<global>#71 -> arrays.c:<global>#72
+EDGES|CFG brace_entry#10 -> brace_entry#9
+EDGES|CFG brace_entry#11 -> brace_entry#12
+EDGES|CFG brace_entry#12 -> brace_entry#10
+EDGES|CFG brace_entry#5 -> brace_entry#11
+EDGES|CFG brace_entry#6 -> brace_entry#8
+EDGES|CFG brace_entry#7 -> brace_entry#5
+EDGES|CFG brace_entry#8 -> brace_entry#7
+EDGES|CFG brace_entry#9 -> brace_entry#13
+EDGES|CFG clean_entry#10 -> clean_entry#9
+EDGES|CFG clean_entry#5 -> clean_entry#10
+EDGES|CFG clean_entry#6 -> clean_entry#8
+EDGES|CFG clean_entry#7 -> clean_entry#5
+EDGES|CFG clean_entry#8 -> clean_entry#7
+EDGES|CFG clean_entry#9 -> clean_entry#11
+EDGES|CFG compound_entry#10 -> compound_entry#5
+EDGES|CFG compound_entry#4 -> compound_entry#11
+EDGES|CFG compound_entry#5 -> compound_entry#4
+EDGES|CFG compound_entry#6 -> compound_entry#10
+EDGES|CFG compound_entry#7 -> compound_entry#9
+EDGES|CFG compound_entry#8 -> compound_entry#6
+EDGES|CFG compound_entry#9 -> compound_entry#8
+EDGES|CFG overwrite_entry#10 -> overwrite_entry#11
+EDGES|CFG overwrite_entry#11 -> overwrite_entry#9
+EDGES|CFG overwrite_entry#12 -> overwrite_entry#14
+EDGES|CFG overwrite_entry#13 -> overwrite_entry#12
+EDGES|CFG overwrite_entry#5 -> overwrite_entry#10
+EDGES|CFG overwrite_entry#6 -> overwrite_entry#8
+EDGES|CFG overwrite_entry#7 -> overwrite_entry#5
+EDGES|CFG overwrite_entry#8 -> overwrite_entry#7
+EDGES|CFG overwrite_entry#9 -> overwrite_entry#13
+EDGES|CFG scalar_entry#10 -> scalar_entry#9
+EDGES|CFG scalar_entry#5 -> scalar_entry#10
+EDGES|CFG scalar_entry#6 -> scalar_entry#8
+EDGES|CFG scalar_entry#7 -> scalar_entry#5
+EDGES|CFG scalar_entry#8 -> scalar_entry#7
+EDGES|CFG scalar_entry#9 -> scalar_entry#11
+EDGES|CFG sink#0 -> sink#4
+EDGES|CFG source#0 -> source#4
+EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+EDGES|CONTAINS <operator>.arrayInitializer#0 -> <operator>.arrayInitializer#2
+EDGES|CONTAINS <operator>.assignment#0 -> <operator>.assignment#2
+EDGES|CONTAINS <operator>.cast#0 -> <operator>.cast#2
+EDGES|CONTAINS <operator>.indirectIndexAccess#0 -> <operator>.indirectIndexAccess#2
+EDGES|CONTAINS D:arrays.c:<global> -> D:brace_entry
+EDGES|CONTAINS D:arrays.c:<global> -> D:clean_entry
+EDGES|CONTAINS D:arrays.c:<global> -> D:compound_entry
+EDGES|CONTAINS D:arrays.c:<global> -> D:overwrite_entry
+EDGES|CONTAINS D:arrays.c:<global> -> D:scalar_entry
+EDGES|CONTAINS D:arrays.c:<global> -> arrays.c:<global>#0
+EDGES|CONTAINS D:arrays.c:<global> -> sink#0
+EDGES|CONTAINS D:arrays.c:<global> -> source#0
+EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+EDGES|CONTAINS F:<includes> -> D:ANY
+EDGES|CONTAINS F:<includes> -> D:int
+EDGES|CONTAINS F:<includes> -> D:int[]
+EDGES|CONTAINS F:<includes> -> D:void
+EDGES|CONTAINS F:arrays.c -> D:arrays.c:<global>
+EDGES|CONTAINS arrays.c:<global>#0 -> arrays.c:<global>#1
+EDGES|CONTAINS arrays.c:<global>#0 -> arrays.c:<global>#15
+EDGES|CONTAINS arrays.c:<global>#0 -> arrays.c:<global>#27
+EDGES|CONTAINS arrays.c:<global>#0 -> arrays.c:<global>#39
+EDGES|CONTAINS arrays.c:<global>#0 -> arrays.c:<global>#54
+EDGES|CONTAINS arrays.c:<global>#0 -> arrays.c:<global>#66
+EDGES|CONTAINS arrays.c:<global>#0 -> arrays.c:<global>#67
+EDGES|CONTAINS arrays.c:<global>#0 -> arrays.c:<global>#68
+EDGES|CONTAINS arrays.c:<global>#0 -> arrays.c:<global>#69
+EDGES|CONTAINS arrays.c:<global>#0 -> arrays.c:<global>#70
+EDGES|CONTAINS arrays.c:<global>#0 -> arrays.c:<global>#71
+EDGES|CONTAINS arrays.c:<global>#1 -> brace_entry#10
+EDGES|CONTAINS arrays.c:<global>#1 -> brace_entry#11
+EDGES|CONTAINS arrays.c:<global>#1 -> brace_entry#12
+EDGES|CONTAINS arrays.c:<global>#1 -> brace_entry#3
+EDGES|CONTAINS arrays.c:<global>#1 -> brace_entry#5
+EDGES|CONTAINS arrays.c:<global>#1 -> brace_entry#6
+EDGES|CONTAINS arrays.c:<global>#1 -> brace_entry#7
+EDGES|CONTAINS arrays.c:<global>#1 -> brace_entry#8
+EDGES|CONTAINS arrays.c:<global>#1 -> brace_entry#9
+EDGES|CONTAINS arrays.c:<global>#15 -> scalar_entry#10
+EDGES|CONTAINS arrays.c:<global>#15 -> scalar_entry#3
+EDGES|CONTAINS arrays.c:<global>#15 -> scalar_entry#5
+EDGES|CONTAINS arrays.c:<global>#15 -> scalar_entry#6
+EDGES|CONTAINS arrays.c:<global>#15 -> scalar_entry#7
+EDGES|CONTAINS arrays.c:<global>#15 -> scalar_entry#8
+EDGES|CONTAINS arrays.c:<global>#15 -> scalar_entry#9
+EDGES|CONTAINS arrays.c:<global>#27 -> clean_entry#10
+EDGES|CONTAINS arrays.c:<global>#27 -> clean_entry#3
+EDGES|CONTAINS arrays.c:<global>#27 -> clean_entry#5
+EDGES|CONTAINS arrays.c:<global>#27 -> clean_entry#6
+EDGES|CONTAINS arrays.c:<global>#27 -> clean_entry#7
+EDGES|CONTAINS arrays.c:<global>#27 -> clean_entry#8
+EDGES|CONTAINS arrays.c:<global>#27 -> clean_entry#9
+EDGES|CONTAINS arrays.c:<global>#39 -> overwrite_entry#10
+EDGES|CONTAINS arrays.c:<global>#39 -> overwrite_entry#11
+EDGES|CONTAINS arrays.c:<global>#39 -> overwrite_entry#12
+EDGES|CONTAINS arrays.c:<global>#39 -> overwrite_entry#13
+EDGES|CONTAINS arrays.c:<global>#39 -> overwrite_entry#3
+EDGES|CONTAINS arrays.c:<global>#39 -> overwrite_entry#5
+EDGES|CONTAINS arrays.c:<global>#39 -> overwrite_entry#6
+EDGES|CONTAINS arrays.c:<global>#39 -> overwrite_entry#7
+EDGES|CONTAINS arrays.c:<global>#39 -> overwrite_entry#8
+EDGES|CONTAINS arrays.c:<global>#39 -> overwrite_entry#9
+EDGES|CONTAINS arrays.c:<global>#54 -> compound_entry#10
+EDGES|CONTAINS arrays.c:<global>#54 -> compound_entry#3
+EDGES|CONTAINS arrays.c:<global>#54 -> compound_entry#4
+EDGES|CONTAINS arrays.c:<global>#54 -> compound_entry#5
+EDGES|CONTAINS arrays.c:<global>#54 -> compound_entry#6
+EDGES|CONTAINS arrays.c:<global>#54 -> compound_entry#7
+EDGES|CONTAINS arrays.c:<global>#54 -> compound_entry#8
+EDGES|CONTAINS arrays.c:<global>#54 -> compound_entry#9
+EDGES|CONTAINS sink#0 -> sink#3
+EDGES|CONTAINS source#0 -> source#3
+EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.arrayInitializer#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.arrayInitializer#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.arrayInitializer#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.arrayInitializer#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#6 -> T:ANY
+EDGES|EVAL_TYPE <operator>.cast#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.cast#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.cast#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.cast#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.cast#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.cast#6 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectIndexAccess#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectIndexAccess#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectIndexAccess#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectIndexAccess#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectIndexAccess#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectIndexAccess#6 -> T:ANY
+EDGES|EVAL_TYPE arrays.c:<global>#66 -> T:ANY
+EDGES|EVAL_TYPE arrays.c:<global>#67 -> T:brace_entry
+EDGES|EVAL_TYPE arrays.c:<global>#68 -> T:scalar_entry
+EDGES|EVAL_TYPE arrays.c:<global>#69 -> T:clean_entry
+EDGES|EVAL_TYPE arrays.c:<global>#70 -> T:overwrite_entry
+EDGES|EVAL_TYPE arrays.c:<global>#71 -> T:compound_entry
+EDGES|EVAL_TYPE arrays.c:<global>#72 -> T:ANY
+EDGES|EVAL_TYPE brace_entry#1 -> T:void
+EDGES|EVAL_TYPE brace_entry#10 -> T:ANY
+EDGES|EVAL_TYPE brace_entry#11 -> T:int[]
+EDGES|EVAL_TYPE brace_entry#12 -> T:int
+EDGES|EVAL_TYPE brace_entry#13 -> T:void
+EDGES|EVAL_TYPE brace_entry#2 -> T:void
+EDGES|EVAL_TYPE brace_entry#3 -> T:void
+EDGES|EVAL_TYPE brace_entry#4 -> T:int[]
+EDGES|EVAL_TYPE brace_entry#5 -> T:void
+EDGES|EVAL_TYPE brace_entry#6 -> T:int[]
+EDGES|EVAL_TYPE brace_entry#7 -> T:ANY
+EDGES|EVAL_TYPE brace_entry#8 -> T:int
+EDGES|EVAL_TYPE brace_entry#9 -> T:void
+EDGES|EVAL_TYPE clean_entry#1 -> T:void
+EDGES|EVAL_TYPE clean_entry#10 -> T:int
+EDGES|EVAL_TYPE clean_entry#11 -> T:void
+EDGES|EVAL_TYPE clean_entry#2 -> T:void
+EDGES|EVAL_TYPE clean_entry#3 -> T:void
+EDGES|EVAL_TYPE clean_entry#4 -> T:int
+EDGES|EVAL_TYPE clean_entry#5 -> T:void
+EDGES|EVAL_TYPE clean_entry#6 -> T:int
+EDGES|EVAL_TYPE clean_entry#7 -> T:ANY
+EDGES|EVAL_TYPE clean_entry#8 -> T:int
+EDGES|EVAL_TYPE clean_entry#9 -> T:void
+EDGES|EVAL_TYPE compound_entry#1 -> T:void
+EDGES|EVAL_TYPE compound_entry#10 -> T:int
+EDGES|EVAL_TYPE compound_entry#11 -> T:void
+EDGES|EVAL_TYPE compound_entry#2 -> T:void
+EDGES|EVAL_TYPE compound_entry#3 -> T:void
+EDGES|EVAL_TYPE compound_entry#4 -> T:void
+EDGES|EVAL_TYPE compound_entry#5 -> T:ANY
+EDGES|EVAL_TYPE compound_entry#6 -> T:int
+EDGES|EVAL_TYPE compound_entry#7 -> T:int
+EDGES|EVAL_TYPE compound_entry#8 -> T:ANY
+EDGES|EVAL_TYPE compound_entry#9 -> T:int
+EDGES|EVAL_TYPE overwrite_entry#1 -> T:void
+EDGES|EVAL_TYPE overwrite_entry#10 -> T:int
+EDGES|EVAL_TYPE overwrite_entry#11 -> T:int
+EDGES|EVAL_TYPE overwrite_entry#12 -> T:void
+EDGES|EVAL_TYPE overwrite_entry#13 -> T:int
+EDGES|EVAL_TYPE overwrite_entry#14 -> T:void
+EDGES|EVAL_TYPE overwrite_entry#2 -> T:void
+EDGES|EVAL_TYPE overwrite_entry#3 -> T:void
+EDGES|EVAL_TYPE overwrite_entry#4 -> T:int
+EDGES|EVAL_TYPE overwrite_entry#5 -> T:void
+EDGES|EVAL_TYPE overwrite_entry#6 -> T:int
+EDGES|EVAL_TYPE overwrite_entry#7 -> T:ANY
+EDGES|EVAL_TYPE overwrite_entry#8 -> T:int
+EDGES|EVAL_TYPE overwrite_entry#9 -> T:ANY
+EDGES|EVAL_TYPE scalar_entry#1 -> T:void
+EDGES|EVAL_TYPE scalar_entry#10 -> T:int
+EDGES|EVAL_TYPE scalar_entry#11 -> T:void
+EDGES|EVAL_TYPE scalar_entry#2 -> T:void
+EDGES|EVAL_TYPE scalar_entry#3 -> T:void
+EDGES|EVAL_TYPE scalar_entry#4 -> T:int
+EDGES|EVAL_TYPE scalar_entry#5 -> T:void
+EDGES|EVAL_TYPE scalar_entry#6 -> T:int
+EDGES|EVAL_TYPE scalar_entry#7 -> T:ANY
+EDGES|EVAL_TYPE scalar_entry#8 -> T:int
+EDGES|EVAL_TYPE scalar_entry#9 -> T:void
+EDGES|EVAL_TYPE sink#1 -> T:int
+EDGES|EVAL_TYPE sink#2 -> T:int
+EDGES|EVAL_TYPE sink#3 -> T:ANY
+EDGES|EVAL_TYPE sink#4 -> T:void
+EDGES|EVAL_TYPE source#1 -> T:void
+EDGES|EVAL_TYPE source#2 -> T:void
+EDGES|EVAL_TYPE source#3 -> T:ANY
+EDGES|EVAL_TYPE source#4 -> T:int
+EDGES|PARAMETER_LINK <operator>.arrayInitializer#1 -> <operator>.arrayInitializer#3
+EDGES|PARAMETER_LINK <operator>.assignment#1 -> <operator>.assignment#3
+EDGES|PARAMETER_LINK <operator>.assignment#4 -> <operator>.assignment#6
+EDGES|PARAMETER_LINK <operator>.cast#1 -> <operator>.cast#3
+EDGES|PARAMETER_LINK <operator>.cast#4 -> <operator>.cast#6
+EDGES|PARAMETER_LINK <operator>.indirectIndexAccess#1 -> <operator>.indirectIndexAccess#3
+EDGES|PARAMETER_LINK <operator>.indirectIndexAccess#4 -> <operator>.indirectIndexAccess#6
+EDGES|PARAMETER_LINK brace_entry#1 -> brace_entry#2
+EDGES|PARAMETER_LINK clean_entry#1 -> clean_entry#2
+EDGES|PARAMETER_LINK compound_entry#1 -> compound_entry#2
+EDGES|PARAMETER_LINK overwrite_entry#1 -> overwrite_entry#2
+EDGES|PARAMETER_LINK scalar_entry#1 -> scalar_entry#2
+EDGES|PARAMETER_LINK sink#1 -> sink#2
+EDGES|PARAMETER_LINK source#1 -> source#2
+EDGES|REF NB:<global> -> NS:<global>
+EDGES|REF NB:<includes>:<global> -> NS:<global>
+EDGES|REF NB:arrays.c:<global> -> NS:<global>
+EDGES|REF T:ANY -> D:ANY
+EDGES|REF T:brace_entry -> D:brace_entry
+EDGES|REF T:clean_entry -> D:clean_entry
+EDGES|REF T:compound_entry -> D:compound_entry
+EDGES|REF T:int -> D:int
+EDGES|REF T:int[] -> D:int[]
+EDGES|REF T:overwrite_entry -> D:overwrite_entry
+EDGES|REF T:scalar_entry -> D:scalar_entry
+EDGES|REF T:void -> D:void
+EDGES|REF arrays.c:<global>#67 -> arrays.c:<global>#1
+EDGES|REF arrays.c:<global>#68 -> arrays.c:<global>#15
+EDGES|REF arrays.c:<global>#69 -> arrays.c:<global>#27
+EDGES|REF arrays.c:<global>#70 -> arrays.c:<global>#39
+EDGES|REF arrays.c:<global>#71 -> arrays.c:<global>#54
+EDGES|REF brace_entry#11 -> brace_entry#4
+EDGES|REF brace_entry#6 -> brace_entry#4
+EDGES|REF clean_entry#10 -> clean_entry#4
+EDGES|REF clean_entry#6 -> clean_entry#4
+EDGES|REF overwrite_entry#10 -> overwrite_entry#4
+EDGES|REF overwrite_entry#13 -> overwrite_entry#4
+EDGES|REF overwrite_entry#6 -> overwrite_entry#4
+EDGES|REF scalar_entry#10 -> scalar_entry#4
+EDGES|REF scalar_entry#6 -> scalar_entry#4
+EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+EDGES|SOURCE_FILE D:ANY -> F:<includes>
+EDGES|SOURCE_FILE D:arrays.c:<global> -> F:arrays.c
+EDGES|SOURCE_FILE D:brace_entry -> F:arrays.c
+EDGES|SOURCE_FILE D:clean_entry -> F:arrays.c
+EDGES|SOURCE_FILE D:compound_entry -> F:arrays.c
+EDGES|SOURCE_FILE D:int -> F:<includes>
+EDGES|SOURCE_FILE D:int[] -> F:<includes>
+EDGES|SOURCE_FILE D:overwrite_entry -> F:arrays.c
+EDGES|SOURCE_FILE D:scalar_entry -> F:arrays.c
+EDGES|SOURCE_FILE D:void -> F:<includes>
+EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
+EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>
+EDGES|SOURCE_FILE NB:arrays.c:<global> -> F:arrays.c
+EDGES|SOURCE_FILE arrays.c:<global>#0 -> F:arrays.c
+EDGES|SOURCE_FILE arrays.c:<global>#1 -> F:arrays.c
+EDGES|SOURCE_FILE arrays.c:<global>#15 -> F:arrays.c
+EDGES|SOURCE_FILE arrays.c:<global>#27 -> F:arrays.c
+EDGES|SOURCE_FILE arrays.c:<global>#39 -> F:arrays.c
+EDGES|SOURCE_FILE arrays.c:<global>#54 -> F:arrays.c
+EDGES|SOURCE_FILE sink#0 -> F:arrays.c
+EDGES|SOURCE_FILE source#0 -> F:arrays.c
+FLOWS|REACHING_DEF[((int[]){source()})[0]] compound_entry#5 -> compound_entry#11
+FLOWS|REACHING_DEF[((int[]){source()})[0]] compound_entry#5 -> compound_entry#4
+FLOWS|REACHING_DEF[(int[]){source()}] compound_entry#6 -> compound_entry#11
+FLOWS|REACHING_DEF[0] clean_entry#8 -> clean_entry#7
+FLOWS|REACHING_DEF[0] overwrite_entry#11 -> overwrite_entry#10
+FLOWS|REACHING_DEF[0] overwrite_entry#11 -> overwrite_entry#9
+FLOWS|REACHING_DEF[] <operator>.arrayInitializer#0 -> <operator>.arrayInitializer#1
+FLOWS|REACHING_DEF[] <operator>.assignment#0 -> <operator>.assignment#1
+FLOWS|REACHING_DEF[] <operator>.assignment#0 -> <operator>.assignment#4
+FLOWS|REACHING_DEF[] <operator>.cast#0 -> <operator>.cast#1
+FLOWS|REACHING_DEF[] <operator>.cast#0 -> <operator>.cast#4
+FLOWS|REACHING_DEF[] <operator>.indirectIndexAccess#0 -> <operator>.indirectIndexAccess#1
+FLOWS|REACHING_DEF[] <operator>.indirectIndexAccess#0 -> <operator>.indirectIndexAccess#4
+FLOWS|REACHING_DEF[] arrays.c:<global>#0 -> arrays.c:<global>#67
+FLOWS|REACHING_DEF[] arrays.c:<global>#0 -> arrays.c:<global>#68
+FLOWS|REACHING_DEF[] arrays.c:<global>#0 -> arrays.c:<global>#69
+FLOWS|REACHING_DEF[] arrays.c:<global>#0 -> arrays.c:<global>#70
+FLOWS|REACHING_DEF[] arrays.c:<global>#0 -> arrays.c:<global>#71
+FLOWS|REACHING_DEF[] arrays.c:<global>#1 -> brace_entry#1
+FLOWS|REACHING_DEF[] arrays.c:<global>#1 -> brace_entry#11
+FLOWS|REACHING_DEF[] arrays.c:<global>#1 -> brace_entry#12
+FLOWS|REACHING_DEF[] arrays.c:<global>#1 -> brace_entry#8
+FLOWS|REACHING_DEF[] arrays.c:<global>#15 -> scalar_entry#1
+FLOWS|REACHING_DEF[] arrays.c:<global>#15 -> scalar_entry#10
+FLOWS|REACHING_DEF[] arrays.c:<global>#15 -> scalar_entry#8
+FLOWS|REACHING_DEF[] arrays.c:<global>#27 -> clean_entry#1
+FLOWS|REACHING_DEF[] arrays.c:<global>#27 -> clean_entry#10
+FLOWS|REACHING_DEF[] arrays.c:<global>#27 -> clean_entry#8
+FLOWS|REACHING_DEF[] arrays.c:<global>#39 -> overwrite_entry#1
+FLOWS|REACHING_DEF[] arrays.c:<global>#39 -> overwrite_entry#11
+FLOWS|REACHING_DEF[] arrays.c:<global>#39 -> overwrite_entry#13
+FLOWS|REACHING_DEF[] arrays.c:<global>#39 -> overwrite_entry#8
+FLOWS|REACHING_DEF[] arrays.c:<global>#54 -> compound_entry#1
+FLOWS|REACHING_DEF[] arrays.c:<global>#54 -> compound_entry#10
+FLOWS|REACHING_DEF[] arrays.c:<global>#54 -> compound_entry#7
+FLOWS|REACHING_DEF[] arrays.c:<global>#54 -> compound_entry#9
+FLOWS|REACHING_DEF[] brace_entry#1 -> brace_entry#13
+FLOWS|REACHING_DEF[] brace_entry#1 -> brace_entry#2
+FLOWS|REACHING_DEF[] clean_entry#1 -> clean_entry#11
+FLOWS|REACHING_DEF[] clean_entry#1 -> clean_entry#2
+FLOWS|REACHING_DEF[] compound_entry#1 -> compound_entry#11
+FLOWS|REACHING_DEF[] compound_entry#1 -> compound_entry#2
+FLOWS|REACHING_DEF[] overwrite_entry#1 -> overwrite_entry#14
+FLOWS|REACHING_DEF[] overwrite_entry#1 -> overwrite_entry#2
+FLOWS|REACHING_DEF[] scalar_entry#1 -> scalar_entry#11
+FLOWS|REACHING_DEF[] scalar_entry#1 -> scalar_entry#2
+FLOWS|REACHING_DEF[] sink#0 -> sink#1
+FLOWS|REACHING_DEF[] source#0 -> source#1
+FLOWS|REACHING_DEF[] source#1 -> source#2
+FLOWS|REACHING_DEF[] source#1 -> source#4
+FLOWS|REACHING_DEF[int[]] compound_entry#7 -> compound_entry#6
+FLOWS|REACHING_DEF[p1] <operator>.arrayInitializer#1 -> <operator>.arrayInitializer#3
+FLOWS|REACHING_DEF[p1] <operator>.arrayInitializer#1 -> <operator>.arrayInitializer#4
+FLOWS|REACHING_DEF[p1] <operator>.assignment#1 -> <operator>.assignment#3
+FLOWS|REACHING_DEF[p1] <operator>.assignment#1 -> <operator>.assignment#5
+FLOWS|REACHING_DEF[p1] <operator>.cast#1 -> <operator>.cast#3
+FLOWS|REACHING_DEF[p1] <operator>.cast#1 -> <operator>.cast#5
+FLOWS|REACHING_DEF[p1] <operator>.indirectIndexAccess#1 -> <operator>.indirectIndexAccess#3
+FLOWS|REACHING_DEF[p1] <operator>.indirectIndexAccess#1 -> <operator>.indirectIndexAccess#5
+FLOWS|REACHING_DEF[p2] <operator>.assignment#4 -> <operator>.assignment#5
+FLOWS|REACHING_DEF[p2] <operator>.assignment#4 -> <operator>.assignment#6
+FLOWS|REACHING_DEF[p2] <operator>.cast#4 -> <operator>.cast#5
+FLOWS|REACHING_DEF[p2] <operator>.cast#4 -> <operator>.cast#6
+FLOWS|REACHING_DEF[p2] <operator>.indirectIndexAccess#4 -> <operator>.indirectIndexAccess#5
+FLOWS|REACHING_DEF[p2] <operator>.indirectIndexAccess#4 -> <operator>.indirectIndexAccess#6
+FLOWS|REACHING_DEF[sink(((int[]){source()})[0])] compound_entry#4 -> compound_entry#11
+FLOWS|REACHING_DEF[sink(value)] clean_entry#9 -> clean_entry#11
+FLOWS|REACHING_DEF[sink(value)] overwrite_entry#12 -> overwrite_entry#14
+FLOWS|REACHING_DEF[sink(value)] scalar_entry#9 -> scalar_entry#11
+FLOWS|REACHING_DEF[sink(values[0])] brace_entry#9 -> brace_entry#13
+FLOWS|REACHING_DEF[source()] brace_entry#8 -> brace_entry#13
+FLOWS|REACHING_DEF[source()] brace_entry#8 -> brace_entry#7
+FLOWS|REACHING_DEF[source()] compound_entry#9 -> compound_entry#11
+FLOWS|REACHING_DEF[source()] compound_entry#9 -> compound_entry#8
+FLOWS|REACHING_DEF[source()] overwrite_entry#8 -> overwrite_entry#14
+FLOWS|REACHING_DEF[source()] overwrite_entry#8 -> overwrite_entry#7
+FLOWS|REACHING_DEF[source()] scalar_entry#8 -> scalar_entry#11
+FLOWS|REACHING_DEF[source()] scalar_entry#8 -> scalar_entry#7
+FLOWS|REACHING_DEF[value = 0] overwrite_entry#9 -> overwrite_entry#14
+FLOWS|REACHING_DEF[value = {0}] clean_entry#5 -> clean_entry#11
+FLOWS|REACHING_DEF[value = {source()}] overwrite_entry#5 -> overwrite_entry#14
+FLOWS|REACHING_DEF[value = {source()}] scalar_entry#5 -> scalar_entry#11
+FLOWS|REACHING_DEF[value] clean_entry#10 -> clean_entry#11
+FLOWS|REACHING_DEF[value] clean_entry#10 -> clean_entry#9
+FLOWS|REACHING_DEF[value] clean_entry#6 -> clean_entry#10
+FLOWS|REACHING_DEF[value] clean_entry#6 -> clean_entry#5
+FLOWS|REACHING_DEF[value] overwrite_entry#10 -> overwrite_entry#13
+FLOWS|REACHING_DEF[value] overwrite_entry#10 -> overwrite_entry#9
+FLOWS|REACHING_DEF[value] overwrite_entry#13 -> overwrite_entry#12
+FLOWS|REACHING_DEF[value] overwrite_entry#13 -> overwrite_entry#14
+FLOWS|REACHING_DEF[value] overwrite_entry#6 -> overwrite_entry#5
+FLOWS|REACHING_DEF[value] scalar_entry#10 -> scalar_entry#11
+FLOWS|REACHING_DEF[value] scalar_entry#10 -> scalar_entry#9
+FLOWS|REACHING_DEF[value] scalar_entry#6 -> scalar_entry#10
+FLOWS|REACHING_DEF[value] scalar_entry#6 -> scalar_entry#5
+FLOWS|REACHING_DEF[value] sink#1 -> sink#2
+FLOWS|REACHING_DEF[value] sink#1 -> sink#4
+FLOWS|REACHING_DEF[values[0]] brace_entry#10 -> brace_entry#13
+FLOWS|REACHING_DEF[values[0]] brace_entry#10 -> brace_entry#9
+FLOWS|REACHING_DEF[values[] = {source()}] brace_entry#5 -> brace_entry#13
+FLOWS|REACHING_DEF[values] brace_entry#6 -> brace_entry#10
+FLOWS|REACHING_DEF[values] brace_entry#6 -> brace_entry#11
+FLOWS|REACHING_DEF[values] brace_entry#6 -> brace_entry#13
+FLOWS|REACHING_DEF[values] brace_entry#6 -> brace_entry#5
+FLOWS|REACHING_DEF[{0}] clean_entry#7 -> clean_entry#11
+FLOWS|REACHING_DEF[{0}] clean_entry#7 -> clean_entry#5
+FLOWS|REACHING_DEF[{0}] clean_entry#7 -> clean_entry#6
+FLOWS|REACHING_DEF[{source()}] brace_entry#7 -> brace_entry#13
+FLOWS|REACHING_DEF[{source()}] brace_entry#7 -> brace_entry#5
+FLOWS|REACHING_DEF[{source()}] brace_entry#7 -> brace_entry#6
+FLOWS|REACHING_DEF[{source()}] compound_entry#8 -> compound_entry#11
+FLOWS|REACHING_DEF[{source()}] compound_entry#8 -> compound_entry#6
+FLOWS|REACHING_DEF[{source()}] overwrite_entry#7 -> overwrite_entry#14
+FLOWS|REACHING_DEF[{source()}] overwrite_entry#7 -> overwrite_entry#5
+FLOWS|REACHING_DEF[{source()}] overwrite_entry#7 -> overwrite_entry#6
+FLOWS|REACHING_DEF[{source()}] scalar_entry#7 -> scalar_entry#11
+FLOWS|REACHING_DEF[{source()}] scalar_entry#7 -> scalar_entry#5
+FLOWS|REACHING_DEF[{source()}] scalar_entry#7 -> scalar_entry#6
