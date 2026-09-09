@@ -67,7 +67,13 @@ pins the behavior.
 - Joern-loadable binary export remains M6 work in `GOAL.md`; the segment/freeze
   APIs are the storage substrate for it.
 - Full CPGQL compatibility remains a compiler expansion task over `LogicalPlan`.
-- DDG-backed taint still depends on porting the byte-parity CFG/reaching-def code
-  from `joern-parity` into `cpg-analysis`; `SparseValueFlow` is the landing zone.
+- DDG-backed taint: the byte-parity `ReachingDefPass` (validated against the
+  `joern-parity` FLOWS oracle) is ported into `cpg-analysis/src/reaching_def.rs`
+  (1180 lines, reads Ast + Cfg, writes `EdgeKind::ReachingDef`). The REMAINING
+  gap is the INTEGRATION layer: wiring `SparseValueFlow` (the sparse DDG-backed
+  view in `cpg-analysis/src/value_flow.rs`) fully into `taint.rs` and the summary
+  store (`summaries.rs`), so interprocedural source→sink propagation uses DDG
+  reverse reachability rather than the current name-based summary lift. See
+  `PROGRESS.md` M7/Track B.
 - Dynamic-language precision remains frontend/rule-pack work; the relation and
   provenance APIs give those rule packs a place to materialize facts.
