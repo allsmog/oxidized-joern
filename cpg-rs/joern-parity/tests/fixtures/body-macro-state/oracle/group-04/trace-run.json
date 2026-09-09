@@ -1,0 +1,37 @@
+{
+  "command": [
+    "/Users/shayaunnejad/vibe-code/joern-oxidized/.local/astra-sprint/oracle/runtime/joern-cli/joern",
+    "--script",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/trace.sc",
+    "--param",
+    "inputPath=/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/input"
+  ],
+  "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/trace-workspace",
+  "javaHome": "/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home",
+  "scriptSha256": "5d14010b0bd3f743488cd93b8f979fe0ef2f27e3329028febafc6821d9031ad1",
+  "inputHashes": {
+    "conditional_before_redefine": {
+      "main.c": "e07f73cbeae1a555469263493c0e9f359a30e91339fb0dc39a74e8511d52329c"
+    },
+    "defined_before_redefine": {
+      "main.c": "835117fcd3b85fd5e093e004133dd3b374629075ca329acc855f82b13e88c593"
+    },
+    "intervening_nonmatching": {
+      "main.c": "9ed88d6cba6157e2fec4f097ec51852f14293c8afc2061d0dc56bc41daa4b9a7"
+    },
+    "ordinary_references_redefined": {
+      "main.c": "9069ed8acfdfb35a4d58f707dd7c18434a9c4a123dd60889c07ec74a4953419c"
+    },
+    "earlier_function_condition": {
+      "main.c": "2d57f01b02fc9943584451bf2b5b0589ec0575afb9e20868aeebcc6970bf3704"
+    }
+  },
+  "joernVersion": "4.0.555",
+  "archiveSha256": "12989883d6b5aeacc97b2dc0ecc4e2951bf50e48cb244f8c8f333d11a8be0c7e",
+  "timeoutSeconds": 180,
+  "pid": 74308,
+  "exitCode": 1,
+  "wallSeconds": 6.054842948913574,
+  "rawStdoutSha256": "c2d3cc76d51b7837bfb7166c32c55782a1d8dbb8675a680b80f04016362620f6",
+  "rawStderrSha256": "bd18d817b8dfb43fdc78b935f167fec308b044f4356be5c20038cc11c09df535"
+}

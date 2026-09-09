@@ -1,0 +1,11 @@
+--- Joern4.0.555
++++ /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-macro-state/candidate-v2/joern-parity
+@@ -94,7 +94,7 @@
+     METHOD_REF CODE=choose TYPE_FULL_NAME=choose METHOD_FULL_NAME=choose ORDER=1
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+ 
+-METHOD NAME=BAD CODE=#define BAD "a" unresolved "b" FULL_NAME=main.c:BAD:char*(0) SIGNATURE=char*(0) ORDER=1
++METHOD NAME=BAD CODE=#define BAD "fine" FULL_NAME=main.c:BAD:char*(0) SIGNATURE=char*(0) ORDER=1
+   BLOCK TYPE_FULL_NAME=ANY ORDER=1
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=char* ORDER=2
+ 

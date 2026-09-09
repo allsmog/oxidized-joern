@@ -1,0 +1,34 @@
+{
+  "command": [
+    "/Users/shayaunnejad/vibe-code/joern-oxidized/.local/astra-sprint/oracle/runtime/joern-cli/joern",
+    "--script",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/ninth-batch/translation-unit-metadata-control/oracle.sc",
+    "--param",
+    "inputPath=/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/ninth-batch/translation-unit-metadata-control/input"
+  ],
+  "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/ninth-batch/translation-unit-metadata-control/oracle-workspace",
+  "javaHome": "/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home",
+  "scriptSha256": "56431f14868678e64f9eb41026b44f1d3d7738404d28d2db62711b520c98c742",
+  "inputHashes": {
+    "duplicate_clinit_tag": {
+      "a.c": "2d336c1f8f11a904ebf5ff1581816548619a326835a89ea349687fca626445ab",
+      "b.c": "c406b50515fe961b3fe270eff57c6904c0669d5b804c049760f787240f8a2af2"
+    }
+  },
+  "joernVersion": "4.0.555",
+  "archiveSha256": "12989883d6b5aeacc97b2dc0ecc4e2951bf50e48cb244f8c8f333d11a8be0c7e",
+  "timeoutSeconds": 180,
+  "pid": 64314,
+  "exitCode": 0,
+  "wallSeconds": 6.0776379108428955,
+  "rawStdoutSha256": "eae4dab4458400723ecd94059bf0fc3245de0ef72bb54e8617959044c93dfa9e",
+  "rawStderrSha256": "58c51e9350e3e7d1cacc8cf754e1a04222029e1b80294686db011c735ca4bc5b",
+  "projects": [
+    {
+      "case": "duplicate_clinit_tag",
+      "canonicalLinesIncludingSeparators": 323,
+      "nonemptySelectedRecords": 313,
+      "expectedSha256": "79bc96282d7e9711dc1bfa8dd96044b3e1eb7e17f4f6cd0074c0ea990990b5b4"
+    }
+  ]
+}

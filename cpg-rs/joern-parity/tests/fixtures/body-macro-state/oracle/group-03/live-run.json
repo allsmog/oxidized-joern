@@ -1,0 +1,45 @@
+{
+  "command": [
+    "/Users/shayaunnejad/vibe-code/joern-oxidized/.local/astra-sprint/oracle/runtime/joern-cli/joern",
+    "--script",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-macro-state/boundaries/oracle.sc",
+    "--param",
+    "inputPath=/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-macro-state/boundaries/input"
+  ],
+  "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-macro-state/boundaries/oracle-workspace",
+  "exitCode": 0,
+  "seconds": 19.682848957978422,
+  "inputHashes": {
+    "spaced_inactive_typedef_shadow": {
+      "main.c": "ff065662e7b3d3524e461e0c77859b02492121ac1bf4cb68755edb4bd64644d4"
+    },
+    "header_entry_before_body": {
+      "main.c": "ba1ad7248e0bd6be16ba572e12927f542f152041acf2c84e652be5878f4b814d"
+    },
+    "local_macro_prototype": {
+      "main.c": "700b8962634c0371467c9600dcdadcd2778e85e1e48956d3e4d850f43a2c572e"
+    },
+    "body_macro_later_prototype": {
+      "main.c": "be6a3b9a6f39e874657c3f9e38bf6318a949dda3a44c523589b796514b0bdac2"
+    },
+    "local_conditional_prototype": {
+      "main.c": "720cd1f238c3e72973f1599f6d6c35bfff347d1ed5c039bf479d820effe83a59"
+    },
+    "include_multiple_effects": {
+      "api.h": "721d9a31abbf3d24dcaf8117c0b364b65f52d6be043670e0a82c3b8652fd4c8f",
+      "main.c": "4339c8184d9d6fd43d365855f93c62071edae105335bca47a1b97c8c158e9eb0"
+    },
+    "body_typedef_does_not_escape": {
+      "main.c": "277c7773c8ed445fc69ccfdfb27d0b1d5d820e32bcb51f7a1d57d8eaa26e24ac"
+    },
+    "body_include_macro_only": {
+      "api.h": "39c6a0ef8f0732115cce55a2ccc6edaa9f16cd4f0d45fb43ed5e4fe0b6849ee3",
+      "main.c": "18895073d0db98c33aa9c6aaa7924c07e99610f9efede43a31e34715d60319e5"
+    }
+  },
+  "scriptSha256": "56431f14868678e64f9eb41026b44f1d3d7738404d28d2db62711b520c98c742",
+  "joernVersion": "4.0.555",
+  "officialArchiveSha256": "12989883d6b5aeacc97b2dc0ecc4e2951bf50e48cb244f8c8f333d11a8be0c7e",
+  "rawStdoutSha256": "c9b5cf6e0c2337908b0b5111ca9a026c709d34b364aa807734c87acd46476e88",
+  "rawStderrSha256": "cbec2f1e3226c87719c4cfaa9ee676997e44a0a4bd1a3fc48fdb28ed8bba7174"
+}

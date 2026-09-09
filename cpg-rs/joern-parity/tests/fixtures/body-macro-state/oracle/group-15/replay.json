@@ -1,0 +1,116 @@
+{
+  "results": [
+    {
+      "variant": "accepted-eighth",
+      "case": "comma_tail",
+      "exact": false,
+      "expected": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/callee-rescan/input/comma_tail/expected.txt",
+        "sha256": "c8e83ccd4a48b387cc394e9794061087bff5a414b324318921c103a044b98745",
+        "bytes": 8234
+      },
+      "actual": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/callee-rescan/accepted-eighth/comma_tail/stdout",
+        "sha256": "2baec41957eb92c0e3fc2b5f362b171d8d936a27e0b9f4dcf343e6038cc40a58",
+        "bytes": 8700
+      },
+      "diff": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/callee-rescan/accepted-eighth/comma_tail/complete.diff",
+        "sha256": "998f1ee58738f826a5ab3da13786c1e1ef8a6125e457d130cc207cc70e068791",
+        "bytes": 8452
+      },
+      "run": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/callee-rescan/accepted-eighth/comma_tail/run.json",
+        "sha256": "43b55ea15aa70226f4c76c027b409ddcb587a843c78b7edde8f8188d7fdc3079",
+        "bytes": 1169
+      }
+    },
+    {
+      "variant": "accepted-eighth",
+      "case": "parenthesized_tail",
+      "exact": false,
+      "expected": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/callee-rescan/input/parenthesized_tail/expected.txt",
+        "sha256": "01335de35e1395493cfca666f4746a0cfe5a321be7603d2e70f31943a2d7e636",
+        "bytes": 9419
+      },
+      "actual": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/callee-rescan/accepted-eighth/parenthesized_tail/stdout",
+        "sha256": "2baec41957eb92c0e3fc2b5f362b171d8d936a27e0b9f4dcf343e6038cc40a58",
+        "bytes": 8700
+      },
+      "diff": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/callee-rescan/accepted-eighth/parenthesized_tail/complete.diff",
+        "sha256": "2a5525a8e8456ebb141b302cb5114c1c2113b3f337acdf788bc02f18df5dc980",
+        "bytes": 8124
+      },
+      "run": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/callee-rescan/accepted-eighth/parenthesized_tail/run.json",
+        "sha256": "c215f052aa34accec797e99122a80ab9ab495400cd116e1e28a5ff8c5c193472",
+        "bytes": 1200
+      }
+    },
+    {
+      "variant": "held-v4",
+      "case": "comma_tail",
+      "exact": false,
+      "expected": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/callee-rescan/input/comma_tail/expected.txt",
+        "sha256": "c8e83ccd4a48b387cc394e9794061087bff5a414b324318921c103a044b98745",
+        "bytes": 8234
+      },
+      "actual": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/callee-rescan/held-v4/comma_tail/stdout",
+        "sha256": "2baec41957eb92c0e3fc2b5f362b171d8d936a27e0b9f4dcf343e6038cc40a58",
+        "bytes": 8700
+      },
+      "diff": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/callee-rescan/held-v4/comma_tail/complete.diff",
+        "sha256": "6ad0aa6e01ec3423ce72edd8f9aebe8c76622c8004ab5f10e0dd303505c1525b",
+        "bytes": 8444
+      },
+      "run": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/callee-rescan/held-v4/comma_tail/run.json",
+        "sha256": "897f0ae3780e8ea86a6b7f1b0e7d48561d790c7e131c36a99a0483c04c8a09b4",
+        "bytes": 1131
+      }
+    },
+    {
+      "variant": "held-v4",
+      "case": "parenthesized_tail",
+      "exact": false,
+      "expected": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/callee-rescan/input/parenthesized_tail/expected.txt",
+        "sha256": "01335de35e1395493cfca666f4746a0cfe5a321be7603d2e70f31943a2d7e636",
+        "bytes": 9419
+      },
+      "actual": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/callee-rescan/held-v4/parenthesized_tail/stdout",
+        "sha256": "2baec41957eb92c0e3fc2b5f362b171d8d936a27e0b9f4dcf343e6038cc40a58",
+        "bytes": 8700
+      },
+      "diff": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/callee-rescan/held-v4/parenthesized_tail/complete.diff",
+        "sha256": "be5295a219f22a84b314d3e211e61302bebd63580a00201cbb8bc2168304a364",
+        "bytes": 8116
+      },
+      "run": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/callee-rescan/held-v4/parenthesized_tail/run.json",
+        "sha256": "fea32001c9c8bf9c89101709a6fe0661d28775705edc3d71044bd8a236032d7a",
+        "bytes": 1163
+      }
+    }
+  ],
+  "oracleRun": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/callee-rescan/oracle-workspace/run.json",
+    "sha256": "e6264de5897a3cf22079587f1e4f98d7d30c4c32642b3c9c957e74b6b9d4df7c",
+    "bytes": 1261
+  },
+  "traceRun": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/callee-rescan/trace/run.json",
+    "sha256": "877f68938eb0e815892538b25a9c31823ba8cb0a0efb75f0ac4a74132b3bc134",
+    "bytes": 26386
+  },
+  "sourceUnchanged": "35dd9430be3309294dc84aa7e76796f9997c4ff0845a2f56013aa3e01513b096",
+  "binaryUnchanged": "5584f11047e1358ef7645386cfe79244787cd5cd9e942645e38e2540f7304673"
+}

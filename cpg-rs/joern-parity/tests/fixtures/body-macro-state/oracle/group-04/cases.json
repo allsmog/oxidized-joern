@@ -1,0 +1,17 @@
+{
+  "conditional_before_redefine": {
+    "main.c": "#define PICK 1\nint choose(void) {\n#if PICK == 1\n#undef PICK\n#define PICK 2\n#endif\n return PICK;\n}\n"
+  },
+  "defined_before_redefine": {
+    "main.c": "#define PICK 1\nint choose(void) {\n#if defined(PICK)\n#undef PICK\n#define PICK 2\n#endif\n return PICK;\n}\n"
+  },
+  "intervening_nonmatching": {
+    "main.c": "#define PICK 1\n#define OTHER 8\nint choose(void) {\n#if PICK == 1\n#undef PICK\n#define PICK 2\n#endif\n int x = OTHER;\n return PICK + x;\n}\n"
+  },
+  "ordinary_references_redefined": {
+    "main.c": "#define PICK 1\nint choose(void) {\n int first = PICK;\n#undef PICK\n#define PICK 2\n return first + PICK;\n}\n"
+  },
+  "earlier_function_condition": {
+    "main.c": "#define PICK 1\nint earlier(void) {\n#if PICK == 1\n#undef PICK\n#define PICK 2\n#endif\n return 0;\n}\nint later(void) { return PICK; }\n"
+  }
+}

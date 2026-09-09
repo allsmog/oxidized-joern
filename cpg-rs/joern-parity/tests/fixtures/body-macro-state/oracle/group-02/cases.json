@@ -1,0 +1,24 @@
+{
+  "recovery_entry_macros": {
+    "main.c": "#define BAD \"a\" unresolved \"b\"\n#define VALUE 3\nint consume(const char *, int);\nint choose(void) {\n int result = consume(BAD, VALUE);\n return result + VALUE;\n}\n"
+  },
+  "recovery_after_redefinition": {
+    "main.c": "#define BAD \"ok\"\n#define VALUE 2\nint consume(const char *, int);\nint choose(void) {\n#undef BAD\n#define BAD \"a\" unresolved \"b\"\n#undef VALUE\n#define VALUE 4\n int first = consume(BAD, VALUE);\n#undef BAD\n#define BAD \"fine\"\n int second = consume(BAD, VALUE);\n return first + second + VALUE;\n}\n"
+  },
+  "nested_copied_arguments": {
+    "main.c": "#define VALUE 2\n#define TWICE(x) ((x) + (x))\nint choose(int value) {\n int first = TWICE(VALUE + value);\n#undef VALUE\n#define VALUE 7\n return first + TWICE(VALUE + value);\n}\n"
+  },
+  "block_macro_typedef_separation": {
+    "main.c": "typedef long T;\nint choose(int value) {\n {\n#define WORD int\n typedef WORD T;\n T inner = value;\n value = inner;\n }\n return (T)(value);\n}\nWORD later(WORD value) { return value; }\n"
+  },
+  "header_after_body_undef": {
+    "api.h": "#if MODE == 3\n#define RESULT 9\n#else\n#define RESULT 1\n#endif\n#undef MODE\n#define MODE 8\n",
+    "main.c": "#define MODE 1\nint before(void) { return MODE; }\nvoid prepare(void) {\n#undef MODE\n#define MODE 3\n}\n#include \"api.h\"\nint after(void) { return RESULT + MODE; }\n"
+  },
+  "runtime_arms_lexical_order": {
+    "main.c": "#define VALUE 1\nint choose(int condition) {\n if (condition) {\n#undef VALUE\n#define VALUE 2\n } else {\n#undef VALUE\n#define VALUE 3\n }\n return VALUE;\n}\nint later(void) { return VALUE; }\n"
+  },
+  "branch_condition_entry_state": {
+    "main.c": "#define PICK 1\nint choose(void) {\n#if PICK == 1\n#undef PICK\n#define PICK 2\n#elif PICK == 2\n#define WRONG 1\n#else\n#undef PICK\n#define PICK 9\n#endif\n#if defined(WRONG)\n return 0;\n#else\n return PICK;\n#endif\n}\nint later(void) { return PICK; }\n"
+  }
+}

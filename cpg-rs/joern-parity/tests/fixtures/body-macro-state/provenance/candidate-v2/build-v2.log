@@ -1,0 +1,12 @@
+   Compiling cpg-lang-c v0.1.1 (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/cpg-rs/cpg-lang-c)
+warning: function `predefined_c_values` is never used
+   --> cpg-lang-c/src/exact.rs:976:4
+    |
+976 | fn predefined_c_values() -> HashMap<String, String> {
+    |    ^^^^^^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: `cpg-lang-c` (lib) generated 1 warning
+   Compiling joern-parity v0.1.1 (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/cpg-rs/joern-parity)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 2.25s

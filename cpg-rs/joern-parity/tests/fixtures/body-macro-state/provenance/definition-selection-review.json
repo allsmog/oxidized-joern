@@ -1,0 +1,1114 @@
+{
+  "status": "REQUIRES_METADATA_SELECTION_REPAIR",
+  "scope": "Independent read-only macro METHOD definition-ownership diagnosis on frozen v1/v2; no full source acceptance, no whole-project producers or Rust builds.",
+  "candidateV1": {
+    "exact.rs": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-macro-state/candidate-v1/exact.rs",
+      "sha256": "6a35ffa8bd1f0320bc640bd2e0137878d343c3eb0efd1b4a1d6663f9a7ad8f35"
+    },
+    "joern-parity": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-macro-state/candidate-v1/joern-parity",
+      "sha256": "a7c93bd42e858ef7f6384c1fc4db5755840bf090065a3f8348256c878dceb0ed"
+    }
+  },
+  "candidateV2": {
+    "exact.rs": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-macro-state/candidate-v2/exact.rs",
+      "sha256": "a660a1117dd523ee85a5b27fe14e0906631e58d559c083bcffd87c34447d90a9"
+    },
+    "joern-parity": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-macro-state/candidate-v2/joern-parity",
+      "sha256": "c4f2259b2b3d7860873948c55282e1a770a99dfd98fc3ea1affdb3f99d9c42a9"
+    }
+  },
+  "groups": [
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review",
+      "liveRun": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/live-run.json",
+        "sha256": "82768079dd02717200539ad3224e4cd9cadab44bea1677fd3a6e9c389b7f1f40"
+      },
+      "raw": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/live.stdout",
+        "sha256": "552a15da2b75709e4bcb5a2110c0273098f5ce0d4df222d72da2e0e8e86b863a"
+      },
+      "oracle": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/oracle.sc",
+        "sha256": "56431f14868678e64f9eb41026b44f1d3d7738404d28d2db62711b520c98c742"
+      },
+      "beforeReplay": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/baseline-eighth/replay.json",
+        "sha256": "7cd81d797416f76113567b08a386b9fddda74119996725b63238799440a1173d"
+      },
+      "currentReplay": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/candidate-v2/replay.json",
+        "sha256": "816f94635be701d2734b18ec66dae55c1007ed49e3162b091a80ab51a6badd76"
+      },
+      "baselineExact": 0,
+      "candidateExact": 3,
+      "rows": [
+        {
+          "case": "conditional_before_redefine",
+          "inputs": {
+            "main.c": {
+              "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/input/conditional_before_redefine/main.c",
+              "sha256": "e07f73cbeae1a555469263493c0e9f359a30e91339fb0dc39a74e8511d52329c"
+            }
+          },
+          "expected": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/input/conditional_before_redefine/expected.txt",
+            "sha256": "0df887fb62b4c432e3e15efcd8e718bf1e82c75842868e5ac9861d2740e2560f"
+          },
+          "before": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/baseline-eighth/conditional_before_redefine/actual.txt",
+            "sha256": "ca4803789b74d26f7efb59de011e57e486421a3bd8a77cfbe60ec3716b4709e8"
+          },
+          "current": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/candidate-v2/conditional_before_redefine/actual.txt",
+            "sha256": "c002a08b47ef29f558a97542acfbd456b3295d87e43fa9b91d6fcf7b3c9768f9"
+          },
+          "completeDifference": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/candidate-v2/conditional_before_redefine/complete.diff",
+            "sha256": "f0f7a165c20b7b48fcbdab030dd0afbfe10262db242948de19610c725c70a5db"
+          },
+          "canonicalLinesIncludingSeparators": 122,
+          "nonemptySelectedRecords": 118,
+          "macroMethods": [
+            {
+              "fullName": "main.c:PICK:int(0)",
+              "liveMethod": [
+                "METHOD NAME=PICK CODE=#define PICK 1 FULL_NAME=main.c:PICK:int(0) SIGNATURE=int(0) ORDER=1",
+                "  BLOCK TYPE_FULL_NAME=ANY ORDER=1",
+                "  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=2"
+              ],
+              "baselineMethod": [
+                "METHOD NAME=PICK CODE=#define PICK 1 FULL_NAME=main.c:PICK:int(0) SIGNATURE=int(0) ORDER=1",
+                "  BLOCK TYPE_FULL_NAME=ANY ORDER=1",
+                "  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=2"
+              ],
+              "candidateMethod": [
+                "METHOD NAME=PICK CODE=#define PICK 2 FULL_NAME=main.c:PICK:int(0) SIGNATURE=int(0) ORDER=1",
+                "  BLOCK TYPE_FULL_NAME=ANY ORDER=1",
+                "  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=2"
+              ],
+              "introducedCorrectMethodRecordLoss": true
+            }
+          ]
+        },
+        {
+          "case": "defined_before_redefine",
+          "inputs": {
+            "main.c": {
+              "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/input/defined_before_redefine/main.c",
+              "sha256": "835117fcd3b85fd5e093e004133dd3b374629075ca329acc855f82b13e88c593"
+            }
+          },
+          "expected": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/input/defined_before_redefine/expected.txt",
+            "sha256": "07eb7586f6344a23f9802efe413dbf893f1c74b4c7123e80d9ad3d1bef58445d"
+          },
+          "before": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/baseline-eighth/defined_before_redefine/actual.txt",
+            "sha256": "15fb07e360f03b762ce31838ae77d5035d8db8c2cdb9477bc4a4e66064c76843"
+          },
+          "current": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/candidate-v2/defined_before_redefine/actual.txt",
+            "sha256": "07eb7586f6344a23f9802efe413dbf893f1c74b4c7123e80d9ad3d1bef58445d"
+          },
+          "completeDifference": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/candidate-v2/defined_before_redefine/complete.diff",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "canonicalLinesIncludingSeparators": 122,
+          "nonemptySelectedRecords": 118,
+          "macroMethods": [
+            {
+              "fullName": "main.c:PICK:int(0)",
+              "liveMethod": [
+                "METHOD NAME=PICK CODE=#define PICK 2 FULL_NAME=main.c:PICK:int(0) SIGNATURE=int(0) ORDER=1",
+                "  BLOCK TYPE_FULL_NAME=ANY ORDER=1",
+                "  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=2"
+              ],
+              "baselineMethod": [
+                "METHOD NAME=PICK CODE=#define PICK 1 FULL_NAME=main.c:PICK:int(0) SIGNATURE=int(0) ORDER=1",
+                "  BLOCK TYPE_FULL_NAME=ANY ORDER=1",
+                "  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=2"
+              ],
+              "candidateMethod": [
+                "METHOD NAME=PICK CODE=#define PICK 2 FULL_NAME=main.c:PICK:int(0) SIGNATURE=int(0) ORDER=1",
+                "  BLOCK TYPE_FULL_NAME=ANY ORDER=1",
+                "  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=2"
+              ],
+              "introducedCorrectMethodRecordLoss": false
+            }
+          ]
+        },
+        {
+          "case": "intervening_nonmatching",
+          "inputs": {
+            "main.c": {
+              "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/input/intervening_nonmatching/main.c",
+              "sha256": "9ed88d6cba6157e2fec4f097ec51852f14293c8afc2061d0dc56bc41daa4b9a7"
+            }
+          },
+          "expected": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/input/intervening_nonmatching/expected.txt",
+            "sha256": "b2939ecd5039b3c6bc81aafa32fe0a37bace6164a749cfd10e417dff1e01f6ae"
+          },
+          "before": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/baseline-eighth/intervening_nonmatching/actual.txt",
+            "sha256": "7489345054f7a05b0d39540c5c44cb7f8a6875354afa5db38ed94f7d48487451"
+          },
+          "current": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/candidate-v2/intervening_nonmatching/actual.txt",
+            "sha256": "b2939ecd5039b3c6bc81aafa32fe0a37bace6164a749cfd10e417dff1e01f6ae"
+          },
+          "completeDifference": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/candidate-v2/intervening_nonmatching/complete.diff",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "canonicalLinesIncludingSeparators": 240,
+          "nonemptySelectedRecords": 233,
+          "macroMethods": [
+            {
+              "fullName": "main.c:OTHER:int(0)",
+              "liveMethod": [
+                "METHOD NAME=OTHER CODE=#define OTHER 8 FULL_NAME=main.c:OTHER:int(0) SIGNATURE=int(0) ORDER=1",
+                "  BLOCK TYPE_FULL_NAME=ANY ORDER=1",
+                "  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=2"
+              ],
+              "baselineMethod": [
+                "METHOD NAME=OTHER CODE=#define OTHER 8 FULL_NAME=main.c:OTHER:int(0) SIGNATURE=int(0) ORDER=1",
+                "  BLOCK TYPE_FULL_NAME=ANY ORDER=1",
+                "  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=2"
+              ],
+              "candidateMethod": [
+                "METHOD NAME=OTHER CODE=#define OTHER 8 FULL_NAME=main.c:OTHER:int(0) SIGNATURE=int(0) ORDER=1",
+                "  BLOCK TYPE_FULL_NAME=ANY ORDER=1",
+                "  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=2"
+              ],
+              "introducedCorrectMethodRecordLoss": false
+            },
+            {
+              "fullName": "main.c:PICK:int(0)",
+              "liveMethod": [
+                "METHOD NAME=PICK CODE=#define PICK 2 FULL_NAME=main.c:PICK:int(0) SIGNATURE=int(0) ORDER=1",
+                "  BLOCK TYPE_FULL_NAME=ANY ORDER=1",
+                "  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=2"
+              ],
+              "baselineMethod": [
+                "METHOD NAME=PICK CODE=#define PICK 1 FULL_NAME=main.c:PICK:int(0) SIGNATURE=int(0) ORDER=1",
+                "  BLOCK TYPE_FULL_NAME=ANY ORDER=1",
+                "  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=2"
+              ],
+              "candidateMethod": [
+                "METHOD NAME=PICK CODE=#define PICK 2 FULL_NAME=main.c:PICK:int(0) SIGNATURE=int(0) ORDER=1",
+                "  BLOCK TYPE_FULL_NAME=ANY ORDER=1",
+                "  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=2"
+              ],
+              "introducedCorrectMethodRecordLoss": false
+            }
+          ]
+        },
+        {
+          "case": "ordinary_references_redefined",
+          "inputs": {
+            "main.c": {
+              "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/input/ordinary_references_redefined/main.c",
+              "sha256": "9069ed8acfdfb35a4d58f707dd7c18434a9c4a123dd60889c07ec74a4953419c"
+            }
+          },
+          "expected": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/input/ordinary_references_redefined/expected.txt",
+            "sha256": "509bb76175f00639afde249067794280377dd3cef729a78b84f164065c5123c8"
+          },
+          "before": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/baseline-eighth/ordinary_references_redefined/actual.txt",
+            "sha256": "bcca9259e429b0e391cd755f0053fdd9f89c2c473003c78a6308e0dcfe0ea446"
+          },
+          "current": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/candidate-v2/ordinary_references_redefined/actual.txt",
+            "sha256": "509bb76175f00639afde249067794280377dd3cef729a78b84f164065c5123c8"
+          },
+          "completeDifference": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/candidate-v2/ordinary_references_redefined/complete.diff",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "canonicalLinesIncludingSeparators": 229,
+          "nonemptySelectedRecords": 223,
+          "macroMethods": [
+            {
+              "fullName": "main.c:PICK:int(0)",
+              "liveMethod": [
+                "METHOD NAME=PICK CODE=#define PICK 1 FULL_NAME=main.c:PICK:int(0) SIGNATURE=int(0) ORDER=1",
+                "  BLOCK TYPE_FULL_NAME=ANY ORDER=1",
+                "  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=2"
+              ],
+              "baselineMethod": [
+                "METHOD NAME=PICK CODE=#define PICK 1 FULL_NAME=main.c:PICK:int(0) SIGNATURE=int(0) ORDER=1",
+                "  BLOCK TYPE_FULL_NAME=ANY ORDER=1",
+                "  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=2"
+              ],
+              "candidateMethod": [
+                "METHOD NAME=PICK CODE=#define PICK 1 FULL_NAME=main.c:PICK:int(0) SIGNATURE=int(0) ORDER=1",
+                "  BLOCK TYPE_FULL_NAME=ANY ORDER=1",
+                "  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=2"
+              ],
+              "introducedCorrectMethodRecordLoss": false
+            }
+          ]
+        },
+        {
+          "case": "earlier_function_condition",
+          "inputs": {
+            "main.c": {
+              "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/input/earlier_function_condition/main.c",
+              "sha256": "2d57f01b02fc9943584451bf2b5b0589ec0575afb9e20868aeebcc6970bf3704"
+            }
+          },
+          "expected": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/input/earlier_function_condition/expected.txt",
+            "sha256": "72189103d915cb0206682e1607de14b3e2c03068f4314b62310e2814e8d80bea"
+          },
+          "before": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/baseline-eighth/earlier_function_condition/actual.txt",
+            "sha256": "cc8a2ef77dd544a38eebacde58d9726939ca54a9828cecbc3d6186476637f86f"
+          },
+          "current": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/candidate-v2/earlier_function_condition/actual.txt",
+            "sha256": "3b1487a4900838078d79ae45edc47d12f938d3352051a20cf0628588f7c0e795"
+          },
+          "completeDifference": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/candidate-v2/earlier_function_condition/complete.diff",
+            "sha256": "26bd34ab6cb3066a2294885291a1a0c30b5c1b219013e524d8eb3f28a7246024"
+          },
+          "canonicalLinesIncludingSeparators": 170,
+          "nonemptySelectedRecords": 165,
+          "macroMethods": [
+            {
+              "fullName": "main.c:PICK:int(0)",
+              "liveMethod": [
+                "METHOD NAME=PICK CODE=#define PICK 1 FULL_NAME=main.c:PICK:int(0) SIGNATURE=int(0) ORDER=1",
+                "  BLOCK TYPE_FULL_NAME=ANY ORDER=1",
+                "  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=2"
+              ],
+              "baselineMethod": [
+                "METHOD NAME=PICK CODE=#define PICK 1 FULL_NAME=main.c:PICK:int(0) SIGNATURE=int(0) ORDER=1",
+                "  BLOCK TYPE_FULL_NAME=ANY ORDER=1",
+                "  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=2"
+              ],
+              "candidateMethod": [
+                "METHOD NAME=PICK CODE=#define PICK 2 FULL_NAME=main.c:PICK:int(0) SIGNATURE=int(0) ORDER=1",
+                "  BLOCK TYPE_FULL_NAME=ANY ORDER=1",
+                "  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=2"
+              ],
+              "introducedCorrectMethodRecordLoss": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/ownership-boundaries",
+      "liveRun": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/ownership-boundaries/live-run.json",
+        "sha256": "a32b866b7e70c1a851a1840960d3b6e79d11052973c352df39dab96d3d8519a5"
+      },
+      "raw": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/ownership-boundaries/live.stdout",
+        "sha256": "ff9879f95eaf881f5a538e7a196696b87a6c175636eba8461353aa04f9df618a"
+      },
+      "oracle": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/ownership-boundaries/oracle.sc",
+        "sha256": "56431f14868678e64f9eb41026b44f1d3d7738404d28d2db62711b520c98c742"
+      },
+      "beforeReplay": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/ownership-boundaries/baseline-eighth/replay.json",
+        "sha256": "9e4f50501873cc0d3e5108379adbe58b4b39ac2982ccd7d61353ea947c585a63"
+      },
+      "currentReplay": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/ownership-boundaries/candidate-v2/replay.json",
+        "sha256": "9a65c58f822e8bb0ef181cbaa94bc159bb678830cd36f9d1d0e7f44d63990284"
+      },
+      "baselineExact": 0,
+      "candidateExact": 0,
+      "rows": [
+        {
+          "case": "file_level_condition",
+          "inputs": {
+            "main.c": {
+              "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/ownership-boundaries/input/file_level_condition/main.c",
+              "sha256": "03d946c2a14a8503b54d594720ce273cec82fe33cdc56a131c9c08932b06559b"
+            }
+          },
+          "expected": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/ownership-boundaries/input/file_level_condition/expected.txt",
+            "sha256": "b465f24684bda7cc39bb63fe50ec819014fa6c018efc044751c881aea4b9bba0"
+          },
+          "before": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/ownership-boundaries/baseline-eighth/file_level_condition/actual.txt",
+            "sha256": "17d1c7b372e92c8617bddaf8dcaedf3757dd26c22c88c638d8c76f7b6f430af8"
+          },
+          "current": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/ownership-boundaries/candidate-v2/file_level_condition/actual.txt",
+            "sha256": "17d1c7b372e92c8617bddaf8dcaedf3757dd26c22c88c638d8c76f7b6f430af8"
+          },
+          "completeDifference": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/ownership-boundaries/candidate-v2/file_level_condition/complete.diff",
+            "sha256": "f0f7a165c20b7b48fcbdab030dd0afbfe10262db242948de19610c725c70a5db"
+          },
+          "canonicalLinesIncludingSeparators": 122,
+          "nonemptySelectedRecords": 118,
+          "macroMethods": [
+            {
+              "fullName": "main.c:PICK:int(0)",
+              "liveMethod": [
+                "METHOD NAME=PICK CODE=#define PICK 1 FULL_NAME=main.c:PICK:int(0) SIGNATURE=int(0) ORDER=1",
+                "  BLOCK TYPE_FULL_NAME=ANY ORDER=1",
+                "  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=2"
+              ],
+              "baselineMethod": [
+                "METHOD NAME=PICK CODE=#define PICK 2 FULL_NAME=main.c:PICK:int(0) SIGNATURE=int(0) ORDER=1",
+                "  BLOCK TYPE_FULL_NAME=ANY ORDER=1",
+                "  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=2"
+              ],
+              "candidateMethod": [
+                "METHOD NAME=PICK CODE=#define PICK 2 FULL_NAME=main.c:PICK:int(0) SIGNATURE=int(0) ORDER=1",
+                "  BLOCK TYPE_FULL_NAME=ANY ORDER=1",
+                "  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=2"
+              ],
+              "introducedCorrectMethodRecordLoss": false
+            }
+          ]
+        },
+        {
+          "case": "header_redefined",
+          "inputs": {
+            "main.c": {
+              "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/ownership-boundaries/input/header_redefined/main.c",
+              "sha256": "ab95184ab8d1acda54f313e09a82deef305d035c19e72c3d27e7d9aae87e27fe"
+            },
+            "api.h": {
+              "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/ownership-boundaries/input/header_redefined/api.h",
+              "sha256": "9313885ae7f29e87c31882a352bfe60f303796aedbb0a3b40ef6dc64037c8dc3"
+            }
+          },
+          "expected": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/ownership-boundaries/input/header_redefined/expected.txt",
+            "sha256": "4bb2816e3084d19794a21910406539088b23ece3031ee369623b9f77af0b4685"
+          },
+          "before": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/ownership-boundaries/baseline-eighth/header_redefined/actual.txt",
+            "sha256": "e8e85bb7b10d950c707f6eecf1d360a9518059d2da718b615aceb07ea4ac1ae6"
+          },
+          "current": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/ownership-boundaries/candidate-v2/header_redefined/actual.txt",
+            "sha256": "e8e85bb7b10d950c707f6eecf1d360a9518059d2da718b615aceb07ea4ac1ae6"
+          },
+          "completeDifference": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/ownership-boundaries/candidate-v2/header_redefined/complete.diff",
+            "sha256": "6878c54b80ee30a3ab6bbf2576c56937675493c0f7d590e6ef5132e83d2e210b"
+          },
+          "canonicalLinesIncludingSeparators": 139,
+          "nonemptySelectedRecords": 134,
+          "macroMethods": [
+            {
+              "fullName": "main.c:PICK:int(0)",
+              "liveMethod": [
+                "METHOD NAME=PICK CODE=#define PICK 1 FULL_NAME=main.c:PICK:int(0) SIGNATURE=int(0) ORDER=1",
+                "  BLOCK TYPE_FULL_NAME=ANY ORDER=1",
+                "  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=2"
+              ],
+              "baselineMethod": null,
+              "candidateMethod": null,
+              "introducedCorrectMethodRecordLoss": false
+            }
+          ]
+        },
+        {
+          "case": "formal_list_redefined",
+          "inputs": {
+            "main.c": {
+              "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/ownership-boundaries/input/formal_list_redefined/main.c",
+              "sha256": "4caee4b582d5655504d78e9028080324fb3cc42961a5f71288ac02fc1608f2ca"
+            }
+          },
+          "expected": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/ownership-boundaries/input/formal_list_redefined/expected.txt",
+            "sha256": "97240d96ac9bf156a6af5d99adb89f479546e6d5bdd261fa4c66ac26fa33f273"
+          },
+          "before": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/ownership-boundaries/baseline-eighth/formal_list_redefined/actual.txt",
+            "sha256": "68b144759e4c61e575073c94926e64d98d595b80d25f32df51f0d885974d4ea9"
+          },
+          "current": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/ownership-boundaries/candidate-v2/formal_list_redefined/actual.txt",
+            "sha256": "68b144759e4c61e575073c94926e64d98d595b80d25f32df51f0d885974d4ea9"
+          },
+          "completeDifference": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/ownership-boundaries/candidate-v2/formal_list_redefined/complete.diff",
+            "sha256": "cbc93cd417e250ad5f4ad44ec3397297a82dee0902db80cd60f01ff45ce21b44"
+          },
+          "canonicalLinesIncludingSeparators": 201,
+          "nonemptySelectedRecords": 196,
+          "macroMethods": [
+            {
+              "fullName": "main.c:PICK:ANY(2)",
+              "liveMethod": [
+                "METHOD NAME=PICK CODE=#define PICK(x) (x) FULL_NAME=main.c:PICK:ANY(2) SIGNATURE=ANY(2) ORDER=1",
+                "  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1",
+                "  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1",
+                "  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2",
+                "  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2",
+                "  BLOCK TYPE_FULL_NAME=ANY ORDER=3",
+                "  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=4"
+              ],
+              "baselineMethod": null,
+              "candidateMethod": null,
+              "introducedCorrectMethodRecordLoss": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/nested-events",
+      "liveRun": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/nested-events/live-run.json",
+        "sha256": "dbc6ed7e88dc22d4756e17c4029d0295f2ecf8491efc63a391dc00b862a2d615"
+      },
+      "raw": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/nested-events/live.stdout",
+        "sha256": "7c912e0cf03701003de87d6359e3ffe0827d140914fa6bebfd44b05fb2ff7a13"
+      },
+      "oracle": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/nested-events/oracle.sc",
+        "sha256": "56431f14868678e64f9eb41026b44f1d3d7738404d28d2db62711b520c98c742"
+      },
+      "beforeReplay": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/nested-events/baseline-eighth/replay.json",
+        "sha256": "6a2c91c93f002fc95ddd7b6a0eb436856eed5ac8672f9e7164cccf103f849893"
+      },
+      "currentReplay": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/nested-events/candidate-v2/replay.json",
+        "sha256": "0d769b8f5a957a36710024b7b225febc38baa741808d00326a62f7b354d00155"
+      },
+      "baselineExact": 1,
+      "candidateExact": 1,
+      "rows": [
+        {
+          "case": "outer_nested_body_argument",
+          "inputs": {
+            "main.c": {
+              "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/nested-events/input/outer_nested_body_argument/main.c",
+              "sha256": "c4988e7d4685323b2ff3b6435cad1f1f70507358b4cc842f775130a1314f6d39"
+            }
+          },
+          "expected": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/nested-events/input/outer_nested_body_argument/expected.txt",
+            "sha256": "361ada5d5c493cf3bd81d96541e693fedd249f641c162e6421265225b8a780cf"
+          },
+          "before": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/nested-events/baseline-eighth/outer_nested_body_argument/actual.txt",
+            "sha256": "361ada5d5c493cf3bd81d96541e693fedd249f641c162e6421265225b8a780cf"
+          },
+          "current": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/nested-events/candidate-v2/outer_nested_body_argument/actual.txt",
+            "sha256": "361ada5d5c493cf3bd81d96541e693fedd249f641c162e6421265225b8a780cf"
+          },
+          "completeDifference": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/nested-events/candidate-v2/outer_nested_body_argument/complete.diff",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "canonicalLinesIncludingSeparators": 171,
+          "nonemptySelectedRecords": 166,
+          "macroMethods": [
+            {
+              "fullName": "main.c:WRAP:ANY(1)",
+              "liveMethod": [
+                "METHOD NAME=WRAP CODE=#define WRAP(x) ((x)+INNER) FULL_NAME=main.c:WRAP:ANY(1) SIGNATURE=ANY(1) ORDER=1",
+                "  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1",
+                "  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1",
+                "  BLOCK TYPE_FULL_NAME=ANY ORDER=2",
+                "  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=3"
+              ],
+              "baselineMethod": [
+                "METHOD NAME=WRAP CODE=#define WRAP(x) ((x)+INNER) FULL_NAME=main.c:WRAP:ANY(1) SIGNATURE=ANY(1) ORDER=1",
+                "  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1",
+                "  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1",
+                "  BLOCK TYPE_FULL_NAME=ANY ORDER=2",
+                "  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=3"
+              ],
+              "candidateMethod": [
+                "METHOD NAME=WRAP CODE=#define WRAP(x) ((x)+INNER) FULL_NAME=main.c:WRAP:ANY(1) SIGNATURE=ANY(1) ORDER=1",
+                "  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1",
+                "  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1",
+                "  BLOCK TYPE_FULL_NAME=ANY ORDER=2",
+                "  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=3"
+              ],
+              "introducedCorrectMethodRecordLoss": false
+            }
+          ]
+        },
+        {
+          "case": "condition_function_and_defined",
+          "inputs": {
+            "main.c": {
+              "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/nested-events/input/condition_function_and_defined/main.c",
+              "sha256": "9827e85190391e9055b5eca6e355a04f49efb79161b1a712501fadcfa3ea0cdd"
+            }
+          },
+          "expected": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/nested-events/input/condition_function_and_defined/expected.txt",
+            "sha256": "61fc46aab4c42f9fd15bbecf15f1818cc9c9d5c06676182aa9dce2bcd8dbadc4"
+          },
+          "before": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/nested-events/baseline-eighth/condition_function_and_defined/actual.txt",
+            "sha256": "81f5d6f388bce67be273ea99d130314d92cb765379c5900d6e0922e337f7b98d"
+          },
+          "current": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/nested-events/candidate-v2/condition_function_and_defined/actual.txt",
+            "sha256": "81f5d6f388bce67be273ea99d130314d92cb765379c5900d6e0922e337f7b98d"
+          },
+          "completeDifference": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/nested-events/candidate-v2/condition_function_and_defined/complete.diff",
+            "sha256": "3399b4f3a64b6e76edf3c353510696549df7ae7e171fc251440c2703086edd88"
+          },
+          "canonicalLinesIncludingSeparators": 178,
+          "nonemptySelectedRecords": 173,
+          "macroMethods": [
+            {
+              "fullName": "main.c:PICK:ANY(1)",
+              "liveMethod": [
+                "METHOD NAME=PICK CODE=#define PICK(x) (x) FULL_NAME=main.c:PICK:ANY(1) SIGNATURE=ANY(1) ORDER=1",
+                "  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1",
+                "  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1",
+                "  BLOCK TYPE_FULL_NAME=ANY ORDER=2",
+                "  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=3"
+              ],
+              "baselineMethod": [
+                "METHOD NAME=PICK CODE=#define PICK(x) (x) FULL_NAME=main.c:PICK:ANY(1) SIGNATURE=ANY(1) ORDER=1",
+                "  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1",
+                "  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1",
+                "  BLOCK TYPE_FULL_NAME=ANY ORDER=2",
+                "  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=3"
+              ],
+              "candidateMethod": [
+                "METHOD NAME=PICK CODE=#define PICK(x) (x) FULL_NAME=main.c:PICK:ANY(1) SIGNATURE=ANY(1) ORDER=1",
+                "  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1",
+                "  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1",
+                "  BLOCK TYPE_FULL_NAME=ANY ORDER=2",
+                "  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=3"
+              ],
+              "introducedCorrectMethodRecordLoss": false
+            }
+          ]
+        },
+        {
+          "case": "inactive_and_shortcircuit",
+          "inputs": {
+            "main.c": {
+              "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/nested-events/input/inactive_and_shortcircuit/main.c",
+              "sha256": "2b39d8200bae3c4c6b56516868c5ce84576a203fc27da949fe2b42e4227e1df5"
+            }
+          },
+          "expected": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/nested-events/input/inactive_and_shortcircuit/expected.txt",
+            "sha256": "7d9827e44eba416ae6038388c7abc8b74720b33bd5c189578233eeb10762b0c0"
+          },
+          "before": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/nested-events/baseline-eighth/inactive_and_shortcircuit/actual.txt",
+            "sha256": "e25cdcd2af8aed9df0c724ef7f6bfbb0b5fca11d0838b08c7751e501010c251c"
+          },
+          "current": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/nested-events/candidate-v2/inactive_and_shortcircuit/actual.txt",
+            "sha256": "e25cdcd2af8aed9df0c724ef7f6bfbb0b5fca11d0838b08c7751e501010c251c"
+          },
+          "completeDifference": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/nested-events/candidate-v2/inactive_and_shortcircuit/complete.diff",
+            "sha256": "74aa689d765c69cca2b3ef41d6983b5c7d5da395a21bc36b5990059c6849ba24"
+          },
+          "canonicalLinesIncludingSeparators": 122,
+          "nonemptySelectedRecords": 118,
+          "macroMethods": [
+            {
+              "fullName": "main.c:FLAG:int(0)",
+              "liveMethod": [
+                "METHOD NAME=FLAG CODE=#define FLAG 1 FULL_NAME=main.c:FLAG:int(0) SIGNATURE=int(0) ORDER=1",
+                "  BLOCK TYPE_FULL_NAME=ANY ORDER=1",
+                "  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=2"
+              ],
+              "baselineMethod": [
+                "METHOD NAME=FLAG CODE=#define FLAG 2 FULL_NAME=main.c:FLAG:int(0) SIGNATURE=int(0) ORDER=1",
+                "  BLOCK TYPE_FULL_NAME=ANY ORDER=1",
+                "  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=2"
+              ],
+              "candidateMethod": [
+                "METHOD NAME=FLAG CODE=#define FLAG 2 FULL_NAME=main.c:FLAG:int(0) SIGNATURE=int(0) ORDER=1",
+                "  BLOCK TYPE_FULL_NAME=ANY ORDER=1",
+                "  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=2"
+              ],
+              "introducedCorrectMethodRecordLoss": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/arity-order",
+      "liveRun": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/arity-order/live-run.json",
+        "sha256": "618d9bada99efd6b365ab511798d0cd40d990d20fd8a79ff7491313627c829ac"
+      },
+      "raw": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/arity-order/live.stdout",
+        "sha256": "2f6dd34cd4310adedaaab7add7c957d8f747c2f87de9a5fef3ac88acac558f4e"
+      },
+      "oracle": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/arity-order/oracle.sc",
+        "sha256": "56431f14868678e64f9eb41026b44f1d3d7738404d28d2db62711b520c98c742"
+      },
+      "beforeReplay": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/arity-order/baseline-eighth/replay.json",
+        "sha256": "f38a48169e7460dde5d726e8a547a15954c56e8dd87039372a469df0d3489e98"
+      },
+      "currentReplay": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/arity-order/candidate-v2/replay.json",
+        "sha256": "2678768a6ad7e67cd696724705f922b275013b5cac2c258ac93d172f7796e39a"
+      },
+      "baselineExact": 0,
+      "candidateExact": 0,
+      "rows": [
+        {
+          "case": "object_to_function",
+          "inputs": {
+            "main.c": {
+              "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/arity-order/input/object_to_function/main.c",
+              "sha256": "e7ad3d034e1ee679661de57c77fa1ab0e56e89628499eb585c7faa432fb79058"
+            }
+          },
+          "expected": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/arity-order/input/object_to_function/expected.txt",
+            "sha256": "1c46b3e3cd38444dd86bc02824c94cb0b81297c1eb166d88ccaf14f31c4a7b22"
+          },
+          "before": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/arity-order/baseline-eighth/object_to_function/actual.txt",
+            "sha256": "a61f0cdcf44603a55bb8032a1260439839d5343fc413de03e517129bb9280e07"
+          },
+          "current": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/arity-order/candidate-v2/object_to_function/actual.txt",
+            "sha256": "a61f0cdcf44603a55bb8032a1260439839d5343fc413de03e517129bb9280e07"
+          },
+          "completeDifference": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/arity-order/candidate-v2/object_to_function/complete.diff",
+            "sha256": "6296b01c1683d3860cabe2baefbfc489c7d3003a5c2ebca005bfb51a2c3b425a"
+          },
+          "canonicalLinesIncludingSeparators": 201,
+          "nonemptySelectedRecords": 196,
+          "macroMethods": [
+            {
+              "fullName": "main.c:PICK:ANY(2)",
+              "liveMethod": [
+                "METHOD NAME=PICK CODE=#define PICK 1 FULL_NAME=main.c:PICK:ANY(2) SIGNATURE=ANY(2) ORDER=1",
+                "  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1",
+                "  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1",
+                "  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2",
+                "  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2",
+                "  BLOCK TYPE_FULL_NAME=ANY ORDER=3",
+                "  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=4"
+              ],
+              "baselineMethod": [
+                "METHOD NAME=PICK CODE=#define PICK(x,y) ((x)+(y)) FULL_NAME=main.c:PICK:ANY(2) SIGNATURE=ANY(2) ORDER=1",
+                "  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1",
+                "  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1",
+                "  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2",
+                "  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2",
+                "  BLOCK TYPE_FULL_NAME=ANY ORDER=3",
+                "  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=4"
+              ],
+              "candidateMethod": [
+                "METHOD NAME=PICK CODE=#define PICK(x,y) ((x)+(y)) FULL_NAME=main.c:PICK:ANY(2) SIGNATURE=ANY(2) ORDER=1",
+                "  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1",
+                "  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1",
+                "  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2",
+                "  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2",
+                "  BLOCK TYPE_FULL_NAME=ANY ORDER=3",
+                "  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=4"
+              ],
+              "introducedCorrectMethodRecordLoss": false
+            }
+          ]
+        },
+        {
+          "case": "global_before_function",
+          "inputs": {
+            "main.c": {
+              "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/arity-order/input/global_before_function/main.c",
+              "sha256": "8fa8dfcd6d603b301d1701a009b8b0337469e16911ce33a465a962407854e18f"
+            }
+          },
+          "expected": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/arity-order/input/global_before_function/expected.txt",
+            "sha256": "01398c83c37332854d56e90832378f2c38ceb0c0c6c16429885ef5dfad622e38"
+          },
+          "before": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/arity-order/baseline-eighth/global_before_function/actual.txt",
+            "sha256": "e6bfb275955a83487565c042b69a2a415beb2f0b16c173da8b73908b96beab1d"
+          },
+          "current": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/arity-order/candidate-v2/global_before_function/actual.txt",
+            "sha256": "e6bfb275955a83487565c042b69a2a415beb2f0b16c173da8b73908b96beab1d"
+          },
+          "completeDifference": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/arity-order/candidate-v2/global_before_function/complete.diff",
+            "sha256": "a4e14630ea98b08c0e752138100a4a115ec9dad9a3a53b404fba75713e1acc9f"
+          },
+          "canonicalLinesIncludingSeparators": 181,
+          "nonemptySelectedRecords": 176,
+          "macroMethods": [
+            {
+              "fullName": "main.c:PICK:int(0)",
+              "liveMethod": [
+                "METHOD NAME=PICK CODE=#define PICK 1 FULL_NAME=main.c:PICK:int(0) SIGNATURE=int(0) ORDER=1",
+                "  BLOCK TYPE_FULL_NAME=ANY ORDER=1",
+                "  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=2"
+              ],
+              "baselineMethod": [
+                "METHOD NAME=PICK CODE=#define PICK 2 FULL_NAME=main.c:PICK:int(0) SIGNATURE=int(0) ORDER=1",
+                "  BLOCK TYPE_FULL_NAME=ANY ORDER=1",
+                "  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=2"
+              ],
+              "candidateMethod": [
+                "METHOD NAME=PICK CODE=#define PICK 2 FULL_NAME=main.c:PICK:int(0) SIGNATURE=int(0) ORDER=1",
+                "  BLOCK TYPE_FULL_NAME=ANY ORDER=1",
+                "  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=2"
+              ],
+              "introducedCorrectMethodRecordLoss": false
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "originalThree": [
+    {
+      "case": "branch_condition_entry_state",
+      "fullName": "main.c:PICK:int(0)",
+      "fullGraphs": {
+        "live": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-body-state-review/input/branch_condition_entry_state/expected.txt",
+          "sha256": "91abd763935d2faa5d86c475737147724af3e7a54be12b4d0588e5af2fc95d04"
+        },
+        "eighth": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-body-state-review/baseline-eighth/branch_condition_entry_state/actual.txt",
+          "sha256": "d027e428792426b14887f9d07255be0a0dc1634d9a15406263b538d8fd09d4de"
+        },
+        "v1": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-macro-state/replay-v1/branch_condition_entry_state/actual.txt",
+          "sha256": "0a4c36d869802f557948c51792875d7a2bda2985b16370b6e721bbe92d8d69f2"
+        },
+        "v2": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-macro-state/replay-v2/branch_condition_entry_state/actual.txt",
+          "sha256": "0a4c36d869802f557948c51792875d7a2bda2985b16370b6e721bbe92d8d69f2"
+        }
+      },
+      "fullMacroMethodBlocks": {
+        "live": [
+          "METHOD NAME=PICK CODE=#define PICK 1 FULL_NAME=main.c:PICK:int(0) SIGNATURE=int(0) ORDER=1",
+          "  BLOCK TYPE_FULL_NAME=ANY ORDER=1",
+          "  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=2"
+        ],
+        "eighth": [
+          "METHOD NAME=PICK CODE=#define PICK 1 FULL_NAME=main.c:PICK:int(0) SIGNATURE=int(0) ORDER=1",
+          "  BLOCK TYPE_FULL_NAME=ANY ORDER=1",
+          "  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=2"
+        ],
+        "v1": [
+          "METHOD NAME=PICK CODE=#define PICK 2 FULL_NAME=main.c:PICK:int(0) SIGNATURE=int(0) ORDER=1",
+          "  BLOCK TYPE_FULL_NAME=ANY ORDER=1",
+          "  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=2"
+        ],
+        "v2": [
+          "METHOD NAME=PICK CODE=#define PICK 2 FULL_NAME=main.c:PICK:int(0) SIGNATURE=int(0) ORDER=1",
+          "  BLOCK TYPE_FULL_NAME=ANY ORDER=1",
+          "  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=2"
+        ]
+      },
+      "introducedCorrectCodeLoss": true,
+      "completeBeforeCurrentDifference": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/original-three/branch_condition_entry_state/eighth-v2-complete.diff",
+        "sha256": "11e892789e2f07d65b10c52d6372f09c7d1dc3e2454b03f55c20e86810bedc00"
+      }
+    },
+    {
+      "case": "header_after_body_undef",
+      "fullName": "main.c:MODE:int(0)",
+      "fullGraphs": {
+        "live": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-body-state-review/input/header_after_body_undef/expected.txt",
+          "sha256": "da7cf6ae8c8a4acb89f907a446f528744d84308443f85c6ca8f90a19d4df7f67"
+        },
+        "eighth": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-body-state-review/baseline-eighth/header_after_body_undef/actual.txt",
+          "sha256": "c271c49a8bb7c628c8dbe6f0aae236d4a985a1e5ad9cacfd7f02527c3bc0482b"
+        },
+        "v1": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-macro-state/replay-v1/header_after_body_undef/actual.txt",
+          "sha256": "9fc92774be54ab173650a4ecefaf16fb796028b29bf765e4775e0f054c40ba52"
+        },
+        "v2": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-macro-state/replay-v2/header_after_body_undef/actual.txt",
+          "sha256": "9fc92774be54ab173650a4ecefaf16fb796028b29bf765e4775e0f054c40ba52"
+        }
+      },
+      "fullMacroMethodBlocks": {
+        "live": [
+          "METHOD NAME=MODE CODE=#define MODE 3 FULL_NAME=main.c:MODE:int(0) SIGNATURE=int(0) ORDER=1",
+          "  BLOCK TYPE_FULL_NAME=ANY ORDER=1",
+          "  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=2"
+        ],
+        "eighth": [
+          "METHOD NAME=MODE CODE=#define MODE 1 FULL_NAME=main.c:MODE:int(0) SIGNATURE=int(0) ORDER=1",
+          "  BLOCK TYPE_FULL_NAME=ANY ORDER=1",
+          "  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=2"
+        ],
+        "v1": [
+          "METHOD NAME=MODE CODE=#define MODE 1 FULL_NAME=main.c:MODE:int(0) SIGNATURE=int(0) ORDER=1",
+          "  BLOCK TYPE_FULL_NAME=ANY ORDER=1",
+          "  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=2"
+        ],
+        "v2": [
+          "METHOD NAME=MODE CODE=#define MODE 1 FULL_NAME=main.c:MODE:int(0) SIGNATURE=int(0) ORDER=1",
+          "  BLOCK TYPE_FULL_NAME=ANY ORDER=1",
+          "  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=2"
+        ]
+      },
+      "introducedCorrectCodeLoss": false,
+      "completeBeforeCurrentDifference": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/original-three/header_after_body_undef/eighth-v2-complete.diff",
+        "sha256": "4920c81f22bc127283543efedff609bda2a61469bcdc7995b73ba2a825235900"
+      }
+    },
+    {
+      "case": "recovery_after_redefinition",
+      "fullName": "main.c:BAD:char*(0)",
+      "fullGraphs": {
+        "live": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-body-state-review/input/recovery_after_redefinition/expected.txt",
+          "sha256": "534dad90f2c6e3f426313d3caf9f1b8cc2aff99da4ee65e3f2e4bff29e37e746"
+        },
+        "eighth": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-body-state-review/baseline-eighth/recovery_after_redefinition/actual.txt",
+          "sha256": "025752aa720dfa6c7031be11ed19aecb593948b05070400a1db54086e830fc38"
+        },
+        "v1": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-macro-state/replay-v1/recovery_after_redefinition/actual.txt",
+          "sha256": "0151c8d0d1da7457961b05b2a9a51231135284edf76546fe22e7e4e05dc7b8b6"
+        },
+        "v2": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-macro-state/replay-v2/recovery_after_redefinition/actual.txt",
+          "sha256": "0151c8d0d1da7457961b05b2a9a51231135284edf76546fe22e7e4e05dc7b8b6"
+        }
+      },
+      "fullMacroMethodBlocks": {
+        "live": [
+          "METHOD NAME=BAD CODE=#define BAD \"a\" unresolved \"b\" FULL_NAME=main.c:BAD:char*(0) SIGNATURE=char*(0) ORDER=1",
+          "  BLOCK TYPE_FULL_NAME=ANY ORDER=1",
+          "  METHOD_RETURN CODE=RET TYPE_FULL_NAME=char* ORDER=2"
+        ],
+        "eighth": [
+          "METHOD NAME=BAD CODE=#define BAD \"ok\" FULL_NAME=main.c:BAD:char*(0) SIGNATURE=char*(0) ORDER=1",
+          "  BLOCK TYPE_FULL_NAME=ANY ORDER=1",
+          "  METHOD_RETURN CODE=RET TYPE_FULL_NAME=char* ORDER=2"
+        ],
+        "v1": [
+          "METHOD NAME=BAD CODE=#define BAD \"fine\" FULL_NAME=main.c:BAD:char*(0) SIGNATURE=char*(0) ORDER=1",
+          "  BLOCK TYPE_FULL_NAME=ANY ORDER=1",
+          "  METHOD_RETURN CODE=RET TYPE_FULL_NAME=char* ORDER=2"
+        ],
+        "v2": [
+          "METHOD NAME=BAD CODE=#define BAD \"fine\" FULL_NAME=main.c:BAD:char*(0) SIGNATURE=char*(0) ORDER=1",
+          "  BLOCK TYPE_FULL_NAME=ANY ORDER=1",
+          "  METHOD_RETURN CODE=RET TYPE_FULL_NAME=char* ORDER=2"
+        ]
+      },
+      "introducedCorrectCodeLoss": false,
+      "completeBeforeCurrentDifference": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/original-three/recovery_after_redefinition/eighth-v2-complete.diff",
+        "sha256": "4ab6b6a1cbf4ddaac71e69f461a126516b6033409eb72d02974ba1ac18f8fb21"
+      }
+    }
+  ],
+  "totals": {
+    "newProjects": 13,
+    "canonicalLinesIncludingSeparators": 2198,
+    "nonemptySelectedRecords": 2134,
+    "baselineExact": 1,
+    "candidateExact": 4,
+    "newIntroducedCorrectMacroMethodLossCases": [
+      "conditional_before_redefine",
+      "earlier_function_condition"
+    ]
+  },
+  "upstream": {
+    "MacroHandler.scala": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/upstream/MacroHandler.scala",
+      "sha256": "73cdeb7c41d9356cc6ba2fe2f276bb198a1a26b77d67e13fb1830491289f0ab6",
+      "url": "https://raw.githubusercontent.com/joernio/joern/v4.0.555/joern-cli/frontends/c2cpg/src/main/scala/io/joern/c2cpg/astcreation/MacroHandler.scala"
+    },
+    "AstCreationPass.scala": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/upstream/AstCreationPass.scala",
+      "sha256": "561c1a211fd9f94fdbd24c1377113d4d7782fb41d26e93877737743185399a07",
+      "url": "https://raw.githubusercontent.com/joernio/joern/v4.0.555/joern-cli/frontends/c2cpg/src/main/scala/io/joern/c2cpg/passes/AstCreationPass.scala"
+    },
+    "AstCreator.scala": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/upstream/AstCreator.scala",
+      "sha256": "b90c7804a6ab74326f67da35124da0873c32be1340e6006f8a3d47720bc0141c",
+      "url": "https://raw.githubusercontent.com/joernio/joern/v4.0.555/joern-cli/frontends/c2cpg/src/main/scala/io/joern/c2cpg/astcreation/AstCreator.scala"
+    },
+    "CdtParser.scala": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/upstream/CdtParser.scala",
+      "sha256": "2c4e9bbf79048170c9ae63c8ce30af640db06e1a46eec5e4fb6fa6f5382132b4",
+      "url": "https://raw.githubusercontent.com/joernio/joern/v4.0.555/joern-cli/frontends/c2cpg/src/main/scala/io/joern/c2cpg/parser/CdtParser.scala"
+    }
+  },
+  "sourceRules": [
+    {
+      "source": "MacroHandler.scala",
+      "lines": "21-28",
+      "fact": "TU macro expansion locations sorted by numeric file-local offset only; filename is not a sort key."
+    },
+    {
+      "source": "MacroHandler.scala",
+      "lines": "61-76",
+      "fact": "Eligible node consumes and discards prior nonmatching events until first same macro name at offset <= node offset."
+    },
+    {
+      "source": "MacroHandler.scala",
+      "lines": "97-110,130-169",
+      "fact": "Selected definition supplies CODE and defining file; current node and MacroArgumentExtractor supply result type and actual argument count."
+    },
+    {
+      "source": "AstCreationPass.scala",
+      "lines": "34-36",
+      "fact": "getOrElseUpdate preserves first method registration by complete full name."
+    },
+    {
+      "source": "AstCreator.scala",
+      "lines": "76-93",
+      "fact": "Joern creates source declaration ASTs in source order; Rust function-before-global rendering must not reorder metadata selection."
+    }
+  ],
+  "trace": {
+    "CdtTrace.scala": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/cdt-trace/CdtTrace.scala",
+      "sha256": "64883481790d4809e84969e96380dc5cf38c6bcae978ea796a1a1bce5ed3f11b"
+    },
+    "compile.json": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/cdt-trace/compile.json",
+      "sha256": "950228f7acd8c7b5a0733dd10597850cf299be931e0e6a564c2fd825b1000f34"
+    },
+    "compile.stdout": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/cdt-trace/compile.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "compile.stderr": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/cdt-trace/compile.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "run.json": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/cdt-trace/run.json",
+      "sha256": "214308c30adb3aa912fe1af6bc652afd11b80ed7ff5950b31d7472213103a2f4"
+    },
+    "trace.stdout": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/cdt-trace/trace.stdout",
+      "sha256": "f76236e3a8170124d0c3f24b86668bec8cb6316528562311bd541c41a473ade2"
+    },
+    "trace.stderr": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/cdt-trace/trace.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "nested-run.json": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/cdt-trace/nested-run.json",
+      "sha256": "1add3eaf40852f88b398ab7b31acbf7977472f846c52c6e946b098917ea1a636"
+    },
+    "nested.stdout": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/cdt-trace/nested.stdout",
+      "sha256": "79f89be7720a6905a295a8ed00ebaab9ecacebc07ba0ce4e75522218de1ef466"
+    },
+    "nested.stderr": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/cdt-trace/nested.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "classes": {
+      "classes/CdtTrace.class": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/cdt-trace/classes/CdtTrace.class",
+        "sha256": "8b413575e8f1ac5cdb30e43575d9c1bb27dd63b12388d99c3891a74b9373b7ed"
+      },
+      "classes/CdtTrace$package$.class": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/cdt-trace/classes/CdtTrace$package$.class",
+        "sha256": "014b37d61de30205bbaa95258ddac0c00248376cc36be6690989c5068ac5c56f"
+      },
+      "classes/CdtTrace$$anon$2.class": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/cdt-trace/classes/CdtTrace$$anon$2.class",
+        "sha256": "3a99c34fb46e18d5134565642d5757ebbd64c15d826f229acae52178424c7c00"
+      },
+      "classes/CdtTrace$.class": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/cdt-trace/classes/CdtTrace$.class",
+        "sha256": "16d2f1a4399ef64c4d91d0a03c86d9cb84b4a15124902427c84b7e333e86e2ee"
+      },
+      "classes/CdtTrace$package.class": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/cdt-trace/classes/CdtTrace$package.class",
+        "sha256": "63bcfb9ddb7e32e2e3589028f6c4827b783ba9c2a67b89748631b8f33fd75a52"
+      },
+      "classes/CdtTrace$$anon$1.class": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/cdt-trace/classes/CdtTrace$$anon$1.class",
+        "sha256": "8d4708fdd54fd4d6b4f6e3b0d2e011f1eaec06d3bddb7ae31c1f24990c037201"
+      }
+    },
+    "failedDirectScriptAttempt": {
+      "trace.sc": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/trace.sc",
+        "sha256": "5d14010b0bd3f743488cd93b8f979fe0ef2f27e3329028febafc6821d9031ad1"
+      },
+      "trace-run.json": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/trace-run.json",
+        "sha256": "f8521287fe366f68e6643b0d0a1f32795570b4e7b7c9a2c142a8ff589f204243"
+      },
+      "trace.stdout": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/trace.stdout",
+        "sha256": "c2d3cc76d51b7837bfb7166c32c55782a1d8dbb8675a680b80f04016362620f6"
+      },
+      "trace.stderr": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/trace.stderr",
+        "sha256": "bd18d817b8dfb43fdc78b935f167fec308b044f4356be5c20038cc11c09df535"
+      },
+      "trace-producer.log": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/trace-producer.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    "failureExplanation": "Initial normal Joern REPL classpath lacked C2Cpg/CDT classes, so the trace script failed to compile; retained unchanged. Successful trace compiled a local observer against the already pinned distribution jars; no producer/library/source changes.",
+    "selectedObservations": [
+      "MODE3 header condition appears at api.h file-local offset4 before main.c MODE1@41: selected old header event explains live main.c MODE CODE3 despite before() expansion literal1.",
+      "PICK1 condition event precedes later PICK2 body event; first normal wrapper consumes PICK1, fixing the introduced CODE regression.",
+      "BAD malformed first initializer has events BAD@176 and VALUE@181 but recovery creates no wrappers to consume them; later normal BAD@241 can consume earlier BAD definition.",
+      "WRAP(ARG) contributes only outer WRAP event, excluding macros nested in argument/replacement.",
+      "defined(FLAG) && PICK(FLAG) contributes only PICK; defined operand and nested argument are excluded.",
+      "#if FLAG within inactive #if0 contributes no event; active #if0 && FLAG does contribute FLAG despite its false result."
+    ]
+  },
+  "requiredFixes": [
+    "Restore previously correct PICK stub CODE in branch_condition_entry_state and the fresh conditional/earlier-function controls; do not label this introduced loss a retained diagnostic.",
+    "Keep expression snapshots and metadata ownership separate. Build outer expansion events in each TU, including active directive conditions and supplied-header local offsets; replay destructive name-matching only for eligible original macro wrappers.",
+    "Use selected definition CODE/file only: current invocation argument count and current expansion result type determine signature. Retain first registration by full name.",
+    "Preserve original recovery/copy/temporary overrides and their non-consumption behavior; do not consume events in phantom/type discovery or duplicate rendering.",
+    "Validate source declaration ordering independently of functions-before-global output, and retain malformed/function-condition/transport diagnostics without filtering."
+  ],
+  "limits": [
+    "This is a definition-ownership diagnosis, not final acceptance of frozen v2.",
+    "The old malformed function-like #if selection gap in formal_list_redefined/condition_function_and_defined remains a full graph diagnostic; supported object_to_function isolates arity.",
+    "No full port percentage, whole-project safety, memory budget or source-location parity is inferred.",
+    "All original17/first7 references and producer binaries remained unchanged."
+  ]
+}

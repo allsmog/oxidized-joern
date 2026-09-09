@@ -1,0 +1,152 @@
+{
+  "status": "PASS_PINNED_CALLEE_RESCAN_OWNERSHIP_CONTROLS_NOT_GRAPH_PARITY",
+  "parentReview": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/final-review.json",
+    "sha256": "7654102e71405d516bf45c92ae2ee08b7fbea0a1061588ebbef9f1054edd8cfb",
+    "bytes": 95342
+  },
+  "setup": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/callee-rescan/setup.json",
+    "sha256": "731a048cce310547e1ca3281f2e7fcb1e1521e09a1454a9c625bcfb535aca865",
+    "bytes": 3241
+  },
+  "oracleRun": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/callee-rescan/oracle-workspace/run.json",
+    "sha256": "e6264de5897a3cf22079587f1e4f98d7d30c4c32642b3c9c957e74b6b9d4df7c",
+    "bytes": 1261
+  },
+  "traceRun": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/callee-rescan/trace/run.json",
+    "sha256": "877f68938eb0e815892538b25a9c31823ba8cb0a0efb75f0ac4a74132b3bc134",
+    "bytes": 26386
+  },
+  "rawOracle": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/callee-rescan/oracle-workspace/stdout",
+    "sha256": "fd66a66033eafc9ef4db0ea8c0cb32cc10f6d6b1a3015e7874fa61cb68fbf3bf",
+    "bytes": 33215
+  },
+  "rawTrace": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/callee-rescan/trace/stdout",
+    "sha256": "528ab18d53fa332d36ac3d5d0b17e08829f4f211a4f91af458165b302640a2b7",
+    "bytes": 15373
+  },
+  "projects": [
+    {
+      "name": "comma_tail",
+      "input": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/callee-rescan/input/comma_tail/main.c",
+        "sha256": "28049dc793519446d8e97ebe2758ed6c51e0832be3d2fe91ecb3b19eca4f8346",
+        "bytes": 125
+      },
+      "expected": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/callee-rescan/input/comma_tail/expected.txt",
+        "sha256": "c8e83ccd4a48b387cc394e9794061087bff5a414b324318921c103a044b98745",
+        "bytes": 8234
+      },
+      "canonicalLines": 155,
+      "nonemptyRecords": 150,
+      "variants": {
+        "accepted-eighth": {
+          "completeExact": false,
+          "run": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/callee-rescan/accepted-eighth/comma_tail/run.json",
+            "sha256": "43b55ea15aa70226f4c76c027b409ddcb587a843c78b7edde8f8188d7fdc3079",
+            "bytes": 1169
+          },
+          "actual": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/callee-rescan/accepted-eighth/comma_tail/stdout",
+            "sha256": "2baec41957eb92c0e3fc2b5f362b171d8d936a27e0b9f4dcf343e6038cc40a58",
+            "bytes": 8700
+          },
+          "fullDiff": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/callee-rescan/accepted-eighth/comma_tail/complete-lf.diff",
+            "sha256": "ec376822fee508dd57c623ffeca0e2fbe344d7c3b588536d3a58c29e8e1c044a",
+            "bytes": 8615
+          }
+        },
+        "held-v4": {
+          "completeExact": false,
+          "run": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/callee-rescan/held-v4/comma_tail/run.json",
+            "sha256": "897f0ae3780e8ea86a6b7f1b0e7d48561d790c7e131c36a99a0483c04c8a09b4",
+            "bytes": 1131
+          },
+          "actual": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/callee-rescan/held-v4/comma_tail/stdout",
+            "sha256": "2baec41957eb92c0e3fc2b5f362b171d8d936a27e0b9f4dcf343e6038cc40a58",
+            "bytes": 8700
+          },
+          "fullDiff": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/callee-rescan/held-v4/comma_tail/complete-lf.diff",
+            "sha256": "4d850a910a64905c6947c77530c2837f3bbf99d38c5a0b42111b6d07ab9149ad",
+            "bytes": 8607
+          }
+        }
+      }
+    },
+    {
+      "name": "parenthesized_tail",
+      "input": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/callee-rescan/input/parenthesized_tail/main.c",
+        "sha256": "f6ce67b800427d9e074a647074cc2beebf80d4b943781af427bb4abc63e65bc2",
+        "bytes": 124
+      },
+      "expected": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/callee-rescan/input/parenthesized_tail/expected.txt",
+        "sha256": "01335de35e1395493cfca666f4746a0cfe5a321be7603d2e70f31943a2d7e636",
+        "bytes": 9419
+      },
+      "canonicalLines": 174,
+      "nonemptyRecords": 168,
+      "variants": {
+        "accepted-eighth": {
+          "completeExact": false,
+          "run": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/callee-rescan/accepted-eighth/parenthesized_tail/run.json",
+            "sha256": "c215f052aa34accec797e99122a80ab9ab495400cd116e1e28a5ff8c5c193472",
+            "bytes": 1200
+          },
+          "actual": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/callee-rescan/accepted-eighth/parenthesized_tail/stdout",
+            "sha256": "2baec41957eb92c0e3fc2b5f362b171d8d936a27e0b9f4dcf343e6038cc40a58",
+            "bytes": 8700
+          },
+          "fullDiff": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/callee-rescan/accepted-eighth/parenthesized_tail/complete-lf.diff",
+            "sha256": "9a7b1acde128ecc9150cc6c3bd7c7cd1e372dd3e22c4583d9ee524e5dc6e00a1",
+            "bytes": 8279
+          }
+        },
+        "held-v4": {
+          "completeExact": false,
+          "run": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/callee-rescan/held-v4/parenthesized_tail/run.json",
+            "sha256": "fea32001c9c8bf9c89101709a6fe0661d28775705edc3d71044bd8a236032d7a",
+            "bytes": 1163
+          },
+          "actual": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/callee-rescan/held-v4/parenthesized_tail/stdout",
+            "sha256": "2baec41957eb92c0e3fc2b5f362b171d8d936a27e0b9f4dcf343e6038cc40a58",
+            "bytes": 8700
+          },
+          "fullDiff": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/callee-rescan/held-v4/parenthesized_tail/complete-lf.diff",
+            "sha256": "f50724ada991f7969644bf4b23e6d3b00a8b588cb390f6674a71161a19ce372f",
+            "bytes": 8271
+          }
+        }
+      }
+    }
+  ],
+  "cdtPairs": {
+    "comma_tail": [
+      "PAIR|112|/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/callee-rescan/input/comma_tail/main.c|#define CALL 0, WRAP"
+    ],
+    "parenthesized_tail": [
+      "PAIR|111|/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/callee-rescan/input/parenthesized_tail/main.c|#define CALL (WRAP)",
+      "PAIR|116|/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/callee-rescan/input/parenthesized_tail/main.c|#define ARG 1"
+    ]
+  },
+  "conclusion": "Object replacement ending in available function-like macro token WRAP consumes following original arguments even with a preceding comma expression. Parenthesized WRAP ends in a closing parenthesis and leaves following ARG as a separate preprocessing event. Both complete graphs remain baseline-nonexact diagnostics; no AST gap is hidden or claimed repaired.",
+  "noBuildsOrProductionEdits": true
+}

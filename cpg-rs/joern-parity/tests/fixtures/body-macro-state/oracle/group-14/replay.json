@@ -1,0 +1,216 @@
+{
+  "results": [
+    {
+      "variant": "accepted-eighth",
+      "case": "cast_type",
+      "exact": false,
+      "expected": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/type-position/input/cast_type/expected.txt",
+        "sha256": "336b265bf07079b32b5fa606ea0bee708dec6edf5728ad9db086ea035421085a",
+        "bytes": 11888
+      },
+      "actual": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/type-position/accepted-eighth/cast_type/stdout",
+        "sha256": "40c41eee573b9147559c02e1fd27029664aaa55d43be290d09ba84ccea080b93",
+        "bytes": 11184
+      },
+      "diff": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/type-position/accepted-eighth/cast_type/complete.diff",
+        "sha256": "00bff240a3915ad776de9fc250dc386db1bd31500c3956edf454fd311c1bc8c1",
+        "bytes": 14517
+      },
+      "run": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/type-position/accepted-eighth/cast_type/run.json",
+        "sha256": "a272852f85383c41832b35560764784a17ac849d9eed5a120f7eba4fd1f5f627",
+        "bytes": 1166
+      }
+    },
+    {
+      "variant": "accepted-eighth",
+      "case": "sizeof_array",
+      "exact": false,
+      "expected": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/type-position/input/sizeof_array/expected.txt",
+        "sha256": "6541eeee773acf76b1986fef95eb1a6d7d01df4c0e592e920e3342287aef1f19",
+        "bytes": 11693
+      },
+      "actual": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/type-position/accepted-eighth/sizeof_array/stdout",
+        "sha256": "a933c09a981031d5b6a383dc73390424b2e7e2017d6c68c42596424f6051ddda",
+        "bytes": 10955
+      },
+      "diff": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/type-position/accepted-eighth/sizeof_array/complete.diff",
+        "sha256": "b340ad7be43247ca3ea7d4471d8c209ca7da862e30011f7d705fc0237f7cce84",
+        "bytes": 11554
+      },
+      "run": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/type-position/accepted-eighth/sizeof_array/run.json",
+        "sha256": "ee61fc2915cdd303c0413751e57b20069055d9e01b71c8d00e7bcb2c7c268655",
+        "bytes": 1177
+      }
+    },
+    {
+      "variant": "accepted-eighth",
+      "case": "sizeof_array_plain",
+      "exact": false,
+      "expected": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/type-position/input/sizeof_array_plain/expected.txt",
+        "sha256": "84deb0cf6033a5b4a56aaf237ec848d231d199ccaecbb81a651c96e590098642",
+        "bytes": 10372
+      },
+      "actual": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/type-position/accepted-eighth/sizeof_array_plain/stdout",
+        "sha256": "d6236135085e9c9320265cf8ba21b44a23b25a026ad73fd922d6ea26147632ae",
+        "bytes": 10372
+      },
+      "diff": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/type-position/accepted-eighth/sizeof_array_plain/complete.diff",
+        "sha256": "076bacb6ee8827d5882acbfcf3c8097f7d35d05ac00ab682ad59b83d5c244126",
+        "bytes": 992
+      },
+      "run": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/type-position/accepted-eighth/sizeof_array_plain/run.json",
+        "sha256": "d4006781e7b3201a936280345fbc8e01ddbadfe526b683fa3513146eec016891",
+        "bytes": 1202
+      }
+    },
+    {
+      "variant": "accepted-eighth",
+      "case": "sizeof_type",
+      "exact": false,
+      "expected": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/type-position/input/sizeof_type/expected.txt",
+        "sha256": "f72d52e77c67c664c179aadbea474dd15ad28d44d28593d4bd8b295fff325f06",
+        "bytes": 11641
+      },
+      "actual": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/type-position/accepted-eighth/sizeof_type/stdout",
+        "sha256": "d46ef4768da259d9e26d793bfa3502534f65ce725df34fa1d1657d7004ca47cc",
+        "bytes": 10812
+      },
+      "diff": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/type-position/accepted-eighth/sizeof_type/complete.diff",
+        "sha256": "fe42cbf7bc79211b7e870eefaf99cc40c810763ebf39e27d5a422513fb053b22",
+        "bytes": 12463
+      },
+      "run": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/type-position/accepted-eighth/sizeof_type/run.json",
+        "sha256": "85959779af3125fb1386e7cf0551976063b612011a01b7efc89eb9fcc288f9f5",
+        "bytes": 1175
+      }
+    },
+    {
+      "variant": "held-v4",
+      "case": "cast_type",
+      "exact": false,
+      "expected": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/type-position/input/cast_type/expected.txt",
+        "sha256": "336b265bf07079b32b5fa606ea0bee708dec6edf5728ad9db086ea035421085a",
+        "bytes": 11888
+      },
+      "actual": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/type-position/held-v4/cast_type/stdout",
+        "sha256": "2a940f330160affa26b2ca7875dacbf0cc70234e90824d71ff0adfcc70a42a9f",
+        "bytes": 11485
+      },
+      "diff": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/type-position/held-v4/cast_type/complete.diff",
+        "sha256": "abd2cef821e749979b8ab819cb81c0555428fd29fab0d4ba2300e435d086b906",
+        "bytes": 13740
+      },
+      "run": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/type-position/held-v4/cast_type/run.json",
+        "sha256": "9aea7222e0c737cd816871fbd52d8036e9db07231b565aa16d4b46d7a8880ea9",
+        "bytes": 1127
+      }
+    },
+    {
+      "variant": "held-v4",
+      "case": "sizeof_array",
+      "exact": false,
+      "expected": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/type-position/input/sizeof_array/expected.txt",
+        "sha256": "6541eeee773acf76b1986fef95eb1a6d7d01df4c0e592e920e3342287aef1f19",
+        "bytes": 11693
+      },
+      "actual": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/type-position/held-v4/sizeof_array/stdout",
+        "sha256": "74550fdb04cc425fa3c65a7c1b301267a0582003f34964b08fb4c13c78ba65eb",
+        "bytes": 10955
+      },
+      "diff": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/type-position/held-v4/sizeof_array/complete.diff",
+        "sha256": "a35bedc4fbc8203c300309cc0aa7b8c06b06d1eeb3e10513a3f29fd76afce26e",
+        "bytes": 11302
+      },
+      "run": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/type-position/held-v4/sizeof_array/run.json",
+        "sha256": "0bf535a4d291a49441d9640fc5ae10ec4161c614caaf2c90d3ebfc4cc7baf372",
+        "bytes": 1140
+      }
+    },
+    {
+      "variant": "held-v4",
+      "case": "sizeof_array_plain",
+      "exact": true,
+      "expected": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/type-position/input/sizeof_array_plain/expected.txt",
+        "sha256": "84deb0cf6033a5b4a56aaf237ec848d231d199ccaecbb81a651c96e590098642",
+        "bytes": 10372
+      },
+      "actual": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/type-position/held-v4/sizeof_array_plain/stdout",
+        "sha256": "84deb0cf6033a5b4a56aaf237ec848d231d199ccaecbb81a651c96e590098642",
+        "bytes": 10372
+      },
+      "diff": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/type-position/held-v4/sizeof_array_plain/complete.diff",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "run": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/type-position/held-v4/sizeof_array_plain/run.json",
+        "sha256": "7ed35091c7055027f6a694e942422275e292776f11dd02ea576ca39b30e537af",
+        "bytes": 1164
+      }
+    },
+    {
+      "variant": "held-v4",
+      "case": "sizeof_type",
+      "exact": false,
+      "expected": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/type-position/input/sizeof_type/expected.txt",
+        "sha256": "f72d52e77c67c664c179aadbea474dd15ad28d44d28593d4bd8b295fff325f06",
+        "bytes": 11641
+      },
+      "actual": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/type-position/held-v4/sizeof_type/stdout",
+        "sha256": "69ac57863e08d71e42101953509d03bd1fe50236f65d06ab237321051837d361",
+        "bytes": 11598
+      },
+      "diff": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/type-position/held-v4/sizeof_type/complete.diff",
+        "sha256": "b9d6472603386bc1f306dd0beff0c87c049d1bd8e7ca9f8aeee815d97a445463",
+        "bytes": 12261
+      },
+      "run": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/type-position/held-v4/sizeof_type/run.json",
+        "sha256": "ad6f2200678ca5012458a62c9414551177c2c9fd9893804de33282569826ae5a",
+        "bytes": 1136
+      }
+    }
+  ],
+  "oracleRun": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/type-position/oracle-workspace/run.json",
+    "sha256": "9aca421658e643fe7ca635793db7ea98473880e82ede0f99ab0f5eed8829fee1",
+    "bytes": 1262
+  },
+  "traceRun": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/type-position/trace/run.json",
+    "sha256": "4648f63c685a08c279f4751fb036126b01c1f5e090dbfae16da790b7828e59a6",
+    "bytes": 26386
+  },
+  "sourceUnchanged": "35dd9430be3309294dc84aa7e76796f9997c4ff0845a2f56013aa3e01513b096",
+  "binaryUnchanged": "5584f11047e1358ef7645386cfe79244787cd5cd9e942645e38e2540f7304673"
+}

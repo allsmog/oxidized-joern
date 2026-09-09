@@ -1,0 +1,44 @@
+{
+  "command": [
+    "/Users/shayaunnejad/vibe-code/joern-oxidized/.local/astra-sprint/oracle/runtime/joern-cli/joern",
+    "--script",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/ninth-batch/deferred-field-controls/oracle.sc",
+    "--param",
+    "inputPath=/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/ninth-batch/deferred-field-controls/input"
+  ],
+  "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/ninth-batch/deferred-field-controls/oracle-workspace",
+  "javaHome": "/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home",
+  "scriptSha256": "56431f14868678e64f9eb41026b44f1d3d7738404d28d2db62711b520c98c742",
+  "inputHashes": {
+    "deferred_full_name_literal": {
+      "main.c": "8983979c5217cd67b1c16f8d1b533e6d453928101f1e8d68440967c0ba15b481",
+      "api.h": "9313885ae7f29e87c31882a352bfe60f303796aedbb0a3b40ef6dc64037c8dc3"
+    },
+    "deferred_full_name_spaces": {
+      "main.c": "4d73e94d0a034059ccbf3ecffb0edf154a9102b7fbcb0feb33a3aca419d37b66",
+      "api header.h": "9313885ae7f29e87c31882a352bfe60f303796aedbb0a3b40ef6dc64037c8dc3"
+    }
+  },
+  "joernVersion": "4.0.555",
+  "archiveSha256": "12989883d6b5aeacc97b2dc0ecc4e2951bf50e48cb244f8c8f333d11a8be0c7e",
+  "timeoutSeconds": 180,
+  "pid": 31720,
+  "exitCode": 0,
+  "wallSeconds": 6.406731128692627,
+  "rawStdoutSha256": "bf1bfcfce7f9f92e2a01ad79f2acf24ddfc3df4292a02053f829b70fc68538dd",
+  "rawStderrSha256": "401b9a83548b806c95730400e64f8f9395d9591dc214073a6bd9ba1716af4563",
+  "projects": [
+    {
+      "case": "deferred_full_name_literal",
+      "canonicalLinesIncludingSeparators": 177,
+      "nonemptySelectedRecords": 171,
+      "expectedSha256": "c25f09289b059a979adddcaba94719f3a84678184a1e9a4be9d3804dc826fdd8"
+    },
+    {
+      "case": "deferred_full_name_spaces",
+      "canonicalLinesIncludingSeparators": 177,
+      "nonemptySelectedRecords": 171,
+      "expectedSha256": "369f74ebb48c924503fd81c8edd2dadfa6196c40ccd201345d15894f23bd9592"
+    }
+  ]
+}

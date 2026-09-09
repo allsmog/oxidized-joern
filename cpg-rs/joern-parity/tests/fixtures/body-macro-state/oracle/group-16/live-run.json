@@ -1,0 +1,26 @@
+{
+  "command": [
+    "/Users/shayaunnejad/vibe-code/joern-oxidized/.local/astra-sprint/oracle/runtime/joern-cli/joern",
+    "--script",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-macro-state/prototype-branches/oracle.sc",
+    "--param",
+    "inputPath=/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-macro-state/prototype-branches/input"
+  ],
+  "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-macro-state/prototype-branches/oracle-workspace",
+  "exitCode": 0,
+  "seconds": 15.856859917024849,
+  "inputHashes": {
+    "local_inactive_prototype": {
+      "main.c": "b6d28af84d0484c0a9376fc5b23f54d28d1f325cb2f36e3049e12419d0369b0a"
+    },
+    "local_inactive_prototype_header": {
+      "api.h": "8eba3452b9d93584713139fb4ccf381deac6ca576dcfd9980607c1d5f70fdc98",
+      "main.c": "87d025e3192f6c3ce1bddc6c176ac7cb9a4e218cd6ee80ac92d75b96722fe8f7"
+    }
+  },
+  "scriptSha256": "56431f14868678e64f9eb41026b44f1d3d7738404d28d2db62711b520c98c742",
+  "joernVersion": "4.0.555",
+  "officialArchiveSha256": "12989883d6b5aeacc97b2dc0ecc4e2951bf50e48cb244f8c8f333d11a8be0c7e",
+  "rawStdoutSha256": "67c790f02372afab0bad8ac9bbebb96dd5d007f7a5e612d9ebff68a2e69f5f87",
+  "rawStderrSha256": "5cb9309ff128ce1ac3206c007dee80baad61767084513215278f309df637468d"
+}

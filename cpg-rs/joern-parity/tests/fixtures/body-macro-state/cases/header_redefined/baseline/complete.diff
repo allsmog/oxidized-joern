@@ -1,0 +1,107 @@
+--- Joern4.0.555
++++ /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/eighth-batch/final-real-differential/bin/joern-parity
+@@ -6,12 +6,16 @@
+   BLOCK TYPE_FULL_NAME=ANY ORDER=1
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+ 
++METHOD NAME=PICK CODE=#define PICK 2 FULL_NAME=api.h:PICK:int(0) SIGNATURE=int(0) ORDER=1
++  BLOCK TYPE_FULL_NAME=ANY ORDER=1
++  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=2
++
+ METHOD NAME=choose CODE=int choose(void) { return PICK; } FULL_NAME=choose SIGNATURE=int(void) ORDER=1
+   METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+   METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+   BLOCK CODE={ return PICK; } TYPE_FULL_NAME=void ORDER=2
+     RETURN CODE=return PICK; ORDER=1
+-      CALL NAME=PICK CODE=PICK TYPE_FULL_NAME=int METHOD_FULL_NAME=main.c:PICK:int(0) SIGNATURE=int(0) ORDER=1 DISPATCH_TYPE=INLINED
++      CALL NAME=PICK CODE=PICK TYPE_FULL_NAME=int METHOD_FULL_NAME=api.h:PICK:int(0) SIGNATURE=int(0) ORDER=1 DISPATCH_TYPE=INLINED
+         BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+           LITERAL CODE=2 TYPE_FULL_NAME=int ORDER=1
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+@@ -22,17 +26,13 @@
+     METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+     BLOCK CODE={ return PICK; } TYPE_FULL_NAME=void ORDER=2
+       RETURN CODE=return PICK; ORDER=1
+-        CALL NAME=PICK CODE=PICK TYPE_FULL_NAME=int METHOD_FULL_NAME=main.c:PICK:int(0) SIGNATURE=int(0) ORDER=1 DISPATCH_TYPE=INLINED
++        CALL NAME=PICK CODE=PICK TYPE_FULL_NAME=int METHOD_FULL_NAME=api.h:PICK:int(0) SIGNATURE=int(0) ORDER=1 DISPATCH_TYPE=INLINED
+           BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+             LITERAL CODE=2 TYPE_FULL_NAME=int ORDER=1
+     METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+   BLOCK TYPE_FULL_NAME=ANY ORDER=1
+     METHOD_REF CODE=choose TYPE_FULL_NAME=choose METHOD_FULL_NAME=choose ORDER=1
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+-
+-METHOD NAME=PICK CODE=#define PICK 1 FULL_NAME=main.c:PICK:int(0) SIGNATURE=int(0) ORDER=1
+-  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+-  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=2
+ 
+ NODES|META_DATA LANGUAGE=NEWC
+ NODES|FILE NAME=<includes> ORDER=1
+@@ -55,9 +55,10 @@
+ NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+ NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+ EDGES|ARGUMENT choose#4 -> choose#5
+-EDGES|CALL choose#5 -> main.c:PICK:int(0)#0
++EDGES|CALL choose#5 -> api.h:PICK:int(0)#0
+ EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+ EDGES|CFG api.h:<global>#0 -> api.h:<global>#2
++EDGES|CFG api.h:PICK:int(0)#0 -> api.h:PICK:int(0)#2
+ EDGES|CFG choose#0 -> choose#5
+ EDGES|CFG choose#4 -> choose#8
+ EDGES|CFG choose#5 -> choose#4
+@@ -65,12 +66,11 @@
+ EDGES|CFG choose#7 -> choose#4
+ EDGES|CFG main.c:<global>#0 -> main.c:<global>#11
+ EDGES|CFG main.c:<global>#11 -> main.c:<global>#12
+-EDGES|CFG main.c:PICK:int(0)#0 -> main.c:PICK:int(0)#2
+ EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+ EDGES|CONTAINS D:api.h:<global> -> api.h:<global>#0
+ EDGES|CONTAINS D:main.c:<global> -> D:choose
++EDGES|CONTAINS D:main.c:<global> -> api.h:PICK:int(0)#0
+ EDGES|CONTAINS D:main.c:<global> -> main.c:<global>#0
+-EDGES|CONTAINS D:main.c:<global> -> main.c:PICK:int(0)#0
+ EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+ EDGES|CONTAINS F:<includes> -> D:ANY
+ EDGES|CONTAINS F:<includes> -> D:int
+@@ -78,6 +78,7 @@
+ EDGES|CONTAINS F:api.h -> D:api.h:<global>
+ EDGES|CONTAINS F:main.c -> D:main.c:<global>
+ EDGES|CONTAINS api.h:<global>#0 -> api.h:<global>#1
++EDGES|CONTAINS api.h:PICK:int(0)#0 -> api.h:PICK:int(0)#1
+ EDGES|CONTAINS choose#0 -> choose#3
+ EDGES|CONTAINS choose#0 -> choose#4
+ EDGES|CONTAINS choose#0 -> choose#5
+@@ -86,11 +87,12 @@
+ EDGES|CONTAINS main.c:<global>#0 -> choose#0
+ EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#10
+ EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#11
+-EDGES|CONTAINS main.c:PICK:int(0)#0 -> main.c:PICK:int(0)#1
+ EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+ EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+ EDGES|EVAL_TYPE api.h:<global>#1 -> T:ANY
+ EDGES|EVAL_TYPE api.h:<global>#2 -> T:ANY
++EDGES|EVAL_TYPE api.h:PICK:int(0)#1 -> T:ANY
++EDGES|EVAL_TYPE api.h:PICK:int(0)#2 -> T:int
+ EDGES|EVAL_TYPE choose#1 -> T:void
+ EDGES|EVAL_TYPE choose#2 -> T:void
+ EDGES|EVAL_TYPE choose#3 -> T:void
+@@ -101,8 +103,6 @@
+ EDGES|EVAL_TYPE main.c:<global>#10 -> T:ANY
+ EDGES|EVAL_TYPE main.c:<global>#11 -> T:choose
+ EDGES|EVAL_TYPE main.c:<global>#12 -> T:ANY
+-EDGES|EVAL_TYPE main.c:PICK:int(0)#1 -> T:ANY
+-EDGES|EVAL_TYPE main.c:PICK:int(0)#2 -> T:int
+ EDGES|PARAMETER_LINK choose#1 -> choose#2
+ EDGES|REF NB:<global> -> NS:<global>
+ EDGES|REF NB:<includes>:<global> -> NS:<global>
+@@ -125,9 +125,9 @@
+ EDGES|SOURCE_FILE NB:api.h:<global> -> F:api.h
+ EDGES|SOURCE_FILE NB:main.c:<global> -> F:main.c
+ EDGES|SOURCE_FILE api.h:<global>#0 -> F:api.h
++EDGES|SOURCE_FILE api.h:PICK:int(0)#0 -> F:main.c
+ EDGES|SOURCE_FILE choose#0 -> F:main.c
+ EDGES|SOURCE_FILE main.c:<global>#0 -> F:main.c
+-EDGES|SOURCE_FILE main.c:PICK:int(0)#0 -> F:main.c
+ FLOWS|REACHING_DEF[<RET>] choose#4 -> choose#8
+ FLOWS|REACHING_DEF[PICK] choose#5 -> choose#4
+ FLOWS|REACHING_DEF[PICK] choose#5 -> choose#8
