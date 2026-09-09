@@ -1,0 +1,649 @@
+{
+  "scope": "Eleven saved-CPG observations: eight new identity projects and three retained controls. Complete snapshots retained; no cross-producer ID equality or whole-port metric.",
+  "cases": [
+    {
+      "case": "duplicate_inherited_static",
+      "group": "new",
+      "acceptedCanonicalExact": false,
+      "candidateCanonicalExact": true
+    },
+    {
+      "case": "duplicate_inline_before_static",
+      "group": "new",
+      "acceptedCanonicalExact": false,
+      "candidateCanonicalExact": true
+    },
+    {
+      "case": "duplicate_literal_static",
+      "group": "new",
+      "acceptedCanonicalExact": false,
+      "candidateCanonicalExact": true
+    },
+    {
+      "case": "duplicate_plain",
+      "group": "new",
+      "acceptedCanonicalExact": false,
+      "candidateCanonicalExact": true
+    },
+    {
+      "case": "duplicate_same_file_location_order",
+      "group": "new",
+      "acceptedCanonicalExact": false,
+      "candidateCanonicalExact": true
+    },
+    {
+      "case": "duplicate_static_late_prototype",
+      "group": "new",
+      "acceptedCanonicalExact": false,
+      "candidateCanonicalExact": true
+    },
+    {
+      "case": "duplicate_supplied_macro_local",
+      "group": "new",
+      "acceptedCanonicalExact": false,
+      "candidateCanonicalExact": true
+    },
+    {
+      "case": "unique_plain_and_static",
+      "group": "new",
+      "acceptedCanonicalExact": true,
+      "candidateCanonicalExact": true
+    },
+    {
+      "case": "tiny_fixedtables_include",
+      "group": "retained",
+      "acceptedCanonicalExact": true,
+      "candidateCanonicalExact": true
+    },
+    {
+      "case": "tiny_fixedtables_inline",
+      "group": "retained",
+      "acceptedCanonicalExact": true,
+      "candidateCanonicalExact": true
+    },
+    {
+      "case": "unsigned_short_array",
+      "group": "retained",
+      "acceptedCanonicalExact": true,
+      "candidateCanonicalExact": true
+    }
+  ],
+  "counts": {
+    "rust": {
+      "nodes": {
+        "BINDING": 36,
+        "BLOCK": 84,
+        "CALL": 64,
+        "FIELD_IDENTIFIER": 4,
+        "FILE": 42,
+        "IDENTIFIER": 54,
+        "LITERAL": 42,
+        "LOCAL": 6,
+        "MEMBER": 11,
+        "META_DATA": 11,
+        "METHOD": 84,
+        "METHOD_PARAMETER_IN": 70,
+        "METHOD_PARAMETER_OUT": 70,
+        "METHOD_REF": 35,
+        "METHOD_RETURN": 84,
+        "MODIFIER": 10,
+        "NAMESPACE": 11,
+        "NAMESPACE_BLOCK": 42,
+        "RETURN": 32,
+        "TYPE": 80,
+        "TYPE_DECL": 108,
+        "TYPE_REF": 5
+      },
+      "edges": {
+        "ARGUMENT": 149,
+        "AST": 614,
+        "BINDS": 36,
+        "CALL": 64,
+        "CFG": 320,
+        "CONTAINS": 495,
+        "EVAL_TYPE": 524,
+        "PARAMETER_LINK": 70,
+        "REACHING_DEF": 660,
+        "REF": 243,
+        "SOURCE_FILE": 217
+      },
+      "properties": {
+        "CODE": 687,
+        "FULL_NAME": 314,
+        "LANGUAGE": 11,
+        "LINE_NUMBER": 474,
+        "METHOD_FULL_NAME": 135,
+        "MODIFIER_TYPE": 10,
+        "NAME": 678,
+        "SIGNATURE": 70,
+        "TYPE_DECL_FULL_NAME": 80,
+        "TYPE_FULL_NAME": 524
+      },
+      "astEndpointLabels": {
+        "BLOCK -> CALL": 15,
+        "BLOCK -> LOCAL": 6,
+        "BLOCK -> METHOD_REF": 35,
+        "BLOCK -> RETURN": 32,
+        "BLOCK -> TYPE_REF": 5,
+        "CALL -> CALL": 25,
+        "CALL -> FIELD_IDENTIFIER": 4,
+        "CALL -> IDENTIFIER": 47,
+        "CALL -> LITERAL": 41,
+        "METHOD -> BLOCK": 84,
+        "METHOD -> METHOD": 35,
+        "METHOD -> METHOD_PARAMETER_IN": 70,
+        "METHOD -> METHOD_PARAMETER_OUT": 70,
+        "METHOD -> METHOD_RETURN": 84,
+        "METHOD -> MODIFIER": 10,
+        "METHOD -> TYPE_DECL": 7,
+        "RETURN -> CALL": 24,
+        "RETURN -> IDENTIFIER": 7,
+        "RETURN -> LITERAL": 1,
+        "TYPE_DECL -> MEMBER": 11,
+        "TYPE_DECL -> METHOD": 1
+      }
+    },
+    "joern": {
+      "nodes": {
+        "BINDING": 36,
+        "BLOCK": 84,
+        "CALL": 64,
+        "DEPENDENCY": 3,
+        "FIELD_IDENTIFIER": 4,
+        "FILE": 42,
+        "IDENTIFIER": 54,
+        "IMPORT": 3,
+        "LITERAL": 42,
+        "LOCAL": 6,
+        "MEMBER": 11,
+        "META_DATA": 11,
+        "METHOD": 84,
+        "METHOD_PARAMETER_IN": 70,
+        "METHOD_PARAMETER_OUT": 70,
+        "METHOD_REF": 35,
+        "METHOD_RETURN": 84,
+        "MODIFIER": 10,
+        "NAMESPACE": 11,
+        "NAMESPACE_BLOCK": 42,
+        "RETURN": 32,
+        "TYPE": 80,
+        "TYPE_DECL": 108,
+        "TYPE_REF": 5
+      },
+      "edges": {
+        "ALIAS_OF": 4,
+        "ARGUMENT": 149,
+        "AST": 797,
+        "BINDS": 36,
+        "CALL": 64,
+        "CFG": 320,
+        "CONTAINS": 495,
+        "DOMINATE": 320,
+        "EVAL_TYPE": 524,
+        "IMPORTS": 3,
+        "PARAMETER_LINK": 70,
+        "POST_DOMINATE": 320,
+        "REACHING_DEF": 670,
+        "REF": 243,
+        "SOURCE_FILE": 217
+      },
+      "properties": {
+        "ALIAS_TYPE_FULL_NAME": 4,
+        "ARGUMENT_INDEX": 134,
+        "AST_PARENT_FULL_NAME": 192,
+        "AST_PARENT_TYPE": 192,
+        "CANONICAL_NAME": 4,
+        "CODE": 690,
+        "COLUMN_NUMBER": 563,
+        "COLUMN_NUMBER_END": 56,
+        "DEPENDENCY_GROUP_ID": 3,
+        "DISPATCH_TYPE": 64,
+        "EVALUATION_STRATEGY": 224,
+        "FILENAME": 217,
+        "FULL_NAME": 314,
+        "IMPORTED_AS": 3,
+        "IMPORTED_ENTITY": 3,
+        "INDEX": 140,
+        "IS_EXTERNAL": 63,
+        "LANGUAGE": 11,
+        "LINE_NUMBER": 585,
+        "LINE_NUMBER_END": 56,
+        "METHOD_FULL_NAME": 135,
+        "MODIFIER_TYPE": 10,
+        "NAME": 681,
+        "ORDER": 804,
+        "OVERLAYS": 11,
+        "ROOT": 11,
+        "SIGNATURE": 70,
+        "TYPE_DECL_FULL_NAME": 80,
+        "TYPE_FULL_NAME": 524,
+        "VERSION": 14
+      },
+      "astEndpointLabels": {
+        "BLOCK -> CALL": 15,
+        "BLOCK -> LOCAL": 6,
+        "BLOCK -> METHOD_REF": 35,
+        "BLOCK -> RETURN": 32,
+        "BLOCK -> TYPE_REF": 5,
+        "CALL -> CALL": 25,
+        "CALL -> FIELD_IDENTIFIER": 4,
+        "CALL -> IDENTIFIER": 47,
+        "CALL -> LITERAL": 41,
+        "FILE -> NAMESPACE_BLOCK": 31,
+        "METHOD -> BLOCK": 84,
+        "METHOD -> METHOD": 35,
+        "METHOD -> METHOD_PARAMETER_IN": 70,
+        "METHOD -> METHOD_PARAMETER_OUT": 70,
+        "METHOD -> METHOD_RETURN": 84,
+        "METHOD -> MODIFIER": 10,
+        "METHOD -> TYPE_DECL": 7,
+        "NAMESPACE_BLOCK -> IMPORT": 3,
+        "NAMESPACE_BLOCK -> METHOD": 28,
+        "NAMESPACE_BLOCK -> TYPE_DECL": 66,
+        "RETURN -> CALL": 24,
+        "RETURN -> IDENTIFIER": 7,
+        "RETURN -> LITERAL": 1,
+        "TYPE_DECL -> MEMBER": 11,
+        "TYPE_DECL -> METHOD": 21,
+        "TYPE_DECL -> TYPE_DECL": 35
+      }
+    }
+  },
+  "nodeLabelCountDeficits": {
+    "DEPENDENCY": 3,
+    "IMPORT": 3
+  },
+  "edgeLabelCountDeficits": {
+    "AST": 183,
+    "REACHING_DEF": 10,
+    "DOMINATE": 320,
+    "POST_DOMINATE": 320,
+    "IMPORTS": 3,
+    "ALIAS_OF": 4
+  },
+  "astEndpointLabelCountDeficits": {
+    "FILE -> NAMESPACE_BLOCK": 31,
+    "NAMESPACE_BLOCK -> METHOD": 28,
+    "NAMESPACE_BLOCK -> TYPE_DECL": 66,
+    "TYPE_DECL -> METHOD": 20,
+    "TYPE_DECL -> TYPE_DECL": 35,
+    "NAMESPACE_BLOCK -> IMPORT": 3
+  },
+  "propertiesObservedInJoernAbsentFromAllRustPropertyMaps": {
+    "COLUMN_NUMBER": 563,
+    "ORDER": 804,
+    "ARGUMENT_INDEX": 134,
+    "DISPATCH_TYPE": 64,
+    "OVERLAYS": 11,
+    "ROOT": 11,
+    "VERSION": 14,
+    "AST_PARENT_FULL_NAME": 192,
+    "AST_PARENT_TYPE": 192,
+    "COLUMN_NUMBER_END": 56,
+    "FILENAME": 217,
+    "LINE_NUMBER_END": 56,
+    "IS_EXTERNAL": 63,
+    "EVALUATION_STRATEGY": 224,
+    "INDEX": 140,
+    "DEPENDENCY_GROUP_ID": 3,
+    "IMPORTED_AS": 3,
+    "IMPORTED_ENTITY": 3,
+    "CANONICAL_NAME": 4,
+    "ALIAS_TYPE_FULL_NAME": 4
+  },
+  "allMissingImportDependencyNodesWithActualEndpoints": [
+    {
+      "case": "duplicate_supplied_macro_local",
+      "completeNodesAndEndpoints": [
+        {
+          "id": "137438953473",
+          "label": "NAMESPACE_BLOCK",
+          "properties": {
+            "FILENAME": {
+              "kind": "string",
+              "value": "a.c"
+            },
+            "FULL_NAME": {
+              "kind": "string",
+              "value": "a.c:<global>"
+            },
+            "NAME": {
+              "kind": "string",
+              "value": "<global>"
+            },
+            "ORDER": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "1"
+            }
+          }
+        },
+        {
+          "id": "137438953474",
+          "label": "NAMESPACE_BLOCK",
+          "properties": {
+            "FILENAME": {
+              "kind": "string",
+              "value": "b.c"
+            },
+            "FULL_NAME": {
+              "kind": "string",
+              "value": "b.c:<global>"
+            },
+            "NAME": {
+              "kind": "string",
+              "value": "<global>"
+            },
+            "ORDER": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "1"
+            }
+          }
+        },
+        {
+          "id": "51539607552",
+          "label": "DEPENDENCY",
+          "properties": {
+            "DEPENDENCY_GROUP_ID": {
+              "kind": "string",
+              "value": "api.h"
+            },
+            "NAME": {
+              "kind": "string",
+              "value": "api.h"
+            },
+            "VERSION": {
+              "kind": "string",
+              "value": "include"
+            }
+          }
+        },
+        {
+          "id": "51539607553",
+          "label": "DEPENDENCY",
+          "properties": {
+            "DEPENDENCY_GROUP_ID": {
+              "kind": "string",
+              "value": "api.h"
+            },
+            "NAME": {
+              "kind": "string",
+              "value": "api.h"
+            },
+            "VERSION": {
+              "kind": "string",
+              "value": "include"
+            }
+          }
+        },
+        {
+          "id": "73014444032",
+          "label": "IMPORT",
+          "properties": {
+            "CODE": {
+              "kind": "string",
+              "value": "#include \"api.h\""
+            },
+            "COLUMN_NUMBER": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "1"
+            },
+            "IMPORTED_AS": {
+              "kind": "string",
+              "value": "api.h"
+            },
+            "IMPORTED_ENTITY": {
+              "kind": "string",
+              "value": "api.h"
+            },
+            "LINE_NUMBER": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "1"
+            },
+            "ORDER": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "1"
+            }
+          }
+        },
+        {
+          "id": "73014444033",
+          "label": "IMPORT",
+          "properties": {
+            "CODE": {
+              "kind": "string",
+              "value": "#include \"api.h\""
+            },
+            "COLUMN_NUMBER": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "1"
+            },
+            "IMPORTED_AS": {
+              "kind": "string",
+              "value": "api.h"
+            },
+            "IMPORTED_ENTITY": {
+              "kind": "string",
+              "value": "api.h"
+            },
+            "LINE_NUMBER": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "1"
+            },
+            "ORDER": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "1"
+            }
+          }
+        }
+      ],
+      "allIncidentEdges": [
+        {
+          "source": "73014444032",
+          "destination": "51539607552",
+          "label": "IMPORTS",
+          "property": {
+            "kind": "null"
+          }
+        },
+        {
+          "source": "73014444033",
+          "destination": "51539607553",
+          "label": "IMPORTS",
+          "property": {
+            "kind": "null"
+          }
+        },
+        {
+          "source": "137438953473",
+          "destination": "73014444032",
+          "label": "AST",
+          "property": {
+            "kind": "null"
+          }
+        },
+        {
+          "source": "137438953474",
+          "destination": "73014444033",
+          "label": "AST",
+          "property": {
+            "kind": "null"
+          }
+        }
+      ],
+      "sourceFiles": {
+        "a.c": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/fixedtables-identity-runner-v3/runs/first-complete-eight-identity-reference-batch/snapshot/input/duplicate_supplied_macro_local/a.c",
+          "sha256": "1451c2a021da1bec7b92bea600133bc4c30a4666c184ce9a64006669035e207e",
+          "bytes": 112,
+          "error": null
+        },
+        "api.h": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/fixedtables-identity-runner-v3/runs/first-complete-eight-identity-reference-batch/snapshot/input/duplicate_supplied_macro_local/api.h",
+          "sha256": "1204017a881a23dd38815832b040f76d3b37ee3355e4f2c1ead9d3e3a4b17db1",
+          "bytes": 21,
+          "error": null
+        },
+        "b.c": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/fixedtables-identity-runner-v3/runs/first-complete-eight-identity-reference-batch/snapshot/input/duplicate_supplied_macro_local/b.c",
+          "sha256": "df59ac123d32a8c86f1161077f35046e09b2862fdc48b0ce7d66cb6181713d64",
+          "bytes": 116,
+          "error": null
+        }
+      }
+    },
+    {
+      "case": "tiny_fixedtables_include",
+      "completeNodesAndEndpoints": [
+        {
+          "id": "137438953473",
+          "label": "NAMESPACE_BLOCK",
+          "properties": {
+            "FILENAME": {
+              "kind": "string",
+              "value": "main.c"
+            },
+            "FULL_NAME": {
+              "kind": "string",
+              "value": "main.c:<global>"
+            },
+            "NAME": {
+              "kind": "string",
+              "value": "<global>"
+            },
+            "ORDER": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "1"
+            }
+          }
+        },
+        {
+          "id": "51539607552",
+          "label": "DEPENDENCY",
+          "properties": {
+            "DEPENDENCY_GROUP_ID": {
+              "kind": "string",
+              "value": "fixed.h"
+            },
+            "NAME": {
+              "kind": "string",
+              "value": "fixed.h"
+            },
+            "VERSION": {
+              "kind": "string",
+              "value": "include"
+            }
+          }
+        },
+        {
+          "id": "73014444032",
+          "label": "IMPORT",
+          "properties": {
+            "CODE": {
+              "kind": "string",
+              "value": "#include \"fixed.h\""
+            },
+            "COLUMN_NUMBER": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "1"
+            },
+            "IMPORTED_AS": {
+              "kind": "string",
+              "value": "fixed.h"
+            },
+            "IMPORTED_ENTITY": {
+              "kind": "string",
+              "value": "fixed.h"
+            },
+            "LINE_NUMBER": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "8"
+            },
+            "ORDER": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "1"
+            }
+          }
+        }
+      ],
+      "allIncidentEdges": [
+        {
+          "source": "73014444032",
+          "destination": "51539607552",
+          "label": "IMPORTS",
+          "property": {
+            "kind": "null"
+          }
+        },
+        {
+          "source": "137438953473",
+          "destination": "73014444032",
+          "label": "AST",
+          "property": {
+            "kind": "null"
+          }
+        }
+      ],
+      "sourceFiles": {
+        "fixed.h": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-runner-v3/runs/first-complete-primitive-member-reference-batch/snapshot/input/tiny_fixedtables_include/fixed.h",
+          "sha256": "3039380a12e6dba1fb44314f13292d1b5ec6744aa80eff5599566a29ea94ea86",
+          "bytes": 98,
+          "error": null
+        },
+        "main.c": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-runner-v3/runs/first-complete-primitive-member-reference-batch/snapshot/input/tiny_fixedtables_include/main.c",
+          "sha256": "7203039d3be732abfb9abaad7177eaa77efa51d6e9fa58d58733346eb6cb4dda",
+          "bytes": 254,
+          "error": null
+        }
+      }
+    }
+  ],
+  "bindings": {
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/twelfth-batch/final-eleven-capture-v2/run.json": "204c6506837a2479bab32f98ce83549005580cdadb91ba2a750f63ceb5f7a622",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/twelfth-batch/final-eleven-capture-v2/duplicate_inherited_static/candidate-supplement.stdout": "9dc822db0bef389ae3bcc1d013b6dadb13167dcec18a4e787a2fd4f95c2a7e6c",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/twelfth-identity-observer-v2/runs/first-complete-eleven-identity-saved-cpg-observation/admitted-supplement/duplicate_inherited_static/supplement.jsonl": "93814482a29ad013c725bf899497c6e6a57614e33b34a067c1a16d5651f22647",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/twelfth-batch/final-eleven-capture-v2/duplicate_inline_before_static/candidate-supplement.stdout": "43b99d5e6ef0f3d7aa420f8618fe319426cdf853727bc19b25310183608bad40",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/twelfth-identity-observer-v2/runs/first-complete-eleven-identity-saved-cpg-observation/admitted-supplement/duplicate_inline_before_static/supplement.jsonl": "f0a7440a5e1149ecef802a3891ff34fd2f6051f5e779051c3c15a01927622ad3",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/twelfth-batch/final-eleven-capture-v2/duplicate_literal_static/candidate-supplement.stdout": "ad68d7179de0424ad90ab9cd14d1cdef8ed2797a874c81990cdf310431284ced",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/twelfth-identity-observer-v2/runs/first-complete-eleven-identity-saved-cpg-observation/admitted-supplement/duplicate_literal_static/supplement.jsonl": "f1f6d0f013e5bc21ba10ae13cbc95953ce3a52ddba29d63b2081bd702c8db47c",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/twelfth-batch/final-eleven-capture-v2/duplicate_plain/candidate-supplement.stdout": "e889a83a602d896d873485fcc4eb46e02cc5dc3c23861093d9a24793b0db2857",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/twelfth-identity-observer-v2/runs/first-complete-eleven-identity-saved-cpg-observation/admitted-supplement/duplicate_plain/supplement.jsonl": "09e0464f5c1ad32722ee244d1afd45d87161854029b953bb5983cca5eeb28595",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/twelfth-batch/final-eleven-capture-v2/duplicate_same_file_location_order/candidate-supplement.stdout": "457efd9ae61f29b1db5a5ba6dd33d1fab64c98918e5aa4c5eb5ba414181e601a",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/twelfth-identity-observer-v2/runs/first-complete-eleven-identity-saved-cpg-observation/admitted-supplement/duplicate_same_file_location_order/supplement.jsonl": "74162d8b75ddbdbe5ec654fd4dbe3d236ec22cd9f7f2b47b1b63a5785fec823d",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/twelfth-batch/final-eleven-capture-v2/duplicate_static_late_prototype/candidate-supplement.stdout": "d719ba6a12895a5ec0e41c90acd8227ad4075685930286726a788a1ab4bbfe47",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/twelfth-identity-observer-v2/runs/first-complete-eleven-identity-saved-cpg-observation/admitted-supplement/duplicate_static_late_prototype/supplement.jsonl": "bec5de42f713c597df1b4172294cdbbb074463e5b5f4f1bb907f2f697bb3aeb4",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/twelfth-batch/final-eleven-capture-v2/duplicate_supplied_macro_local/candidate-supplement.stdout": "aa4c43b587736b9bf7e74665e06806ba861525964485e3a3c374aebbf3ee79d3",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/twelfth-identity-observer-v2/runs/first-complete-eleven-identity-saved-cpg-observation/admitted-supplement/duplicate_supplied_macro_local/supplement.jsonl": "1f67ba287f994102e81216f7f3e97eb4ae2322706804804c2866c9685c31cc3f",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/twelfth-batch/final-eleven-capture-v2/unique_plain_and_static/candidate-supplement.stdout": "732d1d120c469aa96b8e2d6ecf1361d81383bea2095dffa1db40affb1fd8bb2b",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/twelfth-identity-observer-v2/runs/first-complete-eleven-identity-saved-cpg-observation/admitted-supplement/unique_plain_and_static/supplement.jsonl": "50d364429530fde28ca09a98349c063fecd9619db8733afb090b3ab52ad0ee2e",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/twelfth-batch/final-eleven-capture-v2/tiny_fixedtables_include/candidate-supplement.stdout": "4ee92b50ab79430ecbece8c2adcd3a4d6d064d8f7f5b1baf98f02c6ea0caa2bf",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/twelfth-identity-observer-v2/runs/first-complete-eleven-identity-saved-cpg-observation/admitted-supplement/tiny_fixedtables_include/supplement.jsonl": "f61a07a81f97b38480fc42a913b05dac13f9d75e3826ccf7217072a7a3d9fc5f",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/twelfth-batch/final-eleven-capture-v2/tiny_fixedtables_inline/candidate-supplement.stdout": "74d3e1e686f9a33c4002e0302b69cda801afb99a3a2f35cf43fd29490537e209",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/twelfth-identity-observer-v2/runs/first-complete-eleven-identity-saved-cpg-observation/admitted-supplement/tiny_fixedtables_inline/supplement.jsonl": "2eb6a67d75ece96e0b5399e7ccb587ede448d9b83f16c757431c2fda5747fdf6",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/twelfth-batch/final-eleven-capture-v2/unsigned_short_array/candidate-supplement.stdout": "9e3e3b3ec9b42957efe1e835dc72bd38e67fc3b644075eab50c568f1c9c151e9",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/twelfth-identity-observer-v2/runs/first-complete-eleven-identity-saved-cpg-observation/admitted-supplement/unsigned_short_array/supplement.jsonl": "a5bb5ce52e2d976fa59f2a853fd3d549e70ad9069156327d1251c80041d7bb8a",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/joern-parity/tests/fixtures/body-macro-state/provenance/upstream/AstCreatorHelper.scala": "1c3514cb3e006b8c8bf1bb6b5cee072969416a8c94353d185a5ebacbe00e92f2",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/twelfth-batch/lint-corrected/binary-continuity.json": "cde1c14a70485437632f9a483fd074af23bb363995fe5af09c75854a4d37d3d0",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/twelfth-batch/lint-corrected/final-real-differential/bin/source-bindings.json": "33f4740b78f60a142a615b1a07b2a2ea448ed7955e9464395e72fe6a8af91dda",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/twelfth-root-eleven-review-v2/result/final-review.json": "f49071787f448bb48aea7f15eaf79458a14cea0ed920e9fb9a9468ca9f9179d0",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/twelfth-lint-continuity-review/review.json": "404be0c795e93cdb2e255faaf86a89c245277389da408270a15ea6cbcc74f92d"
+  },
+  "limitations": [
+    "Label count differences are not a complete endpoint-by-endpoint source-occurrence matching result.",
+    "Dedicated Rust storage fields can retain an order/index/file relationship without representing the Joern property or its missingness.",
+    "The recommended import increment is a proposal; no implementation, new reference generation or resource claim."
+  ]
+}

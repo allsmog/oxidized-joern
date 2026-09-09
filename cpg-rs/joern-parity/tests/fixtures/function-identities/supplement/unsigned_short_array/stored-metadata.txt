@@ -1,0 +1,5 @@
+BINDING|<clinit>|Record.<clinit>:Record()|<absent>|main.c:<global>|Record.<clinit>:Record()
+BINDING|ordinary|ordinary|int(void)|ordinary|ordinary
+METHOD_REF|ordinary|ordinary|ordinary|ordinary
+MODIFIER|Record.<clinit>:Record()|2|CONSTRUCTOR|<absent>
+MODIFIER|Record.<clinit>:Record()|3|STATIC|<absent>

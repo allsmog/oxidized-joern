@@ -330,3 +330,29 @@ bases. Enum members, named-type fallback, member suffixes and initializer
 construction retain their existing paths. Complete nonprimitive and older
 `member_types` diagnostics remain recorded separately from the 18 complete
 graph gates, including two retained fixedtables anchors.
+
+### Duplicate function identities and stored metadata
+
+The eight [complete function-identity controls](tests/function_identities.rs)
+pin c2cpg's duplicate pass: definitions sort by filename, line and column;
+the first full name stays unchanged and later definitions receive
+`<duplicate>0`, `<duplicate>1`, and so on. For a duplicate carrying a literal
+STATIC modifier, matching CALL NAME and METHOD_FULL_NAME change in its file,
+except that the first definition's entire file is excluded. An inherited
+static prototype, an `inline static` prefix and a macro spelling expanding to
+static do not produce that modifier in these controls. METHOD_REF spelling
+and semantic REF targets retain the original name; their physical source
+lines still belong to their own originating definitions.
+
+Separate complete saved-CPG observations pin BINDING NAME, METHOD_FULL_NAME,
+optional SIGNATURE and distinct BINDS/REF endpoints. The retained array-member
+initializer binds from the file-global TYPE_DECL and has no binding signature.
+Its modifiers are CONSTRUCTOR/ORDER 2 and STATIC/ORDER 3, both without locations.
+Ordinary literal STATIC modifiers retain the observed definition lines.
+CPG2 version 2 stores these properties; retained version 1 graphs reopen with
+the new modifier property absent.
+
+The canonical oracle omits BINDING properties and MODIFIER_TYPE. The complete
+supplemental observations retain IMPORT/DEPENDENCY omissions, unstored columns
+and end locations, property-presence limitations, and edge differences.
+Canonical equality therefore does not establish complete schema parity.

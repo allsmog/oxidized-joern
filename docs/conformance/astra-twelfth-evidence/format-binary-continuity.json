@@ -1,0 +1,33 @@
+{
+  "status": "IDENTICAL_RELEASE_BINARIES_AFTER_FORMAT_ONLY_REBUILD",
+  "previousBuild": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/twelfth-batch/final-real-differential/bin/source-bindings.json",
+    "sha256": "1beeceab8737859d052de0915fd8015d271a705e69749c5bfb8c793d1c016739"
+  },
+  "finalBuild": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/twelfth-batch/fmt-corrected/final-real-differential/bin/source-bindings.json",
+    "sha256": "7e5397d0a3d9ed1650e67c2959fc26006239d97d92ea820adf771200597e895d"
+  },
+  "identicalBinaryHashes": {
+    "cpg": "4567fa27bfdf676995826fb739b3383662bdd1f9154578dea89620261aa40f47",
+    "joern-parity": "8c451b35775018728f71274f2cff1fc665ec35997a00b05760a66769cddc0d10"
+  },
+  "changedSourceFiles": [
+    "cpg-rs/cpg-core/src/graph.rs",
+    "cpg-rs/joern-parity/src/supplemental.rs"
+  ],
+  "unchangedFixtureCount": 11642,
+  "newSourceCount": 149,
+  "formatPatchSha256": "9f567f50e5585046d9eb9799c256629fe84c336de08659aecfdab126abdf71e3",
+  "reusedProducerEvidence": {
+    "elevenCapture": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/twelfth-batch/final-eleven-capture-v2/run.json",
+      "sha256": "204c6506837a2479bab32f98ce83549005580cdadb91ba2a750f63ceb5f7a622"
+    },
+    "wholeProjectComparison": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/twelfth-batch/final-real-differential/comparison-run.json",
+      "sha256": "35f8e82e857ffd1bb26f2c66bfc51b88181708a9ebec2ddad4e67fdc8683611d"
+    }
+  },
+  "claim": "The actual release executable bytes are identical across both builds. Earlier complete eleven-case and whole-project outputs are reused explicitly; no repeat execution is claimed. Final source/fixture validation remains required."
+}

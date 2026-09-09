@@ -102,15 +102,31 @@ fn duplicate_translation_unit_helpers_keep_distinct_call_targets() {
         ),
     ]);
 
-    for (file, expected) in [("a.c", "a.c:helper"), ("b.c", "b.c:helper")] {
+    for (file, call_name, expected, definition) in [
+        (
+            "a.c",
+            "helper",
+            "helper",
+            "static int helper(int x) { return x; }",
+        ),
+        (
+            "b.c",
+            "helper<duplicate>0",
+            "helper<duplicate>0",
+            "static int helper(int x) { return x + 1; }",
+        ),
+    ] {
         let call = cpg
-            .calls_named("helper")
+            .calls_named(call_name)
             .into_iter()
             .find(|&node| cpg.path_of(cpg.file_of(node)) == Some(file))
             .unwrap_or_else(|| panic!("missing helper call in {file}"));
         let targets = cpg.call_targets(call);
         assert_eq!(targets.len(), 1, "{file} targets: {targets:?}");
         assert_eq!(cpg.full_name_of(targets[0]), Some(expected));
+        assert_eq!(cpg.path_of(cpg.file_of(targets[0])), Some(file));
+        assert_eq!(cpg.code_of(targets[0]), Some(definition));
+        assert_eq!(cpg.line_of(targets[0]), Some(1));
     }
 }
 

@@ -1,0 +1,914 @@
+{
+  "status": "PASS_BOUNDED_WHOLE_IDENTITY_SOURCE_OCCURRENCE_RETENTION",
+  "baselineCommit": "c3a8c67e01354872b767b857c98252169bd5cca0",
+  "firstActualWholeComparison": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/twelfth-batch/final-real-differential/comparison-run.json",
+    "sha256": "35f8e82e857ffd1bb26f2c66bfc51b88181708a9ebec2ddad4e67fdc8683611d",
+    "bytes": 31919244
+  },
+  "finalFrozenBuild": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/twelfth-batch/lint-corrected/final-real-differential/bin/source-bindings.json",
+    "sha256": "33f4740b78f60a142a615b1a07b2a2ea448ed7955e9464395e72fe6a8af91dda",
+    "bytes": 2121168
+  },
+  "binaries": {
+    "cpg": "4567fa27bfdf676995826fb739b3383662bdd1f9154578dea89620261aa40f47",
+    "joern-parity": "8c451b35775018728f71274f2cff1fc665ec35997a00b05760a66769cddc0d10"
+  },
+  "continuity": [
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/twelfth-batch/fmt-corrected/binary-continuity.json",
+      "sha256": "9ea601adf2f892d72542fb20ae4d5a98181a8204608df04c700ff6473d0e4bcd",
+      "bytes": 1946
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/twelfth-batch/lint-corrected/binary-continuity.json",
+      "sha256": "cde1c14a70485437632f9a483fd074af23bb363995fe5af09c75854a4d37d3d0",
+      "bytes": 1747
+    }
+  ],
+  "reuseClaim": "Final release bytes exactly match first actual whole producer; no repeat execution claimed.",
+  "priorAcceptedWholeReview": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/eleventh-batch/final/whole-review.json",
+    "sha256": "e026b920863243aa3679655eb9f9c45a6083ba8b15edfbceec89b8ff4f09c669",
+    "bytes": 14524
+  },
+  "projects": [
+    {
+      "case": "zlib-1.3.1-core-full",
+      "sourceFiles": 26,
+      "canonicalCounts": {
+        "AST": 94117,
+        "NODES": 696,
+        "EDGES": 276477,
+        "FLOWS": 162011
+      },
+      "rawMultisetDelta": {
+        "added": 27709,
+        "removed": 27715,
+        "matchingGained": 27686,
+        "matchingLost": 0
+      },
+      "exactMethodsBefore": 160,
+      "exactMethodsCurrent": 160,
+      "exactMethodsLost": [],
+      "exactMethodsGained": [],
+      "changedAstViewOccurrences": 8,
+      "priorFactsRetained": 12,
+      "selectedMethodTreesRetained": 5,
+      "snprintfCallsRetained": 3,
+      "fullComparison": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-function-identities/.local/twelfth-whole-review-v1/zlib-1.3.1-core-full/comparison.json",
+        "sha256": "c885a797b9a0d838eaae2fb95712d740eaa0f68459663b8b19d667ef71919b5d",
+        "bytes": 44784
+      },
+      "rawChangesWithMultiplicity": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-function-identities/.local/twelfth-whole-review-v1/zlib-1.3.1-core-full/complete-selected-delta.json",
+        "sha256": "24520ff59c09f91855715aa850f37b9c93f08f8d3f5885bc24f1326d900220b4",
+        "bytes": 12647574
+      },
+      "sourceOccurrenceReview": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-function-identities/.local/twelfth-whole-review-v1/zlib-1.3.1-core-full/identity-occurrence-review.json",
+        "sha256": "ba37b5db2d59d913d6de0940c69ab539b63e32dc88c7cccf08dd4dd0fd204ae3",
+        "bytes": 180756
+      },
+      "sourceRoleMultiplicityBridge": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-function-identities/.local/twelfth-whole-review-v1/zlib-1.3.1-core-full/identity-source-role-candidates-review.json",
+        "sha256": "2b95d70bda3b24ced4ff6f88a93c851ba4773d6feebfc68096a942b6351c9b30",
+        "bytes": 14562
+      },
+      "priorityReview": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-function-identities/.local/twelfth-whole-review-v1/zlib-1.3.1-core-full/priority-review.json",
+        "sha256": "9b632e9904f5d2d8404b9a6a0b76c70648cc6f2ce042569fb30336ddf81b7664",
+        "bytes": 23904
+      },
+      "actualProducer": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/twelfth-batch/final-real-differential/zlib-1.3.1-core-full/run.json",
+        "sha256": "448cb87c9fd7058cfcb590f8d471ddf000d747de4ac59995b0cdcf074749e5ed",
+        "bytes": 31923935
+      },
+      "rawBindings": {
+        "oracle": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/sixth-batch/fresh-real-oracles/zlib-1.3.1-core-full/joern.stdout",
+          "sha256": "2deeedc465c78e6e3ae0fde8ef7e54444e1d0f7f486a39d89f5c838eec816838",
+          "bytes": 34146770
+        },
+        "baseline": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/eleventh-batch/final-real-differential/zlib-1.3.1-core-full/rust.stdout",
+          "sha256": "0511ae048d6b39e4074012bddd949e5052fef162227be9c5ac1175559f1e2e9c",
+          "bytes": 42973363
+        },
+        "current": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/twelfth-batch/final-real-differential/zlib-1.3.1-core-full/rust.stdout",
+          "sha256": "a60e2aec4b549a5f0d5d27a3abd2133374ad48f626c95efbd16b8b747ece5b86",
+          "bytes": 42781153
+        }
+      },
+      "completeProjectionExact": false
+    },
+    {
+      "case": "lua-5.4.7-full",
+      "sourceFiles": 61,
+      "canonicalCounts": {
+        "AST": 222285,
+        "NODES": 3042,
+        "EDGES": 440480,
+        "FLOWS": 229251
+      },
+      "rawMultisetDelta": {
+        "added": 3772,
+        "removed": 3788,
+        "matchingGained": 2425,
+        "matchingLost": 0
+      },
+      "exactMethodsBefore": 1438,
+      "exactMethodsCurrent": 1442,
+      "exactMethodsLost": [],
+      "exactMethodsGained": [
+        "main",
+        "str_dump",
+        "writer",
+        "writer<duplicate>0"
+      ],
+      "changedAstViewOccurrences": 30,
+      "priorFactsRetained": 49,
+      "selectedMethodTreesRetained": 14,
+      "snprintfCallsRetained": 0,
+      "fullComparison": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-function-identities/.local/twelfth-whole-review-v1/lua-5.4.7-full/comparison.json",
+        "sha256": "adc1ac623bb1f6fa7665476f66897d60bba828d717bd0525d6c562e1f331d551",
+        "bytes": 244986
+      },
+      "rawChangesWithMultiplicity": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-function-identities/.local/twelfth-whole-review-v1/lua-5.4.7-full/complete-selected-delta.json",
+        "sha256": "43e15ccb486dfd0832316845f8b86a0a01b9fe967b5ed42822f4aeac931d6480",
+        "bytes": 1419643
+      },
+      "sourceOccurrenceReview": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-function-identities/.local/twelfth-whole-review-v1/lua-5.4.7-full/identity-occurrence-review.json",
+        "sha256": "fcff1b4de80eb578ad6911864401e5b060127ef13848e18fdad09545d17c2ca6",
+        "bytes": 257138
+      },
+      "sourceRoleMultiplicityBridge": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-function-identities/.local/twelfth-whole-review-v1/lua-5.4.7-full/identity-source-role-candidates-review.json",
+        "sha256": "ebd36efe272d9feb9678a3121bd4e83b7500f03fcfa438e041e6d26afa6beb72",
+        "bytes": 25787
+      },
+      "priorityReview": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-function-identities/.local/twelfth-whole-review-v1/lua-5.4.7-full/priority-review.json",
+        "sha256": "2eeb516aa8ea5ca5b117e4a6d1752ee2d7d43151d466365ffba70e4888ee6a58",
+        "bytes": 68396
+      },
+      "actualProducer": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/twelfth-batch/final-real-differential/lua-5.4.7-full/run.json",
+        "sha256": "83c58e1e306fe51c5de44ec3a405b318426353e75d97b677bf563949a0802479",
+        "bytes": 31929174
+      },
+      "rawBindings": {
+        "oracle": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/sixth-batch/fresh-real-oracles/lua-5.4.7-full/joern.stdout",
+          "sha256": "36079a6db169b6e450b9d4d91dc0025beb076832e497e0eeb83c11047f8b643e",
+          "bytes": 72696901
+        },
+        "baseline": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/eleventh-batch/final-real-differential/lua-5.4.7-full/rust.stdout",
+          "sha256": "fb258a7fdbbf2ef16c567d9a6ebe1e11ad99cc2432caedefb9d67ce0d491fc79",
+          "bytes": 64458002
+        },
+        "current": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/twelfth-batch/final-real-differential/lua-5.4.7-full/rust.stdout",
+          "sha256": "facbd8f799a47741d3a97af258deefad6279b430a8e73f1588b39bf0c3aefffc",
+          "bytes": 64451294
+        }
+      },
+      "completeProjectionExact": false
+    }
+  ],
+  "fixedtables": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-function-identities/.local/twelfth-whole-review-v1/zlib-1.3.1-core-full/fixedtables/review.json",
+    "sha256": "32a2ab848e0feab30f787ee08c07f8eeda613cd2859faa56fce1bae87d04eabf",
+    "bytes": 174429733
+  },
+  "retainedReviewerAttempts": [
+    {
+      "artifact": "occurrences.stderr",
+      "cause": "Initial verifier required complete METHOD CODE equality to locate embedded oracle header; known truncation prevented match. Successor uses same-name METHOD inside the physically paired file global and checks exact identity property independently.",
+      "binding": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-function-identities/.local/twelfth-whole-review-v1/occurrences.stderr",
+        "sha256": "d5ec1f0e8426ff75e55fd110bf7c7addc906498700dcc3114b9529b4bb3db4a1",
+        "bytes": 394
+      }
+    },
+    {
+      "artifact": "fixedtables.stderr",
+      "cause": "Read-only helper namespace omitted __file__. Successor adds only that module context; no artifact produced before failure.",
+      "binding": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-function-identities/.local/twelfth-whole-review-v1/fixedtables.stderr",
+        "sha256": "658962355fbcb3f97c7cf867ae706c5b567628ec0b084351edbdf55f48c9298a",
+        "bytes": 813
+      }
+    },
+    {
+      "artifact": null,
+      "cause": "Inline role audit initially expected every source role unique. Lua repeated AST views produced two identical-role candidates; final bridge preserves equal multiplicity and verifies changed values on every candidate rather than arbitrarily choosing one. The successful zlib-only unique-role derivative is retained."
+    },
+    {
+      "artifact": "final-review.json",
+      "sha256": "f102e75a8d6e8646f05397f6a882fab1e775039f7bd23b00a59879d2eed81054",
+      "cause": "First seal captured seal.stdout before its final digest print. Only that derivative log hash changed; source/raw/semantic checks unaffected. This successor inventories all completed files after the writer exits."
+    }
+  ],
+  "checks": [
+    {
+      "check": "prior reviewed verifier /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/eleventh-whole-review/compare.py",
+      "pass": true
+    },
+    {
+      "check": "prior reviewed verifier /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/eleventh-whole-review/verify_priority.py",
+      "pass": true
+    },
+    {
+      "check": "fmt-corrected previousBuild receipt",
+      "pass": true
+    },
+    {
+      "check": "fmt-corrected previousBuild successful source binding",
+      "pass": true
+    },
+    {
+      "check": "fmt-corrected previousBuild executable cpg",
+      "pass": true
+    },
+    {
+      "check": "fmt-corrected previousBuild executable joern-parity",
+      "pass": true
+    },
+    {
+      "check": "fmt-corrected previousBuild frozen source cpg-rs/Cargo.lock",
+      "pass": true
+    },
+    {
+      "check": "fmt-corrected previousBuild frozen source cpg-rs/Cargo.toml",
+      "pass": true
+    },
+    {
+      "check": "fmt-corrected previousBuild frozen source cpg-rs/cpg-cli/src/export.rs",
+      "pass": true
+    },
+    {
+      "check": "fmt-corrected previousBuild frozen source cpg-rs/cpg-cli/src/rules.rs",
+      "pass": true
+    },
+    {
+      "check": "fmt-corrected previousBuild frozen source cpg-rs/cpg-cli/src/workspace.rs",
+      "pass": true
+    },
+    {
+      "check": "fmt-corrected previousBuild frozen source cpg-rs/cpg-core/src/graph.rs",
+      "pass": true
+    },
+    {
+      "check": "fmt-corrected previousBuild frozen source cpg-rs/cpg-core/src/schema.rs",
+      "pass": true
+    },
+    {
+      "check": "fmt-corrected previousBuild frozen source cpg-rs/cpg-lang-c/src/exact.rs",
+      "pass": true
+    },
+    {
+      "check": "fmt-corrected previousBuild frozen source cpg-rs/cpg-lang-c/src/import.rs",
+      "pass": true
+    },
+    {
+      "check": "fmt-corrected previousBuild frozen source cpg-rs/cpg-lang-c/src/lib.rs",
+      "pass": true
+    },
+    {
+      "check": "fmt-corrected previousBuild frozen source cpg-rs/joern-parity/src/main.rs",
+      "pass": true
+    },
+    {
+      "check": "fmt-corrected previousBuild frozen source cpg-rs/joern-parity/src/production.rs",
+      "pass": true
+    },
+    {
+      "check": "fmt-corrected previousBuild frozen source cpg-rs/joern-parity/src/supplemental.rs",
+      "pass": true
+    },
+    {
+      "check": "fmt-corrected finalBuild receipt",
+      "pass": true
+    },
+    {
+      "check": "fmt-corrected finalBuild successful source binding",
+      "pass": true
+    },
+    {
+      "check": "fmt-corrected finalBuild executable cpg",
+      "pass": true
+    },
+    {
+      "check": "fmt-corrected finalBuild executable joern-parity",
+      "pass": true
+    },
+    {
+      "check": "fmt-corrected finalBuild frozen source cpg-rs/Cargo.lock",
+      "pass": true
+    },
+    {
+      "check": "fmt-corrected finalBuild frozen source cpg-rs/Cargo.toml",
+      "pass": true
+    },
+    {
+      "check": "fmt-corrected finalBuild frozen source cpg-rs/cpg-cli/src/export.rs",
+      "pass": true
+    },
+    {
+      "check": "fmt-corrected finalBuild frozen source cpg-rs/cpg-cli/src/rules.rs",
+      "pass": true
+    },
+    {
+      "check": "fmt-corrected finalBuild frozen source cpg-rs/cpg-cli/src/workspace.rs",
+      "pass": true
+    },
+    {
+      "check": "fmt-corrected finalBuild frozen source cpg-rs/cpg-core/src/graph.rs",
+      "pass": true
+    },
+    {
+      "check": "fmt-corrected finalBuild frozen source cpg-rs/cpg-core/src/schema.rs",
+      "pass": true
+    },
+    {
+      "check": "fmt-corrected finalBuild frozen source cpg-rs/cpg-lang-c/src/exact.rs",
+      "pass": true
+    },
+    {
+      "check": "fmt-corrected finalBuild frozen source cpg-rs/cpg-lang-c/src/import.rs",
+      "pass": true
+    },
+    {
+      "check": "fmt-corrected finalBuild frozen source cpg-rs/cpg-lang-c/src/lib.rs",
+      "pass": true
+    },
+    {
+      "check": "fmt-corrected finalBuild frozen source cpg-rs/joern-parity/src/main.rs",
+      "pass": true
+    },
+    {
+      "check": "fmt-corrected finalBuild frozen source cpg-rs/joern-parity/src/production.rs",
+      "pass": true
+    },
+    {
+      "check": "fmt-corrected finalBuild frozen source cpg-rs/joern-parity/src/supplemental.rs",
+      "pass": true
+    },
+    {
+      "check": "fmt-corrected fixture inventory identical",
+      "pass": true
+    },
+    {
+      "check": "fmt-corrected source names identical",
+      "pass": true
+    },
+    {
+      "check": "fmt-corrected only stated source bytes changed",
+      "pass": true
+    },
+    {
+      "check": "lint-corrected previousBuild receipt",
+      "pass": true
+    },
+    {
+      "check": "lint-corrected previousBuild successful source binding",
+      "pass": true
+    },
+    {
+      "check": "lint-corrected previousBuild executable cpg",
+      "pass": true
+    },
+    {
+      "check": "lint-corrected previousBuild executable joern-parity",
+      "pass": true
+    },
+    {
+      "check": "lint-corrected previousBuild frozen source cpg-rs/Cargo.lock",
+      "pass": true
+    },
+    {
+      "check": "lint-corrected previousBuild frozen source cpg-rs/Cargo.toml",
+      "pass": true
+    },
+    {
+      "check": "lint-corrected previousBuild frozen source cpg-rs/cpg-cli/src/export.rs",
+      "pass": true
+    },
+    {
+      "check": "lint-corrected previousBuild frozen source cpg-rs/cpg-cli/src/rules.rs",
+      "pass": true
+    },
+    {
+      "check": "lint-corrected previousBuild frozen source cpg-rs/cpg-cli/src/workspace.rs",
+      "pass": true
+    },
+    {
+      "check": "lint-corrected previousBuild frozen source cpg-rs/cpg-core/src/graph.rs",
+      "pass": true
+    },
+    {
+      "check": "lint-corrected previousBuild frozen source cpg-rs/cpg-core/src/schema.rs",
+      "pass": true
+    },
+    {
+      "check": "lint-corrected previousBuild frozen source cpg-rs/cpg-lang-c/src/exact.rs",
+      "pass": true
+    },
+    {
+      "check": "lint-corrected previousBuild frozen source cpg-rs/cpg-lang-c/src/import.rs",
+      "pass": true
+    },
+    {
+      "check": "lint-corrected previousBuild frozen source cpg-rs/cpg-lang-c/src/lib.rs",
+      "pass": true
+    },
+    {
+      "check": "lint-corrected previousBuild frozen source cpg-rs/joern-parity/src/main.rs",
+      "pass": true
+    },
+    {
+      "check": "lint-corrected previousBuild frozen source cpg-rs/joern-parity/src/production.rs",
+      "pass": true
+    },
+    {
+      "check": "lint-corrected previousBuild frozen source cpg-rs/joern-parity/src/supplemental.rs",
+      "pass": true
+    },
+    {
+      "check": "lint-corrected finalBuild receipt",
+      "pass": true
+    },
+    {
+      "check": "lint-corrected finalBuild successful source binding",
+      "pass": true
+    },
+    {
+      "check": "lint-corrected finalBuild executable cpg",
+      "pass": true
+    },
+    {
+      "check": "lint-corrected finalBuild executable joern-parity",
+      "pass": true
+    },
+    {
+      "check": "lint-corrected finalBuild frozen source cpg-rs/Cargo.lock",
+      "pass": true
+    },
+    {
+      "check": "lint-corrected finalBuild frozen source cpg-rs/Cargo.toml",
+      "pass": true
+    },
+    {
+      "check": "lint-corrected finalBuild frozen source cpg-rs/cpg-cli/src/export.rs",
+      "pass": true
+    },
+    {
+      "check": "lint-corrected finalBuild frozen source cpg-rs/cpg-cli/src/rules.rs",
+      "pass": true
+    },
+    {
+      "check": "lint-corrected finalBuild frozen source cpg-rs/cpg-cli/src/workspace.rs",
+      "pass": true
+    },
+    {
+      "check": "lint-corrected finalBuild frozen source cpg-rs/cpg-core/src/graph.rs",
+      "pass": true
+    },
+    {
+      "check": "lint-corrected finalBuild frozen source cpg-rs/cpg-core/src/schema.rs",
+      "pass": true
+    },
+    {
+      "check": "lint-corrected finalBuild frozen source cpg-rs/cpg-lang-c/src/exact.rs",
+      "pass": true
+    },
+    {
+      "check": "lint-corrected finalBuild frozen source cpg-rs/cpg-lang-c/src/import.rs",
+      "pass": true
+    },
+    {
+      "check": "lint-corrected finalBuild frozen source cpg-rs/cpg-lang-c/src/lib.rs",
+      "pass": true
+    },
+    {
+      "check": "lint-corrected finalBuild frozen source cpg-rs/joern-parity/src/main.rs",
+      "pass": true
+    },
+    {
+      "check": "lint-corrected finalBuild frozen source cpg-rs/joern-parity/src/production.rs",
+      "pass": true
+    },
+    {
+      "check": "lint-corrected finalBuild frozen source cpg-rs/joern-parity/src/supplemental.rs",
+      "pass": true
+    },
+    {
+      "check": "lint-corrected fixture inventory identical",
+      "pass": true
+    },
+    {
+      "check": "lint-corrected source names identical",
+      "pass": true
+    },
+    {
+      "check": "lint-corrected only stated source bytes changed",
+      "pass": true
+    },
+    {
+      "check": "same raw-producing and final binaries",
+      "pass": true
+    },
+    {
+      "check": "actual first whole comparison complete",
+      "pass": true
+    },
+    {
+      "check": "zlib-1.3.1-core-full actual first run success and stable",
+      "pass": true
+    },
+    {
+      "check": "zlib-1.3.1-core-full final binary identifies actual producer",
+      "pass": true
+    },
+    {
+      "check": "zlib-1.3.1-core-full complete raw oracle",
+      "pass": true
+    },
+    {
+      "check": "zlib-1.3.1-core-full complete raw baseline",
+      "pass": true
+    },
+    {
+      "check": "zlib-1.3.1-core-full complete raw current",
+      "pass": true
+    },
+    {
+      "check": "zlib-1.3.1-core-full stdout bound by actual run",
+      "pass": true
+    },
+    {
+      "check": "zlib-1.3.1-core-full exact accepted-eleventh output",
+      "pass": true
+    },
+    {
+      "check": "zlib-1.3.1-core-full sixth raw oracle",
+      "pass": true
+    },
+    {
+      "check": "zlib-1.3.1-core-full all physical source files unchanged",
+      "pass": true
+    },
+    {
+      "check": "zlib-1.3.1-core-full sixth source snapshots",
+      "pass": true
+    },
+    {
+      "check": "zlib-1.3.1-core-full zero lost matching multisets",
+      "pass": true
+    },
+    {
+      "check": "zlib-1.3.1-core-full no previously exact method loss",
+      "pass": true
+    },
+    {
+      "check": "zlib-1.3.1-core-full all prior facts retained",
+      "pass": true
+    },
+    {
+      "check": "zlib-1.3.1-core-full priority method trees retained",
+      "pass": true
+    },
+    {
+      "check": "zlib-1.3.1-core-full only measured identity properties changed",
+      "pass": true
+    },
+    {
+      "check": "zlib-1.3.1-core-full all source role values correct",
+      "pass": true
+    },
+    {
+      "check": "lua-5.4.7-full actual first run success and stable",
+      "pass": true
+    },
+    {
+      "check": "lua-5.4.7-full final binary identifies actual producer",
+      "pass": true
+    },
+    {
+      "check": "lua-5.4.7-full complete raw oracle",
+      "pass": true
+    },
+    {
+      "check": "lua-5.4.7-full complete raw baseline",
+      "pass": true
+    },
+    {
+      "check": "lua-5.4.7-full complete raw current",
+      "pass": true
+    },
+    {
+      "check": "lua-5.4.7-full stdout bound by actual run",
+      "pass": true
+    },
+    {
+      "check": "lua-5.4.7-full exact accepted-eleventh output",
+      "pass": true
+    },
+    {
+      "check": "lua-5.4.7-full sixth raw oracle",
+      "pass": true
+    },
+    {
+      "check": "lua-5.4.7-full all physical source files unchanged",
+      "pass": true
+    },
+    {
+      "check": "lua-5.4.7-full sixth source snapshots",
+      "pass": true
+    },
+    {
+      "check": "lua-5.4.7-full zero lost matching multisets",
+      "pass": true
+    },
+    {
+      "check": "lua-5.4.7-full no previously exact method loss",
+      "pass": true
+    },
+    {
+      "check": "lua-5.4.7-full all prior facts retained",
+      "pass": true
+    },
+    {
+      "check": "lua-5.4.7-full priority method trees retained",
+      "pass": true
+    },
+    {
+      "check": "lua-5.4.7-full only measured identity properties changed",
+      "pass": true
+    },
+    {
+      "check": "lua-5.4.7-full all source role values correct",
+      "pass": true
+    },
+    {
+      "check": "fixedtables source identity and arrays pass",
+      "pass": true
+    },
+    {
+      "check": "inflate body gap remains",
+      "pass": true
+    }
+  ],
+  "checkCount": 112,
+  "files": {
+    "REVIEW.md": "42ff4705400b4e1321a9e35a427cb773e785ec0f78d2bd1bbe84f10912a6943f",
+    "adaptation.json": "bc4cf72be46ab01221014e3b1ad8185f24d4bfec5fcae9c70870921bf61fee05",
+    "compare-from-eleventh.diff": "de66aa50831027229acc2a6849b2d33b1bc26bf05d86b52f826f7268669795d2",
+    "compare.py": "05b5b965095411804855554e7f574b00dfdc32af8178b02f7cd9310f6bcc5158",
+    "compare.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "compare.stdout": "4a5a492f0e2802497551e9fb46b725f41d6b55dbc3a45d4694a9b9c16a318396",
+    "comparison-review.json": "4112d0729c53c06adcf12a31eee09b6733821c7f623c4673686aa678e22947f7",
+    "final-review.json": "f102e75a8d6e8646f05397f6a882fab1e775039f7bd23b00a59879d2eed81054",
+    "fixedtables-v2.py": "5f5f35bb3a25eda9c4d3aaf3200c56744a4d47803f1904a1b00d4e469424242f",
+    "fixedtables-v2.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "fixedtables-v2.stdout": "85ade8dfd08fbf426e77ed285ac9525f12e85f46a298077b7756d52e8fa8c348",
+    "fixedtables.py": "1dfd1c3ad4e36c6d2ae2b3ba6a1fddf226184dfbee64edac2a3d4e8ead864cb1",
+    "fixedtables.stderr": "658962355fbcb3f97c7cf867ae706c5b567628ec0b084351edbdf55f48c9298a",
+    "fixedtables.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "lua-5.4.7-full/changed-methods/018b167daabf3646/baseline-current.diff": "87ebf12d9cb619e612b9b67fe1934872ddef32e71a29e5948a1fe995c246ee1c",
+    "lua-5.4.7-full/changed-methods/018b167daabf3646/baseline.ast": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "lua-5.4.7-full/changed-methods/018b167daabf3646/current.ast": "d0e9a69fe88732857a2f9edbe813e60e9726d3db8ce69cfdf6f804b78e1356cc",
+    "lua-5.4.7-full/changed-methods/018b167daabf3646/oracle-current.diff": "24e398cf7f6f939df4a1126f973c1eaa48f86e6d545bf593cc84438a0fec86f6",
+    "lua-5.4.7-full/changed-methods/018b167daabf3646/oracle.ast": "70e13b11e80c2cd487cc93c5727ca01c77d60683f0fd52178d6218a0ada01ca4",
+    "lua-5.4.7-full/changed-methods/06930f75676b16e6/baseline-current.diff": "b76e6c3f23ad4a185c95922a8b8ae4dae0c2f6bc0deae20062e37e2ee6f151d4",
+    "lua-5.4.7-full/changed-methods/06930f75676b16e6/baseline.ast": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "lua-5.4.7-full/changed-methods/06930f75676b16e6/current.ast": "09bccecc3ff89c4649fe1c3af6e7d4a98adcd5eba5481bc46118ee51d6bb710b",
+    "lua-5.4.7-full/changed-methods/06930f75676b16e6/oracle-current.diff": "5a8cc6b2f5c8ea4288eb3903b9a32f0271367ca531f5d36a50a2122df35a7732",
+    "lua-5.4.7-full/changed-methods/06930f75676b16e6/oracle.ast": "613ba4162b44f7374d66a1d76caf4a19b196243266388fd6ca0e134320c489af",
+    "lua-5.4.7-full/changed-methods/0c8b4b67ce6a5282/baseline-current.diff": "c89ee0297bcaad1bad8bbfcd7b37aa3e26066afd4b714177560fca76418ad391",
+    "lua-5.4.7-full/changed-methods/0c8b4b67ce6a5282/baseline.ast": "ad8e0b70906fbe1ef1e87a25ba11508370335926e829945a3d05733163bf1fb5",
+    "lua-5.4.7-full/changed-methods/0c8b4b67ce6a5282/current.ast": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "lua-5.4.7-full/changed-methods/0c8b4b67ce6a5282/oracle-current.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "lua-5.4.7-full/changed-methods/0c8b4b67ce6a5282/oracle.ast": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "lua-5.4.7-full/changed-methods/0d6e4079e36703eb/baseline-current.diff": "db8353b3e39b64051c18080eb6658559fee04dd58db4b1ae2721cc892fe13668",
+    "lua-5.4.7-full/changed-methods/0d6e4079e36703eb/baseline.ast": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "lua-5.4.7-full/changed-methods/0d6e4079e36703eb/current.ast": "76549a20783de62bbfcddd19a5b0d7a2bb3db3c8af3a86d86272f680c6607685",
+    "lua-5.4.7-full/changed-methods/0d6e4079e36703eb/oracle-current.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "lua-5.4.7-full/changed-methods/0d6e4079e36703eb/oracle.ast": "76549a20783de62bbfcddd19a5b0d7a2bb3db3c8af3a86d86272f680c6607685",
+    "lua-5.4.7-full/changed-methods/2033eb0d08a0c50e/baseline-current.diff": "3e7a5e440281029321d3b511f641baf8c03665db30d3211e2a149e20b39b47db",
+    "lua-5.4.7-full/changed-methods/2033eb0d08a0c50e/baseline.ast": "2b578d7de7ea9dd9a83ec55135dfb4d7042e5d870efc11fb372b977490216485",
+    "lua-5.4.7-full/changed-methods/2033eb0d08a0c50e/current.ast": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "lua-5.4.7-full/changed-methods/2033eb0d08a0c50e/oracle-current.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "lua-5.4.7-full/changed-methods/2033eb0d08a0c50e/oracle.ast": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "lua-5.4.7-full/changed-methods/2060c3a47e3175d7/baseline-current.diff": "4579558a079346607972694beeccc950dd348b7d49a33ac4684c4f7d7fe91313",
+    "lua-5.4.7-full/changed-methods/2060c3a47e3175d7/baseline.ast": "7633de33913fddec658e89b64783f94a100b78217c437b21f2b2bccafe81185a",
+    "lua-5.4.7-full/changed-methods/2060c3a47e3175d7/current.ast": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "lua-5.4.7-full/changed-methods/2060c3a47e3175d7/oracle-current.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "lua-5.4.7-full/changed-methods/2060c3a47e3175d7/oracle.ast": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "lua-5.4.7-full/changed-methods/26422659061d737b/baseline-current.diff": "8ae94cbc4e6788a33ef190f168e3205d76f8d3ada8572a5db1c4885ac5d0a929",
+    "lua-5.4.7-full/changed-methods/26422659061d737b/baseline.ast": "f4c6fad8b4a40f9cbfe718f33b751752421fa37902d601ad6599f5a2f0aa1813",
+    "lua-5.4.7-full/changed-methods/26422659061d737b/current.ast": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "lua-5.4.7-full/changed-methods/26422659061d737b/oracle-current.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "lua-5.4.7-full/changed-methods/26422659061d737b/oracle.ast": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "lua-5.4.7-full/changed-methods/45f79577ba4ddef0/baseline-current.diff": "365309b23c615407fd0c25bbf531bfae5502c6db91d88ea9378a6b97beb5665b",
+    "lua-5.4.7-full/changed-methods/45f79577ba4ddef0/baseline.ast": "582ef3475ff89d3ead4abf79b476f2c2af08e8421b64c70eec7ef25f9463309d",
+    "lua-5.4.7-full/changed-methods/45f79577ba4ddef0/current.ast": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "lua-5.4.7-full/changed-methods/45f79577ba4ddef0/oracle-current.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "lua-5.4.7-full/changed-methods/45f79577ba4ddef0/oracle.ast": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "lua-5.4.7-full/changed-methods/4b4c97af518709af/baseline-current.diff": "1ab40c47064306aec03745007fe0adca3ab9e7d360555694c10ca313b5541a69",
+    "lua-5.4.7-full/changed-methods/4b4c97af518709af/baseline.ast": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "lua-5.4.7-full/changed-methods/4b4c97af518709af/current.ast": "d1f3fcd9fe396813eb97e991c6bcf63e743fe5c17aef36703d10e9226d3a0d99",
+    "lua-5.4.7-full/changed-methods/4b4c97af518709af/oracle-current.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "lua-5.4.7-full/changed-methods/4b4c97af518709af/oracle.ast": "d1f3fcd9fe396813eb97e991c6bcf63e743fe5c17aef36703d10e9226d3a0d99",
+    "lua-5.4.7-full/changed-methods/82c58361bc85ec50/baseline-current.diff": "b85f26ba4a4000dc7e08074770dc32bc31052ad26bd6e4ec32f28c3ff6a1d48e",
+    "lua-5.4.7-full/changed-methods/82c58361bc85ec50/baseline.ast": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "lua-5.4.7-full/changed-methods/82c58361bc85ec50/current.ast": "d6d3a4522eb4724d54b54d23262a2c042df50de2a0074bb0d27583f6deac5aa4",
+    "lua-5.4.7-full/changed-methods/82c58361bc85ec50/oracle-current.diff": "3379873edb46a2de5a7308f2c42bfcc4b3d5de3f252233b56f3dde036d5c370a",
+    "lua-5.4.7-full/changed-methods/82c58361bc85ec50/oracle.ast": "f75718d89a9ac7df615599b5fbc295227feb352a84eef3e204749a7ed424ef64",
+    "lua-5.4.7-full/changed-methods/b93006774cbdd4b2/baseline-current.diff": "2df1a8566a780492ace0722f749867cf201a8b596890627a4cc71deab7ab9c3b",
+    "lua-5.4.7-full/changed-methods/b93006774cbdd4b2/baseline.ast": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "lua-5.4.7-full/changed-methods/b93006774cbdd4b2/current.ast": "597dd39bc8435f4496275bc7eb75de2969776ecf8d489cdee78e6961aa4718f2",
+    "lua-5.4.7-full/changed-methods/b93006774cbdd4b2/oracle-current.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "lua-5.4.7-full/changed-methods/b93006774cbdd4b2/oracle.ast": "597dd39bc8435f4496275bc7eb75de2969776ecf8d489cdee78e6961aa4718f2",
+    "lua-5.4.7-full/changed-methods/d2b32968d078bd57/baseline-current.diff": "a1ce49bd5dc95ae669b29eccd6dc243c7f1a7e32a98ec57f61c6766b7e259369",
+    "lua-5.4.7-full/changed-methods/d2b32968d078bd57/baseline.ast": "5a7fac38365201354f595e145c77234de8e1294a7ef2640a9cc939d7e6a7357f",
+    "lua-5.4.7-full/changed-methods/d2b32968d078bd57/current.ast": "3d8cc929e21a44328c4f5011758163df05925e428e6bb7b5b3719c9761ddadb4",
+    "lua-5.4.7-full/changed-methods/d2b32968d078bd57/oracle-current.diff": "f77c09a88b05ab3d9f386dbcc6cf0e9cc9e250caf0928a420801d081d18553d1",
+    "lua-5.4.7-full/changed-methods/d2b32968d078bd57/oracle.ast": "f9d79f2b185fbbfab8468ccf4af3cdbb30ee0afcb24e6f04dc4c4c7ddfb1a0d7",
+    "lua-5.4.7-full/changed-methods/d9c6d6abd066a8e0/baseline-current.diff": "d0b57dcda9971d3c5b2e0a81d9cc5a79ddaa595eefaed1f2e94337efabf19f6c",
+    "lua-5.4.7-full/changed-methods/d9c6d6abd066a8e0/baseline.ast": "763e0a1d325435a1a0d574d34aa01a21a27b03ffed3a8cd3739895cb3c56bc99",
+    "lua-5.4.7-full/changed-methods/d9c6d6abd066a8e0/current.ast": "2f7e725bc8b4c84a96f46a3cbd27588884b801ed2b692a80b6a453328e4d708a",
+    "lua-5.4.7-full/changed-methods/d9c6d6abd066a8e0/oracle-current.diff": "98ad069ac3fc63ff5839c66aa8d50d104b4ed6340aa1bd6ee5ad8b11dec073d8",
+    "lua-5.4.7-full/changed-methods/d9c6d6abd066a8e0/oracle.ast": "0132486bcc9a9c4ba5e25a62a0aa52fcab137bad55a5bee2b9533adeab2725b0",
+    "lua-5.4.7-full/changed-methods/e80303e0da1dffa6/baseline-current.diff": "56a1525fbb5b5edfeec5e10fb177e141dfc7077a317bd0dcd666d13878bf0b8f",
+    "lua-5.4.7-full/changed-methods/e80303e0da1dffa6/baseline.ast": "bb605109471591be1cf52d44fcee809aaf5c638b9f75a4ff64884728fc78f747",
+    "lua-5.4.7-full/changed-methods/e80303e0da1dffa6/current.ast": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "lua-5.4.7-full/changed-methods/e80303e0da1dffa6/oracle-current.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "lua-5.4.7-full/changed-methods/e80303e0da1dffa6/oracle.ast": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "lua-5.4.7-full/changed-methods/f27e58a63c46e4d0/baseline-current.diff": "277c2a0edd74a07ed0aba874ebc5d663e84eb821ceec405ee31ae12127d488e0",
+    "lua-5.4.7-full/changed-methods/f27e58a63c46e4d0/baseline.ast": "7d61bc5a1cbc9c4f19b22685686c080dd14ac8e804e663b14bab2bafcaf5bac3",
+    "lua-5.4.7-full/changed-methods/f27e58a63c46e4d0/current.ast": "f0c69b66acaf96a36744d355a2edee41d64332c6e5c2c39ae841331ccc207cb9",
+    "lua-5.4.7-full/changed-methods/f27e58a63c46e4d0/oracle-current.diff": "fe4b05c905674c04307c48cce5f42e92653856012ab1d47d16123bb827c64a71",
+    "lua-5.4.7-full/changed-methods/f27e58a63c46e4d0/oracle.ast": "69f79e5fb71f9942a955088c15ff976b39c173ec4752fdac5b37bb3a6da8f64d",
+    "lua-5.4.7-full/changed-methods/f48c9ffddaa9d4a0/baseline-current.diff": "e400fcf8d4dfbf2ea5b10e6b33c935f2ca5ab9e4b7a42cfaa292e775258ec29a",
+    "lua-5.4.7-full/changed-methods/f48c9ffddaa9d4a0/baseline.ast": "c4f72aa8bc31e6febe5161c20cfb3ae778d49b81e15e13599502fdc639b3d70b",
+    "lua-5.4.7-full/changed-methods/f48c9ffddaa9d4a0/current.ast": "0b569e358de88696172a3c221d1b1771263917fd0c81a9764388b2a57d051993",
+    "lua-5.4.7-full/changed-methods/f48c9ffddaa9d4a0/oracle-current.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "lua-5.4.7-full/changed-methods/f48c9ffddaa9d4a0/oracle.ast": "0b569e358de88696172a3c221d1b1771263917fd0c81a9764388b2a57d051993",
+    "lua-5.4.7-full/changed-methods/index.json": "7601afa8c25d9b63916d441c7a34bed781f872dbc48eaf79c8f2c1fb4f3cd340",
+    "lua-5.4.7-full/comparison.json": "adc1ac623bb1f6fa7665476f66897d60bba828d717bd0525d6c562e1f331d551",
+    "lua-5.4.7-full/complete-before-after.diff": "3e0b90e5b3891c9916b3353c808ace5aee8b2178986443fd28eaaa3a3226d071",
+    "lua-5.4.7-full/complete-live-current.diff": "c4b5bf6f07a5a1f68823d234ba146229d9c448f671ded2f609446b72723eeec4",
+    "lua-5.4.7-full/complete-selected-delta.json": "43e15ccb486dfd0832316845f8b86a0a01b9fe967b5ed42822f4aeac931d6480",
+    "lua-5.4.7-full/identity-occurrence-review.json": "fcff1b4de80eb578ad6911864401e5b060127ef13848e18fdad09545d17c2ca6",
+    "lua-5.4.7-full/identity-source-role-candidates-review.json": "ebd36efe272d9feb9678a3121bd4e83b7500f03fcfa438e041e6d26afa6beb72",
+    "lua-5.4.7-full/priority-methods/05930b1665c68865/baseline.ast": "1677c1f0c3b762055d300990a92045399445944489cda97d5b2f86c792451be6",
+    "lua-5.4.7-full/priority-methods/05930b1665c68865/current.ast": "1677c1f0c3b762055d300990a92045399445944489cda97d5b2f86c792451be6",
+    "lua-5.4.7-full/priority-methods/05930b1665c68865/oracle.ast": "1523c26fd8d45f898a953fb4454971187ce2497f8ce255bb48adc00147aec7e4",
+    "lua-5.4.7-full/priority-methods/170432c2992d6d9c/baseline.ast": "d019315311e1d30abccfee6ced2250bde78bb5eeeb77c169e4b73bc341578ddb",
+    "lua-5.4.7-full/priority-methods/170432c2992d6d9c/current.ast": "d019315311e1d30abccfee6ced2250bde78bb5eeeb77c169e4b73bc341578ddb",
+    "lua-5.4.7-full/priority-methods/170432c2992d6d9c/oracle.ast": "449c20d74b20db778422aa599b7a6fed810403a09f8b9eba4db8022247d56878",
+    "lua-5.4.7-full/priority-methods/3fbd6d87f8ff8a7e/baseline.ast": "9a27de78d562af22adf2eee4185bd0538bd5a0db5085a74f89208d5c2a7e018c",
+    "lua-5.4.7-full/priority-methods/3fbd6d87f8ff8a7e/current.ast": "9a27de78d562af22adf2eee4185bd0538bd5a0db5085a74f89208d5c2a7e018c",
+    "lua-5.4.7-full/priority-methods/3fbd6d87f8ff8a7e/oracle.ast": "9a27de78d562af22adf2eee4185bd0538bd5a0db5085a74f89208d5c2a7e018c",
+    "lua-5.4.7-full/priority-methods/61bca29dd5edf1bd/baseline.ast": "6d4dccecaac0871c1ac90a5d722d0fe5fa513001b5cd146d7840e3c588b710ff",
+    "lua-5.4.7-full/priority-methods/61bca29dd5edf1bd/current.ast": "6d4dccecaac0871c1ac90a5d722d0fe5fa513001b5cd146d7840e3c588b710ff",
+    "lua-5.4.7-full/priority-methods/61bca29dd5edf1bd/oracle.ast": "331b7509dece788de08ec347d541870e30164f8a568f620523e701f9b3f9aa83",
+    "lua-5.4.7-full/priority-methods/6ca01af2903319e0/baseline.ast": "cbdbbe56c0e5ac2562792a0d264116db271b943e96a2395314d14209c1e5e492",
+    "lua-5.4.7-full/priority-methods/6ca01af2903319e0/current.ast": "cbdbbe56c0e5ac2562792a0d264116db271b943e96a2395314d14209c1e5e492",
+    "lua-5.4.7-full/priority-methods/6ca01af2903319e0/oracle.ast": "cbdbbe56c0e5ac2562792a0d264116db271b943e96a2395314d14209c1e5e492",
+    "lua-5.4.7-full/priority-methods/7e43c2e600bfb0eb/baseline.ast": "ab9d23b726fa21a6cc67c61de9a7a22fb5b0cac5445c6704df3bd518a9d335b1",
+    "lua-5.4.7-full/priority-methods/7e43c2e600bfb0eb/current.ast": "ab9d23b726fa21a6cc67c61de9a7a22fb5b0cac5445c6704df3bd518a9d335b1",
+    "lua-5.4.7-full/priority-methods/7e43c2e600bfb0eb/oracle.ast": "ab9d23b726fa21a6cc67c61de9a7a22fb5b0cac5445c6704df3bd518a9d335b1",
+    "lua-5.4.7-full/priority-methods/9f0525348249fee0/baseline.ast": "1acc535d47f4df6fd1beda69cab235adaa97a0cec3c3bf4d28f578515a1cf4f6",
+    "lua-5.4.7-full/priority-methods/9f0525348249fee0/current.ast": "1acc535d47f4df6fd1beda69cab235adaa97a0cec3c3bf4d28f578515a1cf4f6",
+    "lua-5.4.7-full/priority-methods/9f0525348249fee0/oracle.ast": "1acc535d47f4df6fd1beda69cab235adaa97a0cec3c3bf4d28f578515a1cf4f6",
+    "lua-5.4.7-full/priority-methods/a850abee555ea29f/baseline.ast": "a93888b3ff6b9c3c2c606b6a67cf6c3eb6e0474f2010c8e116ca6f691d480dd7",
+    "lua-5.4.7-full/priority-methods/a850abee555ea29f/current.ast": "a93888b3ff6b9c3c2c606b6a67cf6c3eb6e0474f2010c8e116ca6f691d480dd7",
+    "lua-5.4.7-full/priority-methods/a850abee555ea29f/oracle.ast": "a93888b3ff6b9c3c2c606b6a67cf6c3eb6e0474f2010c8e116ca6f691d480dd7",
+    "lua-5.4.7-full/priority-methods/beddd1ea8bda0682/baseline.ast": "ff84a1144d12b044dffc08f12e1f8bbac11a8e9a938d6c988f0623f777e9ffbc",
+    "lua-5.4.7-full/priority-methods/beddd1ea8bda0682/current.ast": "ff84a1144d12b044dffc08f12e1f8bbac11a8e9a938d6c988f0623f777e9ffbc",
+    "lua-5.4.7-full/priority-methods/beddd1ea8bda0682/oracle.ast": "ff84a1144d12b044dffc08f12e1f8bbac11a8e9a938d6c988f0623f777e9ffbc",
+    "lua-5.4.7-full/priority-methods/d527f32454e37fae/baseline.ast": "200a65c6bdf6c1801346d00a1a965607cafee9abe841b4af6474ae5127d1c6d6",
+    "lua-5.4.7-full/priority-methods/d527f32454e37fae/current.ast": "200a65c6bdf6c1801346d00a1a965607cafee9abe841b4af6474ae5127d1c6d6",
+    "lua-5.4.7-full/priority-methods/d527f32454e37fae/oracle.ast": "200a65c6bdf6c1801346d00a1a965607cafee9abe841b4af6474ae5127d1c6d6",
+    "lua-5.4.7-full/priority-methods/e2ac79266ab9502c/baseline.ast": "b8067ec7ccfb10264874124aad5bcd3c3aa9ff2acfef860096630558a3852d96",
+    "lua-5.4.7-full/priority-methods/e2ac79266ab9502c/current.ast": "b8067ec7ccfb10264874124aad5bcd3c3aa9ff2acfef860096630558a3852d96",
+    "lua-5.4.7-full/priority-methods/e2ac79266ab9502c/oracle.ast": "b8067ec7ccfb10264874124aad5bcd3c3aa9ff2acfef860096630558a3852d96",
+    "lua-5.4.7-full/priority-methods/e9a6f851cac8cefa/baseline.ast": "c68aec8b1ce191a49cfba49b1084ded56088f684c921afdaa83015a8cd72e60a",
+    "lua-5.4.7-full/priority-methods/e9a6f851cac8cefa/current.ast": "c68aec8b1ce191a49cfba49b1084ded56088f684c921afdaa83015a8cd72e60a",
+    "lua-5.4.7-full/priority-methods/e9a6f851cac8cefa/oracle.ast": "c68aec8b1ce191a49cfba49b1084ded56088f684c921afdaa83015a8cd72e60a",
+    "lua-5.4.7-full/priority-methods/f52ee5f48eab71ce/baseline.ast": "012d86827e2c45675737a7f326ef6947a0084f017e41f3da91e5b1fc585fe2db",
+    "lua-5.4.7-full/priority-methods/f52ee5f48eab71ce/current.ast": "012d86827e2c45675737a7f326ef6947a0084f017e41f3da91e5b1fc585fe2db",
+    "lua-5.4.7-full/priority-methods/f52ee5f48eab71ce/oracle.ast": "ba5ad954d9c5dfd55886f256d5fd446b6b3a588d3718ed47da4845eaf9ef1a54",
+    "lua-5.4.7-full/priority-methods/fc56c776e3745ae5/baseline.ast": "bfd8dcd23281ff9c72ef8e9a8215b8ab439e570902956c93d8e42ed6d3d05072",
+    "lua-5.4.7-full/priority-methods/fc56c776e3745ae5/current.ast": "bfd8dcd23281ff9c72ef8e9a8215b8ab439e570902956c93d8e42ed6d3d05072",
+    "lua-5.4.7-full/priority-methods/fc56c776e3745ae5/oracle.ast": "bfd8dcd23281ff9c72ef8e9a8215b8ab439e570902956c93d8e42ed6d3d05072",
+    "lua-5.4.7-full/priority-review.json": "2eeb516aa8ea5ca5b117e4a6d1752ee2d7d43151d466365ffba70e4888ee6a58",
+    "occurrences-v2.py": "b67d714e88986d7dec8e50cdd98f21ad8828c9b5f8b373a9f13df3ab98bc12c1",
+    "occurrences-v2.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "occurrences-v2.stdout": "724a1b612a9c233eb62d88af128aa28f478f45a90fc9ca867fb077a6173ec0f9",
+    "occurrences.py": "411ec2cc8a65ffd94158eb907a02fdb772299ff380af14142d9388edcbbc6c29",
+    "occurrences.stderr": "d5ec1f0e8426ff75e55fd110bf7c7addc906498700dcc3114b9529b4bb3db4a1",
+    "occurrences.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "priority-review.json": "8ada4908f60fec340437043d833fc59221c6597da36ca0a30def6f145f78a69b",
+    "priority.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "priority.stdout": "2dcb401b928d4eb6df4d98b3a3bba38525a5cbc30bb4b77372ff7fce67f05156",
+    "seal.py": "5b0c7037a664cced64dc0502ecc7f069fcf749a8ea7a7c7fb72192233c866ca0",
+    "seal.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "seal.stdout": "dea6dd7a8ef7d30eefe739acbe601e79368b26c64269c18e8d9def19f08352c4",
+    "verify_priority.py": "f4f920ef8e310e99f6011b1ccb548cc43fe4ee07ba4c457bcf661fff7733b033",
+    "zlib-1.3.1-core-full/changed-methods/2315bc4794c925d3/baseline-current.diff": "f56bd40a9c0957ef7e4885bd70a84b4f279e1966fdcce3de60daba88142dc923",
+    "zlib-1.3.1-core-full/changed-methods/2315bc4794c925d3/baseline.ast": "932f572f97d239375a0bcbc3c37acad8d22b6a33903f36915ec9ba82e03188bb",
+    "zlib-1.3.1-core-full/changed-methods/2315bc4794c925d3/current.ast": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "zlib-1.3.1-core-full/changed-methods/2315bc4794c925d3/oracle-current.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "zlib-1.3.1-core-full/changed-methods/2315bc4794c925d3/oracle.ast": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "zlib-1.3.1-core-full/changed-methods/6001ea01990fa1a6/baseline-current.diff": "fefb2505b8607b6d30a66a6fab3c195851f32b7df96db302e73737d960b030e2",
+    "zlib-1.3.1-core-full/changed-methods/6001ea01990fa1a6/baseline.ast": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "zlib-1.3.1-core-full/changed-methods/6001ea01990fa1a6/current.ast": "6e5736193b41df214c86b1398cecd78a256ab3cc98712ad4306cc746d0210619",
+    "zlib-1.3.1-core-full/changed-methods/6001ea01990fa1a6/oracle-current.diff": "85dc0eff3037b39de2ae9d517bbcd5cfc6f66af1548c967801899ee3d79d1c97",
+    "zlib-1.3.1-core-full/changed-methods/6001ea01990fa1a6/oracle.ast": "c4a090703106174eeab151d484ab0b412e6e6e4bac7f54c9d3d5dc54cd62f5cb",
+    "zlib-1.3.1-core-full/changed-methods/78a0c41aeeadacca/baseline-current.diff": "57ac9c6a0b2906443db018e49c737c9dfb52140fb49f33aa779872ff68b6345e",
+    "zlib-1.3.1-core-full/changed-methods/78a0c41aeeadacca/baseline.ast": "a13d4a47a8d1372e4eef12a353a81e04a5b7b34f72c45fe632cc1d92e0d2569f",
+    "zlib-1.3.1-core-full/changed-methods/78a0c41aeeadacca/current.ast": "108754946f4bd454f1625d1c476f7d0d0c71430693ec2bd9ece48886111137a9",
+    "zlib-1.3.1-core-full/changed-methods/78a0c41aeeadacca/oracle-current.diff": "5b5888da9411104998685cc9dbc9ecb308fd2808993b424e876c58fc6a8ac65c",
+    "zlib-1.3.1-core-full/changed-methods/78a0c41aeeadacca/oracle.ast": "4070f11a3f03ce8ff97fceb1379a8787d6e22bef32da0ab4409149fb22bdb908",
+    "zlib-1.3.1-core-full/changed-methods/9baddf822db77fa8/baseline-current.diff": "e0296c5a94c207fae4776ae3d437e37ad9b5cc5128dc820aabd38a5ecf8f906b",
+    "zlib-1.3.1-core-full/changed-methods/9baddf822db77fa8/baseline.ast": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "zlib-1.3.1-core-full/changed-methods/9baddf822db77fa8/current.ast": "b91c0e23c146ebdd801a4f20117925ca7861572c163ac2ddade6fcbf3220c968",
+    "zlib-1.3.1-core-full/changed-methods/9baddf822db77fa8/oracle-current.diff": "d0f77ccc9cb469bd3605a0636fb2d40f8ba42be809e178f4ef6d86c7e42ddee1",
+    "zlib-1.3.1-core-full/changed-methods/9baddf822db77fa8/oracle.ast": "d3f78c1bef70abfa90a5577d3a889a6ed99537ea1260d4bf6dc672ec8dc6759e",
+    "zlib-1.3.1-core-full/changed-methods/af75718dcfa9ec0d/baseline-current.diff": "c45dad949646cbb7fe6005c16ad77888eea50f220849e12bb69d6c4f76479c15",
+    "zlib-1.3.1-core-full/changed-methods/af75718dcfa9ec0d/baseline.ast": "1722c5f5e6fad7f32ef100a1625256ebc0d58a4ab3eb37d425dce622a6616799",
+    "zlib-1.3.1-core-full/changed-methods/af75718dcfa9ec0d/current.ast": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "zlib-1.3.1-core-full/changed-methods/af75718dcfa9ec0d/oracle-current.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "zlib-1.3.1-core-full/changed-methods/af75718dcfa9ec0d/oracle.ast": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "zlib-1.3.1-core-full/changed-methods/d505d0e399e4ea72/baseline-current.diff": "d3718d8187a93d787d97a83ac460ee3ccfb0c8a0965e1a63c42384f4367559b3",
+    "zlib-1.3.1-core-full/changed-methods/d505d0e399e4ea72/baseline.ast": "a1d458c8c84c227849d1207dbf7f49f813c040485513b271623e8762ddff8287",
+    "zlib-1.3.1-core-full/changed-methods/d505d0e399e4ea72/current.ast": "d6f16d7a3ca27e8b4d69e4e218313f96ea5c3ff468e9c5f72a78ee0fd1e2f5f4",
+    "zlib-1.3.1-core-full/changed-methods/d505d0e399e4ea72/oracle-current.diff": "822997d9b953de798f6abd260bda60e0e18f712b68a2e8197d51b95537545375",
+    "zlib-1.3.1-core-full/changed-methods/d505d0e399e4ea72/oracle.ast": "d91bc370ee8b2f69537db7b0853724699b5454500ec844e6f32700712dd95c5b",
+    "zlib-1.3.1-core-full/changed-methods/f2913d4b14ce52da/baseline-current.diff": "73a5c2769b3a949e6e4257a1728e310c33b68e3b3dec2a8ffc7572198656389b",
+    "zlib-1.3.1-core-full/changed-methods/f2913d4b14ce52da/baseline.ast": "d63198108285b8343766965ab777d35673d4f7e9468a6d07c6a7caf302bb8263",
+    "zlib-1.3.1-core-full/changed-methods/f2913d4b14ce52da/current.ast": "c79fb07d955886661994dee957614d61dcc06f91610f512a5abb9f27d843f807",
+    "zlib-1.3.1-core-full/changed-methods/f2913d4b14ce52da/oracle-current.diff": "f41869417ff6e3f821101889f03d98084145ec883a0ef02b2141884aadf43ebc",
+    "zlib-1.3.1-core-full/changed-methods/f2913d4b14ce52da/oracle.ast": "9c09d52b127799c35b25abc90fd44c6b7311903c8228557b14d9ff504129fe16",
+    "zlib-1.3.1-core-full/changed-methods/index.json": "6638d51bb262ab1e890caa6ff22d3b855d041f05371b3edfdb915b7cdd10656a",
+    "zlib-1.3.1-core-full/comparison.json": "c885a797b9a0d838eaae2fb95712d740eaa0f68459663b8b19d667ef71919b5d",
+    "zlib-1.3.1-core-full/complete-before-after.diff": "c482e55d43fe2a3fc27fe79af33b67420d3079a8b14106273fd74ea0c7345907",
+    "zlib-1.3.1-core-full/complete-live-current.diff": "9d514978fdae98b22fc60ac0df674d9d2368f426f1a9f243639a77ce654909cb",
+    "zlib-1.3.1-core-full/complete-selected-delta.json": "24520ff59c09f91855715aa850f37b9c93f08f8d3f5885bc24f1326d900220b4",
+    "zlib-1.3.1-core-full/fixedtables/infback.c.baseline.all-incident-relations.txt": "f8020f9ed95cf26b49fb9d49b3c111c0ec1055739c16d1b8765435b069bf586e",
+    "zlib-1.3.1-core-full/fixedtables/infback.c.baseline.method.txt": "f2e7f8e2af40e5ace2ccbfec6704e171722ae65bd603361ef86bbb0182f3a92b",
+    "zlib-1.3.1-core-full/fixedtables/infback.c.current.all-incident-relations.txt": "435af62f6a390a7ef339a5977bb56d473294a851bc310a0480876a2d59e65713",
+    "zlib-1.3.1-core-full/fixedtables/infback.c.current.method.txt": "e7fb3936ba5f254848204733ee1a0d2a8d38e33d5b2237d1e80a45f1863de94b",
+    "zlib-1.3.1-core-full/fixedtables/infback.c.live-current.diff": "18036365369d0bcd037371caf5e53f7cd6fd9fd18bffc38ac674675094320a18",
+    "zlib-1.3.1-core-full/fixedtables/infback.c.oracle.all-incident-relations.txt": "799606e5026a8f7998ed10e2abfa697126b697d6f4c37a909258ab9245df5d36",
+    "zlib-1.3.1-core-full/fixedtables/infback.c.oracle.method.txt": "f60193d7df53b3fe18e1799a2f7acf84a9723edb53b2b21fc70ef78b573c1423",
+    "zlib-1.3.1-core-full/fixedtables/inflate.baseline.method.txt": "704976b96ee4857a7f9670392b8990717dfaf3433c147e4ba77f86948a40e8d7",
+    "zlib-1.3.1-core-full/fixedtables/inflate.c.baseline.all-incident-relations.txt": "3f614892a70da415f6e9cf67500d8eb4a4a16a767964e0d5763f47741f6e8e01",
+    "zlib-1.3.1-core-full/fixedtables/inflate.c.baseline.method.txt": "7bbf19225702a3654ae1bdcb7633ce951654f2692f15360a06e7c1f2e4e10ecf",
+    "zlib-1.3.1-core-full/fixedtables/inflate.c.current.all-incident-relations.txt": "8e2c3bb0d2df30fe7c5a5f2a9d0e746d22b33907c887d0fb81f497015513e3ca",
+    "zlib-1.3.1-core-full/fixedtables/inflate.c.current.method.txt": "201368c7d2fda532d89e20e5d4f14cd0338a51377a0826de631f15e37556d356",
+    "zlib-1.3.1-core-full/fixedtables/inflate.c.live-current.diff": "bd715ab3875c44cda88a8eac51ad325ee6e59deff725c578c852e8b83a709404",
+    "zlib-1.3.1-core-full/fixedtables/inflate.c.oracle.all-incident-relations.txt": "cc903a927c39d4af49b8f46f7ec2a81baa105c977cac79050b659aacc642bb05",
+    "zlib-1.3.1-core-full/fixedtables/inflate.c.oracle.method.txt": "a6e3084fabc85c5cf053700a39cc186cff8d3fd10d644e0bbcef8bf7ecb7ba21",
+    "zlib-1.3.1-core-full/fixedtables/inflate.current.method.txt": "704976b96ee4857a7f9670392b8990717dfaf3433c147e4ba77f86948a40e8d7",
+    "zlib-1.3.1-core-full/fixedtables/inflate.oracle.method.txt": "84eb8d5bc4700b6143c51bb95065f59e5facbd5d71a883df23b06ec8876da3ee",
+    "zlib-1.3.1-core-full/fixedtables/review.json": "32a2ab848e0feab30f787ee08c07f8eeda613cd2859faa56fce1bae87d04eabf",
+    "zlib-1.3.1-core-full/identity-occurrence-review.json": "ba37b5db2d59d913d6de0940c69ab539b63e32dc88c7cccf08dd4dd0fd204ae3",
+    "zlib-1.3.1-core-full/identity-source-role-candidates-review.json": "2b95d70bda3b24ced4ff6f88a93c851ba4773d6feebfc68096a942b6351c9b30",
+    "zlib-1.3.1-core-full/priority-methods/0312e80dd5cc37d1/baseline.ast": "77c89a85b897d5bae3b05c478d9e82e979bfa2db518004f6ef28f73c967a8fc2",
+    "zlib-1.3.1-core-full/priority-methods/0312e80dd5cc37d1/current.ast": "77c89a85b897d5bae3b05c478d9e82e979bfa2db518004f6ef28f73c967a8fc2",
+    "zlib-1.3.1-core-full/priority-methods/0312e80dd5cc37d1/oracle.ast": "77c89a85b897d5bae3b05c478d9e82e979bfa2db518004f6ef28f73c967a8fc2",
+    "zlib-1.3.1-core-full/priority-methods/42b3d55e34d7f563/baseline.ast": "e1b88a789494e2e3730f7991ea2be15ac2b003a7d2858caddbe4d772470bd17a",
+    "zlib-1.3.1-core-full/priority-methods/42b3d55e34d7f563/current.ast": "e1b88a789494e2e3730f7991ea2be15ac2b003a7d2858caddbe4d772470bd17a",
+    "zlib-1.3.1-core-full/priority-methods/42b3d55e34d7f563/oracle.ast": "e1b88a789494e2e3730f7991ea2be15ac2b003a7d2858caddbe4d772470bd17a",
+    "zlib-1.3.1-core-full/priority-methods/66037f6f29ab6acc/baseline.ast": "e0d5ab7c6c0c11ad340dcbbeb57533f71146fe1427887fde80fdeb6f7fe9cacc",
+    "zlib-1.3.1-core-full/priority-methods/66037f6f29ab6acc/current.ast": "e0d5ab7c6c0c11ad340dcbbeb57533f71146fe1427887fde80fdeb6f7fe9cacc",
+    "zlib-1.3.1-core-full/priority-methods/66037f6f29ab6acc/oracle.ast": "e0d5ab7c6c0c11ad340dcbbeb57533f71146fe1427887fde80fdeb6f7fe9cacc",
+    "zlib-1.3.1-core-full/priority-methods/b31774370d540e3f/baseline.ast": "19d266b95847065c82f7775ca20e237fe35c390110f64158b883cdb38ca76eef",
+    "zlib-1.3.1-core-full/priority-methods/b31774370d540e3f/current.ast": "19d266b95847065c82f7775ca20e237fe35c390110f64158b883cdb38ca76eef",
+    "zlib-1.3.1-core-full/priority-methods/b31774370d540e3f/oracle.ast": "19d266b95847065c82f7775ca20e237fe35c390110f64158b883cdb38ca76eef",
+    "zlib-1.3.1-core-full/priority-methods/b588421c52217bb4/baseline.ast": "b5b72f2be9954786b4e6e81fb65def6d9846e6a07e6c1cabc2db98674c42a08b",
+    "zlib-1.3.1-core-full/priority-methods/b588421c52217bb4/current.ast": "b5b72f2be9954786b4e6e81fb65def6d9846e6a07e6c1cabc2db98674c42a08b",
+    "zlib-1.3.1-core-full/priority-methods/b588421c52217bb4/oracle.ast": "048d51a3756d9671a15fed3d579c2476c13fbd5b54b89cb72bd0ed9e6e5fd23f",
+    "zlib-1.3.1-core-full/priority-review.json": "9b632e9904f5d2d8404b9a6a0b76c70648cc6f2ce042569fb30336ddf81b7664",
+    "zlib-1.3.1-core-full/unique-identity-source-role-review.json": "5004b1f2849590afdeb125a73224e8e100fe808ec9f78d885d53726621cd2204"
+  },
+  "limitations": [
+    "Unchanged selected canonical projection only, no full schema/property parity claim.",
+    "Six CODE-only differences per fixedtables tree and missing inflate body remain.",
+    "Repeated source-role AST views keep explicit candidate multiplicity.",
+    "Root final workspace, resource and official acceptance are separate."
+  ]
+}

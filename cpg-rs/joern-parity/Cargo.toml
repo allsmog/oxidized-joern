@@ -13,6 +13,7 @@ cpg-analysis.workspace = true
 cpg-core.workspace = true
 cpg-incremental.workspace = true
 cpg-lang-c.workspace = true
+serde_json = "1"
 
 [dev-dependencies]
 tempfile.workspace = true

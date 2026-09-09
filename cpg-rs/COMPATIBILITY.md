@@ -41,7 +41,8 @@ The release contract covers these C operations:
   SARIF output;
 - canonical flow facts and final findings for branches, kills, loops, returns,
   globals, pointer/member access, sanitizers, cross-calls, and recursion;
-- distinct call identities for same-named translation-unit-local functions;
+- Joern duplicate-function naming and call links for the pinned ordinary and
+  literal-static controls;
 - content-correct project updates whose result equals a clean rebuild;
 - pinned zlib and Lua builds under recorded wall-time and peak-RSS ceilings.
 
@@ -163,6 +164,23 @@ sections are unchanged. Both full projects remain nonexact. Duplicate function
 identity/linking, long fixedtables CODE and the missing inflate body remain
 separate gaps. Final workspace, live-oracle, native and official resource gates
 pass; schema, binary-format, console, query and non-C scope is unchanged.
+
+The [twelfth batch](../docs/conformance/astra-twelfth-batch-2026-09-09.md)
+pins duplicate function names, literal STATIC call fixups, physical reference
+locations, method bindings and modifier properties. Eight new complete
+canonical graphs match Joern. Eleven full snapshots of the Rust graph survive
+save/reopen unchanged, and 81 selected stored metadata occurrences match the
+separately observed Joern graphs. The canonical oracle and these stored-property
+checks cover different scopes: complete cross-producer snapshots still differ.
+The missing IMPORT/DEPENDENCY nodes in include controls, unstored coordinates,
+property presence, and edge properties and relationships remain open.
+
+The native writer now emits CPG2 version 2; readers retain CPG2 version 1 and
+legacy CPG1 support. This change adds a modifier-property column and appended
+binding node/edge tags. Eight actual graphs from the earlier writer exercise
+compatibility. The reserved optional-line sentinel cannot represent
+`Some(u32::MAX)`; saving that value returns an error before replacing a file.
+This is this project's storage format, without Joern binary interoperability.
 
 Confirmed remaining C gaps include broader include/build-definition context,
 function-like macros in preprocessor conditions,

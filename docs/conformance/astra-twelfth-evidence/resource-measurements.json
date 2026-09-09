@@ -1,0 +1,98 @@
+{
+  "zlib-1.3.1-core": {
+    "expected": {
+      "sourceFiles": 26,
+      "nodes": 70390,
+      "graphSha256": "7d459cf9f4eee96dacfe870f76865f4ce1ea22a0d54057ba2f72cb3a9ea55ec9",
+      "edgesSha256": "fead4bd37486f4c91598561348b97b0b237270b77dc0719d2684e32a462ac119",
+      "exportSha256": "6eb133f818215b87853a7a4028bb821e92b4343b5eea4f146d6f92d710ce257a",
+      "sarifSha256": "0becad10ba8527f8055f00b8752fa550f27725d671483aa6f0171d81c335aeec",
+      "findings": 0
+    },
+    "trials": [
+      {
+        "sourceFiles": 26,
+        "nodes": 70390,
+        "findings": 0,
+        "graphSha256": "7d459cf9f4eee96dacfe870f76865f4ce1ea22a0d54057ba2f72cb3a9ea55ec9",
+        "edgesSha256": "fead4bd37486f4c91598561348b97b0b237270b77dc0719d2684e32a462ac119",
+        "exportSha256": "6eb133f818215b87853a7a4028bb821e92b4343b5eea4f146d6f92d710ce257a",
+        "sarifSha256": "0becad10ba8527f8055f00b8752fa550f27725d671483aa6f0171d81c335aeec",
+        "buildSeconds": 3.1100890829984564,
+        "buildRssMiB": 410.046875,
+        "exportSeconds": 0.17860987500171177,
+        "exportRssMiB": 56.828125,
+        "scanSeconds": 1.0421257919806521,
+        "scanRssMiB": 71.34375
+      },
+      {
+        "sourceFiles": 26,
+        "nodes": 70390,
+        "findings": 0,
+        "graphSha256": "7d459cf9f4eee96dacfe870f76865f4ce1ea22a0d54057ba2f72cb3a9ea55ec9",
+        "edgesSha256": "fead4bd37486f4c91598561348b97b0b237270b77dc0719d2684e32a462ac119",
+        "exportSha256": "6eb133f818215b87853a7a4028bb821e92b4343b5eea4f146d6f92d710ce257a",
+        "sarifSha256": "0becad10ba8527f8055f00b8752fa550f27725d671483aa6f0171d81c335aeec",
+        "buildSeconds": 3.1177201249811333,
+        "buildRssMiB": 348.140625,
+        "exportSeconds": 0.19233758401242085,
+        "exportRssMiB": 55.875,
+        "scanSeconds": 1.0269475830136798,
+        "scanRssMiB": 71.390625
+      }
+    ],
+    "update": {
+      "seconds": 11.229528750001919,
+      "rssMiB": 549.125,
+      "output": "update-equivalent 26 files"
+    }
+  },
+  "lua-5.4.7": {
+    "expected": {
+      "sourceFiles": 61,
+      "nodes": 120226,
+      "graphSha256": "73c14a15cc01215e021f07af164296f6900e66788f510e07a23989c6667db0e4",
+      "edgesSha256": "f998c13156b6c84fa6a0862105a7cbc5c34ae26f60a6b0289f299e7b174985af",
+      "exportSha256": "011bfdbf81bbd37d27ed3604fc7c70cc3c5be1ab179d67e8f065ce9b5dccc611",
+      "sarifSha256": "0becad10ba8527f8055f00b8752fa550f27725d671483aa6f0171d81c335aeec",
+      "findings": 0
+    },
+    "trials": [
+      {
+        "sourceFiles": 61,
+        "nodes": 120226,
+        "findings": 0,
+        "graphSha256": "73c14a15cc01215e021f07af164296f6900e66788f510e07a23989c6667db0e4",
+        "edgesSha256": "f998c13156b6c84fa6a0862105a7cbc5c34ae26f60a6b0289f299e7b174985af",
+        "exportSha256": "011bfdbf81bbd37d27ed3604fc7c70cc3c5be1ab179d67e8f065ce9b5dccc611",
+        "sarifSha256": "0becad10ba8527f8055f00b8752fa550f27725d671483aa6f0171d81c335aeec",
+        "buildSeconds": 10.630263708997518,
+        "buildRssMiB": 405.640625,
+        "exportSeconds": 0.4302187080029398,
+        "exportRssMiB": 78.0,
+        "scanSeconds": 2.5116082500026096,
+        "scanRssMiB": 109.125
+      },
+      {
+        "sourceFiles": 61,
+        "nodes": 120226,
+        "findings": 0,
+        "graphSha256": "73c14a15cc01215e021f07af164296f6900e66788f510e07a23989c6667db0e4",
+        "edgesSha256": "f998c13156b6c84fa6a0862105a7cbc5c34ae26f60a6b0289f299e7b174985af",
+        "exportSha256": "011bfdbf81bbd37d27ed3604fc7c70cc3c5be1ab179d67e8f065ce9b5dccc611",
+        "sarifSha256": "0becad10ba8527f8055f00b8752fa550f27725d671483aa6f0171d81c335aeec",
+        "buildSeconds": 8.300196333002532,
+        "buildRssMiB": 461.59375,
+        "exportSeconds": 7.195786832977319,
+        "exportRssMiB": 77.5625,
+        "scanSeconds": 1.5199046669877134,
+        "scanRssMiB": 111.234375
+      }
+    ],
+    "update": {
+      "seconds": 18.40521150000859,
+      "rssMiB": 723.21875,
+      "output": "update-equivalent 61 files"
+    }
+  }
+}

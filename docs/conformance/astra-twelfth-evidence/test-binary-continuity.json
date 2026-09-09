@@ -1,0 +1,29 @@
+{
+  "status": "IDENTICAL_RELEASE_BINARIES_AFTER_TEST_ONLY_CLIPPY_REBUILD",
+  "previousBuild": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/twelfth-batch/fmt-corrected/final-real-differential/bin/source-bindings.json",
+    "sha256": "7e5397d0a3d9ed1650e67c2959fc26006239d97d92ea820adf771200597e895d"
+  },
+  "finalBuild": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/twelfth-batch/lint-corrected/final-real-differential/bin/source-bindings.json",
+    "sha256": "33f4740b78f60a142a615b1a07b2a2ea448ed7955e9464395e72fe6a8af91dda"
+  },
+  "identicalBinaryHashes": {
+    "cpg": "4567fa27bfdf676995826fb739b3383662bdd1f9154578dea89620261aa40f47",
+    "joern-parity": "8c451b35775018728f71274f2cff1fc665ec35997a00b05760a66769cddc0d10"
+  },
+  "changedSourceFiles": [
+    "cpg-rs/joern-parity/src/supplemental.rs"
+  ],
+  "unchangedFixtureCount": 11642,
+  "newSourceCount": 149,
+  "testOnlyPatch": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/twelfth-batch/lint-corrected/test-only-clippy.patch",
+    "sha256": "eddeb4e225b9246e33b167dbcdd87df957f7697efa9a04fcaffad18984a0d54c"
+  },
+  "previousContinuity": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/twelfth-batch/fmt-corrected/binary-continuity.json",
+    "sha256": "9ea601adf2f892d72542fb20ae4d5a98181a8204608df04c700ff6473d0e4bcd"
+  },
+  "claim": "Existing complete eleven-case and whole-project outputs are explicitly reused for byte-identical release executables. No repeat execution claimed. Final root full gates use this source version."
+}

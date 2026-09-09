@@ -1,0 +1,7 @@
+BINDING|entry|entry|int(int)|entry|entry
+BINDING|helper|helper|int(int)|helper|helper
+BINDING|ordinary|ordinary|int(int)|ordinary|ordinary
+METHOD_REF|entry|entry|entry|entry|main.c:<global>|3|3
+METHOD_REF|helper|helper|helper|helper|main.c:<global>|2|2
+METHOD_REF|ordinary|ordinary|ordinary|ordinary|main.c:<global>|1|1
+MODIFIER|helper|3|STATIC|2

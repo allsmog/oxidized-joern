@@ -1,0 +1,22 @@
+{
+  "atUtc": "2026-09-09T03:01:03.011873+00:00",
+  "head": "6fcb30a25bbee3ca3c05b5b197cd3ce93ca4d11a",
+  "status": " M cpg-rs/ARCHITECTURE_GAPS.md\n M plans/README.md\n?? plans/001-fail-closed-filesystem-boundary.md\n?? plans/002-harden-cpg-persistence.md\n?? plans/003-content-correct-cache-and-reopen.md\n?? plans/004-enforce-release-acceptance-gates.md\n?? plans/006-complete-cpg-persistence-safety.md\n?? plans/007-bind-release-to-verified-contract.md\n?? plans/008-make-graph-language-metadata-explicit.md\n?? plans/009-refresh-architecture-and-product-docs.md\n?? plans/010-differential-gate-shared-reaching-def.md\n?? plans/011-migrate-summaries-to-canonical-value-flow.md\n?? plans/012-close-filesystem-boundary-residuals.md\n",
+  "hashes": {
+    "cpg-rs/ARCHITECTURE_GAPS.md": "1a106157606f81799b7fa70f0b7b0c7577a2c4279d731b3bab9409a9a65b70f4",
+    "plans/README.md": "620ad4469826655fb3c8a74cbdeef12d6319053e86e6370e3f156ebb97f2ba4b",
+    "plans/001-fail-closed-filesystem-boundary.md": "00cf7a9468a5f9f6b16b23c1c1e472a043e10687e53f161ee8aeaa8eb1897430",
+    "plans/002-harden-cpg-persistence.md": "b074d8136eddda21755c3afe084bcee619f2e5d0be207ce563e03c4dfb11b34a",
+    "plans/003-content-correct-cache-and-reopen.md": "1533c2d00dd11c4ca49645022542fcdb22bb4276fad75466deff8a85667508f9",
+    "plans/004-enforce-release-acceptance-gates.md": "f398c211f342598eb1d1572a0bb3018e01d5ceefb8ce9886939429855900ef87",
+    "plans/006-complete-cpg-persistence-safety.md": "79768aa08589d22cefbd30cbd670783d1d8ec917705ed8a534196230866794d6",
+    "plans/007-bind-release-to-verified-contract.md": "7265e6108e9fda4d864c0f0a0cfcabc152fd5cb233a3aa34b1536ead0153ddbd",
+    "plans/008-make-graph-language-metadata-explicit.md": "9a784d8db065ee7fedb47479bf6d8846d22d8501e5b8bcd4b665a0edf9134c40",
+    "plans/009-refresh-architecture-and-product-docs.md": "a33dd8d5c11d168c4c562228e7bb50643c85f6b637206a7adc9c7f481e547744",
+    "plans/010-differential-gate-shared-reaching-def.md": "5efb01ce175101b0eccdc8f92bb9a6a0370bb276a00224be90e248e00f032bb3",
+    "plans/011-migrate-summaries-to-canonical-value-flow.md": "77fef056be77c825db626b799870787f0a4f7b830206423abc04d2827d0f45ff",
+    "plans/012-close-filesystem-boundary-residuals.md": "3c91974a8f1cc26aa1deeeb7daf507f29c632b5960168a8a4695de612902e1cf"
+  },
+  "dirtyFileCount": 13,
+  "unchanged": true
+}

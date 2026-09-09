@@ -66,9 +66,9 @@ impl Frontend for CFrontend {
             .iter()
             .map(|(path, source)| ((*path).to_string(), (*source).to_string()))
             .collect();
-        let (dump, origins) = exact::canonical_dump_sources_with_origins(&sources);
-        Some(import::graph_from_canonical_dump_with_origins(
-            &dump, &sources, &origins,
+        let (dump, origins, metadata) = exact::canonical_dump_sources_with_metadata(&sources);
+        Some(import::graph_from_canonical_dump_with_metadata(
+            &dump, &sources, &origins, &metadata,
         ))
     }
 
