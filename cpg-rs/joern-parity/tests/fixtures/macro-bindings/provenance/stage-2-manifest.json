@@ -1,0 +1,53 @@
+{
+  "status": "FROZEN_ADDITIVE_RAW_PROVENANCE_SUPPLEMENT_CANDIDATE_UNBUILT",
+  "baseManifest": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/fourteenth-macro-fixture-stage-v1/package-freeze.json",
+    "sha256": "bc7597ed1516122c27b72d57d40f67464bea33cfdf5efec22b35479272949292"
+  },
+  "fixtureRoot": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/fourteenth-macro-fixture-stage-v1-supplemental/fixtures",
+  "files": {
+    "provenance/RAW-STAGE-STATUS.md": {
+      "sha256": "7682d4f769da05ef081e3bbe778f85dbbeae314be438524cb0ff82f7573e54a0",
+      "bytes": 456
+    },
+    "provenance/observer/prepared/derive.py": {
+      "sha256": "39c0b0a06549b8ce966627f15b6f8d4ddaf35836a88d2aa2e16e69501b69eeb8",
+      "bytes": 2947
+    },
+    "provenance/observer/prepared/observer-release.template.json": {
+      "sha256": "60be53408b5a1a772862e40531976be4814e1523a94346c50dc7aa46f530ee19",
+      "bytes": 1193
+    },
+    "provenance/observer/prepared/predecessor-to-v1.patch": {
+      "sha256": "d82a002e509f3efcfdffbe00bbf815ed5b6c5d635ec41060aacd3b13596670a0",
+      "bytes": 8416
+    },
+    "provenance/observer/snapshot/prepared.json": {
+      "sha256": "10fb42a19a4f4b310765dee02c5572eb0889ce56fc284ddfabf88b8839a63d4d",
+      "bytes": 6310
+    },
+    "provenance/observer/snapshot/run-observer.py": {
+      "sha256": "e58c798b239ced8fb207fc40c15a6b82c13aea7aa941356ebf46ad358a6e6a79",
+      "bytes": 29923
+    },
+    "provenance/releases/observer-release.json": {
+      "sha256": "0563c132c052c0b2ccf579e6dee93be6e2999960ba616cfae8ccaba13893029d",
+      "bytes": 2176
+    },
+    "provenance/supplemental-copy-provenance.json": {
+      "sha256": "da972237c78c256a339d3c6fd2a20a0f8de28c5e7b06943f5fbfbd82a05b9d3c",
+      "bytes": 2287
+    }
+  },
+  "filesCount": 8,
+  "baseFilesCount": 115,
+  "unionFilesCount": 123,
+  "acceptedGraphAssetsRequiringForceStage": [
+    "cpg-rs/joern-parity/tests/fixtures/macro-bindings/cases/function_like_repeated_use/accepted/accepted-v3.cpg",
+    "cpg-rs/joern-parity/tests/fixtures/macro-bindings/cases/local_object_used_unused/accepted/accepted-v3.cpg",
+    "cpg-rs/joern-parity/tests/fixtures/macro-bindings/cases/repeated_direct_include/accepted/accepted-v3.cpg",
+    "cpg-rs/joern-parity/tests/fixtures/macro-bindings/cases/shared_header_two_callers/accepted/accepted-v3.cpg"
+  ],
+  "runtimeOrExecutableFilesCopied": false,
+  "producerRun": false
+}

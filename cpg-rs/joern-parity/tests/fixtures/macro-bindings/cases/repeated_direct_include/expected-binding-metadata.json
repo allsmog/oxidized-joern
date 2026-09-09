@@ -1,0 +1,70 @@
+{
+  "bindings": [
+    {
+      "binding": {
+        "METHOD_FULL_NAME": "entry",
+        "NAME": "entry",
+        "SIGNATURE": "int(void)"
+      },
+      "incidentEdges": [
+        [
+          "binding",
+          "REF",
+          "method"
+        ],
+        [
+          "owner",
+          "BINDS",
+          "binding"
+        ]
+      ],
+      "incomingCallCount": 0,
+      "macro": false,
+      "method": {
+        "CODE": "int entry(void) { return INCLUDED_VALUE; }",
+        "FILENAME": "main.c",
+        "FULL_NAME": "entry",
+        "NAME": "entry",
+        "SIGNATURE": "int(void)"
+      },
+      "owner": {
+        "FILENAME": "main.c",
+        "FULL_NAME": "entry",
+        "NAME": "entry"
+      }
+    },
+    {
+      "binding": {
+        "METHOD_FULL_NAME": "repeat.h:INCLUDED_VALUE:int(0)",
+        "NAME": "INCLUDED_VALUE",
+        "SIGNATURE": "int(0)"
+      },
+      "incidentEdges": [
+        [
+          "binding",
+          "REF",
+          "method"
+        ],
+        [
+          "owner",
+          "BINDS",
+          "binding"
+        ]
+      ],
+      "incomingCallCount": 1,
+      "macro": true,
+      "method": {
+        "CODE": "#define INCLUDED_VALUE 7",
+        "FILENAME": "main.c",
+        "FULL_NAME": "repeat.h:INCLUDED_VALUE:int(0)",
+        "NAME": "INCLUDED_VALUE",
+        "SIGNATURE": "int(0)"
+      },
+      "owner": {
+        "FILENAME": "main.c",
+        "FULL_NAME": "main.c:<global>",
+        "NAME": "<global>"
+      }
+    }
+  ]
+}

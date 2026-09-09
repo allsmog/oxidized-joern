@@ -1,5 +1,10 @@
 # Architecture gap implementation map
 
+**Historical architecture note.** For current Joern parity gaps, evidence and
+engineering estimates, read [REMAINING_PORT_WORK.md](REMAINING_PORT_WORK.md).
+Some staging descriptions below predate the production C graph/analysis path
+and must not be treated as the current implementation backlog.
+
 This document maps the full performance-oriented architecture to concrete code in
 this branch. The goal is to make every gap category code-owned: storage, derived
 facts, sparse value flow, query planning, scan subscriptions, and auditability.

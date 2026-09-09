@@ -42,7 +42,8 @@ use std::time::{Duration, Instant};
 /// v16: C field macros, nested cast tokens, typedef aggregates and recovery.
 /// v23: C method bindings and modifier properties use the CPG2 version 2 payload.
 /// v24: Physical C include references and their properties use CPG2 version 3.
-pub const GRAPH_SHAPE_VERSION: u32 = 24;
+/// v25: Finalized C macro stubs retain their observed binding components.
+pub const GRAPH_SHAPE_VERSION: u32 = 25;
 
 const CACHE_MANIFEST_VERSION: u32 = 1;
 const CACHE_GRAPH_FORMAT: &str = "CPG2";

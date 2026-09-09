@@ -1,0 +1,172 @@
+{
+  "status": "PREPARED_SOURCES_ONLY_PARENT_CHECKPOINT_AND_RELEASE_PENDING",
+  "parentBinding": {
+    "status": "PENDING_ACCEPTED_THIRTEENTH_CHECKPOINT",
+    "commit": null,
+    "release": null
+  },
+  "planManifest": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/macro-binding-next-plan-v1/manifest.json",
+    "sha256": "ae8f1cbcce8ce5afcbd2c01ad9b9c2d58d829e96f2de4c547bc0fb659aaafc5e",
+    "bytes": 1227
+  },
+  "proposal": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/macro-binding-next-plan-v1/proposal.json",
+    "sha256": "f6dc3933cfe449cc30876db864afc1e3124f43372dc29a398355298b1c74d224",
+    "bytes": 4417
+  },
+  "independentPlanReview": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-include-references/.local/thirteenth-macro-binding-plan-review-v1/review.json",
+    "sha256": "15f819387b121b8d82fe06d484672b5753bdd910d2c1c66359059384d2ee6e06",
+    "bytes": 8736
+  },
+  "projectCount": 4,
+  "sourceFileCount": 7,
+  "newProjects": 3,
+  "retainedAnchorProjects": 1,
+  "cases": [
+    {
+      "case": "repeated_direct_include",
+      "kind": "exact-source-and-complete-reference-anchor",
+      "inputs": {
+        "main.c": {
+          "path": "input/repeated_direct_include/main.c",
+          "sha256": "3a71231efb0ec5721cab22fa6230610cfaf13582dc37dc24dcc7011bab0a5776",
+          "bytes": 83
+        },
+        "repeat.h": {
+          "path": "input/repeated_direct_include/repeat.h",
+          "sha256": "9de56527b206dea4b2c43ea0f85460c08fefe041a230b547590a44b4d3373cc4",
+          "bytes": 66
+        }
+      },
+      "purpose": "Reproduce the confirmed macro Binding gap while retaining the already corrected two include pairs.",
+      "retainedCanonical": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-include-references/cpg-rs/joern-parity/tests/fixtures/include-references/cases/repeated_direct_include/expected.txt",
+        "sha256": "0a04058fa847b05e1f00fb81c24c2c003ce044cbb26e36952a71a7fb01f54c92",
+        "bytes": 7590
+      },
+      "retainedSupplement": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-include-references/cpg-rs/joern-parity/tests/fixtures/include-references/cases/repeated_direct_include/joern-supplement.jsonl",
+        "sha256": "8815f4ce639175e0b6bd4e957e137fb20ca94929e061960407f6ddc155826735",
+        "bytes": 32391
+      }
+    },
+    {
+      "case": "local_object_used_unused",
+      "kind": "UNRUN_PROPOSAL",
+      "inputs": {
+        "main.c": {
+          "path": "input/local_object_used_unused/main.c",
+          "sha256": "fbbafbd5e4642d528b8b268702bd7ff457f384b6724b1f7ab0f8de690aa90998",
+          "bytes": 65
+        }
+      },
+      "purpose": "Separate a used same-file object macro from an unused definition; detect an implementation that adds bindings for every define.",
+      "expectedCanonical": null,
+      "expectedSupplement": null
+    },
+    {
+      "case": "function_like_repeated_use",
+      "kind": "UNRUN_PROPOSAL",
+      "inputs": {
+        "main.c": {
+          "path": "input/function_like_repeated_use/main.c",
+          "sha256": "d4c334dfece151a7e56d0b1088da29db077c2899502bb732db5d6608fac89a2c",
+          "bytes": 80
+        }
+      },
+      "purpose": "Observe nonzero-argument signature spelling and whether repeated calls share one finalized stub Binding; do not assume output or exactness.",
+      "expectedCanonical": null,
+      "expectedSupplement": null
+    },
+    {
+      "case": "shared_header_two_callers",
+      "kind": "UNRUN_PROPOSAL",
+      "inputs": {
+        "a.c": {
+          "path": "input/shared_header_two_callers/a.c",
+          "sha256": "5bf72d819de6c04c8e22c5d581e5a286bae71f784277cbbd3df0ec7f8679d4de",
+          "bytes": 54
+        },
+        "shared.h": {
+          "path": "input/shared_header_two_callers/shared.h",
+          "sha256": "b26369e647fb784e8d539541d1f5a281610c63341f0685c9d9072ec4c81b4ad9",
+          "bytes": 16
+        },
+        "z.c": {
+          "path": "input/shared_header_two_callers/z.c",
+          "sha256": "35ef18004ee8709ebfb7326caed0d1951fb9ecbe82059f0571dc26ccffac7fc1",
+          "bytes": 55
+        }
+      },
+      "purpose": "Discriminate definition-file identity from physical owning TYPE_DECL and first registration; pin binding multiplicity across two callers.",
+      "expectedCanonical": null,
+      "expectedSupplement": null
+    }
+  ],
+  "sourceInventory": {
+    "input/repeated_direct_include/main.c": {
+      "sha256": "3a71231efb0ec5721cab22fa6230610cfaf13582dc37dc24dcc7011bab0a5776",
+      "bytes": 83
+    },
+    "input/repeated_direct_include/repeat.h": {
+      "sha256": "9de56527b206dea4b2c43ea0f85460c08fefe041a230b547590a44b4d3373cc4",
+      "bytes": 66
+    },
+    "input/local_object_used_unused/main.c": {
+      "sha256": "fbbafbd5e4642d528b8b268702bd7ff457f384b6724b1f7ab0f8de690aa90998",
+      "bytes": 65
+    },
+    "input/function_like_repeated_use/main.c": {
+      "sha256": "d4c334dfece151a7e56d0b1088da29db077c2899502bb732db5d6608fac89a2c",
+      "bytes": 80
+    },
+    "input/shared_header_two_callers/a.c": {
+      "sha256": "5bf72d819de6c04c8e22c5d581e5a286bae71f784277cbbd3df0ec7f8679d4de",
+      "bytes": 54
+    },
+    "input/shared_header_two_callers/shared.h": {
+      "sha256": "b26369e647fb784e8d539541d1f5a281610c63341f0685c9d9072ec4c81b4ad9",
+      "bytes": 16
+    },
+    "input/shared_header_two_callers/z.c": {
+      "sha256": "35ef18004ee8709ebfb7326caed0d1951fb9ecbe82059f0571dc26ccffac7fc1",
+      "bytes": 55
+    }
+  },
+  "sourceChecks": [
+    {
+      "source": "input/repeated_direct_include/main.c",
+      "exactProposalOrAnchorBytes": true
+    },
+    {
+      "source": "input/repeated_direct_include/repeat.h",
+      "exactProposalOrAnchorBytes": true
+    },
+    {
+      "source": "input/local_object_used_unused/main.c",
+      "exactProposalOrAnchorBytes": true
+    },
+    {
+      "source": "input/function_like_repeated_use/main.c",
+      "exactProposalOrAnchorBytes": true
+    },
+    {
+      "source": "input/shared_header_two_callers/a.c",
+      "exactProposalOrAnchorBytes": true
+    },
+    {
+      "source": "input/shared_header_two_callers/shared.h",
+      "exactProposalOrAnchorBytes": true
+    },
+    {
+      "source": "input/shared_header_two_callers/z.c",
+      "exactProposalOrAnchorBytes": true
+    }
+  ],
+  "newExpectedOutputsInvented": false,
+  "producersRun": false,
+  "currentSourceTestsFixturesOrPlanEdited": false,
+  "scope": "Input bytes only. Retained full anchor references remain bound at their admitted paths; no new expected outputs or execution helper is supplied."
+}

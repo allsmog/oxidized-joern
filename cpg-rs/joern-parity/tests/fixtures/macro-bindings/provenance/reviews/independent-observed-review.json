@@ -1,0 +1,4377 @@
+{
+  "status": "PASS_BOUNDED_OBSERVED_MACRO_BINDING_SEMANTICS",
+  "checkCount": 1054,
+  "checks": [
+    {
+      "name": "observer admitted complete",
+      "passed": true
+    },
+    {
+      "name": "observer snapshots unchanged",
+      "passed": true
+    },
+    {
+      "name": "accepted raw capture complete",
+      "passed": true
+    },
+    {
+      "name": "raw CASE unique function_like_repeated_use",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw CASE unique local_object_used_unused",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw CASE unique repeated_direct_include",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw CASE unique shared_header_two_callers",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "raw observed row has case",
+      "passed": true
+    },
+    {
+      "name": "four complete cases",
+      "passed": true
+    },
+    {
+      "name": "function_like_repeated_use full raw snapshot equality",
+      "passed": true
+    },
+    {
+      "name": "function_like_repeated_use unique nodes and complete edges",
+      "passed": true
+    },
+    {
+      "name": "function_like_repeated_use peer complete components independently reproduced",
+      "passed": true
+    },
+    {
+      "name": "function_like_repeated_use full accepted counts",
+      "passed": true
+    },
+    {
+      "name": "function_like_repeated_use one observed macro Binding",
+      "passed": true
+    },
+    {
+      "name": "function_like_repeated_use exact three properties and absent ORDER/location",
+      "passed": true
+    },
+    {
+      "name": "function_like_repeated_use exact incoming BINDS and outgoing REF",
+      "passed": true
+    },
+    {
+      "name": "function_like_repeated_use null payloads",
+      "passed": true
+    },
+    {
+      "name": "function_like_repeated_use owner and target exact",
+      "passed": true
+    },
+    {
+      "name": "function_like_repeated_use observed invocation multiplicity",
+      "passed": true
+    },
+    {
+      "name": "function_like_repeated_use missing from accepted Rust Binding nodes",
+      "passed": true
+    },
+    {
+      "name": "function_like_repeated_use all complete canonical outputs unchanged",
+      "passed": true
+    },
+    {
+      "name": "local_object_used_unused full raw snapshot equality",
+      "passed": true
+    },
+    {
+      "name": "local_object_used_unused unique nodes and complete edges",
+      "passed": true
+    },
+    {
+      "name": "local_object_used_unused peer complete components independently reproduced",
+      "passed": true
+    },
+    {
+      "name": "local_object_used_unused full accepted counts",
+      "passed": true
+    },
+    {
+      "name": "local_object_used_unused one observed macro Binding",
+      "passed": true
+    },
+    {
+      "name": "local_object_used_unused exact three properties and absent ORDER/location",
+      "passed": true
+    },
+    {
+      "name": "local_object_used_unused exact incoming BINDS and outgoing REF",
+      "passed": true
+    },
+    {
+      "name": "local_object_used_unused null payloads",
+      "passed": true
+    },
+    {
+      "name": "local_object_used_unused owner and target exact",
+      "passed": true
+    },
+    {
+      "name": "local_object_used_unused observed invocation multiplicity",
+      "passed": true
+    },
+    {
+      "name": "local_object_used_unused missing from accepted Rust Binding nodes",
+      "passed": true
+    },
+    {
+      "name": "unused macro has no METHOD or BINDING",
+      "passed": true
+    },
+    {
+      "name": "local_object_used_unused all complete canonical outputs unchanged",
+      "passed": true
+    },
+    {
+      "name": "repeated_direct_include full raw snapshot equality",
+      "passed": true
+    },
+    {
+      "name": "repeated_direct_include unique nodes and complete edges",
+      "passed": true
+    },
+    {
+      "name": "repeated_direct_include peer complete components independently reproduced",
+      "passed": true
+    },
+    {
+      "name": "repeated_direct_include full accepted counts",
+      "passed": true
+    },
+    {
+      "name": "repeated_direct_include one observed macro Binding",
+      "passed": true
+    },
+    {
+      "name": "repeated_direct_include exact three properties and absent ORDER/location",
+      "passed": true
+    },
+    {
+      "name": "repeated_direct_include exact incoming BINDS and outgoing REF",
+      "passed": true
+    },
+    {
+      "name": "repeated_direct_include null payloads",
+      "passed": true
+    },
+    {
+      "name": "repeated_direct_include owner and target exact",
+      "passed": true
+    },
+    {
+      "name": "repeated_direct_include observed invocation multiplicity",
+      "passed": true
+    },
+    {
+      "name": "repeated_direct_include missing from accepted Rust Binding nodes",
+      "passed": true
+    },
+    {
+      "name": "repeated_direct_include all complete canonical outputs unchanged",
+      "passed": true
+    },
+    {
+      "name": "shared_header_two_callers full raw snapshot equality",
+      "passed": true
+    },
+    {
+      "name": "shared_header_two_callers unique nodes and complete edges",
+      "passed": true
+    },
+    {
+      "name": "shared_header_two_callers peer complete components independently reproduced",
+      "passed": true
+    },
+    {
+      "name": "shared_header_two_callers full accepted counts",
+      "passed": true
+    },
+    {
+      "name": "shared_header_two_callers one observed macro Binding",
+      "passed": true
+    },
+    {
+      "name": "shared_header_two_callers exact three properties and absent ORDER/location",
+      "passed": true
+    },
+    {
+      "name": "shared_header_two_callers exact incoming BINDS and outgoing REF",
+      "passed": true
+    },
+    {
+      "name": "shared_header_two_callers null payloads",
+      "passed": true
+    },
+    {
+      "name": "shared_header_two_callers owner and target exact",
+      "passed": true
+    },
+    {
+      "name": "shared_header_two_callers observed invocation multiplicity",
+      "passed": true
+    },
+    {
+      "name": "shared_header_two_callers missing from accepted Rust Binding nodes",
+      "passed": true
+    },
+    {
+      "name": "shared_header_two_callers all complete canonical outputs unchanged",
+      "passed": true
+    },
+    {
+      "name": "full aggregate counts agree",
+      "passed": true
+    },
+    {
+      "name": "bound file retained /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/fourteenth-macro-binding-observer-v1/runs/first-complete-four-macro-binding-saved-cpg-observation/run.json",
+      "passed": true
+    },
+    {
+      "name": "bound file retained /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/macro-binding-canonical-runner-v1/runs/first-complete-four-macro-binding-reference-batch/run.json",
+      "passed": true
+    },
+    {
+      "name": "bound file retained /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/fourteenth-batch/accepted-capture-v1/run.json",
+      "passed": true
+    },
+    {
+      "name": "bound file retained /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/fourteenth-macro-binding-observation-review-v1/binding-facts.json",
+      "passed": true
+    },
+    {
+      "name": "bound file retained /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/fourteenth-macro-binding-observer-v1/runs/first-complete-four-macro-binding-saved-cpg-observation/observer.stdout",
+      "passed": true
+    },
+    {
+      "name": "bound file retained /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/fourteenth-macro-binding-observer-v1/runs/first-complete-four-macro-binding-saved-cpg-observation/observer.stderr",
+      "passed": true
+    },
+    {
+      "name": "bound file retained /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/fourteenth-macro-binding-observer-v1/runs/first-complete-four-macro-binding-saved-cpg-observation/admitted-supplement/function_like_repeated_use/supplement.jsonl",
+      "passed": true
+    },
+    {
+      "name": "bound file retained /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/fourteenth-batch/accepted-capture-v1/function_like_repeated_use/supplement.stdout",
+      "passed": true
+    },
+    {
+      "name": "bound file retained /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/fourteenth-macro-binding-observer-v1/runs/first-complete-four-macro-binding-saved-cpg-observation/admitted-supplement/function_like_repeated_use/reproduced-canonical.txt",
+      "passed": true
+    },
+    {
+      "name": "bound file retained /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/macro-binding-canonical-runner-v1/runs/first-complete-four-macro-binding-reference-batch/expected/function_like_repeated_use/expected.txt",
+      "passed": true
+    },
+    {
+      "name": "bound file retained /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/fourteenth-batch/accepted-capture-v1/function_like_repeated_use/canonical.stdout",
+      "passed": true
+    },
+    {
+      "name": "bound file retained /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/fourteenth-macro-binding-observer-v1/runs/first-complete-four-macro-binding-saved-cpg-observation/admitted-supplement/local_object_used_unused/supplement.jsonl",
+      "passed": true
+    },
+    {
+      "name": "bound file retained /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/fourteenth-batch/accepted-capture-v1/local_object_used_unused/supplement.stdout",
+      "passed": true
+    },
+    {
+      "name": "bound file retained /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/fourteenth-macro-binding-observer-v1/runs/first-complete-four-macro-binding-saved-cpg-observation/admitted-supplement/local_object_used_unused/reproduced-canonical.txt",
+      "passed": true
+    },
+    {
+      "name": "bound file retained /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/macro-binding-canonical-runner-v1/runs/first-complete-four-macro-binding-reference-batch/expected/local_object_used_unused/expected.txt",
+      "passed": true
+    },
+    {
+      "name": "bound file retained /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/fourteenth-batch/accepted-capture-v1/local_object_used_unused/canonical.stdout",
+      "passed": true
+    },
+    {
+      "name": "bound file retained /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/fourteenth-macro-binding-observer-v1/runs/first-complete-four-macro-binding-saved-cpg-observation/admitted-supplement/repeated_direct_include/supplement.jsonl",
+      "passed": true
+    },
+    {
+      "name": "bound file retained /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/fourteenth-batch/accepted-capture-v1/repeated_direct_include/supplement.stdout",
+      "passed": true
+    },
+    {
+      "name": "bound file retained /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/fourteenth-macro-binding-observer-v1/runs/first-complete-four-macro-binding-saved-cpg-observation/admitted-supplement/repeated_direct_include/reproduced-canonical.txt",
+      "passed": true
+    },
+    {
+      "name": "bound file retained /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/macro-binding-canonical-runner-v1/runs/first-complete-four-macro-binding-reference-batch/expected/repeated_direct_include/expected.txt",
+      "passed": true
+    },
+    {
+      "name": "bound file retained /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/fourteenth-batch/accepted-capture-v1/repeated_direct_include/canonical.stdout",
+      "passed": true
+    },
+    {
+      "name": "bound file retained /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/fourteenth-macro-binding-observer-v1/runs/first-complete-four-macro-binding-saved-cpg-observation/admitted-supplement/shared_header_two_callers/supplement.jsonl",
+      "passed": true
+    },
+    {
+      "name": "bound file retained /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/fourteenth-batch/accepted-capture-v1/shared_header_two_callers/supplement.stdout",
+      "passed": true
+    },
+    {
+      "name": "bound file retained /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/fourteenth-macro-binding-observer-v1/runs/first-complete-four-macro-binding-saved-cpg-observation/admitted-supplement/shared_header_two_callers/reproduced-canonical.txt",
+      "passed": true
+    },
+    {
+      "name": "bound file retained /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/macro-binding-canonical-runner-v1/runs/first-complete-four-macro-binding-reference-batch/expected/shared_header_two_callers/expected.txt",
+      "passed": true
+    },
+    {
+      "name": "bound file retained /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/fourteenth-batch/accepted-capture-v1/shared_header_two_callers/canonical.stdout",
+      "passed": true
+    }
+  ],
+  "bindings": {
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/fourteenth-macro-binding-observer-v1/runs/first-complete-four-macro-binding-saved-cpg-observation/run.json": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/fourteenth-macro-binding-observer-v1/runs/first-complete-four-macro-binding-saved-cpg-observation/run.json",
+      "sha256": "3ce025e74711fb1088e384ea8ea881b5cd889e6df6a4f32dc1e03a10fe76f480",
+      "bytes": 1178904
+    },
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/macro-binding-canonical-runner-v1/runs/first-complete-four-macro-binding-reference-batch/run.json": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/macro-binding-canonical-runner-v1/runs/first-complete-four-macro-binding-reference-batch/run.json",
+      "sha256": "edcd92e30072936242b5f73db09c9bb2974998d27597e3e6e766bdd4a9119d72",
+      "bytes": 1442635
+    },
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/fourteenth-batch/accepted-capture-v1/run.json": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/fourteenth-batch/accepted-capture-v1/run.json",
+      "sha256": "3c9ae83723ebb4764aaf082068abe4d96db5f508495306b882181a8dadcc67ed",
+      "bytes": 31342
+    },
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/fourteenth-macro-binding-observation-review-v1/binding-facts.json": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/fourteenth-macro-binding-observation-review-v1/binding-facts.json",
+      "sha256": "ba2b45865536d5f0a5b23f34603b2269440addf1476afbbabad293ca5c44424d",
+      "bytes": 153772
+    },
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/fourteenth-macro-binding-observer-v1/runs/first-complete-four-macro-binding-saved-cpg-observation/observer.stdout": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/fourteenth-macro-binding-observer-v1/runs/first-complete-four-macro-binding-saved-cpg-observation/observer.stdout",
+      "sha256": "3f1ef0a8363c78be50c5370e3e2340680e1d5c84a95bac87c933802a0d48b707",
+      "bytes": 210057
+    },
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/fourteenth-macro-binding-observer-v1/runs/first-complete-four-macro-binding-saved-cpg-observation/observer.stderr": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/fourteenth-macro-binding-observer-v1/runs/first-complete-four-macro-binding-saved-cpg-observation/observer.stderr",
+      "sha256": "5e704e9e1dafa7a93ab03d81d1cb53d3c276d83573d2359e3274e8df31eaefd6",
+      "bytes": 467
+    },
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/fourteenth-macro-binding-observer-v1/runs/first-complete-four-macro-binding-saved-cpg-observation/admitted-supplement/function_like_repeated_use/supplement.jsonl": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/fourteenth-macro-binding-observer-v1/runs/first-complete-four-macro-binding-saved-cpg-observation/admitted-supplement/function_like_repeated_use/supplement.jsonl",
+      "sha256": "168325200e9a321b223596184804107cf4b141bf31f7e105ad8aa80f7764af8e",
+      "bytes": 52364
+    },
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/fourteenth-batch/accepted-capture-v1/function_like_repeated_use/supplement.stdout": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/fourteenth-batch/accepted-capture-v1/function_like_repeated_use/supplement.stdout",
+      "sha256": "e4532fa95b831d325409a53307f96a2217086ae25fd40d0d8fde07f42bbc149f",
+      "bytes": 50306
+    },
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/fourteenth-macro-binding-observer-v1/runs/first-complete-four-macro-binding-saved-cpg-observation/admitted-supplement/function_like_repeated_use/reproduced-canonical.txt": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/fourteenth-macro-binding-observer-v1/runs/first-complete-four-macro-binding-saved-cpg-observation/admitted-supplement/function_like_repeated_use/reproduced-canonical.txt",
+      "sha256": "a1712f218a74f3a667a693b54fc2769bf6c2653feb6ec73129c4d6ed0e2c8b9e",
+      "bytes": 13903
+    },
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/macro-binding-canonical-runner-v1/runs/first-complete-four-macro-binding-reference-batch/expected/function_like_repeated_use/expected.txt": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/macro-binding-canonical-runner-v1/runs/first-complete-four-macro-binding-reference-batch/expected/function_like_repeated_use/expected.txt",
+      "sha256": "a1712f218a74f3a667a693b54fc2769bf6c2653feb6ec73129c4d6ed0e2c8b9e",
+      "bytes": 13903
+    },
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/fourteenth-batch/accepted-capture-v1/function_like_repeated_use/canonical.stdout": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/fourteenth-batch/accepted-capture-v1/function_like_repeated_use/canonical.stdout",
+      "sha256": "a1712f218a74f3a667a693b54fc2769bf6c2653feb6ec73129c4d6ed0e2c8b9e",
+      "bytes": 13903
+    },
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/fourteenth-macro-binding-observer-v1/runs/first-complete-four-macro-binding-saved-cpg-observation/admitted-supplement/local_object_used_unused/supplement.jsonl": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/fourteenth-macro-binding-observer-v1/runs/first-complete-four-macro-binding-saved-cpg-observation/admitted-supplement/local_object_used_unused/supplement.jsonl",
+      "sha256": "e30f5a6ccfe0f78ec61f071cd2f54814d21df9fbac9049c19c8f55196073792d",
+      "bytes": 26417
+    },
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/fourteenth-batch/accepted-capture-v1/local_object_used_unused/supplement.stdout": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/fourteenth-batch/accepted-capture-v1/local_object_used_unused/supplement.stdout",
+      "sha256": "5a0abd80918a1ec1acd3ceb4597f4f87035aa99f4e1e22fe9babd8357cd33c61",
+      "bytes": 26111
+    },
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/fourteenth-macro-binding-observer-v1/runs/first-complete-four-macro-binding-saved-cpg-observation/admitted-supplement/local_object_used_unused/reproduced-canonical.txt": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/fourteenth-macro-binding-observer-v1/runs/first-complete-four-macro-binding-saved-cpg-observation/admitted-supplement/local_object_used_unused/reproduced-canonical.txt",
+      "sha256": "b2b40013af1963000d1bf8f87b5f4f927f79495a43b01ac84420575f9b385842",
+      "bytes": 6344
+    },
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/macro-binding-canonical-runner-v1/runs/first-complete-four-macro-binding-reference-batch/expected/local_object_used_unused/expected.txt": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/macro-binding-canonical-runner-v1/runs/first-complete-four-macro-binding-reference-batch/expected/local_object_used_unused/expected.txt",
+      "sha256": "b2b40013af1963000d1bf8f87b5f4f927f79495a43b01ac84420575f9b385842",
+      "bytes": 6344
+    },
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/fourteenth-batch/accepted-capture-v1/local_object_used_unused/canonical.stdout": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/fourteenth-batch/accepted-capture-v1/local_object_used_unused/canonical.stdout",
+      "sha256": "b2b40013af1963000d1bf8f87b5f4f927f79495a43b01ac84420575f9b385842",
+      "bytes": 6344
+    },
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/fourteenth-macro-binding-observer-v1/runs/first-complete-four-macro-binding-saved-cpg-observation/admitted-supplement/repeated_direct_include/supplement.jsonl": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/fourteenth-macro-binding-observer-v1/runs/first-complete-four-macro-binding-saved-cpg-observation/admitted-supplement/repeated_direct_include/supplement.jsonl",
+      "sha256": "50695a482fb8f24b75c703b5d3c9fa25fb6a27bb00aec956966424820a382f44",
+      "bytes": 32404
+    },
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/fourteenth-batch/accepted-capture-v1/repeated_direct_include/supplement.stdout": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/fourteenth-batch/accepted-capture-v1/repeated_direct_include/supplement.stdout",
+      "sha256": "86ed876d2b727fe140ab47e21038c784cd93046763acf7411f1b06b47de4e305",
+      "bytes": 32547
+    },
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/fourteenth-macro-binding-observer-v1/runs/first-complete-four-macro-binding-saved-cpg-observation/admitted-supplement/repeated_direct_include/reproduced-canonical.txt": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/fourteenth-macro-binding-observer-v1/runs/first-complete-four-macro-binding-saved-cpg-observation/admitted-supplement/repeated_direct_include/reproduced-canonical.txt",
+      "sha256": "0a04058fa847b05e1f00fb81c24c2c003ce044cbb26e36952a71a7fb01f54c92",
+      "bytes": 7590
+    },
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/macro-binding-canonical-runner-v1/runs/first-complete-four-macro-binding-reference-batch/expected/repeated_direct_include/expected.txt": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/macro-binding-canonical-runner-v1/runs/first-complete-four-macro-binding-reference-batch/expected/repeated_direct_include/expected.txt",
+      "sha256": "0a04058fa847b05e1f00fb81c24c2c003ce044cbb26e36952a71a7fb01f54c92",
+      "bytes": 7590
+    },
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/fourteenth-batch/accepted-capture-v1/repeated_direct_include/canonical.stdout": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/fourteenth-batch/accepted-capture-v1/repeated_direct_include/canonical.stdout",
+      "sha256": "0a04058fa847b05e1f00fb81c24c2c003ce044cbb26e36952a71a7fb01f54c92",
+      "bytes": 7590
+    },
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/fourteenth-macro-binding-observer-v1/runs/first-complete-four-macro-binding-saved-cpg-observation/admitted-supplement/shared_header_two_callers/supplement.jsonl": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/fourteenth-macro-binding-observer-v1/runs/first-complete-four-macro-binding-saved-cpg-observation/admitted-supplement/shared_header_two_callers/supplement.jsonl",
+      "sha256": "28aedb1345367f59236b81c7c5ef317477650f8a9e4f531f948bf0e7582a48c3",
+      "bytes": 48480
+    },
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/fourteenth-batch/accepted-capture-v1/shared_header_two_callers/supplement.stdout": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/fourteenth-batch/accepted-capture-v1/shared_header_two_callers/supplement.stdout",
+      "sha256": "84f0fa344240612410f9df5d4fa05c58a80a1535c2fe996bdc70e7f0d90e14c1",
+      "bytes": 47936
+    },
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/fourteenth-macro-binding-observer-v1/runs/first-complete-four-macro-binding-saved-cpg-observation/admitted-supplement/shared_header_two_callers/reproduced-canonical.txt": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/fourteenth-macro-binding-observer-v1/runs/first-complete-four-macro-binding-saved-cpg-observation/admitted-supplement/shared_header_two_callers/reproduced-canonical.txt",
+      "sha256": "5690a066f297f7b60ffd70af6c4728ee7d9d32a7e82f9cb2c966d9e9fb455a01",
+      "bytes": 11209
+    },
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/macro-binding-canonical-runner-v1/runs/first-complete-four-macro-binding-reference-batch/expected/shared_header_two_callers/expected.txt": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/macro-binding-canonical-runner-v1/runs/first-complete-four-macro-binding-reference-batch/expected/shared_header_two_callers/expected.txt",
+      "sha256": "5690a066f297f7b60ffd70af6c4728ee7d9d32a7e82f9cb2c966d9e9fb455a01",
+      "bytes": 11209
+    },
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/fourteenth-batch/accepted-capture-v1/shared_header_two_callers/canonical.stdout": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/fourteenth-batch/accepted-capture-v1/shared_header_two_callers/canonical.stdout",
+      "sha256": "5690a066f297f7b60ffd70af6c4728ee7d9d32a7e82f9cb2c966d9e9fb455a01",
+      "bytes": 11209
+    }
+  },
+  "totals": {
+    "joernNodes": 214,
+    "rustNodes": 210,
+    "joernEdges": 756,
+    "rustEdges": 578,
+    "joernBindings": 9,
+    "rustBindings": 5,
+    "missingBindingComponents": 4
+  },
+  "componentArtifact": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/fourteenth-macro-observed-review-v1/complete-binding-components.json",
+    "sha256": "ff77a270d78e3221bbefdefcb203b33daf74cbde32d0022a58524460ffafedd6"
+  },
+  "findings": [
+    "Exactly one used-macro Binding per case; repeated ADD and shared VALUE calls do not multiply it. UNUSED has no METHOD or Binding in its control.",
+    "Every macro Binding has exactly three string properties; one incoming BINDS and one outgoing REF with null payloads.",
+    "Retained header macro binds from main.c:<global>; shared two-caller macro binds from a.c:<global> although its FULL_NAME starts shared.h. This observed owner must not be inferred from the header prefix.",
+    "Four macro Binding components are missing in accepted Rust. Full214/756 Joern vs210/578 Rust remains nonexact despite four complete canonical byte matches.",
+    "This is observed four-case evidence, not a universal first-file ownership rule, source implementation review or final candidate acceptance."
+  ],
+  "producerRuns": 0,
+  "sourceEdits": false,
+  "blockers": []
+}

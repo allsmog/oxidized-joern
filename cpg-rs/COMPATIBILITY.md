@@ -4,6 +4,10 @@ Oxidized Joern `0.1.x` has a bounded production-preview contract for the C
 workflows listed below. It is not a drop-in replacement for every Joern frontend,
 CPGQL, the Scala console, plugins, or Joern's binary graph format.
 
+For current measured gaps, pending work and engineering estimates, see
+[REMAINING_PORT_WORK.md](REMAINING_PORT_WORK.md). The batch descriptions below
+are historical checkpoints; later repairs supersede earlier gap statements.
+
 Status meanings:
 
 - **Production preview**: release-blocking deterministic and semantic gates
@@ -172,13 +176,16 @@ canonical graphs match Joern. Eleven full snapshots of the Rust graph survive
 save/reopen unchanged, and 81 selected stored metadata occurrences match the
 separately observed Joern graphs. The canonical oracle and these stored-property
 checks cover different scopes: complete cross-producer snapshots still differ.
-The missing IMPORT/DEPENDENCY nodes in include controls, unstored coordinates,
-property presence, and edge properties and relationships remain open.
+At the twelfth checkpoint, IMPORT/DEPENDENCY nodes in include controls,
+unstored coordinates, property presence, and edge properties and relationships
+remained open. The thirteenth checkpoint repaired the observed include pairs;
+broader property and relationship parity remains incomplete.
 
-The native writer now emits CPG2 version 2; readers retain CPG2 version 1 and
-legacy CPG1 support. This change adds a modifier-property column and appended
-binding node/edge tags. Eight actual graphs from the earlier writer exercise
-compatibility. The reserved optional-line sentinel cannot represent
+The native writer now emits CPG2 version 3; readers retain CPG2 versions 1–2
+and legacy CPG1 support. Version 2 added a modifier-property column and binding
+node/edge tags; version 3 adds optional properties, a column coordinate and
+explicit ORDER presence. Actual old-writer fixtures exercise compatibility.
+The reserved optional-line sentinel cannot represent
 `Some(u32::MAX)`; saving that value returns an error before replacing a file.
 This is this project's storage format, without Joern binary interoperability.
 
