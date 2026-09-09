@@ -1,0 +1,283 @@
+   Compiling cpg-lang-c v0.1.1 (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-cast-context/cpg-rs/cpg-lang-c)
+   Compiling joern-parity v0.1.1 (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-cast-context/cpg-rs/joern-parity)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.93s
+     Running unittests src/lib.rs (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-arguments/.local/target/debug/deps/cpg_lang_c-7b1e6f8d590ffc78)
+
+running 16 tests
+test exact::macro_token_tests::argument_slots_follow_preprocessing_tokens ... ok
+test exact::macro_token_tests::argument_splices_precede_comment_recognition ... ok
+test exact::rd_semantics_tests::absent_expression_code_does_not_alias_explicit_empty_names ... ok
+test exact::preproc_tests::macro_expansion_bounds_empty_doubling_chains_and_cycles ... ok
+test exact::macro_token_tests::function_macro_names_inside_preprocessing_numbers_remain_opaque ... ok
+test exact::rd_semantics_tests::pass_through_validation_uses_actual_arguments_without_sibling_flow ... ok
+test import::tests::source_lines_preserve_overlapping_parameters_declarations_and_children ... ok
+test import::tests::imports_every_exact_schema_kind_and_edge_without_loss ... ok
+test import::tests::source_lines_keep_global_declarations_outside_function_bodies ... ok
+test tests::parses_function_with_params_and_call ... ok
+test tests::tolerates_incomplete_code ... ok
+test import::tests::source_lines_anchor_conditional_and_identical_duplicate_definitions ... ok
+test import::tests::source_lines_unmatched_nodes_inherit_without_consuming_siblings ... ok
+test import::tests::source_lines_match_tokens_and_repeated_statements_monotonically ... ok
+test import::tests::source_lines_keep_lua_sweep2old_in_its_own_method ... ok
+test exact::definition_set_tests::membership_and_equality_match_sets_through_union_kill_and_regeneration ... ok
+
+test result: ok. 16 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s
+
+     Running tests/control_truth.rs (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-arguments/.local/target/debug/deps/control_truth-436470e67f510dea)
+
+running 5 tests
+test multiple_for_declarators_share_one_initializer_slot ... ok
+test identifier_truth_tests_use_the_oracle_integer_and_pointer_zero ... ok
+test braceless_loop_bodies_keep_direct_statements_and_cfg_edges ... ok
+test unconditional_do_return_keeps_unreachable_tail_out_of_reaching_defs ... ok
+test explicit_and_non_identifier_conditions_keep_their_expression ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.11s
+
+     Running tests/declaration_shapes.rs (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-arguments/.local/target/debug/deps/declaration_shapes-a194b9399c4134b5)
+
+running 6 tests
+test function_typedefs_do_not_erase_neighboring_ordinary_aliases ... ok
+test parenthesized_definition_keeps_its_body_and_separate_call_identity ... ok
+test headers_apply_undef_and_redefinitions_in_order_without_basename_fallback ... ok
+test quoted_header_macros_resolve_relative_to_each_supplied_source ... ok
+test mixed_prototypes_keep_individual_identities_and_shared_return_type ... ok
+test duplicate_parenthesized_definitions_keep_calls_to_the_shared_plain_stub ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/method_address_definitions.rs (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-arguments/.local/target/debug/deps/method_address_definitions-67e2fe4dfb907e3b)
+
+running 3 tests
+test explicit_function_address_does_not_kill_the_unnamed_parameter ... ok
+test distinct_empty_code_targets_and_unnamed_parameter_reach_exit ... ok
+test reassignment_kills_the_prior_empty_code_definition_by_name ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running unittests src/main.rs (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-arguments/.local/target/debug/deps/joern_parity-fc72eda68314c6ec)
+
+running 13 tests
+test production::tests::migration_report_is_stable_and_sectioned ... ok
+test production::tests::production_counts_imports_in_all_conditional_branches ... ok
+test production::tests::production_keeps_same_name_conditional_methods_distinct ... ok
+test production::tests::production_preserves_macro_expansion_before_a_later_undef ... ok
+test production::tests::production_removes_comments_before_interpreting_directives ... ok
+test production::tests::production_respects_macro_replacement_precedence_and_condition_expressions ... ok
+test production::tests::production_dump_is_deterministic_and_uses_standard_layers ... ok
+test production::tests::production_preserves_braceless_if_call ... ok
+test production::tests::production_preserves_braceless_if_else_calls ... ok
+test production::tests::production_preserves_braceless_if_return ... ok
+test production::tests::production_update_matches_a_clean_rebuild ... ok
+test production::tests::production_retains_all_conditional_declarations_and_only_active_bodies ... ok
+test production::tests::production_selects_conditions_in_source_order_without_losing_inactive_methods ... ok
+
+test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests/array_declarations.rs (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-arguments/.local/target/debug/deps/array_declarations-8a246381af293633)
+
+running 2 tests
+test global_dimensions_do_not_expand_local_allocation_parameters ... ok
+test array_declarations_match_complete_live_graph ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/array_initializers.rs (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-arguments/.local/target/debug/deps/array_initializers-0eb8fcc1cfd96a10)
+
+running 5 tests
+test ordinary_assignments_do_not_borrow_nested_declaration_locations ... ok
+test all_local_allocations_precede_explicit_initializers ... ok
+test array_initializers_preserve_source_lines_across_repeated_methods ... ok
+test allocation_views_do_not_consume_declaration_or_following_statement_locations ... ok
+test array_initializers_match_complete_isolated_live_graphs ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.20s
+
+     Running tests/combined_c_types.rs (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-arguments/.local/target/debug/deps/combined_c_types-fb82912339f11a75)
+
+running 2 tests
+test static_parenthesized_definitions_keep_translation_unit_identities ... ok
+test static_modifiers_primitive_roles_and_numeric_literals_compose ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/concatenated_strings.rs (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-arguments/.local/target/debug/deps/concatenated_strings-2412a498bd79bbb6)
+
+running 3 tests
+test source_literals_and_following_calls_keep_their_lines ... ok
+test lua_ternary_keeps_all_operands_and_cfg_branches ... ok
+test concatenated_strings_match_complete_live_graph ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s
+
+     Running tests/declaration_registration.rs (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-arguments/.local/target/debug/deps/declaration_registration-3c6c9cf5ab28df52)
+
+running 4 tests
+test tags_keep_their_independent_base_type_registration ... ok
+test uninitialized_objects_keep_their_full_types_and_source_locations ... ok
+test only_an_ordinary_objects_own_initializer_adds_the_prefix_type ... ok
+test registration_matches_each_complete_isolated_live_graph ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.10s
+
+     Running tests/direct_field_macros.rs (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-arguments/.local/target/debug/deps/direct_field_macros-dfdb43123bb52cf8)
+
+running 2 tests
+test repeated_field_expansions_keep_their_own_access_and_following_call_lines ... ok
+test direct_field_macros_match_complete_isolated_live_graphs ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.11s
+
+     Running tests/direct_macro_arguments.rs (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-arguments/.local/target/debug/deps/direct_macro_arguments-d10e34843730e07c)
+
+running 2 tests
+test typedef_intop_preserves_operands_and_original_macro_argument_slots ... ok
+test token_arguments_match_complete_isolated_live_graphs ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s
+
+     Running tests/external_functions.rs (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-arguments/.local/target/debug/deps/external_functions-0229c5b52a804378)
+
+running 10 tests
+test block_prototype_shadows_a_pointer_parameter_only_within_that_block ... ok
+test direct_callees_have_no_phantom_locals_and_keep_declared_return_types ... ok
+test block_pointer_shadow_does_not_change_later_direct_function_call ... ok
+test inactive_function_bodies_do_not_register_block_prototypes ... ok
+test late_prototypes_preserve_duplicate_static_definition_identity ... ok
+test leaving_a_block_restores_the_shadowed_parameter_ref_binding ... ok
+test unused_multiple_void_unnamed_and_variadic_prototypes_keep_typed_structure ... ok
+test for_initializer_scope_restores_function_dispatch_and_parameter_binding ... ok
+test synthetic_for_condition_does_not_shift_real_call_locations ... ok
+test initialized_and_uninitialized_local_and_global_function_pointers_dispatch_dynamically ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests/field_cast_interactions.rs (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-arguments/.local/target/debug/deps/field_cast_interactions-1c99996dfa0fa488)
+
+running 1 test
+test field_cast_interactions_match_complete_isolated_live_graphs ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+
+     Running tests/field_macros.rs (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-arguments/.local/target/debug/deps/field_macros-ac8a100fb55de7ab)
+
+running 1 test
+test field_macros_match_complete_isolated_live_graphs ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s
+
+     Running tests/header_macro_locations.rs (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-arguments/.local/target/debug/deps/header_macro_locations-5abd7f1cbcb933f7)
+
+running 2 tests
+test macro_descendants_and_following_statements_match_live_lines ... ok
+test header_macro_location_fixtures_match_complete_live_graphs ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+
+     Running tests/header_macros.rs (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-arguments/.local/target/debug/deps/header_macros-6f5b3958a972bd13)
+
+running 2 tests
+test supplied_header_macros_match_complete_isolated_live_graphs ... ok
+test parity_cli_preserves_relative_header_paths ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.33s
+
+     Running tests/macro_definitions.rs (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-arguments/.local/target/debug/deps/macro_definitions-1793c4c761d4c386)
+
+running 2 tests
+test logical_macro_definitions_match_complete_isolated_live_graphs ... ok
+test macro_wrapper_types_match_complete_live_graph ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+
+     Running tests/macro_recovery.rs (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-arguments/.local/target/debug/deps/macro_recovery-c000ecbf34fd46e8)
+
+running 1 test
+test macro_recovery_matches_complete_isolated_live_graphs ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.19s
+
+     Running tests/nested_macro_casts.rs (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-arguments/.local/target/debug/deps/nested_macro_casts-49ead3ffde9aa6e8)
+
+running 5 tests
+test a_known_macro_suffix_does_not_expand_inside_a_unicode_identifier ... ok
+test nested_type_arguments_and_rawtt_match_complete_live_graph ... ok
+test ordinary_calls_literals_recursion_and_nested_arguments_remain_exact ... ok
+test composite_descriptors_render_once_and_preserve_nested_value_casts ... ok
+test expanded_cast_types_preserve_qualifiers_and_distinct_type_identity ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+
+     Running tests/numeric_literals.rs (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-arguments/.local/target/debug/deps/numeric_literals-ec604be35dcfb883)
+
+running 2 tests
+test signed_children_keep_suffix_types_and_hex_digits_are_not_float_suffixes ... ok
+test numeric_literals_match_complete_live_graph ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s
+
+     Running tests/primitive_roles.rs (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-arguments/.local/target/debug/deps/primitive_roles-1902e547d3bd0681)
+
+running 3 tests
+test definition_prototype_and_call_result_types_stay_distinct ... ok
+test function_pointer_parameters_keep_declaration_types_and_resolve_call_results ... ok
+test primitive_roles_match_each_complete_isolated_live_graph ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.21s
+
+     Running tests/rd_scheduling.rs (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-arguments/.local/target/debug/deps/rd_scheduling-7c9c1847341c22c3)
+
+running 6 tests
+test loop_tail_without_standalone_blocks_is_also_exact ... ok
+test ordered_control_composition_matches_the_complete_live_graph ... ok
+test former_standalone_block_loop_tail_differences_are_exact ... ok
+test an_unscheduled_call_can_define_exit_without_receiving_call_site_edges ... ok
+test scheduling_matches_all_sections_of_the_live_graph ... ok
+test broader_macro_ordering_diagnostic_is_now_exact ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.10s
+
+     Running tests/standalone_blocks.rs (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-arguments/.local/target/debug/deps/standalone_blocks-c5b1a2cc4d2bb505)
+
+running 3 tests
+test standalone_block_is_a_cfg_node_after_its_statements ... ok
+test standalone_scope_restores_parameter_references_and_pointer_dispatch ... ok
+test standalone_blocks_match_complete_live_graph ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s
+
+     Running tests/statement_macros.rs (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-arguments/.local/target/debug/deps/statement_macros-fe4b834e623adad0)
+
+running 4 tests
+test macro_comments_do_not_create_file_scope_declarations ... ok
+test generated_statement_nodes_remain_at_their_own_invocation ... ok
+test statement_macro_findings_match_all_live_positive_and_negative_outcomes ... ok
+test statement_macros_match_complete_isolated_live_graphs ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.18s
+
+     Running tests/static_modifiers.rs (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-arguments/.local/target/debug/deps/static_modifiers-c4e9e7272effd581)
+
+running 2 tests
+test only_a_leading_static_token_adds_a_modifier_and_shifts_the_return ... ok
+test static_modifiers_match_the_complete_live_graph ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running tests/typedef_aggregates.rs (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-arguments/.local/target/debug/deps/typedef_aggregates-b6cfd0f5576af698)
+
+running 5 tests
+test aggregate_pointer_and_array_aliases_keep_underlying_types_and_initializers ... ok
+test every_member_dimension_reaches_the_initializer ... ok
+test lua_typedef_body_and_initializer_survive_production_import ... ok
+test typedef_tags_aliases_and_source_order_remain_distinct ... ok
+test typedef_aggregates_match_complete_isolated_live_graphs ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s
+
+   Doc-tests cpg_lang_c
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

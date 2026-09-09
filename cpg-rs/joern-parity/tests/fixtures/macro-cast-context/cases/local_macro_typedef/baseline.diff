@@ -1,0 +1,180 @@
+--- joern
++++ before
+@@ -2,27 +2,25 @@
+   BLOCK TYPE_FULL_NAME=ANY ORDER=1
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+ 
+-METHOD NAME=<operator>.cast FULL_NAME=<operator>.cast ORDER=0
++METHOD NAME=<operator>.pointerCall FULL_NAME=<operator>.pointerCall ORDER=0
+   METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+   BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+   METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+-  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+-  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+ 
+ METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1
+   METHOD NAME=value CODE=int value(int x) { typedef int T; return CAST(x); } FULL_NAME=value SIGNATURE=int(int) ORDER=1
+     METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+     METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+     BLOCK CODE={ typedef int T; return CAST(x); } TYPE_FULL_NAME=void ORDER=2
+-      TYPE_DECL NAME=T CODE=typedef int T; FULL_NAME=T ORDER=1
+-      RETURN CODE=return CAST(x); ORDER=2
++      LOCAL NAME=T CODE=<unknown> T TYPE_FULL_NAME=ANY ORDER=0
++      RETURN CODE=return CAST(x); ORDER=1
+         CALL NAME=CAST CODE=CAST(x) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=main.c:CAST:ANY(1) SIGNATURE=ANY(1) ORDER=1 DISPATCH_TYPE=INLINED
+           IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+           BLOCK TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+-            CALL NAME=<operator>.cast CODE=(T)(x) TYPE_FULL_NAME=T METHOD_FULL_NAME=<operator>.cast ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+-              TYPE_REF CODE=T TYPE_FULL_NAME=T ORDER=1 ARGUMENT_INDEX=1
+-              IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
++            CALL NAME=<operator>.pointerCall CODE=(T)(x) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.pointerCall ORDER=1 DISPATCH_TYPE=DYNAMIC_DISPATCH
++              IDENTIFIER NAME=T CODE=<unknown> T TYPE_FULL_NAME=ANY ORDER=1
++              IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=1
+     METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+   BLOCK TYPE_FULL_NAME=ANY ORDER=1
+     METHOD_REF CODE=value TYPE_FULL_NAME=value METHOD_FULL_NAME=value ORDER=1
+@@ -38,14 +36,14 @@
+   METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+   METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+   BLOCK CODE={ typedef int T; return CAST(x); } TYPE_FULL_NAME=void ORDER=2
+-    TYPE_DECL NAME=T CODE=typedef int T; FULL_NAME=T ORDER=1
+-    RETURN CODE=return CAST(x); ORDER=2
++    LOCAL NAME=T CODE=<unknown> T TYPE_FULL_NAME=ANY ORDER=0
++    RETURN CODE=return CAST(x); ORDER=1
+       CALL NAME=CAST CODE=CAST(x) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=main.c:CAST:ANY(1) SIGNATURE=ANY(1) ORDER=1 DISPATCH_TYPE=INLINED
+         IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+         BLOCK TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+-          CALL NAME=<operator>.cast CODE=(T)(x) TYPE_FULL_NAME=T METHOD_FULL_NAME=<operator>.cast ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+-            TYPE_REF CODE=T TYPE_FULL_NAME=T ORDER=1 ARGUMENT_INDEX=1
+-            IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
++          CALL NAME=<operator>.pointerCall CODE=(T)(x) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.pointerCall ORDER=1 DISPATCH_TYPE=DYNAMIC_DISPATCH
++            IDENTIFIER NAME=T CODE=<unknown> T TYPE_FULL_NAME=ANY ORDER=1
++            IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=1
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+ 
+ NODES|META_DATA LANGUAGE=NEWC
+@@ -57,24 +55,20 @@
+ NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+ NODES|NAMESPACE NAME=<global>
+ NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+-NODES|TYPE_DECL NAME=T FULL_NAME=T CODE=typedef int T; AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=main.c ORDER=1
+ NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE_DECL NAME=<global> FULL_NAME=main.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+ NODES|TYPE_DECL NAME=value FULL_NAME=value CODE=value AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+ NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+-NODES|TYPE NAME=T FULL_NAME=T TYPE_DECL_FULL_NAME=T
+ NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+ NODES|TYPE NAME=value FULL_NAME=value TYPE_DECL_FULL_NAME=value
+ NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+ EDGES|ARGUMENT value#5 -> value#6
+ EDGES|ARGUMENT value#6 -> value#7
+-EDGES|ARGUMENT value#9 -> value#10
+ EDGES|ARGUMENT value#9 -> value#11
+ EDGES|CALL value#6 -> main.c:CAST:ANY(1)#0
+-EDGES|CALL value#9 -> <operator>.cast#0
+ EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+-EDGES|CFG <operator>.cast#0 -> <operator>.cast#5
++EDGES|CFG <operator>.pointerCall#0 -> <operator>.pointerCall#4
+ EDGES|CFG main.c:<global>#0 -> main.c:<global>#15
+ EDGES|CFG main.c:<global>#1 -> value#7
+ EDGES|CFG main.c:<global>#15 -> main.c:<global>#16
+@@ -87,7 +81,7 @@
+ EDGES|CFG value#7 -> value#6
+ EDGES|CFG value#9 -> value#5
+ EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+-EDGES|CONTAINS <operator>.cast#0 -> <operator>.cast#2
++EDGES|CONTAINS <operator>.pointerCall#0 -> <operator>.pointerCall#2
+ EDGES|CONTAINS D:main.c:<global> -> D:value
+ EDGES|CONTAINS D:main.c:<global> -> main.c:<global>#0
+ EDGES|CONTAINS D:main.c:<global> -> main.c:CAST:ANY(1)#0
+@@ -102,7 +96,6 @@
+ EDGES|CONTAINS main.c:<global>#1 -> value#10
+ EDGES|CONTAINS main.c:<global>#1 -> value#11
+ EDGES|CONTAINS main.c:<global>#1 -> value#3
+-EDGES|CONTAINS main.c:<global>#1 -> value#4
+ EDGES|CONTAINS main.c:<global>#1 -> value#5
+ EDGES|CONTAINS main.c:<global>#1 -> value#6
+ EDGES|CONTAINS main.c:<global>#1 -> value#7
+@@ -111,12 +104,10 @@
+ EDGES|CONTAINS main.c:CAST:ANY(1)#0 -> main.c:CAST:ANY(1)#3
+ EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+ EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+-EDGES|EVAL_TYPE <operator>.cast#1 -> T:ANY
+-EDGES|EVAL_TYPE <operator>.cast#2 -> T:ANY
+-EDGES|EVAL_TYPE <operator>.cast#3 -> T:ANY
+-EDGES|EVAL_TYPE <operator>.cast#4 -> T:ANY
+-EDGES|EVAL_TYPE <operator>.cast#5 -> T:ANY
+-EDGES|EVAL_TYPE <operator>.cast#6 -> T:ANY
++EDGES|EVAL_TYPE <operator>.pointerCall#1 -> T:ANY
++EDGES|EVAL_TYPE <operator>.pointerCall#2 -> T:ANY
++EDGES|EVAL_TYPE <operator>.pointerCall#3 -> T:ANY
++EDGES|EVAL_TYPE <operator>.pointerCall#4 -> T:ANY
+ EDGES|EVAL_TYPE main.c:<global>#14 -> T:ANY
+ EDGES|EVAL_TYPE main.c:<global>#15 -> T:value
+ EDGES|EVAL_TYPE main.c:<global>#16 -> T:ANY
+@@ -125,28 +116,28 @@
+ EDGES|EVAL_TYPE main.c:CAST:ANY(1)#3 -> T:ANY
+ EDGES|EVAL_TYPE main.c:CAST:ANY(1)#4 -> T:ANY
+ EDGES|EVAL_TYPE value#1 -> T:int
+-EDGES|EVAL_TYPE value#10 -> T:T
++EDGES|EVAL_TYPE value#10 -> T:ANY
+ EDGES|EVAL_TYPE value#11 -> T:int
+ EDGES|EVAL_TYPE value#12 -> T:int
+ EDGES|EVAL_TYPE value#2 -> T:int
+ EDGES|EVAL_TYPE value#3 -> T:void
++EDGES|EVAL_TYPE value#4 -> T:ANY
+ EDGES|EVAL_TYPE value#6 -> T:ANY
+ EDGES|EVAL_TYPE value#7 -> T:int
+ EDGES|EVAL_TYPE value#8 -> T:ANY
+-EDGES|EVAL_TYPE value#9 -> T:T
+-EDGES|PARAMETER_LINK <operator>.cast#1 -> <operator>.cast#3
+-EDGES|PARAMETER_LINK <operator>.cast#4 -> <operator>.cast#6
++EDGES|EVAL_TYPE value#9 -> T:ANY
++EDGES|PARAMETER_LINK <operator>.pointerCall#1 -> <operator>.pointerCall#3
+ EDGES|PARAMETER_LINK main.c:CAST:ANY(1)#1 -> main.c:CAST:ANY(1)#2
+ EDGES|PARAMETER_LINK value#1 -> value#2
+ EDGES|REF NB:<global> -> NS:<global>
+ EDGES|REF NB:<includes>:<global> -> NS:<global>
+ EDGES|REF NB:main.c:<global> -> NS:<global>
+ EDGES|REF T:ANY -> D:ANY
+-EDGES|REF T:T -> value#4
+ EDGES|REF T:int -> D:int
+ EDGES|REF T:value -> D:value
+ EDGES|REF T:void -> D:void
+ EDGES|REF main.c:<global>#15 -> main.c:<global>#1
++EDGES|REF value#10 -> value#4
+ EDGES|REF value#11 -> value#1
+ EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+ EDGES|SOURCE_FILE D:ANY -> F:<includes>
+@@ -160,26 +151,21 @@
+ EDGES|SOURCE_FILE main.c:<global>#0 -> F:main.c
+ EDGES|SOURCE_FILE main.c:<global>#1 -> F:main.c
+ EDGES|SOURCE_FILE main.c:CAST:ANY(1)#0 -> F:main.c
+-EDGES|SOURCE_FILE value#4 -> F:main.c
+ FLOWS|REACHING_DEF[(T)(x)] value#9 -> value#12
+ FLOWS|REACHING_DEF[<RET>] value#5 -> value#12
+ FLOWS|REACHING_DEF[CAST(x)] value#6 -> value#12
+ FLOWS|REACHING_DEF[CAST(x)] value#6 -> value#5
+-FLOWS|REACHING_DEF[T] value#10 -> value#9
+-FLOWS|REACHING_DEF[] <operator>.cast#0 -> <operator>.cast#1
+-FLOWS|REACHING_DEF[] <operator>.cast#0 -> <operator>.cast#4
++FLOWS|REACHING_DEF[] <operator>.pointerCall#0 -> <operator>.pointerCall#1
+ FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#15
+ FLOWS|REACHING_DEF[] main.c:<global>#1 -> value#1
+ FLOWS|REACHING_DEF[] main.c:<global>#1 -> value#10
+ FLOWS|REACHING_DEF[] main.c:<global>#1 -> value#11
+ FLOWS|REACHING_DEF[] main.c:<global>#1 -> value#7
+ FLOWS|REACHING_DEF[] main.c:CAST:ANY(1)#0 -> main.c:CAST:ANY(1)#1
+-FLOWS|REACHING_DEF[p1] <operator>.cast#1 -> <operator>.cast#3
+-FLOWS|REACHING_DEF[p1] <operator>.cast#1 -> <operator>.cast#5
++FLOWS|REACHING_DEF[p1] <operator>.pointerCall#1 -> <operator>.pointerCall#3
++FLOWS|REACHING_DEF[p1] <operator>.pointerCall#1 -> <operator>.pointerCall#4
+ FLOWS|REACHING_DEF[p1] main.c:CAST:ANY(1)#1 -> main.c:CAST:ANY(1)#2
+ FLOWS|REACHING_DEF[p1] main.c:CAST:ANY(1)#1 -> main.c:CAST:ANY(1)#4
+-FLOWS|REACHING_DEF[p2] <operator>.cast#4 -> <operator>.cast#5
+-FLOWS|REACHING_DEF[p2] <operator>.cast#4 -> <operator>.cast#6
+ FLOWS|REACHING_DEF[x] value#1 -> value#2
+ FLOWS|REACHING_DEF[x] value#1 -> value#7
+ FLOWS|REACHING_DEF[x] value#11 -> value#12

@@ -1,0 +1,412 @@
+METHOD NAME=<global> CODE=<global> FULL_NAME=<includes>:<global> ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.assignment FULL_NAME=<operator>.assignment ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.notEquals FULL_NAME=<operator>.notEquals ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.pointerCall FULL_NAME=<operator>.pointerCall ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=callback CODE=int callback(int x); FULL_NAME=callback SIGNATURE=int(int) ORDER=1
+  METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+
+METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1
+  METHOD NAME=value CODE=int value(int x){for(int (*T)(int)=callback;x;x=0){use(CAST(x));}return CAST(x);} FULL_NAME=value SIGNATURE=int(int) ORDER=1
+    METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+    METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+    BLOCK CODE={for(int (*T)(int)=callback;x;x=0){use(CAST(x));}return CAST(x);} TYPE_FULL_NAME=void ORDER=2
+      CONTROL_STRUCTURE CODE=for (int (*T)(int)=callback;x;x=0) ORDER=1
+        LOCAL NAME=T CODE=int (*T)(int)=callback; TYPE_FULL_NAME=int(*)(int) ORDER=1
+        CALL NAME=<operator>.assignment CODE=(*T)(int)=callback TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=T CODE= TYPE_FULL_NAME=int(*)(int) ORDER=1 ARGUMENT_INDEX=1
+          METHOD_REF CODE=callback TYPE_FULL_NAME=int METHOD_FULL_NAME=callback ORDER=2 ARGUMENT_INDEX=2
+        CALL NAME=<operator>.notEquals CODE=x != 0 TYPE_FULL_NAME=int METHOD_FULL_NAME=<operator>.notEquals ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+          LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+        CALL NAME=<operator>.assignment CODE=x=0 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=4 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+          LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+        BLOCK CODE={use(CAST(x));} TYPE_FULL_NAME=void ORDER=5
+          CALL NAME=use CODE=use(CAST(x)) TYPE_FULL_NAME=int METHOD_FULL_NAME=use ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+            CALL NAME=CAST CODE=CAST(x) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=main.c:CAST:ANY(1) SIGNATURE=ANY(1) ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=INLINED
+              IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+              BLOCK TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+                CALL NAME=<operator>.pointerCall CODE=(T)(x) TYPE_FULL_NAME=int METHOD_FULL_NAME=<operator>.pointerCall ORDER=1 DISPATCH_TYPE=DYNAMIC_DISPATCH
+                  IDENTIFIER NAME=T CODE=T TYPE_FULL_NAME=int(*)(int) ORDER=1
+                  IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=1
+      RETURN CODE=return CAST(x); ORDER=2
+        CALL NAME=CAST CODE=CAST(x) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=main.c:CAST:ANY(1) SIGNATURE=ANY(1) ORDER=1 DISPATCH_TYPE=INLINED
+          IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+          BLOCK TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+            CALL NAME=<operator>.pointerCall CODE=(T)(x) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.pointerCall ORDER=1 DISPATCH_TYPE=DYNAMIC_DISPATCH
+              IDENTIFIER NAME=T CODE=<unknown> T TYPE_FULL_NAME=ANY ORDER=1
+              IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+    TYPE_DECL NAME=T CODE=typedef int T; FULL_NAME=T ORDER=1
+    METHOD_REF CODE=value TYPE_FULL_NAME=value METHOD_FULL_NAME=value ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=CAST CODE=#define CAST(x) ((T)(x)) FULL_NAME=main.c:CAST:ANY(1) SIGNATURE=ANY(1) ORDER=1
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=3
+
+METHOD NAME=use CODE=int use(int x); FULL_NAME=use SIGNATURE=int(int) ORDER=1
+  METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+
+METHOD NAME=value CODE=int value(int x){for(int (*T)(int)=callback;x;x=0){use(CAST(x));}return CAST(x);} FULL_NAME=value SIGNATURE=int(int) ORDER=1
+  METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+  BLOCK CODE={for(int (*T)(int)=callback;x;x=0){use(CAST(x));}return CAST(x);} TYPE_FULL_NAME=void ORDER=2
+    CONTROL_STRUCTURE CODE=for (int (*T)(int)=callback;x;x=0) ORDER=1
+      LOCAL NAME=T CODE=int (*T)(int)=callback; TYPE_FULL_NAME=int(*)(int) ORDER=1
+      CALL NAME=<operator>.assignment CODE=(*T)(int)=callback TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=T CODE= TYPE_FULL_NAME=int(*)(int) ORDER=1 ARGUMENT_INDEX=1
+        METHOD_REF CODE=callback TYPE_FULL_NAME=int METHOD_FULL_NAME=callback ORDER=2 ARGUMENT_INDEX=2
+      CALL NAME=<operator>.notEquals CODE=x != 0 TYPE_FULL_NAME=int METHOD_FULL_NAME=<operator>.notEquals ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+        LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+      CALL NAME=<operator>.assignment CODE=x=0 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=4 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+        LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+      BLOCK CODE={use(CAST(x));} TYPE_FULL_NAME=void ORDER=5
+        CALL NAME=use CODE=use(CAST(x)) TYPE_FULL_NAME=int METHOD_FULL_NAME=use ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+          CALL NAME=CAST CODE=CAST(x) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=main.c:CAST:ANY(1) SIGNATURE=ANY(1) ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=INLINED
+            IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+            BLOCK TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+              CALL NAME=<operator>.pointerCall CODE=(T)(x) TYPE_FULL_NAME=int METHOD_FULL_NAME=<operator>.pointerCall ORDER=1 DISPATCH_TYPE=DYNAMIC_DISPATCH
+                IDENTIFIER NAME=T CODE=T TYPE_FULL_NAME=int(*)(int) ORDER=1
+                IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=1
+    RETURN CODE=return CAST(x); ORDER=2
+      CALL NAME=CAST CODE=CAST(x) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=main.c:CAST:ANY(1) SIGNATURE=ANY(1) ORDER=1 DISPATCH_TYPE=INLINED
+        IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+        BLOCK TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+          CALL NAME=<operator>.pointerCall CODE=(T)(x) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.pointerCall ORDER=1 DISPATCH_TYPE=DYNAMIC_DISPATCH
+            IDENTIFIER NAME=T CODE=<unknown> T TYPE_FULL_NAME=ANY ORDER=1
+            IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+
+NODES|META_DATA LANGUAGE=NEWC
+NODES|FILE NAME=<includes> ORDER=1
+NODES|FILE NAME=<unknown> ORDER=0
+NODES|FILE NAME=main.c ORDER=0
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<global> FILENAME=<unknown> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<includes>:<global> FILENAME=<includes> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|NAMESPACE NAME=<global>
+NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=T FULL_NAME=T CODE=typedef int T; AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=int(*)(int) FULL_NAME=int(*)(int) CODE=int(*)(int) IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=<global> FULL_NAME=main.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=value FULL_NAME=value CODE=value AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+NODES|TYPE NAME=T FULL_NAME=T TYPE_DECL_FULL_NAME=T
+NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+NODES|TYPE NAME=int(*)(int) FULL_NAME=int(*)(int) TYPE_DECL_FULL_NAME=int(*)(int)
+NODES|TYPE NAME=value FULL_NAME=value TYPE_DECL_FULL_NAME=value
+NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+EDGES|ARGUMENT value#12 -> value#13
+EDGES|ARGUMENT value#12 -> value#14
+EDGES|ARGUMENT value#16 -> value#17
+EDGES|ARGUMENT value#17 -> value#18
+EDGES|ARGUMENT value#20 -> value#22
+EDGES|ARGUMENT value#23 -> value#24
+EDGES|ARGUMENT value#24 -> value#25
+EDGES|ARGUMENT value#27 -> value#29
+EDGES|ARGUMENT value#6 -> value#7
+EDGES|ARGUMENT value#6 -> value#8
+EDGES|ARGUMENT value#9 -> value#10
+EDGES|ARGUMENT value#9 -> value#11
+EDGES|CALL value#12 -> <operator>.assignment#0
+EDGES|CALL value#16 -> use#0
+EDGES|CALL value#17 -> main.c:CAST:ANY(1)#0
+EDGES|CALL value#24 -> main.c:CAST:ANY(1)#0
+EDGES|CALL value#6 -> <operator>.assignment#0
+EDGES|CALL value#9 -> <operator>.notEquals#0
+EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+EDGES|CFG <operator>.assignment#0 -> <operator>.assignment#5
+EDGES|CFG <operator>.notEquals#0 -> <operator>.notEquals#5
+EDGES|CFG <operator>.pointerCall#0 -> <operator>.pointerCall#4
+EDGES|CFG callback#0 -> callback#4
+EDGES|CFG main.c:<global>#0 -> main.c:<global>#34
+EDGES|CFG main.c:<global>#1 -> value#7
+EDGES|CFG main.c:<global>#34 -> main.c:<global>#35
+EDGES|CFG main.c:CAST:ANY(1)#0 -> main.c:CAST:ANY(1)#4
+EDGES|CFG use#0 -> use#4
+EDGES|CFG value#10 -> value#11
+EDGES|CFG value#11 -> value#9
+EDGES|CFG value#12 -> value#10
+EDGES|CFG value#13 -> value#14
+EDGES|CFG value#14 -> value#12
+EDGES|CFG value#16 -> value#13
+EDGES|CFG value#17 -> value#16
+EDGES|CFG value#17 -> value#21
+EDGES|CFG value#18 -> value#17
+EDGES|CFG value#20 -> value#16
+EDGES|CFG value#21 -> value#22
+EDGES|CFG value#22 -> value#20
+EDGES|CFG value#23 -> value#30
+EDGES|CFG value#24 -> value#23
+EDGES|CFG value#24 -> value#28
+EDGES|CFG value#25 -> value#24
+EDGES|CFG value#27 -> value#23
+EDGES|CFG value#28 -> value#29
+EDGES|CFG value#29 -> value#27
+EDGES|CFG value#6 -> value#10
+EDGES|CFG value#7 -> value#8
+EDGES|CFG value#8 -> value#6
+EDGES|CFG value#9 -> value#18
+EDGES|CFG value#9 -> value#25
+EDGES|CONDITION value#4 -> value#9
+EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+EDGES|CONTAINS <operator>.assignment#0 -> <operator>.assignment#2
+EDGES|CONTAINS <operator>.notEquals#0 -> <operator>.notEquals#2
+EDGES|CONTAINS <operator>.pointerCall#0 -> <operator>.pointerCall#2
+EDGES|CONTAINS D:main.c:<global> -> D:value
+EDGES|CONTAINS D:main.c:<global> -> callback#0
+EDGES|CONTAINS D:main.c:<global> -> main.c:<global>#0
+EDGES|CONTAINS D:main.c:<global> -> main.c:CAST:ANY(1)#0
+EDGES|CONTAINS D:main.c:<global> -> use#0
+EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+EDGES|CONTAINS F:<includes> -> D:ANY
+EDGES|CONTAINS F:<includes> -> D:int
+EDGES|CONTAINS F:<includes> -> D:int(*)(int)
+EDGES|CONTAINS F:<includes> -> D:void
+EDGES|CONTAINS F:main.c -> D:main.c:<global>
+EDGES|CONTAINS callback#0 -> callback#3
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#1
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#32
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#33
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#34
+EDGES|CONTAINS main.c:<global>#1 -> value#10
+EDGES|CONTAINS main.c:<global>#1 -> value#11
+EDGES|CONTAINS main.c:<global>#1 -> value#12
+EDGES|CONTAINS main.c:<global>#1 -> value#13
+EDGES|CONTAINS main.c:<global>#1 -> value#14
+EDGES|CONTAINS main.c:<global>#1 -> value#15
+EDGES|CONTAINS main.c:<global>#1 -> value#16
+EDGES|CONTAINS main.c:<global>#1 -> value#17
+EDGES|CONTAINS main.c:<global>#1 -> value#18
+EDGES|CONTAINS main.c:<global>#1 -> value#19
+EDGES|CONTAINS main.c:<global>#1 -> value#20
+EDGES|CONTAINS main.c:<global>#1 -> value#21
+EDGES|CONTAINS main.c:<global>#1 -> value#22
+EDGES|CONTAINS main.c:<global>#1 -> value#23
+EDGES|CONTAINS main.c:<global>#1 -> value#24
+EDGES|CONTAINS main.c:<global>#1 -> value#25
+EDGES|CONTAINS main.c:<global>#1 -> value#26
+EDGES|CONTAINS main.c:<global>#1 -> value#27
+EDGES|CONTAINS main.c:<global>#1 -> value#28
+EDGES|CONTAINS main.c:<global>#1 -> value#29
+EDGES|CONTAINS main.c:<global>#1 -> value#3
+EDGES|CONTAINS main.c:<global>#1 -> value#4
+EDGES|CONTAINS main.c:<global>#1 -> value#6
+EDGES|CONTAINS main.c:<global>#1 -> value#7
+EDGES|CONTAINS main.c:<global>#1 -> value#8
+EDGES|CONTAINS main.c:<global>#1 -> value#9
+EDGES|CONTAINS main.c:CAST:ANY(1)#0 -> main.c:CAST:ANY(1)#3
+EDGES|CONTAINS use#0 -> use#3
+EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#6 -> T:ANY
+EDGES|EVAL_TYPE <operator>.notEquals#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.notEquals#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.notEquals#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.notEquals#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.notEquals#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.notEquals#6 -> T:ANY
+EDGES|EVAL_TYPE <operator>.pointerCall#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.pointerCall#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.pointerCall#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.pointerCall#4 -> T:ANY
+EDGES|EVAL_TYPE callback#1 -> T:int
+EDGES|EVAL_TYPE callback#2 -> T:int
+EDGES|EVAL_TYPE callback#3 -> T:ANY
+EDGES|EVAL_TYPE callback#4 -> T:int
+EDGES|EVAL_TYPE main.c:<global>#32 -> T:ANY
+EDGES|EVAL_TYPE main.c:<global>#34 -> T:value
+EDGES|EVAL_TYPE main.c:<global>#35 -> T:ANY
+EDGES|EVAL_TYPE main.c:CAST:ANY(1)#1 -> T:ANY
+EDGES|EVAL_TYPE main.c:CAST:ANY(1)#2 -> T:ANY
+EDGES|EVAL_TYPE main.c:CAST:ANY(1)#3 -> T:ANY
+EDGES|EVAL_TYPE main.c:CAST:ANY(1)#4 -> T:ANY
+EDGES|EVAL_TYPE use#1 -> T:int
+EDGES|EVAL_TYPE use#2 -> T:int
+EDGES|EVAL_TYPE use#3 -> T:ANY
+EDGES|EVAL_TYPE use#4 -> T:int
+EDGES|EVAL_TYPE value#1 -> T:int
+EDGES|EVAL_TYPE value#10 -> T:int
+EDGES|EVAL_TYPE value#11 -> T:int
+EDGES|EVAL_TYPE value#12 -> T:ANY
+EDGES|EVAL_TYPE value#13 -> T:int
+EDGES|EVAL_TYPE value#14 -> T:int
+EDGES|EVAL_TYPE value#15 -> T:void
+EDGES|EVAL_TYPE value#16 -> T:int
+EDGES|EVAL_TYPE value#17 -> T:ANY
+EDGES|EVAL_TYPE value#18 -> T:int
+EDGES|EVAL_TYPE value#19 -> T:ANY
+EDGES|EVAL_TYPE value#2 -> T:int
+EDGES|EVAL_TYPE value#20 -> T:int
+EDGES|EVAL_TYPE value#21 -> T:int(*)(int)
+EDGES|EVAL_TYPE value#22 -> T:int
+EDGES|EVAL_TYPE value#24 -> T:ANY
+EDGES|EVAL_TYPE value#25 -> T:int
+EDGES|EVAL_TYPE value#26 -> T:ANY
+EDGES|EVAL_TYPE value#27 -> T:ANY
+EDGES|EVAL_TYPE value#28 -> T:ANY
+EDGES|EVAL_TYPE value#29 -> T:int
+EDGES|EVAL_TYPE value#3 -> T:void
+EDGES|EVAL_TYPE value#30 -> T:int
+EDGES|EVAL_TYPE value#5 -> T:int(*)(int)
+EDGES|EVAL_TYPE value#6 -> T:void
+EDGES|EVAL_TYPE value#7 -> T:int(*)(int)
+EDGES|EVAL_TYPE value#8 -> T:int
+EDGES|EVAL_TYPE value#9 -> T:int
+EDGES|FOR_BODY value#4 -> value#15
+EDGES|FOR_INIT value#4 -> value#6
+EDGES|FOR_UPDATE value#4 -> value#12
+EDGES|PARAMETER_LINK <operator>.assignment#1 -> <operator>.assignment#3
+EDGES|PARAMETER_LINK <operator>.assignment#4 -> <operator>.assignment#6
+EDGES|PARAMETER_LINK <operator>.notEquals#1 -> <operator>.notEquals#3
+EDGES|PARAMETER_LINK <operator>.notEquals#4 -> <operator>.notEquals#6
+EDGES|PARAMETER_LINK <operator>.pointerCall#1 -> <operator>.pointerCall#3
+EDGES|PARAMETER_LINK callback#1 -> callback#2
+EDGES|PARAMETER_LINK main.c:CAST:ANY(1)#1 -> main.c:CAST:ANY(1)#2
+EDGES|PARAMETER_LINK use#1 -> use#2
+EDGES|PARAMETER_LINK value#1 -> value#2
+EDGES|REF NB:<global> -> NS:<global>
+EDGES|REF NB:<includes>:<global> -> NS:<global>
+EDGES|REF NB:main.c:<global> -> NS:<global>
+EDGES|REF T:ANY -> D:ANY
+EDGES|REF T:T -> main.c:<global>#33
+EDGES|REF T:int -> D:int
+EDGES|REF T:int(*)(int) -> D:int(*)(int)
+EDGES|REF T:value -> D:value
+EDGES|REF T:void -> D:void
+EDGES|REF main.c:<global>#34 -> main.c:<global>#1
+EDGES|REF value#10 -> value#1
+EDGES|REF value#13 -> value#1
+EDGES|REF value#21 -> value#5
+EDGES|REF value#22 -> value#1
+EDGES|REF value#29 -> value#1
+EDGES|REF value#7 -> value#5
+EDGES|REF value#8 -> callback#0
+EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+EDGES|SOURCE_FILE D:ANY -> F:<includes>
+EDGES|SOURCE_FILE D:int -> F:<includes>
+EDGES|SOURCE_FILE D:int(*)(int) -> F:<includes>
+EDGES|SOURCE_FILE D:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE D:value -> F:main.c
+EDGES|SOURCE_FILE D:void -> F:<includes>
+EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
+EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>
+EDGES|SOURCE_FILE NB:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE callback#0 -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#0 -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#1 -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#33 -> F:main.c
+EDGES|SOURCE_FILE main.c:CAST:ANY(1)#0 -> F:main.c
+EDGES|SOURCE_FILE use#0 -> F:main.c
+FLOWS|REACHING_DEF[(*T)(int)=callback] value#6 -> value#30
+FLOWS|REACHING_DEF[(T)(x)] value#20 -> value#30
+FLOWS|REACHING_DEF[(T)(x)] value#27 -> value#30
+FLOWS|REACHING_DEF[0] value#11 -> value#10
+FLOWS|REACHING_DEF[0] value#11 -> value#9
+FLOWS|REACHING_DEF[0] value#14 -> value#12
+FLOWS|REACHING_DEF[0] value#14 -> value#13
+FLOWS|REACHING_DEF[<RET>] value#23 -> value#30
+FLOWS|REACHING_DEF[CAST(x)] value#17 -> value#16
+FLOWS|REACHING_DEF[CAST(x)] value#24 -> value#23
+FLOWS|REACHING_DEF[CAST(x)] value#24 -> value#30
+FLOWS|REACHING_DEF[] <operator>.assignment#0 -> <operator>.assignment#1
+FLOWS|REACHING_DEF[] <operator>.assignment#0 -> <operator>.assignment#4
+FLOWS|REACHING_DEF[] <operator>.notEquals#0 -> <operator>.notEquals#1
+FLOWS|REACHING_DEF[] <operator>.notEquals#0 -> <operator>.notEquals#4
+FLOWS|REACHING_DEF[] <operator>.pointerCall#0 -> <operator>.pointerCall#1
+FLOWS|REACHING_DEF[] callback#0 -> callback#1
+FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#34
+FLOWS|REACHING_DEF[] main.c:<global>#1 -> value#1
+FLOWS|REACHING_DEF[] main.c:<global>#1 -> value#10
+FLOWS|REACHING_DEF[] main.c:<global>#1 -> value#11
+FLOWS|REACHING_DEF[] main.c:<global>#1 -> value#14
+FLOWS|REACHING_DEF[] main.c:<global>#1 -> value#18
+FLOWS|REACHING_DEF[] main.c:<global>#1 -> value#21
+FLOWS|REACHING_DEF[] main.c:<global>#1 -> value#22
+FLOWS|REACHING_DEF[] main.c:<global>#1 -> value#25
+FLOWS|REACHING_DEF[] main.c:<global>#1 -> value#28
+FLOWS|REACHING_DEF[] main.c:<global>#1 -> value#29
+FLOWS|REACHING_DEF[] main.c:<global>#1 -> value#8
+FLOWS|REACHING_DEF[] main.c:CAST:ANY(1)#0 -> main.c:CAST:ANY(1)#1
+FLOWS|REACHING_DEF[] use#0 -> use#1
+FLOWS|REACHING_DEF[] value#7 -> value#30
+FLOWS|REACHING_DEF[] value#7 -> value#6
+FLOWS|REACHING_DEF[callback] value#8 -> value#6
+FLOWS|REACHING_DEF[callback] value#8 -> value#7
+FLOWS|REACHING_DEF[p1] <operator>.assignment#1 -> <operator>.assignment#3
+FLOWS|REACHING_DEF[p1] <operator>.assignment#1 -> <operator>.assignment#5
+FLOWS|REACHING_DEF[p1] <operator>.notEquals#1 -> <operator>.notEquals#3
+FLOWS|REACHING_DEF[p1] <operator>.notEquals#1 -> <operator>.notEquals#5
+FLOWS|REACHING_DEF[p1] <operator>.pointerCall#1 -> <operator>.pointerCall#3
+FLOWS|REACHING_DEF[p1] <operator>.pointerCall#1 -> <operator>.pointerCall#4
+FLOWS|REACHING_DEF[p1] main.c:CAST:ANY(1)#1 -> main.c:CAST:ANY(1)#2
+FLOWS|REACHING_DEF[p1] main.c:CAST:ANY(1)#1 -> main.c:CAST:ANY(1)#4
+FLOWS|REACHING_DEF[p2] <operator>.assignment#4 -> <operator>.assignment#5
+FLOWS|REACHING_DEF[p2] <operator>.assignment#4 -> <operator>.assignment#6
+FLOWS|REACHING_DEF[p2] <operator>.notEquals#4 -> <operator>.notEquals#5
+FLOWS|REACHING_DEF[p2] <operator>.notEquals#4 -> <operator>.notEquals#6
+FLOWS|REACHING_DEF[use(CAST(x))] value#16 -> value#30
+FLOWS|REACHING_DEF[x != 0] value#9 -> value#30
+FLOWS|REACHING_DEF[x=0] value#12 -> value#30
+FLOWS|REACHING_DEF[x] callback#1 -> callback#2
+FLOWS|REACHING_DEF[x] callback#1 -> callback#4
+FLOWS|REACHING_DEF[x] use#1 -> use#2
+FLOWS|REACHING_DEF[x] use#1 -> use#4
+FLOWS|REACHING_DEF[x] value#1 -> value#10
+FLOWS|REACHING_DEF[x] value#1 -> value#2
+FLOWS|REACHING_DEF[x] value#10 -> value#18
+FLOWS|REACHING_DEF[x] value#10 -> value#25
+FLOWS|REACHING_DEF[x] value#10 -> value#9
+FLOWS|REACHING_DEF[x] value#13 -> value#10
+FLOWS|REACHING_DEF[x] value#13 -> value#12
+FLOWS|REACHING_DEF[x] value#18 -> value#17
+FLOWS|REACHING_DEF[x] value#18 -> value#22
+FLOWS|REACHING_DEF[x] value#22 -> value#20
+FLOWS|REACHING_DEF[x] value#25 -> value#2
+FLOWS|REACHING_DEF[x] value#25 -> value#24
+FLOWS|REACHING_DEF[x] value#25 -> value#29
+FLOWS|REACHING_DEF[x] value#25 -> value#30
+FLOWS|REACHING_DEF[x] value#29 -> value#2
+FLOWS|REACHING_DEF[x] value#29 -> value#27
+FLOWS|REACHING_DEF[x] value#29 -> value#30

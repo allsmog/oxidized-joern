@@ -80,6 +80,7 @@ pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
     let mut raw_fn_decls: Vec<(String, String, usize)> = Vec::new(); // (name, file, node id)
     let mut parenthesized_definitions = HashSet::new();
     let mut struct_decls: Vec<(String, String, String)> = Vec::new(); // (tag, code, file)
+    let mut type_alias_full_names: HashMap<usize, String> = HashMap::new();
     let mut used_types: std::collections::BTreeSet<String> = std::collections::BTreeSet::new();
     for u in &units {
         let b = u.src.as_bytes();
@@ -138,14 +139,11 @@ pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
                     }
                     let aliases = typedef_declarators(f);
                     for alias in &aliases {
-                        let tag = text(*alias, b).to_string();
+                        let tag = type_binding_name(*alias, b);
                         used_types.insert(tag.clone());
+                        used_types.insert(typedef_underlying_type(f, *alias, b));
+                        type_alias_full_names.insert(alias.id(), tag.clone());
                         struct_decls.push((tag, esc(text(f, b)), u.file.clone()));
-                    }
-                    if !aliases.is_empty() {
-                        if let Some(t) = f.child_by_field_name("type") {
-                            used_types.insert(normalize_type(text(t, b)));
-                        }
                     }
                 }
                 _ => {}
@@ -317,7 +315,21 @@ pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
     for u in &units {
         let b = u.src.as_bytes();
         let root = u.tree.root_node();
-        let (active_items, macros, macro_states) = body_macro_context(root, b, &u.file, &units);
+        let BodyMacroContext {
+            items: active_items,
+            macros,
+            macro_states,
+            typedef_states,
+        } = body_macro_context(root, b, &u.file, &units);
+        let mut type_sites = HashMap::new();
+        for item in translation_unit_items(root, b) {
+            type_sites.extend(collect_type_sites(
+                item,
+                b,
+                typedef_states.get(&item.id()).cloned().unwrap_or_default(),
+                macro_states.get(&item.id()).unwrap_or(&macros),
+            ));
+        }
         let active_methods: HashSet<usize> = active_items
             .iter()
             .filter(|node| node.kind() == "function_definition")
@@ -409,6 +421,8 @@ pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
             enumerators: &enumerators,
             macros: macros.clone(),
             macro_states: &macro_states,
+            type_sites,
+            default_typedefs: TypeNameState::default(),
             unknown_declaration_prefixes: &unknown_declaration_prefixes,
             file: u.file.clone(),
             copying_macro_argument: false,
@@ -429,6 +443,8 @@ pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
             phantoms: Vec::new(),
             stubs: &mut stub_uses,
             types: &mut used_types,
+            type_declarations: &mut struct_decls,
+            type_alias_full_names: &mut type_alias_full_names,
             out: String::new(),
             block: String::new(),
             line_no: 0,
@@ -502,6 +518,8 @@ pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
         enumerators: &empty_enums,
         macros: Arc::new(HashMap::new()),
         macro_states: &empty_macro_states,
+        type_sites: HashMap::new(),
+        default_typedefs: TypeNameState::default(),
         unknown_declaration_prefixes: &unknown_declaration_prefixes,
         file: String::new(),
         copying_macro_argument: false,
@@ -522,6 +540,8 @@ pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
         phantoms: Vec::new(),
         stubs: &mut stub_uses2,
         types: &mut used_types,
+        type_declarations: &mut struct_decls,
+        type_alias_full_names: &mut type_alias_full_names,
         out: String::new(),
         block: String::new(),
         line_no: 0,
@@ -868,6 +888,8 @@ struct MacroDef {
 }
 
 type MacroState = Arc<HashMap<String, MacroDef>>;
+type TypeNameState = Arc<HashSet<String>>;
+type TypeSites = HashMap<usize, TypeNameState>;
 
 /// Per-function emission context.
 struct Ctx<'a> {
@@ -887,6 +909,8 @@ struct Ctx<'a> {
     enumerators: &'a Vec<String>,
     macros: MacroState,
     macro_states: &'a HashMap<usize, MacroState>,
+    type_sites: TypeSites,
+    default_typedefs: TypeNameState,
     unknown_declaration_prefixes: &'a HashMap<usize, String>,
     file: String,
     copying_macro_argument: bool,
@@ -913,6 +937,8 @@ struct Ctx<'a> {
     phantoms: Vec<Phantom>,
     stubs: &'a mut HashMap<String, usize>,
     types: &'a mut std::collections::BTreeSet<String>,
+    type_declarations: &'a mut Vec<(String, String, String)>,
+    type_alias_full_names: &'a mut HashMap<usize, String>,
     out: String,
     // --- edge layer (M4) ---
     // Current dump block name and 0-based line index within it; every node's
@@ -971,7 +997,312 @@ struct P {
     dispatch: Option<String>,
 }
 
+/// Type names belong to the ordinary identifier namespace. Record the state
+/// at each expression before lowering loses its original lexical ancestors.
+fn type_definition_names(node: Node, bytes: &[u8]) -> Vec<String> {
+    let mut cursor = node.walk();
+    node.children_by_field_name("declarator", &mut cursor)
+        .map(|decl| type_binding_name(decl, bytes))
+        .filter(|name| !name.is_empty())
+        .collect()
+}
+
+fn type_binding_name(node: Node, bytes: &[u8]) -> String {
+    if matches!(node.kind(), "identifier" | "type_identifier") {
+        return text(node, bytes).to_string();
+    }
+    node.child_by_field_name("declarator")
+        .or_else(|| {
+            (node.kind() == "parenthesized_declarator")
+                .then(|| node.named_child(0))
+                .flatten()
+        })
+        .map(|child| type_binding_name(child, bytes))
+        .unwrap_or_default()
+}
+
+/// A recovered parenthesized expression may contain ERROR siblings. Only a
+/// single complete non-comment token can be reinterpreted as a known type.
+fn sole_parenthesized_child(node: Node) -> Option<Node> {
+    if node.kind() != "parenthesized_expression" || node.has_error() {
+        return None;
+    }
+    let mut cursor = node.walk();
+    let mut children = node
+        .named_children(&mut cursor)
+        .filter(|child| child.kind() != "comment");
+    let child = children.next()?;
+    children.next().is_none().then_some(child)
+}
+
+fn collect_type_sites(
+    root: Node,
+    bytes: &[u8],
+    initial: TypeNameState,
+    macros: &MacroState,
+) -> TypeSites {
+    fn shadow(types: &mut TypeNameState, name: &str) {
+        if types.contains(name) {
+            Arc::make_mut(types).remove(name);
+        }
+    }
+    fn visit(
+        node: Node,
+        bytes: &[u8],
+        types: &mut TypeNameState,
+        sites: &mut TypeSites,
+        macros: &MacroState,
+    ) {
+        if matches!(
+            node.kind(),
+            "call_expression" | "sizeof_expression" | "identifier" | "field_expression"
+        ) {
+            sites.insert(node.id(), types.clone());
+        }
+        match node.kind() {
+            "function_definition" => {
+                let mut inner = types.clone();
+                if let Some((_, _, params)) = fn_header(node, bytes) {
+                    for param in params {
+                        shadow(&mut inner, &param.name);
+                    }
+                }
+                if let Some(body) = node.child_by_field_name("body") {
+                    visit(body, bytes, &mut inner, sites, macros);
+                }
+            }
+            "compound_statement" | "for_statement" => {
+                let mut inner = types.clone();
+                for child in named_children(node) {
+                    visit(child, bytes, &mut inner, sites, macros);
+                }
+            }
+            "preproc_if" | "preproc_ifdef" | "preproc_elif" | "preproc_elifdef"
+            | "preproc_else" => {
+                let take = if matches!(node.kind(), "preproc_if" | "preproc_elif") {
+                    let definitions = macros
+                        .iter()
+                        .map(|(name, def)| {
+                            (
+                                name.clone(),
+                                if def.params.is_some() {
+                                    name.clone()
+                                } else {
+                                    def.body.clone()
+                                },
+                            )
+                        })
+                        .collect();
+                    preproc_condition(node, bytes, &definitions)
+                } else if let Some(name) = node.child_by_field_name("name") {
+                    let negated = node.child(0).is_some_and(|directive| {
+                        matches!(directive.kind(), "#ifndef" | "#elifndef")
+                    });
+                    macros.contains_key(text(name, bytes)) != negated
+                } else {
+                    true
+                };
+                let alternative = node.child_by_field_name("alternative");
+                if take {
+                    for child in named_children(node) {
+                        if Some(child) != node.child_by_field_name("condition")
+                            && Some(child) != node.child_by_field_name("name")
+                            && Some(child) != alternative
+                        {
+                            visit(child, bytes, types, sites, macros);
+                        }
+                    }
+                } else if let Some(alternative) = alternative {
+                    visit(alternative, bytes, types, sites, macros);
+                }
+            }
+            "enumerator" => {
+                for child in named_children(node) {
+                    visit(child, bytes, types, sites, macros);
+                }
+                if let Some(name) = node.child_by_field_name("name") {
+                    shadow(types, text(name, bytes));
+                }
+            }
+            "type_definition" => {
+                for child in named_children(node) {
+                    visit(child, bytes, types, sites, macros);
+                }
+                for name in type_definition_names(node, bytes) {
+                    Arc::make_mut(types).insert(name);
+                }
+            }
+            "declaration" => {
+                let mut cursor = node.walk();
+                let declarators: HashSet<_> = node
+                    .children_by_field_name("declarator", &mut cursor)
+                    .map(|node| node.id())
+                    .collect();
+                for child in named_children(node) {
+                    if declarators.contains(&child.id()) {
+                        let decl = child
+                            .child_by_field_name("declarator")
+                            .filter(|_| child.kind() == "init_declarator")
+                            .unwrap_or(child);
+                        visit(decl, bytes, types, sites, macros);
+                        shadow(types, &type_binding_name(decl, bytes));
+                        if child.kind() == "init_declarator" {
+                            if let Some(value) = child.child_by_field_name("value") {
+                                visit(value, bytes, types, sites, macros);
+                            }
+                        }
+                    } else {
+                        visit(child, bytes, types, sites, macros);
+                    }
+                }
+            }
+            _ => {
+                for child in named_children(node) {
+                    visit(child, bytes, types, sites, macros);
+                }
+            }
+        }
+    }
+    let mut sites = HashMap::new();
+    visit(root, bytes, &mut initial.clone(), &mut sites, macros);
+    sites
+}
+
 impl Ctx<'_> {
+    fn typedefs_at(&self, node: Node) -> TypeNameState {
+        self.type_sites
+            .get(&node.id())
+            .cloned()
+            .unwrap_or_else(|| self.default_typedefs.clone())
+    }
+
+    fn enter_type_tree(
+        &mut self,
+        root: Node,
+        bytes: &[u8],
+        types: TypeNameState,
+    ) -> (TypeSites, TypeNameState) {
+        let sites = collect_type_sites(root, bytes, types.clone(), &self.macros);
+        (
+            std::mem::replace(&mut self.type_sites, sites),
+            std::mem::replace(&mut self.default_typedefs, types),
+        )
+    }
+
+    fn leave_type_tree(&mut self, previous: (TypeSites, TypeNameState)) {
+        (self.type_sites, self.default_typedefs) = previous;
+    }
+
+    fn typedef_cast(&self, node: Node, bytes: &[u8]) -> Option<String> {
+        if node.kind() != "call_expression" || self.recovering_expression || node.has_error() {
+            return None;
+        }
+        let function = node.child_by_field_name("function")?;
+        let name = sole_parenthesized_child(function)?;
+        let arguments = node.child_by_field_name("arguments")?;
+        if !named_children(arguments)
+            .iter()
+            .any(|child| child.kind() != "comment")
+        {
+            return None;
+        }
+        if name.kind() != "identifier" {
+            return None;
+        }
+        let spelling = text(name, bytes);
+        self.typedefs_at(node)
+            .contains(spelling)
+            .then(|| spelling.to_string())
+    }
+
+    fn typedef_cast_identifier(&self, node: Node, bytes: &[u8]) -> Option<String> {
+        let parent = node.parent()?;
+        if sole_parenthesized_child(parent) != Some(node) {
+            return None;
+        }
+        let call = parent.parent()?;
+        if call.child_by_field_name("function") != Some(parent) {
+            return None;
+        }
+        self.typedef_cast(call, bytes)
+    }
+
+    fn emit_local_typedef(&mut self, node: Node, bytes: &[u8], depth: usize, order: &mut i64) {
+        for alias in typedef_declarators(node) {
+            let name = type_binding_name(alias, bytes);
+            let underlying = typedef_underlying_type(node, alias, bytes);
+            self.types.insert(underlying.clone());
+            if let Some(code) = &self.macro_expansion_code {
+                // CDT expands a declaration macro's typedef as a LOCAL, even
+                // though it remains a type binding within this expansion tree.
+                let code = format!("{code} {code}");
+                self.line(
+                    depth,
+                    "LOCAL",
+                    P {
+                        name: Some(name),
+                        code: Some(esc(&code)),
+                        tfn: Some(underlying),
+                        order: Some(*order),
+                        ..Default::default()
+                    },
+                );
+            } else {
+                let full = if let Some(full) = self.type_alias_full_names.get(&alias.id()) {
+                    full.clone()
+                } else {
+                    let count = self
+                        .type_declarations
+                        .iter()
+                        .filter(|(full, _, _)| {
+                            full.split("<duplicate>").next() == Some(name.as_str())
+                        })
+                        .count();
+                    let full = if count == 0 {
+                        name.clone()
+                    } else {
+                        format!("{name}<duplicate>{}", count - 1)
+                    };
+                    self.type_alias_full_names.insert(alias.id(), full.clone());
+                    self.type_declarations.push((
+                        full.clone(),
+                        esc(text(node, bytes)),
+                        self.file.clone(),
+                    ));
+                    full
+                };
+                self.line(
+                    depth,
+                    "TYPE_DECL",
+                    P {
+                        name: Some(name),
+                        code: Some(esc(text(node, bytes))),
+                        full: Some(full),
+                        order: Some(*order),
+                        ..Default::default()
+                    },
+                );
+            }
+            *order += 1;
+        }
+    }
+
+    fn sizeof_identifier(&self, node: Node, bytes: &[u8]) -> Option<Phantom> {
+        if let Some(desc) = node.child_by_field_name("type") {
+            return Some(sizeof_type_identifier(desc, bytes));
+        }
+        let value = node.child_by_field_name("value")?;
+        let identifier = sole_parenthesized_child(value)?;
+        let name = text(identifier, bytes);
+        (identifier.kind() == "identifier" && self.typedefs_at(node).contains(name)).then(|| {
+            Phantom {
+                name: name.into(),
+                code: name.into(),
+                ty: name.into(),
+            }
+        })
+    }
+
     fn begin_block(&mut self, name: &str) {
         self.block = name.to_string();
         self.line_no = 0;
@@ -1598,7 +1929,7 @@ impl Ctx<'_> {
                     // Function and function-pointer typedef declarators do not
                     // produce Joern alias nodes or consume a global slot.
                     for alias in typedef_declarators(n) {
-                        let name = text(alias, b).to_string();
+                        let name = type_binding_name(alias, b);
                         self.line(
                             2,
                             "TYPE_DECL",
@@ -1967,12 +2298,18 @@ impl Ctx<'_> {
                 ..Default::default()
             },
         );
+        let invocation_types = self.typedefs_at(site);
         let expansion_source = format!("void __m() {{ {expansion}; }}");
         let mut parser = Parser::new();
         parser
             .set_language(&tree_sitter_c::LANGUAGE.into())
             .unwrap();
         let tree = parser.parse(&expansion_source, None).unwrap();
+        let previous_types = self.enter_type_tree(
+            tree.root_node(),
+            expansion_source.as_bytes(),
+            invocation_types,
+        );
         let mut candidates = vec![tree.root_node()];
         let mut expression_nodes = Vec::new();
         while let Some(node) = candidates.pop() {
@@ -1988,6 +2325,12 @@ impl Ctx<'_> {
             let found = expression_nodes.iter().find(|node| {
                 let raw = text(**node, expansion_source.as_bytes());
                 if node.kind() == "identifier" {
+                    if self
+                        .typedef_cast_identifier(**node, expansion_source.as_bytes())
+                        .is_some()
+                    {
+                        return raw == normalized;
+                    }
                     if node.parent().is_some_and(|parent| {
                         parent.kind() == "call_expression"
                             && parent.child_by_field_name("function") == Some(**node)
@@ -2032,13 +2375,27 @@ impl Ctx<'_> {
                 let was_copying = self.copying_macro_argument;
                 self.copying_macro_argument = true;
                 let macros = std::mem::replace(&mut self.macros, Arc::new(HashMap::new()));
-                self.emit_expr(
-                    *node,
-                    expansion_source.as_bytes(),
-                    depth + 1,
-                    emitted_args,
-                    Some((i + 1) as i64),
-                );
+                if let Some(ty) = self.typedef_cast_identifier(*node, expansion_source.as_bytes()) {
+                    self.line(
+                        depth + 1,
+                        "TYPE_REF",
+                        P {
+                            code: Some(ty.clone()),
+                            tfn: Some(ty),
+                            order: Some(emitted_args),
+                            arg: Some((i + 1) as i64),
+                            ..Default::default()
+                        },
+                    );
+                } else {
+                    self.emit_expr(
+                        *node,
+                        expansion_source.as_bytes(),
+                        depth + 1,
+                        emitted_args,
+                        Some((i + 1) as i64),
+                    );
+                }
                 self.macros = macros;
                 self.copying_macro_argument = was_copying;
             }
@@ -2063,6 +2420,7 @@ impl Ctx<'_> {
         self.emit_expansion(&expansion, depth + 2);
         self.macro_expansion_code = previous_code;
         self.macros = macros;
+        self.leave_type_tree(previous_types);
     }
 
     /// Parse a macro expansion as an expression and emit it (ORDER=1, no
@@ -2095,6 +2453,7 @@ impl Ctx<'_> {
     }
 
     fn emit_expansion_root(&mut self, root: Node, b: &[u8], depth: usize) {
+        let previous_types = self.enter_type_tree(root, b, self.default_typedefs.clone());
         let previous_root = self.macro_expansion_root.replace(root.id());
         if root.kind() == "compound_statement" {
             // The compound is the expansion BLOCK already emitted by the
@@ -2106,6 +2465,7 @@ impl Ctx<'_> {
             self.emit_expr(root, b, depth, 1, None);
         }
         self.macro_expansion_root = previous_root;
+        self.leave_type_tree(previous_types);
     }
 
     /// METHOD for a used macro: CODE is the #define directive, params p1..pn,
@@ -2359,13 +2719,22 @@ impl Ctx<'_> {
                     let macros = std::mem::replace(&mut self.macros, Arc::new(HashMap::new()));
                     let mut expansion_shadowed = shadowed.to_vec();
                     collect_decl_names(expr, source.as_bytes(), &mut expansion_shadowed);
+                    let previous_types =
+                        self.enter_type_tree(expr, source.as_bytes(), self.typedefs_at(n));
                     self.walk_phantoms(expr, source.as_bytes(), &expansion_shadowed, seen);
+                    self.leave_type_tree(previous_types);
                     self.macros = macros;
                 }
                 continue;
             }
 
             if !prototype_headers(n, b).is_empty() {
+                continue;
+            }
+            if self.typedef_cast(n, b).is_some() {
+                if let Some(args) = n.child_by_field_name("arguments") {
+                    stack.push(args);
+                }
                 continue;
             }
             match n.kind() {
@@ -2459,8 +2828,7 @@ impl Ctx<'_> {
                     }
                 }
                 "sizeof_expression" => {
-                    if let Some(t) = n.child_by_field_name("type") {
-                        let phantom = sizeof_type_identifier(t, b);
+                    if let Some(phantom) = self.sizeof_identifier(n, b) {
                         if let Some(position) = seen.iter().position(|name| name == &phantom.name) {
                             seen.remove(position);
                             seen.push(phantom.name.clone());
@@ -2473,6 +2841,7 @@ impl Ctx<'_> {
                             seen.push(phantom.name.clone());
                             self.phantoms.push(phantom);
                         }
+                        continue;
                     }
                 }
                 // Preprocessor structure: only KEPT #ifdef branches contribute
@@ -2610,6 +2979,9 @@ impl Ctx<'_> {
             }
             "declaration" => {
                 self.emit_declaration(n, b, order, depth, None, false);
+            }
+            "type_definition" if typedef_aggregate(n).is_none() => {
+                self.emit_local_typedef(n, b, depth, order);
             }
             "if_statement" => self.emit_if(n, b, order, depth),
             "for_statement" => self.emit_for(n, b, order, depth),
@@ -3523,12 +3895,74 @@ impl Ctx<'_> {
             }
             pending.extend(named_children(node).into_iter().rev());
         }
+        let previous_types = self.enter_type_tree(root, source.as_bytes(), self.typedefs_at(n));
         let previous = std::mem::replace(&mut self.field_macro_codes, codes);
         let previous_piece = std::mem::replace(&mut self.field_macro_piece, piece);
         self.emit_expr(root, source.as_bytes(), depth, order, arg);
         self.field_macro_codes = previous;
         self.field_macro_piece = previous_piece;
+        self.leave_type_tree(previous_types);
         true
+    }
+
+    fn emit_typedef_cast(
+        &mut self,
+        node: Node,
+        bytes: &[u8],
+        ty: String,
+        depth: usize,
+        order: i64,
+        arg: Option<i64>,
+    ) {
+        self.note_call("<operator>.cast", 2);
+        self.line(
+            depth,
+            "CALL",
+            P {
+                name: Some("<operator>.cast".into()),
+                code: Some(self.expression_code(node, bytes)),
+                tfn: Some(ty.clone()),
+                mfn: Some("<operator>.cast".into()),
+                order: Some(order),
+                arg,
+                dispatch: Some("STATIC_DISPATCH".into()),
+                ..Default::default()
+            },
+        );
+        self.line(
+            depth + 1,
+            "TYPE_REF",
+            P {
+                code: Some(ty.clone()),
+                tfn: Some(ty),
+                order: Some(1),
+                arg: Some(1),
+                ..Default::default()
+            },
+        );
+        if let Some(args) = node.child_by_field_name("arguments") {
+            let values: Vec<_> = named_children(args)
+                .into_iter()
+                .filter(|child| child.kind() != "comment")
+                .collect();
+            if values.len() == 1 {
+                self.emit_expr(values[0], bytes, depth + 1, 2, Some(2));
+            } else {
+                self.line(
+                    depth + 1,
+                    "BLOCK",
+                    P {
+                        tfn: Some("ANY".into()),
+                        order: Some(2),
+                        arg: Some(2),
+                        ..Default::default()
+                    },
+                );
+                for (i, value) in values.into_iter().enumerate() {
+                    self.emit_expr(value, bytes, depth + 2, (i + 1) as i64, None);
+                }
+            }
+        }
     }
 
     // Macro expansion CODE uses CDT's rendered type descriptor, while type
@@ -3797,6 +4231,10 @@ impl Ctx<'_> {
                 }
             }
             "call_expression" => {
+                if let Some(ty) = self.typedef_cast(n, b) {
+                    self.emit_typedef_cast(n, b, ty, depth, order, arg);
+                    return;
+                }
                 let callee = n.child_by_field_name("function");
                 let name = callee
                     .map(|c| text(c, b).to_string())
@@ -4244,10 +4682,8 @@ impl Ctx<'_> {
                         ..Default::default()
                     },
                 );
-                if let Some(t) = n.child_by_field_name("type") {
-                    // sizeof(T): the type name appears as an IDENTIFIER typed
-                    // as itself (and spawns the ORDER=0 phantom LOCAL).
-                    let identifier = sizeof_type_identifier(t, b);
+                if let Some(identifier) = self.sizeof_identifier(n, b) {
+                    // Type-form sizeof shares its typed phantom identity.
                     self.line(
                         depth + 1,
                         "IDENTIFIER",
@@ -4363,6 +4799,13 @@ fn prototype_header_entries<'tree>(
         .collect()
 }
 
+struct BodyMacroContext<'tree> {
+    items: Vec<Node<'tree>>,
+    macros: MacroState,
+    macro_states: HashMap<usize, MacroState>,
+    typedef_states: HashMap<usize, TypeNameState>,
+}
+
 /// Execute available quoted headers in the importing translation unit's macro
 /// environment. Include guards and undef/redefinitions are evaluated at each
 /// inclusion; declarations retain immutable snapshots of the preceding state.
@@ -4371,7 +4814,7 @@ fn body_macro_context<'tree>(
     bytes: &[u8],
     file: &str,
     units: &[SourceUnit],
-) -> (Vec<Node<'tree>>, MacroState, HashMap<usize, MacroState>) {
+) -> BodyMacroContext<'tree> {
     #[allow(clippy::too_many_arguments)]
     fn collect<'tree>(
         node: Node<'tree>,
@@ -4383,6 +4826,8 @@ fn body_macro_context<'tree>(
         macros: &mut MacroState,
         items: &mut Vec<Node<'tree>>,
         states: &mut HashMap<usize, MacroState>,
+        typedefs: &mut TypeNameState,
+        typedef_states: &mut HashMap<usize, TypeNameState>,
         capture: bool,
     ) {
         match node.kind() {
@@ -4419,7 +4864,17 @@ fn body_macro_context<'tree>(
                             && Some(child) != alternative
                         {
                             collect(
-                                child, bytes, file, units, visiting, once, macros, items, states,
+                                child,
+                                bytes,
+                                file,
+                                units,
+                                visiting,
+                                once,
+                                macros,
+                                items,
+                                states,
+                                typedefs,
+                                typedef_states,
                                 capture,
                             );
                         }
@@ -4435,6 +4890,8 @@ fn body_macro_context<'tree>(
                         macros,
                         items,
                         states,
+                        typedefs,
+                        typedef_states,
                         capture,
                     );
                 }
@@ -4451,8 +4908,14 @@ fn body_macro_context<'tree>(
                             | "enum_specifier"
                     ) {
                         states.insert(node.id(), macros.clone());
+                        typedef_states.insert(node.id(), typedefs.clone());
                     }
                     items.push(node);
+                }
+                if node.kind() == "type_definition" {
+                    for name in type_definition_names(node, bytes) {
+                        Arc::make_mut(typedefs).insert(name);
+                    }
                 }
                 if let Some(include) = included_source_name(node, bytes, file) {
                     if !once.contains(&include) && visiting.insert(include.clone()) {
@@ -4475,6 +4938,8 @@ fn body_macro_context<'tree>(
                                     macros,
                                     &mut header_items,
                                     &mut header_states,
+                                    typedefs,
+                                    typedef_states,
                                     false,
                                 );
                             }
@@ -4508,6 +4973,8 @@ fn body_macro_context<'tree>(
     let mut macros = Arc::new(HashMap::new());
     let mut items = Vec::new();
     let mut states = HashMap::new();
+    let mut typedefs = TypeNameState::default();
+    let mut typedef_states = HashMap::new();
     let mut once = HashSet::new();
     let mut visiting = HashSet::from([normalize_source_path(std::path::Path::new(file))]);
     for child in translation_unit_children(root, bytes) {
@@ -4521,10 +4988,17 @@ fn body_macro_context<'tree>(
             &mut macros,
             &mut items,
             &mut states,
+            &mut typedefs,
+            &mut typedef_states,
             true,
         );
     }
-    (items, macros, states)
+    BodyMacroContext {
+        items,
+        macros,
+        macro_states: states,
+        typedef_states,
+    }
 }
 
 /// Object macros from available source headers are needed to distinguish a
@@ -4694,6 +5168,16 @@ fn source_macro_effect(node: Node, b: &[u8]) -> Option<(String, Option<String>)>
     } else {
         None
     }
+}
+
+/// Typedef alias declarations register the resolved underlying expression type;
+/// this is separate from the alias spelling retained on cast TYPE_REF nodes.
+fn typedef_underlying_type(node: Node, alias: Node, bytes: &[u8]) -> String {
+    format!(
+        "{}{}",
+        declaration_type(node, bytes, TypeRole::Expression),
+        decl_suffix(alias, bytes)
+    )
 }
 
 fn typedef_declarators(node: Node) -> Vec<Node> {
