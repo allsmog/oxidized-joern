@@ -25,6 +25,11 @@ pub fn dump_sources(sources: &[(String, String)]) -> String {
 }
 
 fn canonical_project(sources: &[(String, String)]) -> String {
+    cpg_lang_c::import::canonical_dump(&build_graph(sources))
+}
+
+/// Build the actual shipped graph, including its standard pass pipeline.
+pub fn build_graph(sources: &[(String, String)]) -> cpg_core::Cpg {
     let refs: Vec<(&str, &str)> = sources
         .iter()
         .map(|(path, source)| (path.as_str(), source.as_str()))
@@ -34,7 +39,7 @@ fn canonical_project(sources: &[(String, String)]) -> String {
         cpg_analysis::standard_pipeline(),
     );
     project.build(&refs);
-    cpg_lang_c::import::canonical_dump(&project.cpg)
+    project.cpg
 }
 
 /// Exercise the production incremental API on a real source set and compare

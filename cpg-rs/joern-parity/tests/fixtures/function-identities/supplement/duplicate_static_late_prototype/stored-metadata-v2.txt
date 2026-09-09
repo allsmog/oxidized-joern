@@ -1,0 +1,10 @@
+BINDING|entry_a|entry_a|int(int)|entry_a|entry_a
+BINDING|entry_b|entry_b|int(int)|entry_b|entry_b
+BINDING|helper<duplicate>0|helper<duplicate>0|int(int)|helper<duplicate>0|helper<duplicate>0
+BINDING|helper|helper|int(int)|helper|helper
+METHOD_REF|entry_a|entry_a|entry_a|entry_a|a.c:<global>|2|3
+METHOD_REF|entry_b|entry_b|entry_b|entry_b|b.c:<global>|2|2
+METHOD_REF|helper|helper|helper|helper|a.c:<global>|1|1
+METHOD_REF|helper|helper|helper|helper|b.c:<global>|1|1
+MODIFIER|helper<duplicate>0|3|STATIC|1
+MODIFIER|helper|3|STATIC|1

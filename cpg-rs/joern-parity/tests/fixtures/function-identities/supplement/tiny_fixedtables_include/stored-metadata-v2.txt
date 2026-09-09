@@ -1,0 +1,2 @@
+BINDING|fixedtables|fixedtables|void(State*)|fixedtables|fixedtables
+METHOD_REF|fixedtables|fixedtables|fixedtables|fixedtables|main.c:<global>|3|7

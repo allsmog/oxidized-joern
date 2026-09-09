@@ -70,10 +70,48 @@ pub(crate) struct IncludedSourceOrigin {
     pub span: std::ops::Range<usize>,
 }
 
+/// Properties omitted by the canonical oracle, retained for the production CPG.
+#[derive(Default)]
+pub(crate) struct ExactMetadata {
+    pub bindings: Vec<FunctionBinding>,
+    pub modifiers: Vec<ModifierMetadata>,
+    pub reference_origins: Vec<MethodReferenceOrigin>,
+}
+
+pub(crate) struct FunctionBinding {
+    pub name: String,
+    pub full_name: String,
+    pub type_decl_full_name: String,
+    pub signature: Option<String>,
+    /// Physical definition start, independent of project-wide duplicate suffix.
+    pub source_start: Option<usize>,
+}
+
+pub(crate) struct ModifierMetadata {
+    pub address: String,
+    pub modifier_type: &'static str,
+    pub line: Option<u32>,
+}
+
+/// Physical definition represented by a file-global METHOD_REF. Its actual REF
+/// edge can intentionally point to another same-named method after linking.
+pub(crate) struct MethodReferenceOrigin {
+    pub address: String,
+    pub definition_full_name: String,
+}
+
 pub(crate) fn canonical_dump_sources_with_origins(
     sources: &[(String, String)],
 ) -> (String, Vec<IncludedSourceOrigin>) {
+    let (dump, origins, _) = canonical_dump_sources_with_metadata(sources);
+    (dump, origins)
+}
+
+pub(crate) fn canonical_dump_sources_with_metadata(
+    sources: &[(String, String)],
+) -> (String, Vec<IncludedSourceOrigin>, ExactMetadata) {
     let mut included_origins = Vec::new();
+    let mut metadata = ExactMetadata::default();
     let mut parser = Parser::new();
     parser
         .set_language(&tree_sitter_c::LANGUAGE.into())
@@ -95,6 +133,8 @@ pub(crate) fn canonical_dump_sources_with_origins(
     // stubs; each also gets a method TYPE_DECL) and struct definitions.
     let mut defined: Vec<String> = Vec::new();
     let mut raw_fn_decls: Vec<(String, String, usize)> = Vec::new(); // (name, file, node id)
+    let mut definition_locations = HashMap::new();
+    let mut static_definitions = HashSet::new();
     let mut parenthesized_definitions = HashSet::new();
     let mut struct_decls: Vec<(String, String, String)> = Vec::new(); // (tag, code, file)
     let mut type_alias_full_names: HashMap<(usize, usize, usize), String> = HashMap::new();
@@ -115,6 +155,10 @@ pub(crate) fn canonical_dump_sources_with_origins(
                             defined.push(name.clone());
                         }
                         raw_fn_decls.push((name, u.file.clone(), f.id()));
+                        definition_locations.insert(f.id(), f.start_position());
+                        if has_leading_static(text(f, b)) {
+                            static_definitions.insert(f.id());
+                        }
                     }
                 }
                 "struct_specifier" | "union_specifier" | "enum_specifier"
@@ -168,43 +212,42 @@ pub(crate) fn canonical_dump_sources_with_origins(
             }
         }
     }
-    let mut definition_files: HashMap<String, HashSet<String>> = HashMap::new();
-    for (name, file, id) in &raw_fn_decls {
-        if parenthesized_definitions.contains(id) {
-            continue;
-        }
-        definition_files
-            .entry(name.clone())
-            .or_default()
-            .insert(file.clone());
-    }
-    let ambiguous_functions: HashSet<String> = definition_files
-        .iter()
-        .filter_map(|(name, files)| (files.len() > 1).then_some(name.clone()))
-        .collect();
-    let method_full = |name: &str, file: &str| {
-        if ambiguous_functions.contains(name) {
-            format!("{file}:{name}")
-        } else {
-            name.to_string()
-        }
-    };
+    // Joern establishes uniqueness after AST creation, sorted by physical
+    // filename/line/column. The initial name remains the call/reference name.
+    raw_fn_decls.sort_by(|a, b| {
+        let ap = definition_locations[&a.2];
+        let bp = definition_locations[&b.2];
+        (&a.1, ap.row, ap.column).cmp(&(&b.1, bp.row, bp.column))
+    });
     let mut definition_full_names = HashMap::new();
     let mut occurrences: HashMap<String, usize> = HashMap::new();
+    let mut first_definition_files = HashMap::new();
+    let mut call_renames: HashMap<String, HashMap<String, String>> = HashMap::new();
     let fn_decls: Vec<(String, String)> = raw_fn_decls
         .iter()
         .map(|(name, file, id)| {
             let base = if parenthesized_definitions.contains(id) {
                 format!("<unresolvedNamespace>.{name}")
             } else {
-                method_full(name, file)
+                name.clone()
             };
+            let first_file = first_definition_files
+                .entry(base.clone())
+                .or_insert_with(|| file.clone());
             let occurrence = occurrences.entry(base.clone()).or_default();
             let full = if *occurrence == 0 {
-                base
+                base.clone()
             } else {
                 format!("{base}<duplicate>{}", *occurrence - 1)
             };
+            // FullNameUniquenessPass excludes the first method's entire file,
+            // even when another duplicate STATIC method occurs in that file.
+            if *occurrence > 0 && first_file != file && static_definitions.contains(id) {
+                call_renames
+                    .entry(file.clone())
+                    .or_default()
+                    .insert(base, full.clone());
+            }
             *occurrence += 1;
             definition_full_names.insert(*id, full.clone());
             (full, file.clone())
@@ -407,7 +450,7 @@ pub(crate) fn canonical_dump_sources_with_origins(
                         .and_then(|decl| resolved_function_header(f, decl, b, &macros))
                     {
                         let (name, ret, _) = resolved.header;
-                        function_full_names.insert(name.clone(), method_full(&name, &u.file));
+                        function_full_names.insert(name.clone(), name.clone());
                         function_call_types.insert(name.clone(), resolved.call_type);
                         functions.insert(name, ret);
                     }
@@ -476,7 +519,7 @@ pub(crate) fn canonical_dump_sources_with_origins(
             function_call_types: &function_call_types,
             function_full_names: &function_full_names,
             definition_full_names: &definition_full_names,
-            ambiguous_functions: &ambiguous_functions,
+            call_renames: call_renames.get(&u.file),
             globals: &globals,
             enumerators: &enumerators,
             macros: macros.clone(),
@@ -484,6 +527,7 @@ pub(crate) fn canonical_dump_sources_with_origins(
             body_macro_sites,
             source_view: 0,
             included_origins: &mut included_origins,
+            metadata: &mut metadata,
             macro_uses: Vec::new(),
             macro_use_ids: HashMap::new(),
             last_mfn_span: None,
@@ -572,7 +616,6 @@ pub(crate) fn canonical_dump_sources_with_origins(
     // an instrumented Ctx so they too produce addresses and edges.
     let empty_fns: HashMap<String, String> = HashMap::new();
     let empty_full_names: HashMap<String, String> = HashMap::new();
-    let empty_ambiguous: HashSet<String> = HashSet::new();
     let empty_globals: HashMap<String, String> = HashMap::new();
     let mut stub_uses2: HashMap<String, usize> = HashMap::new();
     let empty_enums: Vec<String> = Vec::new();
@@ -583,7 +626,7 @@ pub(crate) fn canonical_dump_sources_with_origins(
         function_call_types: &empty_fns,
         function_full_names: &empty_full_names,
         definition_full_names: &definition_full_names,
-        ambiguous_functions: &empty_ambiguous,
+        call_renames: None,
         globals: &empty_globals,
         enumerators: &empty_enums,
         macros: Arc::new(HashMap::new()),
@@ -591,6 +634,7 @@ pub(crate) fn canonical_dump_sources_with_origins(
         body_macro_sites: &empty_body_macro_sites,
         source_view: 0,
         included_origins: &mut included_origins,
+        metadata: &mut metadata,
         macro_uses: Vec::new(),
         macro_use_ids: HashMap::new(),
         last_mfn_span: None,
@@ -930,7 +974,7 @@ pub(crate) fn canonical_dump_sources_with_origins(
     for l in flow_lines {
         out.push_str(&format!("FLOWS|{l}\n"));
     }
-    (out, included_origins)
+    (out, included_origins, metadata)
 }
 
 fn count_members(n: Node) -> i64 {
@@ -1238,16 +1282,13 @@ fn predefined_c_macros(file: &str) -> MacroState {
 struct Ctx<'a> {
     functions: &'a HashMap<String, String>,
     function_call_types: &'a HashMap<String, String>,
-    /// Translation-unit-local method identities. Duplicate C names are valid
-    /// for `static` helpers across files; qualify those identities by file so
-    /// they remain distinct and local calls resolve deterministically.
+    /// Initial method identities, before the later duplicate-name fixup.
     function_full_names: &'a HashMap<String, String>,
     /// Distinct declaration identities for same-name preprocessor alternatives.
     /// Calls and METHOD_REFs continue to use the first declaration's identity.
     definition_full_names: &'a HashMap<usize, String>,
-    /// Project-wide duplicate definition names. A call without a local target
-    /// stays unresolved instead of acquiring an arbitrary first candidate.
-    ambiguous_functions: &'a HashSet<String>,
+    /// Only STATIC duplicates outside the first definition's file rename calls.
+    call_renames: Option<&'a HashMap<String, String>>,
     globals: &'a HashMap<String, String>,
     enumerators: &'a Vec<String>,
     macros: MacroState,
@@ -1255,6 +1296,7 @@ struct Ctx<'a> {
     body_macro_sites: &'a BodyMacroSites<'a>,
     source_view: usize,
     included_origins: &'a mut Vec<IncludedSourceOrigin>,
+    metadata: &'a mut ExactMetadata,
     macro_uses: Vec<MacroUse>,
     macro_use_ids: HashMap<(usize, usize, String, usize, String), usize>,
     last_mfn_span: Option<std::ops::Range<usize>>,
@@ -1904,7 +1946,20 @@ impl Ctx<'_> {
         }
     }
 
-    fn line(&mut self, depth: usize, label: &str, p: P) {
+    fn line(&mut self, depth: usize, label: &str, mut p: P) {
+        if label == "CALL" {
+            if let Some((full, renamed)) = p.mfn.as_ref().and_then(|full| {
+                self.call_renames
+                    .and_then(|renames| renames.get(full))
+                    .map(|renamed| (full, renamed))
+            }) {
+                let suffix = renamed.strip_prefix(full).expect("duplicate suffix");
+                if let Some(name) = &mut p.name {
+                    name.push_str(suffix);
+                }
+                p.mfn = Some(renamed.clone());
+            }
+        }
         self.last_call_edge = None;
         if let Some(t) = &p.tfn {
             self.types.insert(t.clone());
@@ -1966,11 +2021,9 @@ impl Ctx<'_> {
             }
             if label == "CALL" && p.dispatch.as_deref() != Some("DYNAMIC_DISPATCH") {
                 if let Some(mfn) = &p.mfn {
-                    if !self.ambiguous_functions.contains(mfn) || mfn.contains(':') {
-                        self.last_call_edge = Some(self.edges.len());
-                        self.edges
-                            .push(("CALL".into(), my_addr.clone(), format!("M:{mfn}")));
-                    }
+                    self.last_call_edge = Some(self.edges.len());
+                    self.edges
+                        .push(("CALL".into(), my_addr.clone(), format!("M:{mfn}")));
                 }
             }
             if label == "METHOD_REF" {
@@ -2100,6 +2153,19 @@ impl Ctx<'_> {
                 .collect::<Vec<_>>()
                 .join(",")
         );
+        if !nested {
+            let suffix = full
+                .find("<duplicate>")
+                .map(|index| &full[index..])
+                .unwrap_or("");
+            self.metadata.bindings.push(FunctionBinding {
+                name: format!("{name}{suffix}"),
+                full_name: full.clone(),
+                type_decl_full_name: full.clone(),
+                signature: Some(sig.clone()),
+                source_start: Some(f.start_byte()),
+            });
+        }
         self.line(
             d,
             "METHOD",
@@ -2164,6 +2230,13 @@ impl Ctx<'_> {
         }
         let is_static = has_leading_static(text(f, b));
         if is_static {
+            if !nested {
+                self.metadata.modifiers.push(ModifierMetadata {
+                    address: format!("{}#{}", self.block, self.line_no),
+                    modifier_type: "STATIC",
+                    line: Some((f.start_position().row + 1) as u32),
+                });
+            }
             self.line(
                 d + 1,
                 "MODIFIER",
@@ -2575,6 +2648,14 @@ impl Ctx<'_> {
                                 full.split("<duplicate>").next().unwrap_or(full).to_string()
                             })
                             .unwrap_or_else(|| name.clone());
+                        self.metadata.reference_origins.push(MethodReferenceOrigin {
+                            address: format!("{}#{}", self.block, self.line_no),
+                            definition_full_name: self
+                                .definition_full_names
+                                .get(&n.id())
+                                .cloned()
+                                .unwrap_or_else(|| name.clone()),
+                        });
                         self.line(
                             2,
                             "METHOD_REF",
@@ -2687,6 +2768,15 @@ impl Ctx<'_> {
     /// and a METHOD_RETURN typed as the struct.
     fn emit_clinit(&mut self, n: Node, b: &[u8], depth: usize, order: i64) {
         let tag = aggregate_name(n, b);
+        if depth == 0 {
+            self.metadata.bindings.push(FunctionBinding {
+                name: "<clinit>".into(),
+                full_name: format!("{tag}.<clinit>:{tag}()"),
+                type_decl_full_name: format!("{}:<global>", self.file),
+                signature: None,
+                source_start: None,
+            });
+        }
         self.line(
             depth,
             "METHOD",
@@ -2802,6 +2892,13 @@ impl Ctx<'_> {
                 }
             }
         }
+        if depth == 0 {
+            self.metadata.modifiers.push(ModifierMetadata {
+                address: format!("{}#{}", self.block, self.line_no),
+                modifier_type: "CONSTRUCTOR",
+                line: None,
+            });
+        }
         self.line(
             depth + 1,
             "MODIFIER",
@@ -2810,6 +2907,13 @@ impl Ctx<'_> {
                 ..Default::default()
             },
         );
+        if depth == 0 {
+            self.metadata.modifiers.push(ModifierMetadata {
+                address: format!("{}#{}", self.block, self.line_no),
+                modifier_type: "STATIC",
+                line: None,
+            });
+        }
         self.line(
             depth + 1,
             "MODIFIER",

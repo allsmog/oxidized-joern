@@ -33,6 +33,15 @@ pub(crate) fn graph_from_canonical_dump_with_origins(
     sources: &[(String, String)],
     origins: &[crate::exact::IncludedSourceOrigin],
 ) -> Cpg {
+    graph_from_canonical_dump_with_metadata(dump, sources, origins, &Default::default())
+}
+
+pub(crate) fn graph_from_canonical_dump_with_metadata(
+    dump: &str,
+    sources: &[(String, String)],
+    origins: &[crate::exact::IncludedSourceOrigin],
+    metadata: &crate::exact::ExactMetadata,
+) -> Cpg {
     let mut raw_nodes = Vec::new();
     let mut raw_edges = Vec::new();
     let mut raw_ast_edges = Vec::new();
@@ -240,6 +249,50 @@ pub(crate) fn graph_from_canonical_dump_with_origins(
         cpg.add_edge(raw_to_node[source], raw_to_node[target], edge.kind);
     }
 
+    // The canonical oracle omits these nodes/properties. Retain them from the
+    // lowerer's typed metadata, without encoding invented canonical text.
+    for binding in &metadata.bindings {
+        let method =
+            raw_to_node[resolve_address(&address_to_raw, &format!("M:{}", binding.full_name))];
+        let type_decl = raw_to_node[resolve_address(
+            &address_to_raw,
+            &format!("D:{}", binding.type_decl_full_name),
+        )];
+        let node = cpg.add_node(NodeKind::Binding, cpg.file_of(method));
+        let name = cpg.intern(&binding.name);
+        cpg.set_name(node, name);
+        let full = cpg.intern(&binding.full_name);
+        cpg.set_method_full_name(node, full);
+        if let Some(signature) = &binding.signature {
+            let signature = cpg.intern(signature);
+            cpg.set_signature(node, signature);
+        }
+        cpg.add_edge(type_decl, node, EdgeKind::Binds);
+        cpg.add_edge(node, method, EdgeKind::Ref);
+    }
+    let mut modifier_lines = Vec::new();
+    for modifier in &metadata.modifiers {
+        let node = raw_to_node[resolve_address(&address_to_raw, &modifier.address)];
+        assert_eq!(cpg.kind_of(node), NodeKind::Modifier);
+        let value = cpg.intern(modifier.modifier_type);
+        cpg.set_modifier_type(node, value);
+        modifier_lines.push((node, modifier.line));
+    }
+
+    let reference_origins: Vec<_> = metadata
+        .reference_origins
+        .iter()
+        .map(|origin| {
+            let reference = raw_to_node[resolve_address(&address_to_raw, &origin.address)];
+            let definition = raw_to_node[resolve_address(
+                &address_to_raw,
+                &format!("M:{}", origin.definition_full_name),
+            )];
+            assert_eq!(cpg.kind_of(reference), NodeKind::MethodRef);
+            (reference, definition)
+        })
+        .collect();
+
     // Source location matching only needs the graph and original sources.
     drop(address_to_raw);
     drop(raw_to_node);
@@ -248,7 +301,29 @@ pub(crate) fn graph_from_canonical_dump_with_origins(
         cpg.mark_layer_authoritative(layer);
     }
 
-    assign_source_lines(&mut cpg, sources, &included_roots);
+    let absent_locations = modifier_lines
+        .iter()
+        .filter_map(|(node, line)| line.is_none().then_some(*node))
+        .collect();
+    assign_source_lines(
+        &mut cpg,
+        sources,
+        &included_roots,
+        &metadata.bindings,
+        &absent_locations,
+    );
+    // These references describe a physical definition at their source site;
+    // the linked REF target can remain the first method in another file.
+    for (reference, definition) in reference_origins {
+        if let Some(line) = cpg.line_of(definition) {
+            cpg.set_line(reference, line);
+        }
+    }
+    for (node, line) in modifier_lines {
+        if let Some(line) = line {
+            cpg.set_line(node, line);
+        }
+    }
     cpg
 }
 
@@ -294,6 +369,7 @@ pub fn canonical_dump(cpg: &Cpg) -> String {
 
     let mut scaffolding: Vec<NodeId> = cpg
         .nodes()
+        .filter(|&node| cpg.kind_of(node) != NodeKind::Binding)
         .filter(|node| !ast_nodes.contains(node) || cpg.kind_of(*node) == NodeKind::TypeDecl)
         .collect();
     scaffolding.sort_by_key(|&node| scaffolding_key(cpg, node));
@@ -311,6 +387,11 @@ pub fn canonical_dump(cpg: &Cpg) -> String {
     let mut seen_flow_pairs = HashSet::new();
     for source in cpg.nodes() {
         for edge in cpg.out(source) {
+            if cpg.kind_of(source) == NodeKind::Binding
+                || cpg.kind_of(edge.other) == NodeKind::Binding
+            {
+                continue;
+            }
             if matches!(
                 edge.kind,
                 EdgeKind::Ast | EdgeKind::Ddg | EdgeKind::Receiver
@@ -593,6 +674,7 @@ fn canonical_node_name(kind: NodeKind) -> &'static str {
         NodeKind::JumpTarget => "JUMP_TARGET",
         NodeKind::Modifier => "MODIFIER",
         NodeKind::Unknown => "UNKNOWN",
+        NodeKind::Binding => "BINDING",
     }
 }
 
@@ -613,7 +695,11 @@ fn canonical_edge_name(kind: EdgeKind) -> &'static str {
         EdgeKind::Ref => "REF",
         EdgeKind::SourceFile => "SOURCE_FILE",
         EdgeKind::TrueBody => "TRUE_BODY",
-        EdgeKind::Ast | EdgeKind::Ddg | EdgeKind::Receiver | EdgeKind::ReachingDef => {
+        EdgeKind::Ast
+        | EdgeKind::Ddg
+        | EdgeKind::Receiver
+        | EdgeKind::ReachingDef
+        | EdgeKind::Binds => {
             unreachable!("filtered before canonical edge rendering")
         }
     }
@@ -863,8 +949,18 @@ fn assign_source_lines(
     cpg: &mut Cpg,
     sources: &[(String, String)],
     included_roots: &HashMap<NodeId, &crate::exact::IncludedSourceOrigin>,
+    bindings: &[crate::exact::FunctionBinding],
+    absent_locations: &HashSet<NodeId>,
 ) {
-    let foreign_roots: HashSet<_> = included_roots.keys().copied().collect();
+    let foreign_roots: HashSet<_> = included_roots
+        .keys()
+        .copied()
+        .chain(absent_locations.iter().copied())
+        .collect();
+    let method_starts: HashMap<_, _> = bindings
+        .iter()
+        .filter_map(|binding| Some((binding.full_name.as_str(), binding.source_start?)))
+        .collect();
     let mut parser = tree_sitter::Parser::new();
     parser
         .set_language(&tree_sitter_c::LANGUAGE.into())
@@ -920,6 +1016,10 @@ fn assign_source_lines(
                 ))
             })
             .collect();
+        let functions_by_start: HashMap<_, _> = functions
+            .values()
+            .map(|function| (function.2, function))
+            .collect();
         let methods: Vec<_> = cpg
             .nodes_in_file(file)
             .iter()
@@ -930,16 +1030,20 @@ fn assign_source_lines(
             let Some(name) = cpg.name_of(method) else {
                 continue;
             };
-            // Same-name preprocessor alternatives can have identical CODE.
-            // Their canonical duplicate suffix preserves declaration order.
+            // Global duplicate suffixes do not imply a local occurrence. Use
+            // the physical definition anchor retained by production lowering;
+            // legacy canonical-only input keeps its existing local fallback.
             let occurrence = cpg
                 .full_name_of(method)
                 .and_then(|full| full.rsplit_once("<duplicate>"))
                 .and_then(|(_, suffix)| suffix.parse::<usize>().ok())
                 .map_or(0, |index| index + 1);
-            let Some((code, source_range, start_byte)) =
-                functions.get(&(name.to_owned(), occurrence))
-            else {
+            let function = cpg
+                .full_name_of(method)
+                .and_then(|full| method_starts.get(full))
+                .and_then(|start| functions_by_start.get(start).copied())
+                .or_else(|| functions.get(&(name.to_owned(), occurrence)));
+            let Some((code, source_range, start_byte)) = function else {
                 continue;
             };
             let mut range = source_range.clone();
@@ -1170,7 +1274,7 @@ fn locate_ast(
         // would give multiline arguments different locations from their copies.
         let mut descendants: Vec<_> = cpg.out_kind(node, EdgeKind::Ast).collect();
         while let Some(descendant) = descendants.pop() {
-            if cpg.kind_of(descendant) == NodeKind::Method {
+            if cpg.kind_of(descendant) == NodeKind::Method || foreign_roots.contains(&descendant) {
                 continue;
             }
             cpg.set_line(descendant, line);

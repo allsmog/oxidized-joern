@@ -69,10 +69,10 @@ fn late_prototypes_preserve_duplicate_static_definition_identity() {
         .map(|node| cpg.full_name_of(node).unwrap())
         .collect();
     names.sort();
-    assert_eq!(names, vec!["a.c:helper", "b.c:helper"]);
+    assert_eq!(names, vec!["helper", "helper<duplicate>0"]);
     for (entry, target, file) in [
-        ("entry_a", "a.c:helper", "a.c"),
-        ("entry_b", "b.c:helper", "b.c"),
+        ("entry_a", "helper", "a.c"),
+        ("entry_b", "helper<duplicate>0", "b.c"),
     ] {
         let calls = calls_in(&cpg, entry, "helper(value)");
         assert_eq!(calls.len(), 1);
