@@ -1,0 +1,138 @@
+{
+  "status": "fresh_pinned_live_references_ready",
+  "oracle": "v4.0.555",
+  "oracleExit": 0,
+  "oracleSession": 79596,
+  "workspace": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-registration/.local/multiline-macro-live/workspace",
+  "initialRun": {
+    "session": 66758,
+    "exit": 0,
+    "note": "Initial run used the worktree root cwd. Its newly created seven project directories were verified and moved intact to initial-workspace; final run repeated in the distinct scratch workspace and all selected records are identical."
+  },
+  "binary": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/fourth-batch/header-macros/frozen-e001da70/joern-parity",
+  "binarySha256": "36e71c56cf91763099cb8f68899d979b05cfd038d1dd542952fabdfacba11aef",
+  "liveRawSha256": "b118fda654912a5ce4a5bd73678d91b068f0de27dd95089575afa9e05c713262",
+  "scriptSha256": "d4eeb36dcdb911d1279f1f5bbe72e2b66048481eb7196e3fb1090228db0aff3e",
+  "totalRecords": 2494,
+  "cases": {
+    "lua_checkstackp_call": {
+      "records": 431,
+      "equal": false,
+      "diffLines": 495,
+      "candidateExit": 0,
+      "files": {
+        "defs.h": "3ade3973e3a1fe7e814aa01c8112510560883e41a83c8238b20a055d417af4f3",
+        "expected.txt": "b6fb937b8835f9049f932c48c5d2bd84ad686472dfccfbac97a562dd49eccf1d",
+        "probe.c": "b84c08a6ee7946e1e2e4837fb61957ccc1ab8eb86626f03f7bf241276f92bbaf"
+      }
+    },
+    "lua_checkstackp_names": {
+      "records": 118,
+      "equal": false,
+      "diffLines": 120,
+      "candidateExit": 0,
+      "files": {
+        "defs.h": "2f2f54924eb6955671523562268a52f5755bdcb67c77af9e6b1b1b4b5d8255a8",
+        "expected.txt": "3b6ac1a4f9745576de04839f1d84cf2b1d9d3df2da18ef71862f1b008fbebc1f",
+        "probe.c": "238069b653e47a18e390a60e9bf2b84519a53ec87b577947f00162e4d933fff1"
+      }
+    },
+    "lua_fastgeti_call": {
+      "records": 955,
+      "equal": false,
+      "diffLines": 1064,
+      "candidateExit": 0,
+      "files": {
+        "defs.h": "deee7c1720c1fcbb21ec7976c41ff5c173236799bb3d1c1e1bec307c02a99678",
+        "expected.txt": "a8bdab380b1ba2d0a17660cc1dd8beb8626136c7d4b1bd9fd7d25f76d4f04349",
+        "probe.c": "4ecdac991a27c6793edbfb2afd8cf4dee3ce199464e1a7f674c44e2e5f9c019a"
+      }
+    },
+    "lua_fastgeti_names": {
+      "records": 118,
+      "equal": false,
+      "diffLines": 120,
+      "candidateExit": 0,
+      "files": {
+        "defs.h": "eb808963ff43143268fe237bd884c7b7ae89d285245555496455c3a775ab69cb",
+        "expected.txt": "dc5a229f17ec0a1cf647172b3a5da402b5814344a834d8c17d8a13ea96772a35",
+        "probe.c": "f0067931ed51ee29097c416adce08870c073e17808fa0403b91fdfd8c5f0278e"
+      }
+    },
+    "multiline_comment": {
+      "records": 269,
+      "equal": false,
+      "diffLines": 11,
+      "candidateExit": 0,
+      "files": {
+        "defs.h": "1031c3ae12e8d612bd617f2064e2eff790e49765d651f363c30abe102136be64",
+        "expected.txt": "2ce41c8ea5296887f487540f35d757987929726288c11513c0718bc89aa7f616",
+        "probe.c": "b35e7c8311a501dfc7a752b9887270e4fafa2f3644ca528e664365d0e0241d79"
+      }
+    },
+    "object_macro_cast": {
+      "records": 201,
+      "equal": true,
+      "diffLines": 0,
+      "candidateExit": 0,
+      "files": {
+        "defs.h": "0beb565537642fb4a19ca633391ffbaffb3e52d9465e9def9e154a62ed4bc042",
+        "expected.txt": "4d1749b4424a00e776b76a19dba082faabada11ffa09312b80537d39ab752048",
+        "probe.c": "df07ebe1d638840b2d2b6651137eec1db630c675ed23db07ff443e4f0647eb5f"
+      }
+    },
+    "quoted_formal": {
+      "records": 152,
+      "equal": false,
+      "diffLines": 20,
+      "candidateExit": 0,
+      "files": {
+        "defs.h": "edfef634f6ada5edeb7cdb233de544199271afd389b009d446f27f0778d4eebb",
+        "expected.txt": "0d23ff8a4eb1198956e9705ba5db640728730c6a3e7867b88957db337031f601",
+        "probe.c": "adca93c86a7a5ad161212d7c259f2740526342156cfde176a9af2d5efe66a2ad"
+      }
+    },
+    "multiline_name": {
+      "records": 250,
+      "equal": false,
+      "diffLines": 275,
+      "candidateExit": 0,
+      "files": {
+        "defs.h": "584e3defe05f62e1bee25f8df369967083717275a7084734d819374563786f37",
+        "probe.c": "836262d49da5bd9070fd0db071ba395ab21c64a0638ab96a20ee83671e9281b9",
+        "expected.txt": "a7b3774ff2eec3a50f62ccdca4c26d35f30c4ea70a29625f90db231512b4cb94"
+      },
+      "oracleInputDirectory": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-registration/.local/multiline-macro-live/extra-input/multiline_name",
+      "copiedInputDirectory": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-registration/.local/multiline-macro-live/input/multiline_name"
+    }
+  },
+  "limits": [
+    "These are complete canonical projections, with no AST/NODES/EDGES/FLOWS records removed. Only AST| transport prefix is stripped in expected.txt.",
+    "Original Lua macro directives are byte-exact copies; call fixtures include deliberately small supporting declarations/macros rather than full Lua headers.",
+    "The two expression boundaries are diagnostics; no expectation that the extraction-name repair alone fixes them."
+  ],
+  "extraRun": {
+    "session": 74390,
+    "exit": 0,
+    "workspace": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-registration/.local/multiline-macro-live/extra-workspace",
+    "raw": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-registration/.local/multiline-macro-live/extra.stdout",
+    "rawSha256": "4942b62ab16b85a7031f145f8b229101fb57f08d77af263b1ef55a0cbfc0a8d8"
+  },
+  "nativeSyntax": {
+    "compiler": "Apple clang version 21.0.0 (clang-2100.1.1.101)",
+    "args": [
+      "-fsyntax-only",
+      "-std=c11"
+    ],
+    "allEightPassed": true,
+    "stderrLogs": "input/<case>/clang.stderr"
+  },
+  "findings": {
+    "multiline_name": "Minimal live-confirmed recovery bug: formal p becomes an erroneous object macro name; ordinary probe return p becomes empty INLINED p.",
+    "lua_checkstackp_names": "Byte-exact Lua directive pollutes formal p in an ordinary method.",
+    "lua_fastgeti_names": "Byte-exact Lua directive pollutes formal slot in an ordinary method.",
+    "multiline_comment": "Different lexical boundary: complete macro CODE is truncated after a continued comment, while method and expansion otherwise match.",
+    "object_macro_cast": "Already full-graph exact on frozen-e001; keep as an acceptance boundary.",
+    "quoted_formal": "Quoted macro formal is substituted inside a string literal: live \"x\", candidate \"value\"."
+  }
+}

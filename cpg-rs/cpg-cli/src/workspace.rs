@@ -38,7 +38,8 @@ use std::time::{Duration, Instant};
 /// v12: C braceless `if` consequences are present in canonical AST/CFG/DDG.
 /// v13: C callable declarations, loop conditions, and preprocessing expanded.
 /// v14: C type roles, storage modifiers, blocks, and reaching definitions expanded.
-pub const GRAPH_SHAPE_VERSION: u32 = 14;
+/// v15: C CFG/RD scheduling, array initializers, and supplied-header macros.
+pub const GRAPH_SHAPE_VERSION: u32 = 15;
 
 const CACHE_MANIFEST_VERSION: u32 = 1;
 const CACHE_GRAPH_FORMAT: &str = "CPG2";

@@ -378,7 +378,7 @@ const C_RULES: &str = r#"{"rules":[
   {"id":"C-FMT-003","name":"input-to-format","cwe":"CWE-134","severity":"medium",
    "description":"external input reaches a format string position",
    "sources":["getenv","gets","gets@out0","fgets","fgets@out0","scanf@out1","read@out1","recv@out1","fread@out0"],
-   "sinks":["printf","fprintf","syslog"]}
+   "sinks":["printf@0","fprintf@1","syslog@1"]}
 ]}"#;
 
 #[cfg(test)]

@@ -1,0 +1,199 @@
+METHOD NAME=<global> CODE=<global> FULL_NAME=<includes>:<global> ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=after CODE=int after(void) { return VALUE; } FULL_NAME=after SIGNATURE=int(void) ORDER=1
+  METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  BLOCK CODE={ return VALUE; } TYPE_FULL_NAME=void ORDER=2
+    RETURN CODE=return VALUE; ORDER=1
+      CALL NAME=VALUE CODE=VALUE TYPE_FULL_NAME=int METHOD_FULL_NAME=defs.h:VALUE:int(0) SIGNATURE=int(0) ORDER=1 DISPATCH_TYPE=INLINED
+        BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+          LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+
+METHOD NAME=before CODE=int before(void) { return VALUE; } FULL_NAME=before SIGNATURE=int(void) ORDER=1
+  METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  BLOCK CODE={ return VALUE; } TYPE_FULL_NAME=void ORDER=2
+    RETURN CODE=return VALUE; ORDER=1
+      CALL NAME=VALUE CODE=VALUE TYPE_FULL_NAME=int METHOD_FULL_NAME=defs.h:VALUE:int(0) SIGNATURE=int(0) ORDER=1 DISPATCH_TYPE=INLINED
+        BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+          LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+
+METHOD NAME=<global> CODE=<global> FULL_NAME=defs.h:<global> ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=VALUE CODE=#define VALUE 1 FULL_NAME=defs.h:VALUE:int(0) SIGNATURE=int(0) ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=2
+
+METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1
+  METHOD NAME=before CODE=int before(void) { return VALUE; } FULL_NAME=before SIGNATURE=int(void) ORDER=1
+    METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    BLOCK CODE={ return VALUE; } TYPE_FULL_NAME=void ORDER=2
+      RETURN CODE=return VALUE; ORDER=1
+        CALL NAME=VALUE CODE=VALUE TYPE_FULL_NAME=int METHOD_FULL_NAME=defs.h:VALUE:int(0) SIGNATURE=int(0) ORDER=1 DISPATCH_TYPE=INLINED
+          BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+            LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+  METHOD NAME=after CODE=int after(void) { return VALUE; } FULL_NAME=after SIGNATURE=int(void) ORDER=1
+    METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    BLOCK CODE={ return VALUE; } TYPE_FULL_NAME=void ORDER=2
+      RETURN CODE=return VALUE; ORDER=1
+        CALL NAME=VALUE CODE=VALUE TYPE_FULL_NAME=int METHOD_FULL_NAME=defs.h:VALUE:int(0) SIGNATURE=int(0) ORDER=1 DISPATCH_TYPE=INLINED
+          BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+            LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+    METHOD_REF CODE=before TYPE_FULL_NAME=before METHOD_FULL_NAME=before ORDER=1
+    METHOD_REF CODE=after TYPE_FULL_NAME=after METHOD_FULL_NAME=after ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+NODES|META_DATA LANGUAGE=NEWC
+NODES|FILE NAME=<includes> ORDER=1
+NODES|FILE NAME=<unknown> ORDER=0
+NODES|FILE NAME=defs.h ORDER=0
+NODES|FILE NAME=main.c ORDER=0
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<global> FILENAME=<unknown> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<includes>:<global> FILENAME=<includes> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=defs.h:<global> FILENAME=defs.h ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|NAMESPACE NAME=<global>
+NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=after FULL_NAME=after CODE=after AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=before FULL_NAME=before CODE=before AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=<global> FULL_NAME=defs.h:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=defs.h:<global> FILENAME=defs.h ORDER=1
+NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=<global> FULL_NAME=main.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=3
+NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+NODES|TYPE NAME=after FULL_NAME=after TYPE_DECL_FULL_NAME=after
+NODES|TYPE NAME=before FULL_NAME=before TYPE_DECL_FULL_NAME=before
+NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+EDGES|ARGUMENT after#4 -> after#5
+EDGES|ARGUMENT before#4 -> before#5
+EDGES|CALL after#5 -> defs.h:VALUE:int(0)#0
+EDGES|CALL before#5 -> defs.h:VALUE:int(0)#0
+EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+EDGES|CFG after#0 -> after#5
+EDGES|CFG after#4 -> after#8
+EDGES|CFG after#5 -> after#4
+EDGES|CFG after#5 -> after#7
+EDGES|CFG after#7 -> after#4
+EDGES|CFG before#0 -> before#5
+EDGES|CFG before#4 -> before#8
+EDGES|CFG before#5 -> before#4
+EDGES|CFG before#5 -> before#7
+EDGES|CFG before#7 -> before#4
+EDGES|CFG defs.h:<global>#0 -> defs.h:<global>#2
+EDGES|CFG defs.h:VALUE:int(0)#0 -> defs.h:VALUE:int(0)#2
+EDGES|CFG main.c:<global>#0 -> main.c:<global>#20
+EDGES|CFG main.c:<global>#20 -> main.c:<global>#21
+EDGES|CFG main.c:<global>#21 -> main.c:<global>#22
+EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+EDGES|CONTAINS D:defs.h:<global> -> defs.h:<global>#0
+EDGES|CONTAINS D:main.c:<global> -> D:after
+EDGES|CONTAINS D:main.c:<global> -> D:before
+EDGES|CONTAINS D:main.c:<global> -> defs.h:VALUE:int(0)#0
+EDGES|CONTAINS D:main.c:<global> -> main.c:<global>#0
+EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+EDGES|CONTAINS F:<includes> -> D:ANY
+EDGES|CONTAINS F:<includes> -> D:int
+EDGES|CONTAINS F:<includes> -> D:void
+EDGES|CONTAINS F:defs.h -> D:defs.h:<global>
+EDGES|CONTAINS F:main.c -> D:main.c:<global>
+EDGES|CONTAINS after#0 -> after#3
+EDGES|CONTAINS after#0 -> after#4
+EDGES|CONTAINS after#0 -> after#5
+EDGES|CONTAINS after#0 -> after#6
+EDGES|CONTAINS after#0 -> after#7
+EDGES|CONTAINS before#0 -> before#3
+EDGES|CONTAINS before#0 -> before#4
+EDGES|CONTAINS before#0 -> before#5
+EDGES|CONTAINS before#0 -> before#6
+EDGES|CONTAINS before#0 -> before#7
+EDGES|CONTAINS defs.h:<global>#0 -> defs.h:<global>#1
+EDGES|CONTAINS defs.h:VALUE:int(0)#0 -> defs.h:VALUE:int(0)#1
+EDGES|CONTAINS main.c:<global>#0 -> after#0
+EDGES|CONTAINS main.c:<global>#0 -> before#0
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#19
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#20
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#21
+EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+EDGES|EVAL_TYPE after#1 -> T:void
+EDGES|EVAL_TYPE after#2 -> T:void
+EDGES|EVAL_TYPE after#3 -> T:void
+EDGES|EVAL_TYPE after#5 -> T:int
+EDGES|EVAL_TYPE after#6 -> T:ANY
+EDGES|EVAL_TYPE after#7 -> T:int
+EDGES|EVAL_TYPE after#8 -> T:int
+EDGES|EVAL_TYPE before#1 -> T:void
+EDGES|EVAL_TYPE before#2 -> T:void
+EDGES|EVAL_TYPE before#3 -> T:void
+EDGES|EVAL_TYPE before#5 -> T:int
+EDGES|EVAL_TYPE before#6 -> T:ANY
+EDGES|EVAL_TYPE before#7 -> T:int
+EDGES|EVAL_TYPE before#8 -> T:int
+EDGES|EVAL_TYPE defs.h:<global>#1 -> T:ANY
+EDGES|EVAL_TYPE defs.h:<global>#2 -> T:ANY
+EDGES|EVAL_TYPE defs.h:VALUE:int(0)#1 -> T:ANY
+EDGES|EVAL_TYPE defs.h:VALUE:int(0)#2 -> T:int
+EDGES|EVAL_TYPE main.c:<global>#19 -> T:ANY
+EDGES|EVAL_TYPE main.c:<global>#20 -> T:before
+EDGES|EVAL_TYPE main.c:<global>#21 -> T:after
+EDGES|EVAL_TYPE main.c:<global>#22 -> T:ANY
+EDGES|PARAMETER_LINK after#1 -> after#2
+EDGES|PARAMETER_LINK before#1 -> before#2
+EDGES|REF NB:<global> -> NS:<global>
+EDGES|REF NB:<includes>:<global> -> NS:<global>
+EDGES|REF NB:defs.h:<global> -> NS:<global>
+EDGES|REF NB:main.c:<global> -> NS:<global>
+EDGES|REF T:ANY -> D:ANY
+EDGES|REF T:after -> D:after
+EDGES|REF T:before -> D:before
+EDGES|REF T:int -> D:int
+EDGES|REF T:void -> D:void
+EDGES|REF main.c:<global>#20 -> before#0
+EDGES|REF main.c:<global>#21 -> after#0
+EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+EDGES|SOURCE_FILE D:ANY -> F:<includes>
+EDGES|SOURCE_FILE D:after -> F:main.c
+EDGES|SOURCE_FILE D:before -> F:main.c
+EDGES|SOURCE_FILE D:defs.h:<global> -> F:defs.h
+EDGES|SOURCE_FILE D:int -> F:<includes>
+EDGES|SOURCE_FILE D:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE D:void -> F:<includes>
+EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
+EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>
+EDGES|SOURCE_FILE NB:defs.h:<global> -> F:defs.h
+EDGES|SOURCE_FILE NB:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE after#0 -> F:main.c
+EDGES|SOURCE_FILE before#0 -> F:main.c
+EDGES|SOURCE_FILE defs.h:<global>#0 -> F:defs.h
+EDGES|SOURCE_FILE defs.h:VALUE:int(0)#0 -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#0 -> F:main.c
+FLOWS|REACHING_DEF[<RET>] after#4 -> after#8
+FLOWS|REACHING_DEF[<RET>] before#4 -> before#8
+FLOWS|REACHING_DEF[VALUE] after#5 -> after#4
+FLOWS|REACHING_DEF[VALUE] after#5 -> after#8
+FLOWS|REACHING_DEF[VALUE] before#5 -> before#4
+FLOWS|REACHING_DEF[VALUE] before#5 -> before#8
+FLOWS|REACHING_DEF[] after#0 -> after#1
+FLOWS|REACHING_DEF[] after#0 -> after#5
+FLOWS|REACHING_DEF[] after#0 -> after#7
+FLOWS|REACHING_DEF[] after#1 -> after#2
+FLOWS|REACHING_DEF[] after#1 -> after#8
+FLOWS|REACHING_DEF[] before#0 -> before#1
+FLOWS|REACHING_DEF[] before#0 -> before#5
+FLOWS|REACHING_DEF[] before#0 -> before#7
+FLOWS|REACHING_DEF[] before#1 -> before#2
+FLOWS|REACHING_DEF[] before#1 -> before#8
+FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#20
+FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#21

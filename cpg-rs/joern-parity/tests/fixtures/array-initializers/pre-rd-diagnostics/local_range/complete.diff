@@ -1,0 +1,10 @@
+--- live
++++ array-only
+@@ -252,6 +252,7 @@
+ FLOWS|REACHING_DEF[] arrays#0 -> arrays#18
+ FLOWS|REACHING_DEF[] arrays#0 -> arrays#8
+ FLOWS|REACHING_DEF[] arrays#0 -> arrays#9
++FLOWS|REACHING_DEF[] arrays#1 -> arrays#13
+ FLOWS|REACHING_DEF[] arrays#1 -> arrays#19
+ FLOWS|REACHING_DEF[] arrays#1 -> arrays#2
+ FLOWS|REACHING_DEF[] arrays#13 -> arrays#12

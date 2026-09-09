@@ -1,0 +1,1447 @@
+=======================================================================================================
+Invoking CPG generator in a separate process. Note that the new process will consume additional memory.
+If you are importing a large codebase (and/or running into memory issues), please try the following:
+1) exit joern
+2) invoke the frontend: /Users/shayaunnejad/vibe-code/joern-oxidized/.local/astra-sprint/oracle/runtime/joern-cli/c2cpg.sh -J-Xmx4096m /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/fourth-batch/header-macros/pi-type-review/input --output /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/fourth-batch/header-macros/pi-type-review/run/workspace/proj/cpg.bin.zip
+3) start joern, import the cpg: `importCpg("path/to/cpg")`
+=======================================================================================================
+
+[INFO ] initialising from existing storage (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/fourth-batch/header-macros/pi-type-review/run/workspace/proj/cpg.bin.tmp)
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.FileCreationPass
+[INFO ] Pass io.joern.x2cpg.passes.base.FileCreationPass completed in 12 ms (68% on mutations). 57 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.NamespaceCreator
+[INFO ] Pass io.joern.x2cpg.passes.base.NamespaceCreator completed in 3 ms (51% on mutations). 4 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.TypeDeclStubCreator
+[INFO ] Pass io.joern.x2cpg.passes.base.TypeDeclStubCreator completed in 1 ms (60% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.MethodStubCreator
+[INFO ] Pass io.joern.x2cpg.passes.base.MethodStubCreator completed in 7 ms (18% on mutations). 27 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.ParameterIndexCompatPass
+[INFO ] Pass io.joern.x2cpg.passes.base.ParameterIndexCompatPass completed in 1 ms (55% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.MethodDecoratorPass
+[INFO ] Pass io.joern.x2cpg.passes.base.MethodDecoratorPass completed in 3 ms (36% on mutations). 72 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.AstLinkerPass
+[INFO ] Pass io.joern.x2cpg.passes.base.AstLinkerPass completed in 2 ms (15% on mutations). 37 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.ContainsEdgePass
+[INFO ] Pass io.joern.x2cpg.passes.base.ContainsEdgePass completed in 2 ms (29% on mutations). 176 + 0 changes committed from 59 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.TypeRefPass
+[INFO ] Pass io.joern.x2cpg.passes.base.TypeRefPass completed in 1 ms (31% on mutations). 20 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.TypeEvalPass
+[INFO ] Pass io.joern.x2cpg.passes.base.TypeEvalPass completed in 2 ms (33% on mutations). 192 + 0 changes committed from 2 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 2 ms (28% on mutations). 1 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.controlflow.CfgCreationPass
+[INFO ] Pass io.joern.x2cpg.passes.controlflow.CfgCreationPass completed in 13 ms (5% on mutations). 123 + 0 changes committed from 35 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.controlflow.cfgdominator.CfgDominatorPass
+[INFO ] Pass io.joern.x2cpg.passes.controlflow.cfgdominator.CfgDominatorPass completed in 5 ms (12% on mutations). 214 + 0 changes committed from 35 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.controlflow.codepencegraph.CdgPass
+[INFO ] Pass io.joern.x2cpg.passes.controlflow.codepencegraph.CdgPass completed in 2 ms (9% on mutations). 20 + 0 changes committed from 35 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 0 ms (80% on mutations). 1 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.typerelations.TypeHierarchyPass
+[INFO ] Pass io.joern.x2cpg.passes.typerelations.TypeHierarchyPass completed in 1 ms (27% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.typerelations.AliasLinkerPass
+[INFO ] Pass io.joern.x2cpg.passes.typerelations.AliasLinkerPass completed in 0 ms (37% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.typerelations.FieldAccessLinkerPass
+[INFO ] Pass io.joern.x2cpg.passes.typerelations.FieldAccessLinkerPass completed in 1 ms (26% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 0 ms (80% on mutations). 1 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.callgraph.MethodRefLinker
+[INFO ] Pass io.joern.x2cpg.passes.callgraph.MethodRefLinker completed in 0 ms (48% on mutations). 16 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.callgraph.StaticCallLinker
+[INFO ] Pass io.joern.x2cpg.passes.callgraph.StaticCallLinker completed in 1 ms (27% on mutations). 19 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.callgraph.DynamicCallLinker
+[INFO ] Pass io.joern.x2cpg.passes.callgraph.DynamicCallLinker completed in 0 ms (57% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 0 ms (76% on mutations). 1 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.dataflowengineoss.passes.reachingdef.ReachingDefPass
+[INFO ] Calculating reaching definitions for: types.c:OP:ANY(0) in types.c
+[INFO ] Calculating reaching definitions for: types.c:IDP:ANY(1) in types.c
+[INFO ] Calculating reaching definitions for: expression_statement in types.c
+[INFO ] Calculating reaching definitions for: zero_arg in types.c
+[INFO ] Calculating reaching definitions for: <operator>.assignment in <empty>
+[INFO ] Calculating reaching definitions for: <operator>.cast in <empty>
+[INFO ] Calculating reaching definitions for: nested_objects in types.c
+[INFO ] Calculating reaching definitions for: types.c:NEST:ANY(0) in types.c
+[INFO ] Calculating reaching definitions for: object_paren in types.c
+[INFO ] Calculating reaching definitions for: <operator>.addition in <empty>
+[INFO ] Number of definitions for <operator>.addition: 2
+[INFO ] Number of definitions for types.c:OP:ANY(0): 0
+[INFO ] Number of definitions for <operator>.assignment: 2
+[INFO ] Number of definitions for types.c:NEST:ANY(0): 0
+[INFO ] Number of definitions for <operator>.cast: 2
+[INFO ] Number of definitions for types.c:IDP:ANY(1): 1
+[INFO ] Number of definitions for object_paren: 2
+[INFO ] Number of definitions for expression_statement: 2
+[INFO ] Number of definitions for nested_objects: 2
+[INFO ] Number of definitions for zero_arg: 2
+[INFO ] Calculating reaching definitions for: types.c:PI:ANY(0) in types.c
+[INFO ] Calculating reaching definitions for: types.c:PI_SECOND:ANY(0) in types.c
+[INFO ] Number of definitions for types.c:PI:ANY(0): 0
+[INFO ] Number of definitions for types.c:PI_SECOND:ANY(0): 0
+[INFO ] Calculating reaching definitions for: types.c:AP:ANY(0) in types.c
+[INFO ] Number of definitions for types.c:AP:ANY(0): 0
+[INFO ] Calculating reaching definitions for: types.c:PI_NOP:double(0) in types.c
+[INFO ] Calculating reaching definitions for: types.c:A:int(0) in types.c
+[INFO ] Number of definitions for types.c:PI_NOP:double(0): 0
+[INFO ] Calculating reaching definitions for: types.c:DIRECT:ANY(0) in types.c
+[INFO ] Number of definitions for types.c:A:int(0): 0
+[INFO ] Number of definitions for types.c:DIRECT:ANY(0): 0
+[INFO ] Calculating reaching definitions for: <includes>:<global> in <includes>
+[INFO ] Calculating reaching definitions for: types.c:CAST:ANY(0) in types.c
+[INFO ] Number of definitions for <includes>:<global>: 0
+[INFO ] Calculating reaching definitions for: function_alias in types.c
+[INFO ] Calculating reaching definitions for: operation in types.c
+[INFO ] Calculating reaching definitions for: types.c:DIRECT_RAW:double(0) in types.c
+[INFO ] Calculating reaching definitions for: types.c:ID:double(1) in types.c
+[INFO ] Number of definitions for types.c:DIRECT_RAW:double(0): 0
+[INFO ] Number of definitions for types.c:CAST:ANY(0): 0
+[INFO ] Calculating reaching definitions for: types.c:FNOBJ:double(0) in types.c
+[INFO ] Number of definitions for types.c:ID:double(1): 1
+[INFO ] Number of definitions for types.c:FNOBJ:double(0): 0
+[INFO ] Calculating reaching definitions for: initializer in types.c
+[INFO ] Number of definitions for function_alias: 2
+[INFO ] Calculating reaching definitions for: casted in types.c
+[INFO ] Calculating reaching definitions for: direct_idp in types.c
+[INFO ] Calculating reaching definitions for: types.c:OBJECT_A:ANY(0) in types.c
+[INFO ] Number of definitions for operation: 3
+[INFO ] Number of definitions for casted: 3
+[INFO ] Number of definitions for types.c:OBJECT_A:ANY(0): 0
+[INFO ] Number of definitions for direct_idp: 2
+[INFO ] Calculating reaching definitions for: direct_id in types.c
+[INFO ] Calculating reaching definitions for: direct in types.c
+[INFO ] Calculating reaching definitions for: types.c:<global> in types.c
+[INFO ] Calculating reaching definitions for: direct_raw in types.c
+[INFO ] Number of definitions for direct: 2
+[INFO ] Number of definitions for initializer: 5
+[INFO ] Number of definitions for types.c:<global>: 0
+[INFO ] Number of definitions for direct_raw: 2
+[INFO ] Calculating reaching definitions for: nested_raw in types.c
+[INFO ] Number of definitions for direct_id: 2
+[INFO ] Calculating reaching definitions for: object_chain in types.c
+[INFO ] Calculating reaching definitions for: pi in types.c
+[INFO ] Calculating reaching definitions for: nested_paren in types.c
+[INFO ] Number of definitions for object_chain: 2
+[INFO ] Number of definitions for pi: 2
+[INFO ] Number of definitions for nested_raw: 2
+[INFO ] Number of definitions for nested_paren: 2
+[INFO ] Pass io.joern.dataflowengineoss.passes.reachingdef.ReachingDefPass completed in 25 ms (3% on mutations). 199 + 0 changes committed from 35 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 1 ms (76% on mutations). 1 + 0 changes committed from 1 parts.
+AST|METHOD NAME=<global> CODE=<global> FULL_NAME=<includes>:<global> ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=<operator>.addition FULL_NAME=<operator>.addition ORDER=0
+AST|  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=<operator>.assignment FULL_NAME=<operator>.assignment ORDER=0
+AST|  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=<operator>.cast FULL_NAME=<operator>.cast ORDER=0
+AST|  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=casted CODE=double casted(void) { return CAST; } FULL_NAME=casted SIGNATURE=double(void) ORDER=1
+AST|  METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+AST|  METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+AST|  BLOCK CODE={ return CAST; } TYPE_FULL_NAME=void ORDER=2
+AST|    RETURN CODE=return CAST; ORDER=1
+AST|      CALL NAME=CAST CODE=CAST TYPE_FULL_NAME=ANY METHOD_FULL_NAME=types.c:CAST:ANY(0) SIGNATURE=ANY(0) ORDER=1 DISPATCH_TYPE=INLINED
+AST|        BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|          CALL NAME=<operator>.cast CODE=(double)17 TYPE_FULL_NAME=double METHOD_FULL_NAME=<operator>.cast ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|            TYPE_REF CODE=double TYPE_FULL_NAME=double ORDER=1 ARGUMENT_INDEX=1
+AST|            LITERAL CODE=17 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=double ORDER=3
+AST|
+AST|METHOD NAME=direct CODE=double direct(void) { return DIRECT; } FULL_NAME=direct SIGNATURE=double(void) ORDER=1
+AST|  METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+AST|  METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+AST|  BLOCK CODE={ return DIRECT; } TYPE_FULL_NAME=void ORDER=2
+AST|    RETURN CODE=return DIRECT; ORDER=1
+AST|      CALL NAME=DIRECT CODE=DIRECT TYPE_FULL_NAME=ANY METHOD_FULL_NAME=types.c:DIRECT:ANY(0) SIGNATURE=ANY(0) ORDER=1 DISPATCH_TYPE=INLINED
+AST|        BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|          LITERAL CODE=3.14 TYPE_FULL_NAME=double ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=double ORDER=3
+AST|
+AST|METHOD NAME=direct_id CODE=double direct_id(void) { return ID(3.14); } FULL_NAME=direct_id SIGNATURE=double(void) ORDER=1
+AST|  METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+AST|  METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+AST|  BLOCK CODE={ return ID(3.14); } TYPE_FULL_NAME=void ORDER=2
+AST|    RETURN CODE=return ID(3.14); ORDER=1
+AST|      CALL NAME=ID CODE=ID(3.14) TYPE_FULL_NAME=double METHOD_FULL_NAME=types.c:ID:double(1) SIGNATURE=double(1) ORDER=1 DISPATCH_TYPE=INLINED
+AST|        LITERAL CODE=3.14 TYPE_FULL_NAME=double ORDER=1 ARGUMENT_INDEX=1
+AST|        BLOCK TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+AST|          LITERAL CODE=3.14 TYPE_FULL_NAME=double ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=double ORDER=3
+AST|
+AST|METHOD NAME=direct_idp CODE=double direct_idp(void) { return IDP(3.14); } FULL_NAME=direct_idp SIGNATURE=double(void) ORDER=1
+AST|  METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+AST|  METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+AST|  BLOCK CODE={ return IDP(3.14); } TYPE_FULL_NAME=void ORDER=2
+AST|    RETURN CODE=return IDP(3.14); ORDER=1
+AST|      CALL NAME=IDP CODE=IDP(3.14) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=types.c:IDP:ANY(1) SIGNATURE=ANY(1) ORDER=1 DISPATCH_TYPE=INLINED
+AST|        LITERAL CODE=3.14 TYPE_FULL_NAME=double ORDER=1 ARGUMENT_INDEX=1
+AST|        BLOCK TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+AST|          LITERAL CODE=3.14 TYPE_FULL_NAME=double ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=double ORDER=3
+AST|
+AST|METHOD NAME=direct_raw CODE=double direct_raw(void) { return DIRECT_RAW; } FULL_NAME=direct_raw SIGNATURE=double(void) ORDER=1
+AST|  METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+AST|  METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+AST|  BLOCK CODE={ return DIRECT_RAW; } TYPE_FULL_NAME=void ORDER=2
+AST|    RETURN CODE=return DIRECT_RAW; ORDER=1
+AST|      CALL NAME=DIRECT_RAW CODE=DIRECT_RAW TYPE_FULL_NAME=double METHOD_FULL_NAME=types.c:DIRECT_RAW:double(0) SIGNATURE=double(0) ORDER=1 DISPATCH_TYPE=INLINED
+AST|        BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|          LITERAL CODE=3.14 TYPE_FULL_NAME=double ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=double ORDER=3
+AST|
+AST|METHOD NAME=expression_statement CODE=void expression_statement(void) { PI; } FULL_NAME=expression_statement SIGNATURE=void(void) ORDER=1
+AST|  METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+AST|  METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+AST|  BLOCK CODE={ PI; } TYPE_FULL_NAME=void ORDER=2
+AST|    CALL NAME=PI CODE=PI TYPE_FULL_NAME=ANY METHOD_FULL_NAME=types.c:PI:ANY(0) SIGNATURE=ANY(0) ORDER=1 DISPATCH_TYPE=INLINED
+AST|      BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|        LITERAL CODE=3.14 TYPE_FULL_NAME=double ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+AST|
+AST|METHOD NAME=function_alias CODE=double function_alias(void) { return PI_SECOND; } FULL_NAME=function_alias SIGNATURE=double(void) ORDER=1
+AST|  METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+AST|  METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+AST|  BLOCK CODE={ return PI_SECOND; } TYPE_FULL_NAME=void ORDER=2
+AST|    RETURN CODE=return PI_SECOND; ORDER=1
+AST|      CALL NAME=PI_SECOND CODE=PI_SECOND TYPE_FULL_NAME=ANY METHOD_FULL_NAME=types.c:PI_SECOND:ANY(0) SIGNATURE=ANY(0) ORDER=1 DISPATCH_TYPE=INLINED
+AST|        BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|          LITERAL CODE=3.14 TYPE_FULL_NAME=double ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=double ORDER=3
+AST|
+AST|METHOD NAME=initializer CODE=double initializer(void) { double x = PI; return x; } FULL_NAME=initializer SIGNATURE=double(void) ORDER=1
+AST|  METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+AST|  METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+AST|  BLOCK CODE={ double x = PI; return x; } TYPE_FULL_NAME=void ORDER=2
+AST|    LOCAL NAME=x CODE=double x TYPE_FULL_NAME=double ORDER=1
+AST|    CALL NAME=<operator>.assignment CODE=x = PI TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|      IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=double ORDER=1 ARGUMENT_INDEX=1
+AST|      CALL NAME=PI CODE=PI TYPE_FULL_NAME=ANY METHOD_FULL_NAME=types.c:PI:ANY(0) SIGNATURE=ANY(0) ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=INLINED
+AST|        BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|          LITERAL CODE=3.14 TYPE_FULL_NAME=double ORDER=1
+AST|    RETURN CODE=return x; ORDER=3
+AST|      IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=double ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=double ORDER=3
+AST|
+AST|METHOD NAME=nested_objects CODE=double nested_objects(void) { return OBJECT_A; } FULL_NAME=nested_objects SIGNATURE=double(void) ORDER=1
+AST|  METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+AST|  METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+AST|  BLOCK CODE={ return OBJECT_A; } TYPE_FULL_NAME=void ORDER=2
+AST|    RETURN CODE=return OBJECT_A; ORDER=1
+AST|      CALL NAME=OBJECT_A CODE=OBJECT_A TYPE_FULL_NAME=ANY METHOD_FULL_NAME=types.c:OBJECT_A:ANY(0) SIGNATURE=ANY(0) ORDER=1 DISPATCH_TYPE=INLINED
+AST|        BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|          LITERAL CODE=3.14 TYPE_FULL_NAME=double ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=double ORDER=3
+AST|
+AST|METHOD NAME=nested_paren CODE=double nested_paren(void) { return NEST; } FULL_NAME=nested_paren SIGNATURE=double(void) ORDER=1
+AST|  METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+AST|  METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+AST|  BLOCK CODE={ return NEST; } TYPE_FULL_NAME=void ORDER=2
+AST|    RETURN CODE=return NEST; ORDER=1
+AST|      CALL NAME=NEST CODE=NEST TYPE_FULL_NAME=ANY METHOD_FULL_NAME=types.c:NEST:ANY(0) SIGNATURE=ANY(0) ORDER=1 DISPATCH_TYPE=INLINED
+AST|        BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|          LITERAL CODE=3.14 TYPE_FULL_NAME=double ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=double ORDER=3
+AST|
+AST|METHOD NAME=nested_raw CODE=double nested_raw(void) { return PI_NOP; } FULL_NAME=nested_raw SIGNATURE=double(void) ORDER=1
+AST|  METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+AST|  METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+AST|  BLOCK CODE={ return PI_NOP; } TYPE_FULL_NAME=void ORDER=2
+AST|    RETURN CODE=return PI_NOP; ORDER=1
+AST|      CALL NAME=PI_NOP CODE=PI_NOP TYPE_FULL_NAME=double METHOD_FULL_NAME=types.c:PI_NOP:double(0) SIGNATURE=double(0) ORDER=1 DISPATCH_TYPE=INLINED
+AST|        BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|          LITERAL CODE=3.14 TYPE_FULL_NAME=double ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=double ORDER=3
+AST|
+AST|METHOD NAME=object_chain CODE=int object_chain(void) { return A; } FULL_NAME=object_chain SIGNATURE=int(void) ORDER=1
+AST|  METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+AST|  METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+AST|  BLOCK CODE={ return A; } TYPE_FULL_NAME=void ORDER=2
+AST|    RETURN CODE=return A; ORDER=1
+AST|      CALL NAME=A CODE=A TYPE_FULL_NAME=int METHOD_FULL_NAME=types.c:A:int(0) SIGNATURE=int(0) ORDER=1 DISPATCH_TYPE=INLINED
+AST|        BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|          LITERAL CODE=17 TYPE_FULL_NAME=int ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+AST|
+AST|METHOD NAME=object_paren CODE=int object_paren(void) { return AP; } FULL_NAME=object_paren SIGNATURE=int(void) ORDER=1
+AST|  METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+AST|  METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+AST|  BLOCK CODE={ return AP; } TYPE_FULL_NAME=void ORDER=2
+AST|    RETURN CODE=return AP; ORDER=1
+AST|      CALL NAME=AP CODE=AP TYPE_FULL_NAME=ANY METHOD_FULL_NAME=types.c:AP:ANY(0) SIGNATURE=ANY(0) ORDER=1 DISPATCH_TYPE=INLINED
+AST|        BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|          LITERAL CODE=17 TYPE_FULL_NAME=int ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+AST|
+AST|METHOD NAME=operation CODE=int operation(void) { return OP; } FULL_NAME=operation SIGNATURE=int(void) ORDER=1
+AST|  METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+AST|  METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+AST|  BLOCK CODE={ return OP; } TYPE_FULL_NAME=void ORDER=2
+AST|    RETURN CODE=return OP; ORDER=1
+AST|      CALL NAME=OP CODE=OP TYPE_FULL_NAME=ANY METHOD_FULL_NAME=types.c:OP:ANY(0) SIGNATURE=ANY(0) ORDER=1 DISPATCH_TYPE=INLINED
+AST|        BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|          CALL NAME=<operator>.addition CODE=1 + 2 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|            LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|            LITERAL CODE=2 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+AST|
+AST|METHOD NAME=pi CODE=double pi(void) { return PI; } FULL_NAME=pi SIGNATURE=double(void) ORDER=1
+AST|  METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+AST|  METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+AST|  BLOCK CODE={ return PI; } TYPE_FULL_NAME=void ORDER=2
+AST|    RETURN CODE=return PI; ORDER=1
+AST|      CALL NAME=PI CODE=PI TYPE_FULL_NAME=ANY METHOD_FULL_NAME=types.c:PI:ANY(0) SIGNATURE=ANY(0) ORDER=1 DISPATCH_TYPE=INLINED
+AST|        BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|          LITERAL CODE=3.14 TYPE_FULL_NAME=double ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=double ORDER=3
+AST|
+AST|METHOD NAME=<global> CODE=<global> FULL_NAME=types.c:<global> ORDER=1
+AST|  METHOD NAME=pi CODE=double pi(void) { return PI; } FULL_NAME=pi SIGNATURE=double(void) ORDER=1
+AST|    METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+AST|    METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+AST|    BLOCK CODE={ return PI; } TYPE_FULL_NAME=void ORDER=2
+AST|      RETURN CODE=return PI; ORDER=1
+AST|        CALL NAME=PI CODE=PI TYPE_FULL_NAME=ANY METHOD_FULL_NAME=types.c:PI:ANY(0) SIGNATURE=ANY(0) ORDER=1 DISPATCH_TYPE=INLINED
+AST|          BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|            LITERAL CODE=3.14 TYPE_FULL_NAME=double ORDER=1
+AST|    METHOD_RETURN CODE=RET TYPE_FULL_NAME=double ORDER=3
+AST|  METHOD NAME=direct CODE=double direct(void) { return DIRECT; } FULL_NAME=direct SIGNATURE=double(void) ORDER=1
+AST|    METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+AST|    METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+AST|    BLOCK CODE={ return DIRECT; } TYPE_FULL_NAME=void ORDER=2
+AST|      RETURN CODE=return DIRECT; ORDER=1
+AST|        CALL NAME=DIRECT CODE=DIRECT TYPE_FULL_NAME=ANY METHOD_FULL_NAME=types.c:DIRECT:ANY(0) SIGNATURE=ANY(0) ORDER=1 DISPATCH_TYPE=INLINED
+AST|          BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|            LITERAL CODE=3.14 TYPE_FULL_NAME=double ORDER=1
+AST|    METHOD_RETURN CODE=RET TYPE_FULL_NAME=double ORDER=3
+AST|  METHOD NAME=direct_raw CODE=double direct_raw(void) { return DIRECT_RAW; } FULL_NAME=direct_raw SIGNATURE=double(void) ORDER=1
+AST|    METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+AST|    METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+AST|    BLOCK CODE={ return DIRECT_RAW; } TYPE_FULL_NAME=void ORDER=2
+AST|      RETURN CODE=return DIRECT_RAW; ORDER=1
+AST|        CALL NAME=DIRECT_RAW CODE=DIRECT_RAW TYPE_FULL_NAME=double METHOD_FULL_NAME=types.c:DIRECT_RAW:double(0) SIGNATURE=double(0) ORDER=1 DISPATCH_TYPE=INLINED
+AST|          BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|            LITERAL CODE=3.14 TYPE_FULL_NAME=double ORDER=1
+AST|    METHOD_RETURN CODE=RET TYPE_FULL_NAME=double ORDER=3
+AST|  METHOD NAME=object_chain CODE=int object_chain(void) { return A; } FULL_NAME=object_chain SIGNATURE=int(void) ORDER=1
+AST|    METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+AST|    METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+AST|    BLOCK CODE={ return A; } TYPE_FULL_NAME=void ORDER=2
+AST|      RETURN CODE=return A; ORDER=1
+AST|        CALL NAME=A CODE=A TYPE_FULL_NAME=int METHOD_FULL_NAME=types.c:A:int(0) SIGNATURE=int(0) ORDER=1 DISPATCH_TYPE=INLINED
+AST|          BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|            LITERAL CODE=17 TYPE_FULL_NAME=int ORDER=1
+AST|    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+AST|  METHOD NAME=object_paren CODE=int object_paren(void) { return AP; } FULL_NAME=object_paren SIGNATURE=int(void) ORDER=1
+AST|    METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+AST|    METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+AST|    BLOCK CODE={ return AP; } TYPE_FULL_NAME=void ORDER=2
+AST|      RETURN CODE=return AP; ORDER=1
+AST|        CALL NAME=AP CODE=AP TYPE_FULL_NAME=ANY METHOD_FULL_NAME=types.c:AP:ANY(0) SIGNATURE=ANY(0) ORDER=1 DISPATCH_TYPE=INLINED
+AST|          BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|            LITERAL CODE=17 TYPE_FULL_NAME=int ORDER=1
+AST|    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+AST|  METHOD NAME=nested_paren CODE=double nested_paren(void) { return NEST; } FULL_NAME=nested_paren SIGNATURE=double(void) ORDER=1
+AST|    METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+AST|    METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+AST|    BLOCK CODE={ return NEST; } TYPE_FULL_NAME=void ORDER=2
+AST|      RETURN CODE=return NEST; ORDER=1
+AST|        CALL NAME=NEST CODE=NEST TYPE_FULL_NAME=ANY METHOD_FULL_NAME=types.c:NEST:ANY(0) SIGNATURE=ANY(0) ORDER=1 DISPATCH_TYPE=INLINED
+AST|          BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|            LITERAL CODE=3.14 TYPE_FULL_NAME=double ORDER=1
+AST|    METHOD_RETURN CODE=RET TYPE_FULL_NAME=double ORDER=3
+AST|  METHOD NAME=nested_raw CODE=double nested_raw(void) { return PI_NOP; } FULL_NAME=nested_raw SIGNATURE=double(void) ORDER=1
+AST|    METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+AST|    METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+AST|    BLOCK CODE={ return PI_NOP; } TYPE_FULL_NAME=void ORDER=2
+AST|      RETURN CODE=return PI_NOP; ORDER=1
+AST|        CALL NAME=PI_NOP CODE=PI_NOP TYPE_FULL_NAME=double METHOD_FULL_NAME=types.c:PI_NOP:double(0) SIGNATURE=double(0) ORDER=1 DISPATCH_TYPE=INLINED
+AST|          BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|            LITERAL CODE=3.14 TYPE_FULL_NAME=double ORDER=1
+AST|    METHOD_RETURN CODE=RET TYPE_FULL_NAME=double ORDER=3
+AST|  METHOD NAME=function_alias CODE=double function_alias(void) { return PI_SECOND; } FULL_NAME=function_alias SIGNATURE=double(void) ORDER=1
+AST|    METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+AST|    METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+AST|    BLOCK CODE={ return PI_SECOND; } TYPE_FULL_NAME=void ORDER=2
+AST|      RETURN CODE=return PI_SECOND; ORDER=1
+AST|        CALL NAME=PI_SECOND CODE=PI_SECOND TYPE_FULL_NAME=ANY METHOD_FULL_NAME=types.c:PI_SECOND:ANY(0) SIGNATURE=ANY(0) ORDER=1 DISPATCH_TYPE=INLINED
+AST|          BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|            LITERAL CODE=3.14 TYPE_FULL_NAME=double ORDER=1
+AST|    METHOD_RETURN CODE=RET TYPE_FULL_NAME=double ORDER=3
+AST|  METHOD NAME=nested_objects CODE=double nested_objects(void) { return OBJECT_A; } FULL_NAME=nested_objects SIGNATURE=double(void) ORDER=1
+AST|    METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+AST|    METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+AST|    BLOCK CODE={ return OBJECT_A; } TYPE_FULL_NAME=void ORDER=2
+AST|      RETURN CODE=return OBJECT_A; ORDER=1
+AST|        CALL NAME=OBJECT_A CODE=OBJECT_A TYPE_FULL_NAME=ANY METHOD_FULL_NAME=types.c:OBJECT_A:ANY(0) SIGNATURE=ANY(0) ORDER=1 DISPATCH_TYPE=INLINED
+AST|          BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|            LITERAL CODE=3.14 TYPE_FULL_NAME=double ORDER=1
+AST|    METHOD_RETURN CODE=RET TYPE_FULL_NAME=double ORDER=3
+AST|  METHOD NAME=zero_arg CODE=double zero_arg(void) { return FNOBJ; } FULL_NAME=zero_arg SIGNATURE=double(void) ORDER=1
+AST|    METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+AST|    METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+AST|    BLOCK CODE={ return FNOBJ; } TYPE_FULL_NAME=void ORDER=2
+AST|      RETURN CODE=return FNOBJ; ORDER=1
+AST|        CALL NAME=FNOBJ CODE=FNOBJ TYPE_FULL_NAME=double METHOD_FULL_NAME=types.c:FNOBJ:double(0) SIGNATURE=double(0) ORDER=1 DISPATCH_TYPE=INLINED
+AST|          BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|            LITERAL CODE=3.14 TYPE_FULL_NAME=double ORDER=1
+AST|    METHOD_RETURN CODE=RET TYPE_FULL_NAME=double ORDER=3
+AST|  METHOD NAME=operation CODE=int operation(void) { return OP; } FULL_NAME=operation SIGNATURE=int(void) ORDER=1
+AST|    METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+AST|    METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+AST|    BLOCK CODE={ return OP; } TYPE_FULL_NAME=void ORDER=2
+AST|      RETURN CODE=return OP; ORDER=1
+AST|        CALL NAME=OP CODE=OP TYPE_FULL_NAME=ANY METHOD_FULL_NAME=types.c:OP:ANY(0) SIGNATURE=ANY(0) ORDER=1 DISPATCH_TYPE=INLINED
+AST|          BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|            CALL NAME=<operator>.addition CODE=1 + 2 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|              LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|              LITERAL CODE=2 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+AST|  METHOD NAME=casted CODE=double casted(void) { return CAST; } FULL_NAME=casted SIGNATURE=double(void) ORDER=1
+AST|    METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+AST|    METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+AST|    BLOCK CODE={ return CAST; } TYPE_FULL_NAME=void ORDER=2
+AST|      RETURN CODE=return CAST; ORDER=1
+AST|        CALL NAME=CAST CODE=CAST TYPE_FULL_NAME=ANY METHOD_FULL_NAME=types.c:CAST:ANY(0) SIGNATURE=ANY(0) ORDER=1 DISPATCH_TYPE=INLINED
+AST|          BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|            CALL NAME=<operator>.cast CODE=(double)17 TYPE_FULL_NAME=double METHOD_FULL_NAME=<operator>.cast ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|              TYPE_REF CODE=double TYPE_FULL_NAME=double ORDER=1 ARGUMENT_INDEX=1
+AST|              LITERAL CODE=17 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|    METHOD_RETURN CODE=RET TYPE_FULL_NAME=double ORDER=3
+AST|  METHOD NAME=initializer CODE=double initializer(void) { double x = PI; return x; } FULL_NAME=initializer SIGNATURE=double(void) ORDER=1
+AST|    METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+AST|    METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+AST|    BLOCK CODE={ double x = PI; return x; } TYPE_FULL_NAME=void ORDER=2
+AST|      LOCAL NAME=x CODE=double x TYPE_FULL_NAME=double ORDER=1
+AST|      CALL NAME=<operator>.assignment CODE=x = PI TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=double ORDER=1 ARGUMENT_INDEX=1
+AST|        CALL NAME=PI CODE=PI TYPE_FULL_NAME=ANY METHOD_FULL_NAME=types.c:PI:ANY(0) SIGNATURE=ANY(0) ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=INLINED
+AST|          BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|            LITERAL CODE=3.14 TYPE_FULL_NAME=double ORDER=1
+AST|      RETURN CODE=return x; ORDER=3
+AST|        IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=double ORDER=1
+AST|    METHOD_RETURN CODE=RET TYPE_FULL_NAME=double ORDER=3
+AST|  METHOD NAME=expression_statement CODE=void expression_statement(void) { PI; } FULL_NAME=expression_statement SIGNATURE=void(void) ORDER=1
+AST|    METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+AST|    METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+AST|    BLOCK CODE={ PI; } TYPE_FULL_NAME=void ORDER=2
+AST|      CALL NAME=PI CODE=PI TYPE_FULL_NAME=ANY METHOD_FULL_NAME=types.c:PI:ANY(0) SIGNATURE=ANY(0) ORDER=1 DISPATCH_TYPE=INLINED
+AST|        BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|          LITERAL CODE=3.14 TYPE_FULL_NAME=double ORDER=1
+AST|    METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+AST|  METHOD NAME=direct_id CODE=double direct_id(void) { return ID(3.14); } FULL_NAME=direct_id SIGNATURE=double(void) ORDER=1
+AST|    METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+AST|    METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+AST|    BLOCK CODE={ return ID(3.14); } TYPE_FULL_NAME=void ORDER=2
+AST|      RETURN CODE=return ID(3.14); ORDER=1
+AST|        CALL NAME=ID CODE=ID(3.14) TYPE_FULL_NAME=double METHOD_FULL_NAME=types.c:ID:double(1) SIGNATURE=double(1) ORDER=1 DISPATCH_TYPE=INLINED
+AST|          LITERAL CODE=3.14 TYPE_FULL_NAME=double ORDER=1 ARGUMENT_INDEX=1
+AST|          BLOCK TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+AST|            LITERAL CODE=3.14 TYPE_FULL_NAME=double ORDER=1
+AST|    METHOD_RETURN CODE=RET TYPE_FULL_NAME=double ORDER=3
+AST|  METHOD NAME=direct_idp CODE=double direct_idp(void) { return IDP(3.14); } FULL_NAME=direct_idp SIGNATURE=double(void) ORDER=1
+AST|    METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+AST|    METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+AST|    BLOCK CODE={ return IDP(3.14); } TYPE_FULL_NAME=void ORDER=2
+AST|      RETURN CODE=return IDP(3.14); ORDER=1
+AST|        CALL NAME=IDP CODE=IDP(3.14) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=types.c:IDP:ANY(1) SIGNATURE=ANY(1) ORDER=1 DISPATCH_TYPE=INLINED
+AST|          LITERAL CODE=3.14 TYPE_FULL_NAME=double ORDER=1 ARGUMENT_INDEX=1
+AST|          BLOCK TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+AST|            LITERAL CODE=3.14 TYPE_FULL_NAME=double ORDER=1
+AST|    METHOD_RETURN CODE=RET TYPE_FULL_NAME=double ORDER=3
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+AST|    METHOD_REF CODE=pi TYPE_FULL_NAME=pi METHOD_FULL_NAME=pi ORDER=1
+AST|    METHOD_REF CODE=direct TYPE_FULL_NAME=direct METHOD_FULL_NAME=direct ORDER=2
+AST|    METHOD_REF CODE=direct_raw TYPE_FULL_NAME=direct_raw METHOD_FULL_NAME=direct_raw ORDER=3
+AST|    METHOD_REF CODE=object_chain TYPE_FULL_NAME=object_chain METHOD_FULL_NAME=object_chain ORDER=4
+AST|    METHOD_REF CODE=object_paren TYPE_FULL_NAME=object_paren METHOD_FULL_NAME=object_paren ORDER=5
+AST|    METHOD_REF CODE=nested_paren TYPE_FULL_NAME=nested_paren METHOD_FULL_NAME=nested_paren ORDER=6
+AST|    METHOD_REF CODE=nested_raw TYPE_FULL_NAME=nested_raw METHOD_FULL_NAME=nested_raw ORDER=7
+AST|    METHOD_REF CODE=function_alias TYPE_FULL_NAME=function_alias METHOD_FULL_NAME=function_alias ORDER=8
+AST|    METHOD_REF CODE=nested_objects TYPE_FULL_NAME=nested_objects METHOD_FULL_NAME=nested_objects ORDER=9
+AST|    METHOD_REF CODE=zero_arg TYPE_FULL_NAME=zero_arg METHOD_FULL_NAME=zero_arg ORDER=10
+AST|    METHOD_REF CODE=operation TYPE_FULL_NAME=operation METHOD_FULL_NAME=operation ORDER=11
+AST|    METHOD_REF CODE=casted TYPE_FULL_NAME=casted METHOD_FULL_NAME=casted ORDER=12
+AST|    METHOD_REF CODE=initializer TYPE_FULL_NAME=initializer METHOD_FULL_NAME=initializer ORDER=13
+AST|    METHOD_REF CODE=expression_statement TYPE_FULL_NAME=expression_statement METHOD_FULL_NAME=expression_statement ORDER=14
+AST|    METHOD_REF CODE=direct_id TYPE_FULL_NAME=direct_id METHOD_FULL_NAME=direct_id ORDER=15
+AST|    METHOD_REF CODE=direct_idp TYPE_FULL_NAME=direct_idp METHOD_FULL_NAME=direct_idp ORDER=16
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=A CODE=#define A B FULL_NAME=types.c:A:int(0) SIGNATURE=int(0) ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=2
+AST|
+AST|METHOD NAME=AP CODE=#define AP (B) FULL_NAME=types.c:AP:ANY(0) SIGNATURE=ANY(0) ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=CAST CODE=#define CAST ((double)17) FULL_NAME=types.c:CAST:ANY(0) SIGNATURE=ANY(0) ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=DIRECT CODE=#define DIRECT (3.14) FULL_NAME=types.c:DIRECT:ANY(0) SIGNATURE=ANY(0) ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=DIRECT_RAW CODE=#define DIRECT_RAW 3.14 FULL_NAME=types.c:DIRECT_RAW:double(0) SIGNATURE=double(0) ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=double ORDER=2
+AST|
+AST|METHOD NAME=FNOBJ CODE=#define FNOBJ FN() FULL_NAME=types.c:FNOBJ:double(0) SIGNATURE=double(0) ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=double ORDER=2
+AST|
+AST|METHOD NAME=ID CODE=#define ID(x) x FULL_NAME=types.c:ID:double(1) SIGNATURE=double(1) ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=double ORDER=3
+AST|
+AST|METHOD NAME=IDP CODE=#define IDP(x) (x) FULL_NAME=types.c:IDP:ANY(1) SIGNATURE=ANY(1) ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=3
+AST|
+AST|METHOD NAME=NEST CODE=#define NEST (IDP(3.14)) FULL_NAME=types.c:NEST:ANY(0) SIGNATURE=ANY(0) ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=OBJECT_A CODE=#define OBJECT_A OBJECT_B FULL_NAME=types.c:OBJECT_A:ANY(0) SIGNATURE=ANY(0) ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=OP CODE=#define OP (1 + 2) FULL_NAME=types.c:OP:ANY(0) SIGNATURE=ANY(0) ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=PI CODE=#define PI (ID(3.14)) FULL_NAME=types.c:PI:ANY(0) SIGNATURE=ANY(0) ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=PI_NOP CODE=#define PI_NOP ID(3.14) FULL_NAME=types.c:PI_NOP:double(0) SIGNATURE=double(0) ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=double ORDER=2
+AST|
+AST|METHOD NAME=PI_SECOND CODE=#define PI_SECOND (SECOND(3.14)) FULL_NAME=types.c:PI_SECOND:ANY(0) SIGNATURE=ANY(0) ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=zero_arg CODE=double zero_arg(void) { return FNOBJ; } FULL_NAME=zero_arg SIGNATURE=double(void) ORDER=1
+AST|  METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+AST|  METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+AST|  BLOCK CODE={ return FNOBJ; } TYPE_FULL_NAME=void ORDER=2
+AST|    RETURN CODE=return FNOBJ; ORDER=1
+AST|      CALL NAME=FNOBJ CODE=FNOBJ TYPE_FULL_NAME=double METHOD_FULL_NAME=types.c:FNOBJ:double(0) SIGNATURE=double(0) ORDER=1 DISPATCH_TYPE=INLINED
+AST|        BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|          LITERAL CODE=3.14 TYPE_FULL_NAME=double ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=double ORDER=3
+AST|
+NODES|META_DATA LANGUAGE=NEWC
+NODES|FILE NAME=<includes> ORDER=1
+NODES|FILE NAME=<unknown> ORDER=0
+NODES|FILE NAME=types.c ORDER=0
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<global> FILENAME=<unknown> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<includes>:<global> FILENAME=<includes> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=types.c:<global> FILENAME=types.c ORDER=1
+NODES|NAMESPACE NAME=<global>
+NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=casted FULL_NAME=casted CODE=casted AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=types.c:<global> FILENAME=types.c ORDER=1
+NODES|TYPE_DECL NAME=direct FULL_NAME=direct CODE=direct AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=types.c:<global> FILENAME=types.c ORDER=1
+NODES|TYPE_DECL NAME=direct_id FULL_NAME=direct_id CODE=direct_id AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=types.c:<global> FILENAME=types.c ORDER=1
+NODES|TYPE_DECL NAME=direct_idp FULL_NAME=direct_idp CODE=direct_idp AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=types.c:<global> FILENAME=types.c ORDER=1
+NODES|TYPE_DECL NAME=direct_raw FULL_NAME=direct_raw CODE=direct_raw AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=types.c:<global> FILENAME=types.c ORDER=1
+NODES|TYPE_DECL NAME=double FULL_NAME=double CODE=double IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=expression_statement FULL_NAME=expression_statement CODE=expression_statement AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=types.c:<global> FILENAME=types.c ORDER=1
+NODES|TYPE_DECL NAME=function_alias FULL_NAME=function_alias CODE=function_alias AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=types.c:<global> FILENAME=types.c ORDER=1
+NODES|TYPE_DECL NAME=initializer FULL_NAME=initializer CODE=initializer AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=types.c:<global> FILENAME=types.c ORDER=1
+NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=nested_objects FULL_NAME=nested_objects CODE=nested_objects AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=types.c:<global> FILENAME=types.c ORDER=1
+NODES|TYPE_DECL NAME=nested_paren FULL_NAME=nested_paren CODE=nested_paren AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=types.c:<global> FILENAME=types.c ORDER=1
+NODES|TYPE_DECL NAME=nested_raw FULL_NAME=nested_raw CODE=nested_raw AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=types.c:<global> FILENAME=types.c ORDER=1
+NODES|TYPE_DECL NAME=object_chain FULL_NAME=object_chain CODE=object_chain AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=types.c:<global> FILENAME=types.c ORDER=1
+NODES|TYPE_DECL NAME=object_paren FULL_NAME=object_paren CODE=object_paren AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=types.c:<global> FILENAME=types.c ORDER=1
+NODES|TYPE_DECL NAME=operation FULL_NAME=operation CODE=operation AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=types.c:<global> FILENAME=types.c ORDER=1
+NODES|TYPE_DECL NAME=pi FULL_NAME=pi CODE=pi AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=types.c:<global> FILENAME=types.c ORDER=1
+NODES|TYPE_DECL NAME=<global> FULL_NAME=types.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=types.c:<global> FILENAME=types.c ORDER=1
+NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=zero_arg FULL_NAME=zero_arg CODE=zero_arg AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=types.c:<global> FILENAME=types.c ORDER=1
+NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+NODES|TYPE NAME=casted FULL_NAME=casted TYPE_DECL_FULL_NAME=casted
+NODES|TYPE NAME=direct FULL_NAME=direct TYPE_DECL_FULL_NAME=direct
+NODES|TYPE NAME=direct_id FULL_NAME=direct_id TYPE_DECL_FULL_NAME=direct_id
+NODES|TYPE NAME=direct_idp FULL_NAME=direct_idp TYPE_DECL_FULL_NAME=direct_idp
+NODES|TYPE NAME=direct_raw FULL_NAME=direct_raw TYPE_DECL_FULL_NAME=direct_raw
+NODES|TYPE NAME=double FULL_NAME=double TYPE_DECL_FULL_NAME=double
+NODES|TYPE NAME=expression_statement FULL_NAME=expression_statement TYPE_DECL_FULL_NAME=expression_statement
+NODES|TYPE NAME=function_alias FULL_NAME=function_alias TYPE_DECL_FULL_NAME=function_alias
+NODES|TYPE NAME=initializer FULL_NAME=initializer TYPE_DECL_FULL_NAME=initializer
+NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+NODES|TYPE NAME=nested_objects FULL_NAME=nested_objects TYPE_DECL_FULL_NAME=nested_objects
+NODES|TYPE NAME=nested_paren FULL_NAME=nested_paren TYPE_DECL_FULL_NAME=nested_paren
+NODES|TYPE NAME=nested_raw FULL_NAME=nested_raw TYPE_DECL_FULL_NAME=nested_raw
+NODES|TYPE NAME=object_chain FULL_NAME=object_chain TYPE_DECL_FULL_NAME=object_chain
+NODES|TYPE NAME=object_paren FULL_NAME=object_paren TYPE_DECL_FULL_NAME=object_paren
+NODES|TYPE NAME=operation FULL_NAME=operation TYPE_DECL_FULL_NAME=operation
+NODES|TYPE NAME=pi FULL_NAME=pi TYPE_DECL_FULL_NAME=pi
+NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+NODES|TYPE NAME=zero_arg FULL_NAME=zero_arg TYPE_DECL_FULL_NAME=zero_arg
+EDGES|ARGUMENT casted#4 -> casted#5
+EDGES|ARGUMENT casted#7 -> casted#8
+EDGES|ARGUMENT casted#7 -> casted#9
+EDGES|ARGUMENT direct#4 -> direct#5
+EDGES|ARGUMENT direct_id#4 -> direct_id#5
+EDGES|ARGUMENT direct_id#5 -> direct_id#6
+EDGES|ARGUMENT direct_idp#4 -> direct_idp#5
+EDGES|ARGUMENT direct_idp#5 -> direct_idp#6
+EDGES|ARGUMENT direct_raw#4 -> direct_raw#5
+EDGES|ARGUMENT function_alias#4 -> function_alias#5
+EDGES|ARGUMENT initializer#10 -> initializer#11
+EDGES|ARGUMENT initializer#5 -> initializer#6
+EDGES|ARGUMENT initializer#5 -> initializer#7
+EDGES|ARGUMENT nested_objects#4 -> nested_objects#5
+EDGES|ARGUMENT nested_paren#4 -> nested_paren#5
+EDGES|ARGUMENT nested_raw#4 -> nested_raw#5
+EDGES|ARGUMENT object_chain#4 -> object_chain#5
+EDGES|ARGUMENT object_paren#4 -> object_paren#5
+EDGES|ARGUMENT operation#4 -> operation#5
+EDGES|ARGUMENT operation#7 -> operation#8
+EDGES|ARGUMENT operation#7 -> operation#9
+EDGES|ARGUMENT pi#4 -> pi#5
+EDGES|ARGUMENT zero_arg#4 -> zero_arg#5
+EDGES|CALL casted#5 -> types.c:CAST:ANY(0)#0
+EDGES|CALL casted#7 -> <operator>.cast#0
+EDGES|CALL direct#5 -> types.c:DIRECT:ANY(0)#0
+EDGES|CALL direct_id#5 -> types.c:ID:double(1)#0
+EDGES|CALL direct_idp#5 -> types.c:IDP:ANY(1)#0
+EDGES|CALL direct_raw#5 -> types.c:DIRECT_RAW:double(0)#0
+EDGES|CALL expression_statement#4 -> types.c:PI:ANY(0)#0
+EDGES|CALL function_alias#5 -> types.c:PI_SECOND:ANY(0)#0
+EDGES|CALL initializer#5 -> <operator>.assignment#0
+EDGES|CALL initializer#7 -> types.c:PI:ANY(0)#0
+EDGES|CALL nested_objects#5 -> types.c:OBJECT_A:ANY(0)#0
+EDGES|CALL nested_paren#5 -> types.c:NEST:ANY(0)#0
+EDGES|CALL nested_raw#5 -> types.c:PI_NOP:double(0)#0
+EDGES|CALL object_chain#5 -> types.c:A:int(0)#0
+EDGES|CALL object_paren#5 -> types.c:AP:ANY(0)#0
+EDGES|CALL operation#5 -> types.c:OP:ANY(0)#0
+EDGES|CALL operation#7 -> <operator>.addition#0
+EDGES|CALL pi#5 -> types.c:PI:ANY(0)#0
+EDGES|CALL zero_arg#5 -> types.c:FNOBJ:double(0)#0
+EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+EDGES|CFG <operator>.addition#0 -> <operator>.addition#5
+EDGES|CFG <operator>.assignment#0 -> <operator>.assignment#5
+EDGES|CFG <operator>.cast#0 -> <operator>.cast#5
+EDGES|CFG casted#0 -> casted#5
+EDGES|CFG casted#4 -> casted#10
+EDGES|CFG casted#5 -> casted#4
+EDGES|CFG casted#5 -> casted#8
+EDGES|CFG casted#7 -> casted#4
+EDGES|CFG casted#8 -> casted#9
+EDGES|CFG casted#9 -> casted#7
+EDGES|CFG direct#0 -> direct#5
+EDGES|CFG direct#4 -> direct#8
+EDGES|CFG direct#5 -> direct#4
+EDGES|CFG direct#5 -> direct#7
+EDGES|CFG direct#7 -> direct#4
+EDGES|CFG direct_id#0 -> direct_id#6
+EDGES|CFG direct_id#4 -> direct_id#9
+EDGES|CFG direct_id#5 -> direct_id#4
+EDGES|CFG direct_id#5 -> direct_id#8
+EDGES|CFG direct_id#6 -> direct_id#5
+EDGES|CFG direct_id#8 -> direct_id#4
+EDGES|CFG direct_idp#0 -> direct_idp#6
+EDGES|CFG direct_idp#4 -> direct_idp#9
+EDGES|CFG direct_idp#5 -> direct_idp#4
+EDGES|CFG direct_idp#5 -> direct_idp#8
+EDGES|CFG direct_idp#6 -> direct_idp#5
+EDGES|CFG direct_idp#8 -> direct_idp#4
+EDGES|CFG direct_raw#0 -> direct_raw#5
+EDGES|CFG direct_raw#4 -> direct_raw#8
+EDGES|CFG direct_raw#5 -> direct_raw#4
+EDGES|CFG direct_raw#5 -> direct_raw#7
+EDGES|CFG direct_raw#7 -> direct_raw#4
+EDGES|CFG expression_statement#0 -> expression_statement#4
+EDGES|CFG expression_statement#4 -> expression_statement#6
+EDGES|CFG expression_statement#4 -> expression_statement#7
+EDGES|CFG expression_statement#6 -> expression_statement#7
+EDGES|CFG function_alias#0 -> function_alias#5
+EDGES|CFG function_alias#4 -> function_alias#8
+EDGES|CFG function_alias#5 -> function_alias#4
+EDGES|CFG function_alias#5 -> function_alias#7
+EDGES|CFG function_alias#7 -> function_alias#4
+EDGES|CFG initializer#0 -> initializer#6
+EDGES|CFG initializer#10 -> initializer#12
+EDGES|CFG initializer#11 -> initializer#10
+EDGES|CFG initializer#5 -> initializer#11
+EDGES|CFG initializer#6 -> initializer#7
+EDGES|CFG initializer#7 -> initializer#5
+EDGES|CFG initializer#7 -> initializer#9
+EDGES|CFG initializer#9 -> initializer#5
+EDGES|CFG nested_objects#0 -> nested_objects#5
+EDGES|CFG nested_objects#4 -> nested_objects#8
+EDGES|CFG nested_objects#5 -> nested_objects#4
+EDGES|CFG nested_objects#5 -> nested_objects#7
+EDGES|CFG nested_objects#7 -> nested_objects#4
+EDGES|CFG nested_paren#0 -> nested_paren#5
+EDGES|CFG nested_paren#4 -> nested_paren#8
+EDGES|CFG nested_paren#5 -> nested_paren#4
+EDGES|CFG nested_paren#5 -> nested_paren#7
+EDGES|CFG nested_paren#7 -> nested_paren#4
+EDGES|CFG nested_raw#0 -> nested_raw#5
+EDGES|CFG nested_raw#4 -> nested_raw#8
+EDGES|CFG nested_raw#5 -> nested_raw#4
+EDGES|CFG nested_raw#5 -> nested_raw#7
+EDGES|CFG nested_raw#7 -> nested_raw#4
+EDGES|CFG object_chain#0 -> object_chain#5
+EDGES|CFG object_chain#4 -> object_chain#8
+EDGES|CFG object_chain#5 -> object_chain#4
+EDGES|CFG object_chain#5 -> object_chain#7
+EDGES|CFG object_chain#7 -> object_chain#4
+EDGES|CFG object_paren#0 -> object_paren#5
+EDGES|CFG object_paren#4 -> object_paren#8
+EDGES|CFG object_paren#5 -> object_paren#4
+EDGES|CFG object_paren#5 -> object_paren#7
+EDGES|CFG object_paren#7 -> object_paren#4
+EDGES|CFG operation#0 -> operation#5
+EDGES|CFG operation#4 -> operation#10
+EDGES|CFG operation#5 -> operation#4
+EDGES|CFG operation#5 -> operation#8
+EDGES|CFG operation#7 -> operation#4
+EDGES|CFG operation#8 -> operation#9
+EDGES|CFG operation#9 -> operation#7
+EDGES|CFG pi#0 -> pi#5
+EDGES|CFG pi#4 -> pi#8
+EDGES|CFG pi#5 -> pi#4
+EDGES|CFG pi#5 -> pi#7
+EDGES|CFG pi#7 -> pi#4
+EDGES|CFG types.c:<global>#0 -> types.c:<global>#155
+EDGES|CFG types.c:<global>#155 -> types.c:<global>#156
+EDGES|CFG types.c:<global>#156 -> types.c:<global>#157
+EDGES|CFG types.c:<global>#157 -> types.c:<global>#158
+EDGES|CFG types.c:<global>#158 -> types.c:<global>#159
+EDGES|CFG types.c:<global>#159 -> types.c:<global>#160
+EDGES|CFG types.c:<global>#160 -> types.c:<global>#161
+EDGES|CFG types.c:<global>#161 -> types.c:<global>#162
+EDGES|CFG types.c:<global>#162 -> types.c:<global>#163
+EDGES|CFG types.c:<global>#163 -> types.c:<global>#164
+EDGES|CFG types.c:<global>#164 -> types.c:<global>#165
+EDGES|CFG types.c:<global>#165 -> types.c:<global>#166
+EDGES|CFG types.c:<global>#166 -> types.c:<global>#167
+EDGES|CFG types.c:<global>#167 -> types.c:<global>#168
+EDGES|CFG types.c:<global>#168 -> types.c:<global>#169
+EDGES|CFG types.c:<global>#169 -> types.c:<global>#170
+EDGES|CFG types.c:<global>#170 -> types.c:<global>#171
+EDGES|CFG types.c:<global>#82 -> zero_arg#5
+EDGES|CFG types.c:A:int(0)#0 -> types.c:A:int(0)#2
+EDGES|CFG types.c:AP:ANY(0)#0 -> types.c:AP:ANY(0)#2
+EDGES|CFG types.c:CAST:ANY(0)#0 -> types.c:CAST:ANY(0)#2
+EDGES|CFG types.c:DIRECT:ANY(0)#0 -> types.c:DIRECT:ANY(0)#2
+EDGES|CFG types.c:DIRECT_RAW:double(0)#0 -> types.c:DIRECT_RAW:double(0)#2
+EDGES|CFG types.c:FNOBJ:double(0)#0 -> types.c:FNOBJ:double(0)#2
+EDGES|CFG types.c:ID:double(1)#0 -> types.c:ID:double(1)#4
+EDGES|CFG types.c:IDP:ANY(1)#0 -> types.c:IDP:ANY(1)#4
+EDGES|CFG types.c:NEST:ANY(0)#0 -> types.c:NEST:ANY(0)#2
+EDGES|CFG types.c:OBJECT_A:ANY(0)#0 -> types.c:OBJECT_A:ANY(0)#2
+EDGES|CFG types.c:OP:ANY(0)#0 -> types.c:OP:ANY(0)#2
+EDGES|CFG types.c:PI:ANY(0)#0 -> types.c:PI:ANY(0)#2
+EDGES|CFG types.c:PI_NOP:double(0)#0 -> types.c:PI_NOP:double(0)#2
+EDGES|CFG types.c:PI_SECOND:ANY(0)#0 -> types.c:PI_SECOND:ANY(0)#2
+EDGES|CFG zero_arg#4 -> zero_arg#8
+EDGES|CFG zero_arg#5 -> zero_arg#4
+EDGES|CFG zero_arg#5 -> zero_arg#7
+EDGES|CFG zero_arg#7 -> zero_arg#4
+EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+EDGES|CONTAINS <operator>.addition#0 -> <operator>.addition#2
+EDGES|CONTAINS <operator>.assignment#0 -> <operator>.assignment#2
+EDGES|CONTAINS <operator>.cast#0 -> <operator>.cast#2
+EDGES|CONTAINS D:types.c:<global> -> D:casted
+EDGES|CONTAINS D:types.c:<global> -> D:direct
+EDGES|CONTAINS D:types.c:<global> -> D:direct_id
+EDGES|CONTAINS D:types.c:<global> -> D:direct_idp
+EDGES|CONTAINS D:types.c:<global> -> D:direct_raw
+EDGES|CONTAINS D:types.c:<global> -> D:expression_statement
+EDGES|CONTAINS D:types.c:<global> -> D:function_alias
+EDGES|CONTAINS D:types.c:<global> -> D:initializer
+EDGES|CONTAINS D:types.c:<global> -> D:nested_objects
+EDGES|CONTAINS D:types.c:<global> -> D:nested_paren
+EDGES|CONTAINS D:types.c:<global> -> D:nested_raw
+EDGES|CONTAINS D:types.c:<global> -> D:object_chain
+EDGES|CONTAINS D:types.c:<global> -> D:object_paren
+EDGES|CONTAINS D:types.c:<global> -> D:operation
+EDGES|CONTAINS D:types.c:<global> -> D:pi
+EDGES|CONTAINS D:types.c:<global> -> D:zero_arg
+EDGES|CONTAINS D:types.c:<global> -> types.c:<global>#0
+EDGES|CONTAINS D:types.c:<global> -> types.c:A:int(0)#0
+EDGES|CONTAINS D:types.c:<global> -> types.c:AP:ANY(0)#0
+EDGES|CONTAINS D:types.c:<global> -> types.c:CAST:ANY(0)#0
+EDGES|CONTAINS D:types.c:<global> -> types.c:DIRECT:ANY(0)#0
+EDGES|CONTAINS D:types.c:<global> -> types.c:DIRECT_RAW:double(0)#0
+EDGES|CONTAINS D:types.c:<global> -> types.c:FNOBJ:double(0)#0
+EDGES|CONTAINS D:types.c:<global> -> types.c:ID:double(1)#0
+EDGES|CONTAINS D:types.c:<global> -> types.c:IDP:ANY(1)#0
+EDGES|CONTAINS D:types.c:<global> -> types.c:NEST:ANY(0)#0
+EDGES|CONTAINS D:types.c:<global> -> types.c:OBJECT_A:ANY(0)#0
+EDGES|CONTAINS D:types.c:<global> -> types.c:OP:ANY(0)#0
+EDGES|CONTAINS D:types.c:<global> -> types.c:PI:ANY(0)#0
+EDGES|CONTAINS D:types.c:<global> -> types.c:PI_NOP:double(0)#0
+EDGES|CONTAINS D:types.c:<global> -> types.c:PI_SECOND:ANY(0)#0
+EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+EDGES|CONTAINS F:<includes> -> D:ANY
+EDGES|CONTAINS F:<includes> -> D:double
+EDGES|CONTAINS F:<includes> -> D:int
+EDGES|CONTAINS F:<includes> -> D:void
+EDGES|CONTAINS F:types.c -> D:types.c:<global>
+EDGES|CONTAINS casted#0 -> casted#3
+EDGES|CONTAINS casted#0 -> casted#4
+EDGES|CONTAINS casted#0 -> casted#5
+EDGES|CONTAINS casted#0 -> casted#6
+EDGES|CONTAINS casted#0 -> casted#7
+EDGES|CONTAINS casted#0 -> casted#8
+EDGES|CONTAINS casted#0 -> casted#9
+EDGES|CONTAINS direct#0 -> direct#3
+EDGES|CONTAINS direct#0 -> direct#4
+EDGES|CONTAINS direct#0 -> direct#5
+EDGES|CONTAINS direct#0 -> direct#6
+EDGES|CONTAINS direct#0 -> direct#7
+EDGES|CONTAINS direct_id#0 -> direct_id#3
+EDGES|CONTAINS direct_id#0 -> direct_id#4
+EDGES|CONTAINS direct_id#0 -> direct_id#5
+EDGES|CONTAINS direct_id#0 -> direct_id#6
+EDGES|CONTAINS direct_id#0 -> direct_id#7
+EDGES|CONTAINS direct_id#0 -> direct_id#8
+EDGES|CONTAINS direct_idp#0 -> direct_idp#3
+EDGES|CONTAINS direct_idp#0 -> direct_idp#4
+EDGES|CONTAINS direct_idp#0 -> direct_idp#5
+EDGES|CONTAINS direct_idp#0 -> direct_idp#6
+EDGES|CONTAINS direct_idp#0 -> direct_idp#7
+EDGES|CONTAINS direct_idp#0 -> direct_idp#8
+EDGES|CONTAINS direct_raw#0 -> direct_raw#3
+EDGES|CONTAINS direct_raw#0 -> direct_raw#4
+EDGES|CONTAINS direct_raw#0 -> direct_raw#5
+EDGES|CONTAINS direct_raw#0 -> direct_raw#6
+EDGES|CONTAINS direct_raw#0 -> direct_raw#7
+EDGES|CONTAINS expression_statement#0 -> expression_statement#3
+EDGES|CONTAINS expression_statement#0 -> expression_statement#4
+EDGES|CONTAINS expression_statement#0 -> expression_statement#5
+EDGES|CONTAINS expression_statement#0 -> expression_statement#6
+EDGES|CONTAINS function_alias#0 -> function_alias#3
+EDGES|CONTAINS function_alias#0 -> function_alias#4
+EDGES|CONTAINS function_alias#0 -> function_alias#5
+EDGES|CONTAINS function_alias#0 -> function_alias#6
+EDGES|CONTAINS function_alias#0 -> function_alias#7
+EDGES|CONTAINS initializer#0 -> initializer#10
+EDGES|CONTAINS initializer#0 -> initializer#11
+EDGES|CONTAINS initializer#0 -> initializer#3
+EDGES|CONTAINS initializer#0 -> initializer#5
+EDGES|CONTAINS initializer#0 -> initializer#6
+EDGES|CONTAINS initializer#0 -> initializer#7
+EDGES|CONTAINS initializer#0 -> initializer#8
+EDGES|CONTAINS initializer#0 -> initializer#9
+EDGES|CONTAINS nested_objects#0 -> nested_objects#3
+EDGES|CONTAINS nested_objects#0 -> nested_objects#4
+EDGES|CONTAINS nested_objects#0 -> nested_objects#5
+EDGES|CONTAINS nested_objects#0 -> nested_objects#6
+EDGES|CONTAINS nested_objects#0 -> nested_objects#7
+EDGES|CONTAINS nested_paren#0 -> nested_paren#3
+EDGES|CONTAINS nested_paren#0 -> nested_paren#4
+EDGES|CONTAINS nested_paren#0 -> nested_paren#5
+EDGES|CONTAINS nested_paren#0 -> nested_paren#6
+EDGES|CONTAINS nested_paren#0 -> nested_paren#7
+EDGES|CONTAINS nested_raw#0 -> nested_raw#3
+EDGES|CONTAINS nested_raw#0 -> nested_raw#4
+EDGES|CONTAINS nested_raw#0 -> nested_raw#5
+EDGES|CONTAINS nested_raw#0 -> nested_raw#6
+EDGES|CONTAINS nested_raw#0 -> nested_raw#7
+EDGES|CONTAINS object_chain#0 -> object_chain#3
+EDGES|CONTAINS object_chain#0 -> object_chain#4
+EDGES|CONTAINS object_chain#0 -> object_chain#5
+EDGES|CONTAINS object_chain#0 -> object_chain#6
+EDGES|CONTAINS object_chain#0 -> object_chain#7
+EDGES|CONTAINS object_paren#0 -> object_paren#3
+EDGES|CONTAINS object_paren#0 -> object_paren#4
+EDGES|CONTAINS object_paren#0 -> object_paren#5
+EDGES|CONTAINS object_paren#0 -> object_paren#6
+EDGES|CONTAINS object_paren#0 -> object_paren#7
+EDGES|CONTAINS operation#0 -> operation#3
+EDGES|CONTAINS operation#0 -> operation#4
+EDGES|CONTAINS operation#0 -> operation#5
+EDGES|CONTAINS operation#0 -> operation#6
+EDGES|CONTAINS operation#0 -> operation#7
+EDGES|CONTAINS operation#0 -> operation#8
+EDGES|CONTAINS operation#0 -> operation#9
+EDGES|CONTAINS pi#0 -> pi#3
+EDGES|CONTAINS pi#0 -> pi#4
+EDGES|CONTAINS pi#0 -> pi#5
+EDGES|CONTAINS pi#0 -> pi#6
+EDGES|CONTAINS pi#0 -> pi#7
+EDGES|CONTAINS types.c:<global>#0 -> casted#0
+EDGES|CONTAINS types.c:<global>#0 -> direct#0
+EDGES|CONTAINS types.c:<global>#0 -> direct_id#0
+EDGES|CONTAINS types.c:<global>#0 -> direct_idp#0
+EDGES|CONTAINS types.c:<global>#0 -> direct_raw#0
+EDGES|CONTAINS types.c:<global>#0 -> expression_statement#0
+EDGES|CONTAINS types.c:<global>#0 -> function_alias#0
+EDGES|CONTAINS types.c:<global>#0 -> initializer#0
+EDGES|CONTAINS types.c:<global>#0 -> nested_objects#0
+EDGES|CONTAINS types.c:<global>#0 -> nested_paren#0
+EDGES|CONTAINS types.c:<global>#0 -> nested_raw#0
+EDGES|CONTAINS types.c:<global>#0 -> object_chain#0
+EDGES|CONTAINS types.c:<global>#0 -> object_paren#0
+EDGES|CONTAINS types.c:<global>#0 -> operation#0
+EDGES|CONTAINS types.c:<global>#0 -> pi#0
+EDGES|CONTAINS types.c:<global>#0 -> types.c:<global>#154
+EDGES|CONTAINS types.c:<global>#0 -> types.c:<global>#155
+EDGES|CONTAINS types.c:<global>#0 -> types.c:<global>#156
+EDGES|CONTAINS types.c:<global>#0 -> types.c:<global>#157
+EDGES|CONTAINS types.c:<global>#0 -> types.c:<global>#158
+EDGES|CONTAINS types.c:<global>#0 -> types.c:<global>#159
+EDGES|CONTAINS types.c:<global>#0 -> types.c:<global>#160
+EDGES|CONTAINS types.c:<global>#0 -> types.c:<global>#161
+EDGES|CONTAINS types.c:<global>#0 -> types.c:<global>#162
+EDGES|CONTAINS types.c:<global>#0 -> types.c:<global>#163
+EDGES|CONTAINS types.c:<global>#0 -> types.c:<global>#164
+EDGES|CONTAINS types.c:<global>#0 -> types.c:<global>#165
+EDGES|CONTAINS types.c:<global>#0 -> types.c:<global>#166
+EDGES|CONTAINS types.c:<global>#0 -> types.c:<global>#167
+EDGES|CONTAINS types.c:<global>#0 -> types.c:<global>#168
+EDGES|CONTAINS types.c:<global>#0 -> types.c:<global>#169
+EDGES|CONTAINS types.c:<global>#0 -> types.c:<global>#170
+EDGES|CONTAINS types.c:<global>#0 -> types.c:<global>#82
+EDGES|CONTAINS types.c:<global>#82 -> zero_arg#3
+EDGES|CONTAINS types.c:<global>#82 -> zero_arg#4
+EDGES|CONTAINS types.c:<global>#82 -> zero_arg#5
+EDGES|CONTAINS types.c:<global>#82 -> zero_arg#6
+EDGES|CONTAINS types.c:<global>#82 -> zero_arg#7
+EDGES|CONTAINS types.c:A:int(0)#0 -> types.c:A:int(0)#1
+EDGES|CONTAINS types.c:AP:ANY(0)#0 -> types.c:AP:ANY(0)#1
+EDGES|CONTAINS types.c:CAST:ANY(0)#0 -> types.c:CAST:ANY(0)#1
+EDGES|CONTAINS types.c:DIRECT:ANY(0)#0 -> types.c:DIRECT:ANY(0)#1
+EDGES|CONTAINS types.c:DIRECT_RAW:double(0)#0 -> types.c:DIRECT_RAW:double(0)#1
+EDGES|CONTAINS types.c:FNOBJ:double(0)#0 -> types.c:FNOBJ:double(0)#1
+EDGES|CONTAINS types.c:ID:double(1)#0 -> types.c:ID:double(1)#3
+EDGES|CONTAINS types.c:IDP:ANY(1)#0 -> types.c:IDP:ANY(1)#3
+EDGES|CONTAINS types.c:NEST:ANY(0)#0 -> types.c:NEST:ANY(0)#1
+EDGES|CONTAINS types.c:OBJECT_A:ANY(0)#0 -> types.c:OBJECT_A:ANY(0)#1
+EDGES|CONTAINS types.c:OP:ANY(0)#0 -> types.c:OP:ANY(0)#1
+EDGES|CONTAINS types.c:PI:ANY(0)#0 -> types.c:PI:ANY(0)#1
+EDGES|CONTAINS types.c:PI_NOP:double(0)#0 -> types.c:PI_NOP:double(0)#1
+EDGES|CONTAINS types.c:PI_SECOND:ANY(0)#0 -> types.c:PI_SECOND:ANY(0)#1
+EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#6 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#6 -> T:ANY
+EDGES|EVAL_TYPE <operator>.cast#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.cast#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.cast#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.cast#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.cast#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.cast#6 -> T:ANY
+EDGES|EVAL_TYPE casted#1 -> T:void
+EDGES|EVAL_TYPE casted#10 -> T:double
+EDGES|EVAL_TYPE casted#2 -> T:void
+EDGES|EVAL_TYPE casted#3 -> T:void
+EDGES|EVAL_TYPE casted#5 -> T:ANY
+EDGES|EVAL_TYPE casted#6 -> T:ANY
+EDGES|EVAL_TYPE casted#7 -> T:double
+EDGES|EVAL_TYPE casted#8 -> T:double
+EDGES|EVAL_TYPE casted#9 -> T:int
+EDGES|EVAL_TYPE direct#1 -> T:void
+EDGES|EVAL_TYPE direct#2 -> T:void
+EDGES|EVAL_TYPE direct#3 -> T:void
+EDGES|EVAL_TYPE direct#5 -> T:ANY
+EDGES|EVAL_TYPE direct#6 -> T:ANY
+EDGES|EVAL_TYPE direct#7 -> T:double
+EDGES|EVAL_TYPE direct#8 -> T:double
+EDGES|EVAL_TYPE direct_id#1 -> T:void
+EDGES|EVAL_TYPE direct_id#2 -> T:void
+EDGES|EVAL_TYPE direct_id#3 -> T:void
+EDGES|EVAL_TYPE direct_id#5 -> T:double
+EDGES|EVAL_TYPE direct_id#6 -> T:double
+EDGES|EVAL_TYPE direct_id#7 -> T:ANY
+EDGES|EVAL_TYPE direct_id#8 -> T:double
+EDGES|EVAL_TYPE direct_id#9 -> T:double
+EDGES|EVAL_TYPE direct_idp#1 -> T:void
+EDGES|EVAL_TYPE direct_idp#2 -> T:void
+EDGES|EVAL_TYPE direct_idp#3 -> T:void
+EDGES|EVAL_TYPE direct_idp#5 -> T:ANY
+EDGES|EVAL_TYPE direct_idp#6 -> T:double
+EDGES|EVAL_TYPE direct_idp#7 -> T:ANY
+EDGES|EVAL_TYPE direct_idp#8 -> T:double
+EDGES|EVAL_TYPE direct_idp#9 -> T:double
+EDGES|EVAL_TYPE direct_raw#1 -> T:void
+EDGES|EVAL_TYPE direct_raw#2 -> T:void
+EDGES|EVAL_TYPE direct_raw#3 -> T:void
+EDGES|EVAL_TYPE direct_raw#5 -> T:double
+EDGES|EVAL_TYPE direct_raw#6 -> T:ANY
+EDGES|EVAL_TYPE direct_raw#7 -> T:double
+EDGES|EVAL_TYPE direct_raw#8 -> T:double
+EDGES|EVAL_TYPE expression_statement#1 -> T:void
+EDGES|EVAL_TYPE expression_statement#2 -> T:void
+EDGES|EVAL_TYPE expression_statement#3 -> T:void
+EDGES|EVAL_TYPE expression_statement#4 -> T:ANY
+EDGES|EVAL_TYPE expression_statement#5 -> T:ANY
+EDGES|EVAL_TYPE expression_statement#6 -> T:double
+EDGES|EVAL_TYPE expression_statement#7 -> T:void
+EDGES|EVAL_TYPE function_alias#1 -> T:void
+EDGES|EVAL_TYPE function_alias#2 -> T:void
+EDGES|EVAL_TYPE function_alias#3 -> T:void
+EDGES|EVAL_TYPE function_alias#5 -> T:ANY
+EDGES|EVAL_TYPE function_alias#6 -> T:ANY
+EDGES|EVAL_TYPE function_alias#7 -> T:double
+EDGES|EVAL_TYPE function_alias#8 -> T:double
+EDGES|EVAL_TYPE initializer#1 -> T:void
+EDGES|EVAL_TYPE initializer#11 -> T:double
+EDGES|EVAL_TYPE initializer#12 -> T:double
+EDGES|EVAL_TYPE initializer#2 -> T:void
+EDGES|EVAL_TYPE initializer#3 -> T:void
+EDGES|EVAL_TYPE initializer#4 -> T:double
+EDGES|EVAL_TYPE initializer#5 -> T:void
+EDGES|EVAL_TYPE initializer#6 -> T:double
+EDGES|EVAL_TYPE initializer#7 -> T:ANY
+EDGES|EVAL_TYPE initializer#8 -> T:ANY
+EDGES|EVAL_TYPE initializer#9 -> T:double
+EDGES|EVAL_TYPE nested_objects#1 -> T:void
+EDGES|EVAL_TYPE nested_objects#2 -> T:void
+EDGES|EVAL_TYPE nested_objects#3 -> T:void
+EDGES|EVAL_TYPE nested_objects#5 -> T:ANY
+EDGES|EVAL_TYPE nested_objects#6 -> T:ANY
+EDGES|EVAL_TYPE nested_objects#7 -> T:double
+EDGES|EVAL_TYPE nested_objects#8 -> T:double
+EDGES|EVAL_TYPE nested_paren#1 -> T:void
+EDGES|EVAL_TYPE nested_paren#2 -> T:void
+EDGES|EVAL_TYPE nested_paren#3 -> T:void
+EDGES|EVAL_TYPE nested_paren#5 -> T:ANY
+EDGES|EVAL_TYPE nested_paren#6 -> T:ANY
+EDGES|EVAL_TYPE nested_paren#7 -> T:double
+EDGES|EVAL_TYPE nested_paren#8 -> T:double
+EDGES|EVAL_TYPE nested_raw#1 -> T:void
+EDGES|EVAL_TYPE nested_raw#2 -> T:void
+EDGES|EVAL_TYPE nested_raw#3 -> T:void
+EDGES|EVAL_TYPE nested_raw#5 -> T:double
+EDGES|EVAL_TYPE nested_raw#6 -> T:ANY
+EDGES|EVAL_TYPE nested_raw#7 -> T:double
+EDGES|EVAL_TYPE nested_raw#8 -> T:double
+EDGES|EVAL_TYPE object_chain#1 -> T:void
+EDGES|EVAL_TYPE object_chain#2 -> T:void
+EDGES|EVAL_TYPE object_chain#3 -> T:void
+EDGES|EVAL_TYPE object_chain#5 -> T:int
+EDGES|EVAL_TYPE object_chain#6 -> T:ANY
+EDGES|EVAL_TYPE object_chain#7 -> T:int
+EDGES|EVAL_TYPE object_chain#8 -> T:int
+EDGES|EVAL_TYPE object_paren#1 -> T:void
+EDGES|EVAL_TYPE object_paren#2 -> T:void
+EDGES|EVAL_TYPE object_paren#3 -> T:void
+EDGES|EVAL_TYPE object_paren#5 -> T:ANY
+EDGES|EVAL_TYPE object_paren#6 -> T:ANY
+EDGES|EVAL_TYPE object_paren#7 -> T:int
+EDGES|EVAL_TYPE object_paren#8 -> T:int
+EDGES|EVAL_TYPE operation#1 -> T:void
+EDGES|EVAL_TYPE operation#10 -> T:int
+EDGES|EVAL_TYPE operation#2 -> T:void
+EDGES|EVAL_TYPE operation#3 -> T:void
+EDGES|EVAL_TYPE operation#5 -> T:ANY
+EDGES|EVAL_TYPE operation#6 -> T:ANY
+EDGES|EVAL_TYPE operation#7 -> T:ANY
+EDGES|EVAL_TYPE operation#8 -> T:int
+EDGES|EVAL_TYPE operation#9 -> T:int
+EDGES|EVAL_TYPE pi#1 -> T:void
+EDGES|EVAL_TYPE pi#2 -> T:void
+EDGES|EVAL_TYPE pi#3 -> T:void
+EDGES|EVAL_TYPE pi#5 -> T:ANY
+EDGES|EVAL_TYPE pi#6 -> T:ANY
+EDGES|EVAL_TYPE pi#7 -> T:double
+EDGES|EVAL_TYPE pi#8 -> T:double
+EDGES|EVAL_TYPE types.c:<global>#154 -> T:ANY
+EDGES|EVAL_TYPE types.c:<global>#155 -> T:pi
+EDGES|EVAL_TYPE types.c:<global>#156 -> T:direct
+EDGES|EVAL_TYPE types.c:<global>#157 -> T:direct_raw
+EDGES|EVAL_TYPE types.c:<global>#158 -> T:object_chain
+EDGES|EVAL_TYPE types.c:<global>#159 -> T:object_paren
+EDGES|EVAL_TYPE types.c:<global>#160 -> T:nested_paren
+EDGES|EVAL_TYPE types.c:<global>#161 -> T:nested_raw
+EDGES|EVAL_TYPE types.c:<global>#162 -> T:function_alias
+EDGES|EVAL_TYPE types.c:<global>#163 -> T:nested_objects
+EDGES|EVAL_TYPE types.c:<global>#164 -> T:zero_arg
+EDGES|EVAL_TYPE types.c:<global>#165 -> T:operation
+EDGES|EVAL_TYPE types.c:<global>#166 -> T:casted
+EDGES|EVAL_TYPE types.c:<global>#167 -> T:initializer
+EDGES|EVAL_TYPE types.c:<global>#168 -> T:expression_statement
+EDGES|EVAL_TYPE types.c:<global>#169 -> T:direct_id
+EDGES|EVAL_TYPE types.c:<global>#170 -> T:direct_idp
+EDGES|EVAL_TYPE types.c:<global>#171 -> T:ANY
+EDGES|EVAL_TYPE types.c:A:int(0)#1 -> T:ANY
+EDGES|EVAL_TYPE types.c:A:int(0)#2 -> T:int
+EDGES|EVAL_TYPE types.c:AP:ANY(0)#1 -> T:ANY
+EDGES|EVAL_TYPE types.c:AP:ANY(0)#2 -> T:ANY
+EDGES|EVAL_TYPE types.c:CAST:ANY(0)#1 -> T:ANY
+EDGES|EVAL_TYPE types.c:CAST:ANY(0)#2 -> T:ANY
+EDGES|EVAL_TYPE types.c:DIRECT:ANY(0)#1 -> T:ANY
+EDGES|EVAL_TYPE types.c:DIRECT:ANY(0)#2 -> T:ANY
+EDGES|EVAL_TYPE types.c:DIRECT_RAW:double(0)#1 -> T:ANY
+EDGES|EVAL_TYPE types.c:DIRECT_RAW:double(0)#2 -> T:double
+EDGES|EVAL_TYPE types.c:FNOBJ:double(0)#1 -> T:ANY
+EDGES|EVAL_TYPE types.c:FNOBJ:double(0)#2 -> T:double
+EDGES|EVAL_TYPE types.c:ID:double(1)#1 -> T:ANY
+EDGES|EVAL_TYPE types.c:ID:double(1)#2 -> T:ANY
+EDGES|EVAL_TYPE types.c:ID:double(1)#3 -> T:ANY
+EDGES|EVAL_TYPE types.c:ID:double(1)#4 -> T:double
+EDGES|EVAL_TYPE types.c:IDP:ANY(1)#1 -> T:ANY
+EDGES|EVAL_TYPE types.c:IDP:ANY(1)#2 -> T:ANY
+EDGES|EVAL_TYPE types.c:IDP:ANY(1)#3 -> T:ANY
+EDGES|EVAL_TYPE types.c:IDP:ANY(1)#4 -> T:ANY
+EDGES|EVAL_TYPE types.c:NEST:ANY(0)#1 -> T:ANY
+EDGES|EVAL_TYPE types.c:NEST:ANY(0)#2 -> T:ANY
+EDGES|EVAL_TYPE types.c:OBJECT_A:ANY(0)#1 -> T:ANY
+EDGES|EVAL_TYPE types.c:OBJECT_A:ANY(0)#2 -> T:ANY
+EDGES|EVAL_TYPE types.c:OP:ANY(0)#1 -> T:ANY
+EDGES|EVAL_TYPE types.c:OP:ANY(0)#2 -> T:ANY
+EDGES|EVAL_TYPE types.c:PI:ANY(0)#1 -> T:ANY
+EDGES|EVAL_TYPE types.c:PI:ANY(0)#2 -> T:ANY
+EDGES|EVAL_TYPE types.c:PI_NOP:double(0)#1 -> T:ANY
+EDGES|EVAL_TYPE types.c:PI_NOP:double(0)#2 -> T:double
+EDGES|EVAL_TYPE types.c:PI_SECOND:ANY(0)#1 -> T:ANY
+EDGES|EVAL_TYPE types.c:PI_SECOND:ANY(0)#2 -> T:ANY
+EDGES|EVAL_TYPE zero_arg#1 -> T:void
+EDGES|EVAL_TYPE zero_arg#2 -> T:void
+EDGES|EVAL_TYPE zero_arg#3 -> T:void
+EDGES|EVAL_TYPE zero_arg#5 -> T:double
+EDGES|EVAL_TYPE zero_arg#6 -> T:ANY
+EDGES|EVAL_TYPE zero_arg#7 -> T:double
+EDGES|EVAL_TYPE zero_arg#8 -> T:double
+EDGES|PARAMETER_LINK <operator>.addition#1 -> <operator>.addition#3
+EDGES|PARAMETER_LINK <operator>.addition#4 -> <operator>.addition#6
+EDGES|PARAMETER_LINK <operator>.assignment#1 -> <operator>.assignment#3
+EDGES|PARAMETER_LINK <operator>.assignment#4 -> <operator>.assignment#6
+EDGES|PARAMETER_LINK <operator>.cast#1 -> <operator>.cast#3
+EDGES|PARAMETER_LINK <operator>.cast#4 -> <operator>.cast#6
+EDGES|PARAMETER_LINK casted#1 -> casted#2
+EDGES|PARAMETER_LINK direct#1 -> direct#2
+EDGES|PARAMETER_LINK direct_id#1 -> direct_id#2
+EDGES|PARAMETER_LINK direct_idp#1 -> direct_idp#2
+EDGES|PARAMETER_LINK direct_raw#1 -> direct_raw#2
+EDGES|PARAMETER_LINK expression_statement#1 -> expression_statement#2
+EDGES|PARAMETER_LINK function_alias#1 -> function_alias#2
+EDGES|PARAMETER_LINK initializer#1 -> initializer#2
+EDGES|PARAMETER_LINK nested_objects#1 -> nested_objects#2
+EDGES|PARAMETER_LINK nested_paren#1 -> nested_paren#2
+EDGES|PARAMETER_LINK nested_raw#1 -> nested_raw#2
+EDGES|PARAMETER_LINK object_chain#1 -> object_chain#2
+EDGES|PARAMETER_LINK object_paren#1 -> object_paren#2
+EDGES|PARAMETER_LINK operation#1 -> operation#2
+EDGES|PARAMETER_LINK pi#1 -> pi#2
+EDGES|PARAMETER_LINK types.c:ID:double(1)#1 -> types.c:ID:double(1)#2
+EDGES|PARAMETER_LINK types.c:IDP:ANY(1)#1 -> types.c:IDP:ANY(1)#2
+EDGES|PARAMETER_LINK zero_arg#1 -> zero_arg#2
+EDGES|REF NB:<global> -> NS:<global>
+EDGES|REF NB:<includes>:<global> -> NS:<global>
+EDGES|REF NB:types.c:<global> -> NS:<global>
+EDGES|REF T:ANY -> D:ANY
+EDGES|REF T:casted -> D:casted
+EDGES|REF T:direct -> D:direct
+EDGES|REF T:direct_id -> D:direct_id
+EDGES|REF T:direct_idp -> D:direct_idp
+EDGES|REF T:direct_raw -> D:direct_raw
+EDGES|REF T:double -> D:double
+EDGES|REF T:expression_statement -> D:expression_statement
+EDGES|REF T:function_alias -> D:function_alias
+EDGES|REF T:initializer -> D:initializer
+EDGES|REF T:int -> D:int
+EDGES|REF T:nested_objects -> D:nested_objects
+EDGES|REF T:nested_paren -> D:nested_paren
+EDGES|REF T:nested_raw -> D:nested_raw
+EDGES|REF T:object_chain -> D:object_chain
+EDGES|REF T:object_paren -> D:object_paren
+EDGES|REF T:operation -> D:operation
+EDGES|REF T:pi -> D:pi
+EDGES|REF T:void -> D:void
+EDGES|REF T:zero_arg -> D:zero_arg
+EDGES|REF initializer#11 -> initializer#4
+EDGES|REF initializer#6 -> initializer#4
+EDGES|REF types.c:<global>#155 -> pi#0
+EDGES|REF types.c:<global>#156 -> direct#0
+EDGES|REF types.c:<global>#157 -> direct_raw#0
+EDGES|REF types.c:<global>#158 -> object_chain#0
+EDGES|REF types.c:<global>#159 -> object_paren#0
+EDGES|REF types.c:<global>#160 -> nested_paren#0
+EDGES|REF types.c:<global>#161 -> nested_raw#0
+EDGES|REF types.c:<global>#162 -> function_alias#0
+EDGES|REF types.c:<global>#163 -> nested_objects#0
+EDGES|REF types.c:<global>#164 -> types.c:<global>#82
+EDGES|REF types.c:<global>#165 -> operation#0
+EDGES|REF types.c:<global>#166 -> casted#0
+EDGES|REF types.c:<global>#167 -> initializer#0
+EDGES|REF types.c:<global>#168 -> expression_statement#0
+EDGES|REF types.c:<global>#169 -> direct_id#0
+EDGES|REF types.c:<global>#170 -> direct_idp#0
+EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+EDGES|SOURCE_FILE D:ANY -> F:<includes>
+EDGES|SOURCE_FILE D:casted -> F:types.c
+EDGES|SOURCE_FILE D:direct -> F:types.c
+EDGES|SOURCE_FILE D:direct_id -> F:types.c
+EDGES|SOURCE_FILE D:direct_idp -> F:types.c
+EDGES|SOURCE_FILE D:direct_raw -> F:types.c
+EDGES|SOURCE_FILE D:double -> F:<includes>
+EDGES|SOURCE_FILE D:expression_statement -> F:types.c
+EDGES|SOURCE_FILE D:function_alias -> F:types.c
+EDGES|SOURCE_FILE D:initializer -> F:types.c
+EDGES|SOURCE_FILE D:int -> F:<includes>
+EDGES|SOURCE_FILE D:nested_objects -> F:types.c
+EDGES|SOURCE_FILE D:nested_paren -> F:types.c
+EDGES|SOURCE_FILE D:nested_raw -> F:types.c
+EDGES|SOURCE_FILE D:object_chain -> F:types.c
+EDGES|SOURCE_FILE D:object_paren -> F:types.c
+EDGES|SOURCE_FILE D:operation -> F:types.c
+EDGES|SOURCE_FILE D:pi -> F:types.c
+EDGES|SOURCE_FILE D:types.c:<global> -> F:types.c
+EDGES|SOURCE_FILE D:void -> F:<includes>
+EDGES|SOURCE_FILE D:zero_arg -> F:types.c
+EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
+EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>
+EDGES|SOURCE_FILE NB:types.c:<global> -> F:types.c
+EDGES|SOURCE_FILE casted#0 -> F:types.c
+EDGES|SOURCE_FILE direct#0 -> F:types.c
+EDGES|SOURCE_FILE direct_id#0 -> F:types.c
+EDGES|SOURCE_FILE direct_idp#0 -> F:types.c
+EDGES|SOURCE_FILE direct_raw#0 -> F:types.c
+EDGES|SOURCE_FILE expression_statement#0 -> F:types.c
+EDGES|SOURCE_FILE function_alias#0 -> F:types.c
+EDGES|SOURCE_FILE initializer#0 -> F:types.c
+EDGES|SOURCE_FILE nested_objects#0 -> F:types.c
+EDGES|SOURCE_FILE nested_paren#0 -> F:types.c
+EDGES|SOURCE_FILE nested_raw#0 -> F:types.c
+EDGES|SOURCE_FILE object_chain#0 -> F:types.c
+EDGES|SOURCE_FILE object_paren#0 -> F:types.c
+EDGES|SOURCE_FILE operation#0 -> F:types.c
+EDGES|SOURCE_FILE pi#0 -> F:types.c
+EDGES|SOURCE_FILE types.c:<global>#0 -> F:types.c
+EDGES|SOURCE_FILE types.c:<global>#82 -> F:types.c
+EDGES|SOURCE_FILE types.c:A:int(0)#0 -> F:types.c
+EDGES|SOURCE_FILE types.c:AP:ANY(0)#0 -> F:types.c
+EDGES|SOURCE_FILE types.c:CAST:ANY(0)#0 -> F:types.c
+EDGES|SOURCE_FILE types.c:DIRECT:ANY(0)#0 -> F:types.c
+EDGES|SOURCE_FILE types.c:DIRECT_RAW:double(0)#0 -> F:types.c
+EDGES|SOURCE_FILE types.c:FNOBJ:double(0)#0 -> F:types.c
+EDGES|SOURCE_FILE types.c:ID:double(1)#0 -> F:types.c
+EDGES|SOURCE_FILE types.c:IDP:ANY(1)#0 -> F:types.c
+EDGES|SOURCE_FILE types.c:NEST:ANY(0)#0 -> F:types.c
+EDGES|SOURCE_FILE types.c:OBJECT_A:ANY(0)#0 -> F:types.c
+EDGES|SOURCE_FILE types.c:OP:ANY(0)#0 -> F:types.c
+EDGES|SOURCE_FILE types.c:PI:ANY(0)#0 -> F:types.c
+EDGES|SOURCE_FILE types.c:PI_NOP:double(0)#0 -> F:types.c
+EDGES|SOURCE_FILE types.c:PI_SECOND:ANY(0)#0 -> F:types.c
+FLOWS|REACHING_DEF[(double)17] casted#7 -> casted#10
+FLOWS|REACHING_DEF[1 + 2] operation#7 -> operation#10
+FLOWS|REACHING_DEF[17] casted#9 -> casted#7
+FLOWS|REACHING_DEF[1] operation#8 -> operation#7
+FLOWS|REACHING_DEF[2] operation#9 -> operation#7
+FLOWS|REACHING_DEF[3.14] direct_id#6 -> direct_id#5
+FLOWS|REACHING_DEF[3.14] direct_idp#6 -> direct_idp#5
+FLOWS|REACHING_DEF[<RET>] casted#4 -> casted#10
+FLOWS|REACHING_DEF[<RET>] direct#4 -> direct#8
+FLOWS|REACHING_DEF[<RET>] direct_id#4 -> direct_id#9
+FLOWS|REACHING_DEF[<RET>] direct_idp#4 -> direct_idp#9
+FLOWS|REACHING_DEF[<RET>] direct_raw#4 -> direct_raw#8
+FLOWS|REACHING_DEF[<RET>] function_alias#4 -> function_alias#8
+FLOWS|REACHING_DEF[<RET>] initializer#10 -> initializer#12
+FLOWS|REACHING_DEF[<RET>] nested_objects#4 -> nested_objects#8
+FLOWS|REACHING_DEF[<RET>] nested_paren#4 -> nested_paren#8
+FLOWS|REACHING_DEF[<RET>] nested_raw#4 -> nested_raw#8
+FLOWS|REACHING_DEF[<RET>] object_chain#4 -> object_chain#8
+FLOWS|REACHING_DEF[<RET>] object_paren#4 -> object_paren#8
+FLOWS|REACHING_DEF[<RET>] operation#4 -> operation#10
+FLOWS|REACHING_DEF[<RET>] pi#4 -> pi#8
+FLOWS|REACHING_DEF[<RET>] zero_arg#4 -> zero_arg#8
+FLOWS|REACHING_DEF[AP] object_paren#5 -> object_paren#4
+FLOWS|REACHING_DEF[AP] object_paren#5 -> object_paren#8
+FLOWS|REACHING_DEF[A] object_chain#5 -> object_chain#4
+FLOWS|REACHING_DEF[A] object_chain#5 -> object_chain#8
+FLOWS|REACHING_DEF[CAST] casted#5 -> casted#10
+FLOWS|REACHING_DEF[CAST] casted#5 -> casted#4
+FLOWS|REACHING_DEF[DIRECT] direct#5 -> direct#4
+FLOWS|REACHING_DEF[DIRECT] direct#5 -> direct#8
+FLOWS|REACHING_DEF[DIRECT_RAW] direct_raw#5 -> direct_raw#4
+FLOWS|REACHING_DEF[DIRECT_RAW] direct_raw#5 -> direct_raw#8
+FLOWS|REACHING_DEF[FNOBJ] zero_arg#5 -> zero_arg#4
+FLOWS|REACHING_DEF[FNOBJ] zero_arg#5 -> zero_arg#8
+FLOWS|REACHING_DEF[ID(3.14)] direct_id#5 -> direct_id#4
+FLOWS|REACHING_DEF[ID(3.14)] direct_id#5 -> direct_id#9
+FLOWS|REACHING_DEF[IDP(3.14)] direct_idp#5 -> direct_idp#4
+FLOWS|REACHING_DEF[IDP(3.14)] direct_idp#5 -> direct_idp#9
+FLOWS|REACHING_DEF[NEST] nested_paren#5 -> nested_paren#4
+FLOWS|REACHING_DEF[NEST] nested_paren#5 -> nested_paren#8
+FLOWS|REACHING_DEF[OBJECT_A] nested_objects#5 -> nested_objects#4
+FLOWS|REACHING_DEF[OBJECT_A] nested_objects#5 -> nested_objects#8
+FLOWS|REACHING_DEF[OP] operation#5 -> operation#10
+FLOWS|REACHING_DEF[OP] operation#5 -> operation#4
+FLOWS|REACHING_DEF[PI] expression_statement#4 -> expression_statement#7
+FLOWS|REACHING_DEF[PI] initializer#7 -> initializer#12
+FLOWS|REACHING_DEF[PI] initializer#7 -> initializer#5
+FLOWS|REACHING_DEF[PI] initializer#7 -> initializer#6
+FLOWS|REACHING_DEF[PI] pi#5 -> pi#4
+FLOWS|REACHING_DEF[PI] pi#5 -> pi#8
+FLOWS|REACHING_DEF[PI_NOP] nested_raw#5 -> nested_raw#4
+FLOWS|REACHING_DEF[PI_NOP] nested_raw#5 -> nested_raw#8
+FLOWS|REACHING_DEF[PI_SECOND] function_alias#5 -> function_alias#4
+FLOWS|REACHING_DEF[PI_SECOND] function_alias#5 -> function_alias#8
+FLOWS|REACHING_DEF[] <operator>.addition#0 -> <operator>.addition#1
+FLOWS|REACHING_DEF[] <operator>.addition#0 -> <operator>.addition#4
+FLOWS|REACHING_DEF[] <operator>.assignment#0 -> <operator>.assignment#1
+FLOWS|REACHING_DEF[] <operator>.assignment#0 -> <operator>.assignment#4
+FLOWS|REACHING_DEF[] <operator>.cast#0 -> <operator>.cast#1
+FLOWS|REACHING_DEF[] <operator>.cast#0 -> <operator>.cast#4
+FLOWS|REACHING_DEF[] casted#0 -> casted#1
+FLOWS|REACHING_DEF[] casted#0 -> casted#5
+FLOWS|REACHING_DEF[] casted#0 -> casted#8
+FLOWS|REACHING_DEF[] casted#0 -> casted#9
+FLOWS|REACHING_DEF[] casted#1 -> casted#10
+FLOWS|REACHING_DEF[] casted#1 -> casted#2
+FLOWS|REACHING_DEF[] direct#0 -> direct#1
+FLOWS|REACHING_DEF[] direct#0 -> direct#5
+FLOWS|REACHING_DEF[] direct#0 -> direct#7
+FLOWS|REACHING_DEF[] direct#1 -> direct#2
+FLOWS|REACHING_DEF[] direct#1 -> direct#8
+FLOWS|REACHING_DEF[] direct_id#0 -> direct_id#1
+FLOWS|REACHING_DEF[] direct_id#0 -> direct_id#6
+FLOWS|REACHING_DEF[] direct_id#0 -> direct_id#8
+FLOWS|REACHING_DEF[] direct_id#1 -> direct_id#2
+FLOWS|REACHING_DEF[] direct_id#1 -> direct_id#9
+FLOWS|REACHING_DEF[] direct_idp#0 -> direct_idp#1
+FLOWS|REACHING_DEF[] direct_idp#0 -> direct_idp#6
+FLOWS|REACHING_DEF[] direct_idp#0 -> direct_idp#8
+FLOWS|REACHING_DEF[] direct_idp#1 -> direct_idp#2
+FLOWS|REACHING_DEF[] direct_idp#1 -> direct_idp#9
+FLOWS|REACHING_DEF[] direct_raw#0 -> direct_raw#1
+FLOWS|REACHING_DEF[] direct_raw#0 -> direct_raw#5
+FLOWS|REACHING_DEF[] direct_raw#0 -> direct_raw#7
+FLOWS|REACHING_DEF[] direct_raw#1 -> direct_raw#2
+FLOWS|REACHING_DEF[] direct_raw#1 -> direct_raw#8
+FLOWS|REACHING_DEF[] expression_statement#0 -> expression_statement#1
+FLOWS|REACHING_DEF[] expression_statement#0 -> expression_statement#4
+FLOWS|REACHING_DEF[] expression_statement#0 -> expression_statement#6
+FLOWS|REACHING_DEF[] expression_statement#1 -> expression_statement#2
+FLOWS|REACHING_DEF[] expression_statement#1 -> expression_statement#7
+FLOWS|REACHING_DEF[] function_alias#0 -> function_alias#1
+FLOWS|REACHING_DEF[] function_alias#0 -> function_alias#5
+FLOWS|REACHING_DEF[] function_alias#0 -> function_alias#7
+FLOWS|REACHING_DEF[] function_alias#1 -> function_alias#2
+FLOWS|REACHING_DEF[] function_alias#1 -> function_alias#8
+FLOWS|REACHING_DEF[] initializer#0 -> initializer#1
+FLOWS|REACHING_DEF[] initializer#0 -> initializer#11
+FLOWS|REACHING_DEF[] initializer#0 -> initializer#7
+FLOWS|REACHING_DEF[] initializer#0 -> initializer#9
+FLOWS|REACHING_DEF[] initializer#1 -> initializer#12
+FLOWS|REACHING_DEF[] initializer#1 -> initializer#2
+FLOWS|REACHING_DEF[] nested_objects#0 -> nested_objects#1
+FLOWS|REACHING_DEF[] nested_objects#0 -> nested_objects#5
+FLOWS|REACHING_DEF[] nested_objects#0 -> nested_objects#7
+FLOWS|REACHING_DEF[] nested_objects#1 -> nested_objects#2
+FLOWS|REACHING_DEF[] nested_objects#1 -> nested_objects#8
+FLOWS|REACHING_DEF[] nested_paren#0 -> nested_paren#1
+FLOWS|REACHING_DEF[] nested_paren#0 -> nested_paren#5
+FLOWS|REACHING_DEF[] nested_paren#0 -> nested_paren#7
+FLOWS|REACHING_DEF[] nested_paren#1 -> nested_paren#2
+FLOWS|REACHING_DEF[] nested_paren#1 -> nested_paren#8
+FLOWS|REACHING_DEF[] nested_raw#0 -> nested_raw#1
+FLOWS|REACHING_DEF[] nested_raw#0 -> nested_raw#5
+FLOWS|REACHING_DEF[] nested_raw#0 -> nested_raw#7
+FLOWS|REACHING_DEF[] nested_raw#1 -> nested_raw#2
+FLOWS|REACHING_DEF[] nested_raw#1 -> nested_raw#8
+FLOWS|REACHING_DEF[] object_chain#0 -> object_chain#1
+FLOWS|REACHING_DEF[] object_chain#0 -> object_chain#5
+FLOWS|REACHING_DEF[] object_chain#0 -> object_chain#7
+FLOWS|REACHING_DEF[] object_chain#1 -> object_chain#2
+FLOWS|REACHING_DEF[] object_chain#1 -> object_chain#8
+FLOWS|REACHING_DEF[] object_paren#0 -> object_paren#1
+FLOWS|REACHING_DEF[] object_paren#0 -> object_paren#5
+FLOWS|REACHING_DEF[] object_paren#0 -> object_paren#7
+FLOWS|REACHING_DEF[] object_paren#1 -> object_paren#2
+FLOWS|REACHING_DEF[] object_paren#1 -> object_paren#8
+FLOWS|REACHING_DEF[] operation#0 -> operation#1
+FLOWS|REACHING_DEF[] operation#0 -> operation#5
+FLOWS|REACHING_DEF[] operation#0 -> operation#8
+FLOWS|REACHING_DEF[] operation#0 -> operation#9
+FLOWS|REACHING_DEF[] operation#1 -> operation#10
+FLOWS|REACHING_DEF[] operation#1 -> operation#2
+FLOWS|REACHING_DEF[] pi#0 -> pi#1
+FLOWS|REACHING_DEF[] pi#0 -> pi#5
+FLOWS|REACHING_DEF[] pi#0 -> pi#7
+FLOWS|REACHING_DEF[] pi#1 -> pi#2
+FLOWS|REACHING_DEF[] pi#1 -> pi#8
+FLOWS|REACHING_DEF[] types.c:<global>#0 -> types.c:<global>#155
+FLOWS|REACHING_DEF[] types.c:<global>#0 -> types.c:<global>#156
+FLOWS|REACHING_DEF[] types.c:<global>#0 -> types.c:<global>#157
+FLOWS|REACHING_DEF[] types.c:<global>#0 -> types.c:<global>#158
+FLOWS|REACHING_DEF[] types.c:<global>#0 -> types.c:<global>#159
+FLOWS|REACHING_DEF[] types.c:<global>#0 -> types.c:<global>#160
+FLOWS|REACHING_DEF[] types.c:<global>#0 -> types.c:<global>#161
+FLOWS|REACHING_DEF[] types.c:<global>#0 -> types.c:<global>#162
+FLOWS|REACHING_DEF[] types.c:<global>#0 -> types.c:<global>#163
+FLOWS|REACHING_DEF[] types.c:<global>#0 -> types.c:<global>#164
+FLOWS|REACHING_DEF[] types.c:<global>#0 -> types.c:<global>#165
+FLOWS|REACHING_DEF[] types.c:<global>#0 -> types.c:<global>#166
+FLOWS|REACHING_DEF[] types.c:<global>#0 -> types.c:<global>#167
+FLOWS|REACHING_DEF[] types.c:<global>#0 -> types.c:<global>#168
+FLOWS|REACHING_DEF[] types.c:<global>#0 -> types.c:<global>#169
+FLOWS|REACHING_DEF[] types.c:<global>#0 -> types.c:<global>#170
+FLOWS|REACHING_DEF[] types.c:<global>#82 -> zero_arg#1
+FLOWS|REACHING_DEF[] types.c:<global>#82 -> zero_arg#5
+FLOWS|REACHING_DEF[] types.c:<global>#82 -> zero_arg#7
+FLOWS|REACHING_DEF[] types.c:ID:double(1)#0 -> types.c:ID:double(1)#1
+FLOWS|REACHING_DEF[] types.c:IDP:ANY(1)#0 -> types.c:IDP:ANY(1)#1
+FLOWS|REACHING_DEF[] zero_arg#1 -> zero_arg#2
+FLOWS|REACHING_DEF[] zero_arg#1 -> zero_arg#8
+FLOWS|REACHING_DEF[double] casted#8 -> casted#7
+FLOWS|REACHING_DEF[p1] <operator>.addition#1 -> <operator>.addition#3
+FLOWS|REACHING_DEF[p1] <operator>.addition#1 -> <operator>.addition#5
+FLOWS|REACHING_DEF[p1] <operator>.assignment#1 -> <operator>.assignment#3
+FLOWS|REACHING_DEF[p1] <operator>.assignment#1 -> <operator>.assignment#5
+FLOWS|REACHING_DEF[p1] <operator>.cast#1 -> <operator>.cast#3
+FLOWS|REACHING_DEF[p1] <operator>.cast#1 -> <operator>.cast#5
+FLOWS|REACHING_DEF[p1] types.c:ID:double(1)#1 -> types.c:ID:double(1)#2
+FLOWS|REACHING_DEF[p1] types.c:ID:double(1)#1 -> types.c:ID:double(1)#4
+FLOWS|REACHING_DEF[p1] types.c:IDP:ANY(1)#1 -> types.c:IDP:ANY(1)#2
+FLOWS|REACHING_DEF[p1] types.c:IDP:ANY(1)#1 -> types.c:IDP:ANY(1)#4
+FLOWS|REACHING_DEF[p2] <operator>.addition#4 -> <operator>.addition#5
+FLOWS|REACHING_DEF[p2] <operator>.addition#4 -> <operator>.addition#6
+FLOWS|REACHING_DEF[p2] <operator>.assignment#4 -> <operator>.assignment#5
+FLOWS|REACHING_DEF[p2] <operator>.assignment#4 -> <operator>.assignment#6
+FLOWS|REACHING_DEF[p2] <operator>.cast#4 -> <operator>.cast#5
+FLOWS|REACHING_DEF[p2] <operator>.cast#4 -> <operator>.cast#6
+FLOWS|REACHING_DEF[x = PI] initializer#5 -> initializer#12
+FLOWS|REACHING_DEF[x] initializer#11 -> initializer#10
+FLOWS|REACHING_DEF[x] initializer#6 -> initializer#11
+FLOWS|REACHING_DEF[x] initializer#6 -> initializer#12
+FLOWS|REACHING_DEF[x] initializer#6 -> initializer#5
+[INFO ] writing to storage at `/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/fourth-batch/header-macros/pi-type-review/run/workspace/proj/cpg.bin.tmp`
+[INFO ] closed graph at /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/fourth-batch/header-macros/pi-type-review/run/workspace/proj/cpg.bin.tmp
