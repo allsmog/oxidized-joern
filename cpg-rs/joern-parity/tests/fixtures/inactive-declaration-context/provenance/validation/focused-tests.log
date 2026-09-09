@@ -1,0 +1,10 @@
+   Compiling joern-parity v0.1.1 (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-inactive-declarations/cpg-rs/joern-parity)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.58s
+     Running tests/inactive_declaration_context.rs (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/target/debug/deps/inactive_declaration_context-7e482c22c62bc865)
+
+running 2 tests
+test inactive_directives_cannot_mutate_retained_array_macro_expansions ... ok
+test retained_inactive_declarations_match_complete_live_graphs ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s
+

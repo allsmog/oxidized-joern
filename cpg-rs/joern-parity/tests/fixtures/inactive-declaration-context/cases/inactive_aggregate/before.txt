@@ -1,0 +1,240 @@
+METHOD NAME=<global> CODE=<global> FULL_NAME=<includes>:<global> ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.arrayInitializer FULL_NAME=<operator>.arrayInitializer ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<clinit> CODE=<clinit> FULL_NAME=Bag.<clinit>:Bag() ORDER=2
+  BLOCK ORDER=1
+    CALL NAME=<operator>.arrayInitializer CODE=bytes[WIDTH] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.arrayInitializer ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+      IDENTIFIER NAME=WIDTH CODE=<unknown> WIDTH TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  MODIFIER ORDER=2
+  MODIFIER ORDER=3
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=Bag ORDER=4
+
+METHOD NAME=<clinit> CODE=<clinit> FULL_NAME=Packet.<clinit>:Packet() ORDER=2
+  BLOCK ORDER=1
+    CALL NAME=<operator>.arrayInitializer CODE=bytes[WIDTH] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.arrayInitializer ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+      IDENTIFIER NAME=WIDTH CODE=<unknown> WIDTH TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  MODIFIER ORDER=2
+  MODIFIER ORDER=3
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=Packet ORDER=4
+
+METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1
+  TYPE_DECL NAME=Packet CODE=struct Packet { char bytes[WIDTH]; } FULL_NAME=Packet ORDER=1
+    MEMBER NAME=bytes CODE=bytes[WIDTH] TYPE_FULL_NAME=char[WIDTH] ORDER=1
+    METHOD NAME=<clinit> CODE=<clinit> FULL_NAME=Packet.<clinit>:Packet() ORDER=2
+      BLOCK ORDER=1
+        CALL NAME=<operator>.arrayInitializer CODE=bytes[WIDTH] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.arrayInitializer ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=WIDTH CODE=<unknown> WIDTH TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+      MODIFIER ORDER=2
+      MODIFIER ORDER=3
+      METHOD_RETURN CODE=RET TYPE_FULL_NAME=Packet ORDER=4
+  TYPE_DECL NAME=Bag CODE=typedef struct { char bytes[WIDTH]; } FULL_NAME=Bag ORDER=1
+    MEMBER NAME=bytes CODE=bytes[WIDTH] TYPE_FULL_NAME=char[WIDTH] ORDER=1
+    METHOD NAME=<clinit> CODE=<clinit> FULL_NAME=Bag.<clinit>:Bag() ORDER=2
+      BLOCK ORDER=1
+        CALL NAME=<operator>.arrayInitializer CODE=bytes[WIDTH] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.arrayInitializer ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=WIDTH CODE=<unknown> WIDTH TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+      MODIFIER ORDER=2
+      MODIFIER ORDER=3
+      METHOD_RETURN CODE=RET TYPE_FULL_NAME=Bag ORDER=4
+  LOCAL NAME=Bag CODE=typedef struct { char bytes[WIDTH]; } Bag TYPE_FULL_NAME=struct ORDER=1
+  METHOD NAME=use CODE=int use(void) { return WIDTH; } FULL_NAME=use SIGNATURE=int(void) ORDER=1
+    METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    BLOCK CODE={ return WIDTH; } TYPE_FULL_NAME=void ORDER=2
+      RETURN CODE=return WIDTH; ORDER=1
+        CALL NAME=WIDTH CODE=WIDTH TYPE_FULL_NAME=int METHOD_FULL_NAME=main.c:WIDTH:int(0) SIGNATURE=int(0) ORDER=1 DISPATCH_TYPE=INLINED
+          BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+            LITERAL CODE=2 TYPE_FULL_NAME=int ORDER=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+    TYPE_REF CODE=struct Packet { char bytes[WIDTH]; } TYPE_FULL_NAME=Packet ORDER=1
+    TYPE_REF CODE=typedef struct { char bytes[WIDTH]; } TYPE_FULL_NAME=Bag ORDER=2
+    METHOD_REF CODE=use TYPE_FULL_NAME=use METHOD_FULL_NAME=use ORDER=3
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=WIDTH CODE=#define WIDTH 2 FULL_NAME=main.c:WIDTH:int(0) SIGNATURE=int(0) ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=2
+
+METHOD NAME=use CODE=int use(void) { return WIDTH; } FULL_NAME=use SIGNATURE=int(void) ORDER=1
+  METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  BLOCK CODE={ return WIDTH; } TYPE_FULL_NAME=void ORDER=2
+    RETURN CODE=return WIDTH; ORDER=1
+      CALL NAME=WIDTH CODE=WIDTH TYPE_FULL_NAME=int METHOD_FULL_NAME=main.c:WIDTH:int(0) SIGNATURE=int(0) ORDER=1 DISPATCH_TYPE=INLINED
+        BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+          LITERAL CODE=2 TYPE_FULL_NAME=int ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+
+NODES|META_DATA LANGUAGE=NEWC
+NODES|FILE NAME=<includes> ORDER=1
+NODES|FILE NAME=<unknown> ORDER=0
+NODES|FILE NAME=main.c ORDER=0
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<global> FILENAME=<unknown> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<includes>:<global> FILENAME=<includes> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|NAMESPACE NAME=<global>
+NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=Bag FULL_NAME=Bag CODE=typedef struct { char bytes[WIDTH]; } AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=Packet FULL_NAME=Packet CODE=struct Packet { char bytes[WIDTH]; } AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=char[WIDTH] FULL_NAME=char[WIDTH] CODE=char[WIDTH] IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=<global> FULL_NAME=main.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=struct FULL_NAME=struct CODE=struct IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=use FULL_NAME=use CODE=use AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+NODES|TYPE NAME=Bag FULL_NAME=Bag TYPE_DECL_FULL_NAME=Bag
+NODES|TYPE NAME=Packet FULL_NAME=Packet TYPE_DECL_FULL_NAME=Packet
+NODES|TYPE NAME=char[WIDTH] FULL_NAME=char[WIDTH] TYPE_DECL_FULL_NAME=char[WIDTH]
+NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+NODES|TYPE NAME=struct FULL_NAME=struct TYPE_DECL_FULL_NAME=struct
+NODES|TYPE NAME=use FULL_NAME=use TYPE_DECL_FULL_NAME=use
+NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+EDGES|ARGUMENT Bag.<clinit>:Bag()#2 -> Bag.<clinit>:Bag()#3
+EDGES|ARGUMENT Packet.<clinit>:Packet()#2 -> Packet.<clinit>:Packet()#3
+EDGES|ARGUMENT use#4 -> use#5
+EDGES|CALL Bag.<clinit>:Bag()#2 -> <operator>.arrayInitializer#0
+EDGES|CALL Packet.<clinit>:Packet()#2 -> <operator>.arrayInitializer#0
+EDGES|CALL use#5 -> main.c:WIDTH:int(0)#0
+EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+EDGES|CFG <operator>.arrayInitializer#0 -> <operator>.arrayInitializer#4
+EDGES|CFG Bag.<clinit>:Bag()#0 -> Bag.<clinit>:Bag()#3
+EDGES|CFG Bag.<clinit>:Bag()#2 -> Bag.<clinit>:Bag()#6
+EDGES|CFG Bag.<clinit>:Bag()#3 -> Bag.<clinit>:Bag()#2
+EDGES|CFG Packet.<clinit>:Packet()#0 -> Packet.<clinit>:Packet()#3
+EDGES|CFG Packet.<clinit>:Packet()#2 -> Packet.<clinit>:Packet()#6
+EDGES|CFG Packet.<clinit>:Packet()#3 -> Packet.<clinit>:Packet()#2
+EDGES|CFG main.c:<global>#0 -> main.c:<global>#30
+EDGES|CFG main.c:<global>#20 -> use#5
+EDGES|CFG main.c:<global>#30 -> main.c:<global>#31
+EDGES|CFG main.c:<global>#31 -> main.c:<global>#32
+EDGES|CFG main.c:<global>#32 -> main.c:<global>#33
+EDGES|CFG main.c:WIDTH:int(0)#0 -> main.c:WIDTH:int(0)#2
+EDGES|CFG use#4 -> use#8
+EDGES|CFG use#5 -> use#4
+EDGES|CFG use#5 -> use#7
+EDGES|CFG use#7 -> use#4
+EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+EDGES|CONTAINS <operator>.arrayInitializer#0 -> <operator>.arrayInitializer#2
+EDGES|CONTAINS Bag.<clinit>:Bag()#0 -> Bag.<clinit>:Bag()#1
+EDGES|CONTAINS Bag.<clinit>:Bag()#0 -> Bag.<clinit>:Bag()#2
+EDGES|CONTAINS Bag.<clinit>:Bag()#0 -> Bag.<clinit>:Bag()#3
+EDGES|CONTAINS D:main.c:<global> -> D:use
+EDGES|CONTAINS D:main.c:<global> -> main.c:<global>#0
+EDGES|CONTAINS D:main.c:<global> -> main.c:WIDTH:int(0)#0
+EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+EDGES|CONTAINS F:<includes> -> D:ANY
+EDGES|CONTAINS F:<includes> -> D:char[WIDTH]
+EDGES|CONTAINS F:<includes> -> D:int
+EDGES|CONTAINS F:<includes> -> D:struct
+EDGES|CONTAINS F:<includes> -> D:void
+EDGES|CONTAINS F:main.c -> D:main.c:<global>
+EDGES|CONTAINS Packet.<clinit>:Packet()#0 -> Packet.<clinit>:Packet()#1
+EDGES|CONTAINS Packet.<clinit>:Packet()#0 -> Packet.<clinit>:Packet()#2
+EDGES|CONTAINS Packet.<clinit>:Packet()#0 -> Packet.<clinit>:Packet()#3
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#1
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#10
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#20
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#29
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#30
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#31
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#32
+EDGES|CONTAINS main.c:<global>#1 -> Packet.<clinit>:Packet()#0
+EDGES|CONTAINS main.c:<global>#10 -> Bag.<clinit>:Bag()#0
+EDGES|CONTAINS main.c:<global>#20 -> use#3
+EDGES|CONTAINS main.c:<global>#20 -> use#4
+EDGES|CONTAINS main.c:<global>#20 -> use#5
+EDGES|CONTAINS main.c:<global>#20 -> use#6
+EDGES|CONTAINS main.c:<global>#20 -> use#7
+EDGES|CONTAINS main.c:WIDTH:int(0)#0 -> main.c:WIDTH:int(0)#1
+EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.arrayInitializer#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.arrayInitializer#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.arrayInitializer#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.arrayInitializer#4 -> T:ANY
+EDGES|EVAL_TYPE Bag.<clinit>:Bag()#2 -> T:ANY
+EDGES|EVAL_TYPE Bag.<clinit>:Bag()#3 -> T:ANY
+EDGES|EVAL_TYPE Bag.<clinit>:Bag()#6 -> T:Bag
+EDGES|EVAL_TYPE Packet.<clinit>:Packet()#2 -> T:ANY
+EDGES|EVAL_TYPE Packet.<clinit>:Packet()#3 -> T:ANY
+EDGES|EVAL_TYPE Packet.<clinit>:Packet()#6 -> T:Packet
+EDGES|EVAL_TYPE main.c:<global>#11 -> T:char[WIDTH]
+EDGES|EVAL_TYPE main.c:<global>#19 -> T:struct
+EDGES|EVAL_TYPE main.c:<global>#2 -> T:char[WIDTH]
+EDGES|EVAL_TYPE main.c:<global>#29 -> T:ANY
+EDGES|EVAL_TYPE main.c:<global>#30 -> T:Packet
+EDGES|EVAL_TYPE main.c:<global>#31 -> T:Bag
+EDGES|EVAL_TYPE main.c:<global>#32 -> T:use
+EDGES|EVAL_TYPE main.c:<global>#33 -> T:ANY
+EDGES|EVAL_TYPE main.c:WIDTH:int(0)#1 -> T:ANY
+EDGES|EVAL_TYPE main.c:WIDTH:int(0)#2 -> T:int
+EDGES|EVAL_TYPE use#1 -> T:void
+EDGES|EVAL_TYPE use#2 -> T:void
+EDGES|EVAL_TYPE use#3 -> T:void
+EDGES|EVAL_TYPE use#5 -> T:int
+EDGES|EVAL_TYPE use#6 -> T:ANY
+EDGES|EVAL_TYPE use#7 -> T:int
+EDGES|EVAL_TYPE use#8 -> T:int
+EDGES|PARAMETER_LINK <operator>.arrayInitializer#1 -> <operator>.arrayInitializer#3
+EDGES|PARAMETER_LINK use#1 -> use#2
+EDGES|REF NB:<global> -> NS:<global>
+EDGES|REF NB:<includes>:<global> -> NS:<global>
+EDGES|REF NB:main.c:<global> -> NS:<global>
+EDGES|REF T:ANY -> D:ANY
+EDGES|REF T:Bag -> main.c:<global>#10
+EDGES|REF T:Packet -> main.c:<global>#1
+EDGES|REF T:char[WIDTH] -> D:char[WIDTH]
+EDGES|REF T:int -> D:int
+EDGES|REF T:struct -> D:struct
+EDGES|REF T:use -> D:use
+EDGES|REF T:void -> D:void
+EDGES|REF main.c:<global>#32 -> main.c:<global>#20
+EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+EDGES|SOURCE_FILE Bag.<clinit>:Bag()#0 -> F:main.c
+EDGES|SOURCE_FILE D:ANY -> F:<includes>
+EDGES|SOURCE_FILE D:char[WIDTH] -> F:<includes>
+EDGES|SOURCE_FILE D:int -> F:<includes>
+EDGES|SOURCE_FILE D:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE D:struct -> F:<includes>
+EDGES|SOURCE_FILE D:use -> F:main.c
+EDGES|SOURCE_FILE D:void -> F:<includes>
+EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
+EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>
+EDGES|SOURCE_FILE NB:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE Packet.<clinit>:Packet()#0 -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#0 -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#1 -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#10 -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#20 -> F:main.c
+EDGES|SOURCE_FILE main.c:WIDTH:int(0)#0 -> F:main.c
+FLOWS|REACHING_DEF[<RET>] use#4 -> use#8
+FLOWS|REACHING_DEF[<unknown> WIDTH] Bag.<clinit>:Bag()#3 -> Bag.<clinit>:Bag()#2
+FLOWS|REACHING_DEF[<unknown> WIDTH] Bag.<clinit>:Bag()#3 -> Bag.<clinit>:Bag()#6
+FLOWS|REACHING_DEF[<unknown> WIDTH] Packet.<clinit>:Packet()#3 -> Packet.<clinit>:Packet()#2
+FLOWS|REACHING_DEF[<unknown> WIDTH] Packet.<clinit>:Packet()#3 -> Packet.<clinit>:Packet()#6
+FLOWS|REACHING_DEF[WIDTH] use#5 -> use#4
+FLOWS|REACHING_DEF[WIDTH] use#5 -> use#8
+FLOWS|REACHING_DEF[] <operator>.arrayInitializer#0 -> <operator>.arrayInitializer#1
+FLOWS|REACHING_DEF[] Bag.<clinit>:Bag()#0 -> Bag.<clinit>:Bag()#3
+FLOWS|REACHING_DEF[] Packet.<clinit>:Packet()#0 -> Packet.<clinit>:Packet()#3
+FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#30
+FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#31
+FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#32
+FLOWS|REACHING_DEF[] main.c:<global>#20 -> use#1
+FLOWS|REACHING_DEF[] main.c:<global>#20 -> use#5
+FLOWS|REACHING_DEF[] main.c:<global>#20 -> use#7
+FLOWS|REACHING_DEF[] use#1 -> use#2
+FLOWS|REACHING_DEF[] use#1 -> use#8
+FLOWS|REACHING_DEF[bytes[WIDTH]] Bag.<clinit>:Bag()#2 -> Bag.<clinit>:Bag()#6
+FLOWS|REACHING_DEF[bytes[WIDTH]] Packet.<clinit>:Packet()#2 -> Packet.<clinit>:Packet()#6
+FLOWS|REACHING_DEF[p1] <operator>.arrayInitializer#1 -> <operator>.arrayInitializer#3
+FLOWS|REACHING_DEF[p1] <operator>.arrayInitializer#1 -> <operator>.arrayInitializer#4

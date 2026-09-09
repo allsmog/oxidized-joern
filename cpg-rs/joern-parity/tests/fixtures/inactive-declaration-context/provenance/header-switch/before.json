@@ -1,0 +1,48 @@
+{
+  "binary": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/sixth-batch/final-real-differential-v2/bin/joern-parity",
+    "sha256": "9280342b38a2da5b57249180c11f4adcfe878d77f2114ba47c64dce847c6e68a"
+  },
+  "liveReceipt": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-inactive-declarations/.local/inactive-declarations/header-switch/live-run.json",
+    "sha256": "830422cea2583305c7b445dfbbd0d2848b8819d70aff5bb60e775f1ac5b72ee1"
+  },
+  "results": [
+    {
+      "case": "header_switch",
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/sixth-batch/final-real-differential-v2/bin/joern-parity",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-inactive-declarations/.local/inactive-declarations/header-switch/input/header_switch/api.h",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-inactive-declarations/.local/inactive-declarations/header-switch/input/header_switch/main.c"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 0.0047903749946272,
+      "exact": false,
+      "completeDiffLines": 29,
+      "inputHashes": {
+        "api.h": "9e7315737b80a3b9cb2a5a6f542fab26eb12a7462c36be4684de1e47a42b81dc",
+        "main.c": "412e845b0e3c82455e6b488e13b7ef6305f0fa7a89211ccf2b6283c19a4346cf"
+      },
+      "expectedSha256": "cd5c99d927d7e291b4fe67da8eaba356a2247c4544d190223b75985804c11b39",
+      "actualSha256": "c78f2a15f083e2f19dbfe14b066e5855f4f50e5c68d931a6b25cfb1ad4448fdf"
+    },
+    {
+      "case": "inactive_header_override",
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/sixth-batch/final-real-differential-v2/bin/joern-parity",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-inactive-declarations/.local/inactive-declarations/header-switch/input/inactive_header_override/api.h",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-inactive-declarations/.local/inactive-declarations/header-switch/input/inactive_header_override/main.c"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 0.0045514170051319525,
+      "exact": false,
+      "completeDiffLines": 29,
+      "inputHashes": {
+        "api.h": "b12622fca8c8507b6ada5a00a129fb06cf0c5fcfbbc89b1e37c0874d6d04ff38",
+        "main.c": "412e845b0e3c82455e6b488e13b7ef6305f0fa7a89211ccf2b6283c19a4346cf"
+      },
+      "expectedSha256": "cd5c99d927d7e291b4fe67da8eaba356a2247c4544d190223b75985804c11b39",
+      "actualSha256": "c78f2a15f083e2f19dbfe14b066e5855f4f50e5c68d931a6b25cfb1ad4448fdf"
+    }
+  ]
+}

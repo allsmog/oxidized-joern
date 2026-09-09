@@ -1,0 +1,10 @@
+{
+  "header_switch": {
+    "api.h": "#define ENABLE 1\n",
+    "main.c": "#include \"api.h\"\n#if ENABLE\nlong enabled(int x);\n#else\nint disabled(int x);\n#endif\nint g(int x) { return enabled(x) + disabled(x); }\n"
+  },
+  "inactive_header_override": {
+    "api.h": "#define ENABLE 1\n#if 0\n#undef ENABLE\n#define ENABLE 0\n#endif\n",
+    "main.c": "#include \"api.h\"\n#if ENABLE\nlong enabled(int x);\n#else\nint disabled(int x);\n#endif\nint g(int x) { return enabled(x) + disabled(x); }\n"
+  }
+}
