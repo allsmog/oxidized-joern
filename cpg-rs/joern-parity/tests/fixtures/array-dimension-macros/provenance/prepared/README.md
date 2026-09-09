@@ -1,0 +1,7 @@
+# Held compound-array dimension controls
+
+Four new complete projects pair a macro dimension with an otherwise identical numeric-spelling control: N versus 3; N+1 versus 3+1; (N+1) versus (3+1); +N versus +3. Each declares an uninitialized array, writes one element, and returns another, exercising declaration/type/allocation/reference facts without adding initializer-list behavior. The unchanged body_include_macro_only project is the existing full reference anchor required by the reused runner.
+
+All five projects remain unrun. No expected graph has been written for the four new projects. The canonical oracle, runtime binding, runner, and retained anchor are copied byte-for-byte from reviewed V4. There is no new observation query or helper framework. The inherited runner requires a fresh parent release bound to prepared.json and an unused run name; all results stay held until complete raw output, all input/runtime/checkpoint bindings, and the unchanged anchor pass.
+
+Purpose: determine the exact Joern type-spelling boundary before repairing the observed ordinary zlib compound dimension regression. Bare-macro improvements must be preserved where the pinned reference supports them. Primitive-base normalization behavior, global/member/parameter roles, and general constant folding are not changed or claimed by this preparation. Root owns launch authorization; source implementation remains with the frontend agent.

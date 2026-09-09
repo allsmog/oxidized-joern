@@ -4,6 +4,47 @@ Single source of truth across iterations. Update in the same commit as the work.
 
 ## Current state
 
+- **Tenth measured Astra batch (2026-09-08 UTC).** Active supplied body
+  includes now share an occurrence-specific declaration view across emission,
+  discovery, type sites and prototypes, preserving caller scope and measured
+  header line origins. Macro METHOD metadata follows the pinned source/header
+  pass precedence. Eighteen unique complete references improve **6→14 exact**;
+  all 14 exact graphs are fully gated and four diagnostics remain. Nonempty
+  matching records gain **1,284 and lose two ordinal coincidences** (including
+  separators: +1,288/−2). The prior 76-project family retains 55 exact graphs,
+  unchanged successful V2 graph outputs and its complete importer failure,
+  including each actual exit status. Bare macro array dimensions expand while
+  compound dimensions retain source spelling. This restores all 96 zlib
+  matching records lost by the held candidate. A separate pass-through dataflow
+  allocation repair preserves the original membership relation and removes
+  the measured performance bottleneck. Both held memory failures and the
+  intermediate single pilot remain recorded.
+  All **468 workspace tests /76 groups**, **308/308** committed and fresh
+  Joern v4.0.555 comparisons, 17 checker tests, formatting, strict Clippy,
+  the 73-dependency audit and native release/archive checks pass.
+  Official real-project acceptance also passes. Cache shape is **21**.
+  Whole zlib/Lua matching records gain **8,799/260 and lose none**, with all
+  61 tracked repair facts, 19 selected method trees/stubs and three actual
+  snprintf calls retained. Exact method ASTs are **160/410 /1,438/2,274**;
+  strict primary methods **42/517**, bodies **42/544**, and nonempty bodies
+  **23/522**, with no previous exact loss. The four Lua gains are luaG_addinfo,
+  luaO_tostring, os_tmpname and utf8esc. Both fixedtables methods now contain
+  all 544 initializer rows and 1,632 literals each; full-method differences
+  remain. Whole references reuse the sixth batch's pinned live outputs.
+  Repeated builds pass at **3.18/3.28 seconds zlib /7.18/7.00 seconds Lua**,
+  peaking at **498.78/465.77 MiB** under unchanged ceilings. Clean/update
+  equivalence passes for **26/61** files; separate update RSS is
+  **640.69/720.91 MiB**. Eight reviewed output expectations change: node counts
+  and graph/edge/export hashes. Inputs, licenses, exclusions, budgets and
+  zero-finding SARIF stay fixed. See the [tenth report](../docs/conformance/astra-tenth-batch-2026-09-08.md),
+  [complete counters](../docs/conformance/astra-tenth-batch-metrics.json), and
+  [acceptance receipt](../docs/conformance/astra-tenth-batch-acceptance.json).
+  Full project/product parity remains incomplete. Next: pin primitive MEMBER
+  type spelling with separate numeric, pointer/array and nonprimitive controls.
+  Repeated-include macro fallback, quoted-header lookup, runtime chains,
+  broader preprocessing/types, source transport, schema, queries and non-C
+  parity remain explicit gaps.
+
 - **Ninth measured Astra batch (2026-09-08 UTC).** One source-order macro
   context now feeds active-body emission, phantom/declaration discovery,
   type sites and local prototypes. Macro effects persist across C scopes,

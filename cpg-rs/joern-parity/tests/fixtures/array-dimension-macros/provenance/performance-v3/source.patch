@@ -1,0 +1,108 @@
+--- a/cpg-rs/cpg-lang-c/src/exact.rs
++++ b/cpg-rs/cpg-lang-c/src/exact.rs
+@@ -10379,20 +10379,47 @@
+         None => false,
+     }
+ }
++// PTF consumers ask only existential membership. Borrow its eligible indices
++// instead of allocating and sorting the full (i, i)/(i, -1) mapping per edge.
++// Keep negative indices and sibling index aliases; FIELD_IDENTIFIER and missing
++// ARGUMENT_INDEX children do not themselves contribute mappings.
++fn rd_passthrough_indices(arena: &[DNode], c: usize) -> impl Iterator<Item = i64> + '_ {
++    arena[c].children.iter().filter_map(|&child| {
++        let argument = &arena[child];
++        (argument.has_arg && argument.label != "FIELD_IDENTIFIER" && argument.arg_index != 0)
++            .then_some(argument.arg_index)
++    })
++}
+ fn rd_is_used(arena: &[DNode], e: usize) -> bool {
+-    match rd_in_call(arena, e).and_then(|c| rd_sem(arena, c)) {
++    let call = rd_in_call(arena, e);
++    if let Some(c) = call.filter(|&c| rd_passthrough_operator(&arena[c].name)) {
++        return rd_passthrough_indices(arena, c).any(|index| index == arena[e].arg_index);
++    }
++    match call.and_then(|c| rd_sem(arena, c)) {
+         Some(m) => m.iter().any(|&(s, _)| s == arena[e].arg_index),
+         None => true,
+     }
+ }
+ fn rd_is_defined(arena: &[DNode], e: usize) -> bool {
+-    match rd_in_call(arena, e).and_then(|c| rd_sem(arena, c)) {
++    let call = rd_in_call(arena, e);
++    if let Some(c) = call.filter(|&c| rd_passthrough_operator(&arena[c].name)) {
++        return rd_passthrough_indices(arena, c)
++            .any(|index| index == arena[e].arg_index || arena[e].arg_index == -1);
++    }
++    match call.and_then(|c| rd_sem(arena, c)) {
+         Some(m) => m.iter().any(|&(_, d)| d == arena[e].arg_index),
+         None => true,
+     }
+ }
+ fn rd_has_flow(arena: &[DNode], parent: usize, child: usize) -> bool {
+-    match rd_in_call(arena, parent).and_then(|c| rd_sem(arena, c)) {
++    let call = rd_in_call(arena, parent);
++    if let Some(c) = call.filter(|&c| rd_passthrough_operator(&arena[c].name)) {
++        let source = arena[parent].arg_index;
++        let target = arena[child].arg_index;
++        return (source == target || target == -1)
++            && rd_passthrough_indices(arena, c).any(|index| index == source);
++    }
++    match call.and_then(|c| rd_sem(arena, c)) {
+         Some(m) => m.contains(&(arena[parent].arg_index, arena[child].arg_index)),
+         None => true,
+     }
+@@ -10556,6 +10583,54 @@
+     }
+ 
+     #[test]
++    fn borrowed_pass_through_predicates_preserve_filtered_and_duplicate_indices() {
++        let mut arena = parse_dump_block(
++            "CALL NAME=<operator>.arrayInitializer CODE={}\n\
++             \x20\x20LITERAL CODE=first\n\
++             \x20\x20LITERAL CODE=second\n\
++             \x20\x20FIELD_IDENTIFIER CODE=query ARGUMENT_INDEX=-3\n\
++             \x20\x20FIELD_IDENTIFIER CODE=query ARGUMENT_INDEX=-2\n\
++             \x20\x20FIELD_IDENTIFIER CODE=query ARGUMENT_INDEX=-1\n\
++             \x20\x20FIELD_IDENTIFIER CODE=query ARGUMENT_INDEX=0\n\
++             \x20\x20FIELD_IDENTIFIER CODE=query ARGUMENT_INDEX=1\n\
++             \x20\x20FIELD_IDENTIFIER CODE=query ARGUMENT_INDEX=2\n\
++             \x20\x20FIELD_IDENTIFIER CODE=query ARGUMENT_INDEX=3\n",
++        );
++        for first in 0..20 {
++            for second in 0..20 {
++                for (node, option) in [(1, first), (2, second)] {
++                    arena[node].arg_index = option / 4 - 2;
++                    arena[node].has_arg = option % 4 >= 2;
++                    arena[node].label = if option % 2 == 0 {
++                        "LITERAL".to_string()
++                    } else {
++                        "FIELD_IDENTIFIER".to_string()
++                    };
++                }
++                // Retain the original vector construction as the specification.
++                let mapping = rd_sem(&arena, 0).expect("PTF has explicit semantics");
++                for source in 3..arena.len() {
++                    let index = arena[source].arg_index;
++                    assert_eq!(
++                        rd_is_used(&arena, source),
++                        mapping.iter().any(|&(s, _)| s == index)
++                    );
++                    assert_eq!(
++                        rd_is_defined(&arena, source),
++                        mapping.iter().any(|&(_, d)| d == index)
++                    );
++                    for target in 3..arena.len() {
++                        assert_eq!(
++                            rd_has_flow(&arena, source, target),
++                            mapping.contains(&(index, arena[target].arg_index))
++                        );
++                    }
++                }
++            }
++        }
++    }
++
++    #[test]
+     fn absent_expression_code_does_not_alias_explicit_empty_names() {
+         let arena = parse_dump_block(
+             "METHOD NAME=f FULL_NAME=f\n\

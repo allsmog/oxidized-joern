@@ -1,0 +1,13 @@
+   Compiling cpg-core v0.1.1 (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/cpg-rs/cpg-core)
+   Compiling cpg-frontend v0.1.1 (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/cpg-rs/cpg-frontend)
+   Compiling cpg-lang-c v0.1.1 (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/cpg-rs/cpg-lang-c)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.31s
+     Running unittests src/lib.rs (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/target/debug/deps/cpg_lang_c-f8b296735eb26716)
+
+running 3 tests
+test exact::rd_semantics_tests::absent_expression_code_does_not_alias_explicit_empty_names ... ok
+test exact::rd_semantics_tests::pass_through_validation_uses_actual_arguments_without_sibling_flow ... ok
+test exact::rd_semantics_tests::borrowed_pass_through_predicates_preserve_filtered_and_duplicate_indices ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 18 filtered out; finished in 0.01s
+

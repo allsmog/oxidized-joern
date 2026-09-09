@@ -1,0 +1,55 @@
+{
+  "candidateBinarySha256": "abf6ad43c3e72c77089bcdc50b2b163604d2c34a6c7e7399e0cd62bdab7c8808",
+  "rows": [
+    {
+      "case": "zlib-1.3.1-core-full",
+      "seconds": 3.9831832500058226,
+      "status": 0,
+      "runSha256": "3246a65684058aaec00baf72a4d0deb508e1b0b927c25e3dbb8b84cbd9832d9b",
+      "comparisons": {
+        "accepted-ninth": {
+          "source": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/ninth-batch/reviewed-final-real-differential/zlib-1.3.1-core-full/rust-canonical.txt",
+          "sourceSha256": "e2560b8344bd66437a96cb60554510a9185275ddcf9b849678af1c63cc9c53e7",
+          "rawMatchingLost": 0,
+          "rawMatchingGained": 8799,
+          "allRawRemoved": 4553,
+          "allRawAdded": 40736
+        },
+        "held-v2": {
+          "source": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/tenth-batch/final-real-differential/zlib-1.3.1-core-full/rust-canonical.txt",
+          "sourceSha256": "c94936943b62c681e49e7baab2b5ef1fb4e4dea0df5e0acf1c08b903dee8e081",
+          "rawMatchingLost": 0,
+          "rawMatchingGained": 96,
+          "allRawRemoved": 131,
+          "allRawAdded": 116
+        }
+      }
+    },
+    {
+      "case": "lua-5.4.7-full",
+      "seconds": 9.995080458000302,
+      "status": 0,
+      "runSha256": "d39dd3aa288e1d681dfd1672b8c991757e5335207b4bc4a0b65a0d26f21e137c",
+      "comparisons": {
+        "accepted-ninth": {
+          "source": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/ninth-batch/reviewed-final-real-differential/lua-5.4.7-full/rust-canonical.txt",
+          "sourceSha256": "4fd4e93170030f9343885942ce44643380b153122b8e450160bd5e8ff1290916",
+          "rawMatchingLost": 0,
+          "rawMatchingGained": 260,
+          "allRawRemoved": 389,
+          "allRawAdded": 384
+        },
+        "held-v2": {
+          "source": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/tenth-batch/final-real-differential/lua-5.4.7-full/rust-canonical.txt",
+          "sourceSha256": "52493a3bbd318bb0ccd67590267c59ed72fd1bb60d2e1504857dbf4bba4bcec5",
+          "rawMatchingLost": 0,
+          "rawMatchingGained": 0,
+          "allRawRemoved": 134,
+          "allRawAdded": 134
+        }
+      }
+    }
+  ],
+  "noResourceAcceptanceClaim": true,
+  "scriptSha256": "5af084fca0f738aaf4ba810ac18829f3ec8aa6e9f4957b7611000aa1a80374de"
+}

@@ -1,0 +1,835 @@
+{
+  "status": "INDEPENDENT_SAVED_OUTPUT_UNION_COUNT",
+  "counts": {
+    "projects": 18,
+    "uniqueSourceProjects": 18,
+    "acceptedNinthExact": 6,
+    "heldV2Exact": 11
+  },
+  "rows": [
+    {
+      "family": "body-includes",
+      "case": "body_include_macro_only",
+      "identity": [
+        [
+          "api.h",
+          "39c6a0ef8f0732115cce55a2ccc6edaa9f16cd4f0d45fb43ed5e4fe0b6849ee3"
+        ],
+        [
+          "main.c",
+          "18895073d0db98c33aa9c6aaa7924c07e99610f9efede43a31e34715d60319e5"
+        ]
+      ],
+      "sourcePaths": {
+        "api.h": "../body-includes/cases/body_include_macro_only/api.h",
+        "main.c": "../body-includes/cases/body_include_macro_only/main.c"
+      },
+      "expected": {
+        "path": "../body-includes/cases/body_include_macro_only/expected.txt",
+        "sha256": "c158364df1717bdc80e6d94d22b9567689d8c7d8d8517a96eabc44b8a993f49a"
+      },
+      "observations": {
+        "baseline": {
+          "exact": false,
+          "input": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/joern-parity/tests/fixtures/body-includes/cases/body_include_macro_only/baseline/actual.txt",
+            "sha256": "18fe1622a2ea7cfa96c304ef51aca49fc29abfa0c14be8a6f03765147c84ea77",
+            "bytes": 6495
+          },
+          "run": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/joern-parity/tests/fixtures/body-includes/cases/body_include_macro_only/baseline/run.json",
+            "sha256": "d91d365fa7a07936dc3bc045c71686f01cd7f1cda352cee06047871b97180c2f",
+            "bytes": 988
+          }
+        },
+        "candidate": {
+          "exact": true,
+          "input": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/joern-parity/tests/fixtures/body-includes/cases/body_include_macro_only/candidate/actual.txt",
+            "sha256": "c158364df1717bdc80e6d94d22b9567689d8c7d8d8517a96eabc44b8a993f49a",
+            "bytes": 6675
+          },
+          "run": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/joern-parity/tests/fixtures/body-includes/cases/body_include_macro_only/candidate/run.json",
+            "sha256": "b78108c7c9fb48727e66448d4d96140f766121699083e2f79e8143dafab81b1a",
+            "bytes": 1097
+          }
+        }
+      }
+    },
+    {
+      "family": "body-includes",
+      "case": "guarded_nested_relative_include",
+      "identity": [
+        [
+          "headers/api.h",
+          "4212ba295d8db18bad200705c0f44cd0268d53f02388ba498ef218783af832b9"
+        ],
+        [
+          "headers/leaf values.h",
+          "4a1886cf47df5e5da7c13efecd2ec4233db0a08e0e9bcc9c6caaa276f015f3f1"
+        ],
+        [
+          "main.c",
+          "88fd0f5da7a18648c6cb6eb85382212b6130d95e9090b3992eb04c1e0af826d4"
+        ]
+      ],
+      "sourcePaths": {
+        "main.c": "../body-includes/cases/guarded_nested_relative_include/main.c",
+        "headers/api.h": "../body-includes/cases/guarded_nested_relative_include/headers/api.h",
+        "headers/leaf values.h": "../body-includes/cases/guarded_nested_relative_include/headers/leaf values.h"
+      },
+      "expected": {
+        "path": "../body-includes/cases/guarded_nested_relative_include/expected.txt",
+        "sha256": "43156ea80dd53d452190969c4a313d5cc2a295a77806a8329511ca71885aa5cb"
+      },
+      "observations": {
+        "baseline": {
+          "exact": false,
+          "input": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/joern-parity/tests/fixtures/body-includes/cases/guarded_nested_relative_include/baseline/actual.txt",
+            "sha256": "be2cd15fb5087ad64c9c402d23b23c56541e831983a961d9d03f2bc5ae27afc5",
+            "bytes": 18581
+          },
+          "run": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/joern-parity/tests/fixtures/body-includes/cases/guarded_nested_relative_include/baseline/run.json",
+            "sha256": "2787b36f4b60e72f6f8a25348b7481b544acf4de34f02d83c6b73c5a535bdda2",
+            "bytes": 1318
+          }
+        },
+        "candidate": {
+          "exact": true,
+          "input": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/joern-parity/tests/fixtures/body-includes/cases/guarded_nested_relative_include/candidate/actual.txt",
+            "sha256": "43156ea80dd53d452190969c4a313d5cc2a295a77806a8329511ca71885aa5cb",
+            "bytes": 19895
+          },
+          "run": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/joern-parity/tests/fixtures/body-includes/cases/guarded_nested_relative_include/candidate/run.json",
+            "sha256": "1e809e68f7ee871135d27294079b8d9fb2c207b16bb70c2cd8c2c292d1ead30a",
+            "bytes": 1415
+          }
+        }
+      }
+    },
+    {
+      "family": "body-includes",
+      "case": "inactive_body_include",
+      "identity": [
+        [
+          "inactive.h",
+          "e6be797d4b0e670eb494b4dd9050eb1042f56b832f8218b2a8905b2ab1ac5d7d"
+        ],
+        [
+          "main.c",
+          "6f9fc5b3121682bbce24044f2bedfc75774968c616951955ea4f0c0bb9ba76a6"
+        ]
+      ],
+      "sourcePaths": {
+        "main.c": "../body-includes/cases/inactive_body_include/main.c",
+        "inactive.h": "../body-includes/cases/inactive_body_include/inactive.h"
+      },
+      "expected": {
+        "path": "../body-includes/cases/inactive_body_include/expected.txt",
+        "sha256": "dee62aa4096c4c46c16ebb0a91c5906c1f6786a8b5483d6508ad2837a6a80f3e"
+      },
+      "observations": {
+        "baseline": {
+          "exact": false,
+          "input": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/joern-parity/tests/fixtures/body-includes/cases/inactive_body_include/baseline/actual.txt",
+            "sha256": "cbbcf32a5e206bd6fca3c2b6ca4cd4c4d2a10b7833395a471ab5b642a91b61fe",
+            "bytes": 16102
+          },
+          "run": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/joern-parity/tests/fixtures/body-includes/cases/inactive_body_include/baseline/run.json",
+            "sha256": "2e8d4ff4479302c9ea816d32c7111fa87beef7e7da0f26729061d448c1246168",
+            "bytes": 993
+          }
+        },
+        "candidate": {
+          "exact": true,
+          "input": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/joern-parity/tests/fixtures/body-includes/cases/inactive_body_include/candidate/actual.txt",
+            "sha256": "dee62aa4096c4c46c16ebb0a91c5906c1f6786a8b5483d6508ad2837a6a80f3e",
+            "bytes": 16102
+          },
+          "run": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/joern-parity/tests/fixtures/body-includes/cases/inactive_body_include/candidate/run.json",
+            "sha256": "f0a906ed13aa89c496ee47e591fcb87c8f7830d5f027f6ed2f46dcd9667795d7",
+            "bytes": 1103
+          }
+        }
+      }
+    },
+    {
+      "family": "body-includes",
+      "case": "nested_scope_typedef_macro",
+      "identity": [
+        [
+          "main.c",
+          "15477e5092143e0b32762327e15d6323a40786dc7444d23868fdb300c85a2b72"
+        ],
+        [
+          "scope.h",
+          "0180b80ae57402852b44fe3f0a26dc6d93a91123f1d0e869b0d4d339e9271bdd"
+        ]
+      ],
+      "sourcePaths": {
+        "main.c": "../body-includes/cases/nested_scope_typedef_macro/main.c",
+        "scope.h": "../body-includes/cases/nested_scope_typedef_macro/scope.h"
+      },
+      "expected": {
+        "path": "../body-includes/cases/nested_scope_typedef_macro/expected.txt",
+        "sha256": "e73d9af14f883513c4f5f343a0a0c84257d4e0d700186565927958f9c4bb66a1"
+      },
+      "observations": {
+        "baseline": {
+          "exact": false,
+          "input": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/joern-parity/tests/fixtures/body-includes/cases/nested_scope_typedef_macro/baseline/actual.txt",
+            "sha256": "6c2d6bafbe692e3d1cfa5bd02f7ee1f08a75371cd08fd4b574cb0572e7b5dff2",
+            "bytes": 24795
+          },
+          "run": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/joern-parity/tests/fixtures/body-includes/cases/nested_scope_typedef_macro/baseline/run.json",
+            "sha256": "f6da87ac3455e414441823e325b0d16fb27619359004665483073642ce7a9712",
+            "bytes": 1002
+          }
+        },
+        "candidate": {
+          "exact": true,
+          "input": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/joern-parity/tests/fixtures/body-includes/cases/nested_scope_typedef_macro/candidate/actual.txt",
+            "sha256": "e73d9af14f883513c4f5f343a0a0c84257d4e0d700186565927958f9c4bb66a1",
+            "bytes": 26908
+          },
+          "run": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/joern-parity/tests/fixtures/body-includes/cases/nested_scope_typedef_macro/candidate/run.json",
+            "sha256": "ae7b3b93b965043f341f7c7ab4639ed8f1b79f9f315dc43863a8f76c0f67b424",
+            "bytes": 1112
+          }
+        }
+      }
+    },
+    {
+      "family": "body-includes",
+      "case": "primitive_static_array_include",
+      "identity": [
+        [
+          "main.c",
+          "ef12857b61998de6a68ac326cb8005363a62cf1d35e93da452c63700bc6e71ff"
+        ],
+        [
+          "table.h",
+          "01722e7790931e4dffd1479a5bca2487679e42b6ea367e58798b1a37977aca51"
+        ]
+      ],
+      "sourcePaths": {
+        "main.c": "../body-includes/cases/primitive_static_array_include/main.c",
+        "table.h": "../body-includes/cases/primitive_static_array_include/table.h"
+      },
+      "expected": {
+        "path": "../body-includes/cases/primitive_static_array_include/expected.txt",
+        "sha256": "7a413043d5f75a93899094c5efd86725bad67c504e81b463d5530af182c8759c"
+      },
+      "observations": {
+        "baseline": {
+          "exact": false,
+          "input": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/joern-parity/tests/fixtures/body-includes/cases/primitive_static_array_include/baseline/actual.txt",
+            "sha256": "5cf358788ddb5b9a516fa01dc203241b1f9f0c276739df9febd3ba0f18e0b7fd",
+            "bytes": 15243
+          },
+          "run": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/joern-parity/tests/fixtures/body-includes/cases/primitive_static_array_include/baseline/run.json",
+            "sha256": "bc063717b6ab2b9db8d0133cf9e58f3f13b364d01cd00c7f3944234e0fe951fe",
+            "bytes": 1013
+          }
+        },
+        "candidate": {
+          "exact": true,
+          "input": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/joern-parity/tests/fixtures/body-includes/cases/primitive_static_array_include/candidate/actual.txt",
+            "sha256": "7a413043d5f75a93899094c5efd86725bad67c504e81b463d5530af182c8759c",
+            "bytes": 21379
+          },
+          "run": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/joern-parity/tests/fixtures/body-includes/cases/primitive_static_array_include/candidate/run.json",
+            "sha256": "5f5acb433bd9a010070a4940d943a3ec6bc7f8593bb08e4230a4e654c90a30b7",
+            "bytes": 1124
+          }
+        }
+      }
+    },
+    {
+      "family": "body-includes",
+      "case": "primitive_static_array_inline",
+      "identity": [
+        [
+          "main.c",
+          "eb948f536a5a05c904ea98da790f9a48729a7b6f0cd3ad7454de45e564758128"
+        ]
+      ],
+      "sourcePaths": {
+        "main.c": "../body-includes/cases/primitive_static_array_inline/main.c"
+      },
+      "expected": {
+        "path": "../body-includes/cases/primitive_static_array_inline/expected.txt",
+        "sha256": "d709ab346526f395dbab7d12c694fe3f16b6f05dc0c288d4cfc05b6da32a3a70"
+      },
+      "observations": {
+        "baseline": {
+          "exact": true,
+          "input": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/joern-parity/tests/fixtures/body-includes/cases/primitive_static_array_inline/baseline/actual.txt",
+            "sha256": "d709ab346526f395dbab7d12c694fe3f16b6f05dc0c288d4cfc05b6da32a3a70",
+            "bytes": 18012
+          },
+          "run": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/joern-parity/tests/fixtures/body-includes/cases/primitive_static_array_inline/baseline/run.json",
+            "sha256": "6b44b6e7381aa1841ae6e16f4305a4f00b97a6346f3366a1b84b6d57fc633b61",
+            "bytes": 751
+          }
+        },
+        "candidate": {
+          "exact": true,
+          "input": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/joern-parity/tests/fixtures/body-includes/cases/primitive_static_array_inline/candidate/actual.txt",
+            "sha256": "d709ab346526f395dbab7d12c694fe3f16b6f05dc0c288d4cfc05b6da32a3a70",
+            "bytes": 18012
+          },
+          "run": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/joern-parity/tests/fixtures/body-includes/cases/primitive_static_array_inline/candidate/run.json",
+            "sha256": "bfdbf7504281e1174c6efea223a8e0ae9b3e24f2127786f5700cf238d56af642",
+            "bytes": 874
+          }
+        }
+      }
+    },
+    {
+      "family": "body-includes",
+      "case": "repeated_include_context",
+      "identity": [
+        [
+          "main.c",
+          "3978e883bd0aaf3d326144a6cd78a87a525f590207de23552f98049932b3e20f"
+        ],
+        [
+          "nested/table.h",
+          "3bb7ed86169716c309a9d27e0016132128da26348425a566436c287738a3c15a"
+        ],
+        [
+          "repeat.h",
+          "19dcabefdf697b3ed835d49328b7d35d218acf0dffa5f64c96235d93a9cafb84"
+        ]
+      ],
+      "sourcePaths": {
+        "repeat.h": "../body-includes/cases/repeated_include_context/repeat.h",
+        "main.c": "../body-includes/cases/repeated_include_context/main.c",
+        "nested/table.h": "../body-includes/cases/repeated_include_context/nested/table.h"
+      },
+      "expected": {
+        "path": "../body-includes/cases/repeated_include_context/expected.txt",
+        "sha256": "febd4ffe0c249f8dbd0f4fac596f35b065914292f1d1e886f1d691a1c87ffaba"
+      },
+      "observations": {
+        "baseline": {
+          "exact": false,
+          "input": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/joern-parity/tests/fixtures/body-includes/cases/repeated_include_context/baseline/actual.txt",
+            "sha256": "805fc908e10878d4feeb9fe59dc7dad936541d1c97da1ffb201cbc11ffaa8a23",
+            "bytes": 29655
+          },
+          "run": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/joern-parity/tests/fixtures/body-includes/cases/repeated_include_context/baseline/run.json",
+            "sha256": "bc4c998ce267fe260c10ae95755f04ccbdd5b9329ce0688e182f9c6b9b5ece5e",
+            "bytes": 1267
+          }
+        },
+        "candidate": {
+          "exact": false,
+          "input": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/joern-parity/tests/fixtures/body-includes/cases/repeated_include_context/candidate/actual.txt",
+            "sha256": "308c876d33cccfc46676406966a5b2ce7d4b2d0dbb02e2019c6393415901295e",
+            "bytes": 56548
+          },
+          "run": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/joern-parity/tests/fixtures/body-includes/cases/repeated_include_context/candidate/run.json",
+            "sha256": "ed2bcfbcdba0c24bb8ec909d6d92998ac4abb55fcbaea347efe94e9f3a773d5f",
+            "bytes": 1365
+          }
+        }
+      }
+    },
+    {
+      "family": "body-includes",
+      "case": "tiny_fixedtables_include",
+      "identity": [
+        [
+          "fixed.h",
+          "3039380a12e6dba1fb44314f13292d1b5ec6744aa80eff5599566a29ea94ea86"
+        ],
+        [
+          "main.c",
+          "7203039d3be732abfb9abaad7177eaa77efa51d6e9fa58d58733346eb6cb4dda"
+        ]
+      ],
+      "sourcePaths": {
+        "fixed.h": "../body-includes/cases/tiny_fixedtables_include/fixed.h",
+        "main.c": "../body-includes/cases/tiny_fixedtables_include/main.c"
+      },
+      "expected": {
+        "path": "../body-includes/cases/tiny_fixedtables_include/expected.txt",
+        "sha256": "fc4a1360d6f10152edb364c346a47ae73d2df2460fe5ef12da2d2e79cbb7dd3f"
+      },
+      "observations": {
+        "baseline": {
+          "exact": false,
+          "input": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/joern-parity/tests/fixtures/body-includes/cases/tiny_fixedtables_include/baseline/actual.txt",
+            "sha256": "651cc81c2b575285ad1e5c569884b00ed4f65d38d3c7eec762cc6633159c8223",
+            "bytes": 31710
+          },
+          "run": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/joern-parity/tests/fixtures/body-includes/cases/tiny_fixedtables_include/baseline/run.json",
+            "sha256": "2e9ca101b2640815387e471584b0a312eb7549488994cf941cd984bf70a73e26",
+            "bytes": 996
+          }
+        },
+        "candidate": {
+          "exact": false,
+          "input": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/joern-parity/tests/fixtures/body-includes/cases/tiny_fixedtables_include/candidate/actual.txt",
+            "sha256": "3b15e5adbaa6fba426e00c4b695cafb905e530dc4627573646e3388279393796",
+            "bytes": 48346
+          },
+          "run": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/joern-parity/tests/fixtures/body-includes/cases/tiny_fixedtables_include/candidate/run.json",
+            "sha256": "f2adbd87634274b5112752b5a9a91f5e13cdf4df5bec90d7ab0487ed5e5b8eae",
+            "bytes": 1106
+          }
+        }
+      }
+    },
+    {
+      "family": "body-includes",
+      "case": "tiny_fixedtables_inline",
+      "identity": [
+        [
+          "main.c",
+          "8af2a0a9531deec50f16e8c125de4000c0636b443b11628e232bb9e9413d2a6f"
+        ]
+      ],
+      "sourcePaths": {
+        "main.c": "../body-includes/cases/tiny_fixedtables_inline/main.c"
+      },
+      "expected": {
+        "path": "../body-includes/cases/tiny_fixedtables_inline/expected.txt",
+        "sha256": "6d613c7085ab54541cc1d9fa83494748e33fe70bfc5c541ee39f12aa8046cadd"
+      },
+      "observations": {
+        "baseline": {
+          "exact": false,
+          "input": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/joern-parity/tests/fixtures/body-includes/cases/tiny_fixedtables_inline/baseline/actual.txt",
+            "sha256": "7fc32775a3481703dbe3d002b091e4c68c04bea03c0b2d808c6711e06307fb55",
+            "bytes": 38664
+          },
+          "run": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/joern-parity/tests/fixtures/body-includes/cases/tiny_fixedtables_inline/baseline/run.json",
+            "sha256": "36fe8e20ca137bd91b83a59ff83f778ce1d631ece1ca625e5e38a37b10285c63",
+            "bytes": 739
+          }
+        },
+        "candidate": {
+          "exact": false,
+          "input": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/joern-parity/tests/fixtures/body-includes/cases/tiny_fixedtables_inline/candidate/actual.txt",
+            "sha256": "7fc32775a3481703dbe3d002b091e4c68c04bea03c0b2d808c6711e06307fb55",
+            "bytes": 38664
+          },
+          "run": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/joern-parity/tests/fixtures/body-includes/cases/tiny_fixedtables_inline/candidate/run.json",
+            "sha256": "8e9631613e3cc896819f8979f787ae9dd58f4667e9bc2c28aa5fc87f40d75803",
+            "bytes": 863
+          }
+        }
+      }
+    },
+    {
+      "family": "body-includes",
+      "case": "unresolved_header_controls",
+      "identity": [
+        [
+          "decoys/missing-system.h",
+          "26fb8a822fc16e65f00ab026f77d90c83eae8b1224749241467a16131d6cf2c9"
+        ],
+        [
+          "decoys/missing.h",
+          "34a841d961784ae753f6d50c9addf13918ab1ccedc4f043e3c485a43cd722495"
+        ],
+        [
+          "main.c",
+          "5c95fbe23189d58962a246715705b7072c989f997d3c32c52951e37529178540"
+        ]
+      ],
+      "sourcePaths": {
+        "main.c": "../body-includes/cases/unresolved_header_controls/main.c",
+        "decoys/missing-system.h": "../body-includes/cases/unresolved_header_controls/decoys/missing-system.h",
+        "decoys/missing.h": "../body-includes/cases/unresolved_header_controls/decoys/missing.h"
+      },
+      "expected": {
+        "path": "../body-includes/cases/unresolved_header_controls/expected.txt",
+        "sha256": "11f5a05e9c4c5f9ed1420f7ddd69e503c800596a00374b71f6c6adabbbdd9635"
+      },
+      "observations": {
+        "baseline": {
+          "exact": false,
+          "input": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/joern-parity/tests/fixtures/body-includes/cases/unresolved_header_controls/baseline/actual.txt",
+            "sha256": "589abaef9124c91d8974e91bb34749994bf3e0b23fdccd3eb573e24dbe5964a5",
+            "bytes": 13451
+          },
+          "run": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/joern-parity/tests/fixtures/body-includes/cases/unresolved_header_controls/baseline/run.json",
+            "sha256": "e088c9952b885a387d8f5f9747fb02b1f578f916f4353a2aed9a462e0eca87e0",
+            "bytes": 1309
+          }
+        },
+        "candidate": {
+          "exact": false,
+          "input": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/joern-parity/tests/fixtures/body-includes/cases/unresolved_header_controls/candidate/actual.txt",
+            "sha256": "c6de4af73fa85060da17bdb4a33a1d50614b906e92d4b5c2c3307b011017bb43",
+            "bytes": 13451
+          },
+          "run": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/joern-parity/tests/fixtures/body-includes/cases/unresolved_header_controls/candidate/run.json",
+            "sha256": "c4c97b614e4200a787621fe4c71ae1a0f6c79ab5201b6b8a8cdd69984d2edc05",
+            "bytes": 1407
+          }
+        }
+      }
+    },
+    {
+      "family": "body-includes",
+      "case": "used_scalar_include",
+      "identity": [
+        [
+          "main.c",
+          "5d296e0bff001e708d474a0d9fd6b262d47da11f197e1322007fc116a641d252"
+        ],
+        [
+          "value.h",
+          "9078af34397a7ca8248cdc31c60670042893dc4abe485490ce0cb400f4d7df32"
+        ]
+      ],
+      "sourcePaths": {
+        "value.h": "../body-includes/cases/used_scalar_include/value.h",
+        "main.c": "../body-includes/cases/used_scalar_include/main.c"
+      },
+      "expected": {
+        "path": "../body-includes/cases/used_scalar_include/expected.txt",
+        "sha256": "a0e7f199b0f8c6f197508cc6f998f509ea515ff368cbe3048f8eb021fbee14ad"
+      },
+      "observations": {
+        "baseline": {
+          "exact": false,
+          "input": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/joern-parity/tests/fixtures/body-includes/cases/used_scalar_include/baseline/actual.txt",
+            "sha256": "bd13f304ea9a2cef3cf073ede4592411062d9a6ae8dc375d00f7950b57f4487a",
+            "bytes": 9526
+          },
+          "run": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/joern-parity/tests/fixtures/body-includes/cases/used_scalar_include/baseline/run.json",
+            "sha256": "f14fe962abd17826004b10c452fb7f0cb12b7f7de5b8b07f9492c1b406e8e5d0",
+            "bytes": 980
+          }
+        },
+        "candidate": {
+          "exact": true,
+          "input": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/joern-parity/tests/fixtures/body-includes/cases/used_scalar_include/candidate/actual.txt",
+            "sha256": "a0e7f199b0f8c6f197508cc6f998f509ea515ff368cbe3048f8eb021fbee14ad",
+            "bytes": 10852
+          },
+          "run": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/joern-parity/tests/fixtures/body-includes/cases/used_scalar_include/candidate/run.json",
+            "sha256": "5f5d45332318e9fadd04542a2ee1c12a1c7c4611796243a74f926666963bc4c8",
+            "bytes": 1091
+          }
+        }
+      }
+    },
+    {
+      "family": "body-includes",
+      "case": "used_scalar_inline",
+      "identity": [
+        [
+          "main.c",
+          "4f6acf89c5ef6ed3f224fbb4f7c737f69219c98ac6fc15a312831b699a991221"
+        ]
+      ],
+      "sourcePaths": {
+        "main.c": "../body-includes/cases/used_scalar_inline/main.c"
+      },
+      "expected": {
+        "path": "../body-includes/cases/used_scalar_inline/expected.txt",
+        "sha256": "f4104faa7c7c5d9b0d23a34be8e6834d3e7a5a72b2f7312c43c2e8b78aea7dc6"
+      },
+      "observations": {
+        "baseline": {
+          "exact": true,
+          "input": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/joern-parity/tests/fixtures/body-includes/cases/used_scalar_inline/baseline/actual.txt",
+            "sha256": "f4104faa7c7c5d9b0d23a34be8e6834d3e7a5a72b2f7312c43c2e8b78aea7dc6",
+            "bytes": 8420
+          },
+          "run": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/joern-parity/tests/fixtures/body-includes/cases/used_scalar_inline/baseline/run.json",
+            "sha256": "c91c01b8bb435636e31f7d1afed41dbc13062cb6db37e54c8c5348ae2b1c2e9d",
+            "bytes": 729
+          }
+        },
+        "candidate": {
+          "exact": true,
+          "input": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/joern-parity/tests/fixtures/body-includes/cases/used_scalar_inline/candidate/actual.txt",
+            "sha256": "f4104faa7c7c5d9b0d23a34be8e6834d3e7a5a72b2f7312c43c2e8b78aea7dc6",
+            "bytes": 8420
+          },
+          "run": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/joern-parity/tests/fixtures/body-includes/cases/used_scalar_inline/candidate/run.json",
+            "sha256": "d6166d85024d5f5ca964b8b235251c7cc86b200af4a81bdc77f6367ea85c8e19",
+            "bytes": 852
+          }
+        }
+      }
+    },
+    {
+      "family": "body-includes",
+      "case": "included_call_origin",
+      "identity": [
+        [
+          "api.h",
+          "3064f0f3d560eb7f40dfe541d055b10025f6a6f82d2e8ee2f3dd57915d1205d2"
+        ],
+        [
+          "main.c",
+          "205780cf31cc2024bab2bdf052a8242d00d1faa3dab0a203f1b511133e18eba2"
+        ]
+      ],
+      "sourcePaths": {
+        "api.h": "../body-includes/cases/included_call_origin/api.h",
+        "main.c": "../body-includes/cases/included_call_origin/main.c"
+      },
+      "expected": {
+        "path": "../body-includes/cases/included_call_origin/expected.txt",
+        "sha256": "ede00de3f22c2caff78996f3bdbed91ba716cbf206b9aa17da6dbac113d1f2a9"
+      },
+      "observations": {
+        "baseline": {
+          "exact": false,
+          "input": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/joern-parity/tests/fixtures/body-includes/cases/included_call_origin/baseline/actual.txt",
+            "sha256": "f69035b77ccc6b247d31ac8cbbd0df053cf23ae8d8d6ba7c453737c4844cc2a2",
+            "bytes": 11668
+          },
+          "run": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/joern-parity/tests/fixtures/body-includes/cases/included_call_origin/baseline/run.json",
+            "sha256": "9f10245818674568bd91b9cafcca065c9677e27a24b61846fc418e360f8a985f",
+            "bytes": 3185
+          }
+        },
+        "candidate": {
+          "exact": true,
+          "input": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/joern-parity/tests/fixtures/body-includes/cases/included_call_origin/candidate/actual.txt",
+            "sha256": "ede00de3f22c2caff78996f3bdbed91ba716cbf206b9aa17da6dbac113d1f2a9",
+            "bytes": 13553
+          },
+          "run": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/joern-parity/tests/fixtures/body-includes/cases/included_call_origin/candidate/run.json",
+            "sha256": "257fc0e6226d58188f7ea35a785816ebe193ac3f1514f196b23a47dacf8e0b16",
+            "bytes": 1106
+          }
+        }
+      }
+    },
+    {
+      "family": "body-includes",
+      "case": "inline_call_origin",
+      "identity": [
+        [
+          "main.c",
+          "7383be649c1b401ba51209a1c8dd51fef9e8269f8cab79fa985fc71474614faa"
+        ]
+      ],
+      "sourcePaths": {
+        "main.c": "../body-includes/cases/inline_call_origin/main.c"
+      },
+      "expected": {
+        "path": "../body-includes/cases/inline_call_origin/expected.txt",
+        "sha256": "208ef8ac9a5ed8db304690a3d4b3e46555b578e757b56c0a89c4f2df4e503ec4"
+      },
+      "observations": {
+        "baseline": {
+          "exact": true,
+          "input": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/joern-parity/tests/fixtures/body-includes/cases/inline_call_origin/baseline/actual.txt",
+            "sha256": "208ef8ac9a5ed8db304690a3d4b3e46555b578e757b56c0a89c4f2df4e503ec4",
+            "bytes": 10757
+          },
+          "run": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/joern-parity/tests/fixtures/body-includes/cases/inline_call_origin/baseline/run.json",
+            "sha256": "52fb558e20cb6da8e19af4e77f6cb40629920689abf30bc0c82071a52ff949e4",
+            "bytes": 2576
+          }
+        },
+        "candidate": {
+          "exact": true,
+          "input": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/joern-parity/tests/fixtures/body-includes/cases/inline_call_origin/candidate/actual.txt",
+            "sha256": "208ef8ac9a5ed8db304690a3d4b3e46555b578e757b56c0a89c4f2df4e503ec4",
+            "bytes": 10757
+          },
+          "run": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/joern-parity/tests/fixtures/body-includes/cases/inline_call_origin/candidate/run.json",
+            "sha256": "eb567c2eabdb420604a795a2ad6fb8aa39cca809b230d284ca1561a566b8caaa",
+            "bytes": 859
+          }
+        }
+      }
+    },
+    {
+      "family": "array-dimension-macros",
+      "case": "bare_macro",
+      "identity": [
+        [
+          "main.c",
+          "8afa523c658dcca3169bdde8ffd77954c6553e84f0a7cbdb5448868892318077"
+        ]
+      ],
+      "expected": {
+        "path": "cases/bare_macro/expected.txt",
+        "sha256": "d746557ebaab9b82965a2a20b8f25fd4fc2e5ba67895adcc280cce1cec439260"
+      },
+      "observations": {
+        "baseline": {
+          "status": "COMPLETE_BOUND_REPLAY",
+          "exitCode": 0,
+          "exact": false,
+          "actualSha256": "d290ffd069185aba25cbb5383d1148abd819bd2a44801a06e67027a06d7f3644",
+          "run": "cases/bare_macro/baseline/run.json",
+          "fullDiff": "cases/bare_macro/baseline/complete.diff"
+        },
+        "candidate": {
+          "status": "COMPLETE_BOUND_REPLAY",
+          "exitCode": 0,
+          "exact": true,
+          "actualSha256": "d746557ebaab9b82965a2a20b8f25fd4fc2e5ba67895adcc280cce1cec439260",
+          "run": "cases/bare_macro/held-v2/run.json",
+          "fullDiff": "cases/bare_macro/held-v2/complete.diff"
+        }
+      }
+    },
+    {
+      "family": "array-dimension-macros",
+      "case": "binary_macro",
+      "identity": [
+        [
+          "main.c",
+          "8da3a68392558d8838fa8074c58022b9df57a98f2bf2ad32803e18b1c2931c74"
+        ]
+      ],
+      "expected": {
+        "path": "cases/binary_macro/expected.txt",
+        "sha256": "c561375e48835ef513e37e298c29e2067737854163f26512ab704f53eae6d224"
+      },
+      "observations": {
+        "baseline": {
+          "status": "COMPLETE_BOUND_REPLAY",
+          "exitCode": 0,
+          "exact": true,
+          "actualSha256": "c561375e48835ef513e37e298c29e2067737854163f26512ab704f53eae6d224",
+          "run": "cases/binary_macro/baseline/run.json",
+          "fullDiff": "cases/binary_macro/baseline/complete.diff"
+        },
+        "candidate": {
+          "status": "COMPLETE_BOUND_REPLAY",
+          "exitCode": 0,
+          "exact": false,
+          "actualSha256": "f20132afcc813f78d2b72e75386278f00a41950da3b61438442d178e7916eaa5",
+          "run": "cases/binary_macro/held-v2/run.json",
+          "fullDiff": "cases/binary_macro/held-v2/complete.diff"
+        }
+      }
+    },
+    {
+      "family": "array-dimension-macros",
+      "case": "parenthesized_macro",
+      "identity": [
+        [
+          "main.c",
+          "7c3989e3ecc0f82ecc24e215daa162b45afe4f88971aac27240f357abaad1c45"
+        ]
+      ],
+      "expected": {
+        "path": "cases/parenthesized_macro/expected.txt",
+        "sha256": "08130cca1e81cd61ac03c9a5c988bd7e108b4368b74ce598ca0fe1041152ae46"
+      },
+      "observations": {
+        "baseline": {
+          "status": "COMPLETE_BOUND_REPLAY",
+          "exitCode": 0,
+          "exact": true,
+          "actualSha256": "08130cca1e81cd61ac03c9a5c988bd7e108b4368b74ce598ca0fe1041152ae46",
+          "run": "cases/parenthesized_macro/baseline/run.json",
+          "fullDiff": "cases/parenthesized_macro/baseline/complete.diff"
+        },
+        "candidate": {
+          "status": "COMPLETE_BOUND_REPLAY",
+          "exitCode": 0,
+          "exact": false,
+          "actualSha256": "62de60accd3462e842531643d778d0a9626b8dbfbc4f56c00e38975d07d5d18a",
+          "run": "cases/parenthesized_macro/held-v2/run.json",
+          "fullDiff": "cases/parenthesized_macro/held-v2/complete.diff"
+        }
+      }
+    },
+    {
+      "family": "array-dimension-macros",
+      "case": "unary_macro",
+      "identity": [
+        [
+          "main.c",
+          "a70cfaa22d1ca206e7ac909f1d4916f6db91985e813446b54e34c6abd6545db6"
+        ]
+      ],
+      "expected": {
+        "path": "cases/unary_macro/expected.txt",
+        "sha256": "3968d5812b22f0b914b5e242870383827592ec8ae04772a0efd6a0643e899f26"
+      },
+      "observations": {
+        "baseline": {
+          "status": "COMPLETE_BOUND_REPLAY",
+          "exitCode": 0,
+          "exact": true,
+          "actualSha256": "3968d5812b22f0b914b5e242870383827592ec8ae04772a0efd6a0643e899f26",
+          "run": "cases/unary_macro/baseline/run.json",
+          "fullDiff": "cases/unary_macro/baseline/complete.diff"
+        },
+        "candidate": {
+          "status": "COMPLETE_BOUND_REPLAY",
+          "exitCode": 0,
+          "exact": false,
+          "actualSha256": "a55bb55ea2ac225b3d43f9509c9f7e92dab538d9bbd560a558742567cdbeb0b4",
+          "run": "cases/unary_macro/held-v2/run.json",
+          "fullDiff": "cases/unary_macro/held-v2/complete.diff"
+        }
+      }
+    }
+  ],
+  "scope": "Existing14 retain their frozen workerV2 outputs; new4 use held integrated rootV2. Source/binary bindings are recorded separately. No new replay or repaired-candidate result is claimed."
+}

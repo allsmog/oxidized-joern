@@ -137,9 +137,25 @@ metadata queue has no eligible event, a compatibility fallback remains;
 this is not a complete port of upstream macro handling.
 
 
+The [tenth batch](../docs/conformance/astra-tenth-batch-2026-09-08.md) lowers
+selected supplied body-header declarations through separate include-occurrence
+views, preserving caller scope and measured header line origins. Synthetic
+macro metadata follows the pinned source/header pass precedence. Fourteen of
+18 complete new projects are exact and fully gated; four diagnostics remain.
+Bare macro array dimensions expand while compound dimensions retain source
+spelling. A pass-through dataflow allocation repair preserves the measured
+relation and brings repeated builds under the unchanged resource ceilings.
+Whole zlib/Lua matching records gain 8,799/260 with no matching losses; exact
+method ASTs are 160/410 and 1,438/2,274. Both full projections still differ
+from Joern. The complete fixedtables initializer topology is now present,
+while identity, long CODE, flow-label and linking gaps remain. Repeated body
+includes and quoted-header lookup retain separate diagnostics. Final workspace,
+live-oracle, native and official real-project gates pass; no non-C, schema,
+binary-format, console or query compatibility is promoted by this batch.
+
 Confirmed remaining C gaps include broader include/build-definition context,
 function-like macros in preprocessor conditions,
-body includes and runtime control chains split by preprocessor directives,
+repeated body includes and runtime control chains split by preprocessor directives,
 variadics, stringification, token pasting, unbraced multi-statement replacements,
 unpinned initializer and field-designator forms, tagged and alias type
 resolution, nested macro expansion and recovery-context behavior, and further

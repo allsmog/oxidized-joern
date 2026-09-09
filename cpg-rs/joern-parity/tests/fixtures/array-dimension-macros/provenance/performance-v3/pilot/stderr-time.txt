@@ -1,0 +1,21 @@
+built 26 files in 3.04402275s (parallel 3.034856208s, merge 1.148792ms, passes 22.792µs, summaries 7.994958ms)
+dumped 438638 edges to "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/pilot-v3-ptf/edges.txt"
+saved 70252 nodes to /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/pilot-v3-ptf/graph.cpg (8471024 bytes)
+        3.61 real         2.89 user         0.16 sys
+           512393216  maximum resident set size
+                   0  average shared memory size
+                   0  average unshared data size
+                   0  average unshared stack size
+               42900  page reclaims
+                   0  page faults
+                   0  swaps
+                   0  block input operations
+                   0  block output operations
+                   0  messages sent
+                   0  messages received
+                   0  signals received
+                  12  voluntary context switches
+               31068  involuntary context switches
+         53085490837  instructions retired
+         11209046510  cycles elapsed
+           340984504  peak memory footprint

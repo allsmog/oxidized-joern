@@ -1,0 +1,17 @@
+{
+  "case": "inline_call_origin",
+  "exitCode": 0,
+  "seconds": 0.01099875001818873,
+  "exact": true,
+  "command": [
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/frozen-v2/joern-parity",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/replay-origins-v2/inline_call_origin/input/main.c"
+  ],
+  "inputs": {
+    "main.c": "7383be649c1b401ba51209a1c8dd51fef9e8269f8cab79fa985fc71474614faa"
+  },
+  "expectedSha256": "208ef8ac9a5ed8db304690a3d4b3e46555b578e757b56c0a89c4f2df4e503ec4",
+  "actualSha256": "208ef8ac9a5ed8db304690a3d4b3e46555b578e757b56c0a89c4f2df4e503ec4",
+  "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "diffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

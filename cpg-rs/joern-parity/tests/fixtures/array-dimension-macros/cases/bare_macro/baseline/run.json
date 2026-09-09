@@ -1,0 +1,61 @@
+{
+  "case": "bare_macro",
+  "status": "COMPLETE_PRODUCTION_COMPARISON",
+  "command": [
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/ninth-batch/reviewed-final-real-differential/bin/joern-parity",
+    "--production",
+    "main.c"
+  ],
+  "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/tenth-array-dimension-review/input/bare_macro",
+  "exitCode": 0,
+  "timedOut": false,
+  "seconds": 0.056625249999342486,
+  "inputBefore": {
+    "expected.txt": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/tenth-array-dimension-review/input/bare_macro/expected.txt",
+      "sha256": "d746557ebaab9b82965a2a20b8f25fd4fc2e5ba67895adcc280cce1cec439260",
+      "bytes": 30791
+    },
+    "main.c": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/tenth-array-dimension-review/input/bare_macro/main.c",
+      "sha256": "8afa523c658dcca3169bdde8ffd77954c6553e84f0a7cbdb5448868892318077",
+      "bytes": 212
+    }
+  },
+  "inputAfter": {
+    "expected.txt": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/tenth-array-dimension-review/input/bare_macro/expected.txt",
+      "sha256": "d746557ebaab9b82965a2a20b8f25fd4fc2e5ba67895adcc280cce1cec439260",
+      "bytes": 30791
+    },
+    "main.c": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/tenth-array-dimension-review/input/bare_macro/main.c",
+      "sha256": "8afa523c658dcca3169bdde8ffd77954c6553e84f0a7cbdb5448868892318077",
+      "bytes": 212
+    }
+  },
+  "expected": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/tenth-array-dimension-review/input/bare_macro/expected.txt",
+    "sha256": "d746557ebaab9b82965a2a20b8f25fd4fc2e5ba67895adcc280cce1cec439260",
+    "bytes": 30791
+  },
+  "actual": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/tenth-array-dimension-review/accepted-ninth/bare_macro/actual.txt",
+    "sha256": "d290ffd069185aba25cbb5383d1148abd819bd2a44801a06e67027a06d7f3644",
+    "bytes": 31139
+  },
+  "stderr": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/tenth-array-dimension-review/accepted-ninth/bare_macro/stderr.txt",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0
+  },
+  "completeDiff": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/tenth-array-dimension-review/accepted-ninth/bare_macro/complete.diff",
+    "sha256": "8cb31b6e7f7932501db1e42560bc5d7be48e8bc144d5f529bfcf599db99c59f6",
+    "bytes": 10452
+  },
+  "byteExact": false,
+  "matchingRecordMultiplicities": 440,
+  "missingRecordMultiplicities": 21,
+  "extraRecordMultiplicities": 26
+}

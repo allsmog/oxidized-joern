@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "status": "PARENT_APPROVED_BODY_INCLUDE_PRODUCER_RELEASE",
+  "producerHoldReleased": true,
+  "preparedManifestSha256": "866abff46bf11dc2cc59bac0d6fd4bff6373e08c86b066d238737e4e4cb98d67",
+  "repository": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint",
+  "sourceCommit": "00c37613b3074025d3d65aa632cbd79af95d0c46",
+  "documentationCommit": "1962cd7681b1d414c75e1c9c8de039b25b850228",
+  "acceptance": {
+    "repositoryPath": "docs/conformance/astra-ninth-batch-acceptance.json",
+    "sha256": "bf94cc6345abd979f318a05dd877554c86f42b05d0a3ebdf856e84a1fdd78c77"
+  },
+  "documentationBlobs": [
+    {
+      "repositoryPath": "docs/conformance/astra-ninth-batch-2026-09-08.md",
+      "sha256": "1049e0a9b6ad4e94a381c83062a4a1ad5848d3051f6300c84826c69f5a5e93f8"
+    },
+    {
+      "repositoryPath": "docs/conformance/astra-ninth-batch-metrics.json",
+      "sha256": "baeaac40af0518e55702c6258a43b2be98803857e99e1618f1bb3da773b617fb"
+    },
+    {
+      "repositoryPath": "cpg-rs/PROGRESS.md",
+      "sha256": "ed6a19113bcc36ecf3cb7c46e5c3a0494487b43cf26f23d3aac2455a7cde8cfd"
+    }
+  ],
+  "frozenBuild": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/ninth-batch/reviewed-final-real-differential/bin/source-bindings.json",
+    "sha256": "ed1c4781798ce4be698539e1d0ddae1f0d5a5d14cb055a9cb7dfb050070435bf"
+  },
+  "note": "Parent reviewed unchanged V4 canonical runner/oracle, the separate all-AST Base64 origin query and fail-closed companion launcher. Release one 3-project complete canonical batch followed by its bound raw-origin observation run. Raw origins are supplemental observations; canonical graph projection remains unchanged.",
+  "reviewedPreparationFiles": {
+    "prepared.json": "866abff46bf11dc2cc59bac0d6fd4bff6373e08c86b066d238737e4e4cb98d67",
+    "run-oracle.py": "74cf3fc4f6f4b50ca1cc43f36b1f9f45428ab9a09900be16ff536c9e469b784d",
+    "oracle.sc": "56431f14868678e64f9eb41026b44f1d3d7738404d28d2db62711b520c98c742",
+    "run-origins.py": "ad44a2efb9ed7cbb9d4f0e738b823f834ccefeb70523cb76f7f782d91ce004ea",
+    "origin-observation.sc": "90209759022b8ac784460c5e47c27159d9f52c1aa3bd0490f265f613cebaff95",
+    "offline-checks/review.json": "72dbfee3e959858f383e280f58a84890a1a6556a5907f51a036c94ca7ed3d99e"
+  }
+}

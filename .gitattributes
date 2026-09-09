@@ -41,3 +41,15 @@ cpg-rs/joern-parity/tests/fixtures/predefined-c-macros/**/*.diff -whitespace
 cpg-rs/joern-parity/tests/fixtures/predefined-c-macros/raw/**/live.stdout whitespace=-blank-at-eol
 cpg-rs/joern-parity/tests/fixtures/numeric-macro-roots/**/*.diff -whitespace
 cpg-rs/joern-parity/tests/fixtures/numeric-macro-roots/raw/live.stdout whitespace=-blank-at-eol
+
+# Tenth-batch raw differential evidence retains original context whitespace.
+cpg-rs/joern-parity/tests/fixtures/body-includes/**/*.diff -whitespace
+cpg-rs/joern-parity/tests/fixtures/array-dimension-macros/**/*.diff -whitespace
+cpg-rs/joern-parity/tests/fixtures/array-dimension-macros/provenance/candidate-v4/array-test.log whitespace=-blank-at-eof
+cpg-rs/joern-parity/tests/fixtures/array-dimension-macros/provenance/candidate-v4/unit-tests.log whitespace=-blank-at-eof
+cpg-rs/joern-parity/tests/fixtures/array-dimension-macros/provenance/performance-v3/source.patch -whitespace
+cpg-rs/joern-parity/tests/fixtures/array-dimension-macros/provenance/performance-v3/unit-tests.log whitespace=-blank-at-eof
+cpg-rs/joern-parity/tests/fixtures/body-includes/held/v1/ninth-gates.log whitespace=-blank-at-eof
+cpg-rs/joern-parity/tests/fixtures/body-includes/provenance/candidate/new-package-tests-v2-final.log whitespace=-blank-at-eof
+cpg-rs/joern-parity/tests/fixtures/body-includes/provenance/candidate/ninth-gates.log whitespace=-blank-at-eof
+cpg-rs/joern-parity/tests/fixtures/body-includes/provenance/candidate/origin-lines.log whitespace=-blank-at-eof

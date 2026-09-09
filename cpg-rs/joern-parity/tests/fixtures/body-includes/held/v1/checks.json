@@ -1,0 +1,35 @@
+{
+  "sourceSha256": "96207d5b7b7b3d4bbfa77c8b93f407132eb0d2525e7e8f7915ad784e167ad406",
+  "checks": [
+    {
+      "name": "ninth-gates",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--manifest-path",
+        "cpg-rs/Cargo.toml",
+        "-p",
+        "joern-parity",
+        "--test",
+        "body_macro_state",
+        "--",
+        "--nocapture"
+      ],
+      "exitCode": 0,
+      "logSha256": "35aba3c2cb9caae992bbc5a4242f02230b50276e9f6252dcf4a04b85a76fde1e",
+      "sourceUnchanged": true
+    },
+    {
+      "name": "main308",
+      "command": [
+        "bash",
+        "cpg-rs/joern-parity/check.sh",
+        "--committed-only"
+      ],
+      "exitCode": 0,
+      "logSha256": "c105179d62065e9cbf9f398ff94754c29ec03add1206db7dff281cb4c07b6be6",
+      "sourceUnchanged": true
+    }
+  ]
+}

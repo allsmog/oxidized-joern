@@ -1,0 +1,31 @@
+{
+  "numericControls": [
+    {
+      "case": "bare_macro",
+      "numericControlMethod": "literal_dimension",
+      "completeMethodEqualInAllThree": true,
+      "methodSha256": "c0ef9f7da365eedc30dc49c485a0126fba1e6856ed58a7701dd1865909fca35d"
+    },
+    {
+      "case": "binary_macro",
+      "numericControlMethod": "literal_dimension",
+      "completeMethodEqualInAllThree": true,
+      "methodSha256": "41d47cfa3a74647c9df6e18eff985b047c108ab973db43b78abbecd7b3490411"
+    },
+    {
+      "case": "parenthesized_macro",
+      "numericControlMethod": "literal_dimension",
+      "completeMethodEqualInAllThree": true,
+      "methodSha256": "7ec039fd773559546876ec0691ded24a83904bc055146806458f88e8767f6d9b"
+    },
+    {
+      "case": "unary_macro",
+      "numericControlMethod": "literal_dimension",
+      "completeMethodEqualInAllThree": true,
+      "methodSha256": "526e317ad56bf1e9e6aff37ce6153b3892093d5b66f99dd1016bcda7f252db44"
+    }
+  ],
+  "originalV2Package760FilesUnchanged": true,
+  "originalV2ManifestSha256": "5c111a73e64cf54b5f6cb0a84bcede39bc14278b2b732d129aeabdb1393308dc",
+  "note": "Complete numeric-control METHOD blocks include every AST descendant; whole-project full projections are separately retained. Original760 package files checked without source mutation."
+}

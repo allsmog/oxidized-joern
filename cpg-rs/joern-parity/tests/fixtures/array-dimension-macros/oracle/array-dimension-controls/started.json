@@ -1,0 +1,6 @@
+{
+  "status": "HELD_PENDING_ALL_CHECKS",
+  "startUtc": "2026-09-08T23:20:08.875145+00:00",
+  "parentApprovedReceiptSha256": "d17e5f104f5acadeaaf3c6ae270e54d0d72557976aa28fe1c05065aa2dfc98ee",
+  "producerStarted": false
+}

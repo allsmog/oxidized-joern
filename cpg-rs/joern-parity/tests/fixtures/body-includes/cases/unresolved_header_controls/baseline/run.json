@@ -1,0 +1,19 @@
+{
+  "case": "unresolved_header_controls",
+  "command": [
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/ninth-batch/reviewed-final-real-differential/bin/joern-parity",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/tenth-batch/frozen-baseline-v1/input/unresolved_header_controls/decoys/missing-system.h",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/tenth-batch/frozen-baseline-v1/input/unresolved_header_controls/decoys/missing.h",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/tenth-batch/frozen-baseline-v1/input/unresolved_header_controls/main.c"
+  ],
+  "inputHashes": {
+    "decoys/missing-system.h": "26fb8a822fc16e65f00ab026f77d90c83eae8b1224749241467a16131d6cf2c9",
+    "decoys/missing.h": "34a841d961784ae753f6d50c9addf13918ab1ccedc4f043e3c485a43cd722495",
+    "main.c": "5c95fbe23189d58962a246715705b7072c989f997d3c32c52951e37529178540"
+  },
+  "error": null,
+  "exitCode": 0,
+  "seconds": 0.010669249983038753,
+  "actualSha256": "589abaef9124c91d8974e91bb34749994bf3e0b23fdccd3eb573e24dbe5964a5",
+  "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

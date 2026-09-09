@@ -1,0 +1,4 @@
+  File "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/tenth-array-dimension-review/replay.py", line 102
+    print(json.dumps({'receipt':bind(P/'replay-review.json'),'results':{t:[{k:x[k] for k in ['case','byteExact','missingRecordMultiplicities','extraRecordMultiplicities']} for x in rows] for t,rows in results.items()}))
+                                                                                                                                                                                                                         ^
+SyntaxError: closing parenthesis ')' does not match opening parenthesis '{'

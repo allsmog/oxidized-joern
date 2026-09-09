@@ -1,0 +1,2523 @@
+CASE|bare_macro
+=======================================================================================================
+Invoking CPG generator in a separate process. Note that the new process will consume additional memory.
+If you are importing a large codebase (and/or running into memory issues), please try the following:
+1) exit joern
+2) invoke the frontend: /Users/shayaunnejad/vibe-code/joern-oxidized/.local/astra-sprint/oracle/runtime/joern-cli/c2cpg.sh -J-Xmx4096m /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/tenth-array-dimension-controls/runs/first-complete-array-dimension-reference-batch/snapshot/input/bare_macro --output /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/tenth-array-dimension-controls/runs/first-complete-array-dimension-reference-batch/workspace/workspace/bare_macro/cpg.bin.zip
+3) start joern, import the cpg: `importCpg("path/to/cpg")`
+=======================================================================================================
+
+[INFO ] initialising from existing storage (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/tenth-array-dimension-controls/runs/first-complete-array-dimension-reference-batch/workspace/workspace/bare_macro/cpg.bin.tmp)
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.FileCreationPass
+[INFO ] Pass io.joern.x2cpg.passes.base.FileCreationPass completed in 17 ms (71% on mutations). 16 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.NamespaceCreator
+[INFO ] Pass io.joern.x2cpg.passes.base.NamespaceCreator completed in 4 ms (50% on mutations). 4 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.TypeDeclStubCreator
+[INFO ] Pass io.joern.x2cpg.passes.base.TypeDeclStubCreator completed in 2 ms (58% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.MethodStubCreator
+[INFO ] Pass io.joern.x2cpg.passes.base.MethodStubCreator completed in 11 ms (18% on mutations). 27 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.ParameterIndexCompatPass
+[INFO ] Pass io.joern.x2cpg.passes.base.ParameterIndexCompatPass completed in 2 ms (68% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.MethodDecoratorPass
+[INFO ] Pass io.joern.x2cpg.passes.base.MethodDecoratorPass completed in 12 ms (79% on mutations). 24 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.AstLinkerPass
+[INFO ] Pass io.joern.x2cpg.passes.base.AstLinkerPass completed in 13 ms (42% on mutations). 10 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.ContainsEdgePass
+[INFO ] Pass io.joern.x2cpg.passes.base.ContainsEdgePass completed in 15 ms (51% on mutations). 52 + 0 changes committed from 18 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.TypeRefPass
+[INFO ] Pass io.joern.x2cpg.passes.base.TypeRefPass completed in 13 ms (45% on mutations). 6 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.TypeEvalPass
+[INFO ] Pass io.joern.x2cpg.passes.base.TypeEvalPass completed in 5 ms (55% on mutations). 64 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 4 ms (58% on mutations). 1 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.controlflow.CfgCreationPass
+[INFO ] Pass io.joern.x2cpg.passes.controlflow.CfgCreationPass completed in 19 ms (6% on mutations). 40 + 0 changes committed from 8 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.controlflow.cfgdominator.CfgDominatorPass
+[INFO ] Pass io.joern.x2cpg.passes.controlflow.cfgdominator.CfgDominatorPass completed in 5 ms (23% on mutations). 78 + 0 changes committed from 8 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.controlflow.codepencegraph.CdgPass
+[INFO ] Pass io.joern.x2cpg.passes.controlflow.codepencegraph.CdgPass completed in 2 ms (33% on mutations). 1 + 0 changes committed from 8 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 1 ms (90% on mutations). 1 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.typerelations.TypeHierarchyPass
+[INFO ] Pass io.joern.x2cpg.passes.typerelations.TypeHierarchyPass completed in 7 ms (84% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.typerelations.AliasLinkerPass
+[INFO ] Pass io.joern.x2cpg.passes.typerelations.AliasLinkerPass completed in 2 ms (41% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.typerelations.FieldAccessLinkerPass
+[INFO ] Pass io.joern.x2cpg.passes.typerelations.FieldAccessLinkerPass completed in 1 ms (50% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 1 ms (90% on mutations). 1 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.callgraph.MethodRefLinker
+[INFO ] Pass io.joern.x2cpg.passes.callgraph.MethodRefLinker completed in 0 ms (48% on mutations). 2 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.callgraph.StaticCallLinker
+[INFO ] Pass io.joern.x2cpg.passes.callgraph.StaticCallLinker completed in 1 ms (35% on mutations). 11 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.callgraph.DynamicCallLinker
+[INFO ] Pass io.joern.x2cpg.passes.callgraph.DynamicCallLinker completed in 0 ms (55% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 0 ms (75% on mutations). 1 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.dataflowengineoss.passes.reachingdef.ReachingDefPass
+[INFO ] Calculating reaching definitions for: <operator>.assignment in <empty>
+[INFO ] Calculating reaching definitions for: <operator>.alloc in <empty>
+[INFO ] Calculating reaching definitions for: literal_dimension in main.c
+[INFO ] Calculating reaching definitions for: macro_dimension in main.c
+[INFO ] Calculating reaching definitions for: main.c:N:int(0) in main.c
+[INFO ] Calculating reaching definitions for: main.c:<global> in main.c
+[INFO ] Calculating reaching definitions for: <includes>:<global> in <includes>
+[INFO ] Calculating reaching definitions for: <operator>.indirectIndexAccess in <empty>
+[INFO ] Number of definitions for main.c:<global>: 0
+[INFO ] Number of definitions for <operator>.indirectIndexAccess: 2
+[INFO ] Number of definitions for <operator>.assignment: 2
+[INFO ] Number of definitions for main.c:N:int(0): 0
+[INFO ] Number of definitions for <includes>:<global>: 0
+[INFO ] Number of definitions for <operator>.alloc: 2
+[INFO ] Number of definitions for macro_dimension: 9
+[INFO ] Number of definitions for literal_dimension: 7
+[INFO ] Pass io.joern.dataflowengineoss.passes.reachingdef.ReachingDefPass completed in 25 ms (2% on mutations). 87 + 0 changes committed from 8 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 0 ms (71% on mutations). 1 + 0 changes committed from 1 parts.
+AST|METHOD NAME=<global> CODE=<global> FULL_NAME=<includes>:<global> ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=<operator>.alloc FULL_NAME=<operator>.alloc ORDER=0
+AST|  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=<operator>.assignment FULL_NAME=<operator>.assignment ORDER=0
+AST|  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=<operator>.indirectIndexAccess FULL_NAME=<operator>.indirectIndexAccess ORDER=0
+AST|  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=literal_dimension CODE=int literal_dimension(int index) {\n    int values[3];\n    values[0] = 7;\n    return values[index];\n} FULL_NAME=literal_dimension SIGNATURE=int(int) ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=index CODE=int index TYPE_FULL_NAME=int ORDER=1
+AST|  METHOD_PARAMETER_OUT NAME=index CODE=int index TYPE_FULL_NAME=int ORDER=1
+AST|  BLOCK CODE={\n    int values[3];\n    values[0] = 7;\n    return values[index];\n} TYPE_FULL_NAME=void ORDER=2
+AST|    LOCAL NAME=values CODE=int values[3] TYPE_FULL_NAME=int[3] ORDER=1
+AST|    CALL NAME=<operator>.assignment CODE=values[3] TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|      IDENTIFIER NAME=values CODE=values TYPE_FULL_NAME=int[3] ORDER=1 ARGUMENT_INDEX=1
+AST|      CALL NAME=<operator>.alloc CODE=values[3] TYPE_FULL_NAME=int[3] METHOD_FULL_NAME=<operator>.alloc ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        IDENTIFIER NAME=int[3] CODE=int[3] TYPE_FULL_NAME=int[3] ORDER=1 ARGUMENT_INDEX=1
+AST|        LITERAL CODE=3 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|    CALL NAME=<operator>.assignment CODE=values[0] = 7 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH
+AST|      CALL NAME=<operator>.indirectIndexAccess CODE=values[0] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectIndexAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        IDENTIFIER NAME=values CODE=values TYPE_FULL_NAME=int[3] ORDER=1 ARGUMENT_INDEX=1
+AST|        LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|      LITERAL CODE=7 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|    RETURN CODE=return values[index]; ORDER=4
+AST|      CALL NAME=<operator>.indirectIndexAccess CODE=values[index] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectIndexAccess ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        IDENTIFIER NAME=values CODE=values TYPE_FULL_NAME=int[3] ORDER=1 ARGUMENT_INDEX=1
+AST|        IDENTIFIER NAME=index CODE=index TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+AST|
+AST|METHOD NAME=macro_dimension CODE=int macro_dimension(int index) {\n    int values[N];\n    values[0] = 7;\n    return values[index];\n} FULL_NAME=macro_dimension SIGNATURE=int(int) ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=index CODE=int index TYPE_FULL_NAME=int ORDER=1
+AST|  METHOD_PARAMETER_OUT NAME=index CODE=int index TYPE_FULL_NAME=int ORDER=1
+AST|  BLOCK CODE={\n    int values[N];\n    values[0] = 7;\n    return values[index];\n} TYPE_FULL_NAME=void ORDER=2
+AST|    LOCAL NAME=values CODE=int values[N] TYPE_FULL_NAME=int[3] ORDER=1
+AST|    CALL NAME=<operator>.assignment CODE=values[N] TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|      IDENTIFIER NAME=values CODE=values TYPE_FULL_NAME=int[3] ORDER=1 ARGUMENT_INDEX=1
+AST|      CALL NAME=<operator>.alloc CODE=values[N] TYPE_FULL_NAME=int[3] METHOD_FULL_NAME=<operator>.alloc ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        IDENTIFIER NAME=int[3] CODE=int[3] TYPE_FULL_NAME=int[3] ORDER=1 ARGUMENT_INDEX=1
+AST|        CALL NAME=N CODE=N TYPE_FULL_NAME=int METHOD_FULL_NAME=main.c:N:int(0) SIGNATURE=int(0) ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=INLINED
+AST|          BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|            LITERAL CODE=3 TYPE_FULL_NAME=int ORDER=1
+AST|    CALL NAME=<operator>.assignment CODE=values[0] = 7 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH
+AST|      CALL NAME=<operator>.indirectIndexAccess CODE=values[0] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectIndexAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        IDENTIFIER NAME=values CODE=values TYPE_FULL_NAME=int[3] ORDER=1 ARGUMENT_INDEX=1
+AST|        LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|      LITERAL CODE=7 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|    RETURN CODE=return values[index]; ORDER=4
+AST|      CALL NAME=<operator>.indirectIndexAccess CODE=values[index] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectIndexAccess ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        IDENTIFIER NAME=values CODE=values TYPE_FULL_NAME=int[3] ORDER=1 ARGUMENT_INDEX=1
+AST|        IDENTIFIER NAME=index CODE=index TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+AST|
+AST|METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1
+AST|  METHOD NAME=macro_dimension CODE=int macro_dimension(int index) {\n    int values[N];\n    values[0] = 7;\n    return values[index];\n} FULL_NAME=macro_dimension SIGNATURE=int(int) ORDER=1
+AST|    METHOD_PARAMETER_IN NAME=index CODE=int index TYPE_FULL_NAME=int ORDER=1
+AST|    METHOD_PARAMETER_OUT NAME=index CODE=int index TYPE_FULL_NAME=int ORDER=1
+AST|    BLOCK CODE={\n    int values[N];\n    values[0] = 7;\n    return values[index];\n} TYPE_FULL_NAME=void ORDER=2
+AST|      LOCAL NAME=values CODE=int values[N] TYPE_FULL_NAME=int[3] ORDER=1
+AST|      CALL NAME=<operator>.assignment CODE=values[N] TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        IDENTIFIER NAME=values CODE=values TYPE_FULL_NAME=int[3] ORDER=1 ARGUMENT_INDEX=1
+AST|        CALL NAME=<operator>.alloc CODE=values[N] TYPE_FULL_NAME=int[3] METHOD_FULL_NAME=<operator>.alloc ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          IDENTIFIER NAME=int[3] CODE=int[3] TYPE_FULL_NAME=int[3] ORDER=1 ARGUMENT_INDEX=1
+AST|          CALL NAME=N CODE=N TYPE_FULL_NAME=int METHOD_FULL_NAME=main.c:N:int(0) SIGNATURE=int(0) ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=INLINED
+AST|            BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|              LITERAL CODE=3 TYPE_FULL_NAME=int ORDER=1
+AST|      CALL NAME=<operator>.assignment CODE=values[0] = 7 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        CALL NAME=<operator>.indirectIndexAccess CODE=values[0] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectIndexAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          IDENTIFIER NAME=values CODE=values TYPE_FULL_NAME=int[3] ORDER=1 ARGUMENT_INDEX=1
+AST|          LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|        LITERAL CODE=7 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|      RETURN CODE=return values[index]; ORDER=4
+AST|        CALL NAME=<operator>.indirectIndexAccess CODE=values[index] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectIndexAccess ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          IDENTIFIER NAME=values CODE=values TYPE_FULL_NAME=int[3] ORDER=1 ARGUMENT_INDEX=1
+AST|          IDENTIFIER NAME=index CODE=index TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+AST|  METHOD NAME=literal_dimension CODE=int literal_dimension(int index) {\n    int values[3];\n    values[0] = 7;\n    return values[index];\n} FULL_NAME=literal_dimension SIGNATURE=int(int) ORDER=1
+AST|    METHOD_PARAMETER_IN NAME=index CODE=int index TYPE_FULL_NAME=int ORDER=1
+AST|    METHOD_PARAMETER_OUT NAME=index CODE=int index TYPE_FULL_NAME=int ORDER=1
+AST|    BLOCK CODE={\n    int values[3];\n    values[0] = 7;\n    return values[index];\n} TYPE_FULL_NAME=void ORDER=2
+AST|      LOCAL NAME=values CODE=int values[3] TYPE_FULL_NAME=int[3] ORDER=1
+AST|      CALL NAME=<operator>.assignment CODE=values[3] TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        IDENTIFIER NAME=values CODE=values TYPE_FULL_NAME=int[3] ORDER=1 ARGUMENT_INDEX=1
+AST|        CALL NAME=<operator>.alloc CODE=values[3] TYPE_FULL_NAME=int[3] METHOD_FULL_NAME=<operator>.alloc ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          IDENTIFIER NAME=int[3] CODE=int[3] TYPE_FULL_NAME=int[3] ORDER=1 ARGUMENT_INDEX=1
+AST|          LITERAL CODE=3 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|      CALL NAME=<operator>.assignment CODE=values[0] = 7 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        CALL NAME=<operator>.indirectIndexAccess CODE=values[0] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectIndexAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          IDENTIFIER NAME=values CODE=values TYPE_FULL_NAME=int[3] ORDER=1 ARGUMENT_INDEX=1
+AST|          LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|        LITERAL CODE=7 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|      RETURN CODE=return values[index]; ORDER=4
+AST|        CALL NAME=<operator>.indirectIndexAccess CODE=values[index] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectIndexAccess ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          IDENTIFIER NAME=values CODE=values TYPE_FULL_NAME=int[3] ORDER=1 ARGUMENT_INDEX=1
+AST|          IDENTIFIER NAME=index CODE=index TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+AST|    METHOD_REF CODE=macro_dimension TYPE_FULL_NAME=macro_dimension METHOD_FULL_NAME=macro_dimension ORDER=1
+AST|    METHOD_REF CODE=literal_dimension TYPE_FULL_NAME=literal_dimension METHOD_FULL_NAME=literal_dimension ORDER=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=N CODE=#define N 3 FULL_NAME=main.c:N:int(0) SIGNATURE=int(0) ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=2
+AST|
+NODES|META_DATA LANGUAGE=NEWC
+NODES|FILE NAME=<includes> ORDER=1
+NODES|FILE NAME=<unknown> ORDER=0
+NODES|FILE NAME=main.c ORDER=0
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<global> FILENAME=<unknown> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<includes>:<global> FILENAME=<includes> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|NAMESPACE NAME=<global>
+NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=int[3] FULL_NAME=int[3] CODE=int[3] IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=literal_dimension FULL_NAME=literal_dimension CODE=literal_dimension AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=macro_dimension FULL_NAME=macro_dimension CODE=macro_dimension AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=<global> FULL_NAME=main.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+NODES|TYPE NAME=int[3] FULL_NAME=int[3] TYPE_DECL_FULL_NAME=int[3]
+NODES|TYPE NAME=literal_dimension FULL_NAME=literal_dimension TYPE_DECL_FULL_NAME=literal_dimension
+NODES|TYPE NAME=macro_dimension FULL_NAME=macro_dimension TYPE_DECL_FULL_NAME=macro_dimension
+NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+EDGES|ARGUMENT literal_dimension#10 -> literal_dimension#11
+EDGES|ARGUMENT literal_dimension#10 -> literal_dimension#14
+EDGES|ARGUMENT literal_dimension#11 -> literal_dimension#12
+EDGES|ARGUMENT literal_dimension#11 -> literal_dimension#13
+EDGES|ARGUMENT literal_dimension#15 -> literal_dimension#16
+EDGES|ARGUMENT literal_dimension#16 -> literal_dimension#17
+EDGES|ARGUMENT literal_dimension#16 -> literal_dimension#18
+EDGES|ARGUMENT literal_dimension#5 -> literal_dimension#6
+EDGES|ARGUMENT literal_dimension#5 -> literal_dimension#7
+EDGES|ARGUMENT literal_dimension#7 -> literal_dimension#8
+EDGES|ARGUMENT literal_dimension#7 -> literal_dimension#9
+EDGES|ARGUMENT macro_dimension#12 -> macro_dimension#13
+EDGES|ARGUMENT macro_dimension#12 -> macro_dimension#16
+EDGES|ARGUMENT macro_dimension#13 -> macro_dimension#14
+EDGES|ARGUMENT macro_dimension#13 -> macro_dimension#15
+EDGES|ARGUMENT macro_dimension#17 -> macro_dimension#18
+EDGES|ARGUMENT macro_dimension#18 -> macro_dimension#19
+EDGES|ARGUMENT macro_dimension#18 -> macro_dimension#20
+EDGES|ARGUMENT macro_dimension#5 -> macro_dimension#6
+EDGES|ARGUMENT macro_dimension#5 -> macro_dimension#7
+EDGES|ARGUMENT macro_dimension#7 -> macro_dimension#8
+EDGES|ARGUMENT macro_dimension#7 -> macro_dimension#9
+EDGES|CALL literal_dimension#10 -> <operator>.assignment#0
+EDGES|CALL literal_dimension#11 -> <operator>.indirectIndexAccess#0
+EDGES|CALL literal_dimension#16 -> <operator>.indirectIndexAccess#0
+EDGES|CALL literal_dimension#5 -> <operator>.assignment#0
+EDGES|CALL literal_dimension#7 -> <operator>.alloc#0
+EDGES|CALL macro_dimension#12 -> <operator>.assignment#0
+EDGES|CALL macro_dimension#13 -> <operator>.indirectIndexAccess#0
+EDGES|CALL macro_dimension#18 -> <operator>.indirectIndexAccess#0
+EDGES|CALL macro_dimension#5 -> <operator>.assignment#0
+EDGES|CALL macro_dimension#7 -> <operator>.alloc#0
+EDGES|CALL macro_dimension#9 -> main.c:N:int(0)#0
+EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+EDGES|CFG <operator>.alloc#0 -> <operator>.alloc#5
+EDGES|CFG <operator>.assignment#0 -> <operator>.assignment#5
+EDGES|CFG <operator>.indirectIndexAccess#0 -> <operator>.indirectIndexAccess#5
+EDGES|CFG literal_dimension#0 -> literal_dimension#6
+EDGES|CFG literal_dimension#10 -> literal_dimension#17
+EDGES|CFG literal_dimension#11 -> literal_dimension#14
+EDGES|CFG literal_dimension#12 -> literal_dimension#13
+EDGES|CFG literal_dimension#13 -> literal_dimension#11
+EDGES|CFG literal_dimension#14 -> literal_dimension#10
+EDGES|CFG literal_dimension#15 -> literal_dimension#19
+EDGES|CFG literal_dimension#16 -> literal_dimension#15
+EDGES|CFG literal_dimension#17 -> literal_dimension#18
+EDGES|CFG literal_dimension#18 -> literal_dimension#16
+EDGES|CFG literal_dimension#5 -> literal_dimension#12
+EDGES|CFG literal_dimension#6 -> literal_dimension#8
+EDGES|CFG literal_dimension#7 -> literal_dimension#5
+EDGES|CFG literal_dimension#8 -> literal_dimension#9
+EDGES|CFG literal_dimension#9 -> literal_dimension#7
+EDGES|CFG macro_dimension#0 -> macro_dimension#6
+EDGES|CFG macro_dimension#11 -> macro_dimension#7
+EDGES|CFG macro_dimension#12 -> macro_dimension#19
+EDGES|CFG macro_dimension#13 -> macro_dimension#16
+EDGES|CFG macro_dimension#14 -> macro_dimension#15
+EDGES|CFG macro_dimension#15 -> macro_dimension#13
+EDGES|CFG macro_dimension#16 -> macro_dimension#12
+EDGES|CFG macro_dimension#17 -> macro_dimension#21
+EDGES|CFG macro_dimension#18 -> macro_dimension#17
+EDGES|CFG macro_dimension#19 -> macro_dimension#20
+EDGES|CFG macro_dimension#20 -> macro_dimension#18
+EDGES|CFG macro_dimension#5 -> macro_dimension#14
+EDGES|CFG macro_dimension#6 -> macro_dimension#8
+EDGES|CFG macro_dimension#7 -> macro_dimension#5
+EDGES|CFG macro_dimension#8 -> macro_dimension#9
+EDGES|CFG macro_dimension#9 -> macro_dimension#11
+EDGES|CFG macro_dimension#9 -> macro_dimension#7
+EDGES|CFG main.c:<global>#0 -> main.c:<global>#44
+EDGES|CFG main.c:<global>#44 -> main.c:<global>#45
+EDGES|CFG main.c:<global>#45 -> main.c:<global>#46
+EDGES|CFG main.c:N:int(0)#0 -> main.c:N:int(0)#2
+EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+EDGES|CONTAINS <operator>.alloc#0 -> <operator>.alloc#2
+EDGES|CONTAINS <operator>.assignment#0 -> <operator>.assignment#2
+EDGES|CONTAINS <operator>.indirectIndexAccess#0 -> <operator>.indirectIndexAccess#2
+EDGES|CONTAINS D:main.c:<global> -> D:literal_dimension
+EDGES|CONTAINS D:main.c:<global> -> D:macro_dimension
+EDGES|CONTAINS D:main.c:<global> -> main.c:<global>#0
+EDGES|CONTAINS D:main.c:<global> -> main.c:N:int(0)#0
+EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+EDGES|CONTAINS F:<includes> -> D:ANY
+EDGES|CONTAINS F:<includes> -> D:int
+EDGES|CONTAINS F:<includes> -> D:int[3]
+EDGES|CONTAINS F:<includes> -> D:void
+EDGES|CONTAINS F:main.c -> D:main.c:<global>
+EDGES|CONTAINS literal_dimension#0 -> literal_dimension#10
+EDGES|CONTAINS literal_dimension#0 -> literal_dimension#11
+EDGES|CONTAINS literal_dimension#0 -> literal_dimension#12
+EDGES|CONTAINS literal_dimension#0 -> literal_dimension#13
+EDGES|CONTAINS literal_dimension#0 -> literal_dimension#14
+EDGES|CONTAINS literal_dimension#0 -> literal_dimension#15
+EDGES|CONTAINS literal_dimension#0 -> literal_dimension#16
+EDGES|CONTAINS literal_dimension#0 -> literal_dimension#17
+EDGES|CONTAINS literal_dimension#0 -> literal_dimension#18
+EDGES|CONTAINS literal_dimension#0 -> literal_dimension#3
+EDGES|CONTAINS literal_dimension#0 -> literal_dimension#5
+EDGES|CONTAINS literal_dimension#0 -> literal_dimension#6
+EDGES|CONTAINS literal_dimension#0 -> literal_dimension#7
+EDGES|CONTAINS literal_dimension#0 -> literal_dimension#8
+EDGES|CONTAINS literal_dimension#0 -> literal_dimension#9
+EDGES|CONTAINS macro_dimension#0 -> macro_dimension#10
+EDGES|CONTAINS macro_dimension#0 -> macro_dimension#11
+EDGES|CONTAINS macro_dimension#0 -> macro_dimension#12
+EDGES|CONTAINS macro_dimension#0 -> macro_dimension#13
+EDGES|CONTAINS macro_dimension#0 -> macro_dimension#14
+EDGES|CONTAINS macro_dimension#0 -> macro_dimension#15
+EDGES|CONTAINS macro_dimension#0 -> macro_dimension#16
+EDGES|CONTAINS macro_dimension#0 -> macro_dimension#17
+EDGES|CONTAINS macro_dimension#0 -> macro_dimension#18
+EDGES|CONTAINS macro_dimension#0 -> macro_dimension#19
+EDGES|CONTAINS macro_dimension#0 -> macro_dimension#20
+EDGES|CONTAINS macro_dimension#0 -> macro_dimension#3
+EDGES|CONTAINS macro_dimension#0 -> macro_dimension#5
+EDGES|CONTAINS macro_dimension#0 -> macro_dimension#6
+EDGES|CONTAINS macro_dimension#0 -> macro_dimension#7
+EDGES|CONTAINS macro_dimension#0 -> macro_dimension#8
+EDGES|CONTAINS macro_dimension#0 -> macro_dimension#9
+EDGES|CONTAINS main.c:<global>#0 -> literal_dimension#0
+EDGES|CONTAINS main.c:<global>#0 -> macro_dimension#0
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#43
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#44
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#45
+EDGES|CONTAINS main.c:N:int(0)#0 -> main.c:N:int(0)#1
+EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.alloc#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.alloc#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.alloc#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.alloc#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.alloc#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.alloc#6 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#6 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectIndexAccess#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectIndexAccess#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectIndexAccess#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectIndexAccess#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectIndexAccess#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectIndexAccess#6 -> T:ANY
+EDGES|EVAL_TYPE literal_dimension#1 -> T:int
+EDGES|EVAL_TYPE literal_dimension#10 -> T:ANY
+EDGES|EVAL_TYPE literal_dimension#11 -> T:ANY
+EDGES|EVAL_TYPE literal_dimension#12 -> T:int[3]
+EDGES|EVAL_TYPE literal_dimension#13 -> T:int
+EDGES|EVAL_TYPE literal_dimension#14 -> T:int
+EDGES|EVAL_TYPE literal_dimension#16 -> T:ANY
+EDGES|EVAL_TYPE literal_dimension#17 -> T:int[3]
+EDGES|EVAL_TYPE literal_dimension#18 -> T:int
+EDGES|EVAL_TYPE literal_dimension#19 -> T:int
+EDGES|EVAL_TYPE literal_dimension#2 -> T:int
+EDGES|EVAL_TYPE literal_dimension#3 -> T:void
+EDGES|EVAL_TYPE literal_dimension#4 -> T:int[3]
+EDGES|EVAL_TYPE literal_dimension#5 -> T:void
+EDGES|EVAL_TYPE literal_dimension#6 -> T:int[3]
+EDGES|EVAL_TYPE literal_dimension#7 -> T:int[3]
+EDGES|EVAL_TYPE literal_dimension#8 -> T:int[3]
+EDGES|EVAL_TYPE literal_dimension#9 -> T:int
+EDGES|EVAL_TYPE macro_dimension#1 -> T:int
+EDGES|EVAL_TYPE macro_dimension#10 -> T:ANY
+EDGES|EVAL_TYPE macro_dimension#11 -> T:int
+EDGES|EVAL_TYPE macro_dimension#12 -> T:ANY
+EDGES|EVAL_TYPE macro_dimension#13 -> T:ANY
+EDGES|EVAL_TYPE macro_dimension#14 -> T:int[3]
+EDGES|EVAL_TYPE macro_dimension#15 -> T:int
+EDGES|EVAL_TYPE macro_dimension#16 -> T:int
+EDGES|EVAL_TYPE macro_dimension#18 -> T:ANY
+EDGES|EVAL_TYPE macro_dimension#19 -> T:int[3]
+EDGES|EVAL_TYPE macro_dimension#2 -> T:int
+EDGES|EVAL_TYPE macro_dimension#20 -> T:int
+EDGES|EVAL_TYPE macro_dimension#21 -> T:int
+EDGES|EVAL_TYPE macro_dimension#3 -> T:void
+EDGES|EVAL_TYPE macro_dimension#4 -> T:int[3]
+EDGES|EVAL_TYPE macro_dimension#5 -> T:void
+EDGES|EVAL_TYPE macro_dimension#6 -> T:int[3]
+EDGES|EVAL_TYPE macro_dimension#7 -> T:int[3]
+EDGES|EVAL_TYPE macro_dimension#8 -> T:int[3]
+EDGES|EVAL_TYPE macro_dimension#9 -> T:int
+EDGES|EVAL_TYPE main.c:<global>#43 -> T:ANY
+EDGES|EVAL_TYPE main.c:<global>#44 -> T:macro_dimension
+EDGES|EVAL_TYPE main.c:<global>#45 -> T:literal_dimension
+EDGES|EVAL_TYPE main.c:<global>#46 -> T:ANY
+EDGES|EVAL_TYPE main.c:N:int(0)#1 -> T:ANY
+EDGES|EVAL_TYPE main.c:N:int(0)#2 -> T:int
+EDGES|PARAMETER_LINK <operator>.alloc#1 -> <operator>.alloc#3
+EDGES|PARAMETER_LINK <operator>.alloc#4 -> <operator>.alloc#6
+EDGES|PARAMETER_LINK <operator>.assignment#1 -> <operator>.assignment#3
+EDGES|PARAMETER_LINK <operator>.assignment#4 -> <operator>.assignment#6
+EDGES|PARAMETER_LINK <operator>.indirectIndexAccess#1 -> <operator>.indirectIndexAccess#3
+EDGES|PARAMETER_LINK <operator>.indirectIndexAccess#4 -> <operator>.indirectIndexAccess#6
+EDGES|PARAMETER_LINK literal_dimension#1 -> literal_dimension#2
+EDGES|PARAMETER_LINK macro_dimension#1 -> macro_dimension#2
+EDGES|REF NB:<global> -> NS:<global>
+EDGES|REF NB:<includes>:<global> -> NS:<global>
+EDGES|REF NB:main.c:<global> -> NS:<global>
+EDGES|REF T:ANY -> D:ANY
+EDGES|REF T:int -> D:int
+EDGES|REF T:int[3] -> D:int[3]
+EDGES|REF T:literal_dimension -> D:literal_dimension
+EDGES|REF T:macro_dimension -> D:macro_dimension
+EDGES|REF T:void -> D:void
+EDGES|REF literal_dimension#12 -> literal_dimension#4
+EDGES|REF literal_dimension#17 -> literal_dimension#4
+EDGES|REF literal_dimension#18 -> literal_dimension#1
+EDGES|REF literal_dimension#6 -> literal_dimension#4
+EDGES|REF macro_dimension#14 -> macro_dimension#4
+EDGES|REF macro_dimension#19 -> macro_dimension#4
+EDGES|REF macro_dimension#20 -> macro_dimension#1
+EDGES|REF macro_dimension#6 -> macro_dimension#4
+EDGES|REF main.c:<global>#44 -> macro_dimension#0
+EDGES|REF main.c:<global>#45 -> literal_dimension#0
+EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+EDGES|SOURCE_FILE D:ANY -> F:<includes>
+EDGES|SOURCE_FILE D:int -> F:<includes>
+EDGES|SOURCE_FILE D:int[3] -> F:<includes>
+EDGES|SOURCE_FILE D:literal_dimension -> F:main.c
+EDGES|SOURCE_FILE D:macro_dimension -> F:main.c
+EDGES|SOURCE_FILE D:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE D:void -> F:<includes>
+EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
+EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>
+EDGES|SOURCE_FILE NB:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE literal_dimension#0 -> F:main.c
+EDGES|SOURCE_FILE macro_dimension#0 -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#0 -> F:main.c
+EDGES|SOURCE_FILE main.c:N:int(0)#0 -> F:main.c
+FLOWS|REACHING_DEF[3] literal_dimension#9 -> literal_dimension#7
+FLOWS|REACHING_DEF[7] literal_dimension#14 -> literal_dimension#10
+FLOWS|REACHING_DEF[7] literal_dimension#14 -> literal_dimension#11
+FLOWS|REACHING_DEF[7] macro_dimension#16 -> macro_dimension#12
+FLOWS|REACHING_DEF[7] macro_dimension#16 -> macro_dimension#13
+FLOWS|REACHING_DEF[<RET>] literal_dimension#15 -> literal_dimension#19
+FLOWS|REACHING_DEF[<RET>] macro_dimension#17 -> macro_dimension#21
+FLOWS|REACHING_DEF[N] macro_dimension#9 -> macro_dimension#21
+FLOWS|REACHING_DEF[N] macro_dimension#9 -> macro_dimension#7
+FLOWS|REACHING_DEF[] <operator>.alloc#0 -> <operator>.alloc#1
+FLOWS|REACHING_DEF[] <operator>.alloc#0 -> <operator>.alloc#4
+FLOWS|REACHING_DEF[] <operator>.assignment#0 -> <operator>.assignment#1
+FLOWS|REACHING_DEF[] <operator>.assignment#0 -> <operator>.assignment#4
+FLOWS|REACHING_DEF[] <operator>.indirectIndexAccess#0 -> <operator>.indirectIndexAccess#1
+FLOWS|REACHING_DEF[] <operator>.indirectIndexAccess#0 -> <operator>.indirectIndexAccess#4
+FLOWS|REACHING_DEF[] literal_dimension#0 -> literal_dimension#1
+FLOWS|REACHING_DEF[] literal_dimension#0 -> literal_dimension#12
+FLOWS|REACHING_DEF[] literal_dimension#0 -> literal_dimension#13
+FLOWS|REACHING_DEF[] literal_dimension#0 -> literal_dimension#14
+FLOWS|REACHING_DEF[] literal_dimension#0 -> literal_dimension#17
+FLOWS|REACHING_DEF[] literal_dimension#0 -> literal_dimension#18
+FLOWS|REACHING_DEF[] literal_dimension#0 -> literal_dimension#8
+FLOWS|REACHING_DEF[] literal_dimension#0 -> literal_dimension#9
+FLOWS|REACHING_DEF[] macro_dimension#0 -> macro_dimension#1
+FLOWS|REACHING_DEF[] macro_dimension#0 -> macro_dimension#11
+FLOWS|REACHING_DEF[] macro_dimension#0 -> macro_dimension#14
+FLOWS|REACHING_DEF[] macro_dimension#0 -> macro_dimension#15
+FLOWS|REACHING_DEF[] macro_dimension#0 -> macro_dimension#16
+FLOWS|REACHING_DEF[] macro_dimension#0 -> macro_dimension#19
+FLOWS|REACHING_DEF[] macro_dimension#0 -> macro_dimension#20
+FLOWS|REACHING_DEF[] macro_dimension#0 -> macro_dimension#8
+FLOWS|REACHING_DEF[] macro_dimension#0 -> macro_dimension#9
+FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#44
+FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#45
+FLOWS|REACHING_DEF[index] literal_dimension#1 -> literal_dimension#18
+FLOWS|REACHING_DEF[index] literal_dimension#1 -> literal_dimension#19
+FLOWS|REACHING_DEF[index] literal_dimension#1 -> literal_dimension#2
+FLOWS|REACHING_DEF[index] macro_dimension#1 -> macro_dimension#2
+FLOWS|REACHING_DEF[index] macro_dimension#1 -> macro_dimension#20
+FLOWS|REACHING_DEF[index] macro_dimension#1 -> macro_dimension#21
+FLOWS|REACHING_DEF[int[3]] literal_dimension#8 -> literal_dimension#19
+FLOWS|REACHING_DEF[int[3]] literal_dimension#8 -> literal_dimension#7
+FLOWS|REACHING_DEF[int[3]] macro_dimension#8 -> macro_dimension#21
+FLOWS|REACHING_DEF[int[3]] macro_dimension#8 -> macro_dimension#7
+FLOWS|REACHING_DEF[int[3]] macro_dimension#8 -> macro_dimension#9
+FLOWS|REACHING_DEF[p1] <operator>.alloc#1 -> <operator>.alloc#3
+FLOWS|REACHING_DEF[p1] <operator>.alloc#1 -> <operator>.alloc#5
+FLOWS|REACHING_DEF[p1] <operator>.assignment#1 -> <operator>.assignment#3
+FLOWS|REACHING_DEF[p1] <operator>.assignment#1 -> <operator>.assignment#5
+FLOWS|REACHING_DEF[p1] <operator>.indirectIndexAccess#1 -> <operator>.indirectIndexAccess#3
+FLOWS|REACHING_DEF[p1] <operator>.indirectIndexAccess#1 -> <operator>.indirectIndexAccess#5
+FLOWS|REACHING_DEF[p2] <operator>.alloc#4 -> <operator>.alloc#5
+FLOWS|REACHING_DEF[p2] <operator>.alloc#4 -> <operator>.alloc#6
+FLOWS|REACHING_DEF[p2] <operator>.assignment#4 -> <operator>.assignment#5
+FLOWS|REACHING_DEF[p2] <operator>.assignment#4 -> <operator>.assignment#6
+FLOWS|REACHING_DEF[p2] <operator>.indirectIndexAccess#4 -> <operator>.indirectIndexAccess#5
+FLOWS|REACHING_DEF[p2] <operator>.indirectIndexAccess#4 -> <operator>.indirectIndexAccess#6
+FLOWS|REACHING_DEF[values[0] = 7] literal_dimension#10 -> literal_dimension#19
+FLOWS|REACHING_DEF[values[0] = 7] macro_dimension#12 -> macro_dimension#21
+FLOWS|REACHING_DEF[values[0]] literal_dimension#11 -> literal_dimension#10
+FLOWS|REACHING_DEF[values[0]] literal_dimension#11 -> literal_dimension#17
+FLOWS|REACHING_DEF[values[0]] literal_dimension#11 -> literal_dimension#19
+FLOWS|REACHING_DEF[values[0]] macro_dimension#13 -> macro_dimension#12
+FLOWS|REACHING_DEF[values[0]] macro_dimension#13 -> macro_dimension#19
+FLOWS|REACHING_DEF[values[0]] macro_dimension#13 -> macro_dimension#21
+FLOWS|REACHING_DEF[values[3]] literal_dimension#5 -> literal_dimension#19
+FLOWS|REACHING_DEF[values[3]] literal_dimension#7 -> literal_dimension#19
+FLOWS|REACHING_DEF[values[3]] literal_dimension#7 -> literal_dimension#5
+FLOWS|REACHING_DEF[values[3]] literal_dimension#7 -> literal_dimension#6
+FLOWS|REACHING_DEF[values[N]] macro_dimension#5 -> macro_dimension#21
+FLOWS|REACHING_DEF[values[N]] macro_dimension#7 -> macro_dimension#21
+FLOWS|REACHING_DEF[values[N]] macro_dimension#7 -> macro_dimension#5
+FLOWS|REACHING_DEF[values[N]] macro_dimension#7 -> macro_dimension#6
+FLOWS|REACHING_DEF[values[index]] literal_dimension#16 -> literal_dimension#15
+FLOWS|REACHING_DEF[values[index]] macro_dimension#18 -> macro_dimension#17
+FLOWS|REACHING_DEF[values] literal_dimension#6 -> literal_dimension#12
+FLOWS|REACHING_DEF[values] literal_dimension#6 -> literal_dimension#16
+FLOWS|REACHING_DEF[values] literal_dimension#6 -> literal_dimension#17
+FLOWS|REACHING_DEF[values] literal_dimension#6 -> literal_dimension#19
+FLOWS|REACHING_DEF[values] literal_dimension#6 -> literal_dimension#5
+FLOWS|REACHING_DEF[values] macro_dimension#6 -> macro_dimension#14
+FLOWS|REACHING_DEF[values] macro_dimension#6 -> macro_dimension#18
+FLOWS|REACHING_DEF[values] macro_dimension#6 -> macro_dimension#19
+FLOWS|REACHING_DEF[values] macro_dimension#6 -> macro_dimension#21
+FLOWS|REACHING_DEF[values] macro_dimension#6 -> macro_dimension#5
+CASE|binary_macro
+=======================================================================================================
+Invoking CPG generator in a separate process. Note that the new process will consume additional memory.
+If you are importing a large codebase (and/or running into memory issues), please try the following:
+1) exit joern
+2) invoke the frontend: /Users/shayaunnejad/vibe-code/joern-oxidized/.local/astra-sprint/oracle/runtime/joern-cli/c2cpg.sh -J-Xmx4096m /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/tenth-array-dimension-controls/runs/first-complete-array-dimension-reference-batch/snapshot/input/binary_macro --output /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/tenth-array-dimension-controls/runs/first-complete-array-dimension-reference-batch/workspace/workspace/binary_macro/cpg.bin.zip
+3) start joern, import the cpg: `importCpg("path/to/cpg")`
+=======================================================================================================
+
+[INFO ] initialising from existing storage (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/tenth-array-dimension-controls/runs/first-complete-array-dimension-reference-batch/workspace/workspace/binary_macro/cpg.bin.tmp)
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.FileCreationPass
+[INFO ] Pass io.joern.x2cpg.passes.base.FileCreationPass completed in 1 ms (79% on mutations). 17 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.NamespaceCreator
+[INFO ] Pass io.joern.x2cpg.passes.base.NamespaceCreator completed in 0 ms (77% on mutations). 4 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.TypeDeclStubCreator
+[INFO ] Pass io.joern.x2cpg.passes.base.TypeDeclStubCreator completed in 0 ms (63% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.MethodStubCreator
+[INFO ] Pass io.joern.x2cpg.passes.base.MethodStubCreator completed in 1 ms (57% on mutations). 36 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.ParameterIndexCompatPass
+[INFO ] Pass io.joern.x2cpg.passes.base.ParameterIndexCompatPass completed in 0 ms (72% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.MethodDecoratorPass
+[INFO ] Pass io.joern.x2cpg.passes.base.MethodDecoratorPass completed in 0 ms (74% on mutations). 30 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.AstLinkerPass
+[INFO ] Pass io.joern.x2cpg.passes.base.AstLinkerPass completed in 0 ms (53% on mutations). 12 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.ContainsEdgePass
+[INFO ] Pass io.joern.x2cpg.passes.base.ContainsEdgePass completed in 1 ms (42% on mutations). 58 + 0 changes committed from 20 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.TypeRefPass
+[INFO ] Pass io.joern.x2cpg.passes.base.TypeRefPass completed in 0 ms (60% on mutations). 7 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.TypeEvalPass
+[INFO ] Pass io.joern.x2cpg.passes.base.TypeEvalPass completed in 1 ms (43% on mutations). 74 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 0 ms (77% on mutations). 1 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.controlflow.CfgCreationPass
+[INFO ] Pass io.joern.x2cpg.passes.controlflow.CfgCreationPass completed in 1 ms (35% on mutations). 45 + 0 changes committed from 9 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.controlflow.cfgdominator.CfgDominatorPass
+[INFO ] Pass io.joern.x2cpg.passes.controlflow.cfgdominator.CfgDominatorPass completed in 1 ms (35% on mutations). 88 + 0 changes committed from 9 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.controlflow.codepencegraph.CdgPass
+[INFO ] Pass io.joern.x2cpg.passes.controlflow.codepencegraph.CdgPass completed in 0 ms (52% on mutations). 1 + 0 changes committed from 9 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 0 ms (73% on mutations). 1 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.typerelations.TypeHierarchyPass
+[INFO ] Pass io.joern.x2cpg.passes.typerelations.TypeHierarchyPass completed in 0 ms (66% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.typerelations.AliasLinkerPass
+[INFO ] Pass io.joern.x2cpg.passes.typerelations.AliasLinkerPass completed in 0 ms (72% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.typerelations.FieldAccessLinkerPass
+[INFO ] Pass io.joern.x2cpg.passes.typerelations.FieldAccessLinkerPass completed in 0 ms (71% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 0 ms (79% on mutations). 1 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.callgraph.MethodRefLinker
+[INFO ] Pass io.joern.x2cpg.passes.callgraph.MethodRefLinker completed in 0 ms (69% on mutations). 2 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.callgraph.StaticCallLinker
+[INFO ] Pass io.joern.x2cpg.passes.callgraph.StaticCallLinker completed in 0 ms (58% on mutations). 13 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.callgraph.DynamicCallLinker
+[INFO ] Pass io.joern.x2cpg.passes.callgraph.DynamicCallLinker completed in 0 ms (76% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 0 ms (79% on mutations). 1 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.dataflowengineoss.passes.reachingdef.ReachingDefPass
+[INFO ] Calculating reaching definitions for: <operator>.alloc in <empty>
+[INFO ] Calculating reaching definitions for: literal_dimension in main.c
+[INFO ] Calculating reaching definitions for: <operator>.indirectIndexAccess in <empty>
+[INFO ] Calculating reaching definitions for: macro_dimension in main.c
+[INFO ] Calculating reaching definitions for: <operator>.addition in <empty>
+[INFO ] Calculating reaching definitions for: <operator>.assignment in <empty>
+[INFO ] Calculating reaching definitions for: main.c:<global> in main.c
+[INFO ] Calculating reaching definitions for: <includes>:<global> in <includes>
+[INFO ] Number of definitions for <operator>.alloc: 2
+[INFO ] Calculating reaching definitions for: main.c:N:int(0) in main.c
+[INFO ] Number of definitions for <includes>:<global>: 0
+[INFO ] Number of definitions for main.c:<global>: 0
+[INFO ] Number of definitions for main.c:N:int(0): 0
+[INFO ] Number of definitions for <operator>.addition: 2
+[INFO ] Number of definitions for <operator>.assignment: 2
+[INFO ] Number of definitions for literal_dimension: 9
+[INFO ] Number of definitions for <operator>.indirectIndexAccess: 2
+[INFO ] Number of definitions for macro_dimension: 11
+[INFO ] Pass io.joern.dataflowengineoss.passes.reachingdef.ReachingDefPass completed in 3 ms (10% on mutations). 102 + 0 changes committed from 9 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 0 ms (73% on mutations). 1 + 0 changes committed from 1 parts.
+AST|METHOD NAME=<global> CODE=<global> FULL_NAME=<includes>:<global> ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=<operator>.addition FULL_NAME=<operator>.addition ORDER=0
+AST|  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=<operator>.alloc FULL_NAME=<operator>.alloc ORDER=0
+AST|  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=<operator>.assignment FULL_NAME=<operator>.assignment ORDER=0
+AST|  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=<operator>.indirectIndexAccess FULL_NAME=<operator>.indirectIndexAccess ORDER=0
+AST|  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=literal_dimension CODE=int literal_dimension(int index) {\n    int values[3+1];\n    values[0] = 7;\n    return values[index];\n} FULL_NAME=literal_dimension SIGNATURE=int(int) ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=index CODE=int index TYPE_FULL_NAME=int ORDER=1
+AST|  METHOD_PARAMETER_OUT NAME=index CODE=int index TYPE_FULL_NAME=int ORDER=1
+AST|  BLOCK CODE={\n    int values[3+1];\n    values[0] = 7;\n    return values[index];\n} TYPE_FULL_NAME=void ORDER=2
+AST|    LOCAL NAME=values CODE=int values[3+1] TYPE_FULL_NAME=int[3+1] ORDER=1
+AST|    CALL NAME=<operator>.assignment CODE=values[3+1] TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|      IDENTIFIER NAME=values CODE=values TYPE_FULL_NAME=int[3+1] ORDER=1 ARGUMENT_INDEX=1
+AST|      CALL NAME=<operator>.alloc CODE=values[3+1] TYPE_FULL_NAME=int[3+1] METHOD_FULL_NAME=<operator>.alloc ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        IDENTIFIER NAME=int[3+1] CODE=int[3+1] TYPE_FULL_NAME=int[3+1] ORDER=1 ARGUMENT_INDEX=1
+AST|        CALL NAME=<operator>.addition CODE=3+1 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          LITERAL CODE=3 TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|          LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|    CALL NAME=<operator>.assignment CODE=values[0] = 7 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH
+AST|      CALL NAME=<operator>.indirectIndexAccess CODE=values[0] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectIndexAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        IDENTIFIER NAME=values CODE=values TYPE_FULL_NAME=int[3+1] ORDER=1 ARGUMENT_INDEX=1
+AST|        LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|      LITERAL CODE=7 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|    RETURN CODE=return values[index]; ORDER=4
+AST|      CALL NAME=<operator>.indirectIndexAccess CODE=values[index] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectIndexAccess ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        IDENTIFIER NAME=values CODE=values TYPE_FULL_NAME=int[3+1] ORDER=1 ARGUMENT_INDEX=1
+AST|        IDENTIFIER NAME=index CODE=index TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+AST|
+AST|METHOD NAME=macro_dimension CODE=int macro_dimension(int index) {\n    int values[N+1];\n    values[0] = 7;\n    return values[index];\n} FULL_NAME=macro_dimension SIGNATURE=int(int) ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=index CODE=int index TYPE_FULL_NAME=int ORDER=1
+AST|  METHOD_PARAMETER_OUT NAME=index CODE=int index TYPE_FULL_NAME=int ORDER=1
+AST|  BLOCK CODE={\n    int values[N+1];\n    values[0] = 7;\n    return values[index];\n} TYPE_FULL_NAME=void ORDER=2
+AST|    LOCAL NAME=values CODE=int values[N+1] TYPE_FULL_NAME=int[N+1] ORDER=1
+AST|    CALL NAME=<operator>.assignment CODE=values[N+1] TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|      IDENTIFIER NAME=values CODE=values TYPE_FULL_NAME=int[N+1] ORDER=1 ARGUMENT_INDEX=1
+AST|      CALL NAME=<operator>.alloc CODE=values[N+1] TYPE_FULL_NAME=int[N+1] METHOD_FULL_NAME=<operator>.alloc ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        IDENTIFIER NAME=int[N+1] CODE=int[N+1] TYPE_FULL_NAME=int[N+1] ORDER=1 ARGUMENT_INDEX=1
+AST|        CALL NAME=<operator>.addition CODE=N+1 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          CALL NAME=N CODE=N TYPE_FULL_NAME=int METHOD_FULL_NAME=main.c:N:int(0) SIGNATURE=int(0) ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=INLINED
+AST|            BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|              LITERAL CODE=3 TYPE_FULL_NAME=int ORDER=1
+AST|          LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|    CALL NAME=<operator>.assignment CODE=values[0] = 7 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH
+AST|      CALL NAME=<operator>.indirectIndexAccess CODE=values[0] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectIndexAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        IDENTIFIER NAME=values CODE=values TYPE_FULL_NAME=int[N+1] ORDER=1 ARGUMENT_INDEX=1
+AST|        LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|      LITERAL CODE=7 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|    RETURN CODE=return values[index]; ORDER=4
+AST|      CALL NAME=<operator>.indirectIndexAccess CODE=values[index] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectIndexAccess ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        IDENTIFIER NAME=values CODE=values TYPE_FULL_NAME=int[N+1] ORDER=1 ARGUMENT_INDEX=1
+AST|        IDENTIFIER NAME=index CODE=index TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+AST|
+AST|METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1
+AST|  METHOD NAME=macro_dimension CODE=int macro_dimension(int index) {\n    int values[N+1];\n    values[0] = 7;\n    return values[index];\n} FULL_NAME=macro_dimension SIGNATURE=int(int) ORDER=1
+AST|    METHOD_PARAMETER_IN NAME=index CODE=int index TYPE_FULL_NAME=int ORDER=1
+AST|    METHOD_PARAMETER_OUT NAME=index CODE=int index TYPE_FULL_NAME=int ORDER=1
+AST|    BLOCK CODE={\n    int values[N+1];\n    values[0] = 7;\n    return values[index];\n} TYPE_FULL_NAME=void ORDER=2
+AST|      LOCAL NAME=values CODE=int values[N+1] TYPE_FULL_NAME=int[N+1] ORDER=1
+AST|      CALL NAME=<operator>.assignment CODE=values[N+1] TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        IDENTIFIER NAME=values CODE=values TYPE_FULL_NAME=int[N+1] ORDER=1 ARGUMENT_INDEX=1
+AST|        CALL NAME=<operator>.alloc CODE=values[N+1] TYPE_FULL_NAME=int[N+1] METHOD_FULL_NAME=<operator>.alloc ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          IDENTIFIER NAME=int[N+1] CODE=int[N+1] TYPE_FULL_NAME=int[N+1] ORDER=1 ARGUMENT_INDEX=1
+AST|          CALL NAME=<operator>.addition CODE=N+1 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|            CALL NAME=N CODE=N TYPE_FULL_NAME=int METHOD_FULL_NAME=main.c:N:int(0) SIGNATURE=int(0) ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=INLINED
+AST|              BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|                LITERAL CODE=3 TYPE_FULL_NAME=int ORDER=1
+AST|            LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|      CALL NAME=<operator>.assignment CODE=values[0] = 7 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        CALL NAME=<operator>.indirectIndexAccess CODE=values[0] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectIndexAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          IDENTIFIER NAME=values CODE=values TYPE_FULL_NAME=int[N+1] ORDER=1 ARGUMENT_INDEX=1
+AST|          LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|        LITERAL CODE=7 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|      RETURN CODE=return values[index]; ORDER=4
+AST|        CALL NAME=<operator>.indirectIndexAccess CODE=values[index] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectIndexAccess ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          IDENTIFIER NAME=values CODE=values TYPE_FULL_NAME=int[N+1] ORDER=1 ARGUMENT_INDEX=1
+AST|          IDENTIFIER NAME=index CODE=index TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+AST|  METHOD NAME=literal_dimension CODE=int literal_dimension(int index) {\n    int values[3+1];\n    values[0] = 7;\n    return values[index];\n} FULL_NAME=literal_dimension SIGNATURE=int(int) ORDER=1
+AST|    METHOD_PARAMETER_IN NAME=index CODE=int index TYPE_FULL_NAME=int ORDER=1
+AST|    METHOD_PARAMETER_OUT NAME=index CODE=int index TYPE_FULL_NAME=int ORDER=1
+AST|    BLOCK CODE={\n    int values[3+1];\n    values[0] = 7;\n    return values[index];\n} TYPE_FULL_NAME=void ORDER=2
+AST|      LOCAL NAME=values CODE=int values[3+1] TYPE_FULL_NAME=int[3+1] ORDER=1
+AST|      CALL NAME=<operator>.assignment CODE=values[3+1] TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        IDENTIFIER NAME=values CODE=values TYPE_FULL_NAME=int[3+1] ORDER=1 ARGUMENT_INDEX=1
+AST|        CALL NAME=<operator>.alloc CODE=values[3+1] TYPE_FULL_NAME=int[3+1] METHOD_FULL_NAME=<operator>.alloc ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          IDENTIFIER NAME=int[3+1] CODE=int[3+1] TYPE_FULL_NAME=int[3+1] ORDER=1 ARGUMENT_INDEX=1
+AST|          CALL NAME=<operator>.addition CODE=3+1 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|            LITERAL CODE=3 TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|            LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|      CALL NAME=<operator>.assignment CODE=values[0] = 7 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        CALL NAME=<operator>.indirectIndexAccess CODE=values[0] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectIndexAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          IDENTIFIER NAME=values CODE=values TYPE_FULL_NAME=int[3+1] ORDER=1 ARGUMENT_INDEX=1
+AST|          LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|        LITERAL CODE=7 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|      RETURN CODE=return values[index]; ORDER=4
+AST|        CALL NAME=<operator>.indirectIndexAccess CODE=values[index] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectIndexAccess ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          IDENTIFIER NAME=values CODE=values TYPE_FULL_NAME=int[3+1] ORDER=1 ARGUMENT_INDEX=1
+AST|          IDENTIFIER NAME=index CODE=index TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+AST|    METHOD_REF CODE=macro_dimension TYPE_FULL_NAME=macro_dimension METHOD_FULL_NAME=macro_dimension ORDER=1
+AST|    METHOD_REF CODE=literal_dimension TYPE_FULL_NAME=literal_dimension METHOD_FULL_NAME=literal_dimension ORDER=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=N CODE=#define N 3 FULL_NAME=main.c:N:int(0) SIGNATURE=int(0) ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=2
+AST|
+NODES|META_DATA LANGUAGE=NEWC
+NODES|FILE NAME=<includes> ORDER=1
+NODES|FILE NAME=<unknown> ORDER=0
+NODES|FILE NAME=main.c ORDER=0
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<global> FILENAME=<unknown> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<includes>:<global> FILENAME=<includes> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|NAMESPACE NAME=<global>
+NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=int[3+1] FULL_NAME=int[3+1] CODE=int[3+1] IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=int[N+1] FULL_NAME=int[N+1] CODE=int[N+1] IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=literal_dimension FULL_NAME=literal_dimension CODE=literal_dimension AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=macro_dimension FULL_NAME=macro_dimension CODE=macro_dimension AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=<global> FULL_NAME=main.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+NODES|TYPE NAME=int[3+1] FULL_NAME=int[3+1] TYPE_DECL_FULL_NAME=int[3+1]
+NODES|TYPE NAME=int[N+1] FULL_NAME=int[N+1] TYPE_DECL_FULL_NAME=int[N+1]
+NODES|TYPE NAME=literal_dimension FULL_NAME=literal_dimension TYPE_DECL_FULL_NAME=literal_dimension
+NODES|TYPE NAME=macro_dimension FULL_NAME=macro_dimension TYPE_DECL_FULL_NAME=macro_dimension
+NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+EDGES|ARGUMENT literal_dimension#12 -> literal_dimension#13
+EDGES|ARGUMENT literal_dimension#12 -> literal_dimension#16
+EDGES|ARGUMENT literal_dimension#13 -> literal_dimension#14
+EDGES|ARGUMENT literal_dimension#13 -> literal_dimension#15
+EDGES|ARGUMENT literal_dimension#17 -> literal_dimension#18
+EDGES|ARGUMENT literal_dimension#18 -> literal_dimension#19
+EDGES|ARGUMENT literal_dimension#18 -> literal_dimension#20
+EDGES|ARGUMENT literal_dimension#5 -> literal_dimension#6
+EDGES|ARGUMENT literal_dimension#5 -> literal_dimension#7
+EDGES|ARGUMENT literal_dimension#7 -> literal_dimension#8
+EDGES|ARGUMENT literal_dimension#7 -> literal_dimension#9
+EDGES|ARGUMENT literal_dimension#9 -> literal_dimension#10
+EDGES|ARGUMENT literal_dimension#9 -> literal_dimension#11
+EDGES|ARGUMENT macro_dimension#14 -> macro_dimension#15
+EDGES|ARGUMENT macro_dimension#14 -> macro_dimension#18
+EDGES|ARGUMENT macro_dimension#15 -> macro_dimension#16
+EDGES|ARGUMENT macro_dimension#15 -> macro_dimension#17
+EDGES|ARGUMENT macro_dimension#19 -> macro_dimension#20
+EDGES|ARGUMENT macro_dimension#20 -> macro_dimension#21
+EDGES|ARGUMENT macro_dimension#20 -> macro_dimension#22
+EDGES|ARGUMENT macro_dimension#5 -> macro_dimension#6
+EDGES|ARGUMENT macro_dimension#5 -> macro_dimension#7
+EDGES|ARGUMENT macro_dimension#7 -> macro_dimension#8
+EDGES|ARGUMENT macro_dimension#7 -> macro_dimension#9
+EDGES|ARGUMENT macro_dimension#9 -> macro_dimension#10
+EDGES|ARGUMENT macro_dimension#9 -> macro_dimension#13
+EDGES|CALL literal_dimension#12 -> <operator>.assignment#0
+EDGES|CALL literal_dimension#13 -> <operator>.indirectIndexAccess#0
+EDGES|CALL literal_dimension#18 -> <operator>.indirectIndexAccess#0
+EDGES|CALL literal_dimension#5 -> <operator>.assignment#0
+EDGES|CALL literal_dimension#7 -> <operator>.alloc#0
+EDGES|CALL literal_dimension#9 -> <operator>.addition#0
+EDGES|CALL macro_dimension#10 -> main.c:N:int(0)#0
+EDGES|CALL macro_dimension#14 -> <operator>.assignment#0
+EDGES|CALL macro_dimension#15 -> <operator>.indirectIndexAccess#0
+EDGES|CALL macro_dimension#20 -> <operator>.indirectIndexAccess#0
+EDGES|CALL macro_dimension#5 -> <operator>.assignment#0
+EDGES|CALL macro_dimension#7 -> <operator>.alloc#0
+EDGES|CALL macro_dimension#9 -> <operator>.addition#0
+EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+EDGES|CFG <operator>.addition#0 -> <operator>.addition#5
+EDGES|CFG <operator>.alloc#0 -> <operator>.alloc#5
+EDGES|CFG <operator>.assignment#0 -> <operator>.assignment#5
+EDGES|CFG <operator>.indirectIndexAccess#0 -> <operator>.indirectIndexAccess#5
+EDGES|CFG literal_dimension#0 -> literal_dimension#6
+EDGES|CFG literal_dimension#10 -> literal_dimension#11
+EDGES|CFG literal_dimension#11 -> literal_dimension#9
+EDGES|CFG literal_dimension#12 -> literal_dimension#19
+EDGES|CFG literal_dimension#13 -> literal_dimension#16
+EDGES|CFG literal_dimension#14 -> literal_dimension#15
+EDGES|CFG literal_dimension#15 -> literal_dimension#13
+EDGES|CFG literal_dimension#16 -> literal_dimension#12
+EDGES|CFG literal_dimension#17 -> literal_dimension#21
+EDGES|CFG literal_dimension#18 -> literal_dimension#17
+EDGES|CFG literal_dimension#19 -> literal_dimension#20
+EDGES|CFG literal_dimension#20 -> literal_dimension#18
+EDGES|CFG literal_dimension#5 -> literal_dimension#14
+EDGES|CFG literal_dimension#6 -> literal_dimension#8
+EDGES|CFG literal_dimension#7 -> literal_dimension#5
+EDGES|CFG literal_dimension#8 -> literal_dimension#10
+EDGES|CFG literal_dimension#9 -> literal_dimension#7
+EDGES|CFG macro_dimension#0 -> macro_dimension#6
+EDGES|CFG macro_dimension#10 -> macro_dimension#12
+EDGES|CFG macro_dimension#10 -> macro_dimension#13
+EDGES|CFG macro_dimension#12 -> macro_dimension#13
+EDGES|CFG macro_dimension#13 -> macro_dimension#9
+EDGES|CFG macro_dimension#14 -> macro_dimension#21
+EDGES|CFG macro_dimension#15 -> macro_dimension#18
+EDGES|CFG macro_dimension#16 -> macro_dimension#17
+EDGES|CFG macro_dimension#17 -> macro_dimension#15
+EDGES|CFG macro_dimension#18 -> macro_dimension#14
+EDGES|CFG macro_dimension#19 -> macro_dimension#23
+EDGES|CFG macro_dimension#20 -> macro_dimension#19
+EDGES|CFG macro_dimension#21 -> macro_dimension#22
+EDGES|CFG macro_dimension#22 -> macro_dimension#20
+EDGES|CFG macro_dimension#5 -> macro_dimension#16
+EDGES|CFG macro_dimension#6 -> macro_dimension#8
+EDGES|CFG macro_dimension#7 -> macro_dimension#5
+EDGES|CFG macro_dimension#8 -> macro_dimension#10
+EDGES|CFG macro_dimension#9 -> macro_dimension#7
+EDGES|CFG main.c:<global>#0 -> main.c:<global>#48
+EDGES|CFG main.c:<global>#48 -> main.c:<global>#49
+EDGES|CFG main.c:<global>#49 -> main.c:<global>#50
+EDGES|CFG main.c:N:int(0)#0 -> main.c:N:int(0)#2
+EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+EDGES|CONTAINS <operator>.addition#0 -> <operator>.addition#2
+EDGES|CONTAINS <operator>.alloc#0 -> <operator>.alloc#2
+EDGES|CONTAINS <operator>.assignment#0 -> <operator>.assignment#2
+EDGES|CONTAINS <operator>.indirectIndexAccess#0 -> <operator>.indirectIndexAccess#2
+EDGES|CONTAINS D:main.c:<global> -> D:literal_dimension
+EDGES|CONTAINS D:main.c:<global> -> D:macro_dimension
+EDGES|CONTAINS D:main.c:<global> -> main.c:<global>#0
+EDGES|CONTAINS D:main.c:<global> -> main.c:N:int(0)#0
+EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+EDGES|CONTAINS F:<includes> -> D:ANY
+EDGES|CONTAINS F:<includes> -> D:int
+EDGES|CONTAINS F:<includes> -> D:int[3+1]
+EDGES|CONTAINS F:<includes> -> D:int[N+1]
+EDGES|CONTAINS F:<includes> -> D:void
+EDGES|CONTAINS F:main.c -> D:main.c:<global>
+EDGES|CONTAINS literal_dimension#0 -> literal_dimension#10
+EDGES|CONTAINS literal_dimension#0 -> literal_dimension#11
+EDGES|CONTAINS literal_dimension#0 -> literal_dimension#12
+EDGES|CONTAINS literal_dimension#0 -> literal_dimension#13
+EDGES|CONTAINS literal_dimension#0 -> literal_dimension#14
+EDGES|CONTAINS literal_dimension#0 -> literal_dimension#15
+EDGES|CONTAINS literal_dimension#0 -> literal_dimension#16
+EDGES|CONTAINS literal_dimension#0 -> literal_dimension#17
+EDGES|CONTAINS literal_dimension#0 -> literal_dimension#18
+EDGES|CONTAINS literal_dimension#0 -> literal_dimension#19
+EDGES|CONTAINS literal_dimension#0 -> literal_dimension#20
+EDGES|CONTAINS literal_dimension#0 -> literal_dimension#3
+EDGES|CONTAINS literal_dimension#0 -> literal_dimension#5
+EDGES|CONTAINS literal_dimension#0 -> literal_dimension#6
+EDGES|CONTAINS literal_dimension#0 -> literal_dimension#7
+EDGES|CONTAINS literal_dimension#0 -> literal_dimension#8
+EDGES|CONTAINS literal_dimension#0 -> literal_dimension#9
+EDGES|CONTAINS macro_dimension#0 -> macro_dimension#10
+EDGES|CONTAINS macro_dimension#0 -> macro_dimension#11
+EDGES|CONTAINS macro_dimension#0 -> macro_dimension#12
+EDGES|CONTAINS macro_dimension#0 -> macro_dimension#13
+EDGES|CONTAINS macro_dimension#0 -> macro_dimension#14
+EDGES|CONTAINS macro_dimension#0 -> macro_dimension#15
+EDGES|CONTAINS macro_dimension#0 -> macro_dimension#16
+EDGES|CONTAINS macro_dimension#0 -> macro_dimension#17
+EDGES|CONTAINS macro_dimension#0 -> macro_dimension#18
+EDGES|CONTAINS macro_dimension#0 -> macro_dimension#19
+EDGES|CONTAINS macro_dimension#0 -> macro_dimension#20
+EDGES|CONTAINS macro_dimension#0 -> macro_dimension#21
+EDGES|CONTAINS macro_dimension#0 -> macro_dimension#22
+EDGES|CONTAINS macro_dimension#0 -> macro_dimension#3
+EDGES|CONTAINS macro_dimension#0 -> macro_dimension#5
+EDGES|CONTAINS macro_dimension#0 -> macro_dimension#6
+EDGES|CONTAINS macro_dimension#0 -> macro_dimension#7
+EDGES|CONTAINS macro_dimension#0 -> macro_dimension#8
+EDGES|CONTAINS macro_dimension#0 -> macro_dimension#9
+EDGES|CONTAINS main.c:<global>#0 -> literal_dimension#0
+EDGES|CONTAINS main.c:<global>#0 -> macro_dimension#0
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#47
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#48
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#49
+EDGES|CONTAINS main.c:N:int(0)#0 -> main.c:N:int(0)#1
+EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#6 -> T:ANY
+EDGES|EVAL_TYPE <operator>.alloc#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.alloc#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.alloc#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.alloc#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.alloc#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.alloc#6 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#6 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectIndexAccess#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectIndexAccess#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectIndexAccess#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectIndexAccess#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectIndexAccess#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectIndexAccess#6 -> T:ANY
+EDGES|EVAL_TYPE literal_dimension#1 -> T:int
+EDGES|EVAL_TYPE literal_dimension#10 -> T:int
+EDGES|EVAL_TYPE literal_dimension#11 -> T:int
+EDGES|EVAL_TYPE literal_dimension#12 -> T:ANY
+EDGES|EVAL_TYPE literal_dimension#13 -> T:ANY
+EDGES|EVAL_TYPE literal_dimension#14 -> T:int[3+1]
+EDGES|EVAL_TYPE literal_dimension#15 -> T:int
+EDGES|EVAL_TYPE literal_dimension#16 -> T:int
+EDGES|EVAL_TYPE literal_dimension#18 -> T:ANY
+EDGES|EVAL_TYPE literal_dimension#19 -> T:int[3+1]
+EDGES|EVAL_TYPE literal_dimension#2 -> T:int
+EDGES|EVAL_TYPE literal_dimension#20 -> T:int
+EDGES|EVAL_TYPE literal_dimension#21 -> T:int
+EDGES|EVAL_TYPE literal_dimension#3 -> T:void
+EDGES|EVAL_TYPE literal_dimension#4 -> T:int[3+1]
+EDGES|EVAL_TYPE literal_dimension#5 -> T:void
+EDGES|EVAL_TYPE literal_dimension#6 -> T:int[3+1]
+EDGES|EVAL_TYPE literal_dimension#7 -> T:int[3+1]
+EDGES|EVAL_TYPE literal_dimension#8 -> T:int[3+1]
+EDGES|EVAL_TYPE literal_dimension#9 -> T:ANY
+EDGES|EVAL_TYPE macro_dimension#1 -> T:int
+EDGES|EVAL_TYPE macro_dimension#10 -> T:int
+EDGES|EVAL_TYPE macro_dimension#11 -> T:ANY
+EDGES|EVAL_TYPE macro_dimension#12 -> T:int
+EDGES|EVAL_TYPE macro_dimension#13 -> T:int
+EDGES|EVAL_TYPE macro_dimension#14 -> T:ANY
+EDGES|EVAL_TYPE macro_dimension#15 -> T:ANY
+EDGES|EVAL_TYPE macro_dimension#16 -> T:int[N+1]
+EDGES|EVAL_TYPE macro_dimension#17 -> T:int
+EDGES|EVAL_TYPE macro_dimension#18 -> T:int
+EDGES|EVAL_TYPE macro_dimension#2 -> T:int
+EDGES|EVAL_TYPE macro_dimension#20 -> T:ANY
+EDGES|EVAL_TYPE macro_dimension#21 -> T:int[N+1]
+EDGES|EVAL_TYPE macro_dimension#22 -> T:int
+EDGES|EVAL_TYPE macro_dimension#23 -> T:int
+EDGES|EVAL_TYPE macro_dimension#3 -> T:void
+EDGES|EVAL_TYPE macro_dimension#4 -> T:int[N+1]
+EDGES|EVAL_TYPE macro_dimension#5 -> T:void
+EDGES|EVAL_TYPE macro_dimension#6 -> T:int[N+1]
+EDGES|EVAL_TYPE macro_dimension#7 -> T:int[N+1]
+EDGES|EVAL_TYPE macro_dimension#8 -> T:int[N+1]
+EDGES|EVAL_TYPE macro_dimension#9 -> T:ANY
+EDGES|EVAL_TYPE main.c:<global>#47 -> T:ANY
+EDGES|EVAL_TYPE main.c:<global>#48 -> T:macro_dimension
+EDGES|EVAL_TYPE main.c:<global>#49 -> T:literal_dimension
+EDGES|EVAL_TYPE main.c:<global>#50 -> T:ANY
+EDGES|EVAL_TYPE main.c:N:int(0)#1 -> T:ANY
+EDGES|EVAL_TYPE main.c:N:int(0)#2 -> T:int
+EDGES|PARAMETER_LINK <operator>.addition#1 -> <operator>.addition#3
+EDGES|PARAMETER_LINK <operator>.addition#4 -> <operator>.addition#6
+EDGES|PARAMETER_LINK <operator>.alloc#1 -> <operator>.alloc#3
+EDGES|PARAMETER_LINK <operator>.alloc#4 -> <operator>.alloc#6
+EDGES|PARAMETER_LINK <operator>.assignment#1 -> <operator>.assignment#3
+EDGES|PARAMETER_LINK <operator>.assignment#4 -> <operator>.assignment#6
+EDGES|PARAMETER_LINK <operator>.indirectIndexAccess#1 -> <operator>.indirectIndexAccess#3
+EDGES|PARAMETER_LINK <operator>.indirectIndexAccess#4 -> <operator>.indirectIndexAccess#6
+EDGES|PARAMETER_LINK literal_dimension#1 -> literal_dimension#2
+EDGES|PARAMETER_LINK macro_dimension#1 -> macro_dimension#2
+EDGES|REF NB:<global> -> NS:<global>
+EDGES|REF NB:<includes>:<global> -> NS:<global>
+EDGES|REF NB:main.c:<global> -> NS:<global>
+EDGES|REF T:ANY -> D:ANY
+EDGES|REF T:int -> D:int
+EDGES|REF T:int[3+1] -> D:int[3+1]
+EDGES|REF T:int[N+1] -> D:int[N+1]
+EDGES|REF T:literal_dimension -> D:literal_dimension
+EDGES|REF T:macro_dimension -> D:macro_dimension
+EDGES|REF T:void -> D:void
+EDGES|REF literal_dimension#14 -> literal_dimension#4
+EDGES|REF literal_dimension#19 -> literal_dimension#4
+EDGES|REF literal_dimension#20 -> literal_dimension#1
+EDGES|REF literal_dimension#6 -> literal_dimension#4
+EDGES|REF macro_dimension#16 -> macro_dimension#4
+EDGES|REF macro_dimension#21 -> macro_dimension#4
+EDGES|REF macro_dimension#22 -> macro_dimension#1
+EDGES|REF macro_dimension#6 -> macro_dimension#4
+EDGES|REF main.c:<global>#48 -> macro_dimension#0
+EDGES|REF main.c:<global>#49 -> literal_dimension#0
+EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+EDGES|SOURCE_FILE D:ANY -> F:<includes>
+EDGES|SOURCE_FILE D:int -> F:<includes>
+EDGES|SOURCE_FILE D:int[3+1] -> F:<includes>
+EDGES|SOURCE_FILE D:int[N+1] -> F:<includes>
+EDGES|SOURCE_FILE D:literal_dimension -> F:main.c
+EDGES|SOURCE_FILE D:macro_dimension -> F:main.c
+EDGES|SOURCE_FILE D:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE D:void -> F:<includes>
+EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
+EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>
+EDGES|SOURCE_FILE NB:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE literal_dimension#0 -> F:main.c
+EDGES|SOURCE_FILE macro_dimension#0 -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#0 -> F:main.c
+EDGES|SOURCE_FILE main.c:N:int(0)#0 -> F:main.c
+FLOWS|REACHING_DEF[1] literal_dimension#11 -> literal_dimension#9
+FLOWS|REACHING_DEF[1] macro_dimension#13 -> macro_dimension#9
+FLOWS|REACHING_DEF[3+1] literal_dimension#9 -> literal_dimension#21
+FLOWS|REACHING_DEF[3+1] literal_dimension#9 -> literal_dimension#7
+FLOWS|REACHING_DEF[3] literal_dimension#10 -> literal_dimension#9
+FLOWS|REACHING_DEF[7] literal_dimension#16 -> literal_dimension#12
+FLOWS|REACHING_DEF[7] literal_dimension#16 -> literal_dimension#13
+FLOWS|REACHING_DEF[7] macro_dimension#18 -> macro_dimension#14
+FLOWS|REACHING_DEF[7] macro_dimension#18 -> macro_dimension#15
+FLOWS|REACHING_DEF[<RET>] literal_dimension#17 -> literal_dimension#21
+FLOWS|REACHING_DEF[<RET>] macro_dimension#19 -> macro_dimension#23
+FLOWS|REACHING_DEF[N+1] macro_dimension#9 -> macro_dimension#23
+FLOWS|REACHING_DEF[N+1] macro_dimension#9 -> macro_dimension#7
+FLOWS|REACHING_DEF[N] macro_dimension#10 -> macro_dimension#23
+FLOWS|REACHING_DEF[N] macro_dimension#10 -> macro_dimension#9
+FLOWS|REACHING_DEF[] <operator>.addition#0 -> <operator>.addition#1
+FLOWS|REACHING_DEF[] <operator>.addition#0 -> <operator>.addition#4
+FLOWS|REACHING_DEF[] <operator>.alloc#0 -> <operator>.alloc#1
+FLOWS|REACHING_DEF[] <operator>.alloc#0 -> <operator>.alloc#4
+FLOWS|REACHING_DEF[] <operator>.assignment#0 -> <operator>.assignment#1
+FLOWS|REACHING_DEF[] <operator>.assignment#0 -> <operator>.assignment#4
+FLOWS|REACHING_DEF[] <operator>.indirectIndexAccess#0 -> <operator>.indirectIndexAccess#1
+FLOWS|REACHING_DEF[] <operator>.indirectIndexAccess#0 -> <operator>.indirectIndexAccess#4
+FLOWS|REACHING_DEF[] literal_dimension#0 -> literal_dimension#1
+FLOWS|REACHING_DEF[] literal_dimension#0 -> literal_dimension#10
+FLOWS|REACHING_DEF[] literal_dimension#0 -> literal_dimension#11
+FLOWS|REACHING_DEF[] literal_dimension#0 -> literal_dimension#14
+FLOWS|REACHING_DEF[] literal_dimension#0 -> literal_dimension#15
+FLOWS|REACHING_DEF[] literal_dimension#0 -> literal_dimension#16
+FLOWS|REACHING_DEF[] literal_dimension#0 -> literal_dimension#19
+FLOWS|REACHING_DEF[] literal_dimension#0 -> literal_dimension#20
+FLOWS|REACHING_DEF[] literal_dimension#0 -> literal_dimension#8
+FLOWS|REACHING_DEF[] macro_dimension#0 -> macro_dimension#1
+FLOWS|REACHING_DEF[] macro_dimension#0 -> macro_dimension#10
+FLOWS|REACHING_DEF[] macro_dimension#0 -> macro_dimension#12
+FLOWS|REACHING_DEF[] macro_dimension#0 -> macro_dimension#13
+FLOWS|REACHING_DEF[] macro_dimension#0 -> macro_dimension#16
+FLOWS|REACHING_DEF[] macro_dimension#0 -> macro_dimension#17
+FLOWS|REACHING_DEF[] macro_dimension#0 -> macro_dimension#18
+FLOWS|REACHING_DEF[] macro_dimension#0 -> macro_dimension#21
+FLOWS|REACHING_DEF[] macro_dimension#0 -> macro_dimension#22
+FLOWS|REACHING_DEF[] macro_dimension#0 -> macro_dimension#8
+FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#48
+FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#49
+FLOWS|REACHING_DEF[index] literal_dimension#1 -> literal_dimension#2
+FLOWS|REACHING_DEF[index] literal_dimension#1 -> literal_dimension#20
+FLOWS|REACHING_DEF[index] literal_dimension#1 -> literal_dimension#21
+FLOWS|REACHING_DEF[index] macro_dimension#1 -> macro_dimension#2
+FLOWS|REACHING_DEF[index] macro_dimension#1 -> macro_dimension#22
+FLOWS|REACHING_DEF[index] macro_dimension#1 -> macro_dimension#23
+FLOWS|REACHING_DEF[int[3+1]] literal_dimension#8 -> literal_dimension#21
+FLOWS|REACHING_DEF[int[3+1]] literal_dimension#8 -> literal_dimension#7
+FLOWS|REACHING_DEF[int[3+1]] literal_dimension#8 -> literal_dimension#9
+FLOWS|REACHING_DEF[int[N+1]] macro_dimension#8 -> macro_dimension#23
+FLOWS|REACHING_DEF[int[N+1]] macro_dimension#8 -> macro_dimension#7
+FLOWS|REACHING_DEF[int[N+1]] macro_dimension#8 -> macro_dimension#9
+FLOWS|REACHING_DEF[p1] <operator>.addition#1 -> <operator>.addition#3
+FLOWS|REACHING_DEF[p1] <operator>.addition#1 -> <operator>.addition#5
+FLOWS|REACHING_DEF[p1] <operator>.alloc#1 -> <operator>.alloc#3
+FLOWS|REACHING_DEF[p1] <operator>.alloc#1 -> <operator>.alloc#5
+FLOWS|REACHING_DEF[p1] <operator>.assignment#1 -> <operator>.assignment#3
+FLOWS|REACHING_DEF[p1] <operator>.assignment#1 -> <operator>.assignment#5
+FLOWS|REACHING_DEF[p1] <operator>.indirectIndexAccess#1 -> <operator>.indirectIndexAccess#3
+FLOWS|REACHING_DEF[p1] <operator>.indirectIndexAccess#1 -> <operator>.indirectIndexAccess#5
+FLOWS|REACHING_DEF[p2] <operator>.addition#4 -> <operator>.addition#5
+FLOWS|REACHING_DEF[p2] <operator>.addition#4 -> <operator>.addition#6
+FLOWS|REACHING_DEF[p2] <operator>.alloc#4 -> <operator>.alloc#5
+FLOWS|REACHING_DEF[p2] <operator>.alloc#4 -> <operator>.alloc#6
+FLOWS|REACHING_DEF[p2] <operator>.assignment#4 -> <operator>.assignment#5
+FLOWS|REACHING_DEF[p2] <operator>.assignment#4 -> <operator>.assignment#6
+FLOWS|REACHING_DEF[p2] <operator>.indirectIndexAccess#4 -> <operator>.indirectIndexAccess#5
+FLOWS|REACHING_DEF[p2] <operator>.indirectIndexAccess#4 -> <operator>.indirectIndexAccess#6
+FLOWS|REACHING_DEF[values[0] = 7] literal_dimension#12 -> literal_dimension#21
+FLOWS|REACHING_DEF[values[0] = 7] macro_dimension#14 -> macro_dimension#23
+FLOWS|REACHING_DEF[values[0]] literal_dimension#13 -> literal_dimension#12
+FLOWS|REACHING_DEF[values[0]] literal_dimension#13 -> literal_dimension#19
+FLOWS|REACHING_DEF[values[0]] literal_dimension#13 -> literal_dimension#21
+FLOWS|REACHING_DEF[values[0]] macro_dimension#15 -> macro_dimension#14
+FLOWS|REACHING_DEF[values[0]] macro_dimension#15 -> macro_dimension#21
+FLOWS|REACHING_DEF[values[0]] macro_dimension#15 -> macro_dimension#23
+FLOWS|REACHING_DEF[values[3+1]] literal_dimension#5 -> literal_dimension#21
+FLOWS|REACHING_DEF[values[3+1]] literal_dimension#7 -> literal_dimension#21
+FLOWS|REACHING_DEF[values[3+1]] literal_dimension#7 -> literal_dimension#5
+FLOWS|REACHING_DEF[values[3+1]] literal_dimension#7 -> literal_dimension#6
+FLOWS|REACHING_DEF[values[N+1]] macro_dimension#5 -> macro_dimension#23
+FLOWS|REACHING_DEF[values[N+1]] macro_dimension#7 -> macro_dimension#23
+FLOWS|REACHING_DEF[values[N+1]] macro_dimension#7 -> macro_dimension#5
+FLOWS|REACHING_DEF[values[N+1]] macro_dimension#7 -> macro_dimension#6
+FLOWS|REACHING_DEF[values[index]] literal_dimension#18 -> literal_dimension#17
+FLOWS|REACHING_DEF[values[index]] macro_dimension#20 -> macro_dimension#19
+FLOWS|REACHING_DEF[values] literal_dimension#6 -> literal_dimension#14
+FLOWS|REACHING_DEF[values] literal_dimension#6 -> literal_dimension#18
+FLOWS|REACHING_DEF[values] literal_dimension#6 -> literal_dimension#19
+FLOWS|REACHING_DEF[values] literal_dimension#6 -> literal_dimension#21
+FLOWS|REACHING_DEF[values] literal_dimension#6 -> literal_dimension#5
+FLOWS|REACHING_DEF[values] macro_dimension#6 -> macro_dimension#16
+FLOWS|REACHING_DEF[values] macro_dimension#6 -> macro_dimension#20
+FLOWS|REACHING_DEF[values] macro_dimension#6 -> macro_dimension#21
+FLOWS|REACHING_DEF[values] macro_dimension#6 -> macro_dimension#23
+FLOWS|REACHING_DEF[values] macro_dimension#6 -> macro_dimension#5
+CASE|body_include_macro_only
+=======================================================================================================
+Invoking CPG generator in a separate process. Note that the new process will consume additional memory.
+If you are importing a large codebase (and/or running into memory issues), please try the following:
+1) exit joern
+2) invoke the frontend: /Users/shayaunnejad/vibe-code/joern-oxidized/.local/astra-sprint/oracle/runtime/joern-cli/c2cpg.sh -J-Xmx4096m /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/tenth-array-dimension-controls/runs/first-complete-array-dimension-reference-batch/snapshot/input/body_include_macro_only --output /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/tenth-array-dimension-controls/runs/first-complete-array-dimension-reference-batch/workspace/workspace/body_include_macro_only/cpg.bin.zip
+3) start joern, import the cpg: `importCpg("path/to/cpg")`
+=======================================================================================================
+
+[INFO ] initialising from existing storage (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/tenth-array-dimension-controls/runs/first-complete-array-dimension-reference-batch/workspace/workspace/body_include_macro_only/cpg.bin.tmp)
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.FileCreationPass
+[INFO ] Pass io.joern.x2cpg.passes.base.FileCreationPass completed in 1 ms (91% on mutations). 15 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.NamespaceCreator
+[INFO ] Pass io.joern.x2cpg.passes.base.NamespaceCreator completed in 1 ms (90% on mutations). 5 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.TypeDeclStubCreator
+[INFO ] Pass io.joern.x2cpg.passes.base.TypeDeclStubCreator completed in 0 ms (68% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.MethodStubCreator
+[INFO ] Pass io.joern.x2cpg.passes.base.MethodStubCreator completed in 0 ms (78% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.ParameterIndexCompatPass
+[INFO ] Pass io.joern.x2cpg.passes.base.ParameterIndexCompatPass completed in 0 ms (80% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.MethodDecoratorPass
+[INFO ] Pass io.joern.x2cpg.passes.base.MethodDecoratorPass completed in 0 ms (82% on mutations). 3 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.AstLinkerPass
+[INFO ] Pass io.joern.x2cpg.passes.base.AstLinkerPass completed in 0 ms (61% on mutations). 4 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.ContainsEdgePass
+[INFO ] Pass io.joern.x2cpg.passes.base.ContainsEdgePass completed in 0 ms (41% on mutations). 17 + 0 changes committed from 14 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.TypeRefPass
+[INFO ] Pass io.joern.x2cpg.passes.base.TypeRefPass completed in 0 ms (64% on mutations). 4 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.TypeEvalPass
+[INFO ] Pass io.joern.x2cpg.passes.base.TypeEvalPass completed in 0 ms (55% on mutations). 14 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 0 ms (72% on mutations). 1 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.controlflow.CfgCreationPass
+[INFO ] Pass io.joern.x2cpg.passes.controlflow.CfgCreationPass completed in 0 ms (47% on mutations). 7 + 0 changes committed from 4 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.controlflow.cfgdominator.CfgDominatorPass
+[INFO ] Pass io.joern.x2cpg.passes.controlflow.cfgdominator.CfgDominatorPass completed in 0 ms (44% on mutations). 14 + 0 changes committed from 4 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.controlflow.codepencegraph.CdgPass
+[INFO ] Pass io.joern.x2cpg.passes.controlflow.codepencegraph.CdgPass completed in 0 ms (66% on mutations). 0 + 0 changes committed from 4 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 0 ms (82% on mutations). 1 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.typerelations.TypeHierarchyPass
+[INFO ] Pass io.joern.x2cpg.passes.typerelations.TypeHierarchyPass completed in 0 ms (75% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.typerelations.AliasLinkerPass
+[INFO ] Pass io.joern.x2cpg.passes.typerelations.AliasLinkerPass completed in 0 ms (75% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.typerelations.FieldAccessLinkerPass
+[INFO ] Pass io.joern.x2cpg.passes.typerelations.FieldAccessLinkerPass completed in 0 ms (80% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 0 ms (78% on mutations). 1 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.callgraph.MethodRefLinker
+[INFO ] Pass io.joern.x2cpg.passes.callgraph.MethodRefLinker completed in 0 ms (68% on mutations). 1 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.callgraph.StaticCallLinker
+[INFO ] Pass io.joern.x2cpg.passes.callgraph.StaticCallLinker completed in 0 ms (77% on mutations). 0 + 0 changes committed from 0 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.callgraph.DynamicCallLinker
+[INFO ] Pass io.joern.x2cpg.passes.callgraph.DynamicCallLinker completed in 0 ms (84% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 0 ms (84% on mutations). 1 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.dataflowengineoss.passes.reachingdef.ReachingDefPass
+[INFO ] Calculating reaching definitions for: api.h:<global> in api.h
+[INFO ] Calculating reaching definitions for: main.c:<global> in main.c
+[INFO ] Calculating reaching definitions for: <includes>:<global> in <includes>
+[INFO ] Calculating reaching definitions for: choose in main.c
+[INFO ] Number of definitions for main.c:<global>: 0
+[INFO ] Number of definitions for api.h:<global>: 0
+[INFO ] Number of definitions for <includes>:<global>: 0
+[INFO ] Number of definitions for choose: 1
+[INFO ] Pass io.joern.dataflowengineoss.passes.reachingdef.ReachingDefPass completed in 1 ms (18% on mutations). 9 + 0 changes committed from 4 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 0 ms (80% on mutations). 1 + 0 changes committed from 1 parts.
+AST|METHOD NAME=<global> CODE=<global> FULL_NAME=<includes>:<global> ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=<global> CODE=<global> FULL_NAME=api.h:<global> ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+AST|    LOCAL NAME=included CODE=int included TYPE_FULL_NAME=int ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=choose CODE=int choose(int x) {\n#include "api.h"\n#if FLAG\n return x;\n#else\n return 0;\n#endif\n} FULL_NAME=choose SIGNATURE=int(int) ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+AST|  METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+AST|  BLOCK CODE={\n#include "api.h"\n#if FLAG\n return x;\n#else\n return 0;\n#endif\n} TYPE_FULL_NAME=void ORDER=2
+AST|    LOCAL NAME=included CODE=int included TYPE_FULL_NAME=int ORDER=1
+AST|    RETURN CODE=return x; ORDER=2
+AST|      IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+AST|
+AST|METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1
+AST|  METHOD NAME=choose CODE=int choose(int x) {\n#include "api.h"\n#if FLAG\n return x;\n#else\n return 0;\n#endif\n} FULL_NAME=choose SIGNATURE=int(int) ORDER=1
+AST|    METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+AST|    METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+AST|    BLOCK CODE={\n#include "api.h"\n#if FLAG\n return x;\n#else\n return 0;\n#endif\n} TYPE_FULL_NAME=void ORDER=2
+AST|      LOCAL NAME=included CODE=int included TYPE_FULL_NAME=int ORDER=1
+AST|      RETURN CODE=return x; ORDER=2
+AST|        IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1
+AST|    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+AST|    METHOD_REF CODE=choose TYPE_FULL_NAME=choose METHOD_FULL_NAME=choose ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|
+NODES|META_DATA LANGUAGE=NEWC
+NODES|FILE NAME=<includes> ORDER=1
+NODES|FILE NAME=<unknown> ORDER=0
+NODES|FILE NAME=api.h ORDER=0
+NODES|FILE NAME=main.c ORDER=0
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<global> FILENAME=<unknown> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<includes>:<global> FILENAME=<includes> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=api.h:<global> FILENAME=api.h ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|NAMESPACE NAME=<global>
+NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=<global> FULL_NAME=api.h:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=api.h:<global> FILENAME=api.h ORDER=1
+NODES|TYPE_DECL NAME=choose FULL_NAME=choose CODE=choose AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=<global> FULL_NAME=main.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=2
+NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+NODES|TYPE NAME=choose FULL_NAME=choose TYPE_DECL_FULL_NAME=choose
+NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+EDGES|ARGUMENT choose#5 -> choose#6
+EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+EDGES|CFG api.h:<global>#0 -> api.h:<global>#3
+EDGES|CFG choose#0 -> choose#6
+EDGES|CFG choose#5 -> choose#7
+EDGES|CFG choose#6 -> choose#5
+EDGES|CFG main.c:<global>#0 -> main.c:<global>#10
+EDGES|CFG main.c:<global>#10 -> main.c:<global>#11
+EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+EDGES|CONTAINS D:api.h:<global> -> api.h:<global>#0
+EDGES|CONTAINS D:main.c:<global> -> D:choose
+EDGES|CONTAINS D:main.c:<global> -> main.c:<global>#0
+EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+EDGES|CONTAINS F:<includes> -> D:ANY
+EDGES|CONTAINS F:<includes> -> D:int
+EDGES|CONTAINS F:<includes> -> D:void
+EDGES|CONTAINS F:api.h -> D:api.h:<global>
+EDGES|CONTAINS F:main.c -> D:main.c:<global>
+EDGES|CONTAINS api.h:<global>#0 -> api.h:<global>#1
+EDGES|CONTAINS choose#0 -> choose#3
+EDGES|CONTAINS choose#0 -> choose#5
+EDGES|CONTAINS choose#0 -> choose#6
+EDGES|CONTAINS main.c:<global>#0 -> choose#0
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#10
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#9
+EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+EDGES|EVAL_TYPE api.h:<global>#1 -> T:ANY
+EDGES|EVAL_TYPE api.h:<global>#2 -> T:int
+EDGES|EVAL_TYPE api.h:<global>#3 -> T:ANY
+EDGES|EVAL_TYPE choose#1 -> T:int
+EDGES|EVAL_TYPE choose#2 -> T:int
+EDGES|EVAL_TYPE choose#3 -> T:void
+EDGES|EVAL_TYPE choose#4 -> T:int
+EDGES|EVAL_TYPE choose#6 -> T:int
+EDGES|EVAL_TYPE choose#7 -> T:int
+EDGES|EVAL_TYPE main.c:<global>#10 -> T:choose
+EDGES|EVAL_TYPE main.c:<global>#11 -> T:ANY
+EDGES|EVAL_TYPE main.c:<global>#9 -> T:ANY
+EDGES|PARAMETER_LINK choose#1 -> choose#2
+EDGES|REF NB:<global> -> NS:<global>
+EDGES|REF NB:<includes>:<global> -> NS:<global>
+EDGES|REF NB:api.h:<global> -> NS:<global>
+EDGES|REF NB:main.c:<global> -> NS:<global>
+EDGES|REF T:ANY -> D:ANY
+EDGES|REF T:choose -> D:choose
+EDGES|REF T:int -> D:int
+EDGES|REF T:void -> D:void
+EDGES|REF choose#6 -> choose#1
+EDGES|REF main.c:<global>#10 -> choose#0
+EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+EDGES|SOURCE_FILE D:ANY -> F:<includes>
+EDGES|SOURCE_FILE D:api.h:<global> -> F:api.h
+EDGES|SOURCE_FILE D:choose -> F:main.c
+EDGES|SOURCE_FILE D:int -> F:<includes>
+EDGES|SOURCE_FILE D:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE D:void -> F:<includes>
+EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
+EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>
+EDGES|SOURCE_FILE NB:api.h:<global> -> F:api.h
+EDGES|SOURCE_FILE NB:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE api.h:<global>#0 -> F:api.h
+EDGES|SOURCE_FILE choose#0 -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#0 -> F:main.c
+FLOWS|REACHING_DEF[<RET>] choose#5 -> choose#7
+FLOWS|REACHING_DEF[] choose#0 -> choose#1
+FLOWS|REACHING_DEF[] choose#0 -> choose#6
+FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#10
+FLOWS|REACHING_DEF[x] choose#1 -> choose#2
+FLOWS|REACHING_DEF[x] choose#1 -> choose#6
+FLOWS|REACHING_DEF[x] choose#1 -> choose#7
+FLOWS|REACHING_DEF[x] choose#6 -> choose#5
+CASE|parenthesized_macro
+=======================================================================================================
+Invoking CPG generator in a separate process. Note that the new process will consume additional memory.
+If you are importing a large codebase (and/or running into memory issues), please try the following:
+1) exit joern
+2) invoke the frontend: /Users/shayaunnejad/vibe-code/joern-oxidized/.local/astra-sprint/oracle/runtime/joern-cli/c2cpg.sh -J-Xmx4096m /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/tenth-array-dimension-controls/runs/first-complete-array-dimension-reference-batch/snapshot/input/parenthesized_macro --output /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/tenth-array-dimension-controls/runs/first-complete-array-dimension-reference-batch/workspace/workspace/parenthesized_macro/cpg.bin.zip
+3) start joern, import the cpg: `importCpg("path/to/cpg")`
+=======================================================================================================
+
+[INFO ] initialising from existing storage (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/tenth-array-dimension-controls/runs/first-complete-array-dimension-reference-batch/workspace/workspace/parenthesized_macro/cpg.bin.tmp)
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.FileCreationPass
+[INFO ] Pass io.joern.x2cpg.passes.base.FileCreationPass completed in 0 ms (70% on mutations). 17 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.NamespaceCreator
+[INFO ] Pass io.joern.x2cpg.passes.base.NamespaceCreator completed in 0 ms (77% on mutations). 4 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.TypeDeclStubCreator
+[INFO ] Pass io.joern.x2cpg.passes.base.TypeDeclStubCreator completed in 0 ms (71% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.MethodStubCreator
+[INFO ] Pass io.joern.x2cpg.passes.base.MethodStubCreator completed in 1 ms (57% on mutations). 36 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.ParameterIndexCompatPass
+[INFO ] Pass io.joern.x2cpg.passes.base.ParameterIndexCompatPass completed in 0 ms (78% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.MethodDecoratorPass
+[INFO ] Pass io.joern.x2cpg.passes.base.MethodDecoratorPass completed in 0 ms (74% on mutations). 30 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.AstLinkerPass
+[INFO ] Pass io.joern.x2cpg.passes.base.AstLinkerPass completed in 0 ms (58% on mutations). 12 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.ContainsEdgePass
+[INFO ] Pass io.joern.x2cpg.passes.base.ContainsEdgePass completed in 0 ms (45% on mutations). 58 + 0 changes committed from 20 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.TypeRefPass
+[INFO ] Pass io.joern.x2cpg.passes.base.TypeRefPass completed in 0 ms (67% on mutations). 7 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.TypeEvalPass
+[INFO ] Pass io.joern.x2cpg.passes.base.TypeEvalPass completed in 0 ms (50% on mutations). 74 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 0 ms (76% on mutations). 1 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.controlflow.CfgCreationPass
+[INFO ] Pass io.joern.x2cpg.passes.controlflow.CfgCreationPass completed in 1 ms (34% on mutations). 45 + 0 changes committed from 9 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.controlflow.cfgdominator.CfgDominatorPass
+[INFO ] Pass io.joern.x2cpg.passes.controlflow.cfgdominator.CfgDominatorPass completed in 1 ms (40% on mutations). 88 + 0 changes committed from 9 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.controlflow.codepencegraph.CdgPass
+[INFO ] Pass io.joern.x2cpg.passes.controlflow.codepencegraph.CdgPass completed in 0 ms (50% on mutations). 1 + 0 changes committed from 9 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 0 ms (70% on mutations). 1 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.typerelations.TypeHierarchyPass
+[INFO ] Pass io.joern.x2cpg.passes.typerelations.TypeHierarchyPass completed in 0 ms (75% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.typerelations.AliasLinkerPass
+[INFO ] Pass io.joern.x2cpg.passes.typerelations.AliasLinkerPass completed in 0 ms (78% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.typerelations.FieldAccessLinkerPass
+[INFO ] Pass io.joern.x2cpg.passes.typerelations.FieldAccessLinkerPass completed in 0 ms (77% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 0 ms (84% on mutations). 1 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.callgraph.MethodRefLinker
+[INFO ] Pass io.joern.x2cpg.passes.callgraph.MethodRefLinker completed in 0 ms (64% on mutations). 2 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.callgraph.StaticCallLinker
+[INFO ] Pass io.joern.x2cpg.passes.callgraph.StaticCallLinker completed in 0 ms (63% on mutations). 13 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.callgraph.DynamicCallLinker
+[INFO ] Pass io.joern.x2cpg.passes.callgraph.DynamicCallLinker completed in 0 ms (83% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 0 ms (75% on mutations). 1 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.dataflowengineoss.passes.reachingdef.ReachingDefPass
+[INFO ] Calculating reaching definitions for: <operator>.alloc in <empty>
+[INFO ] Calculating reaching definitions for: literal_dimension in main.c
+[INFO ] Calculating reaching definitions for: <operator>.addition in <empty>
+[INFO ] Calculating reaching definitions for: main.c:<global> in main.c
+[INFO ] Calculating reaching definitions for: main.c:N:int(0) in main.c
+[INFO ] Calculating reaching definitions for: <includes>:<global> in <includes>
+[INFO ] Calculating reaching definitions for: macro_dimension in main.c
+[INFO ] Calculating reaching definitions for: <operator>.indirectIndexAccess in <empty>
+[INFO ] Number of definitions for <operator>.addition: 2
+[INFO ] Number of definitions for main.c:<global>: 0
+[INFO ] Calculating reaching definitions for: <operator>.assignment in <empty>
+[INFO ] Number of definitions for <operator>.alloc: 2
+[INFO ] Number of definitions for literal_dimension: 9
+[INFO ] Number of definitions for <operator>.indirectIndexAccess: 2
+[INFO ] Number of definitions for main.c:N:int(0): 0
+[INFO ] Number of definitions for <operator>.assignment: 2
+[INFO ] Number of definitions for <includes>:<global>: 0
+[INFO ] Number of definitions for macro_dimension: 11
+[INFO ] Pass io.joern.dataflowengineoss.passes.reachingdef.ReachingDefPass completed in 3 ms (10% on mutations). 102 + 0 changes committed from 9 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 0 ms (83% on mutations). 1 + 0 changes committed from 1 parts.
+AST|METHOD NAME=<global> CODE=<global> FULL_NAME=<includes>:<global> ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=<operator>.addition FULL_NAME=<operator>.addition ORDER=0
+AST|  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=<operator>.alloc FULL_NAME=<operator>.alloc ORDER=0
+AST|  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=<operator>.assignment FULL_NAME=<operator>.assignment ORDER=0
+AST|  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=<operator>.indirectIndexAccess FULL_NAME=<operator>.indirectIndexAccess ORDER=0
+AST|  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=literal_dimension CODE=int literal_dimension(int index) {\n    int values[(3+1)];\n    values[0] = 7;\n    return values[index];\n} FULL_NAME=literal_dimension SIGNATURE=int(int) ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=index CODE=int index TYPE_FULL_NAME=int ORDER=1
+AST|  METHOD_PARAMETER_OUT NAME=index CODE=int index TYPE_FULL_NAME=int ORDER=1
+AST|  BLOCK CODE={\n    int values[(3+1)];\n    values[0] = 7;\n    return values[index];\n} TYPE_FULL_NAME=void ORDER=2
+AST|    LOCAL NAME=values CODE=int values[(3+1)] TYPE_FULL_NAME=int[(3+1)] ORDER=1
+AST|    CALL NAME=<operator>.assignment CODE=values[(3+1)] TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|      IDENTIFIER NAME=values CODE=values TYPE_FULL_NAME=int[(3+1)] ORDER=1 ARGUMENT_INDEX=1
+AST|      CALL NAME=<operator>.alloc CODE=values[(3+1)] TYPE_FULL_NAME=int[(3+1)] METHOD_FULL_NAME=<operator>.alloc ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        IDENTIFIER NAME=int[(3+1)] CODE=int[(3+1)] TYPE_FULL_NAME=int[(3+1)] ORDER=1 ARGUMENT_INDEX=1
+AST|        CALL NAME=<operator>.addition CODE=3+1 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          LITERAL CODE=3 TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|          LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|    CALL NAME=<operator>.assignment CODE=values[0] = 7 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH
+AST|      CALL NAME=<operator>.indirectIndexAccess CODE=values[0] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectIndexAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        IDENTIFIER NAME=values CODE=values TYPE_FULL_NAME=int[(3+1)] ORDER=1 ARGUMENT_INDEX=1
+AST|        LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|      LITERAL CODE=7 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|    RETURN CODE=return values[index]; ORDER=4
+AST|      CALL NAME=<operator>.indirectIndexAccess CODE=values[index] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectIndexAccess ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        IDENTIFIER NAME=values CODE=values TYPE_FULL_NAME=int[(3+1)] ORDER=1 ARGUMENT_INDEX=1
+AST|        IDENTIFIER NAME=index CODE=index TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+AST|
+AST|METHOD NAME=macro_dimension CODE=int macro_dimension(int index) {\n    int values[(N+1)];\n    values[0] = 7;\n    return values[index];\n} FULL_NAME=macro_dimension SIGNATURE=int(int) ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=index CODE=int index TYPE_FULL_NAME=int ORDER=1
+AST|  METHOD_PARAMETER_OUT NAME=index CODE=int index TYPE_FULL_NAME=int ORDER=1
+AST|  BLOCK CODE={\n    int values[(N+1)];\n    values[0] = 7;\n    return values[index];\n} TYPE_FULL_NAME=void ORDER=2
+AST|    LOCAL NAME=values CODE=int values[(N+1)] TYPE_FULL_NAME=int[(N+1)] ORDER=1
+AST|    CALL NAME=<operator>.assignment CODE=values[(N+1)] TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|      IDENTIFIER NAME=values CODE=values TYPE_FULL_NAME=int[(N+1)] ORDER=1 ARGUMENT_INDEX=1
+AST|      CALL NAME=<operator>.alloc CODE=values[(N+1)] TYPE_FULL_NAME=int[(N+1)] METHOD_FULL_NAME=<operator>.alloc ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        IDENTIFIER NAME=int[(N+1)] CODE=int[(N+1)] TYPE_FULL_NAME=int[(N+1)] ORDER=1 ARGUMENT_INDEX=1
+AST|        CALL NAME=<operator>.addition CODE=N+1 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          CALL NAME=N CODE=N TYPE_FULL_NAME=int METHOD_FULL_NAME=main.c:N:int(0) SIGNATURE=int(0) ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=INLINED
+AST|            BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|              LITERAL CODE=3 TYPE_FULL_NAME=int ORDER=1
+AST|          LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|    CALL NAME=<operator>.assignment CODE=values[0] = 7 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH
+AST|      CALL NAME=<operator>.indirectIndexAccess CODE=values[0] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectIndexAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        IDENTIFIER NAME=values CODE=values TYPE_FULL_NAME=int[(N+1)] ORDER=1 ARGUMENT_INDEX=1
+AST|        LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|      LITERAL CODE=7 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|    RETURN CODE=return values[index]; ORDER=4
+AST|      CALL NAME=<operator>.indirectIndexAccess CODE=values[index] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectIndexAccess ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        IDENTIFIER NAME=values CODE=values TYPE_FULL_NAME=int[(N+1)] ORDER=1 ARGUMENT_INDEX=1
+AST|        IDENTIFIER NAME=index CODE=index TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+AST|
+AST|METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1
+AST|  METHOD NAME=macro_dimension CODE=int macro_dimension(int index) {\n    int values[(N+1)];\n    values[0] = 7;\n    return values[index];\n} FULL_NAME=macro_dimension SIGNATURE=int(int) ORDER=1
+AST|    METHOD_PARAMETER_IN NAME=index CODE=int index TYPE_FULL_NAME=int ORDER=1
+AST|    METHOD_PARAMETER_OUT NAME=index CODE=int index TYPE_FULL_NAME=int ORDER=1
+AST|    BLOCK CODE={\n    int values[(N+1)];\n    values[0] = 7;\n    return values[index];\n} TYPE_FULL_NAME=void ORDER=2
+AST|      LOCAL NAME=values CODE=int values[(N+1)] TYPE_FULL_NAME=int[(N+1)] ORDER=1
+AST|      CALL NAME=<operator>.assignment CODE=values[(N+1)] TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        IDENTIFIER NAME=values CODE=values TYPE_FULL_NAME=int[(N+1)] ORDER=1 ARGUMENT_INDEX=1
+AST|        CALL NAME=<operator>.alloc CODE=values[(N+1)] TYPE_FULL_NAME=int[(N+1)] METHOD_FULL_NAME=<operator>.alloc ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          IDENTIFIER NAME=int[(N+1)] CODE=int[(N+1)] TYPE_FULL_NAME=int[(N+1)] ORDER=1 ARGUMENT_INDEX=1
+AST|          CALL NAME=<operator>.addition CODE=N+1 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|            CALL NAME=N CODE=N TYPE_FULL_NAME=int METHOD_FULL_NAME=main.c:N:int(0) SIGNATURE=int(0) ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=INLINED
+AST|              BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|                LITERAL CODE=3 TYPE_FULL_NAME=int ORDER=1
+AST|            LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|      CALL NAME=<operator>.assignment CODE=values[0] = 7 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        CALL NAME=<operator>.indirectIndexAccess CODE=values[0] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectIndexAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          IDENTIFIER NAME=values CODE=values TYPE_FULL_NAME=int[(N+1)] ORDER=1 ARGUMENT_INDEX=1
+AST|          LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|        LITERAL CODE=7 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|      RETURN CODE=return values[index]; ORDER=4
+AST|        CALL NAME=<operator>.indirectIndexAccess CODE=values[index] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectIndexAccess ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          IDENTIFIER NAME=values CODE=values TYPE_FULL_NAME=int[(N+1)] ORDER=1 ARGUMENT_INDEX=1
+AST|          IDENTIFIER NAME=index CODE=index TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+AST|  METHOD NAME=literal_dimension CODE=int literal_dimension(int index) {\n    int values[(3+1)];\n    values[0] = 7;\n    return values[index];\n} FULL_NAME=literal_dimension SIGNATURE=int(int) ORDER=1
+AST|    METHOD_PARAMETER_IN NAME=index CODE=int index TYPE_FULL_NAME=int ORDER=1
+AST|    METHOD_PARAMETER_OUT NAME=index CODE=int index TYPE_FULL_NAME=int ORDER=1
+AST|    BLOCK CODE={\n    int values[(3+1)];\n    values[0] = 7;\n    return values[index];\n} TYPE_FULL_NAME=void ORDER=2
+AST|      LOCAL NAME=values CODE=int values[(3+1)] TYPE_FULL_NAME=int[(3+1)] ORDER=1
+AST|      CALL NAME=<operator>.assignment CODE=values[(3+1)] TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        IDENTIFIER NAME=values CODE=values TYPE_FULL_NAME=int[(3+1)] ORDER=1 ARGUMENT_INDEX=1
+AST|        CALL NAME=<operator>.alloc CODE=values[(3+1)] TYPE_FULL_NAME=int[(3+1)] METHOD_FULL_NAME=<operator>.alloc ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          IDENTIFIER NAME=int[(3+1)] CODE=int[(3+1)] TYPE_FULL_NAME=int[(3+1)] ORDER=1 ARGUMENT_INDEX=1
+AST|          CALL NAME=<operator>.addition CODE=3+1 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|            LITERAL CODE=3 TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|            LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|      CALL NAME=<operator>.assignment CODE=values[0] = 7 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        CALL NAME=<operator>.indirectIndexAccess CODE=values[0] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectIndexAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          IDENTIFIER NAME=values CODE=values TYPE_FULL_NAME=int[(3+1)] ORDER=1 ARGUMENT_INDEX=1
+AST|          LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|        LITERAL CODE=7 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|      RETURN CODE=return values[index]; ORDER=4
+AST|        CALL NAME=<operator>.indirectIndexAccess CODE=values[index] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectIndexAccess ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          IDENTIFIER NAME=values CODE=values TYPE_FULL_NAME=int[(3+1)] ORDER=1 ARGUMENT_INDEX=1
+AST|          IDENTIFIER NAME=index CODE=index TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+AST|    METHOD_REF CODE=macro_dimension TYPE_FULL_NAME=macro_dimension METHOD_FULL_NAME=macro_dimension ORDER=1
+AST|    METHOD_REF CODE=literal_dimension TYPE_FULL_NAME=literal_dimension METHOD_FULL_NAME=literal_dimension ORDER=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=N CODE=#define N 3 FULL_NAME=main.c:N:int(0) SIGNATURE=int(0) ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=2
+AST|
+NODES|META_DATA LANGUAGE=NEWC
+NODES|FILE NAME=<includes> ORDER=1
+NODES|FILE NAME=<unknown> ORDER=0
+NODES|FILE NAME=main.c ORDER=0
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<global> FILENAME=<unknown> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<includes>:<global> FILENAME=<includes> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|NAMESPACE NAME=<global>
+NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=int[(3+1)] FULL_NAME=int[(3+1)] CODE=int[(3+1)] IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=int[(N+1)] FULL_NAME=int[(N+1)] CODE=int[(N+1)] IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=literal_dimension FULL_NAME=literal_dimension CODE=literal_dimension AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=macro_dimension FULL_NAME=macro_dimension CODE=macro_dimension AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=<global> FULL_NAME=main.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+NODES|TYPE NAME=int[(3+1)] FULL_NAME=int[(3+1)] TYPE_DECL_FULL_NAME=int[(3+1)]
+NODES|TYPE NAME=int[(N+1)] FULL_NAME=int[(N+1)] TYPE_DECL_FULL_NAME=int[(N+1)]
+NODES|TYPE NAME=literal_dimension FULL_NAME=literal_dimension TYPE_DECL_FULL_NAME=literal_dimension
+NODES|TYPE NAME=macro_dimension FULL_NAME=macro_dimension TYPE_DECL_FULL_NAME=macro_dimension
+NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+EDGES|ARGUMENT literal_dimension#12 -> literal_dimension#13
+EDGES|ARGUMENT literal_dimension#12 -> literal_dimension#16
+EDGES|ARGUMENT literal_dimension#13 -> literal_dimension#14
+EDGES|ARGUMENT literal_dimension#13 -> literal_dimension#15
+EDGES|ARGUMENT literal_dimension#17 -> literal_dimension#18
+EDGES|ARGUMENT literal_dimension#18 -> literal_dimension#19
+EDGES|ARGUMENT literal_dimension#18 -> literal_dimension#20
+EDGES|ARGUMENT literal_dimension#5 -> literal_dimension#6
+EDGES|ARGUMENT literal_dimension#5 -> literal_dimension#7
+EDGES|ARGUMENT literal_dimension#7 -> literal_dimension#8
+EDGES|ARGUMENT literal_dimension#7 -> literal_dimension#9
+EDGES|ARGUMENT literal_dimension#9 -> literal_dimension#10
+EDGES|ARGUMENT literal_dimension#9 -> literal_dimension#11
+EDGES|ARGUMENT macro_dimension#14 -> macro_dimension#15
+EDGES|ARGUMENT macro_dimension#14 -> macro_dimension#18
+EDGES|ARGUMENT macro_dimension#15 -> macro_dimension#16
+EDGES|ARGUMENT macro_dimension#15 -> macro_dimension#17
+EDGES|ARGUMENT macro_dimension#19 -> macro_dimension#20
+EDGES|ARGUMENT macro_dimension#20 -> macro_dimension#21
+EDGES|ARGUMENT macro_dimension#20 -> macro_dimension#22
+EDGES|ARGUMENT macro_dimension#5 -> macro_dimension#6
+EDGES|ARGUMENT macro_dimension#5 -> macro_dimension#7
+EDGES|ARGUMENT macro_dimension#7 -> macro_dimension#8
+EDGES|ARGUMENT macro_dimension#7 -> macro_dimension#9
+EDGES|ARGUMENT macro_dimension#9 -> macro_dimension#10
+EDGES|ARGUMENT macro_dimension#9 -> macro_dimension#13
+EDGES|CALL literal_dimension#12 -> <operator>.assignment#0
+EDGES|CALL literal_dimension#13 -> <operator>.indirectIndexAccess#0
+EDGES|CALL literal_dimension#18 -> <operator>.indirectIndexAccess#0
+EDGES|CALL literal_dimension#5 -> <operator>.assignment#0
+EDGES|CALL literal_dimension#7 -> <operator>.alloc#0
+EDGES|CALL literal_dimension#9 -> <operator>.addition#0
+EDGES|CALL macro_dimension#10 -> main.c:N:int(0)#0
+EDGES|CALL macro_dimension#14 -> <operator>.assignment#0
+EDGES|CALL macro_dimension#15 -> <operator>.indirectIndexAccess#0
+EDGES|CALL macro_dimension#20 -> <operator>.indirectIndexAccess#0
+EDGES|CALL macro_dimension#5 -> <operator>.assignment#0
+EDGES|CALL macro_dimension#7 -> <operator>.alloc#0
+EDGES|CALL macro_dimension#9 -> <operator>.addition#0
+EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+EDGES|CFG <operator>.addition#0 -> <operator>.addition#5
+EDGES|CFG <operator>.alloc#0 -> <operator>.alloc#5
+EDGES|CFG <operator>.assignment#0 -> <operator>.assignment#5
+EDGES|CFG <operator>.indirectIndexAccess#0 -> <operator>.indirectIndexAccess#5
+EDGES|CFG literal_dimension#0 -> literal_dimension#6
+EDGES|CFG literal_dimension#10 -> literal_dimension#11
+EDGES|CFG literal_dimension#11 -> literal_dimension#9
+EDGES|CFG literal_dimension#12 -> literal_dimension#19
+EDGES|CFG literal_dimension#13 -> literal_dimension#16
+EDGES|CFG literal_dimension#14 -> literal_dimension#15
+EDGES|CFG literal_dimension#15 -> literal_dimension#13
+EDGES|CFG literal_dimension#16 -> literal_dimension#12
+EDGES|CFG literal_dimension#17 -> literal_dimension#21
+EDGES|CFG literal_dimension#18 -> literal_dimension#17
+EDGES|CFG literal_dimension#19 -> literal_dimension#20
+EDGES|CFG literal_dimension#20 -> literal_dimension#18
+EDGES|CFG literal_dimension#5 -> literal_dimension#14
+EDGES|CFG literal_dimension#6 -> literal_dimension#8
+EDGES|CFG literal_dimension#7 -> literal_dimension#5
+EDGES|CFG literal_dimension#8 -> literal_dimension#10
+EDGES|CFG literal_dimension#9 -> literal_dimension#7
+EDGES|CFG macro_dimension#0 -> macro_dimension#6
+EDGES|CFG macro_dimension#10 -> macro_dimension#12
+EDGES|CFG macro_dimension#10 -> macro_dimension#13
+EDGES|CFG macro_dimension#12 -> macro_dimension#13
+EDGES|CFG macro_dimension#13 -> macro_dimension#9
+EDGES|CFG macro_dimension#14 -> macro_dimension#21
+EDGES|CFG macro_dimension#15 -> macro_dimension#18
+EDGES|CFG macro_dimension#16 -> macro_dimension#17
+EDGES|CFG macro_dimension#17 -> macro_dimension#15
+EDGES|CFG macro_dimension#18 -> macro_dimension#14
+EDGES|CFG macro_dimension#19 -> macro_dimension#23
+EDGES|CFG macro_dimension#20 -> macro_dimension#19
+EDGES|CFG macro_dimension#21 -> macro_dimension#22
+EDGES|CFG macro_dimension#22 -> macro_dimension#20
+EDGES|CFG macro_dimension#5 -> macro_dimension#16
+EDGES|CFG macro_dimension#6 -> macro_dimension#8
+EDGES|CFG macro_dimension#7 -> macro_dimension#5
+EDGES|CFG macro_dimension#8 -> macro_dimension#10
+EDGES|CFG macro_dimension#9 -> macro_dimension#7
+EDGES|CFG main.c:<global>#0 -> main.c:<global>#48
+EDGES|CFG main.c:<global>#48 -> main.c:<global>#49
+EDGES|CFG main.c:<global>#49 -> main.c:<global>#50
+EDGES|CFG main.c:N:int(0)#0 -> main.c:N:int(0)#2
+EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+EDGES|CONTAINS <operator>.addition#0 -> <operator>.addition#2
+EDGES|CONTAINS <operator>.alloc#0 -> <operator>.alloc#2
+EDGES|CONTAINS <operator>.assignment#0 -> <operator>.assignment#2
+EDGES|CONTAINS <operator>.indirectIndexAccess#0 -> <operator>.indirectIndexAccess#2
+EDGES|CONTAINS D:main.c:<global> -> D:literal_dimension
+EDGES|CONTAINS D:main.c:<global> -> D:macro_dimension
+EDGES|CONTAINS D:main.c:<global> -> main.c:<global>#0
+EDGES|CONTAINS D:main.c:<global> -> main.c:N:int(0)#0
+EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+EDGES|CONTAINS F:<includes> -> D:ANY
+EDGES|CONTAINS F:<includes> -> D:int
+EDGES|CONTAINS F:<includes> -> D:int[(3+1)]
+EDGES|CONTAINS F:<includes> -> D:int[(N+1)]
+EDGES|CONTAINS F:<includes> -> D:void
+EDGES|CONTAINS F:main.c -> D:main.c:<global>
+EDGES|CONTAINS literal_dimension#0 -> literal_dimension#10
+EDGES|CONTAINS literal_dimension#0 -> literal_dimension#11
+EDGES|CONTAINS literal_dimension#0 -> literal_dimension#12
+EDGES|CONTAINS literal_dimension#0 -> literal_dimension#13
+EDGES|CONTAINS literal_dimension#0 -> literal_dimension#14
+EDGES|CONTAINS literal_dimension#0 -> literal_dimension#15
+EDGES|CONTAINS literal_dimension#0 -> literal_dimension#16
+EDGES|CONTAINS literal_dimension#0 -> literal_dimension#17
+EDGES|CONTAINS literal_dimension#0 -> literal_dimension#18
+EDGES|CONTAINS literal_dimension#0 -> literal_dimension#19
+EDGES|CONTAINS literal_dimension#0 -> literal_dimension#20
+EDGES|CONTAINS literal_dimension#0 -> literal_dimension#3
+EDGES|CONTAINS literal_dimension#0 -> literal_dimension#5
+EDGES|CONTAINS literal_dimension#0 -> literal_dimension#6
+EDGES|CONTAINS literal_dimension#0 -> literal_dimension#7
+EDGES|CONTAINS literal_dimension#0 -> literal_dimension#8
+EDGES|CONTAINS literal_dimension#0 -> literal_dimension#9
+EDGES|CONTAINS macro_dimension#0 -> macro_dimension#10
+EDGES|CONTAINS macro_dimension#0 -> macro_dimension#11
+EDGES|CONTAINS macro_dimension#0 -> macro_dimension#12
+EDGES|CONTAINS macro_dimension#0 -> macro_dimension#13
+EDGES|CONTAINS macro_dimension#0 -> macro_dimension#14
+EDGES|CONTAINS macro_dimension#0 -> macro_dimension#15
+EDGES|CONTAINS macro_dimension#0 -> macro_dimension#16
+EDGES|CONTAINS macro_dimension#0 -> macro_dimension#17
+EDGES|CONTAINS macro_dimension#0 -> macro_dimension#18
+EDGES|CONTAINS macro_dimension#0 -> macro_dimension#19
+EDGES|CONTAINS macro_dimension#0 -> macro_dimension#20
+EDGES|CONTAINS macro_dimension#0 -> macro_dimension#21
+EDGES|CONTAINS macro_dimension#0 -> macro_dimension#22
+EDGES|CONTAINS macro_dimension#0 -> macro_dimension#3
+EDGES|CONTAINS macro_dimension#0 -> macro_dimension#5
+EDGES|CONTAINS macro_dimension#0 -> macro_dimension#6
+EDGES|CONTAINS macro_dimension#0 -> macro_dimension#7
+EDGES|CONTAINS macro_dimension#0 -> macro_dimension#8
+EDGES|CONTAINS macro_dimension#0 -> macro_dimension#9
+EDGES|CONTAINS main.c:<global>#0 -> literal_dimension#0
+EDGES|CONTAINS main.c:<global>#0 -> macro_dimension#0
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#47
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#48
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#49
+EDGES|CONTAINS main.c:N:int(0)#0 -> main.c:N:int(0)#1
+EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#6 -> T:ANY
+EDGES|EVAL_TYPE <operator>.alloc#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.alloc#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.alloc#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.alloc#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.alloc#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.alloc#6 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#6 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectIndexAccess#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectIndexAccess#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectIndexAccess#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectIndexAccess#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectIndexAccess#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectIndexAccess#6 -> T:ANY
+EDGES|EVAL_TYPE literal_dimension#1 -> T:int
+EDGES|EVAL_TYPE literal_dimension#10 -> T:int
+EDGES|EVAL_TYPE literal_dimension#11 -> T:int
+EDGES|EVAL_TYPE literal_dimension#12 -> T:ANY
+EDGES|EVAL_TYPE literal_dimension#13 -> T:ANY
+EDGES|EVAL_TYPE literal_dimension#14 -> T:int[(3+1)]
+EDGES|EVAL_TYPE literal_dimension#15 -> T:int
+EDGES|EVAL_TYPE literal_dimension#16 -> T:int
+EDGES|EVAL_TYPE literal_dimension#18 -> T:ANY
+EDGES|EVAL_TYPE literal_dimension#19 -> T:int[(3+1)]
+EDGES|EVAL_TYPE literal_dimension#2 -> T:int
+EDGES|EVAL_TYPE literal_dimension#20 -> T:int
+EDGES|EVAL_TYPE literal_dimension#21 -> T:int
+EDGES|EVAL_TYPE literal_dimension#3 -> T:void
+EDGES|EVAL_TYPE literal_dimension#4 -> T:int[(3+1)]
+EDGES|EVAL_TYPE literal_dimension#5 -> T:void
+EDGES|EVAL_TYPE literal_dimension#6 -> T:int[(3+1)]
+EDGES|EVAL_TYPE literal_dimension#7 -> T:int[(3+1)]
+EDGES|EVAL_TYPE literal_dimension#8 -> T:int[(3+1)]
+EDGES|EVAL_TYPE literal_dimension#9 -> T:ANY
+EDGES|EVAL_TYPE macro_dimension#1 -> T:int
+EDGES|EVAL_TYPE macro_dimension#10 -> T:int
+EDGES|EVAL_TYPE macro_dimension#11 -> T:ANY
+EDGES|EVAL_TYPE macro_dimension#12 -> T:int
+EDGES|EVAL_TYPE macro_dimension#13 -> T:int
+EDGES|EVAL_TYPE macro_dimension#14 -> T:ANY
+EDGES|EVAL_TYPE macro_dimension#15 -> T:ANY
+EDGES|EVAL_TYPE macro_dimension#16 -> T:int[(N+1)]
+EDGES|EVAL_TYPE macro_dimension#17 -> T:int
+EDGES|EVAL_TYPE macro_dimension#18 -> T:int
+EDGES|EVAL_TYPE macro_dimension#2 -> T:int
+EDGES|EVAL_TYPE macro_dimension#20 -> T:ANY
+EDGES|EVAL_TYPE macro_dimension#21 -> T:int[(N+1)]
+EDGES|EVAL_TYPE macro_dimension#22 -> T:int
+EDGES|EVAL_TYPE macro_dimension#23 -> T:int
+EDGES|EVAL_TYPE macro_dimension#3 -> T:void
+EDGES|EVAL_TYPE macro_dimension#4 -> T:int[(N+1)]
+EDGES|EVAL_TYPE macro_dimension#5 -> T:void
+EDGES|EVAL_TYPE macro_dimension#6 -> T:int[(N+1)]
+EDGES|EVAL_TYPE macro_dimension#7 -> T:int[(N+1)]
+EDGES|EVAL_TYPE macro_dimension#8 -> T:int[(N+1)]
+EDGES|EVAL_TYPE macro_dimension#9 -> T:ANY
+EDGES|EVAL_TYPE main.c:<global>#47 -> T:ANY
+EDGES|EVAL_TYPE main.c:<global>#48 -> T:macro_dimension
+EDGES|EVAL_TYPE main.c:<global>#49 -> T:literal_dimension
+EDGES|EVAL_TYPE main.c:<global>#50 -> T:ANY
+EDGES|EVAL_TYPE main.c:N:int(0)#1 -> T:ANY
+EDGES|EVAL_TYPE main.c:N:int(0)#2 -> T:int
+EDGES|PARAMETER_LINK <operator>.addition#1 -> <operator>.addition#3
+EDGES|PARAMETER_LINK <operator>.addition#4 -> <operator>.addition#6
+EDGES|PARAMETER_LINK <operator>.alloc#1 -> <operator>.alloc#3
+EDGES|PARAMETER_LINK <operator>.alloc#4 -> <operator>.alloc#6
+EDGES|PARAMETER_LINK <operator>.assignment#1 -> <operator>.assignment#3
+EDGES|PARAMETER_LINK <operator>.assignment#4 -> <operator>.assignment#6
+EDGES|PARAMETER_LINK <operator>.indirectIndexAccess#1 -> <operator>.indirectIndexAccess#3
+EDGES|PARAMETER_LINK <operator>.indirectIndexAccess#4 -> <operator>.indirectIndexAccess#6
+EDGES|PARAMETER_LINK literal_dimension#1 -> literal_dimension#2
+EDGES|PARAMETER_LINK macro_dimension#1 -> macro_dimension#2
+EDGES|REF NB:<global> -> NS:<global>
+EDGES|REF NB:<includes>:<global> -> NS:<global>
+EDGES|REF NB:main.c:<global> -> NS:<global>
+EDGES|REF T:ANY -> D:ANY
+EDGES|REF T:int -> D:int
+EDGES|REF T:int[(3+1)] -> D:int[(3+1)]
+EDGES|REF T:int[(N+1)] -> D:int[(N+1)]
+EDGES|REF T:literal_dimension -> D:literal_dimension
+EDGES|REF T:macro_dimension -> D:macro_dimension
+EDGES|REF T:void -> D:void
+EDGES|REF literal_dimension#14 -> literal_dimension#4
+EDGES|REF literal_dimension#19 -> literal_dimension#4
+EDGES|REF literal_dimension#20 -> literal_dimension#1
+EDGES|REF literal_dimension#6 -> literal_dimension#4
+EDGES|REF macro_dimension#16 -> macro_dimension#4
+EDGES|REF macro_dimension#21 -> macro_dimension#4
+EDGES|REF macro_dimension#22 -> macro_dimension#1
+EDGES|REF macro_dimension#6 -> macro_dimension#4
+EDGES|REF main.c:<global>#48 -> macro_dimension#0
+EDGES|REF main.c:<global>#49 -> literal_dimension#0
+EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+EDGES|SOURCE_FILE D:ANY -> F:<includes>
+EDGES|SOURCE_FILE D:int -> F:<includes>
+EDGES|SOURCE_FILE D:int[(3+1)] -> F:<includes>
+EDGES|SOURCE_FILE D:int[(N+1)] -> F:<includes>
+EDGES|SOURCE_FILE D:literal_dimension -> F:main.c
+EDGES|SOURCE_FILE D:macro_dimension -> F:main.c
+EDGES|SOURCE_FILE D:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE D:void -> F:<includes>
+EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
+EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>
+EDGES|SOURCE_FILE NB:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE literal_dimension#0 -> F:main.c
+EDGES|SOURCE_FILE macro_dimension#0 -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#0 -> F:main.c
+EDGES|SOURCE_FILE main.c:N:int(0)#0 -> F:main.c
+FLOWS|REACHING_DEF[1] literal_dimension#11 -> literal_dimension#9
+FLOWS|REACHING_DEF[1] macro_dimension#13 -> macro_dimension#9
+FLOWS|REACHING_DEF[3+1] literal_dimension#9 -> literal_dimension#21
+FLOWS|REACHING_DEF[3+1] literal_dimension#9 -> literal_dimension#7
+FLOWS|REACHING_DEF[3] literal_dimension#10 -> literal_dimension#9
+FLOWS|REACHING_DEF[7] literal_dimension#16 -> literal_dimension#12
+FLOWS|REACHING_DEF[7] literal_dimension#16 -> literal_dimension#13
+FLOWS|REACHING_DEF[7] macro_dimension#18 -> macro_dimension#14
+FLOWS|REACHING_DEF[7] macro_dimension#18 -> macro_dimension#15
+FLOWS|REACHING_DEF[<RET>] literal_dimension#17 -> literal_dimension#21
+FLOWS|REACHING_DEF[<RET>] macro_dimension#19 -> macro_dimension#23
+FLOWS|REACHING_DEF[N+1] macro_dimension#9 -> macro_dimension#23
+FLOWS|REACHING_DEF[N+1] macro_dimension#9 -> macro_dimension#7
+FLOWS|REACHING_DEF[N] macro_dimension#10 -> macro_dimension#23
+FLOWS|REACHING_DEF[N] macro_dimension#10 -> macro_dimension#9
+FLOWS|REACHING_DEF[] <operator>.addition#0 -> <operator>.addition#1
+FLOWS|REACHING_DEF[] <operator>.addition#0 -> <operator>.addition#4
+FLOWS|REACHING_DEF[] <operator>.alloc#0 -> <operator>.alloc#1
+FLOWS|REACHING_DEF[] <operator>.alloc#0 -> <operator>.alloc#4
+FLOWS|REACHING_DEF[] <operator>.assignment#0 -> <operator>.assignment#1
+FLOWS|REACHING_DEF[] <operator>.assignment#0 -> <operator>.assignment#4
+FLOWS|REACHING_DEF[] <operator>.indirectIndexAccess#0 -> <operator>.indirectIndexAccess#1
+FLOWS|REACHING_DEF[] <operator>.indirectIndexAccess#0 -> <operator>.indirectIndexAccess#4
+FLOWS|REACHING_DEF[] literal_dimension#0 -> literal_dimension#1
+FLOWS|REACHING_DEF[] literal_dimension#0 -> literal_dimension#10
+FLOWS|REACHING_DEF[] literal_dimension#0 -> literal_dimension#11
+FLOWS|REACHING_DEF[] literal_dimension#0 -> literal_dimension#14
+FLOWS|REACHING_DEF[] literal_dimension#0 -> literal_dimension#15
+FLOWS|REACHING_DEF[] literal_dimension#0 -> literal_dimension#16
+FLOWS|REACHING_DEF[] literal_dimension#0 -> literal_dimension#19
+FLOWS|REACHING_DEF[] literal_dimension#0 -> literal_dimension#20
+FLOWS|REACHING_DEF[] literal_dimension#0 -> literal_dimension#8
+FLOWS|REACHING_DEF[] macro_dimension#0 -> macro_dimension#1
+FLOWS|REACHING_DEF[] macro_dimension#0 -> macro_dimension#10
+FLOWS|REACHING_DEF[] macro_dimension#0 -> macro_dimension#12
+FLOWS|REACHING_DEF[] macro_dimension#0 -> macro_dimension#13
+FLOWS|REACHING_DEF[] macro_dimension#0 -> macro_dimension#16
+FLOWS|REACHING_DEF[] macro_dimension#0 -> macro_dimension#17
+FLOWS|REACHING_DEF[] macro_dimension#0 -> macro_dimension#18
+FLOWS|REACHING_DEF[] macro_dimension#0 -> macro_dimension#21
+FLOWS|REACHING_DEF[] macro_dimension#0 -> macro_dimension#22
+FLOWS|REACHING_DEF[] macro_dimension#0 -> macro_dimension#8
+FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#48
+FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#49
+FLOWS|REACHING_DEF[index] literal_dimension#1 -> literal_dimension#2
+FLOWS|REACHING_DEF[index] literal_dimension#1 -> literal_dimension#20
+FLOWS|REACHING_DEF[index] literal_dimension#1 -> literal_dimension#21
+FLOWS|REACHING_DEF[index] macro_dimension#1 -> macro_dimension#2
+FLOWS|REACHING_DEF[index] macro_dimension#1 -> macro_dimension#22
+FLOWS|REACHING_DEF[index] macro_dimension#1 -> macro_dimension#23
+FLOWS|REACHING_DEF[int[(3+1)]] literal_dimension#8 -> literal_dimension#21
+FLOWS|REACHING_DEF[int[(3+1)]] literal_dimension#8 -> literal_dimension#7
+FLOWS|REACHING_DEF[int[(3+1)]] literal_dimension#8 -> literal_dimension#9
+FLOWS|REACHING_DEF[int[(N+1)]] macro_dimension#8 -> macro_dimension#23
+FLOWS|REACHING_DEF[int[(N+1)]] macro_dimension#8 -> macro_dimension#7
+FLOWS|REACHING_DEF[int[(N+1)]] macro_dimension#8 -> macro_dimension#9
+FLOWS|REACHING_DEF[p1] <operator>.addition#1 -> <operator>.addition#3
+FLOWS|REACHING_DEF[p1] <operator>.addition#1 -> <operator>.addition#5
+FLOWS|REACHING_DEF[p1] <operator>.alloc#1 -> <operator>.alloc#3
+FLOWS|REACHING_DEF[p1] <operator>.alloc#1 -> <operator>.alloc#5
+FLOWS|REACHING_DEF[p1] <operator>.assignment#1 -> <operator>.assignment#3
+FLOWS|REACHING_DEF[p1] <operator>.assignment#1 -> <operator>.assignment#5
+FLOWS|REACHING_DEF[p1] <operator>.indirectIndexAccess#1 -> <operator>.indirectIndexAccess#3
+FLOWS|REACHING_DEF[p1] <operator>.indirectIndexAccess#1 -> <operator>.indirectIndexAccess#5
+FLOWS|REACHING_DEF[p2] <operator>.addition#4 -> <operator>.addition#5
+FLOWS|REACHING_DEF[p2] <operator>.addition#4 -> <operator>.addition#6
+FLOWS|REACHING_DEF[p2] <operator>.alloc#4 -> <operator>.alloc#5
+FLOWS|REACHING_DEF[p2] <operator>.alloc#4 -> <operator>.alloc#6
+FLOWS|REACHING_DEF[p2] <operator>.assignment#4 -> <operator>.assignment#5
+FLOWS|REACHING_DEF[p2] <operator>.assignment#4 -> <operator>.assignment#6
+FLOWS|REACHING_DEF[p2] <operator>.indirectIndexAccess#4 -> <operator>.indirectIndexAccess#5
+FLOWS|REACHING_DEF[p2] <operator>.indirectIndexAccess#4 -> <operator>.indirectIndexAccess#6
+FLOWS|REACHING_DEF[values[(3+1)]] literal_dimension#5 -> literal_dimension#21
+FLOWS|REACHING_DEF[values[(3+1)]] literal_dimension#7 -> literal_dimension#21
+FLOWS|REACHING_DEF[values[(3+1)]] literal_dimension#7 -> literal_dimension#5
+FLOWS|REACHING_DEF[values[(3+1)]] literal_dimension#7 -> literal_dimension#6
+FLOWS|REACHING_DEF[values[(N+1)]] macro_dimension#5 -> macro_dimension#23
+FLOWS|REACHING_DEF[values[(N+1)]] macro_dimension#7 -> macro_dimension#23
+FLOWS|REACHING_DEF[values[(N+1)]] macro_dimension#7 -> macro_dimension#5
+FLOWS|REACHING_DEF[values[(N+1)]] macro_dimension#7 -> macro_dimension#6
+FLOWS|REACHING_DEF[values[0] = 7] literal_dimension#12 -> literal_dimension#21
+FLOWS|REACHING_DEF[values[0] = 7] macro_dimension#14 -> macro_dimension#23
+FLOWS|REACHING_DEF[values[0]] literal_dimension#13 -> literal_dimension#12
+FLOWS|REACHING_DEF[values[0]] literal_dimension#13 -> literal_dimension#19
+FLOWS|REACHING_DEF[values[0]] literal_dimension#13 -> literal_dimension#21
+FLOWS|REACHING_DEF[values[0]] macro_dimension#15 -> macro_dimension#14
+FLOWS|REACHING_DEF[values[0]] macro_dimension#15 -> macro_dimension#21
+FLOWS|REACHING_DEF[values[0]] macro_dimension#15 -> macro_dimension#23
+FLOWS|REACHING_DEF[values[index]] literal_dimension#18 -> literal_dimension#17
+FLOWS|REACHING_DEF[values[index]] macro_dimension#20 -> macro_dimension#19
+FLOWS|REACHING_DEF[values] literal_dimension#6 -> literal_dimension#14
+FLOWS|REACHING_DEF[values] literal_dimension#6 -> literal_dimension#18
+FLOWS|REACHING_DEF[values] literal_dimension#6 -> literal_dimension#19
+FLOWS|REACHING_DEF[values] literal_dimension#6 -> literal_dimension#21
+FLOWS|REACHING_DEF[values] literal_dimension#6 -> literal_dimension#5
+FLOWS|REACHING_DEF[values] macro_dimension#6 -> macro_dimension#16
+FLOWS|REACHING_DEF[values] macro_dimension#6 -> macro_dimension#20
+FLOWS|REACHING_DEF[values] macro_dimension#6 -> macro_dimension#21
+FLOWS|REACHING_DEF[values] macro_dimension#6 -> macro_dimension#23
+FLOWS|REACHING_DEF[values] macro_dimension#6 -> macro_dimension#5
+CASE|unary_macro
+=======================================================================================================
+Invoking CPG generator in a separate process. Note that the new process will consume additional memory.
+If you are importing a large codebase (and/or running into memory issues), please try the following:
+1) exit joern
+2) invoke the frontend: /Users/shayaunnejad/vibe-code/joern-oxidized/.local/astra-sprint/oracle/runtime/joern-cli/c2cpg.sh -J-Xmx4096m /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/tenth-array-dimension-controls/runs/first-complete-array-dimension-reference-batch/snapshot/input/unary_macro --output /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/tenth-array-dimension-controls/runs/first-complete-array-dimension-reference-batch/workspace/workspace/unary_macro/cpg.bin.zip
+3) start joern, import the cpg: `importCpg("path/to/cpg")`
+=======================================================================================================
+
+[INFO ] initialising from existing storage (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/tenth-array-dimension-controls/runs/first-complete-array-dimension-reference-batch/workspace/workspace/unary_macro/cpg.bin.tmp)
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.FileCreationPass
+[INFO ] Pass io.joern.x2cpg.passes.base.FileCreationPass completed in 0 ms (76% on mutations). 17 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.NamespaceCreator
+[INFO ] Pass io.joern.x2cpg.passes.base.NamespaceCreator completed in 0 ms (81% on mutations). 4 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.TypeDeclStubCreator
+[INFO ] Pass io.joern.x2cpg.passes.base.TypeDeclStubCreator completed in 0 ms (72% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.MethodStubCreator
+[INFO ] Pass io.joern.x2cpg.passes.base.MethodStubCreator completed in 1 ms (58% on mutations). 34 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.ParameterIndexCompatPass
+[INFO ] Pass io.joern.x2cpg.passes.base.ParameterIndexCompatPass completed in 0 ms (80% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.MethodDecoratorPass
+[INFO ] Pass io.joern.x2cpg.passes.base.MethodDecoratorPass completed in 0 ms (75% on mutations). 27 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.AstLinkerPass
+[INFO ] Pass io.joern.x2cpg.passes.base.AstLinkerPass completed in 0 ms (62% on mutations). 12 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.ContainsEdgePass
+[INFO ] Pass io.joern.x2cpg.passes.base.ContainsEdgePass completed in 0 ms (45% on mutations). 56 + 0 changes committed from 20 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.TypeRefPass
+[INFO ] Pass io.joern.x2cpg.passes.base.TypeRefPass completed in 0 ms (68% on mutations). 7 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.TypeEvalPass
+[INFO ] Pass io.joern.x2cpg.passes.base.TypeEvalPass completed in 1 ms (57% on mutations). 70 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 0 ms (79% on mutations). 1 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.controlflow.CfgCreationPass
+[INFO ] Pass io.joern.x2cpg.passes.controlflow.CfgCreationPass completed in 1 ms (27% on mutations). 43 + 0 changes committed from 9 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.controlflow.cfgdominator.CfgDominatorPass
+[INFO ] Pass io.joern.x2cpg.passes.controlflow.cfgdominator.CfgDominatorPass completed in 1 ms (23% on mutations). 84 + 0 changes committed from 9 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.controlflow.codepencegraph.CdgPass
+[INFO ] Pass io.joern.x2cpg.passes.controlflow.codepencegraph.CdgPass completed in 0 ms (51% on mutations). 1 + 0 changes committed from 9 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 0 ms (85% on mutations). 1 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.typerelations.TypeHierarchyPass
+[INFO ] Pass io.joern.x2cpg.passes.typerelations.TypeHierarchyPass completed in 0 ms (74% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.typerelations.AliasLinkerPass
+[INFO ] Pass io.joern.x2cpg.passes.typerelations.AliasLinkerPass completed in 0 ms (81% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.typerelations.FieldAccessLinkerPass
+[INFO ] Pass io.joern.x2cpg.passes.typerelations.FieldAccessLinkerPass completed in 0 ms (79% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 0 ms (87% on mutations). 1 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.callgraph.MethodRefLinker
+[INFO ] Pass io.joern.x2cpg.passes.callgraph.MethodRefLinker completed in 0 ms (66% on mutations). 2 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.callgraph.StaticCallLinker
+[INFO ] Pass io.joern.x2cpg.passes.callgraph.StaticCallLinker completed in 0 ms (59% on mutations). 13 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.callgraph.DynamicCallLinker
+[INFO ] Pass io.joern.x2cpg.passes.callgraph.DynamicCallLinker completed in 0 ms (85% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 0 ms (87% on mutations). 1 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.dataflowengineoss.passes.reachingdef.ReachingDefPass
+[INFO ] Calculating reaching definitions for: <operator>.alloc in <empty>
+[INFO ] Calculating reaching definitions for: literal_dimension in main.c
+[INFO ] Calculating reaching definitions for: macro_dimension in main.c
+[INFO ] Calculating reaching definitions for: main.c:<global> in main.c
+[INFO ] Calculating reaching definitions for: main.c:N:int(0) in main.c
+[INFO ] Calculating reaching definitions for: <includes>:<global> in <includes>
+[INFO ] Calculating reaching definitions for: <operator>.indirectIndexAccess in <empty>
+[INFO ] Calculating reaching definitions for: <operator>.assignment in <empty>
+[INFO ] Calculating reaching definitions for: <operator>.plus in <empty>
+[INFO ] Number of definitions for <includes>:<global>: 0
+[INFO ] Number of definitions for <operator>.alloc: 2
+[INFO ] Number of definitions for <operator>.plus: 1
+[INFO ] Number of definitions for main.c:<global>: 0
+[INFO ] Number of definitions for main.c:N:int(0): 0
+[INFO ] Number of definitions for <operator>.indirectIndexAccess: 2
+[INFO ] Number of definitions for <operator>.assignment: 2
+[INFO ] Number of definitions for literal_dimension: 9
+[INFO ] Number of definitions for macro_dimension: 11
+[INFO ] Pass io.joern.dataflowengineoss.passes.reachingdef.ReachingDefPass completed in 3 ms (8% on mutations). 95 + 0 changes committed from 9 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 0 ms (77% on mutations). 1 + 0 changes committed from 1 parts.
+AST|METHOD NAME=<global> CODE=<global> FULL_NAME=<includes>:<global> ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=<operator>.alloc FULL_NAME=<operator>.alloc ORDER=0
+AST|  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=<operator>.assignment FULL_NAME=<operator>.assignment ORDER=0
+AST|  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=<operator>.indirectIndexAccess FULL_NAME=<operator>.indirectIndexAccess ORDER=0
+AST|  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=<operator>.plus FULL_NAME=<operator>.plus ORDER=0
+AST|  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=literal_dimension CODE=int literal_dimension(int index) {\n    int values[+3];\n    values[0] = 7;\n    return values[index];\n} FULL_NAME=literal_dimension SIGNATURE=int(int) ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=index CODE=int index TYPE_FULL_NAME=int ORDER=1
+AST|  METHOD_PARAMETER_OUT NAME=index CODE=int index TYPE_FULL_NAME=int ORDER=1
+AST|  BLOCK CODE={\n    int values[+3];\n    values[0] = 7;\n    return values[index];\n} TYPE_FULL_NAME=void ORDER=2
+AST|    LOCAL NAME=values CODE=int values[+3] TYPE_FULL_NAME=int[+3] ORDER=1
+AST|    CALL NAME=<operator>.assignment CODE=values[+3] TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|      IDENTIFIER NAME=values CODE=values TYPE_FULL_NAME=int[+3] ORDER=1 ARGUMENT_INDEX=1
+AST|      CALL NAME=<operator>.alloc CODE=values[+3] TYPE_FULL_NAME=int[+3] METHOD_FULL_NAME=<operator>.alloc ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        IDENTIFIER NAME=int[+3] CODE=int[+3] TYPE_FULL_NAME=int[+3] ORDER=1 ARGUMENT_INDEX=1
+AST|        CALL NAME=<operator>.plus CODE=+3 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.plus ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          LITERAL CODE=3 TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|    CALL NAME=<operator>.assignment CODE=values[0] = 7 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH
+AST|      CALL NAME=<operator>.indirectIndexAccess CODE=values[0] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectIndexAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        IDENTIFIER NAME=values CODE=values TYPE_FULL_NAME=int[+3] ORDER=1 ARGUMENT_INDEX=1
+AST|        LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|      LITERAL CODE=7 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|    RETURN CODE=return values[index]; ORDER=4
+AST|      CALL NAME=<operator>.indirectIndexAccess CODE=values[index] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectIndexAccess ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        IDENTIFIER NAME=values CODE=values TYPE_FULL_NAME=int[+3] ORDER=1 ARGUMENT_INDEX=1
+AST|        IDENTIFIER NAME=index CODE=index TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+AST|
+AST|METHOD NAME=macro_dimension CODE=int macro_dimension(int index) {\n    int values[+N];\n    values[0] = 7;\n    return values[index];\n} FULL_NAME=macro_dimension SIGNATURE=int(int) ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=index CODE=int index TYPE_FULL_NAME=int ORDER=1
+AST|  METHOD_PARAMETER_OUT NAME=index CODE=int index TYPE_FULL_NAME=int ORDER=1
+AST|  BLOCK CODE={\n    int values[+N];\n    values[0] = 7;\n    return values[index];\n} TYPE_FULL_NAME=void ORDER=2
+AST|    LOCAL NAME=values CODE=int values[+N] TYPE_FULL_NAME=int[+N] ORDER=1
+AST|    CALL NAME=<operator>.assignment CODE=values[+N] TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|      IDENTIFIER NAME=values CODE=values TYPE_FULL_NAME=int[+N] ORDER=1 ARGUMENT_INDEX=1
+AST|      CALL NAME=<operator>.alloc CODE=values[+N] TYPE_FULL_NAME=int[+N] METHOD_FULL_NAME=<operator>.alloc ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        IDENTIFIER NAME=int[+N] CODE=int[+N] TYPE_FULL_NAME=int[+N] ORDER=1 ARGUMENT_INDEX=1
+AST|        CALL NAME=<operator>.plus CODE=+N TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.plus ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          CALL NAME=N CODE=N TYPE_FULL_NAME=int METHOD_FULL_NAME=main.c:N:int(0) SIGNATURE=int(0) ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=INLINED
+AST|            BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|              LITERAL CODE=3 TYPE_FULL_NAME=int ORDER=1
+AST|    CALL NAME=<operator>.assignment CODE=values[0] = 7 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH
+AST|      CALL NAME=<operator>.indirectIndexAccess CODE=values[0] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectIndexAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        IDENTIFIER NAME=values CODE=values TYPE_FULL_NAME=int[+N] ORDER=1 ARGUMENT_INDEX=1
+AST|        LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|      LITERAL CODE=7 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|    RETURN CODE=return values[index]; ORDER=4
+AST|      CALL NAME=<operator>.indirectIndexAccess CODE=values[index] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectIndexAccess ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        IDENTIFIER NAME=values CODE=values TYPE_FULL_NAME=int[+N] ORDER=1 ARGUMENT_INDEX=1
+AST|        IDENTIFIER NAME=index CODE=index TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+AST|
+AST|METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1
+AST|  METHOD NAME=macro_dimension CODE=int macro_dimension(int index) {\n    int values[+N];\n    values[0] = 7;\n    return values[index];\n} FULL_NAME=macro_dimension SIGNATURE=int(int) ORDER=1
+AST|    METHOD_PARAMETER_IN NAME=index CODE=int index TYPE_FULL_NAME=int ORDER=1
+AST|    METHOD_PARAMETER_OUT NAME=index CODE=int index TYPE_FULL_NAME=int ORDER=1
+AST|    BLOCK CODE={\n    int values[+N];\n    values[0] = 7;\n    return values[index];\n} TYPE_FULL_NAME=void ORDER=2
+AST|      LOCAL NAME=values CODE=int values[+N] TYPE_FULL_NAME=int[+N] ORDER=1
+AST|      CALL NAME=<operator>.assignment CODE=values[+N] TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        IDENTIFIER NAME=values CODE=values TYPE_FULL_NAME=int[+N] ORDER=1 ARGUMENT_INDEX=1
+AST|        CALL NAME=<operator>.alloc CODE=values[+N] TYPE_FULL_NAME=int[+N] METHOD_FULL_NAME=<operator>.alloc ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          IDENTIFIER NAME=int[+N] CODE=int[+N] TYPE_FULL_NAME=int[+N] ORDER=1 ARGUMENT_INDEX=1
+AST|          CALL NAME=<operator>.plus CODE=+N TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.plus ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|            CALL NAME=N CODE=N TYPE_FULL_NAME=int METHOD_FULL_NAME=main.c:N:int(0) SIGNATURE=int(0) ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=INLINED
+AST|              BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|                LITERAL CODE=3 TYPE_FULL_NAME=int ORDER=1
+AST|      CALL NAME=<operator>.assignment CODE=values[0] = 7 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        CALL NAME=<operator>.indirectIndexAccess CODE=values[0] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectIndexAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          IDENTIFIER NAME=values CODE=values TYPE_FULL_NAME=int[+N] ORDER=1 ARGUMENT_INDEX=1
+AST|          LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|        LITERAL CODE=7 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|      RETURN CODE=return values[index]; ORDER=4
+AST|        CALL NAME=<operator>.indirectIndexAccess CODE=values[index] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectIndexAccess ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          IDENTIFIER NAME=values CODE=values TYPE_FULL_NAME=int[+N] ORDER=1 ARGUMENT_INDEX=1
+AST|          IDENTIFIER NAME=index CODE=index TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+AST|  METHOD NAME=literal_dimension CODE=int literal_dimension(int index) {\n    int values[+3];\n    values[0] = 7;\n    return values[index];\n} FULL_NAME=literal_dimension SIGNATURE=int(int) ORDER=1
+AST|    METHOD_PARAMETER_IN NAME=index CODE=int index TYPE_FULL_NAME=int ORDER=1
+AST|    METHOD_PARAMETER_OUT NAME=index CODE=int index TYPE_FULL_NAME=int ORDER=1
+AST|    BLOCK CODE={\n    int values[+3];\n    values[0] = 7;\n    return values[index];\n} TYPE_FULL_NAME=void ORDER=2
+AST|      LOCAL NAME=values CODE=int values[+3] TYPE_FULL_NAME=int[+3] ORDER=1
+AST|      CALL NAME=<operator>.assignment CODE=values[+3] TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        IDENTIFIER NAME=values CODE=values TYPE_FULL_NAME=int[+3] ORDER=1 ARGUMENT_INDEX=1
+AST|        CALL NAME=<operator>.alloc CODE=values[+3] TYPE_FULL_NAME=int[+3] METHOD_FULL_NAME=<operator>.alloc ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          IDENTIFIER NAME=int[+3] CODE=int[+3] TYPE_FULL_NAME=int[+3] ORDER=1 ARGUMENT_INDEX=1
+AST|          CALL NAME=<operator>.plus CODE=+3 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.plus ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|            LITERAL CODE=3 TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|      CALL NAME=<operator>.assignment CODE=values[0] = 7 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        CALL NAME=<operator>.indirectIndexAccess CODE=values[0] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectIndexAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          IDENTIFIER NAME=values CODE=values TYPE_FULL_NAME=int[+3] ORDER=1 ARGUMENT_INDEX=1
+AST|          LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|        LITERAL CODE=7 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|      RETURN CODE=return values[index]; ORDER=4
+AST|        CALL NAME=<operator>.indirectIndexAccess CODE=values[index] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectIndexAccess ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          IDENTIFIER NAME=values CODE=values TYPE_FULL_NAME=int[+3] ORDER=1 ARGUMENT_INDEX=1
+AST|          IDENTIFIER NAME=index CODE=index TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+AST|    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+AST|    METHOD_REF CODE=macro_dimension TYPE_FULL_NAME=macro_dimension METHOD_FULL_NAME=macro_dimension ORDER=1
+AST|    METHOD_REF CODE=literal_dimension TYPE_FULL_NAME=literal_dimension METHOD_FULL_NAME=literal_dimension ORDER=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=N CODE=#define N 3 FULL_NAME=main.c:N:int(0) SIGNATURE=int(0) ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=2
+AST|
+NODES|META_DATA LANGUAGE=NEWC
+NODES|FILE NAME=<includes> ORDER=1
+NODES|FILE NAME=<unknown> ORDER=0
+NODES|FILE NAME=main.c ORDER=0
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<global> FILENAME=<unknown> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<includes>:<global> FILENAME=<includes> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|NAMESPACE NAME=<global>
+NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=int[+3] FULL_NAME=int[+3] CODE=int[+3] IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=int[+N] FULL_NAME=int[+N] CODE=int[+N] IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=literal_dimension FULL_NAME=literal_dimension CODE=literal_dimension AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=macro_dimension FULL_NAME=macro_dimension CODE=macro_dimension AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=<global> FULL_NAME=main.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+NODES|TYPE NAME=int[+3] FULL_NAME=int[+3] TYPE_DECL_FULL_NAME=int[+3]
+NODES|TYPE NAME=int[+N] FULL_NAME=int[+N] TYPE_DECL_FULL_NAME=int[+N]
+NODES|TYPE NAME=literal_dimension FULL_NAME=literal_dimension TYPE_DECL_FULL_NAME=literal_dimension
+NODES|TYPE NAME=macro_dimension FULL_NAME=macro_dimension TYPE_DECL_FULL_NAME=macro_dimension
+NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+EDGES|ARGUMENT literal_dimension#11 -> literal_dimension#12
+EDGES|ARGUMENT literal_dimension#11 -> literal_dimension#15
+EDGES|ARGUMENT literal_dimension#12 -> literal_dimension#13
+EDGES|ARGUMENT literal_dimension#12 -> literal_dimension#14
+EDGES|ARGUMENT literal_dimension#16 -> literal_dimension#17
+EDGES|ARGUMENT literal_dimension#17 -> literal_dimension#18
+EDGES|ARGUMENT literal_dimension#17 -> literal_dimension#19
+EDGES|ARGUMENT literal_dimension#5 -> literal_dimension#6
+EDGES|ARGUMENT literal_dimension#5 -> literal_dimension#7
+EDGES|ARGUMENT literal_dimension#7 -> literal_dimension#8
+EDGES|ARGUMENT literal_dimension#7 -> literal_dimension#9
+EDGES|ARGUMENT literal_dimension#9 -> literal_dimension#10
+EDGES|ARGUMENT macro_dimension#13 -> macro_dimension#14
+EDGES|ARGUMENT macro_dimension#13 -> macro_dimension#17
+EDGES|ARGUMENT macro_dimension#14 -> macro_dimension#15
+EDGES|ARGUMENT macro_dimension#14 -> macro_dimension#16
+EDGES|ARGUMENT macro_dimension#18 -> macro_dimension#19
+EDGES|ARGUMENT macro_dimension#19 -> macro_dimension#20
+EDGES|ARGUMENT macro_dimension#19 -> macro_dimension#21
+EDGES|ARGUMENT macro_dimension#5 -> macro_dimension#6
+EDGES|ARGUMENT macro_dimension#5 -> macro_dimension#7
+EDGES|ARGUMENT macro_dimension#7 -> macro_dimension#8
+EDGES|ARGUMENT macro_dimension#7 -> macro_dimension#9
+EDGES|ARGUMENT macro_dimension#9 -> macro_dimension#10
+EDGES|CALL literal_dimension#11 -> <operator>.assignment#0
+EDGES|CALL literal_dimension#12 -> <operator>.indirectIndexAccess#0
+EDGES|CALL literal_dimension#17 -> <operator>.indirectIndexAccess#0
+EDGES|CALL literal_dimension#5 -> <operator>.assignment#0
+EDGES|CALL literal_dimension#7 -> <operator>.alloc#0
+EDGES|CALL literal_dimension#9 -> <operator>.plus#0
+EDGES|CALL macro_dimension#10 -> main.c:N:int(0)#0
+EDGES|CALL macro_dimension#13 -> <operator>.assignment#0
+EDGES|CALL macro_dimension#14 -> <operator>.indirectIndexAccess#0
+EDGES|CALL macro_dimension#19 -> <operator>.indirectIndexAccess#0
+EDGES|CALL macro_dimension#5 -> <operator>.assignment#0
+EDGES|CALL macro_dimension#7 -> <operator>.alloc#0
+EDGES|CALL macro_dimension#9 -> <operator>.plus#0
+EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+EDGES|CFG <operator>.alloc#0 -> <operator>.alloc#5
+EDGES|CFG <operator>.assignment#0 -> <operator>.assignment#5
+EDGES|CFG <operator>.indirectIndexAccess#0 -> <operator>.indirectIndexAccess#5
+EDGES|CFG <operator>.plus#0 -> <operator>.plus#4
+EDGES|CFG literal_dimension#0 -> literal_dimension#6
+EDGES|CFG literal_dimension#10 -> literal_dimension#9
+EDGES|CFG literal_dimension#11 -> literal_dimension#18
+EDGES|CFG literal_dimension#12 -> literal_dimension#15
+EDGES|CFG literal_dimension#13 -> literal_dimension#14
+EDGES|CFG literal_dimension#14 -> literal_dimension#12
+EDGES|CFG literal_dimension#15 -> literal_dimension#11
+EDGES|CFG literal_dimension#16 -> literal_dimension#20
+EDGES|CFG literal_dimension#17 -> literal_dimension#16
+EDGES|CFG literal_dimension#18 -> literal_dimension#19
+EDGES|CFG literal_dimension#19 -> literal_dimension#17
+EDGES|CFG literal_dimension#5 -> literal_dimension#13
+EDGES|CFG literal_dimension#6 -> literal_dimension#8
+EDGES|CFG literal_dimension#7 -> literal_dimension#5
+EDGES|CFG literal_dimension#8 -> literal_dimension#10
+EDGES|CFG literal_dimension#9 -> literal_dimension#7
+EDGES|CFG macro_dimension#0 -> macro_dimension#6
+EDGES|CFG macro_dimension#10 -> macro_dimension#12
+EDGES|CFG macro_dimension#10 -> macro_dimension#9
+EDGES|CFG macro_dimension#12 -> macro_dimension#9
+EDGES|CFG macro_dimension#13 -> macro_dimension#20
+EDGES|CFG macro_dimension#14 -> macro_dimension#17
+EDGES|CFG macro_dimension#15 -> macro_dimension#16
+EDGES|CFG macro_dimension#16 -> macro_dimension#14
+EDGES|CFG macro_dimension#17 -> macro_dimension#13
+EDGES|CFG macro_dimension#18 -> macro_dimension#22
+EDGES|CFG macro_dimension#19 -> macro_dimension#18
+EDGES|CFG macro_dimension#20 -> macro_dimension#21
+EDGES|CFG macro_dimension#21 -> macro_dimension#19
+EDGES|CFG macro_dimension#5 -> macro_dimension#15
+EDGES|CFG macro_dimension#6 -> macro_dimension#8
+EDGES|CFG macro_dimension#7 -> macro_dimension#5
+EDGES|CFG macro_dimension#8 -> macro_dimension#10
+EDGES|CFG macro_dimension#9 -> macro_dimension#7
+EDGES|CFG main.c:<global>#0 -> main.c:<global>#46
+EDGES|CFG main.c:<global>#46 -> main.c:<global>#47
+EDGES|CFG main.c:<global>#47 -> main.c:<global>#48
+EDGES|CFG main.c:N:int(0)#0 -> main.c:N:int(0)#2
+EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+EDGES|CONTAINS <operator>.alloc#0 -> <operator>.alloc#2
+EDGES|CONTAINS <operator>.assignment#0 -> <operator>.assignment#2
+EDGES|CONTAINS <operator>.indirectIndexAccess#0 -> <operator>.indirectIndexAccess#2
+EDGES|CONTAINS <operator>.plus#0 -> <operator>.plus#2
+EDGES|CONTAINS D:main.c:<global> -> D:literal_dimension
+EDGES|CONTAINS D:main.c:<global> -> D:macro_dimension
+EDGES|CONTAINS D:main.c:<global> -> main.c:<global>#0
+EDGES|CONTAINS D:main.c:<global> -> main.c:N:int(0)#0
+EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+EDGES|CONTAINS F:<includes> -> D:ANY
+EDGES|CONTAINS F:<includes> -> D:int
+EDGES|CONTAINS F:<includes> -> D:int[+3]
+EDGES|CONTAINS F:<includes> -> D:int[+N]
+EDGES|CONTAINS F:<includes> -> D:void
+EDGES|CONTAINS F:main.c -> D:main.c:<global>
+EDGES|CONTAINS literal_dimension#0 -> literal_dimension#10
+EDGES|CONTAINS literal_dimension#0 -> literal_dimension#11
+EDGES|CONTAINS literal_dimension#0 -> literal_dimension#12
+EDGES|CONTAINS literal_dimension#0 -> literal_dimension#13
+EDGES|CONTAINS literal_dimension#0 -> literal_dimension#14
+EDGES|CONTAINS literal_dimension#0 -> literal_dimension#15
+EDGES|CONTAINS literal_dimension#0 -> literal_dimension#16
+EDGES|CONTAINS literal_dimension#0 -> literal_dimension#17
+EDGES|CONTAINS literal_dimension#0 -> literal_dimension#18
+EDGES|CONTAINS literal_dimension#0 -> literal_dimension#19
+EDGES|CONTAINS literal_dimension#0 -> literal_dimension#3
+EDGES|CONTAINS literal_dimension#0 -> literal_dimension#5
+EDGES|CONTAINS literal_dimension#0 -> literal_dimension#6
+EDGES|CONTAINS literal_dimension#0 -> literal_dimension#7
+EDGES|CONTAINS literal_dimension#0 -> literal_dimension#8
+EDGES|CONTAINS literal_dimension#0 -> literal_dimension#9
+EDGES|CONTAINS macro_dimension#0 -> macro_dimension#10
+EDGES|CONTAINS macro_dimension#0 -> macro_dimension#11
+EDGES|CONTAINS macro_dimension#0 -> macro_dimension#12
+EDGES|CONTAINS macro_dimension#0 -> macro_dimension#13
+EDGES|CONTAINS macro_dimension#0 -> macro_dimension#14
+EDGES|CONTAINS macro_dimension#0 -> macro_dimension#15
+EDGES|CONTAINS macro_dimension#0 -> macro_dimension#16
+EDGES|CONTAINS macro_dimension#0 -> macro_dimension#17
+EDGES|CONTAINS macro_dimension#0 -> macro_dimension#18
+EDGES|CONTAINS macro_dimension#0 -> macro_dimension#19
+EDGES|CONTAINS macro_dimension#0 -> macro_dimension#20
+EDGES|CONTAINS macro_dimension#0 -> macro_dimension#21
+EDGES|CONTAINS macro_dimension#0 -> macro_dimension#3
+EDGES|CONTAINS macro_dimension#0 -> macro_dimension#5
+EDGES|CONTAINS macro_dimension#0 -> macro_dimension#6
+EDGES|CONTAINS macro_dimension#0 -> macro_dimension#7
+EDGES|CONTAINS macro_dimension#0 -> macro_dimension#8
+EDGES|CONTAINS macro_dimension#0 -> macro_dimension#9
+EDGES|CONTAINS main.c:<global>#0 -> literal_dimension#0
+EDGES|CONTAINS main.c:<global>#0 -> macro_dimension#0
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#45
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#46
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#47
+EDGES|CONTAINS main.c:N:int(0)#0 -> main.c:N:int(0)#1
+EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.alloc#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.alloc#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.alloc#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.alloc#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.alloc#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.alloc#6 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#6 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectIndexAccess#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectIndexAccess#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectIndexAccess#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectIndexAccess#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectIndexAccess#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectIndexAccess#6 -> T:ANY
+EDGES|EVAL_TYPE <operator>.plus#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.plus#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.plus#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.plus#4 -> T:ANY
+EDGES|EVAL_TYPE literal_dimension#1 -> T:int
+EDGES|EVAL_TYPE literal_dimension#10 -> T:int
+EDGES|EVAL_TYPE literal_dimension#11 -> T:ANY
+EDGES|EVAL_TYPE literal_dimension#12 -> T:ANY
+EDGES|EVAL_TYPE literal_dimension#13 -> T:int[+3]
+EDGES|EVAL_TYPE literal_dimension#14 -> T:int
+EDGES|EVAL_TYPE literal_dimension#15 -> T:int
+EDGES|EVAL_TYPE literal_dimension#17 -> T:ANY
+EDGES|EVAL_TYPE literal_dimension#18 -> T:int[+3]
+EDGES|EVAL_TYPE literal_dimension#19 -> T:int
+EDGES|EVAL_TYPE literal_dimension#2 -> T:int
+EDGES|EVAL_TYPE literal_dimension#20 -> T:int
+EDGES|EVAL_TYPE literal_dimension#3 -> T:void
+EDGES|EVAL_TYPE literal_dimension#4 -> T:int[+3]
+EDGES|EVAL_TYPE literal_dimension#5 -> T:void
+EDGES|EVAL_TYPE literal_dimension#6 -> T:int[+3]
+EDGES|EVAL_TYPE literal_dimension#7 -> T:int[+3]
+EDGES|EVAL_TYPE literal_dimension#8 -> T:int[+3]
+EDGES|EVAL_TYPE literal_dimension#9 -> T:ANY
+EDGES|EVAL_TYPE macro_dimension#1 -> T:int
+EDGES|EVAL_TYPE macro_dimension#10 -> T:int
+EDGES|EVAL_TYPE macro_dimension#11 -> T:ANY
+EDGES|EVAL_TYPE macro_dimension#12 -> T:int
+EDGES|EVAL_TYPE macro_dimension#13 -> T:ANY
+EDGES|EVAL_TYPE macro_dimension#14 -> T:ANY
+EDGES|EVAL_TYPE macro_dimension#15 -> T:int[+N]
+EDGES|EVAL_TYPE macro_dimension#16 -> T:int
+EDGES|EVAL_TYPE macro_dimension#17 -> T:int
+EDGES|EVAL_TYPE macro_dimension#19 -> T:ANY
+EDGES|EVAL_TYPE macro_dimension#2 -> T:int
+EDGES|EVAL_TYPE macro_dimension#20 -> T:int[+N]
+EDGES|EVAL_TYPE macro_dimension#21 -> T:int
+EDGES|EVAL_TYPE macro_dimension#22 -> T:int
+EDGES|EVAL_TYPE macro_dimension#3 -> T:void
+EDGES|EVAL_TYPE macro_dimension#4 -> T:int[+N]
+EDGES|EVAL_TYPE macro_dimension#5 -> T:void
+EDGES|EVAL_TYPE macro_dimension#6 -> T:int[+N]
+EDGES|EVAL_TYPE macro_dimension#7 -> T:int[+N]
+EDGES|EVAL_TYPE macro_dimension#8 -> T:int[+N]
+EDGES|EVAL_TYPE macro_dimension#9 -> T:ANY
+EDGES|EVAL_TYPE main.c:<global>#45 -> T:ANY
+EDGES|EVAL_TYPE main.c:<global>#46 -> T:macro_dimension
+EDGES|EVAL_TYPE main.c:<global>#47 -> T:literal_dimension
+EDGES|EVAL_TYPE main.c:<global>#48 -> T:ANY
+EDGES|EVAL_TYPE main.c:N:int(0)#1 -> T:ANY
+EDGES|EVAL_TYPE main.c:N:int(0)#2 -> T:int
+EDGES|PARAMETER_LINK <operator>.alloc#1 -> <operator>.alloc#3
+EDGES|PARAMETER_LINK <operator>.alloc#4 -> <operator>.alloc#6
+EDGES|PARAMETER_LINK <operator>.assignment#1 -> <operator>.assignment#3
+EDGES|PARAMETER_LINK <operator>.assignment#4 -> <operator>.assignment#6
+EDGES|PARAMETER_LINK <operator>.indirectIndexAccess#1 -> <operator>.indirectIndexAccess#3
+EDGES|PARAMETER_LINK <operator>.indirectIndexAccess#4 -> <operator>.indirectIndexAccess#6
+EDGES|PARAMETER_LINK <operator>.plus#1 -> <operator>.plus#3
+EDGES|PARAMETER_LINK literal_dimension#1 -> literal_dimension#2
+EDGES|PARAMETER_LINK macro_dimension#1 -> macro_dimension#2
+EDGES|REF NB:<global> -> NS:<global>
+EDGES|REF NB:<includes>:<global> -> NS:<global>
+EDGES|REF NB:main.c:<global> -> NS:<global>
+EDGES|REF T:ANY -> D:ANY
+EDGES|REF T:int -> D:int
+EDGES|REF T:int[+3] -> D:int[+3]
+EDGES|REF T:int[+N] -> D:int[+N]
+EDGES|REF T:literal_dimension -> D:literal_dimension
+EDGES|REF T:macro_dimension -> D:macro_dimension
+EDGES|REF T:void -> D:void
+EDGES|REF literal_dimension#13 -> literal_dimension#4
+EDGES|REF literal_dimension#18 -> literal_dimension#4
+EDGES|REF literal_dimension#19 -> literal_dimension#1
+EDGES|REF literal_dimension#6 -> literal_dimension#4
+EDGES|REF macro_dimension#15 -> macro_dimension#4
+EDGES|REF macro_dimension#20 -> macro_dimension#4
+EDGES|REF macro_dimension#21 -> macro_dimension#1
+EDGES|REF macro_dimension#6 -> macro_dimension#4
+EDGES|REF main.c:<global>#46 -> macro_dimension#0
+EDGES|REF main.c:<global>#47 -> literal_dimension#0
+EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+EDGES|SOURCE_FILE D:ANY -> F:<includes>
+EDGES|SOURCE_FILE D:int -> F:<includes>
+EDGES|SOURCE_FILE D:int[+3] -> F:<includes>
+EDGES|SOURCE_FILE D:int[+N] -> F:<includes>
+EDGES|SOURCE_FILE D:literal_dimension -> F:main.c
+EDGES|SOURCE_FILE D:macro_dimension -> F:main.c
+EDGES|SOURCE_FILE D:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE D:void -> F:<includes>
+EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
+EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>
+EDGES|SOURCE_FILE NB:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE literal_dimension#0 -> F:main.c
+EDGES|SOURCE_FILE macro_dimension#0 -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#0 -> F:main.c
+EDGES|SOURCE_FILE main.c:N:int(0)#0 -> F:main.c
+FLOWS|REACHING_DEF[+3] literal_dimension#9 -> literal_dimension#20
+FLOWS|REACHING_DEF[+3] literal_dimension#9 -> literal_dimension#7
+FLOWS|REACHING_DEF[+N] macro_dimension#9 -> macro_dimension#22
+FLOWS|REACHING_DEF[+N] macro_dimension#9 -> macro_dimension#7
+FLOWS|REACHING_DEF[3] literal_dimension#10 -> literal_dimension#9
+FLOWS|REACHING_DEF[7] literal_dimension#15 -> literal_dimension#11
+FLOWS|REACHING_DEF[7] literal_dimension#15 -> literal_dimension#12
+FLOWS|REACHING_DEF[7] macro_dimension#17 -> macro_dimension#13
+FLOWS|REACHING_DEF[7] macro_dimension#17 -> macro_dimension#14
+FLOWS|REACHING_DEF[<RET>] literal_dimension#16 -> literal_dimension#20
+FLOWS|REACHING_DEF[<RET>] macro_dimension#18 -> macro_dimension#22
+FLOWS|REACHING_DEF[N] macro_dimension#10 -> macro_dimension#22
+FLOWS|REACHING_DEF[N] macro_dimension#10 -> macro_dimension#9
+FLOWS|REACHING_DEF[] <operator>.alloc#0 -> <operator>.alloc#1
+FLOWS|REACHING_DEF[] <operator>.alloc#0 -> <operator>.alloc#4
+FLOWS|REACHING_DEF[] <operator>.assignment#0 -> <operator>.assignment#1
+FLOWS|REACHING_DEF[] <operator>.assignment#0 -> <operator>.assignment#4
+FLOWS|REACHING_DEF[] <operator>.indirectIndexAccess#0 -> <operator>.indirectIndexAccess#1
+FLOWS|REACHING_DEF[] <operator>.indirectIndexAccess#0 -> <operator>.indirectIndexAccess#4
+FLOWS|REACHING_DEF[] <operator>.plus#0 -> <operator>.plus#1
+FLOWS|REACHING_DEF[] literal_dimension#0 -> literal_dimension#1
+FLOWS|REACHING_DEF[] literal_dimension#0 -> literal_dimension#10
+FLOWS|REACHING_DEF[] literal_dimension#0 -> literal_dimension#13
+FLOWS|REACHING_DEF[] literal_dimension#0 -> literal_dimension#14
+FLOWS|REACHING_DEF[] literal_dimension#0 -> literal_dimension#15
+FLOWS|REACHING_DEF[] literal_dimension#0 -> literal_dimension#18
+FLOWS|REACHING_DEF[] literal_dimension#0 -> literal_dimension#19
+FLOWS|REACHING_DEF[] literal_dimension#0 -> literal_dimension#8
+FLOWS|REACHING_DEF[] macro_dimension#0 -> macro_dimension#1
+FLOWS|REACHING_DEF[] macro_dimension#0 -> macro_dimension#10
+FLOWS|REACHING_DEF[] macro_dimension#0 -> macro_dimension#12
+FLOWS|REACHING_DEF[] macro_dimension#0 -> macro_dimension#15
+FLOWS|REACHING_DEF[] macro_dimension#0 -> macro_dimension#16
+FLOWS|REACHING_DEF[] macro_dimension#0 -> macro_dimension#17
+FLOWS|REACHING_DEF[] macro_dimension#0 -> macro_dimension#20
+FLOWS|REACHING_DEF[] macro_dimension#0 -> macro_dimension#21
+FLOWS|REACHING_DEF[] macro_dimension#0 -> macro_dimension#8
+FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#46
+FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#47
+FLOWS|REACHING_DEF[index] literal_dimension#1 -> literal_dimension#19
+FLOWS|REACHING_DEF[index] literal_dimension#1 -> literal_dimension#2
+FLOWS|REACHING_DEF[index] literal_dimension#1 -> literal_dimension#20
+FLOWS|REACHING_DEF[index] macro_dimension#1 -> macro_dimension#2
+FLOWS|REACHING_DEF[index] macro_dimension#1 -> macro_dimension#21
+FLOWS|REACHING_DEF[index] macro_dimension#1 -> macro_dimension#22
+FLOWS|REACHING_DEF[int[+3]] literal_dimension#8 -> literal_dimension#20
+FLOWS|REACHING_DEF[int[+3]] literal_dimension#8 -> literal_dimension#7
+FLOWS|REACHING_DEF[int[+3]] literal_dimension#8 -> literal_dimension#9
+FLOWS|REACHING_DEF[int[+N]] macro_dimension#8 -> macro_dimension#22
+FLOWS|REACHING_DEF[int[+N]] macro_dimension#8 -> macro_dimension#7
+FLOWS|REACHING_DEF[int[+N]] macro_dimension#8 -> macro_dimension#9
+FLOWS|REACHING_DEF[p1] <operator>.alloc#1 -> <operator>.alloc#3
+FLOWS|REACHING_DEF[p1] <operator>.alloc#1 -> <operator>.alloc#5
+FLOWS|REACHING_DEF[p1] <operator>.assignment#1 -> <operator>.assignment#3
+FLOWS|REACHING_DEF[p1] <operator>.assignment#1 -> <operator>.assignment#5
+FLOWS|REACHING_DEF[p1] <operator>.indirectIndexAccess#1 -> <operator>.indirectIndexAccess#3
+FLOWS|REACHING_DEF[p1] <operator>.indirectIndexAccess#1 -> <operator>.indirectIndexAccess#5
+FLOWS|REACHING_DEF[p1] <operator>.plus#1 -> <operator>.plus#3
+FLOWS|REACHING_DEF[p1] <operator>.plus#1 -> <operator>.plus#4
+FLOWS|REACHING_DEF[p2] <operator>.alloc#4 -> <operator>.alloc#5
+FLOWS|REACHING_DEF[p2] <operator>.alloc#4 -> <operator>.alloc#6
+FLOWS|REACHING_DEF[p2] <operator>.assignment#4 -> <operator>.assignment#5
+FLOWS|REACHING_DEF[p2] <operator>.assignment#4 -> <operator>.assignment#6
+FLOWS|REACHING_DEF[p2] <operator>.indirectIndexAccess#4 -> <operator>.indirectIndexAccess#5
+FLOWS|REACHING_DEF[p2] <operator>.indirectIndexAccess#4 -> <operator>.indirectIndexAccess#6
+FLOWS|REACHING_DEF[values[+3]] literal_dimension#5 -> literal_dimension#20
+FLOWS|REACHING_DEF[values[+3]] literal_dimension#7 -> literal_dimension#20
+FLOWS|REACHING_DEF[values[+3]] literal_dimension#7 -> literal_dimension#5
+FLOWS|REACHING_DEF[values[+3]] literal_dimension#7 -> literal_dimension#6
+FLOWS|REACHING_DEF[values[+N]] macro_dimension#5 -> macro_dimension#22
+FLOWS|REACHING_DEF[values[+N]] macro_dimension#7 -> macro_dimension#22
+FLOWS|REACHING_DEF[values[+N]] macro_dimension#7 -> macro_dimension#5
+FLOWS|REACHING_DEF[values[+N]] macro_dimension#7 -> macro_dimension#6
+FLOWS|REACHING_DEF[values[0] = 7] literal_dimension#11 -> literal_dimension#20
+FLOWS|REACHING_DEF[values[0] = 7] macro_dimension#13 -> macro_dimension#22
+FLOWS|REACHING_DEF[values[0]] literal_dimension#12 -> literal_dimension#11
+FLOWS|REACHING_DEF[values[0]] literal_dimension#12 -> literal_dimension#18
+FLOWS|REACHING_DEF[values[0]] literal_dimension#12 -> literal_dimension#20
+FLOWS|REACHING_DEF[values[0]] macro_dimension#14 -> macro_dimension#13
+FLOWS|REACHING_DEF[values[0]] macro_dimension#14 -> macro_dimension#20
+FLOWS|REACHING_DEF[values[0]] macro_dimension#14 -> macro_dimension#22
+FLOWS|REACHING_DEF[values[index]] literal_dimension#17 -> literal_dimension#16
+FLOWS|REACHING_DEF[values[index]] macro_dimension#19 -> macro_dimension#18
+FLOWS|REACHING_DEF[values] literal_dimension#6 -> literal_dimension#13
+FLOWS|REACHING_DEF[values] literal_dimension#6 -> literal_dimension#17
+FLOWS|REACHING_DEF[values] literal_dimension#6 -> literal_dimension#18
+FLOWS|REACHING_DEF[values] literal_dimension#6 -> literal_dimension#20
+FLOWS|REACHING_DEF[values] literal_dimension#6 -> literal_dimension#5
+FLOWS|REACHING_DEF[values] macro_dimension#6 -> macro_dimension#15
+FLOWS|REACHING_DEF[values] macro_dimension#6 -> macro_dimension#19
+FLOWS|REACHING_DEF[values] macro_dimension#6 -> macro_dimension#20
+FLOWS|REACHING_DEF[values] macro_dimension#6 -> macro_dimension#22
+FLOWS|REACHING_DEF[values] macro_dimension#6 -> macro_dimension#5
+[INFO ] writing to storage at `/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/tenth-array-dimension-controls/runs/first-complete-array-dimension-reference-batch/workspace/workspace/bare_macro/cpg.bin.tmp`
+[INFO ] closed graph at /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/tenth-array-dimension-controls/runs/first-complete-array-dimension-reference-batch/workspace/workspace/bare_macro/cpg.bin.tmp
+[INFO ] writing to storage at `/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/tenth-array-dimension-controls/runs/first-complete-array-dimension-reference-batch/workspace/workspace/binary_macro/cpg.bin.tmp`
+[INFO ] closed graph at /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/tenth-array-dimension-controls/runs/first-complete-array-dimension-reference-batch/workspace/workspace/binary_macro/cpg.bin.tmp
+[INFO ] writing to storage at `/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/tenth-array-dimension-controls/runs/first-complete-array-dimension-reference-batch/workspace/workspace/body_include_macro_only/cpg.bin.tmp`
+[INFO ] closed graph at /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/tenth-array-dimension-controls/runs/first-complete-array-dimension-reference-batch/workspace/workspace/body_include_macro_only/cpg.bin.tmp
+[INFO ] writing to storage at `/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/tenth-array-dimension-controls/runs/first-complete-array-dimension-reference-batch/workspace/workspace/parenthesized_macro/cpg.bin.tmp`
+[INFO ] closed graph at /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/tenth-array-dimension-controls/runs/first-complete-array-dimension-reference-batch/workspace/workspace/parenthesized_macro/cpg.bin.tmp
+[INFO ] writing to storage at `/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/tenth-array-dimension-controls/runs/first-complete-array-dimension-reference-batch/workspace/workspace/unary_macro/cpg.bin.tmp`
+[INFO ] closed graph at /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/tenth-array-dimension-controls/runs/first-complete-array-dimension-reference-batch/workspace/workspace/unary_macro/cpg.bin.tmp

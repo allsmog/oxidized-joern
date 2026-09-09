@@ -1,0 +1,13 @@
+{
+  "exitCode": 1,
+  "stage": "18 final union assertion",
+  "reason": "The verifier counted blank canonical separators as selected records. All18 reference/exact counts matched; nonempty-selected gain1284 and canonical-with-separators gain1288 differ by4 matching blank separators. Both are preserved in the corrected receipt. No producer or source mutation occurred.",
+  "observed": {
+    "baselineExact": 6,
+    "currentExact": 14,
+    "canonicalLines": 7125,
+    "nonempty": 6991,
+    "gainIncludingSeparators": 1288,
+    "lossIncludingSeparators": 2
+  }
+}

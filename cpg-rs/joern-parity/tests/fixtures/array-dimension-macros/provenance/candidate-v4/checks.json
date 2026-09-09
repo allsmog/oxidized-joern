@@ -1,0 +1,47 @@
+{
+  "status": "PASS",
+  "sourceUnchanged": true,
+  "sourceInputCount": 196,
+  "candidateBindingSha256": "4d014b9736c04734b11e2614ca1d93fc26a0434830e276d34217205f3ec0f46d",
+  "replay14Sha256": "6e476289a5edcbbcebfc2612a0352661d05d0ed72239f84825fc82e968a39e18",
+  "main308": {
+    "exit": 0,
+    "logSha256": "c105179d62065e9cbf9f398ff94754c29ec03add1206db7dff281cb4c07b6be6",
+    "actualSha256": "73cbd12e77aa52f120c3ebfa56feeca8bf9b737c22cf45a9519cdac7550190c4",
+    "checkerAndReference": {
+      "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/cpg-rs/joern-parity/check.sh": "4e70680cda0c2191c2356398df7b2ea30f7180c6e54666fa0a37276b59bf36aa",
+      "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/cpg-rs/joern-parity/oracle_all.txt": "0cd3403a367ae297f2ddf60b70684f0b84cd81c9e2ca0c149f6663749df70abf"
+    },
+    "frozenProducerShimSha256": "d9da2db3928ce8e9d0ac0b4910a8ca63cf4c024d3a51fb858c278af16af9007a"
+  },
+  "arrayTests": {
+    "command": [
+      "cargo",
+      "test",
+      "--locked",
+      "--manifest-path",
+      "cpg-rs/Cargo.toml",
+      "-p",
+      "joern-parity",
+      "--test",
+      "array_dimension_macros"
+    ],
+    "exit": 0,
+    "logSha256": "7596aac4de0da7070f1ac165ba1de701176d06d0dacb79947212c7659c36402f"
+  },
+  "unitTests": {
+    "command": [
+      "cargo",
+      "test",
+      "--locked",
+      "--manifest-path",
+      "cpg-rs/Cargo.toml",
+      "-p",
+      "cpg-lang-c",
+      "--lib",
+      "exact::rd_semantics_tests"
+    ],
+    "exit": 0,
+    "logSha256": "5f5f092452635fdba391c69c1639d02aa695e5e7c7d3e4498866d04a108f9ece"
+  }
+}

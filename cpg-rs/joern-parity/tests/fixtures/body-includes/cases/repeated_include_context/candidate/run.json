@@ -1,0 +1,21 @@
+{
+  "case": "repeated_include_context",
+  "exitCode": 0,
+  "seconds": 0.042609833006281406,
+  "exact": false,
+  "command": [
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/frozen-v2/joern-parity",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/replay-v2/repeated_include_context/input/main.c",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/replay-v2/repeated_include_context/input/nested/table.h",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/replay-v2/repeated_include_context/input/repeat.h"
+  ],
+  "inputs": {
+    "repeat.h": "19dcabefdf697b3ed835d49328b7d35d218acf0dffa5f64c96235d93a9cafb84",
+    "main.c": "3978e883bd0aaf3d326144a6cd78a87a525f590207de23552f98049932b3e20f",
+    "nested/table.h": "3bb7ed86169716c309a9d27e0016132128da26348425a566436c287738a3c15a"
+  },
+  "expectedSha256": "febd4ffe0c249f8dbd0f4fac596f35b065914292f1d1e886f1d691a1c87ffaba",
+  "actualSha256": "308c876d33cccfc46676406966a5b2ce7d4b2d0dbb02e2019c6393415901295e",
+  "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "diffSha256": "bea072e5d7bf37d83d3221a0a459de864f1e04f13f1511ca76077471080cfa4f"
+}
