@@ -1,0 +1,194 @@
+METHOD NAME=<global> CODE=<global> FULL_NAME=<includes>:<global> ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.addition FULL_NAME=<operator>.addition ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.arrayInitializer FULL_NAME=<operator>.arrayInitializer ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<clinit> CODE=<clinit> FULL_NAME=RN.<clinit>:RN() ORDER=5
+  BLOCK ORDER=1
+    CALL NAME=<operator>.arrayInitializer CODE=buff[L_MAXLENNUM + 1] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.arrayInitializer ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+      CALL NAME=<operator>.addition CODE=L_MAXLENNUM + 1 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+        CALL NAME=L_MAXLENNUM CODE=L_MAXLENNUM TYPE_FULL_NAME=int METHOD_FULL_NAME=main.c:L_MAXLENNUM:int(0) SIGNATURE=int(0) ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=INLINED
+          BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+            LITERAL CODE=200 TYPE_FULL_NAME=int ORDER=1
+        LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+  MODIFIER ORDER=2
+  MODIFIER ORDER=3
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=RN ORDER=4
+
+METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1
+  TYPE_DECL NAME=RN CODE=typedef struct {\n  FILE *f;  /* file being read */\n  int c;  /* current character (look ahead) */\n  int n;  /* number of elements in buffer 'buff' */\n  char buff[L_MAXLENNUM + 1];  /* +1 for ending '\0' */\n} FULL_NAME=RN ORDER=1
+    MEMBER NAME=f CODE=*f TYPE_FULL_NAME=FILE* ORDER=1
+    MEMBER NAME=c CODE=c TYPE_FULL_NAME=int ORDER=2
+    MEMBER NAME=n CODE=n TYPE_FULL_NAME=int ORDER=3
+    MEMBER NAME=buff CODE=buff[L_MAXLENNUM + 1] TYPE_FULL_NAME=char[L_MAXLENNUM+1] ORDER=4
+    METHOD NAME=<clinit> CODE=<clinit> FULL_NAME=RN.<clinit>:RN() ORDER=5
+      BLOCK ORDER=1
+        CALL NAME=<operator>.arrayInitializer CODE=buff[L_MAXLENNUM + 1] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.arrayInitializer ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+          CALL NAME=<operator>.addition CODE=L_MAXLENNUM + 1 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+            CALL NAME=L_MAXLENNUM CODE=L_MAXLENNUM TYPE_FULL_NAME=int METHOD_FULL_NAME=main.c:L_MAXLENNUM:int(0) SIGNATURE=int(0) ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=INLINED
+              BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+                LITERAL CODE=200 TYPE_FULL_NAME=int ORDER=1
+            LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+      MODIFIER ORDER=2
+      MODIFIER ORDER=3
+      METHOD_RETURN CODE=RET TYPE_FULL_NAME=RN ORDER=4
+  LOCAL NAME=RN CODE=typedef struct { FILE *f; /* file being read */ int c; /* current character (look ahead) */ int n; /* number of elements in buffer 'buff' */ char buff[L_MAXLENNUM + 1]; /* +1 for ending '\0' */ } RN TYPE_FULL_NAME=struct ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+    TYPE_REF CODE=typedef struct {\n  FILE *f;  /* file being read */\n  int c;  /* current character (look ahead) */\n  int n;  /* number of elements in buffer 'buff' */\n  char buff[L_MAXLENNUM + 1];  /* +1 for ending '\0' */\n} TYPE_FULL_NAME=RN ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=L_MAXLENNUM CODE=#define L_MAXLENNUM 200 FULL_NAME=main.c:L_MAXLENNUM:int(0) SIGNATURE=int(0) ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=2
+
+NODES|META_DATA LANGUAGE=NEWC
+NODES|FILE NAME=<includes> ORDER=1
+NODES|FILE NAME=<unknown> ORDER=0
+NODES|FILE NAME=main.c ORDER=0
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<global> FILENAME=<unknown> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<includes>:<global> FILENAME=<includes> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|NAMESPACE NAME=<global>
+NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=FILE* FULL_NAME=FILE* CODE=FILE* IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=RN FULL_NAME=RN CODE=typedef struct {\n  FILE *f;  /* file being read */\n  int c;  /* current character (look ahead) */\n  int n;  /* number of elements in buffer 'buff' */\n  char buff[L_MAXLENNUM + 1];  /* +1 for ending '\0' */\n} AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=char[L_MAXLENNUM+1] FULL_NAME=char[L_MAXLENNUM+1] CODE=char[L_MAXLENNUM+1] IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=<global> FULL_NAME=main.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=struct FULL_NAME=struct CODE=struct IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+NODES|TYPE NAME=FILE* FULL_NAME=FILE* TYPE_DECL_FULL_NAME=FILE*
+NODES|TYPE NAME=RN FULL_NAME=RN TYPE_DECL_FULL_NAME=RN
+NODES|TYPE NAME=char[L_MAXLENNUM+1] FULL_NAME=char[L_MAXLENNUM+1] TYPE_DECL_FULL_NAME=char[L_MAXLENNUM+1]
+NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+NODES|TYPE NAME=struct FULL_NAME=struct TYPE_DECL_FULL_NAME=struct
+EDGES|ARGUMENT RN.<clinit>:RN()#2 -> RN.<clinit>:RN()#3
+EDGES|ARGUMENT RN.<clinit>:RN()#3 -> RN.<clinit>:RN()#4
+EDGES|ARGUMENT RN.<clinit>:RN()#3 -> RN.<clinit>:RN()#7
+EDGES|CALL RN.<clinit>:RN()#2 -> <operator>.arrayInitializer#0
+EDGES|CALL RN.<clinit>:RN()#3 -> <operator>.addition#0
+EDGES|CALL RN.<clinit>:RN()#4 -> main.c:L_MAXLENNUM:int(0)#0
+EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+EDGES|CFG <operator>.addition#0 -> <operator>.addition#5
+EDGES|CFG <operator>.arrayInitializer#0 -> <operator>.arrayInitializer#4
+EDGES|CFG RN.<clinit>:RN()#0 -> RN.<clinit>:RN()#4
+EDGES|CFG RN.<clinit>:RN()#2 -> RN.<clinit>:RN()#10
+EDGES|CFG RN.<clinit>:RN()#3 -> RN.<clinit>:RN()#2
+EDGES|CFG RN.<clinit>:RN()#4 -> RN.<clinit>:RN()#6
+EDGES|CFG RN.<clinit>:RN()#4 -> RN.<clinit>:RN()#7
+EDGES|CFG RN.<clinit>:RN()#6 -> RN.<clinit>:RN()#7
+EDGES|CFG RN.<clinit>:RN()#7 -> RN.<clinit>:RN()#3
+EDGES|CFG main.c:<global>#0 -> main.c:<global>#19
+EDGES|CFG main.c:<global>#19 -> main.c:<global>#20
+EDGES|CFG main.c:L_MAXLENNUM:int(0)#0 -> main.c:L_MAXLENNUM:int(0)#2
+EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+EDGES|CONTAINS <operator>.addition#0 -> <operator>.addition#2
+EDGES|CONTAINS <operator>.arrayInitializer#0 -> <operator>.arrayInitializer#2
+EDGES|CONTAINS D:main.c:<global> -> main.c:<global>#0
+EDGES|CONTAINS D:main.c:<global> -> main.c:L_MAXLENNUM:int(0)#0
+EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+EDGES|CONTAINS F:<includes> -> D:ANY
+EDGES|CONTAINS F:<includes> -> D:FILE*
+EDGES|CONTAINS F:<includes> -> D:char[L_MAXLENNUM+1]
+EDGES|CONTAINS F:<includes> -> D:int
+EDGES|CONTAINS F:<includes> -> D:struct
+EDGES|CONTAINS F:main.c -> D:main.c:<global>
+EDGES|CONTAINS RN.<clinit>:RN()#0 -> RN.<clinit>:RN()#1
+EDGES|CONTAINS RN.<clinit>:RN()#0 -> RN.<clinit>:RN()#2
+EDGES|CONTAINS RN.<clinit>:RN()#0 -> RN.<clinit>:RN()#3
+EDGES|CONTAINS RN.<clinit>:RN()#0 -> RN.<clinit>:RN()#4
+EDGES|CONTAINS RN.<clinit>:RN()#0 -> RN.<clinit>:RN()#5
+EDGES|CONTAINS RN.<clinit>:RN()#0 -> RN.<clinit>:RN()#6
+EDGES|CONTAINS RN.<clinit>:RN()#0 -> RN.<clinit>:RN()#7
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#1
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#18
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#19
+EDGES|CONTAINS main.c:<global>#1 -> RN.<clinit>:RN()#0
+EDGES|CONTAINS main.c:L_MAXLENNUM:int(0)#0 -> main.c:L_MAXLENNUM:int(0)#1
+EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#6 -> T:ANY
+EDGES|EVAL_TYPE <operator>.arrayInitializer#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.arrayInitializer#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.arrayInitializer#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.arrayInitializer#4 -> T:ANY
+EDGES|EVAL_TYPE RN.<clinit>:RN()#10 -> T:RN
+EDGES|EVAL_TYPE RN.<clinit>:RN()#2 -> T:ANY
+EDGES|EVAL_TYPE RN.<clinit>:RN()#3 -> T:ANY
+EDGES|EVAL_TYPE RN.<clinit>:RN()#4 -> T:int
+EDGES|EVAL_TYPE RN.<clinit>:RN()#5 -> T:ANY
+EDGES|EVAL_TYPE RN.<clinit>:RN()#6 -> T:int
+EDGES|EVAL_TYPE RN.<clinit>:RN()#7 -> T:int
+EDGES|EVAL_TYPE main.c:<global>#17 -> T:struct
+EDGES|EVAL_TYPE main.c:<global>#18 -> T:ANY
+EDGES|EVAL_TYPE main.c:<global>#19 -> T:RN
+EDGES|EVAL_TYPE main.c:<global>#2 -> T:FILE*
+EDGES|EVAL_TYPE main.c:<global>#20 -> T:ANY
+EDGES|EVAL_TYPE main.c:<global>#3 -> T:int
+EDGES|EVAL_TYPE main.c:<global>#4 -> T:int
+EDGES|EVAL_TYPE main.c:<global>#5 -> T:char[L_MAXLENNUM+1]
+EDGES|EVAL_TYPE main.c:L_MAXLENNUM:int(0)#1 -> T:ANY
+EDGES|EVAL_TYPE main.c:L_MAXLENNUM:int(0)#2 -> T:int
+EDGES|PARAMETER_LINK <operator>.addition#1 -> <operator>.addition#3
+EDGES|PARAMETER_LINK <operator>.addition#4 -> <operator>.addition#6
+EDGES|PARAMETER_LINK <operator>.arrayInitializer#1 -> <operator>.arrayInitializer#3
+EDGES|REF NB:<global> -> NS:<global>
+EDGES|REF NB:<includes>:<global> -> NS:<global>
+EDGES|REF NB:main.c:<global> -> NS:<global>
+EDGES|REF T:ANY -> D:ANY
+EDGES|REF T:FILE* -> D:FILE*
+EDGES|REF T:RN -> main.c:<global>#1
+EDGES|REF T:char[L_MAXLENNUM+1] -> D:char[L_MAXLENNUM+1]
+EDGES|REF T:int -> D:int
+EDGES|REF T:struct -> D:struct
+EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+EDGES|SOURCE_FILE D:ANY -> F:<includes>
+EDGES|SOURCE_FILE D:FILE* -> F:<includes>
+EDGES|SOURCE_FILE D:char[L_MAXLENNUM+1] -> F:<includes>
+EDGES|SOURCE_FILE D:int -> F:<includes>
+EDGES|SOURCE_FILE D:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE D:struct -> F:<includes>
+EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
+EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>
+EDGES|SOURCE_FILE NB:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE RN.<clinit>:RN()#0 -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#0 -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#1 -> F:main.c
+EDGES|SOURCE_FILE main.c:L_MAXLENNUM:int(0)#0 -> F:main.c
+FLOWS|REACHING_DEF[1] RN.<clinit>:RN()#7 -> RN.<clinit>:RN()#3
+FLOWS|REACHING_DEF[L_MAXLENNUM + 1] RN.<clinit>:RN()#3 -> RN.<clinit>:RN()#10
+FLOWS|REACHING_DEF[L_MAXLENNUM + 1] RN.<clinit>:RN()#3 -> RN.<clinit>:RN()#2
+FLOWS|REACHING_DEF[L_MAXLENNUM] RN.<clinit>:RN()#4 -> RN.<clinit>:RN()#10
+FLOWS|REACHING_DEF[L_MAXLENNUM] RN.<clinit>:RN()#4 -> RN.<clinit>:RN()#3
+FLOWS|REACHING_DEF[] <operator>.addition#0 -> <operator>.addition#1
+FLOWS|REACHING_DEF[] <operator>.addition#0 -> <operator>.addition#4
+FLOWS|REACHING_DEF[] <operator>.arrayInitializer#0 -> <operator>.arrayInitializer#1
+FLOWS|REACHING_DEF[] RN.<clinit>:RN()#0 -> RN.<clinit>:RN()#4
+FLOWS|REACHING_DEF[] RN.<clinit>:RN()#0 -> RN.<clinit>:RN()#6
+FLOWS|REACHING_DEF[] RN.<clinit>:RN()#0 -> RN.<clinit>:RN()#7
+FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#19
+FLOWS|REACHING_DEF[buff[L_MAXLENNUM + 1]] RN.<clinit>:RN()#2 -> RN.<clinit>:RN()#10
+FLOWS|REACHING_DEF[p1] <operator>.addition#1 -> <operator>.addition#3
+FLOWS|REACHING_DEF[p1] <operator>.addition#1 -> <operator>.addition#5
+FLOWS|REACHING_DEF[p1] <operator>.arrayInitializer#1 -> <operator>.arrayInitializer#3
+FLOWS|REACHING_DEF[p1] <operator>.arrayInitializer#1 -> <operator>.arrayInitializer#4
+FLOWS|REACHING_DEF[p2] <operator>.addition#4 -> <operator>.addition#5
+FLOWS|REACHING_DEF[p2] <operator>.addition#4 -> <operator>.addition#6

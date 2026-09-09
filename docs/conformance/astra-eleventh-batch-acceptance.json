@@ -1,0 +1,605 @@
+{
+  "schemaVersion": 1,
+  "status": "accepted bounded C parity increment; full port remains incomplete",
+  "completedAtUtc": "2026-09-09T01:03:27.819399+00:00",
+  "baselineSourceRevision": "f235a0f898c4e19fda90998b903f57741b776ec7",
+  "baselineDocumentationRevision": "f235a0f898c4e19fda90998b903f57741b776ec7",
+  "cacheShapeVersion": 22,
+  "sourceIdentity": "Frozen file hashes identify the tested source prepared for this local checkpoint. Source and PROGRESS will be committed together; no self-referential commit hash is asserted.",
+  "frozenBuild": {
+    "createdAtUtc": "2026-09-09T00:49:02.072148+00:00",
+    "buildStartedAtUtc": "2026-09-09T00:48:44.649838+00:00",
+    "parentRevision": "f235a0f898c4e19fda90998b903f57741b776ec7",
+    "workingChangesPresent": true,
+    "frozenBeforeFinalGates": true,
+    "sources": {
+      "cpg-rs/Cargo.lock": "fa7eab41e0c072e6b33205997fd241e7d87b511f9fd91ceee6ee1fdc9a099a63",
+      "cpg-rs/Cargo.toml": "0c095573bd24459caa83a975c4fdec291e8b11bef92745576f935f5fd17f0d29",
+      "cpg-rs/cpg-cli/src/export.rs": "49ed223d835380399bfca43c387f120ba2f22c88fbb7c8fe4d423463501fd057",
+      "cpg-rs/cpg-cli/src/rules.rs": "fc19394abdfe4c309d0e2e961516827d52c6da2e1b191593dab53c08276be2e5",
+      "cpg-rs/cpg-cli/src/workspace.rs": "5c2df84a94332ca0eff48c30b92b117e2b71e0fc5d5cb3870921750f9c229fcb",
+      "cpg-rs/cpg-lang-c/src/exact.rs": "a76495894a72f4e1a023dea997e4308d60122bbf3ceb812538e1dd31a4161893",
+      "cpg-rs/cpg-lang-c/src/import.rs": "f7c20320c10edf3597f921dbc5cf43bed7401856737418985fd3c12042d43ee2",
+      "cpg-rs/cpg-lang-c/src/lib.rs": "b0f413451969d4f62a08f451e0e5a7fd63cb9f7a11540deb0e2dd58694e8e968",
+      "cpg-rs/joern-parity/src/production.rs": "2535a739735e38bf1c2015afb191cc74ea20488cd58e5b5c3897494e1dd683bb"
+    },
+    "binaries": {
+      "cpg": "0d00b62788f9db4b619c18a0c619fed17500c71b2cc5510b4fd2c542255f421a",
+      "joern-parity": "c365ae739c9dfbadd5303ef63b9587fa7023205583df572b9c6a99cd91b6dca0"
+    },
+    "allRustAndCargoInputs": {
+      "cpg-rs/Cargo.lock": "fa7eab41e0c072e6b33205997fd241e7d87b511f9fd91ceee6ee1fdc9a099a63",
+      "cpg-rs/Cargo.toml": "0c095573bd24459caa83a975c4fdec291e8b11bef92745576f935f5fd17f0d29",
+      "cpg-rs/conformance/Cargo.toml": "a93fda024961e68424c351576cfa839f7b74cd6b83f4e935f8d1e20f973a2393",
+      "cpg-rs/conformance/src/lib.rs": "abd20e65d2d0d08eed12cffe269904f51fc1e883f18cdc782cc22dbae85b9703",
+      "cpg-rs/cpg-analysis/Cargo.toml": "39c875b394b9583cb82bd979381ab0add69a493d801f06857f9fd03a49183bdb",
+      "cpg-rs/cpg-analysis/src/authz.rs": "bb41e7f3d601a911679468894313b833872550db4f7a1905a00b86ed0fb29624",
+      "cpg-rs/cpg-analysis/src/callgraph.rs": "8ba8cbadf1c00ebce5923479cf73658446f510a05373d4a2950dc17561d227a9",
+      "cpg-rs/cpg-analysis/src/cfg.rs": "66d98e950cf0ad039846580fe67d5584a4f528914c07fe518cca691d9d8f70c2",
+      "cpg-rs/cpg-analysis/src/entries.rs": "a5ff9af37e90876fffe10f0c0fce8af5c4babd2e19f58b7a7a665de7a8bbee3a",
+      "cpg-rs/cpg-analysis/src/lib.rs": "060ed2715a88c5086ede5d6eae10405b17cf135d4476afce832d08070d6c88de",
+      "cpg-rs/cpg-analysis/src/middleware.rs": "056c92eabf6d0e816a7a521d3d90b5c3fcd77bba2156d5cfc717308222a80d44",
+      "cpg-rs/cpg-analysis/src/pass.rs": "c67d85a397c8d801ac0ebeec166547685901f7698921e6ca5149a9a87b83da68",
+      "cpg-rs/cpg-analysis/src/provenance.rs": "d083ee582d5df6b860df7de96156f0ac651a7631fa270c061c22fc09584f3a15",
+      "cpg-rs/cpg-analysis/src/query.rs": "b09682c0e03a3984d51c185d883e4fb2419f3ac9908ad3ca49fe93093c79aa3f",
+      "cpg-rs/cpg-analysis/src/reaching_def.rs": "17fc68b7683cb14026568e236b698273525183954be58c6376338f8b761298cf",
+      "cpg-rs/cpg-analysis/src/relations.rs": "30b04658431c96d7a228ae3703925c0991768bc9350748219172d8c200aeaa90",
+      "cpg-rs/cpg-analysis/src/return_flow.rs": "b5b25769fda1008bb6ac23b670a0e8b42bd2a2bd1ff4f32db01b804dff8e0146",
+      "cpg-rs/cpg-analysis/src/scan.rs": "3fcc17009551b044de8373f01aa45b444492d14ccfb04112c4d96bcf78ebce79",
+      "cpg-rs/cpg-analysis/src/structural.rs": "facb54734d0d6289671af9e4b4ffb36de05eef86adf740d10169292c3ba8c3fd",
+      "cpg-rs/cpg-analysis/src/summaries.rs": "0c1313a89a76827f57cf722013261805dbea59a6113501ea3744bcf544b0a8f3",
+      "cpg-rs/cpg-analysis/src/symbols.rs": "96ead310400fbd9a92425c63e1f648ef08d1c55711c72f50179915ae7d787b76",
+      "cpg-rs/cpg-analysis/src/taint.rs": "c57b6826d1a30e9a3cfe714f50f3080dee60dace000dac525501b79f6e5d0150",
+      "cpg-rs/cpg-analysis/src/value_flow.rs": "c16c1d682ca83f877f934100e1f58e46ec9798e837222eaf64bd184e9c3ce65a",
+      "cpg-rs/cpg-analysis/tests/canonical_c_array_initializers.rs": "66b8190b7c3dbf5a423b7faa250e1705cee0ef90d0f363e9a96b3eb8318e4389",
+      "cpg-rs/cpg-analysis/tests/canonical_c_braceless_if.rs": "ec27bee154a5f70acba4a176c940903e3088943eb60335f8280ea9258b650cc2",
+      "cpg-rs/cpg-analysis/tests/canonical_c_braceless_loops.rs": "a0eda2cd34f12318a7c8dda7fb3eefbaa760501f38ce3b9a12e4606ff939ecdd",
+      "cpg-rs/cpg-analysis/tests/canonical_c_flow.rs": "e306db53229e4e26f184b5756955e7a278806264e6201086c5324e9132ed75be",
+      "cpg-rs/cpg-analysis/tests/canonical_c_preprocessor.rs": "92d39fcd6bc4ff07bfd441cd01cf9d5164de4c84dfb71dafe1fe9f5e0ce2ee45",
+      "cpg-rs/cpg-analysis/tests/canonical_c_standalone_blocks.rs": "76889e736ee3561b93670285bab6109b1d6fc1dc651f79f5fe90c691256355e2",
+      "cpg-rs/cpg-analysis/tests/direct_c_flow.rs": "c2416c1038eaa5a53173cb893167282055efbeba5e2728d58bf787ff2fc34134",
+      "cpg-rs/cpg-analysis/tests/taint_sanitizers.rs": "0da0ccb9de576dc1d2ed683b85196b5470bb87034a8ae51c81e8a92540a8e2ef",
+      "cpg-rs/cpg-cli/Cargo.toml": "8bdba2d1c88e0f4adf5a4ffc0782a77d8d720ea29c8c878b46c61c453ff3d629",
+      "cpg-rs/cpg-cli/src/apis.rs": "6b5a5fcca1d8fae3588730e22b350f65e9fad321d17419ad4f4eee2f68734234",
+      "cpg-rs/cpg-cli/src/coverage.rs": "310a166d300386a45d2d25b8aac7588b4c86a778d05a32855c46d6e5d89e9fa9",
+      "cpg-rs/cpg-cli/src/export.rs": "49ed223d835380399bfca43c387f120ba2f22c88fbb7c8fe4d423463501fd057",
+      "cpg-rs/cpg-cli/src/lib.rs": "f5e3edf7e580c6e2fddd3bd3aafa6e569a103d80d78d6f7435edc5735aa24967",
+      "cpg-rs/cpg-cli/src/main.rs": "8a4d781c371d89d47abb4a6bf62771649cc0025290db9fbe0e80d12c179b689d",
+      "cpg-rs/cpg-cli/src/mcp.rs": "ee96214074f7b204b1c5ed2b85b555bf7858ba055cb0612b967187bd99fcb8ce",
+      "cpg-rs/cpg-cli/src/merge.rs": "12f72d936ed057d91222db28f916a205dc2b2ba879297427c22117e5a7cd9d27",
+      "cpg-rs/cpg-cli/src/play.rs": "f1a63f9c871d296d73939f97ab7c7eec95284ea56707083f59f3a64a0f4e9b34",
+      "cpg-rs/cpg-cli/src/rules.rs": "fc19394abdfe4c309d0e2e961516827d52c6da2e1b191593dab53c08276be2e5",
+      "cpg-rs/cpg-cli/src/sarif.rs": "4ea0f62f260f475f4b3275e8d8195938978a5795eae6f841c7777010e65ccbab",
+      "cpg-rs/cpg-cli/src/scan.rs": "5da6f1006995d1c5b1ae2658e1b455f5e4aec9c6c92770e88f9c40abdd329302",
+      "cpg-rs/cpg-cli/src/slice.rs": "3240d305c5e9791443447ffc6a76cf53df5ebed560c8e07305736ea3c3861281",
+      "cpg-rs/cpg-cli/src/thrift.rs": "6079db8ce9e381c2bb6ad239429f798adb9777a6cded2e4a88c6eaf418e84b2c",
+      "cpg-rs/cpg-cli/src/vectors.rs": "320a22fd4d3dd60b4e821d5ba457630617935461b11352860a1563addd1b8e56",
+      "cpg-rs/cpg-cli/src/workspace.rs": "5c2df84a94332ca0eff48c30b92b117e2b71e0fc5d5cb3870921750f9c229fcb",
+      "cpg-rs/cpg-cli/tests/c_format_positions.rs": "108fe1db6bcc2740438c6280469ead253a22a2e6e161937edaada5fce600ec26",
+      "cpg-rs/cpg-cli/tests/cli_metadata.rs": "41f203e8c9424ac719d4437c031e037366793a04e51d74f867384f161233d58f",
+      "cpg-rs/cpg-cli/tests/mcp_stdio.rs": "0be8b27b2738fa12d6a101c8799ecae8d1cf1ef52efd1df623622494d050c91a",
+      "cpg-rs/cpg-cli/tests/scan_sarif.rs": "ea66460e9e31a126d8b729c1bd3e0b27dbb4462366a0850eed178d8638e3df3e",
+      "cpg-rs/cpg-cli/tests/source_idents.rs": "9c4511c2f4e1cdaa3a9183a872bbefb791d3b5ee3d265aec3d8eaf633bf91377",
+      "cpg-rs/cpg-cli/tests/thrift_stitch.rs": "38530101e9cadbb4b1e082f7ae0717919959423aa2863081148cf48094e10a5d",
+      "cpg-rs/cpg-cli/tests/tools_parity.rs": "7f20ffec4170691f4c07fd6f65bc588a1aa63b75837ff9720e43816b552c0524",
+      "cpg-rs/cpg-core/Cargo.toml": "725cb1ada6023a709900f28837f75512934f096292ffaeb42ea284c80727b43a",
+      "cpg-rs/cpg-core/src/builder.rs": "e5ba81e20a81adccf898a3417617f0988d0480e009a28be65c1cfa64231672f9",
+      "cpg-rs/cpg-core/src/freeze.rs": "f37ca4516cb8f8b3d6213ac0cf2afeb44d9f639026441518d2a492c5032b2150",
+      "cpg-rs/cpg-core/src/graph.rs": "a17093aba5bb286044b3290ce3bca4b9f390acccb7a5103117beb105f35c7102",
+      "cpg-rs/cpg-core/src/intern.rs": "59c23351d066b78787199efd2df8ad939ab795a2faa7ade2da313617056736b2",
+      "cpg-rs/cpg-core/src/lib.rs": "f3db27ab18437181cb65433a6e59dfceadc3baf8724df66dd0851eabcde9b2df",
+      "cpg-rs/cpg-core/src/persist.rs": "166e21b78935ee8e1f520f96a4caaf157269f566c95b678937bbd6a057668ea3",
+      "cpg-rs/cpg-core/src/schema.rs": "0c9dca3b89c7b9755261798ed7abfb7828a2b4eed0f707b3f71debf4e6d15970",
+      "cpg-rs/cpg-core/src/segments.rs": "7bfed808dfce2f7e79ab5f06f87d4fbdf9497852539c88fd1c6d1e01f68ef282",
+      "cpg-rs/cpg-core/src/traversal.rs": "e277e7945c88481a3e823f8dd9aa5e28eb3efb4124209246263b0c3cde923d54",
+      "cpg-rs/cpg-frontend/Cargo.toml": "9f8da6e2462e42e44bb8ea943384a232cfc816103e669c070d187266e0d6a236",
+      "cpg-rs/cpg-frontend/src/lib.rs": "7ef680364d7e6c591b252621898c66294961b05cd2c09b474ffdce797e7e988c",
+      "cpg-rs/cpg-incremental/Cargo.toml": "7c9dafbe17e461081099947ee3ee920242c8303010142bac2eb6d3ba780cdd21",
+      "cpg-rs/cpg-incremental/examples/scale.rs": "03ab48acb82b07bfa09aafca57bb6455c9c140405344ef8fd035b3c4f26e9754",
+      "cpg-rs/cpg-incremental/src/lib.rs": "235dcec9187aae44a5079b039a9982f8b0b7b7eaa42cc41a3495099212f65bcb",
+      "cpg-rs/cpg-lang-c/Cargo.toml": "dc5908117b0110792cbab1be82ee14348df4714180481d91b1e19ea0417bfdf5",
+      "cpg-rs/cpg-lang-c/src/exact.rs": "a76495894a72f4e1a023dea997e4308d60122bbf3ceb812538e1dd31a4161893",
+      "cpg-rs/cpg-lang-c/src/import.rs": "f7c20320c10edf3597f921dbc5cf43bed7401856737418985fd3c12042d43ee2",
+      "cpg-rs/cpg-lang-c/src/lib.rs": "b0f413451969d4f62a08f451e0e5a7fd63cb9f7a11540deb0e2dd58694e8e968",
+      "cpg-rs/cpg-lang-c/tests/control_truth.rs": "bfadd9df09bdbc45e43b5bf9a4cea73a80b63012876b883551b549eb18e0b9e8",
+      "cpg-rs/cpg-lang-c/tests/declaration_shapes.rs": "fa06c867b06b7f50216658e989c11fc568f195eb5b3b088225b5a8bcdfca248e",
+      "cpg-rs/cpg-lang-c/tests/method_address_definitions.rs": "61c4bc300875c98f12706a2b38b3769a0fed2ab84dc92994f7fafa3e9178871c",
+      "cpg-rs/cpg-lang-python/Cargo.toml": "c81f5830cb2f03601d80090deb8b068468b0f65a76b30eed009a585f6cc5a1a7",
+      "cpg-rs/cpg-lang-python/src/lib.rs": "ea9e2baadaf2d9d693ff8b067dd00ea30c12892a0eb9defe883e95517d5a225d",
+      "cpg-rs/cpg-lang-ts/Cargo.toml": "7b2791b6f99335d3c83c09781ba0611e7d6dd00c2704a40305ab80910095f92a",
+      "cpg-rs/cpg-lang-ts/src/engine.rs": "62ab40bfa238d3867af361ee6e68fbac75a24bc562ada97ddca2c74aa5d4ae94",
+      "cpg-rs/cpg-lang-ts/src/lib.rs": "81db8f3a10abebaaed70afe29a93dc13ad79a212bc6f89debc3ca6c3211ec799",
+      "cpg-rs/cpg-lang-ts/src/spec.rs": "30337b33991f71d33c347f8155e0f16f9d18c461dd38d05f467cec78f414c130",
+      "cpg-rs/cpg-lang-ts/tests/robustness.rs": "306fd97ad17b8547c323285009ae3bf74f6f36ac3f9d57ee117ce928b94d5139",
+      "cpg-rs/joern-parity/Cargo.toml": "ed55fca3be7dc38a3e25a94532948e9d847a605170874c1dc9dca70a582e8edd",
+      "cpg-rs/joern-parity/src/main.rs": "f44d0a822a0f5319738a9c58a74817303bac0b0a7ebb9242ababdda8143b6d73",
+      "cpg-rs/joern-parity/src/production.rs": "2535a739735e38bf1c2015afb191cc74ea20488cd58e5b5c3897494e1dd683bb",
+      "cpg-rs/joern-parity/tests/array_declarations.rs": "9c8106d0256991925845be1b1236b0472ced56c19e4880045cb1c43a46e9533e",
+      "cpg-rs/joern-parity/tests/array_dimension_macros.rs": "ef768790da95ff3ff49aa4dcc00b745d70f58027e4ebe53c43d453fb08b64977",
+      "cpg-rs/joern-parity/tests/array_initializers.rs": "c831fc85ed9fd97a16620399c4f5bdef1c78e0c75a874228a0f54ce12bb0e4e2",
+      "cpg-rs/joern-parity/tests/body_includes.rs": "9f76d0d576884e9fac89cafaf5654ce478828470cf97ed9f0d08f70a311e79a4",
+      "cpg-rs/joern-parity/tests/body_macro_state.rs": "2b36d9d5ace7e8b7cde363bbffd247f00985ff8030c97db7a75ba6c4f8acd19c",
+      "cpg-rs/joern-parity/tests/body_preprocessor.rs": "ed5345653b0df501199d54e6279231154d483bc371875ba955339006507859e1",
+      "cpg-rs/joern-parity/tests/combined_c_types.rs": "05d66500aa2d0ce5cdef591ca4c7cab1eb1bee95c0c4cdf9173e874b453926c6",
+      "cpg-rs/joern-parity/tests/concatenated_strings.rs": "d9617278d9f73de208351bf105567f7e9d281b877f98ab14bfa1aa82fb844497",
+      "cpg-rs/joern-parity/tests/declaration_macros.rs": "ccf46995a0b6214318bce7180347eac027956fd20293aa05d5e7bf26efdd097c",
+      "cpg-rs/joern-parity/tests/declaration_registration.rs": "9807dde30d6b43e56daf1f8fa7877ace724b2d36c8c370693c2586d781de7362",
+      "cpg-rs/joern-parity/tests/direct_field_macros.rs": "7e220569f1b86c87f0551e0ae8cff0093e3f619c0eb0ad33749e2e4008b8eaa9",
+      "cpg-rs/joern-parity/tests/direct_macro_arguments.rs": "a0fbb05104500941af514a516ab6eec9f7faa34dd03364f6238eabd2cd2f398c",
+      "cpg-rs/joern-parity/tests/external_functions.rs": "c30f9ada8752f6b107dae322fd8b79018df6088dbf496e376d8690c0955abaa4",
+      "cpg-rs/joern-parity/tests/field_cast_interactions.rs": "ed293d576bf5e2b3d00cddf2b6798cb8930589573d8490249446f86603adc434",
+      "cpg-rs/joern-parity/tests/field_macros.rs": "8fad630302d89ae99edd9d8708da3a9a58989e187986af7f706800a48ee8c188",
+      "cpg-rs/joern-parity/tests/fixtures/array-dimension-macros/provenance/candidate-v4/exact.rs": "7ea06ac7361e2580b9d6fc77fdf6fa7e06cbb4b9bb294aa57787c3e8f9ce2da8",
+      "cpg-rs/joern-parity/tests/fixtures/array-dimension-macros/provenance/performance-v3/exact.rs": "e9b27e9795e35b9f03b61bb2438337f38517850e48c04b5177380704a037fa0f",
+      "cpg-rs/joern-parity/tests/fixtures/body-includes/held/v1/source/cpg-rs/cpg-lang-c/src/exact.rs": "96207d5b7b7b3d4bbfa77c8b93f407132eb0d2525e7e8f7915ad784e167ad406",
+      "cpg-rs/joern-parity/tests/fixtures/body-includes/held/v1/source/cpg-rs/cpg-lang-c/src/import.rs": "3fb6695576fe87e463b5e44160bcbe828321bf32149d67abcc2256eb88d11aba",
+      "cpg-rs/joern-parity/tests/fixtures/body-includes/held/v1/source/cpg-rs/cpg-lang-c/src/lib.rs": "7dfc597adff695eddc36574f99739e274e1abba14d64f850620e5d4e9019a005",
+      "cpg-rs/joern-parity/tests/fixtures/body-includes/held/v1/source/cpg-rs/joern-parity/src/main.rs": "f44d0a822a0f5319738a9c58a74817303bac0b0a7ebb9242ababdda8143b6d73",
+      "cpg-rs/joern-parity/tests/fixtures/body-macro-state/provenance/before-exact.rs": "8b132fab7d079a97e774b10d5b1f14c1a1df4f093ef8f437ebfcaadfdde33b3b",
+      "cpg-rs/joern-parity/tests/fixtures/body-macro-state/provenance/candidate-v1/exact.rs": "6a35ffa8bd1f0320bc640bd2e0137878d343c3eb0efd1b4a1d6663f9a7ad8f35",
+      "cpg-rs/joern-parity/tests/fixtures/body-macro-state/provenance/candidate-v2/exact.rs": "a660a1117dd523ee85a5b27fe14e0906631e58d559c083bcffd87c34447d90a9",
+      "cpg-rs/joern-parity/tests/fixtures/body-macro-state/provenance/candidate-v3/exact.rs": "bcf4dc9106e5b0043a0d11604e277ed1be85a21a6a3fd025b2267b1aa1f1e443",
+      "cpg-rs/joern-parity/tests/fixtures/body-macro-state/provenance/candidate-v4/exact.rs": "35dd9430be3309294dc84aa7e76796f9997c4ff0845a2f56013aa3e01513b096",
+      "cpg-rs/joern-parity/tests/fixtures/body-macro-state/provenance/candidate-v5/exact.rs": "442a1c79241ca8cdbad9b379b86ff80333cdc2534d0651101fc94a0e9451bca9",
+      "cpg-rs/joern-parity/tests/fixtures/body-macro-state/provenance/candidate-v6/exact.rs": "c6fbd18f35dc536fa8ba04ba15bea12fb185745fa6e72eb1025e178597383f62",
+      "cpg-rs/joern-parity/tests/fixtures/body-macro-state/provenance/candidate-v7/exact.rs": "0ce51afd4699e7594c5e18f5f0f06fd10baf124b5fd7e7ec59f4668fc4ecc221",
+      "cpg-rs/joern-parity/tests/fixtures/body-macro-state/provenance/candidate-v8/exact.rs": "f8dd06912d8acddeae363ee398df4b10c1502f4d0b47acd64cbe449c34789ec1",
+      "cpg-rs/joern-parity/tests/fixtures/primitive-members/provenance/frozen-v1/source/cpg-rs/cpg-cli/src/workspace.rs": "94ee79aa2a7f757e2dd526bc42f63a7817b010ade045cbcf10e3b273462f1624",
+      "cpg-rs/joern-parity/tests/fixtures/primitive-members/provenance/frozen-v1/source/cpg-rs/cpg-lang-c/src/exact.rs": "a76495894a72f4e1a023dea997e4308d60122bbf3ceb812538e1dd31a4161893",
+      "cpg-rs/joern-parity/tests/fixtures/primitive-members/provenance/frozen-v1/source/cpg-rs/cpg-lang-c/src/import.rs": "f7c20320c10edf3597f921dbc5cf43bed7401856737418985fd3c12042d43ee2",
+      "cpg-rs/joern-parity/tests/fixtures/primitive-members/provenance/frozen-v1/source/cpg-rs/cpg-lang-c/src/lib.rs": "b0f413451969d4f62a08f451e0e5a7fd63cb9f7a11540deb0e2dd58694e8e968",
+      "cpg-rs/joern-parity/tests/fixtures/primitive-members/provenance/frozen-v1/source/cpg-rs/joern-parity/tests/primitive_members.rs": "8e1661f4cec9b6d693d68c4bd332664442c0d7256ebfd87e8fe8d47207e8a2ff",
+      "cpg-rs/joern-parity/tests/fixtures/primitive-members/provenance/validation/primitive_members.rs": "920fe8b29a06e76a263eb8cf49dbe8470c81c5dc32b1879188bf0c58e352babe",
+      "cpg-rs/joern-parity/tests/header_macro_locations.rs": "557459b2e72e48646d31e6a3eb60b88bf1b184765c86e138c1e522c36001f279",
+      "cpg-rs/joern-parity/tests/header_macros.rs": "1fd9f1373c3f0d75fa16ef859b52b55959ee98dbc241cbc46bc64946f630dbc5",
+      "cpg-rs/joern-parity/tests/header_return_bindings.rs": "5ad1e7bbd9c26a3d3db213ed02f41e53c222d9af80a8b30ee0b9210d6d528c31",
+      "cpg-rs/joern-parity/tests/inactive_declaration_context.rs": "18d964aff002e878a5b9a18170fa5d2b790d192a9b841d7a551f80f0ca1fe368",
+      "cpg-rs/joern-parity/tests/macro_cast_context.rs": "a3d1d95cdb2ea14012ac6d09e8ed431600b631cf450a175fc0f65628fb7f5d21",
+      "cpg-rs/joern-parity/tests/macro_definitions.rs": "ca46b3af53fd318553eedce91a60c9e4bb99f691412761b7843e5a96d3546087",
+      "cpg-rs/joern-parity/tests/macro_recovery.rs": "f98ef9534b6f00589ead6d2e2d04e82dbf8a4862bf7bfef91bbd1576c5927f69",
+      "cpg-rs/joern-parity/tests/nested_macro_casts.rs": "5f60b40ff7290c19ca37268274494c45d5e128e6e0fb413987b7766475a1f910",
+      "cpg-rs/joern-parity/tests/numeric_literals.rs": "e96391a2b2347f850a548a7da0d6d3dd8ac155af9fc533a54e6a614b982a70b8",
+      "cpg-rs/joern-parity/tests/numeric_macro_roots.rs": "062ed8cd5c513dc806bd1c96fad62f10b65335fc21a162c015df5dffb027ba30",
+      "cpg-rs/joern-parity/tests/predefined_c_macros.rs": "dff5c08372872daa7f36a7b0046724164750dc4b6aaab41cac8b7d586d5a1e92",
+      "cpg-rs/joern-parity/tests/primitive_members.rs": "920fe8b29a06e76a263eb8cf49dbe8470c81c5dc32b1879188bf0c58e352babe",
+      "cpg-rs/joern-parity/tests/primitive_roles.rs": "6161c7dc80df3522f95809646edf189482d4d03d6b6b2b6a6dd2174e4bec5665",
+      "cpg-rs/joern-parity/tests/rd_scheduling.rs": "f03c569cfb5dc81e9b21e004f7836f964b34ff23bd35ae5e6bf1d670e4b340f7",
+      "cpg-rs/joern-parity/tests/sixth_context_interactions.rs": "5e6edc3f111a2d73bea6885b0c3d20af4866f8c5d20c227996a6105f2c895c1b",
+      "cpg-rs/joern-parity/tests/sixth_integration_promotions.rs": "44c8e6c0177d977c32eaed2aa877b7d7f171117c1c8834ce87dd6cabacf4b1ec",
+      "cpg-rs/joern-parity/tests/sizeof_expansion.rs": "8006d05c77aff954d8c503428593230ffb903c7c529d351f5de6cb30726445cc",
+      "cpg-rs/joern-parity/tests/spaced_method_names.rs": "8759c60e101301908b28df22c60106132ca8323f95c07473c7c974453603f539",
+      "cpg-rs/joern-parity/tests/standalone_blocks.rs": "8ed5c25e72380a4418a1afaa66f247abfe89e8627aaffccbcc2a4f7f7fe142c4",
+      "cpg-rs/joern-parity/tests/statement_macros.rs": "0411f75f22d8b3f0ebd226abe7b3da7fe83a13ccb8329502088032afcd767ab1",
+      "cpg-rs/joern-parity/tests/static_modifiers.rs": "87605210de72194a9a2be21b9559022431c743d083cdb9e2141caf2d7a8db102",
+      "cpg-rs/joern-parity/tests/typedef_aggregates.rs": "3f3234f0ff17aab45caaf248083f0c4bf097420c2f81b32e8e5d4503596529b8",
+      "cpg-rs/joern-parity/tests/typedef_existence.rs": "c969289703fc9dba4a1554448a0710709c683c6874436d12ee77d8a453b06b17"
+    },
+    "allInputsUnchangedDuringBuild": true
+  },
+  "frozenBuildReceipt": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/eleventh-batch/final-real-differential/bin/source-bindings.json",
+    "sha256": "c53df23929810416947d4383ee6e5592ea9189dff26e1f5dbc362b89d74c22d7",
+    "bytes": 19126
+  },
+  "allFrozenBuildInputsMatchDeliveredSource": 145,
+  "buildInventoryNote": "The inventory includes six immutable Rust source/test provenance copies; these are not additional compilation units.",
+  "binaries": {
+    "cpg": "0d00b62788f9db4b619c18a0c619fed17500c71b2cc5510b4fd2c542255f421a",
+    "joern-parity": "c365ae739c9dfbadd5303ef63b9587fa7023205583df572b9c6a99cd91b6dca0"
+  },
+  "fixtureSummary": {
+    "projects": 19,
+    "newProjects": 17,
+    "retainedAnchors": 2,
+    "beforeExact": 2,
+    "candidateExact": 18,
+    "newCompleteGraphGates": 16,
+    "retainedAnchorCompleteGraphGates": 2,
+    "completeDiagnostics": 1,
+    "referenceLfLines": 3493,
+    "referenceNonemptyRecords": 3423,
+    "matchingGainsNonempty": 126,
+    "matchingLossesNonempty": 0,
+    "counterTerminalEmptyPolicy": "Replay counters split on LF and include a terminal empty entry in includingSeparators; 3512 such entries across19. Nonempty totals3423 and LF line count3493 are distinct."
+  },
+  "fixtureMeasurement": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/joern-parity/tests/fixtures/primitive-members/measurement.json",
+    "sha256": "184cbe70a8bc25f7eb451621b592bff10d8da9617d1b15f8deb2ae7ace3f67bd",
+    "bytes": 18706
+  },
+  "workerPackageFreeze": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/eleventh-batch/worker-package-freeze.json",
+    "sha256": "d5d9b40efac4f1a36b22eeccbedb180a6a57a5bd41e23a7bae593fc16192995a",
+    "bytes": 802471
+  },
+  "workerPackageFilesUnchanged": 3252,
+  "oldParityFiles": {
+    "count": 8362,
+    "byteIdentical": 8361,
+    "onlyChangedPath": "cpg-rs/joern-parity/QUIRKS.md",
+    "change": "append-only measured primitive MEMBER quirk"
+  },
+  "sourceAndPackageReviews": {
+    "source": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/eleventh-batch/worker-source-review.json",
+      "sha256": "c661e055259b242337c477bb3a44040de1a59502a9433fd8e6a82fc9aeb92855",
+      "bytes": 146499
+    },
+    "package": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/eleventh-batch/worker-package-review.json",
+      "sha256": "ebe18821e02282aed19b683271b561b3988adfa11384c24ceebfdbbb5c0bb855",
+      "bytes": 4629341
+    },
+    "priorRetention": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/eleventh-batch/final/worker-prior-retention-review.json",
+      "sha256": "89a65cbcb9b5e34cdd98a15bb7dfd89b9721c2493e4cf1e583658085a0b7a565",
+      "bytes": 6178
+    }
+  },
+  "priorReplaySummary": {
+    "caseInstances": 229,
+    "successfulPairs": 228,
+    "beforeExact": 203,
+    "candidateExact": 205,
+    "nonemptySuccessfulPairTotals": {
+      "expected": 50240,
+      "before": 50025,
+      "candidate": 50025,
+      "matchingBefore": 48990,
+      "matchingCandidate": 49004,
+      "gained": 14,
+      "lost": 0
+    },
+    "rawTransportNote": "Replay helper contains CR/CRLF normalization, but every actual raw stdout equals stored .txt byte for byte; independent complete diffs were recomputed using LF-only splitting. No input/reference/actual graph was altered in this evidence."
+  },
+  "priorGainsOverlapNew19": true,
+  "wholeComparison": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/eleventh-batch/final-real-differential/comparison-run.json",
+    "sha256": "9202037b33b0fcfdf64e86fe2f46b6e8b5604ef1dea426db437a522a936d1b4d",
+    "bytes": 636768
+  },
+  "wholeSourceOccurrenceReview": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/eleventh-batch/final/whole-review.json",
+    "sha256": "e026b920863243aa3679655eb9f9c45a6083ba8b15edfbceec89b8ff4f09c669",
+    "bytes": 14524
+  },
+  "postProducerManifestObservation": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/eleventh-batch/final/post-producer-manifest-observation.json",
+    "sha256": "77ee471d2c08b88ae63185929b5a975b886c9f57876e8fe97c401f93b680e317",
+    "bytes": 1651
+  },
+  "wholeMetrics": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/docs/conformance/astra-eleventh-batch-metrics.json",
+    "sha256": "7090bd11e1c2ba40b83d2c11e8e2f83d3e3ebfad6ddb447a97daeb9103cc547b",
+    "bytes": 1425081
+  },
+  "oracle": {
+    "version": "v4.0.555",
+    "reusedSavedLiveOutputs": true,
+    "freshRunReceipts": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/sixth-batch/fresh-real-oracles/runs.json",
+    "transport": "The unchanged selected projection is decoded with LF-only record boundaries. Physical LF inside selected flow labels is escaped; this encoding is not injective. Saved sixth whole-project outputs are compared to saved fourth selected bytes, with both raw artifacts and receipts bound. No new whole-project Joern execution is claimed."
+  },
+  "gates": {
+    "completedAtUtc": "2026-09-09T01:00:06.207144+00:00",
+    "workspaceTests": 470,
+    "workspaceResultGroups": 77,
+    "checkerTests": 17,
+    "auditedCrates": 73,
+    "committedBlocks": 308,
+    "freshLiveBlocks": 308,
+    "allFailedIgnoredFiltered": 0,
+    "formatting": "passed",
+    "strictClippy": "passed",
+    "nativeRelease": "passed",
+    "nativeArchive": "passed",
+    "officialRealProjectAcceptance": "passed",
+    "nativePlatform": "macos-arm64",
+    "containerOtherPlatformsRun": false,
+    "frozenBuildSha256": "c53df23929810416947d4383ee6e5592ea9189dff26e1f5dbc362b89d74c22d7",
+    "allFrozenInputFilesUnchanged": 145,
+    "manifestSha256": "418aad7bcc9d83fee976a4044488fc8a34e1951f503d3148b5115c097c099ea1",
+    "logs": {
+      "fmt.log": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/eleventh-batch/final/fmt.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "workspace-tests.log": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/eleventh-batch/final/workspace-tests.log",
+        "sha256": "72b2058123138c4606bd9399b982c7cef1a571419c07e9ec2bed9ac6f6943dc9"
+      },
+      "clippy.log": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/eleventh-batch/final/clippy.log",
+        "sha256": "c8862cb837dda88de57fb3e4080451645e57d5dd86d50a35948719c56729ff0a"
+      },
+      "release-build.log": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/eleventh-batch/final/release-build.log",
+        "sha256": "488e5eac28fc212a393def6dddca0c18345a26a2ebcd522517051978f5ec6ceb"
+      },
+      "release-recheck.log": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/eleventh-batch/final/release-recheck.log",
+        "sha256": "3997fc6790b8063b86c119e91f87ac7395ac6cf26135da637dcb229006bc32dc"
+      },
+      "committed-parity.log": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/eleventh-batch/final/committed-parity.log",
+        "sha256": "c105179d62065e9cbf9f398ff94754c29ec03add1206db7dff281cb4c07b6be6"
+      },
+      "live-parity.log": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/eleventh-batch/final/live-parity.log",
+        "sha256": "715e0c188ca0e7a744ace60c9fa451649f34143022f2a1a163bd46303772dd68"
+      },
+      "checker-tests.log": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/eleventh-batch/final/checker-tests.log",
+        "sha256": "e58021e3a532c1725b8cef22f697b15943c92fc024fcb476d7bd2f736168f5d1"
+      },
+      "dependency-audit.log": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/eleventh-batch/final/dependency-audit.log",
+        "sha256": "2a91a692bdd0f166d94bb45220a29b5f469072246f9ef0b5205b36dd0375393b"
+      },
+      "native-release.log": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/eleventh-batch/final/native-release.log",
+        "sha256": "d3377c4f931f2fb721bf59d90b129789f10d3a0cfbb9f148e005aaf2e91678da"
+      },
+      "native-archive.log": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/eleventh-batch/final/native-archive.log",
+        "sha256": "d3e9b4a85ee02fffceda3b4998b2598547c023c9a9097f523d5bf3143da64f49"
+      },
+      "official-real-project-acceptance.log": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/eleventh-batch/final/official-real-project-acceptance.log",
+        "sha256": "6ebbe7641387aa8ed8881e1018a18b56a975bdfd1874f871b8a44d8d8d0ee255"
+      }
+    }
+  },
+  "gatesReceipt": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/eleventh-batch/final/gates.json",
+    "sha256": "ff7f664bda17f910cb4225d94983077fc2b8d98bdd68dd15cf5a52fe54d4bffe",
+    "bytes": 3949
+  },
+  "resourceMeasurements": {
+    "zlib-1.3.1-core": {
+      "expected": {
+        "sourceFiles": 26,
+        "nodes": 70248,
+        "graphSha256": "04d2c1f3f4c4e6a0e774328ab883ff145916935cf0fb7674dbc4507b92d49a8a",
+        "edgesSha256": "206e34559b359876c6c8e1c63b98b68bff99164d94f049d5065f2264cd61ddb5",
+        "exportSha256": "33fc488943d0b9b4c3a25d6096c43888b017dbd0a0d1c5ebab66d2e7ac258df3",
+        "sarifSha256": "0becad10ba8527f8055f00b8752fa550f27725d671483aa6f0171d81c335aeec",
+        "findings": 0
+      },
+      "trials": [
+        {
+          "sourceFiles": 26,
+          "nodes": 70248,
+          "findings": 0,
+          "graphSha256": "04d2c1f3f4c4e6a0e774328ab883ff145916935cf0fb7674dbc4507b92d49a8a",
+          "edgesSha256": "206e34559b359876c6c8e1c63b98b68bff99164d94f049d5065f2264cd61ddb5",
+          "exportSha256": "33fc488943d0b9b4c3a25d6096c43888b017dbd0a0d1c5ebab66d2e7ac258df3",
+          "sarifSha256": "0becad10ba8527f8055f00b8752fa550f27725d671483aa6f0171d81c335aeec",
+          "buildSeconds": 2.776867417007452,
+          "buildRssMiB": 439.65625,
+          "exportSeconds": 0.1485915829834994,
+          "exportRssMiB": 56.59375,
+          "scanSeconds": 0.9741445000108797,
+          "scanRssMiB": 70.578125
+        },
+        {
+          "sourceFiles": 26,
+          "nodes": 70248,
+          "findings": 0,
+          "graphSha256": "04d2c1f3f4c4e6a0e774328ab883ff145916935cf0fb7674dbc4507b92d49a8a",
+          "edgesSha256": "206e34559b359876c6c8e1c63b98b68bff99164d94f049d5065f2264cd61ddb5",
+          "exportSha256": "33fc488943d0b9b4c3a25d6096c43888b017dbd0a0d1c5ebab66d2e7ac258df3",
+          "sarifSha256": "0becad10ba8527f8055f00b8752fa550f27725d671483aa6f0171d81c335aeec",
+          "buildSeconds": 2.8004462079843506,
+          "buildRssMiB": 490.03125,
+          "exportSeconds": 0.15212662500562146,
+          "exportRssMiB": 55.296875,
+          "scanSeconds": 0.9679655410000123,
+          "scanRssMiB": 71.15625
+        }
+      ],
+      "update": {
+        "seconds": 8.412618458998622,
+        "rssMiB": 644.625,
+        "output": "update-equivalent 26 files"
+      }
+    },
+    "lua-5.4.7": {
+      "expected": {
+        "sourceFiles": 61,
+        "nodes": 119088,
+        "graphSha256": "eb522b7ac0a7e7ec01406acb4916522245bc940c25654c06ff0a3f95dc90c3a9",
+        "edgesSha256": "6b3bb6405518c4142b9f3e7137a13480958ff3689433477e4185d4faf3fbe26e",
+        "exportSha256": "5d66b711e5ddd55ca2b341162df759fbe7f4f1027c2cd32959222cdbabd44f3b",
+        "sarifSha256": "0becad10ba8527f8055f00b8752fa550f27725d671483aa6f0171d81c335aeec",
+        "findings": 0
+      },
+      "trials": [
+        {
+          "sourceFiles": 61,
+          "nodes": 119088,
+          "findings": 0,
+          "graphSha256": "eb522b7ac0a7e7ec01406acb4916522245bc940c25654c06ff0a3f95dc90c3a9",
+          "edgesSha256": "6b3bb6405518c4142b9f3e7137a13480958ff3689433477e4185d4faf3fbe26e",
+          "exportSha256": "5d66b711e5ddd55ca2b341162df759fbe7f4f1027c2cd32959222cdbabd44f3b",
+          "sarifSha256": "0becad10ba8527f8055f00b8752fa550f27725d671483aa6f0171d81c335aeec",
+          "buildSeconds": 5.944506458006799,
+          "buildRssMiB": 463.40625,
+          "exportSeconds": 0.27955416598706506,
+          "exportRssMiB": 76.625,
+          "scanSeconds": 1.3324898749997374,
+          "scanRssMiB": 108.671875
+        },
+        {
+          "sourceFiles": 61,
+          "nodes": 119088,
+          "findings": 0,
+          "graphSha256": "eb522b7ac0a7e7ec01406acb4916522245bc940c25654c06ff0a3f95dc90c3a9",
+          "edgesSha256": "6b3bb6405518c4142b9f3e7137a13480958ff3689433477e4185d4faf3fbe26e",
+          "exportSha256": "5d66b711e5ddd55ca2b341162df759fbe7f4f1027c2cd32959222cdbabd44f3b",
+          "sarifSha256": "0becad10ba8527f8055f00b8752fa550f27725d671483aa6f0171d81c335aeec",
+          "buildSeconds": 5.766057375003584,
+          "buildRssMiB": 463.125,
+          "exportSeconds": 0.2830019589746371,
+          "exportRssMiB": 76.265625,
+          "scanSeconds": 1.3616243339783978,
+          "scanRssMiB": 108.9375
+        }
+      ],
+      "update": {
+        "seconds": 17.419013874983648,
+        "rssMiB": 717.296875,
+        "output": "update-equivalent 61 files"
+      }
+    }
+  },
+  "resourceMeasurementReceipt": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/eleventh-batch/final/resource-measurement-run.json",
+    "sha256": "b36adc0323e8c10b178c2b4bbb8c79384fc6b89f94383325bba501a6bdced6f3",
+    "bytes": 1438719
+  },
+  "resourceScope": {
+    "buildSeconds": 20,
+    "zlibBuildRssMiB": 512,
+    "luaBuildRssMiB": 1024,
+    "updateTimeoutSeconds": 120,
+    "updateRssSeparateFromBuildCeilings": true,
+    "officialRssCumulativeChildScopeNotIsolatedBuildMeasurement": true,
+    "unrelatedHostActivityControlled": false
+  },
+  "processObservations": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/eleventh-batch/final/resource-producer-release.json",
+    "sha256": "00c8eb2826465f5e162189362ad996cefb7a769c5da71ada72c85570788e8f3f",
+    "bytes": 621
+  },
+  "resourceManifestReview": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/eleventh-batch/final/resource-manifest-review.json",
+    "sha256": "ce7fa01380c14a0469c72eb376058a60631d404c2a6620ae2188cdf702941e9c",
+    "bytes": 10500
+  },
+  "manifest": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/acceptance/real-projects/manifest.json",
+    "sha256": "418aad7bcc9d83fee976a4044488fc8a34e1951f503d3148b5115c097c099ea1",
+    "bytes": 2191
+  },
+  "manifestProposal": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/eleventh-batch/final/manifest-proposal.json",
+    "sha256": "47b425c1d9085f1552a4855a484a0aae978e72aa3167e6ec16ad110ee5f29d35",
+    "bytes": 2079
+  },
+  "manifestApplied": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/eleventh-batch/final/manifest-applied.json",
+    "sha256": "156ed1422f56770e4d317cff322cca6d13328b8947d48fc6a00a82f4bf81afcf",
+    "bytes": 1983
+  },
+  "manifestChanges": [
+    {
+      "project": "zlib-1.3.1-core",
+      "field": "nodes",
+      "before": 70246,
+      "after": 70248
+    },
+    {
+      "project": "zlib-1.3.1-core",
+      "field": "graphSha256",
+      "before": "9240ba4cfbf4ed56aa28edd0533fde57d46c9162658cad19c1572030b31661d3",
+      "after": "04d2c1f3f4c4e6a0e774328ab883ff145916935cf0fb7674dbc4507b92d49a8a"
+    },
+    {
+      "project": "zlib-1.3.1-core",
+      "field": "edgesSha256",
+      "before": "5c66f88b01e186cbdbac78ea39074638d38a4ad6d0367ecb06af0cdf4ad93325",
+      "after": "206e34559b359876c6c8e1c63b98b68bff99164d94f049d5065f2264cd61ddb5"
+    },
+    {
+      "project": "zlib-1.3.1-core",
+      "field": "exportSha256",
+      "before": "1a531fd0dfc08b9cea315bdc6e53907b5edaa7e4977d57bd0769c1f31f1a9a1f",
+      "after": "33fc488943d0b9b4c3a25d6096c43888b017dbd0a0d1c5ebab66d2e7ac258df3"
+    },
+    {
+      "project": "lua-5.4.7",
+      "field": "graphSha256",
+      "before": "6c131cac7542a1bcd836d7249a5e9410bd705e8aef78717631ee74554862ff1c",
+      "after": "eb522b7ac0a7e7ec01406acb4916522245bc940c25654c06ff0a3f95dc90c3a9"
+    },
+    {
+      "project": "lua-5.4.7",
+      "field": "edgesSha256",
+      "before": "ce1ac9ffbec7bf14bc8216bd51c4706b3c2feab3cdcadff43cbb1d49a3c9d307",
+      "after": "6b3bb6405518c4142b9f3e7137a13480958ff3689433477e4185d4faf3fbe26e"
+    },
+    {
+      "project": "lua-5.4.7",
+      "field": "exportSha256",
+      "before": "428f110fe348a9fbdf6b1a930407ee45a9758c05683799f7b5e35fe6d396a58a",
+      "after": "5d66b711e5ddd55ca2b341162df759fbe7f4f1027c2cd32959222cdbabd44f3b"
+    }
+  ],
+  "officialRun": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/eleventh-batch/final/official-real-project-acceptance-run.json",
+    "sha256": "bd4cbebc47572c021c49adf4fde17bd5d0fd3c9f55891c174c48ea9edcb93c5b",
+    "bytes": 1416175
+  },
+  "officialOutput": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/eleventh-batch/final/official-real-project-acceptance.log",
+    "sha256": "6ebbe7641387aa8ed8881e1018a18b56a975bdfd1874f871b8a44d8d8d0ee255",
+    "bytes": 214
+  },
+  "gateHelperReview": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/eleventh-batch/final-helper-independent-review.json",
+    "sha256": "d9db0369a8a32ad15d6b125af0b23dfe26bc35e470c887ec8d3c700af9c29ba1",
+    "bytes": 14898
+  },
+  "originalCheckout": {
+    "atUtc": "2026-09-09T01:03:21.707219+00:00",
+    "head": "6fcb30a25bbee3ca3c05b5b197cd3ce93ca4d11a",
+    "status": " M cpg-rs/ARCHITECTURE_GAPS.md\n M plans/README.md\n?? plans/001-fail-closed-filesystem-boundary.md\n?? plans/002-harden-cpg-persistence.md\n?? plans/003-content-correct-cache-and-reopen.md\n?? plans/004-enforce-release-acceptance-gates.md\n?? plans/006-complete-cpg-persistence-safety.md\n?? plans/007-bind-release-to-verified-contract.md\n?? plans/008-make-graph-language-metadata-explicit.md\n?? plans/009-refresh-architecture-and-product-docs.md\n?? plans/010-differential-gate-shared-reaching-def.md\n?? plans/011-migrate-summaries-to-canonical-value-flow.md\n?? plans/012-close-filesystem-boundary-residuals.md\n",
+    "hashes": {
+      "cpg-rs/ARCHITECTURE_GAPS.md": "1a106157606f81799b7fa70f0b7b0c7577a2c4279d731b3bab9409a9a65b70f4",
+      "plans/README.md": "620ad4469826655fb3c8a74cbdeef12d6319053e86e6370e3f156ebb97f2ba4b",
+      "plans/001-fail-closed-filesystem-boundary.md": "00cf7a9468a5f9f6b16b23c1c1e472a043e10687e53f161ee8aeaa8eb1897430",
+      "plans/002-harden-cpg-persistence.md": "b074d8136eddda21755c3afe084bcee619f2e5d0be207ce563e03c4dfb11b34a",
+      "plans/003-content-correct-cache-and-reopen.md": "1533c2d00dd11c4ca49645022542fcdb22bb4276fad75466deff8a85667508f9",
+      "plans/004-enforce-release-acceptance-gates.md": "f398c211f342598eb1d1572a0bb3018e01d5ceefb8ce9886939429855900ef87",
+      "plans/006-complete-cpg-persistence-safety.md": "79768aa08589d22cefbd30cbd670783d1d8ec917705ed8a534196230866794d6",
+      "plans/007-bind-release-to-verified-contract.md": "7265e6108e9fda4d864c0f0a0cfcabc152fd5cb233a3aa34b1536ead0153ddbd",
+      "plans/008-make-graph-language-metadata-explicit.md": "9a784d8db065ee7fedb47479bf6d8846d22d8501e5b8bcd4b665a0edf9134c40",
+      "plans/009-refresh-architecture-and-product-docs.md": "a33dd8d5c11d168c4c562228e7bb50643c85f6b637206a7adc9c7f481e547744",
+      "plans/010-differential-gate-shared-reaching-def.md": "5efb01ce175101b0eccdc8f92bb9a6a0370bb276a00224be90e248e00f032bb3",
+      "plans/011-migrate-summaries-to-canonical-value-flow.md": "77fef056be77c825db626b799870787f0a4f7b830206423abc04d2827d0f45ff",
+      "plans/012-close-filesystem-boundary-residuals.md": "3c91974a8f1cc26aa1deeeb7daf507f29c632b5960168a8a4695de612902e1cf"
+    },
+    "dirtyFileCount": 13,
+    "unchanged": true
+  },
+  "integrationBranch": "codex/astra-parity-sprint",
+  "pushed": false,
+  "merged": false,
+  "artifactAvailability": "Small complete fixture evidence and independent fixture reviews are delivered in the repository. Large whole-project outputs, runtime files and release executables remain local at the bound paths. Historical receipts preserve original paths and observation-time status.",
+  "nextWork": {
+    "proposal": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/eleventh-batch/next-work/NEXT.md",
+      "sha256": "324fbee461a9918ec16036b253763c76aea7e0cb9a5f0b62f9c844819e63c5d3",
+      "bytes": 7304
+    },
+    "cases": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/eleventh-batch/next-work/proposed-cases.json",
+      "sha256": "5e78bd546f40d6bbc5729ea92519c79434508420e338cdb8386bc6f8a653e0f9",
+      "bytes": 11960
+    },
+    "receipt": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/eleventh-batch/next-work/receipt.json",
+      "sha256": "6b15e71974fb50d8f63b1ed0116fb84841ebc96ac9d5ce432dbd9bb359a1c359",
+      "bytes": 6016
+    },
+    "status": "Five initial duplicate-function identity/linking controls proposed; no new fixture files, oracle outputs or implementation run."
+  },
+  "fullPortGoalComplete": false,
+  "limits": [
+    "Neither complete zlib nor Lua selected graph projection is exact.",
+    "Selected AST/NODES/EDGES/FLOWS projection omits schema properties and positions; text transport is noninjective.",
+    "The nonprimitive control retains 20 missing type-registration/scaffold records; prior diagnostics and the -6/-6 importer abort remain.",
+    "Fixedtables identity/linking, long CODE and the absent inflate body remain distinct.",
+    "Broader preprocessing, source transport, type recovery, reaching definitions, schema, CPG binary compatibility, Scala CPGQL/console/plugins and non-C parity remain incomplete."
+  ]
+}

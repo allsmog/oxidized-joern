@@ -1,0 +1,327 @@
+METHOD NAME=<global> CODE=<global> FULL_NAME=<includes>:<global> ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.indirection FULL_NAME=<operator>.indirection ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.pointerCall FULL_NAME=<operator>.pointerCall ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=callback_deref CODE=unsigned long callback_deref(unsigned long (*callback)(unsigned long), unsigned long value) { return (*callback)(value); } FULL_NAME=callback_deref SIGNATURE=unsigned long(longunsigned,longunsigned) ORDER=1
+  METHOD_PARAMETER_IN NAME=callback CODE=unsigned long (*callback)(unsigned long) TYPE_FULL_NAME=longunsigned ORDER=1
+  METHOD_PARAMETER_OUT NAME=callback CODE=unsigned long (*callback)(unsigned long) TYPE_FULL_NAME=longunsigned ORDER=1
+  METHOD_PARAMETER_IN NAME=value CODE=unsigned long value TYPE_FULL_NAME=longunsigned ORDER=2
+  METHOD_PARAMETER_OUT NAME=value CODE=unsigned long value TYPE_FULL_NAME=longunsigned ORDER=2
+  BLOCK CODE={ return (*callback)(value); } TYPE_FULL_NAME=void ORDER=3
+    RETURN CODE=return (*callback)(value); ORDER=1
+      CALL NAME=<operator>.pointerCall CODE=(*callback)(value) TYPE_FULL_NAME=unsigned longint METHOD_FULL_NAME=<operator>.pointerCall ORDER=1 DISPATCH_TYPE=DYNAMIC_DISPATCH
+        CALL NAME=<operator>.indirection CODE=*callback TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirection ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=callback CODE=callback TYPE_FULL_NAME=longunsigned ORDER=1 ARGUMENT_INDEX=1
+        IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=longunsigned ORDER=2 ARGUMENT_INDEX=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=unsigned long ORDER=4
+
+METHOD NAME=callback_direct CODE=unsigned long callback_direct(unsigned long (*callback)(unsigned long), unsigned long value) { return callback(value); } FULL_NAME=callback_direct SIGNATURE=unsigned long(longunsigned,longunsigned) ORDER=1
+  METHOD_PARAMETER_IN NAME=callback CODE=unsigned long (*callback)(unsigned long) TYPE_FULL_NAME=longunsigned ORDER=1
+  METHOD_PARAMETER_OUT NAME=callback CODE=unsigned long (*callback)(unsigned long) TYPE_FULL_NAME=longunsigned ORDER=1
+  METHOD_PARAMETER_IN NAME=value CODE=unsigned long value TYPE_FULL_NAME=longunsigned ORDER=2
+  METHOD_PARAMETER_OUT NAME=value CODE=unsigned long value TYPE_FULL_NAME=longunsigned ORDER=2
+  BLOCK CODE={ return callback(value); } TYPE_FULL_NAME=void ORDER=3
+    RETURN CODE=return callback(value); ORDER=1
+      CALL NAME=<operator>.pointerCall CODE=callback(value) TYPE_FULL_NAME=unsigned longint METHOD_FULL_NAME=<operator>.pointerCall ORDER=1 DISPATCH_TYPE=DYNAMIC_DISPATCH
+        IDENTIFIER NAME=callback CODE=callback TYPE_FULL_NAME=longunsigned ORDER=1
+        IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=longunsigned ORDER=2 ARGUMENT_INDEX=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=unsigned long ORDER=4
+
+METHOD NAME=<global> CODE=<global> FULL_NAME=callback_parameters.c:<global> ORDER=1
+  METHOD NAME=callback_direct CODE=unsigned long callback_direct(unsigned long (*callback)(unsigned long), unsigned long value) { return callback(value); } FULL_NAME=callback_direct SIGNATURE=unsigned long(longunsigned,longunsigned) ORDER=1
+    METHOD_PARAMETER_IN NAME=callback CODE=unsigned long (*callback)(unsigned long) TYPE_FULL_NAME=longunsigned ORDER=1
+    METHOD_PARAMETER_OUT NAME=callback CODE=unsigned long (*callback)(unsigned long) TYPE_FULL_NAME=longunsigned ORDER=1
+    METHOD_PARAMETER_IN NAME=value CODE=unsigned long value TYPE_FULL_NAME=longunsigned ORDER=2
+    METHOD_PARAMETER_OUT NAME=value CODE=unsigned long value TYPE_FULL_NAME=longunsigned ORDER=2
+    BLOCK CODE={ return callback(value); } TYPE_FULL_NAME=void ORDER=3
+      RETURN CODE=return callback(value); ORDER=1
+        CALL NAME=<operator>.pointerCall CODE=callback(value) TYPE_FULL_NAME=unsigned longint METHOD_FULL_NAME=<operator>.pointerCall ORDER=1 DISPATCH_TYPE=DYNAMIC_DISPATCH
+          IDENTIFIER NAME=callback CODE=callback TYPE_FULL_NAME=longunsigned ORDER=1
+          IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=longunsigned ORDER=2 ARGUMENT_INDEX=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=unsigned long ORDER=4
+  METHOD NAME=callback_deref CODE=unsigned long callback_deref(unsigned long (*callback)(unsigned long), unsigned long value) { return (*callback)(value); } FULL_NAME=callback_deref SIGNATURE=unsigned long(longunsigned,longunsigned) ORDER=1
+    METHOD_PARAMETER_IN NAME=callback CODE=unsigned long (*callback)(unsigned long) TYPE_FULL_NAME=longunsigned ORDER=1
+    METHOD_PARAMETER_OUT NAME=callback CODE=unsigned long (*callback)(unsigned long) TYPE_FULL_NAME=longunsigned ORDER=1
+    METHOD_PARAMETER_IN NAME=value CODE=unsigned long value TYPE_FULL_NAME=longunsigned ORDER=2
+    METHOD_PARAMETER_OUT NAME=value CODE=unsigned long value TYPE_FULL_NAME=longunsigned ORDER=2
+    BLOCK CODE={ return (*callback)(value); } TYPE_FULL_NAME=void ORDER=3
+      RETURN CODE=return (*callback)(value); ORDER=1
+        CALL NAME=<operator>.pointerCall CODE=(*callback)(value) TYPE_FULL_NAME=unsigned longint METHOD_FULL_NAME=<operator>.pointerCall ORDER=1 DISPATCH_TYPE=DYNAMIC_DISPATCH
+          CALL NAME=<operator>.indirection CODE=*callback TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirection ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+            IDENTIFIER NAME=callback CODE=callback TYPE_FULL_NAME=longunsigned ORDER=1 ARGUMENT_INDEX=1
+          IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=longunsigned ORDER=2 ARGUMENT_INDEX=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=unsigned long ORDER=4
+  METHOD NAME=callback_paren CODE=unsigned long callback_paren(unsigned long (*callback)(unsigned long), unsigned long value) { return (callback)(value); } FULL_NAME=callback_paren SIGNATURE=unsigned long(longunsigned,longunsigned) ORDER=1
+    METHOD_PARAMETER_IN NAME=callback CODE=unsigned long (*callback)(unsigned long) TYPE_FULL_NAME=longunsigned ORDER=1
+    METHOD_PARAMETER_OUT NAME=callback CODE=unsigned long (*callback)(unsigned long) TYPE_FULL_NAME=longunsigned ORDER=1
+    METHOD_PARAMETER_IN NAME=value CODE=unsigned long value TYPE_FULL_NAME=longunsigned ORDER=2
+    METHOD_PARAMETER_OUT NAME=value CODE=unsigned long value TYPE_FULL_NAME=longunsigned ORDER=2
+    BLOCK CODE={ return (callback)(value); } TYPE_FULL_NAME=void ORDER=3
+      RETURN CODE=return (callback)(value); ORDER=1
+        CALL NAME=<operator>.pointerCall CODE=(callback)(value) TYPE_FULL_NAME=unsigned longint METHOD_FULL_NAME=<operator>.pointerCall ORDER=1 DISPATCH_TYPE=DYNAMIC_DISPATCH
+          IDENTIFIER NAME=callback CODE=callback TYPE_FULL_NAME=longunsigned ORDER=1
+          IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=longunsigned ORDER=2 ARGUMENT_INDEX=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=unsigned long ORDER=4
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+    METHOD_REF CODE=callback_direct TYPE_FULL_NAME=callback_direct METHOD_FULL_NAME=callback_direct ORDER=1
+    METHOD_REF CODE=callback_deref TYPE_FULL_NAME=callback_deref METHOD_FULL_NAME=callback_deref ORDER=2
+    METHOD_REF CODE=callback_paren TYPE_FULL_NAME=callback_paren METHOD_FULL_NAME=callback_paren ORDER=3
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=callback_paren CODE=unsigned long callback_paren(unsigned long (*callback)(unsigned long), unsigned long value) { return (callback)(value); } FULL_NAME=callback_paren SIGNATURE=unsigned long(longunsigned,longunsigned) ORDER=1
+  METHOD_PARAMETER_IN NAME=callback CODE=unsigned long (*callback)(unsigned long) TYPE_FULL_NAME=longunsigned ORDER=1
+  METHOD_PARAMETER_OUT NAME=callback CODE=unsigned long (*callback)(unsigned long) TYPE_FULL_NAME=longunsigned ORDER=1
+  METHOD_PARAMETER_IN NAME=value CODE=unsigned long value TYPE_FULL_NAME=longunsigned ORDER=2
+  METHOD_PARAMETER_OUT NAME=value CODE=unsigned long value TYPE_FULL_NAME=longunsigned ORDER=2
+  BLOCK CODE={ return (callback)(value); } TYPE_FULL_NAME=void ORDER=3
+    RETURN CODE=return (callback)(value); ORDER=1
+      CALL NAME=<operator>.pointerCall CODE=(callback)(value) TYPE_FULL_NAME=unsigned longint METHOD_FULL_NAME=<operator>.pointerCall ORDER=1 DISPATCH_TYPE=DYNAMIC_DISPATCH
+        IDENTIFIER NAME=callback CODE=callback TYPE_FULL_NAME=longunsigned ORDER=1
+        IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=longunsigned ORDER=2 ARGUMENT_INDEX=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=unsigned long ORDER=4
+
+NODES|META_DATA LANGUAGE=NEWC
+NODES|FILE NAME=<includes> ORDER=1
+NODES|FILE NAME=<unknown> ORDER=0
+NODES|FILE NAME=callback_parameters.c ORDER=0
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<global> FILENAME=<unknown> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<includes>:<global> FILENAME=<includes> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=callback_parameters.c:<global> FILENAME=callback_parameters.c ORDER=1
+NODES|NAMESPACE NAME=<global>
+NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=callback_deref FULL_NAME=callback_deref CODE=callback_deref AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=callback_parameters.c:<global> FILENAME=callback_parameters.c ORDER=1
+NODES|TYPE_DECL NAME=callback_direct FULL_NAME=callback_direct CODE=callback_direct AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=callback_parameters.c:<global> FILENAME=callback_parameters.c ORDER=1
+NODES|TYPE_DECL NAME=<global> FULL_NAME=callback_parameters.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=callback_parameters.c:<global> FILENAME=callback_parameters.c ORDER=1
+NODES|TYPE_DECL NAME=callback_paren FULL_NAME=callback_paren CODE=callback_paren AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=callback_parameters.c:<global> FILENAME=callback_parameters.c ORDER=1
+NODES|TYPE_DECL NAME=longunsigned FULL_NAME=longunsigned CODE=longunsigned IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=unsigned long FULL_NAME=unsigned long CODE=unsigned long IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=unsigned longint FULL_NAME=unsigned longint CODE=unsigned longint IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+NODES|TYPE NAME=callback_deref FULL_NAME=callback_deref TYPE_DECL_FULL_NAME=callback_deref
+NODES|TYPE NAME=callback_direct FULL_NAME=callback_direct TYPE_DECL_FULL_NAME=callback_direct
+NODES|TYPE NAME=callback_paren FULL_NAME=callback_paren TYPE_DECL_FULL_NAME=callback_paren
+NODES|TYPE NAME=longunsigned FULL_NAME=longunsigned TYPE_DECL_FULL_NAME=longunsigned
+NODES|TYPE NAME=unsigned long FULL_NAME=unsigned long TYPE_DECL_FULL_NAME=unsigned long
+NODES|TYPE NAME=unsigned longint FULL_NAME=unsigned longint TYPE_DECL_FULL_NAME=unsigned longint
+NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+EDGES|ARGUMENT callback_deref#6 -> callback_deref#7
+EDGES|ARGUMENT callback_deref#7 -> callback_deref#10
+EDGES|ARGUMENT callback_deref#8 -> callback_deref#9
+EDGES|ARGUMENT callback_direct#6 -> callback_direct#7
+EDGES|ARGUMENT callback_direct#7 -> callback_direct#9
+EDGES|ARGUMENT callback_paren#6 -> callback_paren#7
+EDGES|ARGUMENT callback_paren#7 -> callback_paren#9
+EDGES|CALL callback_deref#8 -> <operator>.indirection#0
+EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+EDGES|CFG <operator>.indirection#0 -> <operator>.indirection#4
+EDGES|CFG <operator>.pointerCall#0 -> <operator>.pointerCall#4
+EDGES|CFG callback_deref#0 -> callback_deref#9
+EDGES|CFG callback_deref#10 -> callback_deref#7
+EDGES|CFG callback_deref#6 -> callback_deref#11
+EDGES|CFG callback_deref#7 -> callback_deref#6
+EDGES|CFG callback_deref#8 -> callback_deref#10
+EDGES|CFG callback_deref#9 -> callback_deref#8
+EDGES|CFG callback_direct#0 -> callback_direct#8
+EDGES|CFG callback_direct#6 -> callback_direct#10
+EDGES|CFG callback_direct#7 -> callback_direct#6
+EDGES|CFG callback_direct#8 -> callback_direct#9
+EDGES|CFG callback_direct#9 -> callback_direct#7
+EDGES|CFG callback_parameters.c:<global>#0 -> callback_parameters.c:<global>#36
+EDGES|CFG callback_parameters.c:<global>#24 -> callback_paren#8
+EDGES|CFG callback_parameters.c:<global>#36 -> callback_parameters.c:<global>#37
+EDGES|CFG callback_parameters.c:<global>#37 -> callback_parameters.c:<global>#38
+EDGES|CFG callback_parameters.c:<global>#38 -> callback_parameters.c:<global>#39
+EDGES|CFG callback_paren#6 -> callback_paren#10
+EDGES|CFG callback_paren#7 -> callback_paren#6
+EDGES|CFG callback_paren#8 -> callback_paren#9
+EDGES|CFG callback_paren#9 -> callback_paren#7
+EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+EDGES|CONTAINS <operator>.indirection#0 -> <operator>.indirection#2
+EDGES|CONTAINS <operator>.pointerCall#0 -> <operator>.pointerCall#2
+EDGES|CONTAINS D:callback_parameters.c:<global> -> D:callback_deref
+EDGES|CONTAINS D:callback_parameters.c:<global> -> D:callback_direct
+EDGES|CONTAINS D:callback_parameters.c:<global> -> D:callback_paren
+EDGES|CONTAINS D:callback_parameters.c:<global> -> callback_parameters.c:<global>#0
+EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+EDGES|CONTAINS F:<includes> -> D:ANY
+EDGES|CONTAINS F:<includes> -> D:longunsigned
+EDGES|CONTAINS F:<includes> -> D:unsigned long
+EDGES|CONTAINS F:<includes> -> D:unsigned longint
+EDGES|CONTAINS F:<includes> -> D:void
+EDGES|CONTAINS F:callback_parameters.c -> D:callback_parameters.c:<global>
+EDGES|CONTAINS callback_deref#0 -> callback_deref#10
+EDGES|CONTAINS callback_deref#0 -> callback_deref#5
+EDGES|CONTAINS callback_deref#0 -> callback_deref#6
+EDGES|CONTAINS callback_deref#0 -> callback_deref#7
+EDGES|CONTAINS callback_deref#0 -> callback_deref#8
+EDGES|CONTAINS callback_deref#0 -> callback_deref#9
+EDGES|CONTAINS callback_direct#0 -> callback_direct#5
+EDGES|CONTAINS callback_direct#0 -> callback_direct#6
+EDGES|CONTAINS callback_direct#0 -> callback_direct#7
+EDGES|CONTAINS callback_direct#0 -> callback_direct#8
+EDGES|CONTAINS callback_direct#0 -> callback_direct#9
+EDGES|CONTAINS callback_parameters.c:<global>#0 -> callback_deref#0
+EDGES|CONTAINS callback_parameters.c:<global>#0 -> callback_direct#0
+EDGES|CONTAINS callback_parameters.c:<global>#0 -> callback_parameters.c:<global>#24
+EDGES|CONTAINS callback_parameters.c:<global>#0 -> callback_parameters.c:<global>#35
+EDGES|CONTAINS callback_parameters.c:<global>#0 -> callback_parameters.c:<global>#36
+EDGES|CONTAINS callback_parameters.c:<global>#0 -> callback_parameters.c:<global>#37
+EDGES|CONTAINS callback_parameters.c:<global>#0 -> callback_parameters.c:<global>#38
+EDGES|CONTAINS callback_parameters.c:<global>#24 -> callback_paren#5
+EDGES|CONTAINS callback_parameters.c:<global>#24 -> callback_paren#6
+EDGES|CONTAINS callback_parameters.c:<global>#24 -> callback_paren#7
+EDGES|CONTAINS callback_parameters.c:<global>#24 -> callback_paren#8
+EDGES|CONTAINS callback_parameters.c:<global>#24 -> callback_paren#9
+EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirection#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirection#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirection#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirection#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.pointerCall#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.pointerCall#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.pointerCall#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.pointerCall#4 -> T:ANY
+EDGES|EVAL_TYPE callback_deref#1 -> T:longunsigned
+EDGES|EVAL_TYPE callback_deref#10 -> T:longunsigned
+EDGES|EVAL_TYPE callback_deref#11 -> T:unsigned long
+EDGES|EVAL_TYPE callback_deref#2 -> T:longunsigned
+EDGES|EVAL_TYPE callback_deref#3 -> T:longunsigned
+EDGES|EVAL_TYPE callback_deref#4 -> T:longunsigned
+EDGES|EVAL_TYPE callback_deref#5 -> T:void
+EDGES|EVAL_TYPE callback_deref#7 -> T:unsigned longint
+EDGES|EVAL_TYPE callback_deref#8 -> T:ANY
+EDGES|EVAL_TYPE callback_deref#9 -> T:longunsigned
+EDGES|EVAL_TYPE callback_direct#1 -> T:longunsigned
+EDGES|EVAL_TYPE callback_direct#10 -> T:unsigned long
+EDGES|EVAL_TYPE callback_direct#2 -> T:longunsigned
+EDGES|EVAL_TYPE callback_direct#3 -> T:longunsigned
+EDGES|EVAL_TYPE callback_direct#4 -> T:longunsigned
+EDGES|EVAL_TYPE callback_direct#5 -> T:void
+EDGES|EVAL_TYPE callback_direct#7 -> T:unsigned longint
+EDGES|EVAL_TYPE callback_direct#8 -> T:longunsigned
+EDGES|EVAL_TYPE callback_direct#9 -> T:longunsigned
+EDGES|EVAL_TYPE callback_parameters.c:<global>#35 -> T:ANY
+EDGES|EVAL_TYPE callback_parameters.c:<global>#36 -> T:callback_direct
+EDGES|EVAL_TYPE callback_parameters.c:<global>#37 -> T:callback_deref
+EDGES|EVAL_TYPE callback_parameters.c:<global>#38 -> T:callback_paren
+EDGES|EVAL_TYPE callback_parameters.c:<global>#39 -> T:ANY
+EDGES|EVAL_TYPE callback_paren#1 -> T:longunsigned
+EDGES|EVAL_TYPE callback_paren#10 -> T:unsigned long
+EDGES|EVAL_TYPE callback_paren#2 -> T:longunsigned
+EDGES|EVAL_TYPE callback_paren#3 -> T:longunsigned
+EDGES|EVAL_TYPE callback_paren#4 -> T:longunsigned
+EDGES|EVAL_TYPE callback_paren#5 -> T:void
+EDGES|EVAL_TYPE callback_paren#7 -> T:unsigned longint
+EDGES|EVAL_TYPE callback_paren#8 -> T:longunsigned
+EDGES|EVAL_TYPE callback_paren#9 -> T:longunsigned
+EDGES|PARAMETER_LINK <operator>.indirection#1 -> <operator>.indirection#3
+EDGES|PARAMETER_LINK <operator>.pointerCall#1 -> <operator>.pointerCall#3
+EDGES|PARAMETER_LINK callback_deref#1 -> callback_deref#2
+EDGES|PARAMETER_LINK callback_deref#3 -> callback_deref#4
+EDGES|PARAMETER_LINK callback_direct#1 -> callback_direct#2
+EDGES|PARAMETER_LINK callback_direct#3 -> callback_direct#4
+EDGES|PARAMETER_LINK callback_paren#1 -> callback_paren#2
+EDGES|PARAMETER_LINK callback_paren#3 -> callback_paren#4
+EDGES|REF NB:<global> -> NS:<global>
+EDGES|REF NB:<includes>:<global> -> NS:<global>
+EDGES|REF NB:callback_parameters.c:<global> -> NS:<global>
+EDGES|REF T:ANY -> D:ANY
+EDGES|REF T:callback_deref -> D:callback_deref
+EDGES|REF T:callback_direct -> D:callback_direct
+EDGES|REF T:callback_paren -> D:callback_paren
+EDGES|REF T:longunsigned -> D:longunsigned
+EDGES|REF T:unsigned long -> D:unsigned long
+EDGES|REF T:unsigned longint -> D:unsigned longint
+EDGES|REF T:void -> D:void
+EDGES|REF callback_deref#10 -> callback_deref#3
+EDGES|REF callback_deref#9 -> callback_deref#1
+EDGES|REF callback_direct#8 -> callback_direct#1
+EDGES|REF callback_direct#9 -> callback_direct#3
+EDGES|REF callback_parameters.c:<global>#36 -> callback_direct#0
+EDGES|REF callback_parameters.c:<global>#37 -> callback_deref#0
+EDGES|REF callback_parameters.c:<global>#38 -> callback_parameters.c:<global>#24
+EDGES|REF callback_paren#8 -> callback_paren#1
+EDGES|REF callback_paren#9 -> callback_paren#3
+EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+EDGES|SOURCE_FILE D:ANY -> F:<includes>
+EDGES|SOURCE_FILE D:callback_deref -> F:callback_parameters.c
+EDGES|SOURCE_FILE D:callback_direct -> F:callback_parameters.c
+EDGES|SOURCE_FILE D:callback_parameters.c:<global> -> F:callback_parameters.c
+EDGES|SOURCE_FILE D:callback_paren -> F:callback_parameters.c
+EDGES|SOURCE_FILE D:longunsigned -> F:<includes>
+EDGES|SOURCE_FILE D:unsigned long -> F:<includes>
+EDGES|SOURCE_FILE D:unsigned longint -> F:<includes>
+EDGES|SOURCE_FILE D:void -> F:<includes>
+EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
+EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>
+EDGES|SOURCE_FILE NB:callback_parameters.c:<global> -> F:callback_parameters.c
+EDGES|SOURCE_FILE callback_deref#0 -> F:callback_parameters.c
+EDGES|SOURCE_FILE callback_direct#0 -> F:callback_parameters.c
+EDGES|SOURCE_FILE callback_parameters.c:<global>#0 -> F:callback_parameters.c
+EDGES|SOURCE_FILE callback_parameters.c:<global>#24 -> F:callback_parameters.c
+FLOWS|REACHING_DEF[(*callback)(value)] callback_deref#7 -> callback_deref#11
+FLOWS|REACHING_DEF[(*callback)(value)] callback_deref#7 -> callback_deref#6
+FLOWS|REACHING_DEF[(callback)(value)] callback_paren#7 -> callback_paren#10
+FLOWS|REACHING_DEF[(callback)(value)] callback_paren#7 -> callback_paren#6
+FLOWS|REACHING_DEF[<RET>] callback_deref#6 -> callback_deref#11
+FLOWS|REACHING_DEF[<RET>] callback_direct#6 -> callback_direct#10
+FLOWS|REACHING_DEF[<RET>] callback_paren#6 -> callback_paren#10
+FLOWS|REACHING_DEF[] <operator>.indirection#0 -> <operator>.indirection#1
+FLOWS|REACHING_DEF[] <operator>.pointerCall#0 -> <operator>.pointerCall#1
+FLOWS|REACHING_DEF[] callback_deref#0 -> callback_deref#1
+FLOWS|REACHING_DEF[] callback_deref#0 -> callback_deref#10
+FLOWS|REACHING_DEF[] callback_deref#0 -> callback_deref#3
+FLOWS|REACHING_DEF[] callback_deref#0 -> callback_deref#9
+FLOWS|REACHING_DEF[] callback_direct#0 -> callback_direct#1
+FLOWS|REACHING_DEF[] callback_direct#0 -> callback_direct#3
+FLOWS|REACHING_DEF[] callback_direct#0 -> callback_direct#8
+FLOWS|REACHING_DEF[] callback_direct#0 -> callback_direct#9
+FLOWS|REACHING_DEF[] callback_parameters.c:<global>#0 -> callback_parameters.c:<global>#36
+FLOWS|REACHING_DEF[] callback_parameters.c:<global>#0 -> callback_parameters.c:<global>#37
+FLOWS|REACHING_DEF[] callback_parameters.c:<global>#0 -> callback_parameters.c:<global>#38
+FLOWS|REACHING_DEF[] callback_parameters.c:<global>#24 -> callback_paren#1
+FLOWS|REACHING_DEF[] callback_parameters.c:<global>#24 -> callback_paren#3
+FLOWS|REACHING_DEF[] callback_parameters.c:<global>#24 -> callback_paren#8
+FLOWS|REACHING_DEF[] callback_parameters.c:<global>#24 -> callback_paren#9
+FLOWS|REACHING_DEF[callback(value)] callback_direct#7 -> callback_direct#10
+FLOWS|REACHING_DEF[callback(value)] callback_direct#7 -> callback_direct#6
+FLOWS|REACHING_DEF[callback] callback_deref#1 -> callback_deref#11
+FLOWS|REACHING_DEF[callback] callback_deref#1 -> callback_deref#2
+FLOWS|REACHING_DEF[callback] callback_deref#1 -> callback_deref#9
+FLOWS|REACHING_DEF[callback] callback_direct#1 -> callback_direct#10
+FLOWS|REACHING_DEF[callback] callback_direct#1 -> callback_direct#2
+FLOWS|REACHING_DEF[callback] callback_paren#1 -> callback_paren#10
+FLOWS|REACHING_DEF[callback] callback_paren#1 -> callback_paren#2
+FLOWS|REACHING_DEF[p1] <operator>.indirection#1 -> <operator>.indirection#3
+FLOWS|REACHING_DEF[p1] <operator>.indirection#1 -> <operator>.indirection#4
+FLOWS|REACHING_DEF[p1] <operator>.pointerCall#1 -> <operator>.pointerCall#3
+FLOWS|REACHING_DEF[p1] <operator>.pointerCall#1 -> <operator>.pointerCall#4
+FLOWS|REACHING_DEF[value] callback_deref#10 -> callback_deref#11
+FLOWS|REACHING_DEF[value] callback_deref#10 -> callback_deref#4
+FLOWS|REACHING_DEF[value] callback_deref#10 -> callback_deref#7
+FLOWS|REACHING_DEF[value] callback_deref#3 -> callback_deref#10
+FLOWS|REACHING_DEF[value] callback_deref#3 -> callback_deref#4
+FLOWS|REACHING_DEF[value] callback_direct#3 -> callback_direct#4
+FLOWS|REACHING_DEF[value] callback_direct#3 -> callback_direct#9
+FLOWS|REACHING_DEF[value] callback_direct#9 -> callback_direct#10
+FLOWS|REACHING_DEF[value] callback_direct#9 -> callback_direct#4
+FLOWS|REACHING_DEF[value] callback_direct#9 -> callback_direct#7
+FLOWS|REACHING_DEF[value] callback_paren#3 -> callback_paren#4
+FLOWS|REACHING_DEF[value] callback_paren#3 -> callback_paren#9
+FLOWS|REACHING_DEF[value] callback_paren#9 -> callback_paren#10
+FLOWS|REACHING_DEF[value] callback_paren#9 -> callback_paren#4
+FLOWS|REACHING_DEF[value] callback_paren#9 -> callback_paren#7

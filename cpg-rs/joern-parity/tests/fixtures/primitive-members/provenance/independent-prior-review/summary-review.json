@@ -1,0 +1,175 @@
+{
+  "status": "PASS_BOUNDED_PRIOR_RETENTION_VALIDATION_AND_AGGREGATE_REVIEW",
+  "checkCount": 11380,
+  "sourceCommitBaseline": "f235a0f898c4e19fda90998b903f57741b776ec7",
+  "replay": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay-prior-v1/replay.json",
+    "sha256": "1ec133c54770652fc9384877ed88a0785f8f6e245c851fa8395fb2e14602fa31",
+    "bytes": 765627
+  },
+  "validation": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/validation-v1-final-test/checks.json",
+    "sha256": "1b583646d0dee5c0040033c7ec32b9d7afa23471d2282803134ef15bcd6f5d72",
+    "bytes": 28731
+  },
+  "packageFreeze": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/package-v1/freeze.json",
+    "sha256": "d5d9b40efac4f1a36b22eeccbedb180a6a57a5bd41e23a7bae593fc16192995a",
+    "bytes": 802471
+  },
+  "reviewScript": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/eleventh-prior-retention-review-v1/review.py",
+    "sha256": "4b40c19ce2bb0db8046ec138e8a49bed8ae317d888960601dacb3e0627be03d7",
+    "bytes": 15042
+  },
+  "caseInstances": 229,
+  "plannedPriorInstances": 228,
+  "additionalDiagnostic": 1,
+  "successfulPairs": 228,
+  "beforeExact": 203,
+  "candidateExact": 205,
+  "rawOutputFilesVerified": 458,
+  "allRawStdoutIdenticalToStoredText": true,
+  "rawTransportNote": "Replay helper contains CR/CRLF normalization, but every actual raw stdout equals stored .txt byte for byte; independent complete diffs were recomputed using LF-only splitting. No input/reference/actual graph was altered in this evidence.",
+  "nonemptySuccessfulPairTotals": {
+    "expected": 50240,
+    "before": 50025,
+    "candidate": 50025,
+    "matchingBefore": 48990,
+    "matchingCandidate": 49004,
+    "gained": 14,
+    "lost": 0
+  },
+  "lfSuccessfulPairTotals": {
+    "expected": 51517,
+    "before": 51302,
+    "candidate": 51302,
+    "matchingBefore": 50262,
+    "matchingCandidate": 50276,
+    "gained": 14,
+    "lost": 0
+  },
+  "storedSeparatorCounterNote": "Worker includingSeparators counters also count the sole terminal split sentinel. They were independently reproduced; lfSuccessfulPairTotals remove that sentinel and represent physical LF records. Failure empty stdout is not a graph and is excluded from successful-pair totals.",
+  "families": [
+    {
+      "family": "primitive-roles",
+      "cases": 39,
+      "beforeExact": 39,
+      "candidateExact": 39,
+      "successfulPairs": 39,
+      "sameOutputs": 39,
+      "matchingGains": 0,
+      "matchingLosses": 0
+    },
+    {
+      "family": "typedef-aggregates",
+      "cases": 26,
+      "beforeExact": 26,
+      "candidateExact": 26,
+      "successfulPairs": 26,
+      "sameOutputs": 26,
+      "matchingGains": 0,
+      "matchingLosses": 0
+    },
+    {
+      "family": "array-initializers",
+      "cases": 69,
+      "beforeExact": 69,
+      "candidateExact": 69,
+      "successfulPairs": 69,
+      "sameOutputs": 69,
+      "matchingGains": 0,
+      "matchingLosses": 0
+    },
+    {
+      "family": "body-includes",
+      "cases": 14,
+      "beforeExact": 10,
+      "candidateExact": 12,
+      "successfulPairs": 14,
+      "sameOutputs": 12,
+      "matchingGains": 14,
+      "matchingLosses": 0
+    },
+    {
+      "family": "array-dimension-macros",
+      "cases": 4,
+      "beforeExact": 4,
+      "candidateExact": 4,
+      "successfulPairs": 4,
+      "sameOutputs": 4,
+      "matchingGains": 0,
+      "matchingLosses": 0
+    },
+    {
+      "family": "body-macro-state",
+      "cases": 76,
+      "beforeExact": 55,
+      "candidateExact": 55,
+      "successfulPairs": 75,
+      "sameOutputs": 76,
+      "matchingGains": 0,
+      "matchingLosses": 0
+    },
+    {
+      "family": "array-initializers-diagnostic",
+      "cases": 1,
+      "beforeExact": 0,
+      "candidateExact": 0,
+      "successfulPairs": 1,
+      "sameOutputs": 1,
+      "matchingGains": 0,
+      "matchingLosses": 0
+    }
+  ],
+  "changedOutputs": [
+    "body-includes/tiny_fixedtables_include",
+    "body-includes/tiny_fixedtables_inline"
+  ],
+  "retainedAbort": {
+    "case": "body-macro-state/duplicate_clinit_tag",
+    "exits": [
+      -6,
+      -6
+    ],
+    "stdoutBytes": [
+      0,
+      0
+    ],
+    "sameAssertion": true,
+    "stderrByteIdentical": false,
+    "includedInSuccessfulCounters": false,
+    "beforeStderr": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay-prior-v1/body-macro-state/duplicate_clinit_tag/accepted-tenth.stderr",
+      "sha256": "9d1c27911ef580c2b6326e6b1aac4fd259c858306c9fb0c6d01dd052bb2f3be3",
+      "bytes": 590
+    },
+    "candidateStderr": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay-prior-v1/body-macro-state/duplicate_clinit_tag/candidate-v1.stderr",
+      "sha256": "554a137f355c33adb5e563429d6b2578ada9a4b9cdbaa54ffbf6716323d4432c",
+      "bytes": 590
+    }
+  },
+  "priorGainsOverlapNew19": 14,
+  "rootInventoryExpectation": {
+    "acceptedWorkspaceTests": 468,
+    "addedRustTests": 2,
+    "expectedWorkspaceTests": 470,
+    "acceptedWorkspaceGroups": 76,
+    "addedGroup": 1,
+    "expectedWorkspaceGroups": 77,
+    "status": "Expected from reviewed inventory; root final execution still required."
+  },
+  "validationScope": "Worker21 focused tests, committed308, fmt and strict Clippy for cpg-lang-c/joern-parity all targets. No worker full-workspace, fresh-live, whole-project or resource acceptance claim.",
+  "completeGitBlobsVerified": 491,
+  "verifiedPriorArtifactFiles": 2545,
+  "packageFilesVerified": 3252,
+  "blockers": [],
+  "producerRuns": 0,
+  "rootWrites": false,
+  "fullAudit": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/eleventh-prior-retention-review-v1/final-review.json",
+    "sha256": "5b667ffbe73fff5949a4298557a0526c3cbaf761f24c838549a9c4475a9d6b65",
+    "bytes": 1749203
+  }
+}

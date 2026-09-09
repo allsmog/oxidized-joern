@@ -153,6 +153,17 @@ includes and quoted-header lookup retain separate diagnostics. Final workspace,
 live-oracle, native and official real-project gates pass; no non-C, schema,
 binary-format, console or query compatibility is promoted by this batch.
 
+The [eleventh batch](../docs/conformance/astra-eleventh-batch-2026-09-09.md)
+uses the existing declaration renderer for primitive MEMBER bases. Sixteen
+new projects and two retained tiny-fixedtables anchors now match complete
+live graphs; the nonprimitive control retains 20 missing type-registration
+records. All prior diagnostics and the importer abort remain. Whole zlib/Lua
+matching records gain 21/11 with no losses; method exactness and complete flow
+sections are unchanged. Both full projects remain nonexact. Duplicate function
+identity/linking, long fixedtables CODE and the missing inflate body remain
+separate gaps. Final workspace, live-oracle, native and official resource gates
+pass; schema, binary-format, console, query and non-C scope is unchanged.
+
 Confirmed remaining C gaps include broader include/build-definition context,
 function-like macros in preprocessor conditions,
 repeated body includes and runtime control chains split by preprocessor directives,

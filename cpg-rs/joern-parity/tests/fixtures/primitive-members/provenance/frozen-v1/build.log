@@ -1,0 +1,10 @@
+   Compiling cpg-core v0.1.1 (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/cpg-core)
+   Compiling cpg-frontend v0.1.1 (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/cpg-frontend)
+   Compiling cpg-analysis v0.1.1 (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/cpg-analysis)
+   Compiling cpg-lang-c v0.1.1 (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/cpg-lang-c)
+   Compiling cpg-lang-python v0.1.1 (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/cpg-lang-python)
+   Compiling cpg-lang-ts v0.1.1 (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/cpg-lang-ts)
+   Compiling cpg-incremental v0.1.1 (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/cpg-incremental)
+   Compiling cpg-cli v0.1.1 (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/cpg-cli)
+   Compiling joern-parity v0.1.1 (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/joern-parity)
+    Finished `release` profile [optimized] target(s) in 23.09s

@@ -4,6 +4,44 @@ Single source of truth across iterations. Update in the same commit as the work.
 
 ## Current state
 
+- **Eleventh measured Astra batch (2026-09-09 UTC).** Primitive MEMBER
+  bases now use the existing declaration-type renderer; suffixes, CODE,
+  order and initializer construction retain their paths. Cache shape is **22**.
+  Seventeen new complete references plus two retained tiny-fixedtables anchors
+  improve **2→18 exact**, gaining **126 matching nonempty records with no
+  losses**. All 18 exact graphs are fully gated. The nonprimitive control
+  retains its 20-record type-registration/scaffold gap and unchanged full
+  output. The older member_types diagnostic also remains unchanged.
+  All 229 prior case instances are retained: **203→205 exact**, with +14/0
+  matching records across successful pairs, entirely overlapping the same two
+  anchors. The importer abort remains **−6/−6**, with both full transcripts;
+  failed runs are excluded from semantic preservation claims.
+  Whole zlib/Lua matching records gain **21/11 and lose none**; all twelve
+  changed member type properties match their live source occurrences, while
+  six rows retain pre-existing ORDER differences. Complete flow sections and
+  all other AST properties/topology remain unchanged. All 61 prior facts,
+  19 selected trees/stubs and three snprintf calls remain. Exact method ASTs
+  stay **160/410 /1,438/2,274**, strict primary **42/517**, bodies **42/544**
+  and nonempty bodies **23/522**. Both whole projections remain nonexact;
+  references explicitly reuse the sixth batch's saved live outputs.
+  All **470 workspace tests /77 groups**, **308/308** committed and fresh
+  Joern comparisons, formatting, strict Clippy, 17 checker tests, 73-dependency
+  audit, native release/archive and official real-project acceptance pass.
+  All 145 frozen Rust/Cargo files and both release binaries remain unchanged.
+  Repeated builds pass at **2.78/2.80 seconds zlib /5.94/5.77 seconds Lua**,
+  peaking at **490.03/463.41 MiB** under unchanged ceilings. Clean/update
+  equivalence passes for **26/61** files; separate update RSS is
+  **644.63/717.30 MiB**. Exactly seven reviewed manifest output fields change;
+  inputs, licenses, exclusions, budgets and zero-finding SARIF remain fixed.
+  See the [eleventh report](../docs/conformance/astra-eleventh-batch-2026-09-09.md),
+  [complete counters](../docs/conformance/astra-eleventh-batch-metrics.json), and
+  [acceptance receipt](../docs/conformance/astra-eleventh-batch-acceptance.json).
+  Full port parity remains incomplete. Next: five unrun controls for duplicate
+  function identities, STATIC modifiers, calls, references and type scaffolds.
+  Full fixedtables identity/long CODE, missing inflate body, nonprimitive
+  registration, preprocessing, runtime chains, schema, transport, queries and
+  non-C gaps remain separate.
+
 - **Tenth measured Astra batch (2026-09-08 UTC).** Active supplied body
   includes now share an occurrence-specific declaration view across emission,
   discovery, type sites and prototypes, preserving caller scope and measured

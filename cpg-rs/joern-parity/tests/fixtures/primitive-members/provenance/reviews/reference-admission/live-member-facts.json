@@ -1,0 +1,693 @@
+{
+  "status": "OBSERVED_LIVE_MEMBER_FACTS_NO_IMPLEMENTATION_INFERENCE",
+  "createdAtUtc": "2026-09-09T00:27:49.057380+00:00",
+  "admissionReview": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/eleventh-primitive-preflight/reference-admission-review.json",
+    "sha256": "f7df8498bcd18d9b58dfe1075821067b254645e7d632a300a894b4e0f7cc2446",
+    "bytes": 157661
+  },
+  "cases": [
+    {
+      "case": "base_qualified_pointer",
+      "completeReference": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-runner-v3/runs/first-complete-primitive-member-reference-batch/expected/base_qualified_pointer/expected.txt",
+        "sha256": "53b149c0c3b91fc21969901c294099353666c6e0842f621bf49d596a9017cb5c",
+        "bytes": 6775
+      },
+      "sourceHashes": {
+        "base_qualified_pointer/main.c": "683671d135a3d3d8385a92bba5f8fc1b87e1650c0b698282ee8416a11d110e0d"
+      },
+      "members": [
+        {
+          "canonicalLine": 7,
+          "raw": "    MEMBER NAME=value CODE=*value TYPE_FULL_NAME=shortunsigned* ORDER=1",
+          "name": "value",
+          "code": "*value",
+          "typeFullName": "shortunsigned*",
+          "order": 1,
+          "fullAncestorRecords": [
+            "METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1",
+            "  TYPE_DECL NAME=Record CODE=struct Record {\\n    const unsigned short *value;\\n} FULL_NAME=Record ORDER=1"
+          ]
+        }
+      ]
+    },
+    {
+      "case": "const_unsigned_short",
+      "completeReference": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-runner-v3/runs/first-complete-primitive-member-reference-batch/expected/const_unsigned_short/expected.txt",
+        "sha256": "7ffc36c68f07466a0ab2f31de41b75a9f73e7e130ddf547cbc96d1b4fa774284",
+        "bytes": 6759
+      },
+      "sourceHashes": {
+        "const_unsigned_short/main.c": "57e3d6a3da034eaeda3da20d1ba518bac47a740b3aa62c4f5bf16def20bbc385"
+      },
+      "members": [
+        {
+          "canonicalLine": 7,
+          "raw": "    MEMBER NAME=value CODE=value TYPE_FULL_NAME=shortunsigned ORDER=1",
+          "name": "value",
+          "code": "value",
+          "typeFullName": "shortunsigned",
+          "order": 1,
+          "fullAncestorRecords": [
+            "METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1",
+            "  TYPE_DECL NAME=Record CODE=struct Record {\\n    const unsigned short value;\\n} FULL_NAME=Record ORDER=1"
+          ]
+        }
+      ]
+    },
+    {
+      "case": "mixed_declarator_shapes",
+      "completeReference": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-runner-v3/runs/first-complete-primitive-member-reference-batch/expected/mixed_declarator_shapes/expected.txt",
+        "sha256": "1d3402f00cd066767d6a87552aa217b8292a66629c72309165bafaa1a8d4ff0d",
+        "bytes": 10918
+      },
+      "sourceHashes": {
+        "mixed_declarator_shapes/main.c": "78a9ab60868e0c24ba739ac8c1ed1cffb97913d16e6c14a8da5e985a0976dfe7"
+      },
+      "members": [
+        {
+          "canonicalLine": 21,
+          "raw": "    MEMBER NAME=scalar CODE=scalar TYPE_FULL_NAME=shortunsigned ORDER=1",
+          "name": "scalar",
+          "code": "scalar",
+          "typeFullName": "shortunsigned",
+          "order": 1,
+          "fullAncestorRecords": [
+            "METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1",
+            "  TYPE_DECL NAME=Record CODE=struct Record {\\n    unsigned short scalar, *pointer, table[3];\\n} FULL_NAME=Record ORDER=1"
+          ]
+        },
+        {
+          "canonicalLine": 22,
+          "raw": "    MEMBER NAME=pointer CODE=*pointer TYPE_FULL_NAME=shortunsigned* ORDER=2",
+          "name": "pointer",
+          "code": "*pointer",
+          "typeFullName": "shortunsigned*",
+          "order": 2,
+          "fullAncestorRecords": [
+            "METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1",
+            "  TYPE_DECL NAME=Record CODE=struct Record {\\n    unsigned short scalar, *pointer, table[3];\\n} FULL_NAME=Record ORDER=1"
+          ]
+        },
+        {
+          "canonicalLine": 23,
+          "raw": "    MEMBER NAME=table CODE=table[3] TYPE_FULL_NAME=shortunsigned[3] ORDER=3",
+          "name": "table",
+          "code": "table[3]",
+          "typeFullName": "shortunsigned[3]",
+          "order": 3,
+          "fullAncestorRecords": [
+            "METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1",
+            "  TYPE_DECL NAME=Record CODE=struct Record {\\n    unsigned short scalar, *pointer, table[3];\\n} FULL_NAME=Record ORDER=1"
+          ]
+        }
+      ]
+    },
+    {
+      "case": "nonprimitive_scalar_control",
+      "completeReference": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-runner-v3/runs/first-complete-primitive-member-reference-batch/expected/nonprimitive_scalar_control/expected.txt",
+        "sha256": "d01b88fb2012eb6671de933e8be87c445c1cc7d951aeee509276ddd6373dd34c",
+        "bytes": 11430
+      },
+      "sourceHashes": {
+        "nonprimitive_scalar_control/main.c": "30f7610f6251619e111dccd66822d2b620b131a00520a94432f29a23737cbcee"
+      },
+      "members": [
+        {
+          "canonicalLine": 7,
+          "raw": "    MEMBER NAME=item CODE=item TYPE_FULL_NAME=int ORDER=1",
+          "name": "item",
+          "code": "item",
+          "typeFullName": "int",
+          "order": 1,
+          "fullAncestorRecords": [
+            "METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1",
+            "  TYPE_DECL NAME=Inner CODE=struct Inner {\\n    int item;\\n} FULL_NAME=Inner ORDER=1"
+          ]
+        },
+        {
+          "canonicalLine": 9,
+          "raw": "    MEMBER NAME=integer_value CODE=integer_value TYPE_FULL_NAME=int ORDER=1",
+          "name": "integer_value",
+          "code": "integer_value",
+          "typeFullName": "int",
+          "order": 1,
+          "fullAncestorRecords": [
+            "METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1",
+            "  TYPE_DECL NAME=Choice CODE=union Choice {\\n    int integer_value;\\n    double floating_value;\\n} FULL_NAME=Choice ORDER=1"
+          ]
+        },
+        {
+          "canonicalLine": 10,
+          "raw": "    MEMBER NAME=floating_value CODE=floating_value TYPE_FULL_NAME=double ORDER=2",
+          "name": "floating_value",
+          "code": "floating_value",
+          "typeFullName": "double",
+          "order": 2,
+          "fullAncestorRecords": [
+            "METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1",
+            "  TYPE_DECL NAME=Choice CODE=union Choice {\\n    int integer_value;\\n    double floating_value;\\n} FULL_NAME=Choice ORDER=1"
+          ]
+        },
+        {
+          "canonicalLine": 12,
+          "raw": "    MEMBER NAME=struct_value CODE=struct_value TYPE_FULL_NAME=Inner ORDER=1",
+          "name": "struct_value",
+          "code": "struct_value",
+          "typeFullName": "Inner",
+          "order": 1,
+          "fullAncestorRecords": [
+            "METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1",
+            "  TYPE_DECL NAME=Record CODE=struct Record {\\n    struct Inner struct_value;\\n    union Choice union_value;\\n    Alias alias_value;\\n} FULL_NAME=Record ORDER=1"
+          ]
+        },
+        {
+          "canonicalLine": 13,
+          "raw": "    MEMBER NAME=union_value CODE=union_value TYPE_FULL_NAME=unionChoice ORDER=2",
+          "name": "union_value",
+          "code": "union_value",
+          "typeFullName": "unionChoice",
+          "order": 2,
+          "fullAncestorRecords": [
+            "METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1",
+            "  TYPE_DECL NAME=Record CODE=struct Record {\\n    struct Inner struct_value;\\n    union Choice union_value;\\n    Alias alias_value;\\n} FULL_NAME=Record ORDER=1"
+          ]
+        },
+        {
+          "canonicalLine": 14,
+          "raw": "    MEMBER NAME=alias_value CODE=alias_value TYPE_FULL_NAME=Alias ORDER=3",
+          "name": "alias_value",
+          "code": "alias_value",
+          "typeFullName": "Alias",
+          "order": 3,
+          "fullAncestorRecords": [
+            "METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1",
+            "  TYPE_DECL NAME=Record CODE=struct Record {\\n    struct Inner struct_value;\\n    union Choice union_value;\\n    Alias alias_value;\\n} FULL_NAME=Record ORDER=1"
+          ]
+        }
+      ]
+    },
+    {
+      "case": "ordinary_numeric_control",
+      "completeReference": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-runner-v3/runs/first-complete-primitive-member-reference-batch/expected/ordinary_numeric_control/expected.txt",
+        "sha256": "4528adacb40f21e1aa33eb4195cfb87470e8f5a3a288a1678486d1800c63aef1",
+        "bytes": 6960
+      },
+      "sourceHashes": {
+        "ordinary_numeric_control/main.c": "ca63fcf93080419061d59acd5f7cefe2818a399a29190125a011d7397e52caa6"
+      },
+      "members": [
+        {
+          "canonicalLine": 7,
+          "raw": "    MEMBER NAME=integer_value CODE=integer_value TYPE_FULL_NAME=int ORDER=1",
+          "name": "integer_value",
+          "code": "integer_value",
+          "typeFullName": "int",
+          "order": 1,
+          "fullAncestorRecords": [
+            "METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1",
+            "  TYPE_DECL NAME=NumericRecord CODE=struct NumericRecord {\\n    int integer_value;\\n    double floating_value;\\n} FULL_NAME=NumericRecord ORDER=1"
+          ]
+        },
+        {
+          "canonicalLine": 8,
+          "raw": "    MEMBER NAME=floating_value CODE=floating_value TYPE_FULL_NAME=double ORDER=2",
+          "name": "floating_value",
+          "code": "floating_value",
+          "typeFullName": "double",
+          "order": 2,
+          "fullAncestorRecords": [
+            "METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1",
+            "  TYPE_DECL NAME=NumericRecord CODE=struct NumericRecord {\\n    int integer_value;\\n    double floating_value;\\n} FULL_NAME=NumericRecord ORDER=1"
+          ]
+        }
+      ]
+    },
+    {
+      "case": "pointer_qualified_pointer",
+      "completeReference": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-runner-v3/runs/first-complete-primitive-member-reference-batch/expected/pointer_qualified_pointer/expected.txt",
+        "sha256": "1efb5791f73bc51f3d36709eb8f61cd5e9850b3b01fe4687ff8a64f26e01b625",
+        "bytes": 6785
+      },
+      "sourceHashes": {
+        "pointer_qualified_pointer/main.c": "ce703562d1d768702fd9d0f4177d315a354346fd5924b53feca86633ab49dd29"
+      },
+      "members": [
+        {
+          "canonicalLine": 7,
+          "raw": "    MEMBER NAME=value CODE=* const value TYPE_FULL_NAME=shortunsigned* ORDER=1",
+          "name": "value",
+          "code": "* const value",
+          "typeFullName": "shortunsigned*",
+          "order": 1,
+          "fullAncestorRecords": [
+            "METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1",
+            "  TYPE_DECL NAME=Record CODE=struct Record {\\n    unsigned short * const value;\\n} FULL_NAME=Record ORDER=1"
+          ]
+        }
+      ]
+    },
+    {
+      "case": "short_int_unsigned",
+      "completeReference": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-runner-v3/runs/first-complete-primitive-member-reference-batch/expected/short_int_unsigned/expected.txt",
+        "sha256": "92cfd06fee6b3bcb4a94e9eb9f76234322feb6f521fafbbcd7ab928d2d4b92e0",
+        "bytes": 6813
+      },
+      "sourceHashes": {
+        "short_int_unsigned/main.c": "0c049f5c6fd7eb24665d96d4ff592154b323a755cc58e92d5fe0a499dd596648"
+      },
+      "members": [
+        {
+          "canonicalLine": 7,
+          "raw": "    MEMBER NAME=value CODE=value TYPE_FULL_NAME=short unsigned int ORDER=1",
+          "name": "value",
+          "code": "value",
+          "typeFullName": "short unsigned int",
+          "order": 1,
+          "fullAncestorRecords": [
+            "METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1",
+            "  TYPE_DECL NAME=Record CODE=struct Record {\\n    short int unsigned value;\\n} FULL_NAME=Record ORDER=1"
+          ]
+        }
+      ]
+    },
+    {
+      "case": "short_unsigned",
+      "completeReference": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-runner-v3/runs/first-complete-primitive-member-reference-batch/expected/short_unsigned/expected.txt",
+        "sha256": "33b6a8ed56ff9b624cfa8bf0410d5bd9372fcdbf1cb41fde895ef129446ba90f",
+        "bytes": 6741
+      },
+      "sourceHashes": {
+        "short_unsigned/main.c": "5fb6e70b45823d56203bd1b7c9e35750e574fd671788cf67cad78b17bb7c10a2"
+      },
+      "members": [
+        {
+          "canonicalLine": 7,
+          "raw": "    MEMBER NAME=value CODE=value TYPE_FULL_NAME=shortunsigned ORDER=1",
+          "name": "value",
+          "code": "value",
+          "typeFullName": "shortunsigned",
+          "order": 1,
+          "fullAncestorRecords": [
+            "METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1",
+            "  TYPE_DECL NAME=Record CODE=struct Record {\\n    short unsigned value;\\n} FULL_NAME=Record ORDER=1"
+          ]
+        }
+      ]
+    },
+    {
+      "case": "signed_char",
+      "completeReference": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-runner-v3/runs/first-complete-primitive-member-reference-batch/expected/signed_char/expected.txt",
+        "sha256": "01213a09ac6d7a925b92e76fa1e9424a8c6e1d1f60201de3f0701c987ac794aa",
+        "bytes": 6696
+      },
+      "sourceHashes": {
+        "signed_char/main.c": "65222d14e53a108d3e98d3e3efa30aeda2b6df4dbed97b88e92698dee74d32c0"
+      },
+      "members": [
+        {
+          "canonicalLine": 7,
+          "raw": "    MEMBER NAME=value CODE=value TYPE_FULL_NAME=signedchar ORDER=1",
+          "name": "value",
+          "code": "value",
+          "typeFullName": "signedchar",
+          "order": 1,
+          "fullAncestorRecords": [
+            "METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1",
+            "  TYPE_DECL NAME=Record CODE=struct Record {\\n    signed char value;\\n} FULL_NAME=Record ORDER=1"
+          ]
+        }
+      ]
+    },
+    {
+      "case": "signed_short",
+      "completeReference": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-runner-v3/runs/first-complete-primitive-member-reference-batch/expected/signed_short/expected.txt",
+        "sha256": "d1a36fa051100458c9a44e8cafb4499d361950fe1e5f8ff5fd4f0b2e9aa22d39",
+        "bytes": 6711
+      },
+      "sourceHashes": {
+        "signed_short/main.c": "da4b39f4cbd65496ecfcfe1a217413da07c5d35378b3a80ba7bc4fecec5dae79"
+      },
+      "members": [
+        {
+          "canonicalLine": 7,
+          "raw": "    MEMBER NAME=value CODE=value TYPE_FULL_NAME=shortsigned ORDER=1",
+          "name": "value",
+          "code": "value",
+          "typeFullName": "shortsigned",
+          "order": 1,
+          "fullAncestorRecords": [
+            "METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1",
+            "  TYPE_DECL NAME=Record CODE=struct Record {\\n    signed short value;\\n} FULL_NAME=Record ORDER=1"
+          ]
+        }
+      ]
+    },
+    {
+      "case": "tiny_fixedtables_include",
+      "completeReference": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-runner-v3/runs/first-complete-primitive-member-reference-batch/expected/tiny_fixedtables_include/expected.txt",
+        "sha256": "fc4a1360d6f10152edb364c346a47ae73d2df2460fe5ef12da2d2e79cbb7dd3f",
+        "bytes": 48334
+      },
+      "sourceHashes": {
+        "tiny_fixedtables_include/fixed.h": "3039380a12e6dba1fb44314f13292d1b5ec6744aa80eff5599566a29ea94ea86",
+        "tiny_fixedtables_include/main.c": "7203039d3be732abfb9abaad7177eaa77efa51d6e9fa58d58733346eb6cb4dda"
+      },
+      "members": [
+        {
+          "canonicalLine": 111,
+          "raw": "    MEMBER NAME=op CODE=op TYPE_FULL_NAME=unsigned char ORDER=1",
+          "name": "op",
+          "code": "op",
+          "typeFullName": "unsigned char",
+          "order": 1,
+          "fullAncestorRecords": [
+            "METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1",
+            "  TYPE_DECL NAME=Entry CODE=typedef struct Entry {\\n unsigned char op;\\n unsigned char bits;\\n unsigned short value;\\n} FULL_NAME=Entry ORDER=1"
+          ]
+        },
+        {
+          "canonicalLine": 112,
+          "raw": "    MEMBER NAME=bits CODE=bits TYPE_FULL_NAME=unsigned char ORDER=2",
+          "name": "bits",
+          "code": "bits",
+          "typeFullName": "unsigned char",
+          "order": 2,
+          "fullAncestorRecords": [
+            "METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1",
+            "  TYPE_DECL NAME=Entry CODE=typedef struct Entry {\\n unsigned char op;\\n unsigned char bits;\\n unsigned short value;\\n} FULL_NAME=Entry ORDER=1"
+          ]
+        },
+        {
+          "canonicalLine": 113,
+          "raw": "    MEMBER NAME=value CODE=value TYPE_FULL_NAME=shortunsigned ORDER=3",
+          "name": "value",
+          "code": "value",
+          "typeFullName": "shortunsigned",
+          "order": 3,
+          "fullAncestorRecords": [
+            "METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1",
+            "  TYPE_DECL NAME=Entry CODE=typedef struct Entry {\\n unsigned char op;\\n unsigned char bits;\\n unsigned short value;\\n} FULL_NAME=Entry ORDER=1"
+          ]
+        },
+        {
+          "canonicalLine": 116,
+          "raw": "    MEMBER NAME=len CODE=*len TYPE_FULL_NAME=Code* ORDER=1",
+          "name": "len",
+          "code": "*len",
+          "typeFullName": "Code*",
+          "order": 1,
+          "fullAncestorRecords": [
+            "METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1",
+            "  TYPE_DECL NAME=State CODE=struct State { const Code *len; const Code *dist; } FULL_NAME=State ORDER=1"
+          ]
+        },
+        {
+          "canonicalLine": 117,
+          "raw": "    MEMBER NAME=dist CODE=*dist TYPE_FULL_NAME=Code* ORDER=2",
+          "name": "dist",
+          "code": "*dist",
+          "typeFullName": "Code*",
+          "order": 2,
+          "fullAncestorRecords": [
+            "METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1",
+            "  TYPE_DECL NAME=State CODE=struct State { const Code *len; const Code *dist; } FULL_NAME=State ORDER=1"
+          ]
+        }
+      ]
+    },
+    {
+      "case": "tiny_fixedtables_inline",
+      "completeReference": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-runner-v3/runs/first-complete-primitive-member-reference-batch/expected/tiny_fixedtables_inline/expected.txt",
+        "sha256": "6d613c7085ab54541cc1d9fa83494748e33fe70bfc5c541ee39f12aa8046cadd",
+        "bytes": 38652
+      },
+      "sourceHashes": {
+        "tiny_fixedtables_inline/main.c": "8af2a0a9531deec50f16e8c125de4000c0636b443b11628e232bb9e9413d2a6f"
+      },
+      "members": [
+        {
+          "canonicalLine": 87,
+          "raw": "    MEMBER NAME=op CODE=op TYPE_FULL_NAME=unsigned char ORDER=1",
+          "name": "op",
+          "code": "op",
+          "typeFullName": "unsigned char",
+          "order": 1,
+          "fullAncestorRecords": [
+            "METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1",
+            "  TYPE_DECL NAME=Entry CODE=typedef struct Entry {\\n unsigned char op;\\n unsigned char bits;\\n unsigned short value;\\n} FULL_NAME=Entry ORDER=1"
+          ]
+        },
+        {
+          "canonicalLine": 88,
+          "raw": "    MEMBER NAME=bits CODE=bits TYPE_FULL_NAME=unsigned char ORDER=2",
+          "name": "bits",
+          "code": "bits",
+          "typeFullName": "unsigned char",
+          "order": 2,
+          "fullAncestorRecords": [
+            "METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1",
+            "  TYPE_DECL NAME=Entry CODE=typedef struct Entry {\\n unsigned char op;\\n unsigned char bits;\\n unsigned short value;\\n} FULL_NAME=Entry ORDER=1"
+          ]
+        },
+        {
+          "canonicalLine": 89,
+          "raw": "    MEMBER NAME=value CODE=value TYPE_FULL_NAME=shortunsigned ORDER=3",
+          "name": "value",
+          "code": "value",
+          "typeFullName": "shortunsigned",
+          "order": 3,
+          "fullAncestorRecords": [
+            "METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1",
+            "  TYPE_DECL NAME=Entry CODE=typedef struct Entry {\\n unsigned char op;\\n unsigned char bits;\\n unsigned short value;\\n} FULL_NAME=Entry ORDER=1"
+          ]
+        },
+        {
+          "canonicalLine": 92,
+          "raw": "    MEMBER NAME=len CODE=*len TYPE_FULL_NAME=Code* ORDER=1",
+          "name": "len",
+          "code": "*len",
+          "typeFullName": "Code*",
+          "order": 1,
+          "fullAncestorRecords": [
+            "METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1",
+            "  TYPE_DECL NAME=State CODE=struct State { const Code *len; const Code *dist; } FULL_NAME=State ORDER=1"
+          ]
+        },
+        {
+          "canonicalLine": 93,
+          "raw": "    MEMBER NAME=dist CODE=*dist TYPE_FULL_NAME=Code* ORDER=2",
+          "name": "dist",
+          "code": "*dist",
+          "typeFullName": "Code*",
+          "order": 2,
+          "fullAncestorRecords": [
+            "METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1",
+            "  TYPE_DECL NAME=State CODE=struct State { const Code *len; const Code *dist; } FULL_NAME=State ORDER=1"
+          ]
+        }
+      ]
+    },
+    {
+      "case": "unsigned_char",
+      "completeReference": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-runner-v3/runs/first-complete-primitive-member-reference-batch/expected/unsigned_char/expected.txt",
+        "sha256": "4a794f1b11f8d0b222bdc91d3e45abe0c55ecbdbaf64db736a95f91828aec8d4",
+        "bytes": 6738
+      },
+      "sourceHashes": {
+        "unsigned_char/main.c": "ab73e292cafb2ac78baf257cb5a3710955bcfb9f71d82078478916590e813721"
+      },
+      "members": [
+        {
+          "canonicalLine": 7,
+          "raw": "    MEMBER NAME=value CODE=value TYPE_FULL_NAME=unsigned char ORDER=1",
+          "name": "value",
+          "code": "value",
+          "typeFullName": "unsigned char",
+          "order": 1,
+          "fullAncestorRecords": [
+            "METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1",
+            "  TYPE_DECL NAME=Record CODE=struct Record {\\n    unsigned char value;\\n} FULL_NAME=Record ORDER=1"
+          ]
+        }
+      ]
+    },
+    {
+      "case": "unsigned_long_long_int",
+      "completeReference": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-runner-v3/runs/first-complete-primitive-member-reference-batch/expected/unsigned_long_long_int/expected.txt",
+        "sha256": "8cdd2dbee080157990c124b09867988f64b4c790a00ab92b5be48b270c61a720",
+        "bytes": 6861
+      },
+      "sourceHashes": {
+        "unsigned_long_long_int/main.c": "c772a4b67dd1cfb5cf2943b6d97525c24063c4a476c33a2fba23664f480bae26"
+      },
+      "members": [
+        {
+          "canonicalLine": 7,
+          "raw": "    MEMBER NAME=value CODE=value TYPE_FULL_NAME=longlong unsigned int ORDER=1",
+          "name": "value",
+          "code": "value",
+          "typeFullName": "longlong unsigned int",
+          "order": 1,
+          "fullAncestorRecords": [
+            "METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1",
+            "  TYPE_DECL NAME=Record CODE=struct Record {\\n    unsigned long long int value;\\n} FULL_NAME=Record ORDER=1"
+          ]
+        }
+      ]
+    },
+    {
+      "case": "unsigned_short",
+      "completeReference": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-runner-v3/runs/first-complete-primitive-member-reference-batch/expected/unsigned_short/expected.txt",
+        "sha256": "67200ecf8fbbbf5beacd4025936a0f959c30ede649497118d7510d2bea4f7b88",
+        "bytes": 6741
+      },
+      "sourceHashes": {
+        "unsigned_short/main.c": "15c28619bfdeb3b65e60afb2011092c2c52d425ef4f4b67be09083a3657aea47"
+      },
+      "members": [
+        {
+          "canonicalLine": 7,
+          "raw": "    MEMBER NAME=value CODE=value TYPE_FULL_NAME=shortunsigned ORDER=1",
+          "name": "value",
+          "code": "value",
+          "typeFullName": "shortunsigned",
+          "order": 1,
+          "fullAncestorRecords": [
+            "METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1",
+            "  TYPE_DECL NAME=Record CODE=struct Record {\\n    unsigned short value;\\n} FULL_NAME=Record ORDER=1"
+          ]
+        }
+      ]
+    },
+    {
+      "case": "unsigned_short_array",
+      "completeReference": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-runner-v3/runs/first-complete-primitive-member-reference-batch/expected/unsigned_short_array/expected.txt",
+        "sha256": "500f0b8fd015d905346cdc8b0d9dea88b91ecb24bf068504ff9ddb59b1916ef0",
+        "bytes": 9763
+      },
+      "sourceHashes": {
+        "unsigned_short_array/main.c": "e30c69af8869ef328c2de4270ab270fc6a23211fac7b55533efadd02ccc3aa49"
+      },
+      "members": [
+        {
+          "canonicalLine": 21,
+          "raw": "    MEMBER NAME=value CODE=value[3] TYPE_FULL_NAME=shortunsigned[3] ORDER=1",
+          "name": "value",
+          "code": "value[3]",
+          "typeFullName": "shortunsigned[3]",
+          "order": 1,
+          "fullAncestorRecords": [
+            "METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1",
+            "  TYPE_DECL NAME=Record CODE=struct Record {\\n    unsigned short value[3];\\n} FULL_NAME=Record ORDER=1"
+          ]
+        }
+      ]
+    },
+    {
+      "case": "unsigned_short_int",
+      "completeReference": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-runner-v3/runs/first-complete-primitive-member-reference-batch/expected/unsigned_short_int/expected.txt",
+        "sha256": "2f53a7bf0e015f6d42627dde4d6c54bafcd2e55b0b81a3f2b80b70f9a46cf3d1",
+        "bytes": 6813
+      },
+      "sourceHashes": {
+        "unsigned_short_int/main.c": "76277bee00be9bb521ee0bc24c5127ef632678fc3e0aa233f4bba4de713fed85"
+      },
+      "members": [
+        {
+          "canonicalLine": 7,
+          "raw": "    MEMBER NAME=value CODE=value TYPE_FULL_NAME=short unsigned int ORDER=1",
+          "name": "value",
+          "code": "value",
+          "typeFullName": "short unsigned int",
+          "order": 1,
+          "fullAncestorRecords": [
+            "METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1",
+            "  TYPE_DECL NAME=Record CODE=struct Record {\\n    unsigned short int value;\\n} FULL_NAME=Record ORDER=1"
+          ]
+        }
+      ]
+    },
+    {
+      "case": "unsigned_short_pointer",
+      "completeReference": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-runner-v3/runs/first-complete-primitive-member-reference-batch/expected/unsigned_short_pointer/expected.txt",
+        "sha256": "75c4b6060b1e8d56e967c641dd7050a696c00ab95b37b284633ca58ad5fdb0f9",
+        "bytes": 6757
+      },
+      "sourceHashes": {
+        "unsigned_short_pointer/main.c": "7b5de0d2a5dc3eb44e456043dd90fba8820cb2f3c7c839919a8b3eec34c1a97e"
+      },
+      "members": [
+        {
+          "canonicalLine": 7,
+          "raw": "    MEMBER NAME=value CODE=*value TYPE_FULL_NAME=shortunsigned* ORDER=1",
+          "name": "value",
+          "code": "*value",
+          "typeFullName": "shortunsigned*",
+          "order": 1,
+          "fullAncestorRecords": [
+            "METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1",
+            "  TYPE_DECL NAME=Record CODE=struct Record {\\n    unsigned short *value;\\n} FULL_NAME=Record ORDER=1"
+          ]
+        }
+      ]
+    },
+    {
+      "case": "volatile_unsigned_short",
+      "completeReference": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-runner-v3/runs/first-complete-primitive-member-reference-batch/expected/volatile_unsigned_short/expected.txt",
+        "sha256": "3dc76afa755430aab0204df9f9ef02f714b67b2468229d70a316746460e2e8d9",
+        "bytes": 6876
+      },
+      "sourceHashes": {
+        "volatile_unsigned_short/main.c": "e80f725b99b57290699d3daf7f4bb116df52d666ad1c6973bea83f82d0675d64"
+      },
+      "members": [
+        {
+          "canonicalLine": 7,
+          "raw": "    MEMBER NAME=value CODE=value TYPE_FULL_NAME=volatile shortunsigned ORDER=1",
+          "name": "value",
+          "code": "value",
+          "typeFullName": "volatile shortunsigned",
+          "order": 1,
+          "fullAncestorRecords": [
+            "METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1",
+            "  TYPE_DECL NAME=Record CODE=struct Record {\\n    volatile unsigned short value;\\n} FULL_NAME=Record ORDER=1"
+          ]
+        }
+      ]
+    }
+  ],
+  "boundedFindings": [
+    "Bare unsigned short and short unsigned both select shortunsigned; explicit-int permutations select short unsigned int.",
+    "signed short selects shortsigned; signed char selects signedchar; unsigned char retains a space; unsigned long long int selects longlong unsigned int.",
+    "Scalar const unsigned short drops const from MEMBER TYPE_FULL_NAME; volatile unsigned short retains volatile. These are observed MEMBER-role rules only.",
+    "Both base-qualified and pointer-qualified const controls select shortunsigned*; exact CODE differs as *value versus * const value. Do not change CODE while repairing type spelling.",
+    "Numeric array suffix[3] and mixed scalar/pointer/array declarators retain their individual CODE/order and select the corresponding shortunsigned base+suffix.",
+    "Nonprimitive scalar controls select Inner,unionChoice,Alias; numeric fields remain int/double. No alias/scaffold rewrite is implied."
+  ],
+  "limits": [
+    "Each fact refers to a complete admitted live graph with original source bytes and full ancestor records retained.",
+    "This is Joern reference fact extraction, not a Rust before/after parity or no-regression claim.",
+    "The baseline helper and complete baseline comparison are separately owned by analysis_scope.",
+    "No new producer or source/expected edit."
+  ]
+}

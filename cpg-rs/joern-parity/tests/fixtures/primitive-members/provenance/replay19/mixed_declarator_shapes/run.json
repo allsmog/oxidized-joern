@@ -1,0 +1,99 @@
+{
+  "case": "mixed_declarator_shapes",
+  "retainedAnchor": false,
+  "command": [
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/frozen-v1/joern-parity",
+    "--production",
+    "main.c"
+  ],
+  "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/mixed_declarator_shapes/input",
+  "seconds": 0.006759334006346762,
+  "exitCode": 0,
+  "timeout": false,
+  "error": null,
+  "beforeExact": false,
+  "candidateExact": true,
+  "beforeCandidateIdentical": false,
+  "inputHashes": {
+    "main.c": "78a9ab60868e0c24ba739ac8c1ed1cffb97913d16e6c14a8da5e985a0976dfe7"
+  },
+  "counts": {
+    "includingSeparators": {
+      "expected": 180,
+      "before": 180,
+      "candidate": 180,
+      "matchingBefore": 159,
+      "matchingCandidate": 180,
+      "gained": 21,
+      "lost": 0,
+      "lostRecords": {},
+      "gainedRecords": {
+        "    MEMBER NAME=scalar CODE=scalar TYPE_FULL_NAME=shortunsigned ORDER=1": 1,
+        "    MEMBER NAME=pointer CODE=*pointer TYPE_FULL_NAME=shortunsigned* ORDER=2": 1,
+        "    MEMBER NAME=table CODE=table[3] TYPE_FULL_NAME=shortunsigned[3] ORDER=3": 1,
+        "NODES|TYPE_DECL NAME=shortunsigned FULL_NAME=shortunsigned CODE=shortunsigned IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>": 1,
+        "NODES|TYPE_DECL NAME=shortunsigned* FULL_NAME=shortunsigned* CODE=shortunsigned* IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>": 1,
+        "NODES|TYPE_DECL NAME=shortunsigned[3] FULL_NAME=shortunsigned[3] CODE=shortunsigned[3] IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>": 1,
+        "NODES|TYPE NAME=shortunsigned FULL_NAME=shortunsigned TYPE_DECL_FULL_NAME=shortunsigned": 1,
+        "NODES|TYPE NAME=shortunsigned* FULL_NAME=shortunsigned* TYPE_DECL_FULL_NAME=shortunsigned*": 1,
+        "NODES|TYPE NAME=shortunsigned[3] FULL_NAME=shortunsigned[3] TYPE_DECL_FULL_NAME=shortunsigned[3]": 1,
+        "EDGES|CONTAINS F:<includes> -> D:shortunsigned": 1,
+        "EDGES|CONTAINS F:<includes> -> D:shortunsigned*": 1,
+        "EDGES|CONTAINS F:<includes> -> D:shortunsigned[3]": 1,
+        "EDGES|EVAL_TYPE main.c:<global>#2 -> T:shortunsigned": 1,
+        "EDGES|EVAL_TYPE main.c:<global>#3 -> T:shortunsigned*": 1,
+        "EDGES|EVAL_TYPE main.c:<global>#4 -> T:shortunsigned[3]": 1,
+        "EDGES|REF T:shortunsigned -> D:shortunsigned": 1,
+        "EDGES|REF T:shortunsigned* -> D:shortunsigned*": 1,
+        "EDGES|REF T:shortunsigned[3] -> D:shortunsigned[3]": 1,
+        "EDGES|SOURCE_FILE D:shortunsigned -> F:<includes>": 1,
+        "EDGES|SOURCE_FILE D:shortunsigned* -> F:<includes>": 1,
+        "EDGES|SOURCE_FILE D:shortunsigned[3] -> F:<includes>": 1
+      }
+    },
+    "nonempty": {
+      "expected": 174,
+      "before": 174,
+      "candidate": 174,
+      "matchingBefore": 153,
+      "matchingCandidate": 174,
+      "gained": 21,
+      "lost": 0,
+      "lostRecords": {},
+      "gainedRecords": {
+        "    MEMBER NAME=scalar CODE=scalar TYPE_FULL_NAME=shortunsigned ORDER=1": 1,
+        "    MEMBER NAME=pointer CODE=*pointer TYPE_FULL_NAME=shortunsigned* ORDER=2": 1,
+        "    MEMBER NAME=table CODE=table[3] TYPE_FULL_NAME=shortunsigned[3] ORDER=3": 1,
+        "NODES|TYPE_DECL NAME=shortunsigned FULL_NAME=shortunsigned CODE=shortunsigned IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>": 1,
+        "NODES|TYPE_DECL NAME=shortunsigned* FULL_NAME=shortunsigned* CODE=shortunsigned* IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>": 1,
+        "NODES|TYPE_DECL NAME=shortunsigned[3] FULL_NAME=shortunsigned[3] CODE=shortunsigned[3] IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>": 1,
+        "NODES|TYPE NAME=shortunsigned FULL_NAME=shortunsigned TYPE_DECL_FULL_NAME=shortunsigned": 1,
+        "NODES|TYPE NAME=shortunsigned* FULL_NAME=shortunsigned* TYPE_DECL_FULL_NAME=shortunsigned*": 1,
+        "NODES|TYPE NAME=shortunsigned[3] FULL_NAME=shortunsigned[3] TYPE_DECL_FULL_NAME=shortunsigned[3]": 1,
+        "EDGES|CONTAINS F:<includes> -> D:shortunsigned": 1,
+        "EDGES|CONTAINS F:<includes> -> D:shortunsigned*": 1,
+        "EDGES|CONTAINS F:<includes> -> D:shortunsigned[3]": 1,
+        "EDGES|EVAL_TYPE main.c:<global>#2 -> T:shortunsigned": 1,
+        "EDGES|EVAL_TYPE main.c:<global>#3 -> T:shortunsigned*": 1,
+        "EDGES|EVAL_TYPE main.c:<global>#4 -> T:shortunsigned[3]": 1,
+        "EDGES|REF T:shortunsigned -> D:shortunsigned": 1,
+        "EDGES|REF T:shortunsigned* -> D:shortunsigned*": 1,
+        "EDGES|REF T:shortunsigned[3] -> D:shortunsigned[3]": 1,
+        "EDGES|SOURCE_FILE D:shortunsigned -> F:<includes>": 1,
+        "EDGES|SOURCE_FILE D:shortunsigned* -> F:<includes>": 1,
+        "EDGES|SOURCE_FILE D:shortunsigned[3] -> F:<includes>": 1
+      }
+    }
+  },
+  "files": {
+    "actual.txt": "1d3402f00cd066767d6a87552aa217b8292a66629c72309165bafaa1a8d4ff0d",
+    "before-candidate.diff": "0f26f619cf0f0315f459dc92dd28f194a2ecc37189cf219239243bf2b72b40df",
+    "before.txt": "11aaaca3111248fd6db26a5a93cef887572c7667f643269e8d8004011d24ba44",
+    "expected-before.diff": "2e3347fbc11f8ea97a0bfe5eeea127ece5c6b2a89d978fd8705b02a1a2865821",
+    "expected-candidate.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "expected.txt": "1d3402f00cd066767d6a87552aa217b8292a66629c72309165bafaa1a8d4ff0d",
+    "input/main.c": "78a9ab60868e0c24ba739ac8c1ed1cffb97913d16e6c14a8da5e985a0976dfe7",
+    "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout.txt": "1d3402f00cd066767d6a87552aa217b8292a66629c72309165bafaa1a8d4ff0d"
+  }
+}

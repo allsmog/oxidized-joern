@@ -1,0 +1,55 @@
+{
+  "case": "ordinary_numeric_control",
+  "retainedAnchor": false,
+  "command": [
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/frozen-v1/joern-parity",
+    "--production",
+    "main.c"
+  ],
+  "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/ordinary_numeric_control/input",
+  "seconds": 0.004978707991540432,
+  "exitCode": 0,
+  "timeout": false,
+  "error": null,
+  "beforeExact": true,
+  "candidateExact": true,
+  "beforeCandidateIdentical": true,
+  "inputHashes": {
+    "main.c": "ca63fcf93080419061d59acd5f7cefe2818a399a29190125a011d7397e52caa6"
+  },
+  "counts": {
+    "includingSeparators": {
+      "expected": 121,
+      "before": 121,
+      "candidate": 121,
+      "matchingBefore": 121,
+      "matchingCandidate": 121,
+      "gained": 0,
+      "lost": 0,
+      "lostRecords": {},
+      "gainedRecords": {}
+    },
+    "nonempty": {
+      "expected": 117,
+      "before": 117,
+      "candidate": 117,
+      "matchingBefore": 117,
+      "matchingCandidate": 117,
+      "gained": 0,
+      "lost": 0,
+      "lostRecords": {},
+      "gainedRecords": {}
+    }
+  },
+  "files": {
+    "actual.txt": "4528adacb40f21e1aa33eb4195cfb87470e8f5a3a288a1678486d1800c63aef1",
+    "before-candidate.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "before.txt": "4528adacb40f21e1aa33eb4195cfb87470e8f5a3a288a1678486d1800c63aef1",
+    "expected-before.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "expected-candidate.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "expected.txt": "4528adacb40f21e1aa33eb4195cfb87470e8f5a3a288a1678486d1800c63aef1",
+    "input/main.c": "ca63fcf93080419061d59acd5f7cefe2818a399a29190125a011d7397e52caa6",
+    "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout.txt": "4528adacb40f21e1aa33eb4195cfb87470e8f5a3a288a1678486d1800c63aef1"
+  }
+}

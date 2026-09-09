@@ -314,3 +314,19 @@ their source spelling. Their numeric partner methods remain exact. This is
 an observed type-spelling rule, not general constant folding. Restricting
 expansion to a bare identifier restores the three complete controls and the
 96 matching zlib records lost by the held tenth candidate.
+
+### Primitive MEMBER declaration spelling
+
+The [complete primitive MEMBER fixtures](tests/fixtures/primitive-members/README.md)
+pin declaration-role spelling for field bases: `unsigned short` and `short
+unsigned` become `shortunsigned`, while an explicit `int` yields `short unsigned
+int`. `signed char` becomes `signedchar`; `unsigned char` keeps its space.
+Base `const` is absent from the type, base `volatile` remains, and pointer
+qualifiers remain in CODE without changing the pointer type suffix. Each member
+of a mixed declaration keeps its own declarator CODE and suffix.
+
+The measured change uses the existing declaration renderer only for field
+bases. Enum members, named-type fallback, member suffixes and initializer
+construction retain their existing paths. Complete nonprimitive and older
+`member_types` diagnostics remain recorded separately from the 18 complete
+graph gates, including two retained fixedtables anchors.

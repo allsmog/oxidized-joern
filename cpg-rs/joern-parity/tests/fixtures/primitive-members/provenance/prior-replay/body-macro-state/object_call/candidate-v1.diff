@@ -1,0 +1,97 @@
+--- live
++++ candidate-v1
+@@ -1,5 +1,11 @@
+ METHOD NAME=<global> CODE=<global> FULL_NAME=<includes>:<global> ORDER=1
+   BLOCK TYPE_FULL_NAME=ANY ORDER=1
++  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
++
++METHOD NAME=CALL FULL_NAME=CALL ORDER=0
++  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
++  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
++  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+ 
+ METHOD NAME=consume CODE=int consume(int value); FULL_NAME=consume SIGNATURE=int(int) ORDER=1
+@@ -14,7 +20,7 @@
+     METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+     BLOCK CODE={ return CALL(ARG); } TYPE_FULL_NAME=void ORDER=2
+       RETURN CODE=return CALL(ARG); ORDER=1
+-        CALL NAME=consume CODE=consume(1) TYPE_FULL_NAME=int METHOD_FULL_NAME=consume ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
++        CALL NAME=CALL CODE=CALL(ARG) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=CALL ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+           CALL NAME=ARG CODE=ARG TYPE_FULL_NAME=int METHOD_FULL_NAME=main.c:ARG:int(0) SIGNATURE=int(0) ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=INLINED
+             BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+               LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=1
+@@ -32,7 +38,7 @@
+   METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+   BLOCK CODE={ return CALL(ARG); } TYPE_FULL_NAME=void ORDER=2
+     RETURN CODE=return CALL(ARG); ORDER=1
+-      CALL NAME=consume CODE=consume(1) TYPE_FULL_NAME=int METHOD_FULL_NAME=consume ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
++      CALL NAME=CALL CODE=CALL(ARG) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=CALL ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+         CALL NAME=ARG CODE=ARG TYPE_FULL_NAME=int METHOD_FULL_NAME=main.c:ARG:int(0) SIGNATURE=int(0) ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=INLINED
+           BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+             LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=1
+@@ -57,9 +63,10 @@
+ NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+ EDGES|ARGUMENT sample#4 -> sample#5
+ EDGES|ARGUMENT sample#5 -> sample#6
+-EDGES|CALL sample#5 -> consume#0
++EDGES|CALL sample#5 -> CALL#0
+ EDGES|CALL sample#6 -> main.c:ARG:int(0)#0
+ EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
++EDGES|CFG CALL#0 -> CALL#4
+ EDGES|CFG consume#0 -> consume#4
+ EDGES|CFG main.c:<global>#0 -> main.c:<global>#12
+ EDGES|CFG main.c:<global>#1 -> sample#6
+@@ -71,6 +78,7 @@
+ EDGES|CFG sample#6 -> sample#8
+ EDGES|CFG sample#8 -> sample#5
+ EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
++EDGES|CONTAINS CALL#0 -> CALL#2
+ EDGES|CONTAINS D:main.c:<global> -> D:sample
+ EDGES|CONTAINS D:main.c:<global> -> consume#0
+ EDGES|CONTAINS D:main.c:<global> -> main.c:<global>#0
+@@ -93,6 +101,10 @@
+ EDGES|CONTAINS main.c:ARG:int(0)#0 -> main.c:ARG:int(0)#1
+ EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+ EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
++EDGES|EVAL_TYPE CALL#1 -> T:ANY
++EDGES|EVAL_TYPE CALL#2 -> T:ANY
++EDGES|EVAL_TYPE CALL#3 -> T:ANY
++EDGES|EVAL_TYPE CALL#4 -> T:ANY
+ EDGES|EVAL_TYPE consume#1 -> T:int
+ EDGES|EVAL_TYPE consume#2 -> T:int
+ EDGES|EVAL_TYPE consume#3 -> T:ANY
+@@ -105,11 +117,12 @@
+ EDGES|EVAL_TYPE sample#1 -> T:void
+ EDGES|EVAL_TYPE sample#2 -> T:void
+ EDGES|EVAL_TYPE sample#3 -> T:void
+-EDGES|EVAL_TYPE sample#5 -> T:int
++EDGES|EVAL_TYPE sample#5 -> T:ANY
+ EDGES|EVAL_TYPE sample#6 -> T:int
+ EDGES|EVAL_TYPE sample#7 -> T:ANY
+ EDGES|EVAL_TYPE sample#8 -> T:int
+ EDGES|EVAL_TYPE sample#9 -> T:int
++EDGES|PARAMETER_LINK CALL#1 -> CALL#3
+ EDGES|PARAMETER_LINK consume#1 -> consume#2
+ EDGES|PARAMETER_LINK sample#1 -> sample#2
+ EDGES|REF NB:<global> -> NS:<global>
+@@ -136,6 +149,9 @@
+ FLOWS|REACHING_DEF[<RET>] sample#4 -> sample#9
+ FLOWS|REACHING_DEF[ARG] sample#6 -> sample#5
+ FLOWS|REACHING_DEF[ARG] sample#6 -> sample#9
++FLOWS|REACHING_DEF[CALL(ARG)] sample#5 -> sample#4
++FLOWS|REACHING_DEF[CALL(ARG)] sample#5 -> sample#9
++FLOWS|REACHING_DEF[] CALL#0 -> CALL#1
+ FLOWS|REACHING_DEF[] consume#0 -> consume#1
+ FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#12
+ FLOWS|REACHING_DEF[] main.c:<global>#1 -> sample#1
+@@ -143,7 +159,7 @@
+ FLOWS|REACHING_DEF[] main.c:<global>#1 -> sample#8
+ FLOWS|REACHING_DEF[] sample#1 -> sample#2
+ FLOWS|REACHING_DEF[] sample#1 -> sample#9
+-FLOWS|REACHING_DEF[consume(1)] sample#5 -> sample#4
+-FLOWS|REACHING_DEF[consume(1)] sample#5 -> sample#9
++FLOWS|REACHING_DEF[p1] CALL#1 -> CALL#3
++FLOWS|REACHING_DEF[p1] CALL#1 -> CALL#4
+ FLOWS|REACHING_DEF[value] consume#1 -> consume#2
+ FLOWS|REACHING_DEF[value] consume#1 -> consume#4

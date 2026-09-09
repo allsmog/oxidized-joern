@@ -1,0 +1,90 @@
+[
+  {
+    "check": "fmt",
+    "command": [
+      "cargo",
+      "fmt",
+      "--manifest-path",
+      "cpg-rs/Cargo.toml",
+      "--all",
+      "--",
+      "--check"
+    ],
+    "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members",
+    "exitCode": 0,
+    "startedAtUtc": "2026-09-09T00:40:31.796762+00:00",
+    "seconds": 0.3882557079778053,
+    "sourceInputsUnchanged": true,
+    "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "check": "focused",
+    "command": [
+      "cargo",
+      "test",
+      "--locked",
+      "--manifest-path",
+      "cpg-rs/Cargo.toml",
+      "-p",
+      "joern-parity",
+      "--test",
+      "primitive_members",
+      "--test",
+      "primitive_roles",
+      "--test",
+      "typedef_aggregates",
+      "--test",
+      "array_initializers",
+      "--test",
+      "body_includes",
+      "--test",
+      "array_dimension_macros",
+      "--test",
+      "body_macro_state"
+    ],
+    "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members",
+    "exitCode": 0,
+    "startedAtUtc": "2026-09-09T00:40:32.185257+00:00",
+    "seconds": 6.779854624997824,
+    "sourceInputsUnchanged": true,
+    "logSha256": "98fb258a81185e10cee0825a8a0901ec0e4f164525e0048fdf70137ab987073d"
+  },
+  {
+    "check": "main308",
+    "command": [
+      "bash",
+      "cpg-rs/joern-parity/check.sh",
+      "--committed-only"
+    ],
+    "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members",
+    "exitCode": 0,
+    "startedAtUtc": "2026-09-09T00:40:38.965319+00:00",
+    "seconds": 1.7110841670073569,
+    "sourceInputsUnchanged": true,
+    "logSha256": "c105179d62065e9cbf9f398ff94754c29ec03add1206db7dff281cb4c07b6be6"
+  },
+  {
+    "check": "clippy",
+    "command": [
+      "cargo",
+      "clippy",
+      "--locked",
+      "--manifest-path",
+      "cpg-rs/Cargo.toml",
+      "-p",
+      "cpg-lang-c",
+      "-p",
+      "joern-parity",
+      "--all-targets",
+      "--",
+      "-D",
+      "warnings"
+    ],
+    "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members",
+    "exitCode": 0,
+    "startedAtUtc": "2026-09-09T00:40:40.676642+00:00",
+    "seconds": 3.140697333990829,
+    "sourceInputsUnchanged": true,
+    "logSha256": "197c830c5a7507716b756fac188aa4f87c4e635c1e7d5fa397cc81ecd09a05af"
+  }
+]

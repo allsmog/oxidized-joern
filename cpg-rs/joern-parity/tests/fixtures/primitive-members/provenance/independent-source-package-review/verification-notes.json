@@ -1,0 +1,18 @@
+{
+  "status": "REVIEWER_VERIFIER_CORRECTIONS_ONLY",
+  "finalReceiptSha256": "c661e055259b242337c477bb3a44040de1a59502a9433fd8e6a82fc9aeb92855",
+  "attempts": [
+    {
+      "script": "verifier-attempt-v1.py",
+      "sha256": "46f994fb1aa764cdfa37e900b9363cdce1c8706d965f01e471d731fde685dbb6",
+      "finding": "Reviewer equality assertion omitted the final test explanatory comments. Source and actual test were unchanged; corrected assertion admits exactly the two reviewed comment lines."
+    },
+    {
+      "script": "verifier-attempt-v2.py",
+      "sha256": "22fbc9629def5cd9745aea99a5490cad92592a71cf3dae5f8beee55980e7e599",
+      "finding": "Reviewer test-name regex also counted the assertion format string {name}. Corrected regex restricts case names to lowercase letters/underscore."
+    }
+  ],
+  "finalVerifierSha256": "6ba9136f06dd3e38152b8d3f2ba441b97c09c5ffd981a3c083df0364dbd0f9cb",
+  "noProducerExecuted": true
+}

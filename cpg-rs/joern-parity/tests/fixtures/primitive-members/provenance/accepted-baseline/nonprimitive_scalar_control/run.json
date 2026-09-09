@@ -1,0 +1,74 @@
+{
+  "case": "nonprimitive_scalar_control",
+  "status": "COMPLETE_BOUND_COMPARISON",
+  "exitCode": 0,
+  "timedOut": false,
+  "processError": null,
+  "command": [
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/tenth-batch/repaired-final-real-differential/bin/joern-parity",
+    "--production",
+    "main.c"
+  ],
+  "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/nonprimitive_scalar_control/input",
+  "seconds": 0.012719250022200868,
+  "inputBefore": {
+    "files": {
+      "main.c": {
+        "kind": "file",
+        "sha256": "30f7610f6251619e111dccd66822d2b620b131a00520a94432f29a23737cbcee",
+        "bytes": 260
+      }
+    },
+    "directories": []
+  },
+  "inputAfter": {
+    "files": {
+      "main.c": {
+        "kind": "file",
+        "sha256": "30f7610f6251619e111dccd66822d2b620b131a00520a94432f29a23737cbcee",
+        "bytes": 260
+      }
+    },
+    "directories": []
+  },
+  "bindingErrors": [],
+  "expected": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/nonprimitive_scalar_control/expected.txt",
+    "sha256": "d01b88fb2012eb6671de933e8be87c445c1cc7d951aeee509276ddd6373dd34c",
+    "bytes": 11430
+  },
+  "actual": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/nonprimitive_scalar_control/actual.txt",
+    "sha256": "2193e03adf6e49107881f79b1006f5787adfa5d2084cd57bf9dc59120045a3bd",
+    "bytes": 9840
+  },
+  "stderr": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/nonprimitive_scalar_control/stderr.txt",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0
+  },
+  "completeDiff": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/nonprimitive_scalar_control/complete.diff",
+    "sha256": "92a7c9040eb34d49935b08ec227955012a2481c97c13475ab6539ece90a87ebf",
+    "bytes": 5254
+  },
+  "byteExact": false,
+  "exact": false,
+  "completeProducer": true,
+  "multiplicities": {
+    "includingSeparators": {
+      "expected": 181,
+      "actual": 161,
+      "matching": 161,
+      "missing": 20,
+      "extra": 0
+    },
+    "nonempty": {
+      "expected": 178,
+      "actual": 158,
+      "matching": 158,
+      "missing": 20,
+      "extra": 0
+    }
+  }
+}

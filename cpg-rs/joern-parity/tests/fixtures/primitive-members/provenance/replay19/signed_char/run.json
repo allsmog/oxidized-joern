@@ -1,0 +1,71 @@
+{
+  "case": "signed_char",
+  "retainedAnchor": false,
+  "command": [
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/frozen-v1/joern-parity",
+    "--production",
+    "main.c"
+  ],
+  "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/signed_char/input",
+  "seconds": 0.004253457998856902,
+  "exitCode": 0,
+  "timeout": false,
+  "error": null,
+  "beforeExact": false,
+  "candidateExact": true,
+  "beforeCandidateIdentical": false,
+  "inputHashes": {
+    "main.c": "65222d14e53a108d3e98d3e3efa30aeda2b6df4dbed97b88e92698dee74d32c0"
+  },
+  "counts": {
+    "includingSeparators": {
+      "expected": 119,
+      "before": 119,
+      "candidate": 119,
+      "matchingBefore": 112,
+      "matchingCandidate": 119,
+      "gained": 7,
+      "lost": 0,
+      "lostRecords": {},
+      "gainedRecords": {
+        "    MEMBER NAME=value CODE=value TYPE_FULL_NAME=signedchar ORDER=1": 1,
+        "NODES|TYPE_DECL NAME=signedchar FULL_NAME=signedchar CODE=signedchar IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>": 1,
+        "NODES|TYPE NAME=signedchar FULL_NAME=signedchar TYPE_DECL_FULL_NAME=signedchar": 1,
+        "EDGES|CONTAINS F:<includes> -> D:signedchar": 1,
+        "EDGES|EVAL_TYPE main.c:<global>#2 -> T:signedchar": 1,
+        "EDGES|REF T:signedchar -> D:signedchar": 1,
+        "EDGES|SOURCE_FILE D:signedchar -> F:<includes>": 1
+      }
+    },
+    "nonempty": {
+      "expected": 115,
+      "before": 115,
+      "candidate": 115,
+      "matchingBefore": 108,
+      "matchingCandidate": 115,
+      "gained": 7,
+      "lost": 0,
+      "lostRecords": {},
+      "gainedRecords": {
+        "    MEMBER NAME=value CODE=value TYPE_FULL_NAME=signedchar ORDER=1": 1,
+        "NODES|TYPE_DECL NAME=signedchar FULL_NAME=signedchar CODE=signedchar IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>": 1,
+        "NODES|TYPE NAME=signedchar FULL_NAME=signedchar TYPE_DECL_FULL_NAME=signedchar": 1,
+        "EDGES|CONTAINS F:<includes> -> D:signedchar": 1,
+        "EDGES|EVAL_TYPE main.c:<global>#2 -> T:signedchar": 1,
+        "EDGES|REF T:signedchar -> D:signedchar": 1,
+        "EDGES|SOURCE_FILE D:signedchar -> F:<includes>": 1
+      }
+    }
+  },
+  "files": {
+    "actual.txt": "01213a09ac6d7a925b92e76fa1e9424a8c6e1d1f60201de3f0701c987ac794aa",
+    "before-candidate.diff": "b7bcb73961d7b87b7e60ade54a077ca1479e5ade65d2787d1b53f3b04f06fa0e",
+    "before.txt": "450ee58b73fd4e3bb70e91538302fd1c334b3e04a5b9262ddfb36e617c8cb5e8",
+    "expected-before.diff": "747d70895d6d0a12c099dd31dc0635a71c6061995eaa5456fd6ba83026454287",
+    "expected-candidate.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "expected.txt": "01213a09ac6d7a925b92e76fa1e9424a8c6e1d1f60201de3f0701c987ac794aa",
+    "input/main.c": "65222d14e53a108d3e98d3e3efa30aeda2b6df4dbed97b88e92698dee74d32c0",
+    "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout.txt": "01213a09ac6d7a925b92e76fa1e9424a8c6e1d1f60201de3f0701c987ac794aa"
+  }
+}

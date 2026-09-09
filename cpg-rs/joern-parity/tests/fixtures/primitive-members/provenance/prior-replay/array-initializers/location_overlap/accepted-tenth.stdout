@@ -1,0 +1,920 @@
+METHOD NAME=<global> CODE=<global> FULL_NAME=<includes>:<global> ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.alloc FULL_NAME=<operator>.alloc ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.arrayInitializer FULL_NAME=<operator>.arrayInitializer ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.assignment FULL_NAME=<operator>.assignment ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<global> CODE=<global> FULL_NAME=arrays.c:<global> ORDER=1
+  METHOD NAME=sized_string CODE=void sized_string(void) {\n    char value[2] =\n        "x";\n    use_char(value);\n} FULL_NAME=sized_string SIGNATURE=void(void) ORDER=1
+    METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    BLOCK CODE={\n    char value[2] =\n        "x";\n    use_char(value);\n} TYPE_FULL_NAME=void ORDER=2
+      LOCAL NAME=value CODE=char value[2] TYPE_FULL_NAME=char[2] ORDER=1
+      CALL NAME=<operator>.assignment CODE=value[2] =\n        "x" TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=char[2] ORDER=1 ARGUMENT_INDEX=1
+        CALL NAME=<operator>.alloc CODE=value[2] =\n        "x" TYPE_FULL_NAME=char[2] METHOD_FULL_NAME=<operator>.alloc ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=char[2] CODE=char[2] TYPE_FULL_NAME=char[2] ORDER=1 ARGUMENT_INDEX=1
+          LITERAL CODE=2 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+      CALL NAME=<operator>.assignment CODE=value[2] =\n        "x" TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=char[2] ORDER=1 ARGUMENT_INDEX=1
+        LITERAL CODE="x" TYPE_FULL_NAME=char* ORDER=2 ARGUMENT_INDEX=2
+      CALL NAME=use_char CODE=use_char(value) TYPE_FULL_NAME=void METHOD_FULL_NAME=use_char ORDER=4 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=char[2] ORDER=1 ARGUMENT_INDEX=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+  METHOD NAME=mixed_array_first CODE=void mixed_array_first(void) {\n    int a[2] = {1},\n        b[2];\n    use(a);\n} FULL_NAME=mixed_array_first SIGNATURE=void(void) ORDER=1
+    METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    BLOCK CODE={\n    int a[2] = {1},\n        b[2];\n    use(a);\n} TYPE_FULL_NAME=void ORDER=2
+      LOCAL NAME=a CODE=int a[2] TYPE_FULL_NAME=int[2] ORDER=1
+      LOCAL NAME=b CODE=int b[2] TYPE_FULL_NAME=int[2] ORDER=2
+      CALL NAME=<operator>.assignment CODE=a[2] = {1} TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=a CODE=a TYPE_FULL_NAME=int[2] ORDER=1 ARGUMENT_INDEX=1
+        CALL NAME=<operator>.alloc CODE=a[2] = {1} TYPE_FULL_NAME=int[2] METHOD_FULL_NAME=<operator>.alloc ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=int[2] CODE=int[2] TYPE_FULL_NAME=int[2] ORDER=1 ARGUMENT_INDEX=1
+          LITERAL CODE=2 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+      CALL NAME=<operator>.assignment CODE=b[2] TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=4 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=b CODE=b TYPE_FULL_NAME=int[2] ORDER=1 ARGUMENT_INDEX=1
+        CALL NAME=<operator>.alloc CODE=b[2] TYPE_FULL_NAME=int[2] METHOD_FULL_NAME=<operator>.alloc ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=int[2] CODE=int[2] TYPE_FULL_NAME=int[2] ORDER=1 ARGUMENT_INDEX=1
+          LITERAL CODE=2 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+      CALL NAME=<operator>.assignment CODE=a[2] = {1} TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=5 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=a CODE=a TYPE_FULL_NAME=int[2] ORDER=1 ARGUMENT_INDEX=1
+        CALL NAME=<operator>.arrayInitializer CODE={1} TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.arrayInitializer ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+          LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+      CALL NAME=use CODE=use(a) TYPE_FULL_NAME=void METHOD_FULL_NAME=use ORDER=6 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=a CODE=a TYPE_FULL_NAME=int[2] ORDER=1 ARGUMENT_INDEX=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+  METHOD NAME=mixed_scalar_first CODE=void mixed_scalar_first(void) {\n    int a=1,\n        b[2];\n    use(b);\n} FULL_NAME=mixed_scalar_first SIGNATURE=void(void) ORDER=1
+    METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    BLOCK CODE={\n    int a=1,\n        b[2];\n    use(b);\n} TYPE_FULL_NAME=void ORDER=2
+      LOCAL NAME=a CODE=int a TYPE_FULL_NAME=int ORDER=1
+      LOCAL NAME=b CODE=int b[2] TYPE_FULL_NAME=int[2] ORDER=2
+      CALL NAME=<operator>.assignment CODE=b[2] TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=b CODE=b TYPE_FULL_NAME=int[2] ORDER=1 ARGUMENT_INDEX=1
+        CALL NAME=<operator>.alloc CODE=b[2] TYPE_FULL_NAME=int[2] METHOD_FULL_NAME=<operator>.alloc ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=int[2] CODE=int[2] TYPE_FULL_NAME=int[2] ORDER=1 ARGUMENT_INDEX=1
+          LITERAL CODE=2 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+      CALL NAME=<operator>.assignment CODE=a=1 TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=4 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=a CODE=a TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+        LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+      CALL NAME=use CODE=use(b) TYPE_FULL_NAME=void METHOD_FULL_NAME=use ORDER=5 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=b CODE=b TYPE_FULL_NAME=int[2] ORDER=1 ARGUMENT_INDEX=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+  METHOD NAME=repeat_dimension CODE=void repeat_dimension(void) {\n    int a[size()];\n    size();\n} FULL_NAME=repeat_dimension SIGNATURE=void(void) ORDER=1
+    METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    BLOCK CODE={\n    int a[size()];\n    size();\n} TYPE_FULL_NAME=void ORDER=2
+      LOCAL NAME=a CODE=int a[size()] TYPE_FULL_NAME=int[size()] ORDER=1
+      CALL NAME=<operator>.assignment CODE=a[size()] TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=a CODE=a TYPE_FULL_NAME=int[size()] ORDER=1 ARGUMENT_INDEX=1
+        CALL NAME=<operator>.alloc CODE=a[size()] TYPE_FULL_NAME=int[size()] METHOD_FULL_NAME=<operator>.alloc ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=int[size()] CODE=int[size()] TYPE_FULL_NAME=int[size()] ORDER=1 ARGUMENT_INDEX=1
+          CALL NAME=size CODE=size() TYPE_FULL_NAME=int METHOD_FULL_NAME=size ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+      CALL NAME=size CODE=size() TYPE_FULL_NAME=int METHOD_FULL_NAME=size ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+  METHOD NAME=separate_scope CODE=void separate_scope(void) {\n    { int a[2]={1}; }\n    int a[2]={1};\n    use(a);\n} FULL_NAME=separate_scope SIGNATURE=void(void) ORDER=1
+    METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    BLOCK CODE={\n    { int a[2]={1}; }\n    int a[2]={1};\n    use(a);\n} TYPE_FULL_NAME=void ORDER=2
+      BLOCK CODE={ int a[2]={1}; } TYPE_FULL_NAME=void ORDER=1
+        LOCAL NAME=a CODE=int a[2] TYPE_FULL_NAME=int[2] ORDER=1
+        CALL NAME=<operator>.assignment CODE=a[2]={1} TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=a CODE=a TYPE_FULL_NAME=int[2] ORDER=1 ARGUMENT_INDEX=1
+          CALL NAME=<operator>.alloc CODE=a[2]={1} TYPE_FULL_NAME=int[2] METHOD_FULL_NAME=<operator>.alloc ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+            IDENTIFIER NAME=int[2] CODE=int[2] TYPE_FULL_NAME=int[2] ORDER=1 ARGUMENT_INDEX=1
+            LITERAL CODE=2 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+        CALL NAME=<operator>.assignment CODE=a[2]={1} TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=a CODE=a TYPE_FULL_NAME=int[2] ORDER=1 ARGUMENT_INDEX=1
+          CALL NAME=<operator>.arrayInitializer CODE={1} TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.arrayInitializer ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+            LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+      LOCAL NAME=a CODE=int a[2] TYPE_FULL_NAME=int[2] ORDER=2
+      CALL NAME=<operator>.assignment CODE=a[2]={1} TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=a CODE=a TYPE_FULL_NAME=int[2] ORDER=1 ARGUMENT_INDEX=1
+        CALL NAME=<operator>.alloc CODE=a[2]={1} TYPE_FULL_NAME=int[2] METHOD_FULL_NAME=<operator>.alloc ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=int[2] CODE=int[2] TYPE_FULL_NAME=int[2] ORDER=1 ARGUMENT_INDEX=1
+          LITERAL CODE=2 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+      CALL NAME=<operator>.assignment CODE=a[2]={1} TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=4 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=a CODE=a TYPE_FULL_NAME=int[2] ORDER=1 ARGUMENT_INDEX=1
+        CALL NAME=<operator>.arrayInitializer CODE={1} TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.arrayInitializer ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+          LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+      CALL NAME=use CODE=use(a) TYPE_FULL_NAME=void METHOD_FULL_NAME=use ORDER=5 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=a CODE=a TYPE_FULL_NAME=int[2] ORDER=1 ARGUMENT_INDEX=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+    METHOD_REF CODE=sized_string TYPE_FULL_NAME=sized_string METHOD_FULL_NAME=sized_string ORDER=1
+    METHOD_REF CODE=mixed_array_first TYPE_FULL_NAME=mixed_array_first METHOD_FULL_NAME=mixed_array_first ORDER=2
+    METHOD_REF CODE=mixed_scalar_first TYPE_FULL_NAME=mixed_scalar_first METHOD_FULL_NAME=mixed_scalar_first ORDER=3
+    METHOD_REF CODE=repeat_dimension TYPE_FULL_NAME=repeat_dimension METHOD_FULL_NAME=repeat_dimension ORDER=4
+    METHOD_REF CODE=separate_scope TYPE_FULL_NAME=separate_scope METHOD_FULL_NAME=separate_scope ORDER=5
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=mixed_array_first CODE=void mixed_array_first(void) {\n    int a[2] = {1},\n        b[2];\n    use(a);\n} FULL_NAME=mixed_array_first SIGNATURE=void(void) ORDER=1
+  METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  BLOCK CODE={\n    int a[2] = {1},\n        b[2];\n    use(a);\n} TYPE_FULL_NAME=void ORDER=2
+    LOCAL NAME=a CODE=int a[2] TYPE_FULL_NAME=int[2] ORDER=1
+    LOCAL NAME=b CODE=int b[2] TYPE_FULL_NAME=int[2] ORDER=2
+    CALL NAME=<operator>.assignment CODE=a[2] = {1} TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH
+      IDENTIFIER NAME=a CODE=a TYPE_FULL_NAME=int[2] ORDER=1 ARGUMENT_INDEX=1
+      CALL NAME=<operator>.alloc CODE=a[2] = {1} TYPE_FULL_NAME=int[2] METHOD_FULL_NAME=<operator>.alloc ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=int[2] CODE=int[2] TYPE_FULL_NAME=int[2] ORDER=1 ARGUMENT_INDEX=1
+        LITERAL CODE=2 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+    CALL NAME=<operator>.assignment CODE=b[2] TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=4 DISPATCH_TYPE=STATIC_DISPATCH
+      IDENTIFIER NAME=b CODE=b TYPE_FULL_NAME=int[2] ORDER=1 ARGUMENT_INDEX=1
+      CALL NAME=<operator>.alloc CODE=b[2] TYPE_FULL_NAME=int[2] METHOD_FULL_NAME=<operator>.alloc ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=int[2] CODE=int[2] TYPE_FULL_NAME=int[2] ORDER=1 ARGUMENT_INDEX=1
+        LITERAL CODE=2 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+    CALL NAME=<operator>.assignment CODE=a[2] = {1} TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=5 DISPATCH_TYPE=STATIC_DISPATCH
+      IDENTIFIER NAME=a CODE=a TYPE_FULL_NAME=int[2] ORDER=1 ARGUMENT_INDEX=1
+      CALL NAME=<operator>.arrayInitializer CODE={1} TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.arrayInitializer ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+        LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+    CALL NAME=use CODE=use(a) TYPE_FULL_NAME=void METHOD_FULL_NAME=use ORDER=6 DISPATCH_TYPE=STATIC_DISPATCH
+      IDENTIFIER NAME=a CODE=a TYPE_FULL_NAME=int[2] ORDER=1 ARGUMENT_INDEX=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+
+METHOD NAME=mixed_scalar_first CODE=void mixed_scalar_first(void) {\n    int a=1,\n        b[2];\n    use(b);\n} FULL_NAME=mixed_scalar_first SIGNATURE=void(void) ORDER=1
+  METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  BLOCK CODE={\n    int a=1,\n        b[2];\n    use(b);\n} TYPE_FULL_NAME=void ORDER=2
+    LOCAL NAME=a CODE=int a TYPE_FULL_NAME=int ORDER=1
+    LOCAL NAME=b CODE=int b[2] TYPE_FULL_NAME=int[2] ORDER=2
+    CALL NAME=<operator>.assignment CODE=b[2] TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH
+      IDENTIFIER NAME=b CODE=b TYPE_FULL_NAME=int[2] ORDER=1 ARGUMENT_INDEX=1
+      CALL NAME=<operator>.alloc CODE=b[2] TYPE_FULL_NAME=int[2] METHOD_FULL_NAME=<operator>.alloc ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=int[2] CODE=int[2] TYPE_FULL_NAME=int[2] ORDER=1 ARGUMENT_INDEX=1
+        LITERAL CODE=2 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+    CALL NAME=<operator>.assignment CODE=a=1 TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=4 DISPATCH_TYPE=STATIC_DISPATCH
+      IDENTIFIER NAME=a CODE=a TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+      LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+    CALL NAME=use CODE=use(b) TYPE_FULL_NAME=void METHOD_FULL_NAME=use ORDER=5 DISPATCH_TYPE=STATIC_DISPATCH
+      IDENTIFIER NAME=b CODE=b TYPE_FULL_NAME=int[2] ORDER=1 ARGUMENT_INDEX=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+
+METHOD NAME=repeat_dimension CODE=void repeat_dimension(void) {\n    int a[size()];\n    size();\n} FULL_NAME=repeat_dimension SIGNATURE=void(void) ORDER=1
+  METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  BLOCK CODE={\n    int a[size()];\n    size();\n} TYPE_FULL_NAME=void ORDER=2
+    LOCAL NAME=a CODE=int a[size()] TYPE_FULL_NAME=int[size()] ORDER=1
+    CALL NAME=<operator>.assignment CODE=a[size()] TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+      IDENTIFIER NAME=a CODE=a TYPE_FULL_NAME=int[size()] ORDER=1 ARGUMENT_INDEX=1
+      CALL NAME=<operator>.alloc CODE=a[size()] TYPE_FULL_NAME=int[size()] METHOD_FULL_NAME=<operator>.alloc ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=int[size()] CODE=int[size()] TYPE_FULL_NAME=int[size()] ORDER=1 ARGUMENT_INDEX=1
+        CALL NAME=size CODE=size() TYPE_FULL_NAME=int METHOD_FULL_NAME=size ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+    CALL NAME=size CODE=size() TYPE_FULL_NAME=int METHOD_FULL_NAME=size ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+
+METHOD NAME=separate_scope CODE=void separate_scope(void) {\n    { int a[2]={1}; }\n    int a[2]={1};\n    use(a);\n} FULL_NAME=separate_scope SIGNATURE=void(void) ORDER=1
+  METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  BLOCK CODE={\n    { int a[2]={1}; }\n    int a[2]={1};\n    use(a);\n} TYPE_FULL_NAME=void ORDER=2
+    BLOCK CODE={ int a[2]={1}; } TYPE_FULL_NAME=void ORDER=1
+      LOCAL NAME=a CODE=int a[2] TYPE_FULL_NAME=int[2] ORDER=1
+      CALL NAME=<operator>.assignment CODE=a[2]={1} TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=a CODE=a TYPE_FULL_NAME=int[2] ORDER=1 ARGUMENT_INDEX=1
+        CALL NAME=<operator>.alloc CODE=a[2]={1} TYPE_FULL_NAME=int[2] METHOD_FULL_NAME=<operator>.alloc ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=int[2] CODE=int[2] TYPE_FULL_NAME=int[2] ORDER=1 ARGUMENT_INDEX=1
+          LITERAL CODE=2 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+      CALL NAME=<operator>.assignment CODE=a[2]={1} TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=a CODE=a TYPE_FULL_NAME=int[2] ORDER=1 ARGUMENT_INDEX=1
+        CALL NAME=<operator>.arrayInitializer CODE={1} TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.arrayInitializer ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+          LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+    LOCAL NAME=a CODE=int a[2] TYPE_FULL_NAME=int[2] ORDER=2
+    CALL NAME=<operator>.assignment CODE=a[2]={1} TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH
+      IDENTIFIER NAME=a CODE=a TYPE_FULL_NAME=int[2] ORDER=1 ARGUMENT_INDEX=1
+      CALL NAME=<operator>.alloc CODE=a[2]={1} TYPE_FULL_NAME=int[2] METHOD_FULL_NAME=<operator>.alloc ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=int[2] CODE=int[2] TYPE_FULL_NAME=int[2] ORDER=1 ARGUMENT_INDEX=1
+        LITERAL CODE=2 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+    CALL NAME=<operator>.assignment CODE=a[2]={1} TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=4 DISPATCH_TYPE=STATIC_DISPATCH
+      IDENTIFIER NAME=a CODE=a TYPE_FULL_NAME=int[2] ORDER=1 ARGUMENT_INDEX=1
+      CALL NAME=<operator>.arrayInitializer CODE={1} TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.arrayInitializer ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+        LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+    CALL NAME=use CODE=use(a) TYPE_FULL_NAME=void METHOD_FULL_NAME=use ORDER=5 DISPATCH_TYPE=STATIC_DISPATCH
+      IDENTIFIER NAME=a CODE=a TYPE_FULL_NAME=int[2] ORDER=1 ARGUMENT_INDEX=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+
+METHOD NAME=size CODE=int size(void); FULL_NAME=size SIGNATURE=int(void) ORDER=1
+  METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+
+METHOD NAME=sized_string CODE=void sized_string(void) {\n    char value[2] =\n        "x";\n    use_char(value);\n} FULL_NAME=sized_string SIGNATURE=void(void) ORDER=1
+  METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  BLOCK CODE={\n    char value[2] =\n        "x";\n    use_char(value);\n} TYPE_FULL_NAME=void ORDER=2
+    LOCAL NAME=value CODE=char value[2] TYPE_FULL_NAME=char[2] ORDER=1
+    CALL NAME=<operator>.assignment CODE=value[2] =\n        "x" TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+      IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=char[2] ORDER=1 ARGUMENT_INDEX=1
+      CALL NAME=<operator>.alloc CODE=value[2] =\n        "x" TYPE_FULL_NAME=char[2] METHOD_FULL_NAME=<operator>.alloc ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=char[2] CODE=char[2] TYPE_FULL_NAME=char[2] ORDER=1 ARGUMENT_INDEX=1
+        LITERAL CODE=2 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+    CALL NAME=<operator>.assignment CODE=value[2] =\n        "x" TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH
+      IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=char[2] ORDER=1 ARGUMENT_INDEX=1
+      LITERAL CODE="x" TYPE_FULL_NAME=char* ORDER=2 ARGUMENT_INDEX=2
+    CALL NAME=use_char CODE=use_char(value) TYPE_FULL_NAME=void METHOD_FULL_NAME=use_char ORDER=4 DISPATCH_TYPE=STATIC_DISPATCH
+      IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=char[2] ORDER=1 ARGUMENT_INDEX=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+
+METHOD NAME=use CODE=void use(int *value); FULL_NAME=use SIGNATURE=void(int*) ORDER=1
+  METHOD_PARAMETER_IN NAME=value CODE=int *value TYPE_FULL_NAME=int* ORDER=1
+  METHOD_PARAMETER_OUT NAME=value CODE=int *value TYPE_FULL_NAME=int* ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+
+METHOD NAME=use_char CODE=void use_char(char *value); FULL_NAME=use_char SIGNATURE=void(char*) ORDER=1
+  METHOD_PARAMETER_IN NAME=value CODE=char *value TYPE_FULL_NAME=char* ORDER=1
+  METHOD_PARAMETER_OUT NAME=value CODE=char *value TYPE_FULL_NAME=char* ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+
+NODES|META_DATA LANGUAGE=NEWC
+NODES|FILE NAME=<includes> ORDER=1
+NODES|FILE NAME=<unknown> ORDER=0
+NODES|FILE NAME=arrays.c ORDER=0
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<global> FILENAME=<unknown> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<includes>:<global> FILENAME=<includes> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=arrays.c:<global> FILENAME=arrays.c ORDER=1
+NODES|NAMESPACE NAME=<global>
+NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=<global> FULL_NAME=arrays.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=arrays.c:<global> FILENAME=arrays.c ORDER=1
+NODES|TYPE_DECL NAME=char FULL_NAME=char CODE=char IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=char* FULL_NAME=char* CODE=char* IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=char[2] FULL_NAME=char[2] CODE=char[2] IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=int* FULL_NAME=int* CODE=int* IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=int[2] FULL_NAME=int[2] CODE=int[2] IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=int[size()] FULL_NAME=int[size()] CODE=int[size()] IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=mixed_array_first FULL_NAME=mixed_array_first CODE=mixed_array_first AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=arrays.c:<global> FILENAME=arrays.c ORDER=1
+NODES|TYPE_DECL NAME=mixed_scalar_first FULL_NAME=mixed_scalar_first CODE=mixed_scalar_first AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=arrays.c:<global> FILENAME=arrays.c ORDER=1
+NODES|TYPE_DECL NAME=repeat_dimension FULL_NAME=repeat_dimension CODE=repeat_dimension AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=arrays.c:<global> FILENAME=arrays.c ORDER=1
+NODES|TYPE_DECL NAME=separate_scope FULL_NAME=separate_scope CODE=separate_scope AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=arrays.c:<global> FILENAME=arrays.c ORDER=1
+NODES|TYPE_DECL NAME=sized_string FULL_NAME=sized_string CODE=sized_string AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=arrays.c:<global> FILENAME=arrays.c ORDER=1
+NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+NODES|TYPE NAME=char FULL_NAME=char TYPE_DECL_FULL_NAME=char
+NODES|TYPE NAME=char* FULL_NAME=char* TYPE_DECL_FULL_NAME=char*
+NODES|TYPE NAME=char[2] FULL_NAME=char[2] TYPE_DECL_FULL_NAME=char[2]
+NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+NODES|TYPE NAME=int* FULL_NAME=int* TYPE_DECL_FULL_NAME=int*
+NODES|TYPE NAME=int[2] FULL_NAME=int[2] TYPE_DECL_FULL_NAME=int[2]
+NODES|TYPE NAME=int[size()] FULL_NAME=int[size()] TYPE_DECL_FULL_NAME=int[size()]
+NODES|TYPE NAME=mixed_array_first FULL_NAME=mixed_array_first TYPE_DECL_FULL_NAME=mixed_array_first
+NODES|TYPE NAME=mixed_scalar_first FULL_NAME=mixed_scalar_first TYPE_DECL_FULL_NAME=mixed_scalar_first
+NODES|TYPE NAME=repeat_dimension FULL_NAME=repeat_dimension TYPE_DECL_FULL_NAME=repeat_dimension
+NODES|TYPE NAME=separate_scope FULL_NAME=separate_scope TYPE_DECL_FULL_NAME=separate_scope
+NODES|TYPE NAME=sized_string FULL_NAME=sized_string TYPE_DECL_FULL_NAME=sized_string
+NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+EDGES|ARGUMENT mixed_array_first#11 -> mixed_array_first#12
+EDGES|ARGUMENT mixed_array_first#11 -> mixed_array_first#13
+EDGES|ARGUMENT mixed_array_first#13 -> mixed_array_first#14
+EDGES|ARGUMENT mixed_array_first#13 -> mixed_array_first#15
+EDGES|ARGUMENT mixed_array_first#16 -> mixed_array_first#17
+EDGES|ARGUMENT mixed_array_first#16 -> mixed_array_first#18
+EDGES|ARGUMENT mixed_array_first#18 -> mixed_array_first#19
+EDGES|ARGUMENT mixed_array_first#20 -> mixed_array_first#21
+EDGES|ARGUMENT mixed_array_first#6 -> mixed_array_first#7
+EDGES|ARGUMENT mixed_array_first#6 -> mixed_array_first#8
+EDGES|ARGUMENT mixed_array_first#8 -> mixed_array_first#10
+EDGES|ARGUMENT mixed_array_first#8 -> mixed_array_first#9
+EDGES|ARGUMENT mixed_scalar_first#11 -> mixed_scalar_first#12
+EDGES|ARGUMENT mixed_scalar_first#11 -> mixed_scalar_first#13
+EDGES|ARGUMENT mixed_scalar_first#14 -> mixed_scalar_first#15
+EDGES|ARGUMENT mixed_scalar_first#6 -> mixed_scalar_first#7
+EDGES|ARGUMENT mixed_scalar_first#6 -> mixed_scalar_first#8
+EDGES|ARGUMENT mixed_scalar_first#8 -> mixed_scalar_first#10
+EDGES|ARGUMENT mixed_scalar_first#8 -> mixed_scalar_first#9
+EDGES|ARGUMENT repeat_dimension#5 -> repeat_dimension#6
+EDGES|ARGUMENT repeat_dimension#5 -> repeat_dimension#7
+EDGES|ARGUMENT repeat_dimension#7 -> repeat_dimension#8
+EDGES|ARGUMENT repeat_dimension#7 -> repeat_dimension#9
+EDGES|ARGUMENT separate_scope#11 -> separate_scope#12
+EDGES|ARGUMENT separate_scope#11 -> separate_scope#13
+EDGES|ARGUMENT separate_scope#13 -> separate_scope#14
+EDGES|ARGUMENT separate_scope#16 -> separate_scope#17
+EDGES|ARGUMENT separate_scope#16 -> separate_scope#18
+EDGES|ARGUMENT separate_scope#18 -> separate_scope#19
+EDGES|ARGUMENT separate_scope#18 -> separate_scope#20
+EDGES|ARGUMENT separate_scope#21 -> separate_scope#22
+EDGES|ARGUMENT separate_scope#21 -> separate_scope#23
+EDGES|ARGUMENT separate_scope#23 -> separate_scope#24
+EDGES|ARGUMENT separate_scope#25 -> separate_scope#26
+EDGES|ARGUMENT separate_scope#6 -> separate_scope#7
+EDGES|ARGUMENT separate_scope#6 -> separate_scope#8
+EDGES|ARGUMENT separate_scope#8 -> separate_scope#10
+EDGES|ARGUMENT separate_scope#8 -> separate_scope#9
+EDGES|ARGUMENT sized_string#10 -> sized_string#11
+EDGES|ARGUMENT sized_string#10 -> sized_string#12
+EDGES|ARGUMENT sized_string#13 -> sized_string#14
+EDGES|ARGUMENT sized_string#5 -> sized_string#6
+EDGES|ARGUMENT sized_string#5 -> sized_string#7
+EDGES|ARGUMENT sized_string#7 -> sized_string#8
+EDGES|ARGUMENT sized_string#7 -> sized_string#9
+EDGES|CALL mixed_array_first#11 -> <operator>.assignment#0
+EDGES|CALL mixed_array_first#13 -> <operator>.alloc#0
+EDGES|CALL mixed_array_first#16 -> <operator>.assignment#0
+EDGES|CALL mixed_array_first#18 -> <operator>.arrayInitializer#0
+EDGES|CALL mixed_array_first#20 -> use#0
+EDGES|CALL mixed_array_first#6 -> <operator>.assignment#0
+EDGES|CALL mixed_array_first#8 -> <operator>.alloc#0
+EDGES|CALL mixed_scalar_first#11 -> <operator>.assignment#0
+EDGES|CALL mixed_scalar_first#14 -> use#0
+EDGES|CALL mixed_scalar_first#6 -> <operator>.assignment#0
+EDGES|CALL mixed_scalar_first#8 -> <operator>.alloc#0
+EDGES|CALL repeat_dimension#10 -> size#0
+EDGES|CALL repeat_dimension#5 -> <operator>.assignment#0
+EDGES|CALL repeat_dimension#7 -> <operator>.alloc#0
+EDGES|CALL repeat_dimension#9 -> size#0
+EDGES|CALL separate_scope#11 -> <operator>.assignment#0
+EDGES|CALL separate_scope#13 -> <operator>.arrayInitializer#0
+EDGES|CALL separate_scope#16 -> <operator>.assignment#0
+EDGES|CALL separate_scope#18 -> <operator>.alloc#0
+EDGES|CALL separate_scope#21 -> <operator>.assignment#0
+EDGES|CALL separate_scope#23 -> <operator>.arrayInitializer#0
+EDGES|CALL separate_scope#25 -> use#0
+EDGES|CALL separate_scope#6 -> <operator>.assignment#0
+EDGES|CALL separate_scope#8 -> <operator>.alloc#0
+EDGES|CALL sized_string#10 -> <operator>.assignment#0
+EDGES|CALL sized_string#13 -> use_char#0
+EDGES|CALL sized_string#5 -> <operator>.assignment#0
+EDGES|CALL sized_string#7 -> <operator>.alloc#0
+EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+EDGES|CFG <operator>.alloc#0 -> <operator>.alloc#5
+EDGES|CFG <operator>.arrayInitializer#0 -> <operator>.arrayInitializer#4
+EDGES|CFG <operator>.assignment#0 -> <operator>.assignment#5
+EDGES|CFG arrays.c:<global>#0 -> arrays.c:<global>#98
+EDGES|CFG arrays.c:<global>#1 -> sized_string#6
+EDGES|CFG arrays.c:<global>#100 -> arrays.c:<global>#101
+EDGES|CFG arrays.c:<global>#101 -> arrays.c:<global>#102
+EDGES|CFG arrays.c:<global>#102 -> arrays.c:<global>#103
+EDGES|CFG arrays.c:<global>#17 -> mixed_array_first#7
+EDGES|CFG arrays.c:<global>#40 -> mixed_scalar_first#7
+EDGES|CFG arrays.c:<global>#57 -> repeat_dimension#6
+EDGES|CFG arrays.c:<global>#69 -> separate_scope#7
+EDGES|CFG arrays.c:<global>#98 -> arrays.c:<global>#99
+EDGES|CFG arrays.c:<global>#99 -> arrays.c:<global>#100
+EDGES|CFG mixed_array_first#10 -> mixed_array_first#8
+EDGES|CFG mixed_array_first#11 -> mixed_array_first#17
+EDGES|CFG mixed_array_first#12 -> mixed_array_first#14
+EDGES|CFG mixed_array_first#13 -> mixed_array_first#11
+EDGES|CFG mixed_array_first#14 -> mixed_array_first#15
+EDGES|CFG mixed_array_first#15 -> mixed_array_first#13
+EDGES|CFG mixed_array_first#16 -> mixed_array_first#21
+EDGES|CFG mixed_array_first#17 -> mixed_array_first#19
+EDGES|CFG mixed_array_first#18 -> mixed_array_first#16
+EDGES|CFG mixed_array_first#19 -> mixed_array_first#18
+EDGES|CFG mixed_array_first#20 -> mixed_array_first#22
+EDGES|CFG mixed_array_first#21 -> mixed_array_first#20
+EDGES|CFG mixed_array_first#6 -> mixed_array_first#12
+EDGES|CFG mixed_array_first#7 -> mixed_array_first#9
+EDGES|CFG mixed_array_first#8 -> mixed_array_first#6
+EDGES|CFG mixed_array_first#9 -> mixed_array_first#10
+EDGES|CFG mixed_scalar_first#10 -> mixed_scalar_first#8
+EDGES|CFG mixed_scalar_first#11 -> mixed_scalar_first#15
+EDGES|CFG mixed_scalar_first#12 -> mixed_scalar_first#13
+EDGES|CFG mixed_scalar_first#13 -> mixed_scalar_first#11
+EDGES|CFG mixed_scalar_first#14 -> mixed_scalar_first#16
+EDGES|CFG mixed_scalar_first#15 -> mixed_scalar_first#14
+EDGES|CFG mixed_scalar_first#6 -> mixed_scalar_first#12
+EDGES|CFG mixed_scalar_first#7 -> mixed_scalar_first#9
+EDGES|CFG mixed_scalar_first#8 -> mixed_scalar_first#6
+EDGES|CFG mixed_scalar_first#9 -> mixed_scalar_first#10
+EDGES|CFG repeat_dimension#10 -> repeat_dimension#11
+EDGES|CFG repeat_dimension#5 -> repeat_dimension#10
+EDGES|CFG repeat_dimension#6 -> repeat_dimension#8
+EDGES|CFG repeat_dimension#7 -> repeat_dimension#5
+EDGES|CFG repeat_dimension#8 -> repeat_dimension#9
+EDGES|CFG repeat_dimension#9 -> repeat_dimension#7
+EDGES|CFG separate_scope#10 -> separate_scope#8
+EDGES|CFG separate_scope#11 -> separate_scope#4
+EDGES|CFG separate_scope#12 -> separate_scope#14
+EDGES|CFG separate_scope#13 -> separate_scope#11
+EDGES|CFG separate_scope#14 -> separate_scope#13
+EDGES|CFG separate_scope#16 -> separate_scope#22
+EDGES|CFG separate_scope#17 -> separate_scope#19
+EDGES|CFG separate_scope#18 -> separate_scope#16
+EDGES|CFG separate_scope#19 -> separate_scope#20
+EDGES|CFG separate_scope#20 -> separate_scope#18
+EDGES|CFG separate_scope#21 -> separate_scope#26
+EDGES|CFG separate_scope#22 -> separate_scope#24
+EDGES|CFG separate_scope#23 -> separate_scope#21
+EDGES|CFG separate_scope#24 -> separate_scope#23
+EDGES|CFG separate_scope#25 -> separate_scope#27
+EDGES|CFG separate_scope#26 -> separate_scope#25
+EDGES|CFG separate_scope#4 -> separate_scope#17
+EDGES|CFG separate_scope#6 -> separate_scope#12
+EDGES|CFG separate_scope#7 -> separate_scope#9
+EDGES|CFG separate_scope#8 -> separate_scope#6
+EDGES|CFG separate_scope#9 -> separate_scope#10
+EDGES|CFG size#0 -> size#4
+EDGES|CFG sized_string#10 -> sized_string#14
+EDGES|CFG sized_string#11 -> sized_string#12
+EDGES|CFG sized_string#12 -> sized_string#10
+EDGES|CFG sized_string#13 -> sized_string#15
+EDGES|CFG sized_string#14 -> sized_string#13
+EDGES|CFG sized_string#5 -> sized_string#11
+EDGES|CFG sized_string#6 -> sized_string#8
+EDGES|CFG sized_string#7 -> sized_string#5
+EDGES|CFG sized_string#8 -> sized_string#9
+EDGES|CFG sized_string#9 -> sized_string#7
+EDGES|CFG use#0 -> use#4
+EDGES|CFG use_char#0 -> use_char#4
+EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+EDGES|CONTAINS <operator>.alloc#0 -> <operator>.alloc#2
+EDGES|CONTAINS <operator>.arrayInitializer#0 -> <operator>.arrayInitializer#2
+EDGES|CONTAINS <operator>.assignment#0 -> <operator>.assignment#2
+EDGES|CONTAINS D:arrays.c:<global> -> D:mixed_array_first
+EDGES|CONTAINS D:arrays.c:<global> -> D:mixed_scalar_first
+EDGES|CONTAINS D:arrays.c:<global> -> D:repeat_dimension
+EDGES|CONTAINS D:arrays.c:<global> -> D:separate_scope
+EDGES|CONTAINS D:arrays.c:<global> -> D:sized_string
+EDGES|CONTAINS D:arrays.c:<global> -> arrays.c:<global>#0
+EDGES|CONTAINS D:arrays.c:<global> -> size#0
+EDGES|CONTAINS D:arrays.c:<global> -> use#0
+EDGES|CONTAINS D:arrays.c:<global> -> use_char#0
+EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+EDGES|CONTAINS F:<includes> -> D:ANY
+EDGES|CONTAINS F:<includes> -> D:char
+EDGES|CONTAINS F:<includes> -> D:char*
+EDGES|CONTAINS F:<includes> -> D:char[2]
+EDGES|CONTAINS F:<includes> -> D:int
+EDGES|CONTAINS F:<includes> -> D:int*
+EDGES|CONTAINS F:<includes> -> D:int[2]
+EDGES|CONTAINS F:<includes> -> D:int[size()]
+EDGES|CONTAINS F:<includes> -> D:void
+EDGES|CONTAINS F:arrays.c -> D:arrays.c:<global>
+EDGES|CONTAINS arrays.c:<global>#0 -> arrays.c:<global>#1
+EDGES|CONTAINS arrays.c:<global>#0 -> arrays.c:<global>#100
+EDGES|CONTAINS arrays.c:<global>#0 -> arrays.c:<global>#101
+EDGES|CONTAINS arrays.c:<global>#0 -> arrays.c:<global>#102
+EDGES|CONTAINS arrays.c:<global>#0 -> arrays.c:<global>#17
+EDGES|CONTAINS arrays.c:<global>#0 -> arrays.c:<global>#40
+EDGES|CONTAINS arrays.c:<global>#0 -> arrays.c:<global>#57
+EDGES|CONTAINS arrays.c:<global>#0 -> arrays.c:<global>#69
+EDGES|CONTAINS arrays.c:<global>#0 -> arrays.c:<global>#97
+EDGES|CONTAINS arrays.c:<global>#0 -> arrays.c:<global>#98
+EDGES|CONTAINS arrays.c:<global>#0 -> arrays.c:<global>#99
+EDGES|CONTAINS arrays.c:<global>#1 -> sized_string#10
+EDGES|CONTAINS arrays.c:<global>#1 -> sized_string#11
+EDGES|CONTAINS arrays.c:<global>#1 -> sized_string#12
+EDGES|CONTAINS arrays.c:<global>#1 -> sized_string#13
+EDGES|CONTAINS arrays.c:<global>#1 -> sized_string#14
+EDGES|CONTAINS arrays.c:<global>#1 -> sized_string#3
+EDGES|CONTAINS arrays.c:<global>#1 -> sized_string#5
+EDGES|CONTAINS arrays.c:<global>#1 -> sized_string#6
+EDGES|CONTAINS arrays.c:<global>#1 -> sized_string#7
+EDGES|CONTAINS arrays.c:<global>#1 -> sized_string#8
+EDGES|CONTAINS arrays.c:<global>#1 -> sized_string#9
+EDGES|CONTAINS arrays.c:<global>#17 -> mixed_array_first#10
+EDGES|CONTAINS arrays.c:<global>#17 -> mixed_array_first#11
+EDGES|CONTAINS arrays.c:<global>#17 -> mixed_array_first#12
+EDGES|CONTAINS arrays.c:<global>#17 -> mixed_array_first#13
+EDGES|CONTAINS arrays.c:<global>#17 -> mixed_array_first#14
+EDGES|CONTAINS arrays.c:<global>#17 -> mixed_array_first#15
+EDGES|CONTAINS arrays.c:<global>#17 -> mixed_array_first#16
+EDGES|CONTAINS arrays.c:<global>#17 -> mixed_array_first#17
+EDGES|CONTAINS arrays.c:<global>#17 -> mixed_array_first#18
+EDGES|CONTAINS arrays.c:<global>#17 -> mixed_array_first#19
+EDGES|CONTAINS arrays.c:<global>#17 -> mixed_array_first#20
+EDGES|CONTAINS arrays.c:<global>#17 -> mixed_array_first#21
+EDGES|CONTAINS arrays.c:<global>#17 -> mixed_array_first#3
+EDGES|CONTAINS arrays.c:<global>#17 -> mixed_array_first#6
+EDGES|CONTAINS arrays.c:<global>#17 -> mixed_array_first#7
+EDGES|CONTAINS arrays.c:<global>#17 -> mixed_array_first#8
+EDGES|CONTAINS arrays.c:<global>#17 -> mixed_array_first#9
+EDGES|CONTAINS arrays.c:<global>#40 -> mixed_scalar_first#10
+EDGES|CONTAINS arrays.c:<global>#40 -> mixed_scalar_first#11
+EDGES|CONTAINS arrays.c:<global>#40 -> mixed_scalar_first#12
+EDGES|CONTAINS arrays.c:<global>#40 -> mixed_scalar_first#13
+EDGES|CONTAINS arrays.c:<global>#40 -> mixed_scalar_first#14
+EDGES|CONTAINS arrays.c:<global>#40 -> mixed_scalar_first#15
+EDGES|CONTAINS arrays.c:<global>#40 -> mixed_scalar_first#3
+EDGES|CONTAINS arrays.c:<global>#40 -> mixed_scalar_first#6
+EDGES|CONTAINS arrays.c:<global>#40 -> mixed_scalar_first#7
+EDGES|CONTAINS arrays.c:<global>#40 -> mixed_scalar_first#8
+EDGES|CONTAINS arrays.c:<global>#40 -> mixed_scalar_first#9
+EDGES|CONTAINS arrays.c:<global>#57 -> repeat_dimension#10
+EDGES|CONTAINS arrays.c:<global>#57 -> repeat_dimension#3
+EDGES|CONTAINS arrays.c:<global>#57 -> repeat_dimension#5
+EDGES|CONTAINS arrays.c:<global>#57 -> repeat_dimension#6
+EDGES|CONTAINS arrays.c:<global>#57 -> repeat_dimension#7
+EDGES|CONTAINS arrays.c:<global>#57 -> repeat_dimension#8
+EDGES|CONTAINS arrays.c:<global>#57 -> repeat_dimension#9
+EDGES|CONTAINS arrays.c:<global>#69 -> separate_scope#10
+EDGES|CONTAINS arrays.c:<global>#69 -> separate_scope#11
+EDGES|CONTAINS arrays.c:<global>#69 -> separate_scope#12
+EDGES|CONTAINS arrays.c:<global>#69 -> separate_scope#13
+EDGES|CONTAINS arrays.c:<global>#69 -> separate_scope#14
+EDGES|CONTAINS arrays.c:<global>#69 -> separate_scope#16
+EDGES|CONTAINS arrays.c:<global>#69 -> separate_scope#17
+EDGES|CONTAINS arrays.c:<global>#69 -> separate_scope#18
+EDGES|CONTAINS arrays.c:<global>#69 -> separate_scope#19
+EDGES|CONTAINS arrays.c:<global>#69 -> separate_scope#20
+EDGES|CONTAINS arrays.c:<global>#69 -> separate_scope#21
+EDGES|CONTAINS arrays.c:<global>#69 -> separate_scope#22
+EDGES|CONTAINS arrays.c:<global>#69 -> separate_scope#23
+EDGES|CONTAINS arrays.c:<global>#69 -> separate_scope#24
+EDGES|CONTAINS arrays.c:<global>#69 -> separate_scope#25
+EDGES|CONTAINS arrays.c:<global>#69 -> separate_scope#26
+EDGES|CONTAINS arrays.c:<global>#69 -> separate_scope#3
+EDGES|CONTAINS arrays.c:<global>#69 -> separate_scope#4
+EDGES|CONTAINS arrays.c:<global>#69 -> separate_scope#6
+EDGES|CONTAINS arrays.c:<global>#69 -> separate_scope#7
+EDGES|CONTAINS arrays.c:<global>#69 -> separate_scope#8
+EDGES|CONTAINS arrays.c:<global>#69 -> separate_scope#9
+EDGES|CONTAINS size#0 -> size#3
+EDGES|CONTAINS use#0 -> use#3
+EDGES|CONTAINS use_char#0 -> use_char#3
+EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.alloc#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.alloc#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.alloc#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.alloc#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.alloc#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.alloc#6 -> T:ANY
+EDGES|EVAL_TYPE <operator>.arrayInitializer#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.arrayInitializer#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.arrayInitializer#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.arrayInitializer#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#6 -> T:ANY
+EDGES|EVAL_TYPE arrays.c:<global>#100 -> T:mixed_scalar_first
+EDGES|EVAL_TYPE arrays.c:<global>#101 -> T:repeat_dimension
+EDGES|EVAL_TYPE arrays.c:<global>#102 -> T:separate_scope
+EDGES|EVAL_TYPE arrays.c:<global>#103 -> T:ANY
+EDGES|EVAL_TYPE arrays.c:<global>#97 -> T:ANY
+EDGES|EVAL_TYPE arrays.c:<global>#98 -> T:sized_string
+EDGES|EVAL_TYPE arrays.c:<global>#99 -> T:mixed_array_first
+EDGES|EVAL_TYPE mixed_array_first#1 -> T:void
+EDGES|EVAL_TYPE mixed_array_first#10 -> T:int
+EDGES|EVAL_TYPE mixed_array_first#11 -> T:void
+EDGES|EVAL_TYPE mixed_array_first#12 -> T:int[2]
+EDGES|EVAL_TYPE mixed_array_first#13 -> T:int[2]
+EDGES|EVAL_TYPE mixed_array_first#14 -> T:int[2]
+EDGES|EVAL_TYPE mixed_array_first#15 -> T:int
+EDGES|EVAL_TYPE mixed_array_first#16 -> T:void
+EDGES|EVAL_TYPE mixed_array_first#17 -> T:int[2]
+EDGES|EVAL_TYPE mixed_array_first#18 -> T:ANY
+EDGES|EVAL_TYPE mixed_array_first#19 -> T:int
+EDGES|EVAL_TYPE mixed_array_first#2 -> T:void
+EDGES|EVAL_TYPE mixed_array_first#20 -> T:void
+EDGES|EVAL_TYPE mixed_array_first#21 -> T:int[2]
+EDGES|EVAL_TYPE mixed_array_first#22 -> T:void
+EDGES|EVAL_TYPE mixed_array_first#3 -> T:void
+EDGES|EVAL_TYPE mixed_array_first#4 -> T:int[2]
+EDGES|EVAL_TYPE mixed_array_first#5 -> T:int[2]
+EDGES|EVAL_TYPE mixed_array_first#6 -> T:void
+EDGES|EVAL_TYPE mixed_array_first#7 -> T:int[2]
+EDGES|EVAL_TYPE mixed_array_first#8 -> T:int[2]
+EDGES|EVAL_TYPE mixed_array_first#9 -> T:int[2]
+EDGES|EVAL_TYPE mixed_scalar_first#1 -> T:void
+EDGES|EVAL_TYPE mixed_scalar_first#10 -> T:int
+EDGES|EVAL_TYPE mixed_scalar_first#11 -> T:void
+EDGES|EVAL_TYPE mixed_scalar_first#12 -> T:int
+EDGES|EVAL_TYPE mixed_scalar_first#13 -> T:int
+EDGES|EVAL_TYPE mixed_scalar_first#14 -> T:void
+EDGES|EVAL_TYPE mixed_scalar_first#15 -> T:int[2]
+EDGES|EVAL_TYPE mixed_scalar_first#16 -> T:void
+EDGES|EVAL_TYPE mixed_scalar_first#2 -> T:void
+EDGES|EVAL_TYPE mixed_scalar_first#3 -> T:void
+EDGES|EVAL_TYPE mixed_scalar_first#4 -> T:int
+EDGES|EVAL_TYPE mixed_scalar_first#5 -> T:int[2]
+EDGES|EVAL_TYPE mixed_scalar_first#6 -> T:void
+EDGES|EVAL_TYPE mixed_scalar_first#7 -> T:int[2]
+EDGES|EVAL_TYPE mixed_scalar_first#8 -> T:int[2]
+EDGES|EVAL_TYPE mixed_scalar_first#9 -> T:int[2]
+EDGES|EVAL_TYPE repeat_dimension#1 -> T:void
+EDGES|EVAL_TYPE repeat_dimension#10 -> T:int
+EDGES|EVAL_TYPE repeat_dimension#11 -> T:void
+EDGES|EVAL_TYPE repeat_dimension#2 -> T:void
+EDGES|EVAL_TYPE repeat_dimension#3 -> T:void
+EDGES|EVAL_TYPE repeat_dimension#4 -> T:int[size()]
+EDGES|EVAL_TYPE repeat_dimension#5 -> T:void
+EDGES|EVAL_TYPE repeat_dimension#6 -> T:int[size()]
+EDGES|EVAL_TYPE repeat_dimension#7 -> T:int[size()]
+EDGES|EVAL_TYPE repeat_dimension#8 -> T:int[size()]
+EDGES|EVAL_TYPE repeat_dimension#9 -> T:int
+EDGES|EVAL_TYPE separate_scope#1 -> T:void
+EDGES|EVAL_TYPE separate_scope#10 -> T:int
+EDGES|EVAL_TYPE separate_scope#11 -> T:void
+EDGES|EVAL_TYPE separate_scope#12 -> T:int[2]
+EDGES|EVAL_TYPE separate_scope#13 -> T:ANY
+EDGES|EVAL_TYPE separate_scope#14 -> T:int
+EDGES|EVAL_TYPE separate_scope#15 -> T:int[2]
+EDGES|EVAL_TYPE separate_scope#16 -> T:void
+EDGES|EVAL_TYPE separate_scope#17 -> T:int[2]
+EDGES|EVAL_TYPE separate_scope#18 -> T:int[2]
+EDGES|EVAL_TYPE separate_scope#19 -> T:int[2]
+EDGES|EVAL_TYPE separate_scope#2 -> T:void
+EDGES|EVAL_TYPE separate_scope#20 -> T:int
+EDGES|EVAL_TYPE separate_scope#21 -> T:void
+EDGES|EVAL_TYPE separate_scope#22 -> T:int[2]
+EDGES|EVAL_TYPE separate_scope#23 -> T:ANY
+EDGES|EVAL_TYPE separate_scope#24 -> T:int
+EDGES|EVAL_TYPE separate_scope#25 -> T:void
+EDGES|EVAL_TYPE separate_scope#26 -> T:int[2]
+EDGES|EVAL_TYPE separate_scope#27 -> T:void
+EDGES|EVAL_TYPE separate_scope#3 -> T:void
+EDGES|EVAL_TYPE separate_scope#4 -> T:void
+EDGES|EVAL_TYPE separate_scope#5 -> T:int[2]
+EDGES|EVAL_TYPE separate_scope#6 -> T:void
+EDGES|EVAL_TYPE separate_scope#7 -> T:int[2]
+EDGES|EVAL_TYPE separate_scope#8 -> T:int[2]
+EDGES|EVAL_TYPE separate_scope#9 -> T:int[2]
+EDGES|EVAL_TYPE size#1 -> T:void
+EDGES|EVAL_TYPE size#2 -> T:void
+EDGES|EVAL_TYPE size#3 -> T:ANY
+EDGES|EVAL_TYPE size#4 -> T:int
+EDGES|EVAL_TYPE sized_string#1 -> T:void
+EDGES|EVAL_TYPE sized_string#10 -> T:void
+EDGES|EVAL_TYPE sized_string#11 -> T:char[2]
+EDGES|EVAL_TYPE sized_string#12 -> T:char*
+EDGES|EVAL_TYPE sized_string#13 -> T:void
+EDGES|EVAL_TYPE sized_string#14 -> T:char[2]
+EDGES|EVAL_TYPE sized_string#15 -> T:void
+EDGES|EVAL_TYPE sized_string#2 -> T:void
+EDGES|EVAL_TYPE sized_string#3 -> T:void
+EDGES|EVAL_TYPE sized_string#4 -> T:char[2]
+EDGES|EVAL_TYPE sized_string#5 -> T:void
+EDGES|EVAL_TYPE sized_string#6 -> T:char[2]
+EDGES|EVAL_TYPE sized_string#7 -> T:char[2]
+EDGES|EVAL_TYPE sized_string#8 -> T:char[2]
+EDGES|EVAL_TYPE sized_string#9 -> T:int
+EDGES|EVAL_TYPE use#1 -> T:int*
+EDGES|EVAL_TYPE use#2 -> T:int*
+EDGES|EVAL_TYPE use#3 -> T:ANY
+EDGES|EVAL_TYPE use#4 -> T:void
+EDGES|EVAL_TYPE use_char#1 -> T:char*
+EDGES|EVAL_TYPE use_char#2 -> T:char*
+EDGES|EVAL_TYPE use_char#3 -> T:ANY
+EDGES|EVAL_TYPE use_char#4 -> T:void
+EDGES|PARAMETER_LINK <operator>.alloc#1 -> <operator>.alloc#3
+EDGES|PARAMETER_LINK <operator>.alloc#4 -> <operator>.alloc#6
+EDGES|PARAMETER_LINK <operator>.arrayInitializer#1 -> <operator>.arrayInitializer#3
+EDGES|PARAMETER_LINK <operator>.assignment#1 -> <operator>.assignment#3
+EDGES|PARAMETER_LINK <operator>.assignment#4 -> <operator>.assignment#6
+EDGES|PARAMETER_LINK mixed_array_first#1 -> mixed_array_first#2
+EDGES|PARAMETER_LINK mixed_scalar_first#1 -> mixed_scalar_first#2
+EDGES|PARAMETER_LINK repeat_dimension#1 -> repeat_dimension#2
+EDGES|PARAMETER_LINK separate_scope#1 -> separate_scope#2
+EDGES|PARAMETER_LINK size#1 -> size#2
+EDGES|PARAMETER_LINK sized_string#1 -> sized_string#2
+EDGES|PARAMETER_LINK use#1 -> use#2
+EDGES|PARAMETER_LINK use_char#1 -> use_char#2
+EDGES|REF NB:<global> -> NS:<global>
+EDGES|REF NB:<includes>:<global> -> NS:<global>
+EDGES|REF NB:arrays.c:<global> -> NS:<global>
+EDGES|REF T:ANY -> D:ANY
+EDGES|REF T:char -> D:char
+EDGES|REF T:char* -> D:char*
+EDGES|REF T:char[2] -> D:char[2]
+EDGES|REF T:int -> D:int
+EDGES|REF T:int* -> D:int*
+EDGES|REF T:int[2] -> D:int[2]
+EDGES|REF T:int[size()] -> D:int[size()]
+EDGES|REF T:mixed_array_first -> D:mixed_array_first
+EDGES|REF T:mixed_scalar_first -> D:mixed_scalar_first
+EDGES|REF T:repeat_dimension -> D:repeat_dimension
+EDGES|REF T:separate_scope -> D:separate_scope
+EDGES|REF T:sized_string -> D:sized_string
+EDGES|REF T:void -> D:void
+EDGES|REF arrays.c:<global>#100 -> arrays.c:<global>#40
+EDGES|REF arrays.c:<global>#101 -> arrays.c:<global>#57
+EDGES|REF arrays.c:<global>#102 -> arrays.c:<global>#69
+EDGES|REF arrays.c:<global>#98 -> arrays.c:<global>#1
+EDGES|REF arrays.c:<global>#99 -> arrays.c:<global>#17
+EDGES|REF mixed_array_first#12 -> mixed_array_first#5
+EDGES|REF mixed_array_first#17 -> mixed_array_first#4
+EDGES|REF mixed_array_first#21 -> mixed_array_first#4
+EDGES|REF mixed_array_first#7 -> mixed_array_first#4
+EDGES|REF mixed_scalar_first#12 -> mixed_scalar_first#4
+EDGES|REF mixed_scalar_first#15 -> mixed_scalar_first#5
+EDGES|REF mixed_scalar_first#7 -> mixed_scalar_first#5
+EDGES|REF repeat_dimension#6 -> repeat_dimension#4
+EDGES|REF separate_scope#12 -> separate_scope#5
+EDGES|REF separate_scope#17 -> separate_scope#15
+EDGES|REF separate_scope#22 -> separate_scope#15
+EDGES|REF separate_scope#26 -> separate_scope#15
+EDGES|REF separate_scope#7 -> separate_scope#5
+EDGES|REF sized_string#11 -> sized_string#4
+EDGES|REF sized_string#14 -> sized_string#4
+EDGES|REF sized_string#6 -> sized_string#4
+EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+EDGES|SOURCE_FILE D:ANY -> F:<includes>
+EDGES|SOURCE_FILE D:arrays.c:<global> -> F:arrays.c
+EDGES|SOURCE_FILE D:char -> F:<includes>
+EDGES|SOURCE_FILE D:char* -> F:<includes>
+EDGES|SOURCE_FILE D:char[2] -> F:<includes>
+EDGES|SOURCE_FILE D:int -> F:<includes>
+EDGES|SOURCE_FILE D:int* -> F:<includes>
+EDGES|SOURCE_FILE D:int[2] -> F:<includes>
+EDGES|SOURCE_FILE D:int[size()] -> F:<includes>
+EDGES|SOURCE_FILE D:mixed_array_first -> F:arrays.c
+EDGES|SOURCE_FILE D:mixed_scalar_first -> F:arrays.c
+EDGES|SOURCE_FILE D:repeat_dimension -> F:arrays.c
+EDGES|SOURCE_FILE D:separate_scope -> F:arrays.c
+EDGES|SOURCE_FILE D:sized_string -> F:arrays.c
+EDGES|SOURCE_FILE D:void -> F:<includes>
+EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
+EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>
+EDGES|SOURCE_FILE NB:arrays.c:<global> -> F:arrays.c
+EDGES|SOURCE_FILE arrays.c:<global>#0 -> F:arrays.c
+EDGES|SOURCE_FILE arrays.c:<global>#1 -> F:arrays.c
+EDGES|SOURCE_FILE arrays.c:<global>#17 -> F:arrays.c
+EDGES|SOURCE_FILE arrays.c:<global>#40 -> F:arrays.c
+EDGES|SOURCE_FILE arrays.c:<global>#57 -> F:arrays.c
+EDGES|SOURCE_FILE arrays.c:<global>#69 -> F:arrays.c
+EDGES|SOURCE_FILE size#0 -> F:arrays.c
+EDGES|SOURCE_FILE use#0 -> F:arrays.c
+EDGES|SOURCE_FILE use_char#0 -> F:arrays.c
+FLOWS|REACHING_DEF["x"] sized_string#12 -> sized_string#10
+FLOWS|REACHING_DEF["x"] sized_string#12 -> sized_string#11
+FLOWS|REACHING_DEF[1] mixed_array_first#19 -> mixed_array_first#18
+FLOWS|REACHING_DEF[1] mixed_scalar_first#13 -> mixed_scalar_first#11
+FLOWS|REACHING_DEF[1] mixed_scalar_first#13 -> mixed_scalar_first#12
+FLOWS|REACHING_DEF[1] separate_scope#14 -> separate_scope#13
+FLOWS|REACHING_DEF[1] separate_scope#24 -> separate_scope#23
+FLOWS|REACHING_DEF[2] mixed_array_first#10 -> mixed_array_first#8
+FLOWS|REACHING_DEF[2] mixed_array_first#10 -> mixed_array_first#9
+FLOWS|REACHING_DEF[2] mixed_array_first#15 -> mixed_array_first#13
+FLOWS|REACHING_DEF[2] mixed_array_first#15 -> mixed_array_first#14
+FLOWS|REACHING_DEF[2] mixed_scalar_first#10 -> mixed_scalar_first#8
+FLOWS|REACHING_DEF[2] separate_scope#10 -> separate_scope#8
+FLOWS|REACHING_DEF[2] separate_scope#10 -> separate_scope#9
+FLOWS|REACHING_DEF[2] separate_scope#20 -> separate_scope#18
+FLOWS|REACHING_DEF[2] separate_scope#20 -> separate_scope#19
+FLOWS|REACHING_DEF[2] sized_string#9 -> sized_string#7
+FLOWS|REACHING_DEF[] <operator>.alloc#0 -> <operator>.alloc#1
+FLOWS|REACHING_DEF[] <operator>.alloc#0 -> <operator>.alloc#4
+FLOWS|REACHING_DEF[] <operator>.arrayInitializer#0 -> <operator>.arrayInitializer#1
+FLOWS|REACHING_DEF[] <operator>.assignment#0 -> <operator>.assignment#1
+FLOWS|REACHING_DEF[] <operator>.assignment#0 -> <operator>.assignment#4
+FLOWS|REACHING_DEF[] arrays.c:<global>#0 -> arrays.c:<global>#100
+FLOWS|REACHING_DEF[] arrays.c:<global>#0 -> arrays.c:<global>#101
+FLOWS|REACHING_DEF[] arrays.c:<global>#0 -> arrays.c:<global>#102
+FLOWS|REACHING_DEF[] arrays.c:<global>#0 -> arrays.c:<global>#98
+FLOWS|REACHING_DEF[] arrays.c:<global>#0 -> arrays.c:<global>#99
+FLOWS|REACHING_DEF[] arrays.c:<global>#1 -> sized_string#1
+FLOWS|REACHING_DEF[] arrays.c:<global>#1 -> sized_string#12
+FLOWS|REACHING_DEF[] arrays.c:<global>#1 -> sized_string#14
+FLOWS|REACHING_DEF[] arrays.c:<global>#1 -> sized_string#8
+FLOWS|REACHING_DEF[] arrays.c:<global>#1 -> sized_string#9
+FLOWS|REACHING_DEF[] arrays.c:<global>#17 -> mixed_array_first#1
+FLOWS|REACHING_DEF[] arrays.c:<global>#17 -> mixed_array_first#10
+FLOWS|REACHING_DEF[] arrays.c:<global>#17 -> mixed_array_first#14
+FLOWS|REACHING_DEF[] arrays.c:<global>#17 -> mixed_array_first#15
+FLOWS|REACHING_DEF[] arrays.c:<global>#17 -> mixed_array_first#19
+FLOWS|REACHING_DEF[] arrays.c:<global>#17 -> mixed_array_first#21
+FLOWS|REACHING_DEF[] arrays.c:<global>#17 -> mixed_array_first#9
+FLOWS|REACHING_DEF[] arrays.c:<global>#40 -> mixed_scalar_first#1
+FLOWS|REACHING_DEF[] arrays.c:<global>#40 -> mixed_scalar_first#10
+FLOWS|REACHING_DEF[] arrays.c:<global>#40 -> mixed_scalar_first#13
+FLOWS|REACHING_DEF[] arrays.c:<global>#40 -> mixed_scalar_first#15
+FLOWS|REACHING_DEF[] arrays.c:<global>#40 -> mixed_scalar_first#9
+FLOWS|REACHING_DEF[] arrays.c:<global>#57 -> repeat_dimension#1
+FLOWS|REACHING_DEF[] arrays.c:<global>#57 -> repeat_dimension#10
+FLOWS|REACHING_DEF[] arrays.c:<global>#57 -> repeat_dimension#8
+FLOWS|REACHING_DEF[] arrays.c:<global>#57 -> repeat_dimension#9
+FLOWS|REACHING_DEF[] arrays.c:<global>#69 -> separate_scope#1
+FLOWS|REACHING_DEF[] arrays.c:<global>#69 -> separate_scope#10
+FLOWS|REACHING_DEF[] arrays.c:<global>#69 -> separate_scope#14
+FLOWS|REACHING_DEF[] arrays.c:<global>#69 -> separate_scope#19
+FLOWS|REACHING_DEF[] arrays.c:<global>#69 -> separate_scope#20
+FLOWS|REACHING_DEF[] arrays.c:<global>#69 -> separate_scope#24
+FLOWS|REACHING_DEF[] arrays.c:<global>#69 -> separate_scope#26
+FLOWS|REACHING_DEF[] arrays.c:<global>#69 -> separate_scope#4
+FLOWS|REACHING_DEF[] arrays.c:<global>#69 -> separate_scope#9
+FLOWS|REACHING_DEF[] mixed_array_first#1 -> mixed_array_first#2
+FLOWS|REACHING_DEF[] mixed_array_first#1 -> mixed_array_first#22
+FLOWS|REACHING_DEF[] mixed_scalar_first#1 -> mixed_scalar_first#16
+FLOWS|REACHING_DEF[] mixed_scalar_first#1 -> mixed_scalar_first#2
+FLOWS|REACHING_DEF[] repeat_dimension#1 -> repeat_dimension#11
+FLOWS|REACHING_DEF[] repeat_dimension#1 -> repeat_dimension#2
+FLOWS|REACHING_DEF[] separate_scope#1 -> separate_scope#2
+FLOWS|REACHING_DEF[] separate_scope#1 -> separate_scope#27
+FLOWS|REACHING_DEF[] size#0 -> size#1
+FLOWS|REACHING_DEF[] size#1 -> size#2
+FLOWS|REACHING_DEF[] size#1 -> size#4
+FLOWS|REACHING_DEF[] sized_string#1 -> sized_string#15
+FLOWS|REACHING_DEF[] sized_string#1 -> sized_string#2
+FLOWS|REACHING_DEF[] use#0 -> use#1
+FLOWS|REACHING_DEF[] use_char#0 -> use_char#1
+FLOWS|REACHING_DEF[a=1] mixed_scalar_first#11 -> mixed_scalar_first#16
+FLOWS|REACHING_DEF[a[2] = {1}] mixed_array_first#16 -> mixed_array_first#22
+FLOWS|REACHING_DEF[a[2] = {1}] mixed_array_first#8 -> mixed_array_first#6
+FLOWS|REACHING_DEF[a[2] = {1}] mixed_array_first#8 -> mixed_array_first#7
+FLOWS|REACHING_DEF[a[2]={1}] separate_scope#18 -> separate_scope#16
+FLOWS|REACHING_DEF[a[2]={1}] separate_scope#18 -> separate_scope#17
+FLOWS|REACHING_DEF[a[2]={1}] separate_scope#21 -> separate_scope#27
+FLOWS|REACHING_DEF[a[2]={1}] separate_scope#8 -> separate_scope#6
+FLOWS|REACHING_DEF[a[2]={1}] separate_scope#8 -> separate_scope#7
+FLOWS|REACHING_DEF[a[size()]] repeat_dimension#5 -> repeat_dimension#11
+FLOWS|REACHING_DEF[a[size()]] repeat_dimension#7 -> repeat_dimension#11
+FLOWS|REACHING_DEF[a[size()]] repeat_dimension#7 -> repeat_dimension#5
+FLOWS|REACHING_DEF[a[size()]] repeat_dimension#7 -> repeat_dimension#6
+FLOWS|REACHING_DEF[a] mixed_array_first#17 -> mixed_array_first#16
+FLOWS|REACHING_DEF[a] mixed_array_first#17 -> mixed_array_first#21
+FLOWS|REACHING_DEF[a] mixed_array_first#21 -> mixed_array_first#20
+FLOWS|REACHING_DEF[a] mixed_array_first#21 -> mixed_array_first#22
+FLOWS|REACHING_DEF[a] mixed_array_first#7 -> mixed_array_first#6
+FLOWS|REACHING_DEF[a] mixed_scalar_first#12 -> mixed_scalar_first#11
+FLOWS|REACHING_DEF[a] mixed_scalar_first#12 -> mixed_scalar_first#16
+FLOWS|REACHING_DEF[a] repeat_dimension#6 -> repeat_dimension#11
+FLOWS|REACHING_DEF[a] repeat_dimension#6 -> repeat_dimension#5
+FLOWS|REACHING_DEF[a] separate_scope#12 -> separate_scope#11
+FLOWS|REACHING_DEF[a] separate_scope#17 -> separate_scope#16
+FLOWS|REACHING_DEF[a] separate_scope#22 -> separate_scope#21
+FLOWS|REACHING_DEF[a] separate_scope#22 -> separate_scope#26
+FLOWS|REACHING_DEF[a] separate_scope#26 -> separate_scope#25
+FLOWS|REACHING_DEF[a] separate_scope#26 -> separate_scope#27
+FLOWS|REACHING_DEF[a] separate_scope#7 -> separate_scope#6
+FLOWS|REACHING_DEF[b[2]] mixed_array_first#11 -> mixed_array_first#22
+FLOWS|REACHING_DEF[b[2]] mixed_array_first#13 -> mixed_array_first#11
+FLOWS|REACHING_DEF[b[2]] mixed_array_first#13 -> mixed_array_first#12
+FLOWS|REACHING_DEF[b[2]] mixed_array_first#13 -> mixed_array_first#22
+FLOWS|REACHING_DEF[b[2]] mixed_scalar_first#6 -> mixed_scalar_first#16
+FLOWS|REACHING_DEF[b[2]] mixed_scalar_first#8 -> mixed_scalar_first#16
+FLOWS|REACHING_DEF[b[2]] mixed_scalar_first#8 -> mixed_scalar_first#6
+FLOWS|REACHING_DEF[b[2]] mixed_scalar_first#8 -> mixed_scalar_first#7
+FLOWS|REACHING_DEF[b] mixed_array_first#12 -> mixed_array_first#11
+FLOWS|REACHING_DEF[b] mixed_array_first#12 -> mixed_array_first#22
+FLOWS|REACHING_DEF[b] mixed_scalar_first#15 -> mixed_scalar_first#14
+FLOWS|REACHING_DEF[b] mixed_scalar_first#15 -> mixed_scalar_first#16
+FLOWS|REACHING_DEF[b] mixed_scalar_first#7 -> mixed_scalar_first#15
+FLOWS|REACHING_DEF[b] mixed_scalar_first#7 -> mixed_scalar_first#6
+FLOWS|REACHING_DEF[char[2]] sized_string#8 -> sized_string#15
+FLOWS|REACHING_DEF[char[2]] sized_string#8 -> sized_string#7
+FLOWS|REACHING_DEF[int[2]] mixed_array_first#14 -> mixed_array_first#13
+FLOWS|REACHING_DEF[int[2]] mixed_array_first#14 -> mixed_array_first#22
+FLOWS|REACHING_DEF[int[2]] mixed_array_first#9 -> mixed_array_first#14
+FLOWS|REACHING_DEF[int[2]] mixed_array_first#9 -> mixed_array_first#8
+FLOWS|REACHING_DEF[int[2]] mixed_scalar_first#9 -> mixed_scalar_first#16
+FLOWS|REACHING_DEF[int[2]] mixed_scalar_first#9 -> mixed_scalar_first#8
+FLOWS|REACHING_DEF[int[2]] separate_scope#19 -> separate_scope#18
+FLOWS|REACHING_DEF[int[2]] separate_scope#19 -> separate_scope#27
+FLOWS|REACHING_DEF[int[2]] separate_scope#9 -> separate_scope#19
+FLOWS|REACHING_DEF[int[2]] separate_scope#9 -> separate_scope#8
+FLOWS|REACHING_DEF[int[size()]] repeat_dimension#8 -> repeat_dimension#11
+FLOWS|REACHING_DEF[int[size()]] repeat_dimension#8 -> repeat_dimension#7
+FLOWS|REACHING_DEF[int[size()]] repeat_dimension#8 -> repeat_dimension#9
+FLOWS|REACHING_DEF[p1] <operator>.alloc#1 -> <operator>.alloc#3
+FLOWS|REACHING_DEF[p1] <operator>.alloc#1 -> <operator>.alloc#5
+FLOWS|REACHING_DEF[p1] <operator>.arrayInitializer#1 -> <operator>.arrayInitializer#3
+FLOWS|REACHING_DEF[p1] <operator>.arrayInitializer#1 -> <operator>.arrayInitializer#4
+FLOWS|REACHING_DEF[p1] <operator>.assignment#1 -> <operator>.assignment#3
+FLOWS|REACHING_DEF[p1] <operator>.assignment#1 -> <operator>.assignment#5
+FLOWS|REACHING_DEF[p2] <operator>.alloc#4 -> <operator>.alloc#5
+FLOWS|REACHING_DEF[p2] <operator>.alloc#4 -> <operator>.alloc#6
+FLOWS|REACHING_DEF[p2] <operator>.assignment#4 -> <operator>.assignment#5
+FLOWS|REACHING_DEF[p2] <operator>.assignment#4 -> <operator>.assignment#6
+FLOWS|REACHING_DEF[size()] repeat_dimension#10 -> repeat_dimension#11
+FLOWS|REACHING_DEF[size()] repeat_dimension#9 -> repeat_dimension#7
+FLOWS|REACHING_DEF[use(a)] mixed_array_first#20 -> mixed_array_first#22
+FLOWS|REACHING_DEF[use(a)] separate_scope#25 -> separate_scope#27
+FLOWS|REACHING_DEF[use(b)] mixed_scalar_first#14 -> mixed_scalar_first#16
+FLOWS|REACHING_DEF[use_char(value)] sized_string#13 -> sized_string#15
+FLOWS|REACHING_DEF[value[2] =\n        "x"] sized_string#10 -> sized_string#15
+FLOWS|REACHING_DEF[value[2] =\n        "x"] sized_string#7 -> sized_string#5
+FLOWS|REACHING_DEF[value[2] =\n        "x"] sized_string#7 -> sized_string#6
+FLOWS|REACHING_DEF[value] sized_string#11 -> sized_string#10
+FLOWS|REACHING_DEF[value] sized_string#11 -> sized_string#14
+FLOWS|REACHING_DEF[value] sized_string#14 -> sized_string#13
+FLOWS|REACHING_DEF[value] sized_string#14 -> sized_string#15
+FLOWS|REACHING_DEF[value] sized_string#6 -> sized_string#5
+FLOWS|REACHING_DEF[value] use#1 -> use#2
+FLOWS|REACHING_DEF[value] use#1 -> use#4
+FLOWS|REACHING_DEF[value] use_char#1 -> use_char#2
+FLOWS|REACHING_DEF[value] use_char#1 -> use_char#4
+FLOWS|REACHING_DEF[{1}] mixed_array_first#18 -> mixed_array_first#16
+FLOWS|REACHING_DEF[{1}] mixed_array_first#18 -> mixed_array_first#17
+FLOWS|REACHING_DEF[{1}] mixed_array_first#18 -> mixed_array_first#22
+FLOWS|REACHING_DEF[{1}] separate_scope#13 -> separate_scope#11
+FLOWS|REACHING_DEF[{1}] separate_scope#13 -> separate_scope#12
+FLOWS|REACHING_DEF[{1}] separate_scope#23 -> separate_scope#21
+FLOWS|REACHING_DEF[{1}] separate_scope#23 -> separate_scope#22
+FLOWS|REACHING_DEF[{1}] separate_scope#23 -> separate_scope#27
