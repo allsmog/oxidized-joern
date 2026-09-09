@@ -1,0 +1,60 @@
+--- joern
++++ before_fix
+@@ -116,19 +116,19 @@
+ NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+ NODES|NAMESPACE NAME=<global>
+ NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
++NODES|TYPE_DECL NAME=BASE FULL_NAME=BASE CODE=BASE IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE_DECL NAME=U FULL_NAME=U CODE=typedef BASE U; AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=main.c ORDER=1
+ NODES|TYPE_DECL NAME=add FULL_NAME=add CODE=add AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+ NODES|TYPE_DECL NAME=direct FULL_NAME=direct CODE=direct AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+ NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE_DECL NAME=<global> FULL_NAME=main.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+-NODES|TYPE_DECL NAME=unsigned longlongint FULL_NAME=unsigned longlongint CODE=unsigned longlongint IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
++NODES|TYPE NAME=BASE FULL_NAME=BASE TYPE_DECL_FULL_NAME=BASE
+ NODES|TYPE NAME=U FULL_NAME=U TYPE_DECL_FULL_NAME=U
+ NODES|TYPE NAME=add FULL_NAME=add TYPE_DECL_FULL_NAME=add
+ NODES|TYPE NAME=direct FULL_NAME=direct TYPE_DECL_FULL_NAME=direct
+ NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+-NODES|TYPE NAME=unsigned longlongint FULL_NAME=unsigned longlongint TYPE_DECL_FULL_NAME=unsigned longlongint
+ NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+ EDGES|ARGUMENT add#11 -> add#12
+ EDGES|ARGUMENT add#11 -> add#13
+@@ -193,8 +193,8 @@
+ EDGES|CONTAINS D:main.c:<global> -> main.c:CAST:ANY(1)#0
+ EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+ EDGES|CONTAINS F:<includes> -> D:ANY
++EDGES|CONTAINS F:<includes> -> D:BASE
+ EDGES|CONTAINS F:<includes> -> D:int
+-EDGES|CONTAINS F:<includes> -> D:unsigned longlongint
+ EDGES|CONTAINS F:<includes> -> D:void
+ EDGES|CONTAINS F:main.c -> D:main.c:<global>
+ EDGES|CONTAINS add#0 -> add#10
+@@ -299,11 +299,11 @@
+ EDGES|REF NB:<includes>:<global> -> NS:<global>
+ EDGES|REF NB:main.c:<global> -> NS:<global>
+ EDGES|REF T:ANY -> D:ANY
++EDGES|REF T:BASE -> D:BASE
+ EDGES|REF T:U -> main.c:<global>#35
+ EDGES|REF T:add -> D:add
+ EDGES|REF T:direct -> D:direct
+ EDGES|REF T:int -> D:int
+-EDGES|REF T:unsigned longlongint -> D:unsigned longlongint
+ EDGES|REF T:void -> D:void
+ EDGES|REF add#16 -> add#1
+ EDGES|REF add#19 -> add#3
+@@ -312,11 +312,11 @@
+ EDGES|REF main.c:<global>#37 -> add#0
+ EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+ EDGES|SOURCE_FILE D:ANY -> F:<includes>
++EDGES|SOURCE_FILE D:BASE -> F:<includes>
+ EDGES|SOURCE_FILE D:add -> F:main.c
+ EDGES|SOURCE_FILE D:direct -> F:main.c
+ EDGES|SOURCE_FILE D:int -> F:<includes>
+ EDGES|SOURCE_FILE D:main.c:<global> -> F:main.c
+-EDGES|SOURCE_FILE D:unsigned longlongint -> F:<includes>
+ EDGES|SOURCE_FILE D:void -> F:<includes>
+ EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
+ EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>

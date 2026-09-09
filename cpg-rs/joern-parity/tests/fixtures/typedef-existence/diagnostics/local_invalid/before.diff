@@ -1,0 +1,313 @@
+--- joern
++++ before
+@@ -2,29 +2,27 @@
+   BLOCK TYPE_FULL_NAME=ANY ORDER=1
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+ 
+-METHOD NAME=<operator>.pointerCall FULL_NAME=<operator>.pointerCall ORDER=0
++METHOD NAME=<operator>.cast FULL_NAME=<operator>.cast ORDER=0
+   METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+   BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+   METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
++  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
++  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+ 
+ METHOD NAME=check CODE=int check(int x) {typedef BASE U;return CAST(U,x);} FULL_NAME=check SIGNATURE=int(int) ORDER=1
+   METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+   METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+   BLOCK CODE={typedef BASE U;return CAST(U,x);} TYPE_FULL_NAME=void ORDER=2
+-    LOCAL NAME=U CODE=<unknown> U TYPE_FULL_NAME=ANY ORDER=0
+-    TYPE_DECL NAME=UNKNOWN CODE=typedef BASE FULL_NAME=UNKNOWN ORDER=1
+-    CALL NAME=BASE CODE=BASE TYPE_FULL_NAME=ANY METHOD_FULL_NAME=main.c:BASE:ANY(0) SIGNATURE=ANY(0) ORDER=2 DISPATCH_TYPE=INLINED
+-      BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+-        UNKNOWN CODE=BASE ORDER=1
+-    IDENTIFIER NAME=U CODE=<unknown> U TYPE_FULL_NAME=ANY ORDER=3
+-    RETURN CODE=return CAST(U,x); ORDER=4
++    TYPE_DECL NAME=U CODE=typedef BASE U; FULL_NAME=U ORDER=1
++    RETURN CODE=return CAST(U,x); ORDER=2
+       CALL NAME=CAST CODE=CAST(U,x) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=main.c:CAST:ANY(2) SIGNATURE=ANY(2) ORDER=1 DISPATCH_TYPE=INLINED
+-        IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=2
+-        BLOCK TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+-          CALL NAME=<operator>.pointerCall CODE=(U)(x) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.pointerCall ORDER=1 DISPATCH_TYPE=DYNAMIC_DISPATCH
+-            IDENTIFIER NAME=U CODE=<unknown> U TYPE_FULL_NAME=ANY ORDER=1
+-            IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=1
++        TYPE_REF CODE=U TYPE_FULL_NAME=U ORDER=1 ARGUMENT_INDEX=1
++        IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
++        BLOCK TYPE_FULL_NAME=ANY ORDER=3 ARGUMENT_INDEX=3
++          CALL NAME=<operator>.cast CODE=(U)(x) TYPE_FULL_NAME=U METHOD_FULL_NAME=<operator>.cast ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
++            TYPE_REF CODE=U TYPE_FULL_NAME=U ORDER=1 ARGUMENT_INDEX=1
++            IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+ 
+ METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1
+@@ -32,26 +30,18 @@
+     METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+     METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+     BLOCK CODE={typedef BASE U;return CAST(U,x);} TYPE_FULL_NAME=void ORDER=2
+-      LOCAL NAME=U CODE=<unknown> U TYPE_FULL_NAME=ANY ORDER=0
+-      TYPE_DECL NAME=UNKNOWN CODE=typedef BASE FULL_NAME=UNKNOWN ORDER=1
+-      CALL NAME=BASE CODE=BASE TYPE_FULL_NAME=ANY METHOD_FULL_NAME=main.c:BASE:ANY(0) SIGNATURE=ANY(0) ORDER=2 DISPATCH_TYPE=INLINED
+-        BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+-          UNKNOWN CODE=BASE ORDER=1
+-      IDENTIFIER NAME=U CODE=<unknown> U TYPE_FULL_NAME=ANY ORDER=3
+-      RETURN CODE=return CAST(U,x); ORDER=4
++      TYPE_DECL NAME=U CODE=typedef BASE U; FULL_NAME=U ORDER=1
++      RETURN CODE=return CAST(U,x); ORDER=2
+         CALL NAME=CAST CODE=CAST(U,x) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=main.c:CAST:ANY(2) SIGNATURE=ANY(2) ORDER=1 DISPATCH_TYPE=INLINED
+-          IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=2
+-          BLOCK TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+-            CALL NAME=<operator>.pointerCall CODE=(U)(x) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.pointerCall ORDER=1 DISPATCH_TYPE=DYNAMIC_DISPATCH
+-              IDENTIFIER NAME=U CODE=<unknown> U TYPE_FULL_NAME=ANY ORDER=1
+-              IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=1
++          TYPE_REF CODE=U TYPE_FULL_NAME=U ORDER=1 ARGUMENT_INDEX=1
++          IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
++          BLOCK TYPE_FULL_NAME=ANY ORDER=3 ARGUMENT_INDEX=3
++            CALL NAME=<operator>.cast CODE=(U)(x) TYPE_FULL_NAME=U METHOD_FULL_NAME=<operator>.cast ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
++              TYPE_REF CODE=U TYPE_FULL_NAME=U ORDER=1 ARGUMENT_INDEX=1
++              IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+     METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+   BLOCK TYPE_FULL_NAME=ANY ORDER=1
+     METHOD_REF CODE=check TYPE_FULL_NAME=check METHOD_FULL_NAME=check ORDER=1
+-  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+-
+-METHOD NAME=BASE CODE=#define BASE unsigned UNKNOWN FULL_NAME=main.c:BASE:ANY(0) SIGNATURE=ANY(0) ORDER=1
+-  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+ 
+ METHOD NAME=CAST CODE=#define CAST(t,x) ((t)(x)) FULL_NAME=main.c:CAST:ANY(2) SIGNATURE=ANY(2) ORDER=1
+@@ -71,103 +61,94 @@
+ NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+ NODES|NAMESPACE NAME=<global>
+ NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+-NODES|TYPE_DECL NAME=UNKNOWN FULL_NAME=UNKNOWN CODE=typedef BASE AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=main.c ORDER=1
++NODES|TYPE_DECL NAME=BASE FULL_NAME=BASE CODE=BASE IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
++NODES|TYPE_DECL NAME=U FULL_NAME=U CODE=typedef BASE U; AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=main.c ORDER=1
+ NODES|TYPE_DECL NAME=check FULL_NAME=check CODE=check AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+ NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE_DECL NAME=<global> FULL_NAME=main.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+-NODES|TYPE_DECL NAME=unsigned int FULL_NAME=unsigned int CODE=unsigned int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+-NODES|TYPE NAME=UNKNOWN FULL_NAME=UNKNOWN TYPE_DECL_FULL_NAME=UNKNOWN
++NODES|TYPE NAME=BASE FULL_NAME=BASE TYPE_DECL_FULL_NAME=BASE
++NODES|TYPE NAME=U FULL_NAME=U TYPE_DECL_FULL_NAME=U
+ NODES|TYPE NAME=check FULL_NAME=check TYPE_DECL_FULL_NAME=check
+ NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+-NODES|TYPE NAME=unsigned int FULL_NAME=unsigned int TYPE_DECL_FULL_NAME=unsigned int
+ NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+ EDGES|ARGUMENT check#10 -> check#11
+-EDGES|ARGUMENT check#11 -> check#12
+-EDGES|ARGUMENT check#14 -> check#16
+-EDGES|CALL check#11 -> main.c:CAST:ANY(2)#0
+-EDGES|CALL check#6 -> main.c:BASE:ANY(0)#0
++EDGES|ARGUMENT check#10 -> check#12
++EDGES|ARGUMENT check#5 -> check#6
++EDGES|ARGUMENT check#6 -> check#7
++EDGES|ARGUMENT check#6 -> check#8
++EDGES|CALL check#10 -> <operator>.cast#0
++EDGES|CALL check#6 -> main.c:CAST:ANY(2)#0
+ EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+-EDGES|CFG <operator>.pointerCall#0 -> <operator>.pointerCall#4
+-EDGES|CFG check#0 -> check#6
+-EDGES|CFG check#10 -> check#17
+-EDGES|CFG check#11 -> check#10
+-EDGES|CFG check#11 -> check#15
+-EDGES|CFG check#12 -> check#11
+-EDGES|CFG check#14 -> check#10
+-EDGES|CFG check#15 -> check#16
+-EDGES|CFG check#16 -> check#14
+-EDGES|CFG check#6 -> check#8
+-EDGES|CFG check#6 -> check#9
+-EDGES|CFG check#8 -> check#9
+-EDGES|CFG check#9 -> check#12
+-EDGES|CFG main.c:<global>#0 -> main.c:<global>#20
+-EDGES|CFG main.c:<global>#20 -> main.c:<global>#21
+-EDGES|CFG main.c:BASE:ANY(0)#0 -> main.c:BASE:ANY(0)#2
++EDGES|CFG <operator>.cast#0 -> <operator>.cast#5
++EDGES|CFG check#0 -> check#7
++EDGES|CFG check#10 -> check#5
++EDGES|CFG check#11 -> check#12
++EDGES|CFG check#12 -> check#10
++EDGES|CFG check#5 -> check#13
++EDGES|CFG check#6 -> check#11
++EDGES|CFG check#6 -> check#5
++EDGES|CFG check#7 -> check#8
++EDGES|CFG check#8 -> check#6
++EDGES|CFG main.c:<global>#0 -> main.c:<global>#16
++EDGES|CFG main.c:<global>#16 -> main.c:<global>#17
+ EDGES|CFG main.c:CAST:ANY(2)#0 -> main.c:CAST:ANY(2)#6
+ EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+-EDGES|CONTAINS <operator>.pointerCall#0 -> <operator>.pointerCall#2
++EDGES|CONTAINS <operator>.cast#0 -> <operator>.cast#2
+ EDGES|CONTAINS D:main.c:<global> -> D:check
+ EDGES|CONTAINS D:main.c:<global> -> main.c:<global>#0
+-EDGES|CONTAINS D:main.c:<global> -> main.c:BASE:ANY(0)#0
+ EDGES|CONTAINS D:main.c:<global> -> main.c:CAST:ANY(2)#0
+ EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+ EDGES|CONTAINS F:<includes> -> D:ANY
++EDGES|CONTAINS F:<includes> -> D:BASE
+ EDGES|CONTAINS F:<includes> -> D:int
+-EDGES|CONTAINS F:<includes> -> D:unsigned int
+ EDGES|CONTAINS F:<includes> -> D:void
+ EDGES|CONTAINS F:main.c -> D:main.c:<global>
+ EDGES|CONTAINS check#0 -> check#10
+ EDGES|CONTAINS check#0 -> check#11
+ EDGES|CONTAINS check#0 -> check#12
+-EDGES|CONTAINS check#0 -> check#13
+-EDGES|CONTAINS check#0 -> check#14
+-EDGES|CONTAINS check#0 -> check#15
+-EDGES|CONTAINS check#0 -> check#16
+ EDGES|CONTAINS check#0 -> check#3
++EDGES|CONTAINS check#0 -> check#4
+ EDGES|CONTAINS check#0 -> check#5
+ EDGES|CONTAINS check#0 -> check#6
+ EDGES|CONTAINS check#0 -> check#7
+ EDGES|CONTAINS check#0 -> check#8
+ EDGES|CONTAINS check#0 -> check#9
+ EDGES|CONTAINS main.c:<global>#0 -> check#0
+-EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#19
+-EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#20
+-EDGES|CONTAINS main.c:BASE:ANY(0)#0 -> main.c:BASE:ANY(0)#1
++EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#15
++EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#16
+ EDGES|CONTAINS main.c:CAST:ANY(2)#0 -> main.c:CAST:ANY(2)#5
+ EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+ EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+-EDGES|EVAL_TYPE <operator>.pointerCall#1 -> T:ANY
+-EDGES|EVAL_TYPE <operator>.pointerCall#2 -> T:ANY
+-EDGES|EVAL_TYPE <operator>.pointerCall#3 -> T:ANY
+-EDGES|EVAL_TYPE <operator>.pointerCall#4 -> T:ANY
++EDGES|EVAL_TYPE <operator>.cast#1 -> T:ANY
++EDGES|EVAL_TYPE <operator>.cast#2 -> T:ANY
++EDGES|EVAL_TYPE <operator>.cast#3 -> T:ANY
++EDGES|EVAL_TYPE <operator>.cast#4 -> T:ANY
++EDGES|EVAL_TYPE <operator>.cast#5 -> T:ANY
++EDGES|EVAL_TYPE <operator>.cast#6 -> T:ANY
+ EDGES|EVAL_TYPE check#1 -> T:int
+-EDGES|EVAL_TYPE check#11 -> T:ANY
++EDGES|EVAL_TYPE check#10 -> T:U
++EDGES|EVAL_TYPE check#11 -> T:U
+ EDGES|EVAL_TYPE check#12 -> T:int
+-EDGES|EVAL_TYPE check#13 -> T:ANY
+-EDGES|EVAL_TYPE check#14 -> T:ANY
+-EDGES|EVAL_TYPE check#15 -> T:ANY
+-EDGES|EVAL_TYPE check#16 -> T:int
+-EDGES|EVAL_TYPE check#17 -> T:int
++EDGES|EVAL_TYPE check#13 -> T:int
+ EDGES|EVAL_TYPE check#2 -> T:int
+ EDGES|EVAL_TYPE check#3 -> T:void
+-EDGES|EVAL_TYPE check#4 -> T:ANY
+ EDGES|EVAL_TYPE check#6 -> T:ANY
+-EDGES|EVAL_TYPE check#7 -> T:ANY
++EDGES|EVAL_TYPE check#7 -> T:U
++EDGES|EVAL_TYPE check#8 -> T:int
+ EDGES|EVAL_TYPE check#9 -> T:ANY
+-EDGES|EVAL_TYPE main.c:<global>#19 -> T:ANY
+-EDGES|EVAL_TYPE main.c:<global>#20 -> T:check
+-EDGES|EVAL_TYPE main.c:<global>#21 -> T:ANY
+-EDGES|EVAL_TYPE main.c:BASE:ANY(0)#1 -> T:ANY
+-EDGES|EVAL_TYPE main.c:BASE:ANY(0)#2 -> T:ANY
++EDGES|EVAL_TYPE main.c:<global>#15 -> T:ANY
++EDGES|EVAL_TYPE main.c:<global>#16 -> T:check
++EDGES|EVAL_TYPE main.c:<global>#17 -> T:ANY
+ EDGES|EVAL_TYPE main.c:CAST:ANY(2)#1 -> T:ANY
+ EDGES|EVAL_TYPE main.c:CAST:ANY(2)#2 -> T:ANY
+ EDGES|EVAL_TYPE main.c:CAST:ANY(2)#3 -> T:ANY
+ EDGES|EVAL_TYPE main.c:CAST:ANY(2)#4 -> T:ANY
+ EDGES|EVAL_TYPE main.c:CAST:ANY(2)#5 -> T:ANY
+ EDGES|EVAL_TYPE main.c:CAST:ANY(2)#6 -> T:ANY
+-EDGES|PARAMETER_LINK <operator>.pointerCall#1 -> <operator>.pointerCall#3
++EDGES|PARAMETER_LINK <operator>.cast#1 -> <operator>.cast#3
++EDGES|PARAMETER_LINK <operator>.cast#4 -> <operator>.cast#6
+ EDGES|PARAMETER_LINK check#1 -> check#2
+ EDGES|PARAMETER_LINK main.c:CAST:ANY(2)#1 -> main.c:CAST:ANY(2)#2
+ EDGES|PARAMETER_LINK main.c:CAST:ANY(2)#3 -> main.c:CAST:ANY(2)#4
+@@ -175,57 +156,58 @@
+ EDGES|REF NB:<includes>:<global> -> NS:<global>
+ EDGES|REF NB:main.c:<global> -> NS:<global>
+ EDGES|REF T:ANY -> D:ANY
+-EDGES|REF T:UNKNOWN -> check#5
++EDGES|REF T:BASE -> D:BASE
++EDGES|REF T:U -> check#4
+ EDGES|REF T:check -> D:check
+ EDGES|REF T:int -> D:int
+-EDGES|REF T:unsigned int -> D:unsigned int
+ EDGES|REF T:void -> D:void
+-EDGES|REF check#15 -> check#4
+-EDGES|REF check#16 -> check#1
+-EDGES|REF check#9 -> check#4
+-EDGES|REF main.c:<global>#20 -> check#0
++EDGES|REF check#12 -> check#1
++EDGES|REF main.c:<global>#16 -> check#0
+ EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+ EDGES|SOURCE_FILE D:ANY -> F:<includes>
++EDGES|SOURCE_FILE D:BASE -> F:<includes>
+ EDGES|SOURCE_FILE D:check -> F:main.c
+ EDGES|SOURCE_FILE D:int -> F:<includes>
+ EDGES|SOURCE_FILE D:main.c:<global> -> F:main.c
+-EDGES|SOURCE_FILE D:unsigned int -> F:<includes>
+ EDGES|SOURCE_FILE D:void -> F:<includes>
+ EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
+ EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>
+ EDGES|SOURCE_FILE NB:main.c:<global> -> F:main.c
+ EDGES|SOURCE_FILE check#0 -> F:main.c
+-EDGES|SOURCE_FILE check#5 -> F:main.c
++EDGES|SOURCE_FILE check#4 -> F:main.c
+ EDGES|SOURCE_FILE main.c:<global>#0 -> F:main.c
+-EDGES|SOURCE_FILE main.c:BASE:ANY(0)#0 -> F:main.c
+ EDGES|SOURCE_FILE main.c:CAST:ANY(2)#0 -> F:main.c
+-FLOWS|REACHING_DEF[(U)(x)] check#14 -> check#17
+-FLOWS|REACHING_DEF[<RET>] check#10 -> check#17
+-FLOWS|REACHING_DEF[BASE] check#6 -> check#17
+-FLOWS|REACHING_DEF[CAST(U,x)] check#11 -> check#10
+-FLOWS|REACHING_DEF[CAST(U,x)] check#11 -> check#17
+-FLOWS|REACHING_DEF[] <operator>.pointerCall#0 -> <operator>.pointerCall#1
++FLOWS|REACHING_DEF[(U)(x)] check#10 -> check#13
++FLOWS|REACHING_DEF[<RET>] check#5 -> check#13
++FLOWS|REACHING_DEF[CAST(U,x)] check#6 -> check#13
++FLOWS|REACHING_DEF[CAST(U,x)] check#6 -> check#5
++FLOWS|REACHING_DEF[U] check#11 -> check#10
++FLOWS|REACHING_DEF[U] check#7 -> check#6
++FLOWS|REACHING_DEF[U] check#7 -> check#8
++FLOWS|REACHING_DEF[] <operator>.cast#0 -> <operator>.cast#1
++FLOWS|REACHING_DEF[] <operator>.cast#0 -> <operator>.cast#4
+ FLOWS|REACHING_DEF[] check#0 -> check#1
++FLOWS|REACHING_DEF[] check#0 -> check#11
+ FLOWS|REACHING_DEF[] check#0 -> check#12
+-FLOWS|REACHING_DEF[] check#0 -> check#15
+-FLOWS|REACHING_DEF[] check#0 -> check#16
+-FLOWS|REACHING_DEF[] check#0 -> check#6
+-FLOWS|REACHING_DEF[] check#0 -> check#9
+-FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#20
++FLOWS|REACHING_DEF[] check#0 -> check#7
++FLOWS|REACHING_DEF[] check#0 -> check#8
++FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#16
+ FLOWS|REACHING_DEF[] main.c:CAST:ANY(2)#0 -> main.c:CAST:ANY(2)#1
+ FLOWS|REACHING_DEF[] main.c:CAST:ANY(2)#0 -> main.c:CAST:ANY(2)#3
+-FLOWS|REACHING_DEF[p1] <operator>.pointerCall#1 -> <operator>.pointerCall#3
+-FLOWS|REACHING_DEF[p1] <operator>.pointerCall#1 -> <operator>.pointerCall#4
++FLOWS|REACHING_DEF[p1] <operator>.cast#1 -> <operator>.cast#3
++FLOWS|REACHING_DEF[p1] <operator>.cast#1 -> <operator>.cast#5
+ FLOWS|REACHING_DEF[p1] main.c:CAST:ANY(2)#1 -> main.c:CAST:ANY(2)#2
+ FLOWS|REACHING_DEF[p1] main.c:CAST:ANY(2)#1 -> main.c:CAST:ANY(2)#6
++FLOWS|REACHING_DEF[p2] <operator>.cast#4 -> <operator>.cast#5
++FLOWS|REACHING_DEF[p2] <operator>.cast#4 -> <operator>.cast#6
+ FLOWS|REACHING_DEF[p2] main.c:CAST:ANY(2)#3 -> main.c:CAST:ANY(2)#4
+ FLOWS|REACHING_DEF[p2] main.c:CAST:ANY(2)#3 -> main.c:CAST:ANY(2)#6
+-FLOWS|REACHING_DEF[x] check#1 -> check#12
+ FLOWS|REACHING_DEF[x] check#1 -> check#2
+-FLOWS|REACHING_DEF[x] check#12 -> check#11
+-FLOWS|REACHING_DEF[x] check#12 -> check#16
+-FLOWS|REACHING_DEF[x] check#12 -> check#17
++FLOWS|REACHING_DEF[x] check#1 -> check#8
++FLOWS|REACHING_DEF[x] check#12 -> check#10
++FLOWS|REACHING_DEF[x] check#12 -> check#13
+ FLOWS|REACHING_DEF[x] check#12 -> check#2
+-FLOWS|REACHING_DEF[x] check#16 -> check#14
+-FLOWS|REACHING_DEF[x] check#16 -> check#17
+-FLOWS|REACHING_DEF[x] check#16 -> check#2
++FLOWS|REACHING_DEF[x] check#8 -> check#12
++FLOWS|REACHING_DEF[x] check#8 -> check#13
++FLOWS|REACHING_DEF[x] check#8 -> check#2
++FLOWS|REACHING_DEF[x] check#8 -> check#6

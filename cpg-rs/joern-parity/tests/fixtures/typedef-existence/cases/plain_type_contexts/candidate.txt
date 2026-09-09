@@ -1,0 +1,412 @@
+METHOD NAME=<global> CODE=<global> FULL_NAME=<includes>:<global> ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.addition FULL_NAME=<operator>.addition ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.cast FULL_NAME=<operator>.cast ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=add CODE=int add(int x,int y){return ADD(x,y);} FULL_NAME=add SIGNATURE=int(int,int) ORDER=1
+  METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_IN NAME=y CODE=int y TYPE_FULL_NAME=int ORDER=2
+  METHOD_PARAMETER_OUT NAME=y CODE=int y TYPE_FULL_NAME=int ORDER=2
+  BLOCK CODE={return ADD(x,y);} TYPE_FULL_NAME=void ORDER=3
+    RETURN CODE=return ADD(x,y); ORDER=1
+      CALL NAME=ADD CODE=ADD(x,y) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=main.c:ADD:ANY(2) SIGNATURE=ANY(2) ORDER=1 DISPATCH_TYPE=INLINED
+        IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+        IDENTIFIER NAME=y CODE=y TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+        BLOCK TYPE_FULL_NAME=ANY ORDER=3 ARGUMENT_INDEX=3
+          CALL NAME=<operator>.cast CODE=(U)(((U)(x)) + ((U)(y))) TYPE_FULL_NAME=U METHOD_FULL_NAME=<operator>.cast ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+            TYPE_REF CODE=U TYPE_FULL_NAME=U ORDER=1 ARGUMENT_INDEX=1
+            CALL NAME=<operator>.addition CODE=((U)(x)) + ((U)(y)) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+              CALL NAME=<operator>.cast CODE=(U)(x) TYPE_FULL_NAME=U METHOD_FULL_NAME=<operator>.cast ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                TYPE_REF CODE=U TYPE_FULL_NAME=U ORDER=1 ARGUMENT_INDEX=1
+                IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+              CALL NAME=<operator>.cast CODE=(U)(y) TYPE_FULL_NAME=U METHOD_FULL_NAME=<operator>.cast ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+                TYPE_REF CODE=U TYPE_FULL_NAME=U ORDER=1 ARGUMENT_INDEX=1
+                IDENTIFIER NAME=y CODE=y TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=4
+
+METHOD NAME=direct CODE=int direct(int x){return CAST(x);} FULL_NAME=direct SIGNATURE=int(int) ORDER=1
+  METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+  BLOCK CODE={return CAST(x);} TYPE_FULL_NAME=void ORDER=2
+    RETURN CODE=return CAST(x); ORDER=1
+      CALL NAME=CAST CODE=CAST(x) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=main.c:CAST:ANY(1) SIGNATURE=ANY(1) ORDER=1 DISPATCH_TYPE=INLINED
+        IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+        BLOCK TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+          CALL NAME=<operator>.cast CODE=(U)(x) TYPE_FULL_NAME=U METHOD_FULL_NAME=<operator>.cast ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+            TYPE_REF CODE=U TYPE_FULL_NAME=U ORDER=1 ARGUMENT_INDEX=1
+            IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+
+METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1
+  METHOD NAME=direct CODE=int direct(int x){return CAST(x);} FULL_NAME=direct SIGNATURE=int(int) ORDER=1
+    METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+    METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+    BLOCK CODE={return CAST(x);} TYPE_FULL_NAME=void ORDER=2
+      RETURN CODE=return CAST(x); ORDER=1
+        CALL NAME=CAST CODE=CAST(x) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=main.c:CAST:ANY(1) SIGNATURE=ANY(1) ORDER=1 DISPATCH_TYPE=INLINED
+          IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+          BLOCK TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+            CALL NAME=<operator>.cast CODE=(U)(x) TYPE_FULL_NAME=U METHOD_FULL_NAME=<operator>.cast ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+              TYPE_REF CODE=U TYPE_FULL_NAME=U ORDER=1 ARGUMENT_INDEX=1
+              IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+  METHOD NAME=add CODE=int add(int x,int y){return ADD(x,y);} FULL_NAME=add SIGNATURE=int(int,int) ORDER=1
+    METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+    METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+    METHOD_PARAMETER_IN NAME=y CODE=int y TYPE_FULL_NAME=int ORDER=2
+    METHOD_PARAMETER_OUT NAME=y CODE=int y TYPE_FULL_NAME=int ORDER=2
+    BLOCK CODE={return ADD(x,y);} TYPE_FULL_NAME=void ORDER=3
+      RETURN CODE=return ADD(x,y); ORDER=1
+        CALL NAME=ADD CODE=ADD(x,y) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=main.c:ADD:ANY(2) SIGNATURE=ANY(2) ORDER=1 DISPATCH_TYPE=INLINED
+          IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+          IDENTIFIER NAME=y CODE=y TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+          BLOCK TYPE_FULL_NAME=ANY ORDER=3 ARGUMENT_INDEX=3
+            CALL NAME=<operator>.cast CODE=(U)(((U)(x)) + ((U)(y))) TYPE_FULL_NAME=U METHOD_FULL_NAME=<operator>.cast ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+              TYPE_REF CODE=U TYPE_FULL_NAME=U ORDER=1 ARGUMENT_INDEX=1
+              CALL NAME=<operator>.addition CODE=((U)(x)) + ((U)(y)) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+                CALL NAME=<operator>.cast CODE=(U)(x) TYPE_FULL_NAME=U METHOD_FULL_NAME=<operator>.cast ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                  TYPE_REF CODE=U TYPE_FULL_NAME=U ORDER=1 ARGUMENT_INDEX=1
+                  IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+                CALL NAME=<operator>.cast CODE=(U)(y) TYPE_FULL_NAME=U METHOD_FULL_NAME=<operator>.cast ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+                  TYPE_REF CODE=U TYPE_FULL_NAME=U ORDER=1 ARGUMENT_INDEX=1
+                  IDENTIFIER NAME=y CODE=y TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=4
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+    TYPE_DECL NAME=U CODE=typedef unsigned long long U; FULL_NAME=U ORDER=1
+    METHOD_REF CODE=direct TYPE_FULL_NAME=direct METHOD_FULL_NAME=direct ORDER=2
+    METHOD_REF CODE=add TYPE_FULL_NAME=add METHOD_FULL_NAME=add ORDER=3
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=ADD CODE=#define ADD(a,b) ((U)(CAST(a)+CAST(b))) FULL_NAME=main.c:ADD:ANY(2) SIGNATURE=ANY(2) ORDER=1
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  BLOCK TYPE_FULL_NAME=ANY ORDER=3
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=4
+
+METHOD NAME=CAST CODE=#define CAST(x) ((U)(x)) FULL_NAME=main.c:CAST:ANY(1) SIGNATURE=ANY(1) ORDER=1
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=3
+
+NODES|META_DATA LANGUAGE=NEWC
+NODES|FILE NAME=<includes> ORDER=1
+NODES|FILE NAME=<unknown> ORDER=0
+NODES|FILE NAME=main.c ORDER=0
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<global> FILENAME=<unknown> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<includes>:<global> FILENAME=<includes> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|NAMESPACE NAME=<global>
+NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=U FULL_NAME=U CODE=typedef unsigned long long U; AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=add FULL_NAME=add CODE=add AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=direct FULL_NAME=direct CODE=direct AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=<global> FULL_NAME=main.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=unsigned longlongint FULL_NAME=unsigned longlongint CODE=unsigned longlongint IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+NODES|TYPE NAME=U FULL_NAME=U TYPE_DECL_FULL_NAME=U
+NODES|TYPE NAME=add FULL_NAME=add TYPE_DECL_FULL_NAME=add
+NODES|TYPE NAME=direct FULL_NAME=direct TYPE_DECL_FULL_NAME=direct
+NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+NODES|TYPE NAME=unsigned longlongint FULL_NAME=unsigned longlongint TYPE_DECL_FULL_NAME=unsigned longlongint
+NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+EDGES|ARGUMENT add#11 -> add#12
+EDGES|ARGUMENT add#11 -> add#13
+EDGES|ARGUMENT add#13 -> add#14
+EDGES|ARGUMENT add#13 -> add#17
+EDGES|ARGUMENT add#14 -> add#15
+EDGES|ARGUMENT add#14 -> add#16
+EDGES|ARGUMENT add#17 -> add#18
+EDGES|ARGUMENT add#17 -> add#19
+EDGES|ARGUMENT add#6 -> add#7
+EDGES|ARGUMENT add#7 -> add#8
+EDGES|ARGUMENT add#7 -> add#9
+EDGES|ARGUMENT direct#4 -> direct#5
+EDGES|ARGUMENT direct#5 -> direct#6
+EDGES|ARGUMENT direct#8 -> direct#10
+EDGES|ARGUMENT direct#8 -> direct#9
+EDGES|CALL add#11 -> <operator>.cast#0
+EDGES|CALL add#13 -> <operator>.addition#0
+EDGES|CALL add#14 -> <operator>.cast#0
+EDGES|CALL add#17 -> <operator>.cast#0
+EDGES|CALL add#7 -> main.c:ADD:ANY(2)#0
+EDGES|CALL direct#5 -> main.c:CAST:ANY(1)#0
+EDGES|CALL direct#8 -> <operator>.cast#0
+EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+EDGES|CFG <operator>.addition#0 -> <operator>.addition#5
+EDGES|CFG <operator>.cast#0 -> <operator>.cast#5
+EDGES|CFG add#0 -> add#8
+EDGES|CFG add#11 -> add#6
+EDGES|CFG add#12 -> add#15
+EDGES|CFG add#13 -> add#11
+EDGES|CFG add#14 -> add#18
+EDGES|CFG add#15 -> add#16
+EDGES|CFG add#16 -> add#14
+EDGES|CFG add#17 -> add#13
+EDGES|CFG add#18 -> add#19
+EDGES|CFG add#19 -> add#17
+EDGES|CFG add#6 -> add#20
+EDGES|CFG add#7 -> add#12
+EDGES|CFG add#7 -> add#6
+EDGES|CFG add#8 -> add#9
+EDGES|CFG add#9 -> add#7
+EDGES|CFG direct#0 -> direct#6
+EDGES|CFG direct#10 -> direct#8
+EDGES|CFG direct#4 -> direct#11
+EDGES|CFG direct#5 -> direct#4
+EDGES|CFG direct#5 -> direct#9
+EDGES|CFG direct#6 -> direct#5
+EDGES|CFG direct#8 -> direct#4
+EDGES|CFG direct#9 -> direct#10
+EDGES|CFG main.c:<global>#0 -> main.c:<global>#36
+EDGES|CFG main.c:<global>#36 -> main.c:<global>#37
+EDGES|CFG main.c:<global>#37 -> main.c:<global>#38
+EDGES|CFG main.c:ADD:ANY(2)#0 -> main.c:ADD:ANY(2)#6
+EDGES|CFG main.c:CAST:ANY(1)#0 -> main.c:CAST:ANY(1)#4
+EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+EDGES|CONTAINS <operator>.addition#0 -> <operator>.addition#2
+EDGES|CONTAINS <operator>.cast#0 -> <operator>.cast#2
+EDGES|CONTAINS D:main.c:<global> -> D:add
+EDGES|CONTAINS D:main.c:<global> -> D:direct
+EDGES|CONTAINS D:main.c:<global> -> main.c:<global>#0
+EDGES|CONTAINS D:main.c:<global> -> main.c:ADD:ANY(2)#0
+EDGES|CONTAINS D:main.c:<global> -> main.c:CAST:ANY(1)#0
+EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+EDGES|CONTAINS F:<includes> -> D:ANY
+EDGES|CONTAINS F:<includes> -> D:int
+EDGES|CONTAINS F:<includes> -> D:unsigned longlongint
+EDGES|CONTAINS F:<includes> -> D:void
+EDGES|CONTAINS F:main.c -> D:main.c:<global>
+EDGES|CONTAINS add#0 -> add#10
+EDGES|CONTAINS add#0 -> add#11
+EDGES|CONTAINS add#0 -> add#12
+EDGES|CONTAINS add#0 -> add#13
+EDGES|CONTAINS add#0 -> add#14
+EDGES|CONTAINS add#0 -> add#15
+EDGES|CONTAINS add#0 -> add#16
+EDGES|CONTAINS add#0 -> add#17
+EDGES|CONTAINS add#0 -> add#18
+EDGES|CONTAINS add#0 -> add#19
+EDGES|CONTAINS add#0 -> add#5
+EDGES|CONTAINS add#0 -> add#6
+EDGES|CONTAINS add#0 -> add#7
+EDGES|CONTAINS add#0 -> add#8
+EDGES|CONTAINS add#0 -> add#9
+EDGES|CONTAINS direct#0 -> direct#10
+EDGES|CONTAINS direct#0 -> direct#3
+EDGES|CONTAINS direct#0 -> direct#4
+EDGES|CONTAINS direct#0 -> direct#5
+EDGES|CONTAINS direct#0 -> direct#6
+EDGES|CONTAINS direct#0 -> direct#7
+EDGES|CONTAINS direct#0 -> direct#8
+EDGES|CONTAINS direct#0 -> direct#9
+EDGES|CONTAINS main.c:<global>#0 -> add#0
+EDGES|CONTAINS main.c:<global>#0 -> direct#0
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#34
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#35
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#36
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#37
+EDGES|CONTAINS main.c:ADD:ANY(2)#0 -> main.c:ADD:ANY(2)#5
+EDGES|CONTAINS main.c:CAST:ANY(1)#0 -> main.c:CAST:ANY(1)#3
+EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#6 -> T:ANY
+EDGES|EVAL_TYPE <operator>.cast#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.cast#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.cast#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.cast#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.cast#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.cast#6 -> T:ANY
+EDGES|EVAL_TYPE add#1 -> T:int
+EDGES|EVAL_TYPE add#10 -> T:ANY
+EDGES|EVAL_TYPE add#11 -> T:U
+EDGES|EVAL_TYPE add#12 -> T:U
+EDGES|EVAL_TYPE add#13 -> T:ANY
+EDGES|EVAL_TYPE add#14 -> T:U
+EDGES|EVAL_TYPE add#15 -> T:U
+EDGES|EVAL_TYPE add#16 -> T:int
+EDGES|EVAL_TYPE add#17 -> T:U
+EDGES|EVAL_TYPE add#18 -> T:U
+EDGES|EVAL_TYPE add#19 -> T:int
+EDGES|EVAL_TYPE add#2 -> T:int
+EDGES|EVAL_TYPE add#20 -> T:int
+EDGES|EVAL_TYPE add#3 -> T:int
+EDGES|EVAL_TYPE add#4 -> T:int
+EDGES|EVAL_TYPE add#5 -> T:void
+EDGES|EVAL_TYPE add#7 -> T:ANY
+EDGES|EVAL_TYPE add#8 -> T:int
+EDGES|EVAL_TYPE add#9 -> T:int
+EDGES|EVAL_TYPE direct#1 -> T:int
+EDGES|EVAL_TYPE direct#10 -> T:int
+EDGES|EVAL_TYPE direct#11 -> T:int
+EDGES|EVAL_TYPE direct#2 -> T:int
+EDGES|EVAL_TYPE direct#3 -> T:void
+EDGES|EVAL_TYPE direct#5 -> T:ANY
+EDGES|EVAL_TYPE direct#6 -> T:int
+EDGES|EVAL_TYPE direct#7 -> T:ANY
+EDGES|EVAL_TYPE direct#8 -> T:U
+EDGES|EVAL_TYPE direct#9 -> T:U
+EDGES|EVAL_TYPE main.c:<global>#34 -> T:ANY
+EDGES|EVAL_TYPE main.c:<global>#36 -> T:direct
+EDGES|EVAL_TYPE main.c:<global>#37 -> T:add
+EDGES|EVAL_TYPE main.c:<global>#38 -> T:ANY
+EDGES|EVAL_TYPE main.c:ADD:ANY(2)#1 -> T:ANY
+EDGES|EVAL_TYPE main.c:ADD:ANY(2)#2 -> T:ANY
+EDGES|EVAL_TYPE main.c:ADD:ANY(2)#3 -> T:ANY
+EDGES|EVAL_TYPE main.c:ADD:ANY(2)#4 -> T:ANY
+EDGES|EVAL_TYPE main.c:ADD:ANY(2)#5 -> T:ANY
+EDGES|EVAL_TYPE main.c:ADD:ANY(2)#6 -> T:ANY
+EDGES|EVAL_TYPE main.c:CAST:ANY(1)#1 -> T:ANY
+EDGES|EVAL_TYPE main.c:CAST:ANY(1)#2 -> T:ANY
+EDGES|EVAL_TYPE main.c:CAST:ANY(1)#3 -> T:ANY
+EDGES|EVAL_TYPE main.c:CAST:ANY(1)#4 -> T:ANY
+EDGES|PARAMETER_LINK <operator>.addition#1 -> <operator>.addition#3
+EDGES|PARAMETER_LINK <operator>.addition#4 -> <operator>.addition#6
+EDGES|PARAMETER_LINK <operator>.cast#1 -> <operator>.cast#3
+EDGES|PARAMETER_LINK <operator>.cast#4 -> <operator>.cast#6
+EDGES|PARAMETER_LINK add#1 -> add#2
+EDGES|PARAMETER_LINK add#3 -> add#4
+EDGES|PARAMETER_LINK direct#1 -> direct#2
+EDGES|PARAMETER_LINK main.c:ADD:ANY(2)#1 -> main.c:ADD:ANY(2)#2
+EDGES|PARAMETER_LINK main.c:ADD:ANY(2)#3 -> main.c:ADD:ANY(2)#4
+EDGES|PARAMETER_LINK main.c:CAST:ANY(1)#1 -> main.c:CAST:ANY(1)#2
+EDGES|REF NB:<global> -> NS:<global>
+EDGES|REF NB:<includes>:<global> -> NS:<global>
+EDGES|REF NB:main.c:<global> -> NS:<global>
+EDGES|REF T:ANY -> D:ANY
+EDGES|REF T:U -> main.c:<global>#35
+EDGES|REF T:add -> D:add
+EDGES|REF T:direct -> D:direct
+EDGES|REF T:int -> D:int
+EDGES|REF T:unsigned longlongint -> D:unsigned longlongint
+EDGES|REF T:void -> D:void
+EDGES|REF add#16 -> add#1
+EDGES|REF add#19 -> add#3
+EDGES|REF direct#10 -> direct#1
+EDGES|REF main.c:<global>#36 -> direct#0
+EDGES|REF main.c:<global>#37 -> add#0
+EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+EDGES|SOURCE_FILE D:ANY -> F:<includes>
+EDGES|SOURCE_FILE D:add -> F:main.c
+EDGES|SOURCE_FILE D:direct -> F:main.c
+EDGES|SOURCE_FILE D:int -> F:<includes>
+EDGES|SOURCE_FILE D:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE D:unsigned longlongint -> F:<includes>
+EDGES|SOURCE_FILE D:void -> F:<includes>
+EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
+EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>
+EDGES|SOURCE_FILE NB:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE add#0 -> F:main.c
+EDGES|SOURCE_FILE direct#0 -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#0 -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#35 -> F:main.c
+EDGES|SOURCE_FILE main.c:ADD:ANY(2)#0 -> F:main.c
+EDGES|SOURCE_FILE main.c:CAST:ANY(1)#0 -> F:main.c
+FLOWS|REACHING_DEF[((U)(x)) + ((U)(y))] add#13 -> add#11
+FLOWS|REACHING_DEF[((U)(x)) + ((U)(y))] add#13 -> add#20
+FLOWS|REACHING_DEF[(U)(((U)(x)) + ((U)(y)))] add#11 -> add#20
+FLOWS|REACHING_DEF[(U)(x)] add#14 -> add#13
+FLOWS|REACHING_DEF[(U)(x)] add#14 -> add#20
+FLOWS|REACHING_DEF[(U)(x)] direct#8 -> direct#11
+FLOWS|REACHING_DEF[(U)(y)] add#17 -> add#13
+FLOWS|REACHING_DEF[(U)(y)] add#17 -> add#20
+FLOWS|REACHING_DEF[<RET>] add#6 -> add#20
+FLOWS|REACHING_DEF[<RET>] direct#4 -> direct#11
+FLOWS|REACHING_DEF[ADD(x,y)] add#7 -> add#20
+FLOWS|REACHING_DEF[ADD(x,y)] add#7 -> add#6
+FLOWS|REACHING_DEF[CAST(x)] direct#5 -> direct#11
+FLOWS|REACHING_DEF[CAST(x)] direct#5 -> direct#4
+FLOWS|REACHING_DEF[U] add#12 -> add#11
+FLOWS|REACHING_DEF[U] add#15 -> add#14
+FLOWS|REACHING_DEF[U] add#18 -> add#17
+FLOWS|REACHING_DEF[U] direct#9 -> direct#8
+FLOWS|REACHING_DEF[] <operator>.addition#0 -> <operator>.addition#1
+FLOWS|REACHING_DEF[] <operator>.addition#0 -> <operator>.addition#4
+FLOWS|REACHING_DEF[] <operator>.cast#0 -> <operator>.cast#1
+FLOWS|REACHING_DEF[] <operator>.cast#0 -> <operator>.cast#4
+FLOWS|REACHING_DEF[] add#0 -> add#1
+FLOWS|REACHING_DEF[] add#0 -> add#12
+FLOWS|REACHING_DEF[] add#0 -> add#15
+FLOWS|REACHING_DEF[] add#0 -> add#16
+FLOWS|REACHING_DEF[] add#0 -> add#18
+FLOWS|REACHING_DEF[] add#0 -> add#19
+FLOWS|REACHING_DEF[] add#0 -> add#3
+FLOWS|REACHING_DEF[] add#0 -> add#8
+FLOWS|REACHING_DEF[] add#0 -> add#9
+FLOWS|REACHING_DEF[] direct#0 -> direct#1
+FLOWS|REACHING_DEF[] direct#0 -> direct#10
+FLOWS|REACHING_DEF[] direct#0 -> direct#6
+FLOWS|REACHING_DEF[] direct#0 -> direct#9
+FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#36
+FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#37
+FLOWS|REACHING_DEF[] main.c:ADD:ANY(2)#0 -> main.c:ADD:ANY(2)#1
+FLOWS|REACHING_DEF[] main.c:ADD:ANY(2)#0 -> main.c:ADD:ANY(2)#3
+FLOWS|REACHING_DEF[] main.c:CAST:ANY(1)#0 -> main.c:CAST:ANY(1)#1
+FLOWS|REACHING_DEF[p1] <operator>.addition#1 -> <operator>.addition#3
+FLOWS|REACHING_DEF[p1] <operator>.addition#1 -> <operator>.addition#5
+FLOWS|REACHING_DEF[p1] <operator>.cast#1 -> <operator>.cast#3
+FLOWS|REACHING_DEF[p1] <operator>.cast#1 -> <operator>.cast#5
+FLOWS|REACHING_DEF[p1] main.c:ADD:ANY(2)#1 -> main.c:ADD:ANY(2)#2
+FLOWS|REACHING_DEF[p1] main.c:ADD:ANY(2)#1 -> main.c:ADD:ANY(2)#6
+FLOWS|REACHING_DEF[p1] main.c:CAST:ANY(1)#1 -> main.c:CAST:ANY(1)#2
+FLOWS|REACHING_DEF[p1] main.c:CAST:ANY(1)#1 -> main.c:CAST:ANY(1)#4
+FLOWS|REACHING_DEF[p2] <operator>.addition#4 -> <operator>.addition#5
+FLOWS|REACHING_DEF[p2] <operator>.addition#4 -> <operator>.addition#6
+FLOWS|REACHING_DEF[p2] <operator>.cast#4 -> <operator>.cast#5
+FLOWS|REACHING_DEF[p2] <operator>.cast#4 -> <operator>.cast#6
+FLOWS|REACHING_DEF[p2] main.c:ADD:ANY(2)#3 -> main.c:ADD:ANY(2)#4
+FLOWS|REACHING_DEF[p2] main.c:ADD:ANY(2)#3 -> main.c:ADD:ANY(2)#6
+FLOWS|REACHING_DEF[x] add#1 -> add#2
+FLOWS|REACHING_DEF[x] add#1 -> add#8
+FLOWS|REACHING_DEF[x] add#16 -> add#14
+FLOWS|REACHING_DEF[x] add#16 -> add#2
+FLOWS|REACHING_DEF[x] add#16 -> add#20
+FLOWS|REACHING_DEF[x] add#8 -> add#16
+FLOWS|REACHING_DEF[x] add#8 -> add#2
+FLOWS|REACHING_DEF[x] add#8 -> add#20
+FLOWS|REACHING_DEF[x] add#8 -> add#7
+FLOWS|REACHING_DEF[x] add#8 -> add#9
+FLOWS|REACHING_DEF[x] direct#1 -> direct#2
+FLOWS|REACHING_DEF[x] direct#1 -> direct#6
+FLOWS|REACHING_DEF[x] direct#10 -> direct#11
+FLOWS|REACHING_DEF[x] direct#10 -> direct#2
+FLOWS|REACHING_DEF[x] direct#10 -> direct#8
+FLOWS|REACHING_DEF[x] direct#6 -> direct#10
+FLOWS|REACHING_DEF[x] direct#6 -> direct#11
+FLOWS|REACHING_DEF[x] direct#6 -> direct#2
+FLOWS|REACHING_DEF[x] direct#6 -> direct#5
+FLOWS|REACHING_DEF[y] add#19 -> add#17
+FLOWS|REACHING_DEF[y] add#19 -> add#20
+FLOWS|REACHING_DEF[y] add#19 -> add#4
+FLOWS|REACHING_DEF[y] add#3 -> add#4
+FLOWS|REACHING_DEF[y] add#3 -> add#9
+FLOWS|REACHING_DEF[y] add#9 -> add#19
+FLOWS|REACHING_DEF[y] add#9 -> add#20
+FLOWS|REACHING_DEF[y] add#9 -> add#4
+FLOWS|REACHING_DEF[y] add#9 -> add#7
+FLOWS|REACHING_DEF[y] add#9 -> add#8

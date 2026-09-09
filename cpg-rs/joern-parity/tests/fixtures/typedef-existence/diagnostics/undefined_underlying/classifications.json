@@ -1,0 +1,22 @@
+{
+  "direct": [
+    [
+      "<operator>.cast",
+      "(U)(x)"
+    ]
+  ],
+  "add": [
+    [
+      "<operator>.cast",
+      "(U)(((U)(x)) + ((U)(y)))"
+    ],
+    [
+      "<operator>.cast",
+      "(U)(x)"
+    ],
+    [
+      "<operator>.cast",
+      "(U)(y)"
+    ]
+  ]
+}

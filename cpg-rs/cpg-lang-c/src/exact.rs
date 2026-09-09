@@ -80,6 +80,7 @@ pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
     let mut raw_fn_decls: Vec<(String, String, usize)> = Vec::new(); // (name, file, node id)
     let mut parenthesized_definitions = HashSet::new();
     let mut struct_decls: Vec<(String, String, String)> = Vec::new(); // (tag, code, file)
+    let mut type_alias_full_names: HashMap<usize, String> = HashMap::new();
     let mut used_types: std::collections::BTreeSet<String> = std::collections::BTreeSet::new();
     for u in &units {
         let b = u.src.as_bytes();
@@ -138,14 +139,11 @@ pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
                     }
                     let aliases = typedef_declarators(f);
                     for alias in &aliases {
-                        let tag = text(*alias, b).to_string();
+                        let tag = type_binding_name(*alias, b);
                         used_types.insert(tag.clone());
+                        used_types.insert(typedef_underlying_type(f, *alias, b));
+                        type_alias_full_names.insert(alias.id(), tag.clone());
                         struct_decls.push((tag, esc(text(f, b)), u.file.clone()));
-                    }
-                    if !aliases.is_empty() {
-                        if let Some(t) = f.child_by_field_name("type") {
-                            used_types.insert(normalize_type(text(t, b)));
-                        }
                     }
                 }
                 _ => {}
@@ -201,6 +199,7 @@ pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
     let macro_tables = source_macro_tables(sources);
     let mut unknown_declaration_prefixes = HashMap::new();
     for u in &units {
+        let context = body_macro_context(u.tree.root_node(), u.src.as_bytes(), &u.file, &units);
         let root = u.tree.root_node();
         let bytes = u.src.as_bytes();
         let active_items = active_translation_unit_items(root, bytes);
@@ -224,7 +223,18 @@ pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
                 );
                 directive_index += 1;
             }
-            for (declarator, header) in prototype_header_entries(declaration, bytes) {
+            let macros = context
+                .macro_states
+                .get(&declaration.id())
+                .cloned()
+                .unwrap_or_default();
+            for (declarator, _) in prototype_header_entries(declaration, bytes) {
+                let Some(resolved) =
+                    resolved_function_header(declaration, declarator, bytes, &macros)
+                else {
+                    continue;
+                };
+                let header = resolved.header;
                 let parenthesized = parenthesized_function_parts(declarator);
                 let full = if parenthesized.is_some() {
                     format!("<unresolvedNamespace>.{}", header.0)
@@ -232,7 +242,9 @@ pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
                     header.0.clone()
                 };
                 if !defined.contains(&full) {
-                    let mut code = esc(text(declaration, bytes));
+                    let mut code = resolved
+                        .expanded_code
+                        .unwrap_or_else(|| esc(text(declaration, bytes)));
                     if macro_declaration_return(declaration).is_some() {
                         let prefix = declaration
                             .child_by_field_name("type")
@@ -315,9 +327,25 @@ pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
         .collect();
 
     for u in &units {
+        let context = body_macro_context(u.tree.root_node(), u.src.as_bytes(), &u.file, &units);
         let b = u.src.as_bytes();
         let root = u.tree.root_node();
-        let (active_items, macros, macro_states) = body_macro_context(root, b, &u.file, &units);
+        let BodyMacroContext {
+            items: active_items,
+            macros,
+            macro_states,
+            header_declarations,
+            typedef_states,
+        } = &context;
+        let mut type_sites = HashMap::new();
+        for item in translation_unit_items(root, b) {
+            type_sites.extend(collect_type_sites(
+                item,
+                b,
+                typedef_states.get(&item.id()).cloned().unwrap_or_default(),
+                macro_states.get(&item.id()).unwrap_or(macros),
+            ));
+        }
         let active_methods: HashSet<usize> = active_items
             .iter()
             .filter(|node| node.kind() == "function_definition")
@@ -346,28 +374,31 @@ pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
         for f in translation_unit_items(root, b) {
             match f.kind() {
                 "function_definition" => {
-                    if let Some((name, ret, _)) = fn_header(f, b) {
+                    let macros = macro_states.get(&f.id()).cloned().unwrap_or_default();
+                    if let Some(resolved) = f
+                        .child_by_field_name("declarator")
+                        .and_then(|decl| resolved_function_header(f, decl, b, &macros))
+                    {
+                        let (name, ret, _) = resolved.header;
                         function_full_names.insert(name.clone(), method_full(&name, &u.file));
-                        function_call_types.insert(
-                            name.clone(),
-                            function_return_type(
-                                f,
-                                f.child_by_field_name("declarator").unwrap(),
-                                b,
-                                TypeRole::Expression,
-                            ),
-                        );
+                        function_call_types.insert(name.clone(), resolved.call_type);
                         functions.insert(name, ret);
                     }
                 }
                 "declaration" => {
-                    for (declarator, (name, ret, _)) in prototype_header_entries(f, b) {
+                    let macros = macro_states.get(&f.id()).cloned().unwrap_or_default();
+                    for (declarator, _) in prototype_header_entries(f, b) {
+                        let Some(resolved) = resolved_function_header(f, declarator, b, &macros)
+                        else {
+                            continue;
+                        };
+                        let (name, ret, _) = resolved.header;
                         function_full_names
                             .entry(name.clone())
                             .or_insert_with(|| name.clone());
-                        function_call_types.entry(name.clone()).or_insert_with(|| {
-                            function_return_type(f, declarator, b, TypeRole::Expression)
-                        });
+                        function_call_types
+                            .entry(name.clone())
+                            .or_insert(resolved.call_type);
                         functions.entry(name).or_insert(ret);
                     }
 
@@ -399,6 +430,17 @@ pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
             }
         }
 
+        for declaration in header_declarations {
+            let (name, ret, _) = &declaration.header;
+            function_full_names
+                .entry(name.clone())
+                .or_insert_with(|| name.clone());
+            functions.entry(name.clone()).or_insert_with(|| ret.clone());
+            function_call_types
+                .entry(name.clone())
+                .or_insert_with(|| declaration.call_type.clone());
+        }
+
         let mut ctx = Ctx {
             functions: &functions,
             function_call_types: &function_call_types,
@@ -408,7 +450,9 @@ pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
             globals: &globals,
             enumerators: &enumerators,
             macros: macros.clone(),
-            macro_states: &macro_states,
+            macro_states,
+            type_sites,
+            default_typedefs: TypeNameState::default(),
             unknown_declaration_prefixes: &unknown_declaration_prefixes,
             file: u.file.clone(),
             copying_macro_argument: false,
@@ -429,6 +473,8 @@ pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
             phantoms: Vec::new(),
             stubs: &mut stub_uses,
             types: &mut used_types,
+            type_declarations: &mut struct_decls,
+            type_alias_full_names: &mut type_alias_full_names,
             out: String::new(),
             block: String::new(),
             line_no: 0,
@@ -502,6 +548,8 @@ pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
         enumerators: &empty_enums,
         macros: Arc::new(HashMap::new()),
         macro_states: &empty_macro_states,
+        type_sites: HashMap::new(),
+        default_typedefs: TypeNameState::default(),
         unknown_declaration_prefixes: &unknown_declaration_prefixes,
         file: String::new(),
         copying_macro_argument: false,
@@ -522,6 +570,8 @@ pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
         phantoms: Vec::new(),
         stubs: &mut stub_uses2,
         types: &mut used_types,
+        type_declarations: &mut struct_decls,
+        type_alias_full_names: &mut type_alias_full_names,
         out: String::new(),
         block: String::new(),
         line_no: 0,
@@ -868,6 +918,8 @@ struct MacroDef {
 }
 
 type MacroState = Arc<HashMap<String, MacroDef>>;
+type TypeNameState = Arc<HashSet<String>>;
+type TypeSites = HashMap<usize, TypeNameState>;
 
 /// Per-function emission context.
 struct Ctx<'a> {
@@ -887,6 +939,8 @@ struct Ctx<'a> {
     enumerators: &'a Vec<String>,
     macros: MacroState,
     macro_states: &'a HashMap<usize, MacroState>,
+    type_sites: TypeSites,
+    default_typedefs: TypeNameState,
     unknown_declaration_prefixes: &'a HashMap<usize, String>,
     file: String,
     copying_macro_argument: bool,
@@ -913,6 +967,8 @@ struct Ctx<'a> {
     phantoms: Vec<Phantom>,
     stubs: &'a mut HashMap<String, usize>,
     types: &'a mut std::collections::BTreeSet<String>,
+    type_declarations: &'a mut Vec<(String, String, String)>,
+    type_alias_full_names: &'a mut HashMap<usize, String>,
     out: String,
     // --- edge layer (M4) ---
     // Current dump block name and 0-based line index within it; every node's
@@ -971,7 +1027,377 @@ struct P {
     dispatch: Option<String>,
 }
 
+/// A typedef name exists only when its declaration remains valid after the
+/// macros visible at that definition have expanded. An unresolved plain type
+/// name is accepted by CDT, but a primitive modifier followed by a type name
+/// (`unsigned UNKNOWN`) is not. Tree-sitter accepts that latter shape without
+/// an ERROR node, so it needs a separate check before populating cast context.
+fn valid_type_definition_names(
+    node: Node,
+    bytes: &[u8],
+    macros: &HashMap<String, MacroDef>,
+) -> Vec<String> {
+    fn names(node: Node, bytes: &[u8]) -> Vec<String> {
+        if node.kind() != "type_definition" || node.has_error() {
+            return Vec::new();
+        }
+        let Some(specifier) = node.child_by_field_name("type") else {
+            return Vec::new();
+        };
+        if specifier.kind() == "sized_type_specifier"
+            && named_children(specifier)
+                .iter()
+                .any(|child| child.kind() == "type_identifier")
+        {
+            return Vec::new();
+        }
+        let mut cursor = node.walk();
+        let bindings: Vec<_> = node
+            .children_by_field_name("declarator", &mut cursor)
+            .map(|decl| type_binding_name(decl, bytes))
+            .collect();
+        if bindings.iter().any(String::is_empty) {
+            Vec::new()
+        } else {
+            bindings
+        }
+    }
+
+    let raw = text(node, bytes);
+    let Some(expanded) = expand_declaration_tokens(raw, macros, &mut HashSet::new(), &mut 65_536)
+    else {
+        return Vec::new();
+    };
+    if expanded == raw {
+        return names(node, bytes);
+    }
+    let mut parser = Parser::new();
+    parser
+        .set_language(&tree_sitter_c::LANGUAGE.into())
+        .unwrap();
+    let Some(tree) = parser.parse(&expanded, None) else {
+        return Vec::new();
+    };
+    let root = tree.root_node();
+    if root.has_error() {
+        return Vec::new();
+    }
+    let mut cursor = root.walk();
+    let mut declarations = root
+        .named_children(&mut cursor)
+        .filter(|child| child.kind() != "comment");
+    let Some(declaration) = declarations.next() else {
+        return Vec::new();
+    };
+    if declarations.next().is_some() {
+        return Vec::new();
+    }
+    names(declaration, expanded.as_bytes())
+}
+
+fn type_binding_name(node: Node, bytes: &[u8]) -> String {
+    if matches!(node.kind(), "identifier" | "type_identifier") {
+        return text(node, bytes).to_string();
+    }
+    node.child_by_field_name("declarator")
+        .or_else(|| {
+            (node.kind() == "parenthesized_declarator")
+                .then(|| node.named_child(0))
+                .flatten()
+        })
+        .map(|child| type_binding_name(child, bytes))
+        .unwrap_or_default()
+}
+
+/// A recovered parenthesized expression may contain ERROR siblings. Only a
+/// single complete non-comment token can be reinterpreted as a known type.
+fn sole_parenthesized_child(node: Node) -> Option<Node> {
+    if node.kind() != "parenthesized_expression" || node.has_error() {
+        return None;
+    }
+    let mut cursor = node.walk();
+    let mut children = node
+        .named_children(&mut cursor)
+        .filter(|child| child.kind() != "comment");
+    let child = children.next()?;
+    children.next().is_none().then_some(child)
+}
+
+fn collect_type_sites(
+    root: Node,
+    bytes: &[u8],
+    initial: TypeNameState,
+    macros: &MacroState,
+) -> TypeSites {
+    fn shadow(types: &mut TypeNameState, name: &str) {
+        if types.contains(name) {
+            Arc::make_mut(types).remove(name);
+        }
+    }
+    fn visit(
+        node: Node,
+        bytes: &[u8],
+        types: &mut TypeNameState,
+        sites: &mut TypeSites,
+        macros: &MacroState,
+    ) {
+        if matches!(
+            node.kind(),
+            "call_expression" | "sizeof_expression" | "identifier" | "field_expression"
+        ) {
+            sites.insert(node.id(), types.clone());
+        }
+        match node.kind() {
+            "function_definition" => {
+                let mut inner = types.clone();
+                // Parameter macros must shadow typedefs with the same resolved
+                // names that method emission uses for this declaration.
+                let header = node
+                    .child_by_field_name("declarator")
+                    .and_then(|decl| resolved_function_header(node, decl, bytes, macros))
+                    .map(|resolved| resolved.header)
+                    .or_else(|| fn_header(node, bytes));
+                if let Some((_, _, params)) = header {
+                    for param in params {
+                        shadow(&mut inner, &param.name);
+                    }
+                }
+                if let Some(body) = node.child_by_field_name("body") {
+                    visit(body, bytes, &mut inner, sites, macros);
+                }
+            }
+            "compound_statement" | "for_statement" => {
+                let mut inner = types.clone();
+                for child in named_children(node) {
+                    visit(child, bytes, &mut inner, sites, macros);
+                }
+            }
+            "preproc_if" | "preproc_ifdef" | "preproc_elif" | "preproc_elifdef"
+            | "preproc_else" => {
+                let take = if matches!(node.kind(), "preproc_if" | "preproc_elif") {
+                    let definitions = macros
+                        .iter()
+                        .map(|(name, def)| {
+                            (
+                                name.clone(),
+                                if def.params.is_some() {
+                                    name.clone()
+                                } else {
+                                    def.body.clone()
+                                },
+                            )
+                        })
+                        .collect();
+                    preproc_condition(node, bytes, &definitions)
+                } else if let Some(name) = node.child_by_field_name("name") {
+                    let negated = node.child(0).is_some_and(|directive| {
+                        matches!(directive.kind(), "#ifndef" | "#elifndef")
+                    });
+                    macros.contains_key(text(name, bytes)) != negated
+                } else {
+                    true
+                };
+                let alternative = node.child_by_field_name("alternative");
+                if take {
+                    for child in named_children(node) {
+                        if Some(child) != node.child_by_field_name("condition")
+                            && Some(child) != node.child_by_field_name("name")
+                            && Some(child) != alternative
+                        {
+                            visit(child, bytes, types, sites, macros);
+                        }
+                    }
+                } else if let Some(alternative) = alternative {
+                    visit(alternative, bytes, types, sites, macros);
+                }
+            }
+            "enumerator" => {
+                for child in named_children(node) {
+                    visit(child, bytes, types, sites, macros);
+                }
+                if let Some(name) = node.child_by_field_name("name") {
+                    shadow(types, text(name, bytes));
+                }
+            }
+            "type_definition" => {
+                for child in named_children(node) {
+                    visit(child, bytes, types, sites, macros);
+                }
+                for name in valid_type_definition_names(node, bytes, macros) {
+                    Arc::make_mut(types).insert(name);
+                }
+            }
+            "declaration" => {
+                let mut cursor = node.walk();
+                let declarators: HashSet<_> = node
+                    .children_by_field_name("declarator", &mut cursor)
+                    .map(|node| node.id())
+                    .collect();
+                for child in named_children(node) {
+                    if declarators.contains(&child.id()) {
+                        let decl = child
+                            .child_by_field_name("declarator")
+                            .filter(|_| child.kind() == "init_declarator")
+                            .unwrap_or(child);
+                        visit(decl, bytes, types, sites, macros);
+                        shadow(types, &type_binding_name(decl, bytes));
+                        if child.kind() == "init_declarator" {
+                            if let Some(value) = child.child_by_field_name("value") {
+                                visit(value, bytes, types, sites, macros);
+                            }
+                        }
+                    } else {
+                        visit(child, bytes, types, sites, macros);
+                    }
+                }
+            }
+            _ => {
+                for child in named_children(node) {
+                    visit(child, bytes, types, sites, macros);
+                }
+            }
+        }
+    }
+    let mut sites = HashMap::new();
+    visit(root, bytes, &mut initial.clone(), &mut sites, macros);
+    sites
+}
+
 impl Ctx<'_> {
+    fn typedefs_at(&self, node: Node) -> TypeNameState {
+        self.type_sites
+            .get(&node.id())
+            .cloned()
+            .unwrap_or_else(|| self.default_typedefs.clone())
+    }
+
+    fn enter_type_tree(
+        &mut self,
+        root: Node,
+        bytes: &[u8],
+        types: TypeNameState,
+    ) -> (TypeSites, TypeNameState) {
+        let sites = collect_type_sites(root, bytes, types.clone(), &self.macros);
+        (
+            std::mem::replace(&mut self.type_sites, sites),
+            std::mem::replace(&mut self.default_typedefs, types),
+        )
+    }
+
+    fn leave_type_tree(&mut self, previous: (TypeSites, TypeNameState)) {
+        (self.type_sites, self.default_typedefs) = previous;
+    }
+
+    fn typedef_cast(&self, node: Node, bytes: &[u8]) -> Option<String> {
+        if node.kind() != "call_expression" || self.recovering_expression || node.has_error() {
+            return None;
+        }
+        let function = node.child_by_field_name("function")?;
+        let name = sole_parenthesized_child(function)?;
+        let arguments = node.child_by_field_name("arguments")?;
+        if !named_children(arguments)
+            .iter()
+            .any(|child| child.kind() != "comment")
+        {
+            return None;
+        }
+        if name.kind() != "identifier" {
+            return None;
+        }
+        let spelling = text(name, bytes);
+        self.typedefs_at(node)
+            .contains(spelling)
+            .then(|| spelling.to_string())
+    }
+
+    fn typedef_cast_identifier(&self, node: Node, bytes: &[u8]) -> Option<String> {
+        let parent = node.parent()?;
+        if sole_parenthesized_child(parent) != Some(node) {
+            return None;
+        }
+        let call = parent.parent()?;
+        if call.child_by_field_name("function") != Some(parent) {
+            return None;
+        }
+        self.typedef_cast(call, bytes)
+    }
+
+    fn emit_local_typedef(&mut self, node: Node, bytes: &[u8], depth: usize, order: &mut i64) {
+        for alias in typedef_declarators(node) {
+            let name = type_binding_name(alias, bytes);
+            let underlying = typedef_underlying_type(node, alias, bytes);
+            self.types.insert(underlying.clone());
+            if let Some(code) = &self.macro_expansion_code {
+                // CDT expands a declaration macro's typedef as a LOCAL, even
+                // though it remains a type binding within this expansion tree.
+                let code = format!("{code} {code}");
+                self.line(
+                    depth,
+                    "LOCAL",
+                    P {
+                        name: Some(name),
+                        code: Some(esc(&code)),
+                        tfn: Some(underlying),
+                        order: Some(*order),
+                        ..Default::default()
+                    },
+                );
+            } else {
+                let full = if let Some(full) = self.type_alias_full_names.get(&alias.id()) {
+                    full.clone()
+                } else {
+                    let count = self
+                        .type_declarations
+                        .iter()
+                        .filter(|(full, _, _)| {
+                            full.split("<duplicate>").next() == Some(name.as_str())
+                        })
+                        .count();
+                    let full = if count == 0 {
+                        name.clone()
+                    } else {
+                        format!("{name}<duplicate>{}", count - 1)
+                    };
+                    self.type_alias_full_names.insert(alias.id(), full.clone());
+                    self.type_declarations.push((
+                        full.clone(),
+                        esc(text(node, bytes)),
+                        self.file.clone(),
+                    ));
+                    full
+                };
+                self.line(
+                    depth,
+                    "TYPE_DECL",
+                    P {
+                        name: Some(name),
+                        code: Some(esc(text(node, bytes))),
+                        full: Some(full),
+                        order: Some(*order),
+                        ..Default::default()
+                    },
+                );
+            }
+            *order += 1;
+        }
+    }
+
+    fn sizeof_identifier(&self, node: Node, bytes: &[u8]) -> Option<Phantom> {
+        if let Some(desc) = node.child_by_field_name("type") {
+            return Some(sizeof_type_identifier(desc, bytes));
+        }
+        let value = node.child_by_field_name("value")?;
+        let identifier = sole_parenthesized_child(value)?;
+        let name = text(identifier, bytes);
+        (identifier.kind() == "identifier" && self.typedefs_at(node).contains(name)).then(|| {
+            Phantom {
+                name: name.into(),
+                code: name.into(),
+                ty: name.into(),
+            }
+        })
+    }
+
     fn begin_block(&mut self, name: &str) {
         self.block = name.to_string();
         self.line_no = 0;
@@ -1156,7 +1582,14 @@ impl Ctx<'_> {
         self.symbol_call_types.clear();
         self.method_functions.clear();
         self.method_call_types.clear();
-        let (name, ret, params) = fn_header(f, b).expect("function header");
+        let resolved = resolved_function_header(
+            f,
+            f.child_by_field_name("declarator").unwrap(),
+            b,
+            &self.macros,
+        )
+        .expect("function header");
+        let (name, ret, params) = resolved.header;
         let full = self
             .definition_full_names
             .get(&f.id())
@@ -1176,7 +1609,7 @@ impl Ctx<'_> {
             "METHOD",
             P {
                 name: Some(name.clone()),
-                code: Some(esc(text(f, b))),
+                code: Some(resolved.expanded_code.unwrap_or_else(|| esc(text(f, b)))),
                 full: Some(full),
                 sig: Some(sig),
                 order: Some(1),
@@ -1598,7 +2031,7 @@ impl Ctx<'_> {
                     // Function and function-pointer typedef declarators do not
                     // produce Joern alias nodes or consume a global slot.
                     for alias in typedef_declarators(n) {
-                        let name = text(alias, b).to_string();
+                        let name = type_binding_name(alias, b);
                         self.line(
                             2,
                             "TYPE_DECL",
@@ -1967,12 +2400,18 @@ impl Ctx<'_> {
                 ..Default::default()
             },
         );
+        let invocation_types = self.typedefs_at(site);
         let expansion_source = format!("void __m() {{ {expansion}; }}");
         let mut parser = Parser::new();
         parser
             .set_language(&tree_sitter_c::LANGUAGE.into())
             .unwrap();
         let tree = parser.parse(&expansion_source, None).unwrap();
+        let previous_types = self.enter_type_tree(
+            tree.root_node(),
+            expansion_source.as_bytes(),
+            invocation_types,
+        );
         let mut candidates = vec![tree.root_node()];
         let mut expression_nodes = Vec::new();
         while let Some(node) = candidates.pop() {
@@ -1988,6 +2427,12 @@ impl Ctx<'_> {
             let found = expression_nodes.iter().find(|node| {
                 let raw = text(**node, expansion_source.as_bytes());
                 if node.kind() == "identifier" {
+                    if self
+                        .typedef_cast_identifier(**node, expansion_source.as_bytes())
+                        .is_some()
+                    {
+                        return raw == normalized;
+                    }
                     if node.parent().is_some_and(|parent| {
                         parent.kind() == "call_expression"
                             && parent.child_by_field_name("function") == Some(**node)
@@ -2032,13 +2477,27 @@ impl Ctx<'_> {
                 let was_copying = self.copying_macro_argument;
                 self.copying_macro_argument = true;
                 let macros = std::mem::replace(&mut self.macros, Arc::new(HashMap::new()));
-                self.emit_expr(
-                    *node,
-                    expansion_source.as_bytes(),
-                    depth + 1,
-                    emitted_args,
-                    Some((i + 1) as i64),
-                );
+                if let Some(ty) = self.typedef_cast_identifier(*node, expansion_source.as_bytes()) {
+                    self.line(
+                        depth + 1,
+                        "TYPE_REF",
+                        P {
+                            code: Some(ty.clone()),
+                            tfn: Some(ty),
+                            order: Some(emitted_args),
+                            arg: Some((i + 1) as i64),
+                            ..Default::default()
+                        },
+                    );
+                } else {
+                    self.emit_expr(
+                        *node,
+                        expansion_source.as_bytes(),
+                        depth + 1,
+                        emitted_args,
+                        Some((i + 1) as i64),
+                    );
+                }
                 self.macros = macros;
                 self.copying_macro_argument = was_copying;
             }
@@ -2063,6 +2522,7 @@ impl Ctx<'_> {
         self.emit_expansion(&expansion, depth + 2);
         self.macro_expansion_code = previous_code;
         self.macros = macros;
+        self.leave_type_tree(previous_types);
     }
 
     /// Parse a macro expansion as an expression and emit it (ORDER=1, no
@@ -2095,6 +2555,7 @@ impl Ctx<'_> {
     }
 
     fn emit_expansion_root(&mut self, root: Node, b: &[u8], depth: usize) {
+        let previous_types = self.enter_type_tree(root, b, self.default_typedefs.clone());
         let previous_root = self.macro_expansion_root.replace(root.id());
         if root.kind() == "compound_statement" {
             // The compound is the expansion BLOCK already emitted by the
@@ -2106,6 +2567,7 @@ impl Ctx<'_> {
             self.emit_expr(root, b, depth, 1, None);
         }
         self.macro_expansion_root = previous_root;
+        self.leave_type_tree(previous_types);
     }
 
     /// METHOD for a used macro: CODE is the #define directive, params p1..pn,
@@ -2359,13 +2821,22 @@ impl Ctx<'_> {
                     let macros = std::mem::replace(&mut self.macros, Arc::new(HashMap::new()));
                     let mut expansion_shadowed = shadowed.to_vec();
                     collect_decl_names(expr, source.as_bytes(), &mut expansion_shadowed);
+                    let previous_types =
+                        self.enter_type_tree(expr, source.as_bytes(), self.typedefs_at(n));
                     self.walk_phantoms(expr, source.as_bytes(), &expansion_shadowed, seen);
+                    self.leave_type_tree(previous_types);
                     self.macros = macros;
                 }
                 continue;
             }
 
             if !prototype_headers(n, b).is_empty() {
+                continue;
+            }
+            if self.typedef_cast(n, b).is_some() {
+                if let Some(args) = n.child_by_field_name("arguments") {
+                    stack.push(args);
+                }
                 continue;
             }
             match n.kind() {
@@ -2459,8 +2930,7 @@ impl Ctx<'_> {
                     }
                 }
                 "sizeof_expression" => {
-                    if let Some(t) = n.child_by_field_name("type") {
-                        let phantom = sizeof_type_identifier(t, b);
+                    if let Some(phantom) = self.sizeof_identifier(n, b) {
                         if let Some(position) = seen.iter().position(|name| name == &phantom.name) {
                             seen.remove(position);
                             seen.push(phantom.name.clone());
@@ -2473,6 +2943,7 @@ impl Ctx<'_> {
                             seen.push(phantom.name.clone());
                             self.phantoms.push(phantom);
                         }
+                        continue;
                     }
                 }
                 // Preprocessor structure: only KEPT #ifdef branches contribute
@@ -2610,6 +3081,9 @@ impl Ctx<'_> {
             }
             "declaration" => {
                 self.emit_declaration(n, b, order, depth, None, false);
+            }
+            "type_definition" if typedef_aggregate(n).is_none() => {
+                self.emit_local_typedef(n, b, depth, order);
             }
             "if_statement" => self.emit_if(n, b, order, depth),
             "for_statement" => self.emit_for(n, b, order, depth),
@@ -3523,12 +3997,74 @@ impl Ctx<'_> {
             }
             pending.extend(named_children(node).into_iter().rev());
         }
+        let previous_types = self.enter_type_tree(root, source.as_bytes(), self.typedefs_at(n));
         let previous = std::mem::replace(&mut self.field_macro_codes, codes);
         let previous_piece = std::mem::replace(&mut self.field_macro_piece, piece);
         self.emit_expr(root, source.as_bytes(), depth, order, arg);
         self.field_macro_codes = previous;
         self.field_macro_piece = previous_piece;
+        self.leave_type_tree(previous_types);
         true
+    }
+
+    fn emit_typedef_cast(
+        &mut self,
+        node: Node,
+        bytes: &[u8],
+        ty: String,
+        depth: usize,
+        order: i64,
+        arg: Option<i64>,
+    ) {
+        self.note_call("<operator>.cast", 2);
+        self.line(
+            depth,
+            "CALL",
+            P {
+                name: Some("<operator>.cast".into()),
+                code: Some(self.expression_code(node, bytes)),
+                tfn: Some(ty.clone()),
+                mfn: Some("<operator>.cast".into()),
+                order: Some(order),
+                arg,
+                dispatch: Some("STATIC_DISPATCH".into()),
+                ..Default::default()
+            },
+        );
+        self.line(
+            depth + 1,
+            "TYPE_REF",
+            P {
+                code: Some(ty.clone()),
+                tfn: Some(ty),
+                order: Some(1),
+                arg: Some(1),
+                ..Default::default()
+            },
+        );
+        if let Some(args) = node.child_by_field_name("arguments") {
+            let values: Vec<_> = named_children(args)
+                .into_iter()
+                .filter(|child| child.kind() != "comment")
+                .collect();
+            if values.len() == 1 {
+                self.emit_expr(values[0], bytes, depth + 1, 2, Some(2));
+            } else {
+                self.line(
+                    depth + 1,
+                    "BLOCK",
+                    P {
+                        tfn: Some("ANY".into()),
+                        order: Some(2),
+                        arg: Some(2),
+                        ..Default::default()
+                    },
+                );
+                for (i, value) in values.into_iter().enumerate() {
+                    self.emit_expr(value, bytes, depth + 2, (i + 1) as i64, None);
+                }
+            }
+        }
     }
 
     // Macro expansion CODE uses CDT's rendered type descriptor, while type
@@ -3797,6 +4333,10 @@ impl Ctx<'_> {
                 }
             }
             "call_expression" => {
+                if let Some(ty) = self.typedef_cast(n, b) {
+                    self.emit_typedef_cast(n, b, ty, depth, order, arg);
+                    return;
+                }
                 let callee = n.child_by_field_name("function");
                 let name = callee
                     .map(|c| text(c, b).to_string())
@@ -4244,10 +4784,8 @@ impl Ctx<'_> {
                         ..Default::default()
                     },
                 );
-                if let Some(t) = n.child_by_field_name("type") {
-                    // sizeof(T): the type name appears as an IDENTIFIER typed
-                    // as itself (and spawns the ORDER=0 phantom LOCAL).
-                    let identifier = sizeof_type_identifier(t, b);
+                if let Some(identifier) = self.sizeof_identifier(n, b) {
+                    // Type-form sizeof shares its typed phantom identity.
                     self.line(
                         depth + 1,
                         "IDENTIFIER",
@@ -4366,12 +4904,25 @@ fn prototype_header_entries<'tree>(
 /// Execute available quoted headers in the importing translation unit's macro
 /// environment. Include guards and undef/redefinitions are evaluated at each
 /// inclusion; declarations retain immutable snapshots of the preceding state.
+struct BodyMacroContext<'tree> {
+    items: Vec<Node<'tree>>,
+    macros: MacroState,
+    macro_states: HashMap<usize, MacroState>,
+    header_declarations: Vec<HeaderDeclaration>,
+    typedef_states: HashMap<usize, TypeNameState>,
+}
+
+struct HeaderDeclaration {
+    header: FunctionHeader,
+    call_type: String,
+}
+
 fn body_macro_context<'tree>(
     root: Node<'tree>,
     bytes: &[u8],
     file: &str,
     units: &[SourceUnit],
-) -> (Vec<Node<'tree>>, MacroState, HashMap<usize, MacroState>) {
+) -> BodyMacroContext<'tree> {
     #[allow(clippy::too_many_arguments)]
     fn collect<'tree>(
         node: Node<'tree>,
@@ -4383,6 +4934,9 @@ fn body_macro_context<'tree>(
         macros: &mut MacroState,
         items: &mut Vec<Node<'tree>>,
         states: &mut HashMap<usize, MacroState>,
+        header_declarations: &mut Vec<HeaderDeclaration>,
+        typedefs: &mut TypeNameState,
+        typedef_states: &mut HashMap<usize, TypeNameState>,
         capture: bool,
     ) {
         match node.kind() {
@@ -4419,7 +4973,18 @@ fn body_macro_context<'tree>(
                             && Some(child) != alternative
                         {
                             collect(
-                                child, bytes, file, units, visiting, once, macros, items, states,
+                                child,
+                                bytes,
+                                file,
+                                units,
+                                visiting,
+                                once,
+                                macros,
+                                items,
+                                states,
+                                header_declarations,
+                                typedefs,
+                                typedef_states,
                                 capture,
                             );
                         }
@@ -4435,6 +5000,9 @@ fn body_macro_context<'tree>(
                         macros,
                         items,
                         states,
+                        header_declarations,
+                        typedefs,
+                        typedef_states,
                         capture,
                     );
                 }
@@ -4451,8 +5019,26 @@ fn body_macro_context<'tree>(
                             | "enum_specifier"
                     ) {
                         states.insert(node.id(), macros.clone());
+                        typedef_states.insert(node.id(), typedefs.clone());
                     }
                     items.push(node);
+                }
+                if !capture {
+                    for (declarator, _) in prototype_header_entries(node, bytes) {
+                        if let Some(resolved) =
+                            resolved_function_header(node, declarator, bytes, macros)
+                        {
+                            header_declarations.push(HeaderDeclaration {
+                                header: resolved.header,
+                                call_type: resolved.call_type,
+                            });
+                        }
+                    }
+                }
+                if node.kind() == "type_definition" {
+                    for name in valid_type_definition_names(node, bytes, macros) {
+                        Arc::make_mut(typedefs).insert(name);
+                    }
                 }
                 if let Some(include) = included_source_name(node, bytes, file) {
                     if !once.contains(&include) && visiting.insert(include.clone()) {
@@ -4475,6 +5061,9 @@ fn body_macro_context<'tree>(
                                     macros,
                                     &mut header_items,
                                     &mut header_states,
+                                    header_declarations,
+                                    typedefs,
+                                    typedef_states,
                                     false,
                                 );
                             }
@@ -4508,6 +5097,9 @@ fn body_macro_context<'tree>(
     let mut macros = Arc::new(HashMap::new());
     let mut items = Vec::new();
     let mut states = HashMap::new();
+    let mut header_declarations = Vec::new();
+    let mut typedefs = TypeNameState::default();
+    let mut typedef_states = HashMap::new();
     let mut once = HashSet::new();
     let mut visiting = HashSet::from([normalize_source_path(std::path::Path::new(file))]);
     for child in translation_unit_children(root, bytes) {
@@ -4521,10 +5113,19 @@ fn body_macro_context<'tree>(
             &mut macros,
             &mut items,
             &mut states,
+            &mut header_declarations,
+            &mut typedefs,
+            &mut typedef_states,
             true,
         );
     }
-    (items, macros, states)
+    BodyMacroContext {
+        items,
+        macros,
+        macro_states: states,
+        header_declarations,
+        typedef_states,
+    }
 }
 
 /// Object macros from available source headers are needed to distinguish a
@@ -4696,6 +5297,16 @@ fn source_macro_effect(node: Node, b: &[u8]) -> Option<(String, Option<String>)>
     }
 }
 
+/// Typedef alias declarations register the resolved underlying expression type;
+/// this is separate from the alias spelling retained on cast TYPE_REF nodes.
+fn typedef_underlying_type(node: Node, alias: Node, bytes: &[u8]) -> String {
+    format!(
+        "{}{}",
+        declaration_type(node, bytes, TypeRole::Expression),
+        decl_suffix(alias, bytes)
+    )
+}
+
 fn typedef_declarators(node: Node) -> Vec<Node> {
     let mut cursor = node.walk();
     node.children_by_field_name("declarator", &mut cursor)
@@ -4798,6 +5409,373 @@ fn prototype_declarations<'a>(root: Node<'a>, b: &[u8]) -> Vec<Node<'a>> {
 /// (name, return type, params) for a function_definition.
 pub(crate) fn function_name(f: Node, b: &[u8]) -> Option<String> {
     fn_header(f, b).map(|(name, _, _)| name)
+}
+
+struct ResolvedFunctionHeader {
+    header: FunctionHeader,
+    call_type: String,
+    expanded_code: Option<String>,
+}
+
+/// Expand declaration tokens without expression rendering. In particular a
+/// type-valued replacement must not first be interpreted as a C call/cast.
+fn expand_declaration_tokens(
+    source: &str,
+    macros: &HashMap<String, MacroDef>,
+    disabled: &mut HashSet<String>,
+    budget: &mut usize,
+) -> Option<String> {
+    let bytes = source.as_bytes();
+    let mut out = String::new();
+    let mut i = 0;
+    while i < bytes.len() {
+        if *budget == 0 {
+            return None;
+        }
+        let start = i;
+        if let Some(end) = macro_opaque_end(bytes, i) {
+            i = end;
+        } else if bytes[i].is_ascii_digit()
+            || (bytes[i] == b'.' && bytes.get(i + 1).is_some_and(u8::is_ascii_digit))
+        {
+            i += 1;
+            while i < bytes.len() {
+                if bytes[i] == b'.'
+                    || (matches!(bytes[i], b'+' | b'-')
+                        && matches!(bytes[i - 1], b'e' | b'E' | b'p' | b'P'))
+                {
+                    i += 1;
+                } else {
+                    let next = macro_identifier_unit(bytes, i, false);
+                    if next == 0 {
+                        break;
+                    }
+                    i += next;
+                }
+            }
+        } else if macro_identifier_unit(bytes, i, true) != 0 {
+            i += macro_identifier_unit(bytes, i, true);
+            while i < bytes.len() {
+                let next = macro_identifier_unit(bytes, i, false);
+                if next == 0 {
+                    break;
+                }
+                i += next;
+            }
+            let name = &source[start..i];
+            if disabled.len() < 64 && !disabled.contains(name) {
+                if let Some(definition) = macros.get(name) {
+                    let replacement = if let Some(params) = &definition.params {
+                        let mut open = i;
+                        while open < bytes.len() {
+                            if bytes[open].is_ascii_whitespace() {
+                                open += 1;
+                            } else if bytes[open..].starts_with(b"/*")
+                                || bytes[open..].starts_with(b"//")
+                            {
+                                open = macro_opaque_end(bytes, open)?;
+                            } else {
+                                break;
+                            }
+                        }
+                        if bytes.get(open) != Some(&b'(') {
+                            None
+                        } else if let Some((args, end)) = macro_arguments(source, open) {
+                            i = end + 1;
+                            Some(substitute(&definition.body, params, &args))
+                        } else {
+                            None
+                        }
+                    } else {
+                        Some(definition.body.clone())
+                    };
+                    if let Some(replacement) = replacement {
+                        *budget -= 1;
+                        disabled.insert(name.to_string());
+                        let replacement =
+                            expand_declaration_tokens(&replacement, macros, disabled, budget);
+                        disabled.remove(name);
+                        out.push_str(&replacement?);
+                        continue;
+                    }
+                }
+            }
+        } else {
+            i += source[i..].chars().next()?.len_utf8();
+        }
+        let token = &source[start..i];
+        *budget = budget.checked_sub(token.len())?;
+        out.push_str(token);
+    }
+    Some(out)
+}
+
+fn expanded_declaration_specifier(node: Node, bytes: &[u8]) -> String {
+    let Some(base) = node.child_by_field_name("type") else {
+        return String::new();
+    };
+    let raw = text(base, bytes);
+    let base_code = if raw == "unsigned long" {
+        "long unsigned"
+    } else {
+        raw
+    };
+    let prefix = named_children(node)
+        .into_iter()
+        .filter(|child| {
+            child.end_byte() <= base.start_byte()
+                && matches!(child.kind(), "storage_class_specifier" | "type_qualifier")
+        })
+        .map(|child| text(child, bytes))
+        .collect::<Vec<_>>()
+        .join(" ");
+    format!("{prefix} {base_code}")
+        .split_whitespace()
+        .collect::<Vec<_>>()
+        .join(" ")
+}
+
+fn expanded_declaration_declarator(node: Node, bytes: &[u8]) -> Option<String> {
+    let inner = || {
+        node.child_by_field_name("declarator")
+            .map(|child| expanded_declaration_declarator(child, bytes))
+            .unwrap_or_else(|| Some(String::new()))
+    };
+    match node.kind() {
+        "identifier" => Some(String::new()),
+        "pointer_declarator" | "abstract_pointer_declarator" => {
+            let qualifiers = named_children(node)
+                .into_iter()
+                .filter(|child| child.kind() == "type_qualifier")
+                .map(|child| text(child, bytes))
+                .collect::<Vec<_>>()
+                .join(" ");
+            let nested = inner()?;
+            Some(if qualifiers.is_empty() {
+                format!("*{nested}")
+            } else {
+                format!("* {qualifiers}{nested}")
+            })
+        }
+        "array_declarator" | "abstract_array_declarator" => Some(format!("{}[]", inner()?)),
+        "function_declarator" => {
+            let nested = inner()?;
+            let parameters = node.child_by_field_name("parameters")?;
+            let parameters = named_children(parameters)
+                .into_iter()
+                .filter(|param| {
+                    matches!(param.kind(), "parameter_declaration" | "variadic_parameter")
+                })
+                .map(|param| {
+                    if param.kind() == "variadic_parameter" {
+                        return Some("...".to_string());
+                    }
+                    let code = expanded_declaration_specifier(param, bytes);
+                    let suffix = param
+                        .child_by_field_name("declarator")
+                        .map(|decl| expanded_declaration_declarator(decl, bytes))
+                        .unwrap_or_else(|| Some(String::new()))?;
+                    Some(if suffix.is_empty() {
+                        code
+                    } else {
+                        format!("{code} {suffix}")
+                    })
+                })
+                .collect::<Option<Vec<_>>>()?
+                .join(", ");
+            Some(format!("{nested}({parameters})"))
+        }
+        _ => None,
+    }
+}
+
+fn expanded_prototype_code(node: Node, bytes: &[u8]) -> Option<String> {
+    let specifier = expanded_declaration_specifier(node, bytes);
+    let mut cursor = node.walk();
+    let declarations = node
+        .children_by_field_name("declarator", &mut cursor)
+        .map(|decl| {
+            expanded_declaration_declarator(decl, bytes)
+                .map(|declarator| format!("{specifier} {declarator}"))
+        })
+        .collect::<Option<Vec<_>>>()?;
+    Some(esc(&format!("{specifier} {};", declarations.join(" "))))
+}
+
+// CDT source ranges start after an empty leading specifier macro. A nonempty
+// leading macro instead gives declarations a synthesized specifier/declarator
+// spelling; a macro after an ordinary leading qualifier retains raw CODE.
+fn declaration_code_start(source: &str, macros: &HashMap<String, MacroDef>) -> usize {
+    let bytes = source.as_bytes();
+    let mut start = 0;
+    loop {
+        let mut end = start;
+        while end < bytes.len() {
+            let size = macro_identifier_unit(bytes, end, end == start);
+            if size == 0 {
+                break;
+            }
+            end += size;
+        }
+        if end == start || !macros.contains_key(&source[start..end]) {
+            return start;
+        }
+        if !expand_declaration_tokens(
+            &source[start..end],
+            macros,
+            &mut HashSet::new(),
+            &mut 65_536,
+        )
+        .is_some_and(|expanded| expanded.trim().is_empty())
+        {
+            return start;
+        }
+        start = end;
+        while start < bytes.len() && bytes[start].is_ascii_whitespace() {
+            start += 1;
+        }
+    }
+}
+
+pub(crate) struct EmptyMacroMethodSpan {
+    pub code: String,
+    pub start: usize,
+}
+
+/// Used lazily by location recovery only when a METHOD's CODE differs from its
+/// parsed source. Verify omitted prefixes in the same include-aware, immutable
+/// macro environment as lowering; ordinary suffix text is not an anchor.
+pub(crate) fn empty_macro_method_spans(
+    sources: &[(String, String)],
+) -> HashMap<(String, usize), EmptyMacroMethodSpan> {
+    let mut parser = Parser::new();
+    parser
+        .set_language(&tree_sitter_c::LANGUAGE.into())
+        .unwrap();
+    let units: Vec<_> = sources
+        .iter()
+        .map(|(file, src)| SourceUnit {
+            file: file.clone(),
+            src: src.clone(),
+            tree: parser.parse(src, None).unwrap(),
+        })
+        .collect();
+    let mut spans = HashMap::new();
+    for unit in &units {
+        let bytes = unit.src.as_bytes();
+        let context = body_macro_context(unit.tree.root_node(), bytes, &unit.file, &units);
+        for node in translation_unit_items(unit.tree.root_node(), bytes) {
+            if node.kind() != "function_definition" {
+                continue;
+            }
+            let Some(macros) = context.macro_states.get(&node.id()) else {
+                continue;
+            };
+            let source = text(node, bytes);
+            let offset = declaration_code_start(source, macros);
+            if offset > 0 {
+                spans.insert(
+                    (unit.file.clone(), node.start_byte()),
+                    EmptyMacroMethodSpan {
+                        code: source[offset..].replace("\\n", "\n").trim().to_string(),
+                        start: node.start_byte() + offset,
+                    },
+                );
+            }
+        }
+    }
+    spans
+}
+
+fn resolved_function_header(
+    f: Node,
+    decl: Node,
+    bytes: &[u8],
+    macros: &HashMap<String, MacroDef>,
+) -> Option<ResolvedFunctionHeader> {
+    let original = fn_header_declarator(f, decl, bytes)?;
+    let fallback = || ResolvedFunctionHeader {
+        header: fn_header_declarator(f, decl, bytes).expect("original header"),
+        call_type: function_return_type(f, decl, bytes, TypeRole::Expression),
+        expanded_code: None,
+    };
+    let end = f
+        .child_by_field_name("body")
+        .map_or(f.end_byte(), |body| body.start_byte());
+    let raw = std::str::from_utf8(&bytes[f.start_byte()..end]).ok()?;
+    let Some(expanded) = expand_declaration_tokens(raw, macros, &mut HashSet::new(), &mut 65_536)
+    else {
+        return Some(fallback());
+    };
+    if expanded == raw {
+        return Some(fallback());
+    }
+    let source = if f.kind() == "function_definition" {
+        format!("{expanded}{{}}")
+    } else {
+        expanded
+    };
+    let mut parser = Parser::new();
+    parser
+        .set_language(&tree_sitter_c::LANGUAGE.into())
+        .unwrap();
+    let tree = parser.parse(&source, None)?;
+    let node = named_children(tree.root_node())
+        .into_iter()
+        .find(|node| node.kind() == f.kind());
+    let Some(node) = node.filter(|node| !node.has_error()) else {
+        return Some(fallback());
+    };
+    let candidates = if node.kind() == "function_definition" {
+        node.child_by_field_name("declarator")
+            .into_iter()
+            .collect::<Vec<_>>()
+    } else {
+        let mut cursor = node.walk();
+        node.children_by_field_name("declarator", &mut cursor)
+            .collect()
+    };
+    let Some((expanded_decl, mut header)) = candidates
+        .into_iter()
+        .filter_map(|decl| {
+            fn_header_declarator(node, decl, source.as_bytes()).map(|header| (decl, header))
+        })
+        .find(|(_, header)| header.0 == original.0)
+    else {
+        return Some(fallback());
+    };
+    if header.2.len() != original.2.len() {
+        return Some(fallback());
+    }
+    for (parameter, original) in header.2.iter_mut().zip(original.2) {
+        parameter.code = original.code;
+    }
+    let call_type =
+        function_return_type(node, expanded_decl, source.as_bytes(), TypeRole::Expression);
+    let code = text(f, bytes);
+    let code_start = declaration_code_start(code, macros);
+    let leading = &code[code_start..];
+    let mut token_end = 0;
+    while token_end < leading.len() {
+        let size = macro_identifier_unit(leading.as_bytes(), token_end, token_end == 0);
+        if size == 0 {
+            break;
+        }
+        token_end += size;
+    }
+    let leading_macro = macros.contains_key(&leading[..token_end]);
+    let expanded_code = if node.kind() == "declaration" && leading_macro {
+        expanded_prototype_code(node, source.as_bytes())
+    } else if code_start > 0 {
+        Some(esc(leading))
+    } else {
+        None
+    };
+    Some(ResolvedFunctionHeader {
+        header,
+        call_type,
+        expanded_code,
+    })
 }
 
 fn fn_header(f: Node, b: &[u8]) -> Option<FunctionHeader> {
@@ -5770,6 +6748,34 @@ fn macro_argument_text(source: &str) -> String {
     out.trim().to_string()
 }
 
+// Consume the complete token even when its spelling is outside the ASCII
+// macro-name registry. Otherwise an ASCII suffix of an extended identifier
+// could be mistaken for a separate macro invocation.
+fn macro_identifier_unit(bytes: &[u8], start: usize, first: bool) -> usize {
+    let b = bytes[start];
+    if b.is_ascii_alphabetic()
+        || matches!(b, b'_' | b'$')
+        || !b.is_ascii()
+        || (!first && b.is_ascii_digit())
+    {
+        return 1;
+    }
+    if b == b'\\' {
+        let digits = match bytes.get(start + 1) {
+            Some(b'u') => 4,
+            Some(b'U') => 8,
+            _ => return 0,
+        };
+        if bytes
+            .get(start + 2..start + 2 + digits)
+            .is_some_and(|value| value.iter().all(u8::is_ascii_hexdigit))
+        {
+            return 2 + digits;
+        }
+    }
+    0
+}
+
 /// Expand known function macros using preprocessing-token parentheses. Strings
 /// and comments are opaque; ordinary calls and type spellings remain untouched.
 fn expand_function_macro_tokens(
@@ -5778,33 +6784,6 @@ fn expand_function_macro_tokens(
     disabled: &mut HashSet<String>,
     budget: &mut usize,
 ) -> String {
-    // Consume the complete token even when its spelling is outside the ASCII
-    // macro-name registry. Otherwise an ASCII suffix of an extended identifier
-    // could be mistaken for a separate macro invocation.
-    fn identifier_unit(bytes: &[u8], start: usize, first: bool) -> usize {
-        let b = bytes[start];
-        if b.is_ascii_alphabetic()
-            || matches!(b, b'_' | b'$')
-            || !b.is_ascii()
-            || (!first && b.is_ascii_digit())
-        {
-            return 1;
-        }
-        if b == b'\\' {
-            let digits = match bytes.get(start + 1) {
-                Some(b'u') => 4,
-                Some(b'U') => 8,
-                _ => return 0,
-            };
-            if bytes
-                .get(start + 2..start + 2 + digits)
-                .is_some_and(|value| value.iter().all(u8::is_ascii_hexdigit))
-            {
-                return 2 + digits;
-            }
-        }
-        0
-    }
     let bytes = source.as_bytes();
     let mut result = String::new();
     let mut copied = 0;
@@ -5828,7 +6807,7 @@ fn expand_function_macro_tokens(
                 {
                     i += 1;
                 } else {
-                    let next = identifier_unit(bytes, i, false);
+                    let next = macro_identifier_unit(bytes, i, false);
                     if next == 0 {
                         break;
                     }
@@ -5837,7 +6816,7 @@ fn expand_function_macro_tokens(
             }
             continue;
         }
-        let first = identifier_unit(bytes, i, true);
+        let first = macro_identifier_unit(bytes, i, true);
         if first == 0 {
             i += 1;
             continue;
@@ -5845,7 +6824,7 @@ fn expand_function_macro_tokens(
         let start = i;
         i += first;
         while i < bytes.len() {
-            let next = identifier_unit(bytes, i, false);
+            let next = macro_identifier_unit(bytes, i, false);
             if next == 0 {
                 break;
             }
@@ -5898,6 +6877,64 @@ fn expand_function_macro_tokens(
 #[cfg(test)]
 mod macro_token_tests {
     use super::*;
+
+    #[test]
+    fn declaration_expansion_preserves_opaque_preprocessing_tokens() {
+        let macros = HashMap::from([(
+            "M".to_string(),
+            MacroDef {
+                params: None,
+                body: "int".to_string(),
+                file: "test.c".to_string(),
+                directive: String::new(),
+            },
+        )]);
+        let source = r#"M éM \u00e9M 1M 0xM 1e+M "M" 'M' /* M */"#;
+        assert_eq!(
+            expand_declaration_tokens(source, &macros, &mut HashSet::new(), &mut 65_536),
+            Some(r#"int éM \u00e9M 1M 0xM 1e+M "M" 'M' /* M */"#.to_string())
+        );
+    }
+
+    #[test]
+    fn declaration_expansion_bounds_recursive_and_oversized_replacements() {
+        let macros = HashMap::from([
+            (
+                "A".to_string(),
+                MacroDef {
+                    params: None,
+                    body: "B".to_string(),
+                    file: "test.c".to_string(),
+                    directive: String::new(),
+                },
+            ),
+            (
+                "B".to_string(),
+                MacroDef {
+                    params: None,
+                    body: "A".to_string(),
+                    file: "test.c".to_string(),
+                    directive: String::new(),
+                },
+            ),
+            (
+                "BIG".to_string(),
+                MacroDef {
+                    params: None,
+                    body: "x".repeat(65_536),
+                    file: "test.c".to_string(),
+                    directive: String::new(),
+                },
+            ),
+        ]);
+        assert_eq!(
+            expand_declaration_tokens("A f(A x)", &macros, &mut HashSet::new(), &mut 65_536),
+            Some("A f(A x)".to_string())
+        );
+        assert!(
+            expand_declaration_tokens("BIG", &macros, &mut HashSet::new(), &mut 65_536).is_none()
+        );
+    }
 
     #[test]
     fn argument_slots_follow_preprocessing_tokens() {
@@ -6057,6 +7094,41 @@ fn expand_body_expression(
                     expand_body_expression(&call, macros, disabled, budget)
                 } else {
                     call
+                }
+            }
+            "sizeof_expression" => {
+                if node.child_by_field_name("type").is_some() {
+                    format!("sizeof ({})", child("type"))
+                } else if let Some(mut value) = node.child_by_field_name("value") {
+                    // CDT renders the operator token separately from its
+                    // operand, and removes trivia just inside parentheses.
+                    // Ordinary source CODE bypasses this expansion renderer.
+                    let mut parentheses = 0;
+                    while value.kind() == "parenthesized_expression" {
+                        let mut children = named_children(value)
+                            .into_iter()
+                            .filter(|n| n.kind() != "comment");
+                        let Some(inner) = children.next() else {
+                            break;
+                        };
+                        // Error recovery can retain multiple named children.
+                        // Keep that complete spelling instead of dropping a
+                        // sibling while removing only surrounding trivia.
+                        if children.next().is_some() {
+                            break;
+                        }
+                        parentheses += 1;
+                        value = inner;
+                    }
+                    let operand = render(value, bytes, macros, disabled, budget);
+                    format!(
+                        "sizeof {}{}{}",
+                        "(".repeat(parentheses),
+                        operand,
+                        ")".repeat(parentheses)
+                    )
+                } else {
+                    raw.to_string()
                 }
             }
             "offsetof_expression" => {

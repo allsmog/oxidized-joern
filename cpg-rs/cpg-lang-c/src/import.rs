@@ -838,6 +838,7 @@ fn assign_source_lines(cpg: &mut Cpg, sources: &[(String, String)]) {
     parser
         .set_language(&tree_sitter_c::LANGUAGE.into())
         .unwrap();
+    let mut empty_macro_spans = None;
     for (path, source) in sources {
         let file = cpg.file_id(path);
         let mut tokens = source_tokens(source);
@@ -882,7 +883,10 @@ fn assign_source_lines(cpg: &mut Cpg, sources: &[(String, String)]) {
                 let code = source[node.byte_range()].replace("\\n", "\n");
                 let start = tokens.partition_point(|token| token.start < node.start_byte());
                 let end = tokens.partition_point(|token| token.start < node.end_byte());
-                Some((identity, (code.trim().to_owned(), start..end)))
+                Some((
+                    identity,
+                    (code.trim().to_owned(), start..end, node.start_byte()),
+                ))
             })
             .collect();
         let methods: Vec<_> = cpg
@@ -902,11 +906,25 @@ fn assign_source_lines(cpg: &mut Cpg, sources: &[(String, String)]) {
                 .and_then(|full| full.rsplit_once("<duplicate>"))
                 .and_then(|(_, suffix)| suffix.parse::<usize>().ok())
                 .map_or(0, |index| index + 1);
-            let Some((code, range)) = functions.get(&(name.to_owned(), occurrence)) else {
+            let Some((code, source_range, start_byte)) =
+                functions.get(&(name.to_owned(), occurrence))
+            else {
                 continue;
             };
+            let mut range = source_range.clone();
             if cpg.code_of(method).map(str::trim) != Some(code.as_str()) {
-                continue;
+                let verified = empty_macro_spans
+                    .get_or_insert_with(|| crate::exact::empty_macro_method_spans(sources));
+                let Some(span) = verified.get(&(path.clone(), *start_byte)) else {
+                    continue;
+                };
+                if cpg.code_of(method).map(str::trim) != Some(span.code.as_str()) {
+                    continue;
+                }
+                range.start = tokens.partition_point(|token| token.start < span.start);
+                if range.start >= range.end {
+                    continue;
+                }
             }
             locate_ast(
                 cpg,

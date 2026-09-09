@@ -1,0 +1,71 @@
+--- joern
++++ typedef_existence
+@@ -90,7 +90,7 @@
+                   IDENTIFIER NAME=y CODE=y TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=1
+     METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=4
+   BLOCK TYPE_FULL_NAME=ANY ORDER=1
+-    UNKNOWN CODE=typedef BASE U; ORDER=1
++    TYPE_DECL NAME=U CODE=typedef BASE U; FULL_NAME=U ORDER=1
+     METHOD_REF CODE=direct TYPE_FULL_NAME=direct METHOD_FULL_NAME=direct ORDER=2
+     METHOD_REF CODE=add TYPE_FULL_NAME=add METHOD_FULL_NAME=add ORDER=3
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+@@ -118,12 +118,16 @@
+ NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+ NODES|NAMESPACE NAME=<global>
+ NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
++NODES|TYPE_DECL NAME=BASE FULL_NAME=BASE CODE=BASE IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
++NODES|TYPE_DECL NAME=U FULL_NAME=U CODE=typedef BASE U; AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=main.c ORDER=1
+ NODES|TYPE_DECL NAME=add FULL_NAME=add CODE=add AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+ NODES|TYPE_DECL NAME=direct FULL_NAME=direct CODE=direct AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+ NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE_DECL NAME=<global> FULL_NAME=main.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+ NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
++NODES|TYPE NAME=BASE FULL_NAME=BASE TYPE_DECL_FULL_NAME=BASE
++NODES|TYPE NAME=U FULL_NAME=U TYPE_DECL_FULL_NAME=U
+ NODES|TYPE NAME=add FULL_NAME=add TYPE_DECL_FULL_NAME=add
+ NODES|TYPE NAME=direct FULL_NAME=direct TYPE_DECL_FULL_NAME=direct
+ NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+@@ -168,8 +172,7 @@
+ EDGES|CFG direct#6 -> direct#5
+ EDGES|CFG direct#7 -> direct#6
+ EDGES|CFG direct#9 -> direct#5
+-EDGES|CFG main.c:<global>#0 -> main.c:<global>#37
+-EDGES|CFG main.c:<global>#37 -> main.c:<global>#38
++EDGES|CFG main.c:<global>#0 -> main.c:<global>#38
+ EDGES|CFG main.c:<global>#38 -> main.c:<global>#39
+ EDGES|CFG main.c:<global>#39 -> main.c:<global>#40
+ EDGES|CFG main.c:ADD:ANY(2)#0 -> main.c:ADD:ANY(2)#6
+@@ -184,6 +187,7 @@
+ EDGES|CONTAINS D:main.c:<global> -> main.c:CAST:ANY(1)#0
+ EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+ EDGES|CONTAINS F:<includes> -> D:ANY
++EDGES|CONTAINS F:<includes> -> D:BASE
+ EDGES|CONTAINS F:<includes> -> D:int
+ EDGES|CONTAINS F:<includes> -> D:void
+ EDGES|CONTAINS F:main.c -> D:main.c:<global>
+@@ -288,6 +292,8 @@
+ EDGES|REF NB:<includes>:<global> -> NS:<global>
+ EDGES|REF NB:main.c:<global> -> NS:<global>
+ EDGES|REF T:ANY -> D:ANY
++EDGES|REF T:BASE -> D:BASE
++EDGES|REF T:U -> main.c:<global>#37
+ EDGES|REF T:add -> D:add
+ EDGES|REF T:direct -> D:direct
+ EDGES|REF T:int -> D:int
+@@ -303,6 +309,7 @@
+ EDGES|REF main.c:<global>#39 -> add#0
+ EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+ EDGES|SOURCE_FILE D:ANY -> F:<includes>
++EDGES|SOURCE_FILE D:BASE -> F:<includes>
+ EDGES|SOURCE_FILE D:add -> F:main.c
+ EDGES|SOURCE_FILE D:direct -> F:main.c
+ EDGES|SOURCE_FILE D:int -> F:<includes>
+@@ -314,6 +321,7 @@
+ EDGES|SOURCE_FILE add#0 -> F:main.c
+ EDGES|SOURCE_FILE direct#0 -> F:main.c
+ EDGES|SOURCE_FILE main.c:<global>#0 -> F:main.c
++EDGES|SOURCE_FILE main.c:<global>#37 -> F:main.c
+ EDGES|SOURCE_FILE main.c:ADD:ANY(2)#0 -> F:main.c
+ EDGES|SOURCE_FILE main.c:CAST:ANY(1)#0 -> F:main.c
+ FLOWS|REACHING_DEF[((U)(x)) + ((U)(y))] add#14 -> add#12

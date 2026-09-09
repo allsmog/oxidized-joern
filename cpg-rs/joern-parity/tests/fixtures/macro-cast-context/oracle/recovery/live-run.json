@@ -1,0 +1,23 @@
+{
+  "command": [
+    "/Users/shayaunnejad/vibe-code/joern-oxidized/.local/astra-sprint/oracle/runtime/joern-cli/joern",
+    "--script",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-cast-context/.local/macro-cast-context/recovery/oracle.sc",
+    "--param",
+    "inputPath=/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-cast-context/.local/macro-cast-context/recovery/input"
+  ],
+  "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-cast-context/.local/macro-cast-context/recovery/oracle-workspace",
+  "exitCode": 0,
+  "wallSeconds": 8.941394041001331,
+  "scriptSha256": "56431f14868678e64f9eb41026b44f1d3d7738404d28d2db62711b520c98c742",
+  "stdoutSha256": "e7277ae06936d8c3d3fd1ab0ea3b79bb3a3fdd353e6d96a3f0e44e540db0d48b",
+  "inputs": {
+    "global_pointer_shadow/main.c": "9005b32324e57bf4f9c08409472965d2a1152f6ebf1ca976098bd77e829ab1b8",
+    "global_enum_shadow/main.c": "ad9f312acf6ee1722826a505eaa5879a4b3658ebbe2ff59acaa553f7671dc182",
+    "cast_comment/main.c": "27aeaa2be7d275e7d0984a5c1a9ff8d0c49762aa0179475654a7d18d2fd02297",
+    "cast_recovered_separator/main.c": "bdda3d21f3dded84de223da16116d3f8245d330d63a41b31e6d57136769468c6",
+    "global_function_shadow/main.c": "b0c93af4523caa6b62835a0fac64d320bc8556ffb09ba3f13c242f5a32cd3ab3",
+    "cast_recovered_name/main.c": "9c6e8cd52608ee325b77caffc49e75f43fc0c4cff0c00efdb37d489b2dacb3da",
+    "local_before_global/main.c": "d85e3547f39082550beeaec21d7105468cbfb464643f4e5d223b888b1384dc8e"
+  }
+}

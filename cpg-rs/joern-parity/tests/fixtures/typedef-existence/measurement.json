@@ -1,0 +1,518 @@
+{
+  "scope": "Typedef existence after definition-position macro expansion. Full graphs are retained without filtering; only listed exact cases are full-graph gates. Classification tests additionally cover explicit remaining diagnostics.",
+  "baseline": {
+    "origin": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/sixth-batch/integration/frozen-combined-debug",
+    "files": {
+      "exact.rs": "1603202779e066f2a9039f2fa3b075ab5722d9bb806be885e90f0b7c43a26d0d",
+      "import.rs": "3fb6695576fe87e463b5e44160bcbe828321bf32149d67abcc2256eb88d11aba"
+    }
+  },
+  "candidate": {
+    "files": {
+      "import.rs": "3fb6695576fe87e463b5e44160bcbe828321bf32149d67abcc2256eb88d11aba",
+      "joern-parity": "aa1f75003fcf68d6e9f10d6c5d8555425327392139ec8a8025591a050dba70a7",
+      "exact.rs": "76f0c8bc15a6bff023659427ccc057c4b3f38ec2d9343d11cbc3c24f2b424948"
+    }
+  },
+  "cases": [
+    {
+      "case": "known_outer_unknown_inner",
+      "oracleGroup": "regression",
+      "oracleCase": "known_outer_unknown_inner",
+      "path": "cases/known_outer_unknown_inner",
+      "sourceFiles": [
+        "main.c"
+      ],
+      "beforeExact": true,
+      "candidateExact": true,
+      "beforeDiffLines": 0,
+      "candidateDiffLines": 0,
+      "recordCount": 414,
+      "hashes": {
+        "before.txt": "6cee053f3a07354799224ca7c667ee492164f270ef0df84b685f7d4c3aa13794",
+        "classifications.json": "831e732e3039f16741ee0b25198b4f438ec4dffdd25d286bab60b83730646561",
+        "expected.txt": "6cee053f3a07354799224ca7c667ee492164f270ef0df84b685f7d4c3aa13794",
+        "main.c": "eef4c0b8a7cd3576f48c93a1cd6fe54a5ce723ba816b57924017b1fd2902f913",
+        "candidate.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "candidate.txt": "6cee053f3a07354799224ca7c667ee492164f270ef0df84b685f7d4c3aa13794",
+        "before.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "case": "lua_all_headers",
+      "oracleGroup": "regression",
+      "oracleCase": "lua_all_headers",
+      "path": "diagnostics/lua_all_headers",
+      "sourceFiles": [
+        "lapi.h",
+        "lauxlib.h",
+        "lcode.h",
+        "lctype.h",
+        "ldebug.h",
+        "ldo.h",
+        "lfunc.h",
+        "lgc.h",
+        "ljumptab.h",
+        "llex.h",
+        "llimits.h",
+        "lmem.h",
+        "lobject.h",
+        "lopcodes.h",
+        "lopnames.h",
+        "lparser.h",
+        "lprefix.h",
+        "lstate.h",
+        "lstring.h",
+        "ltable.h",
+        "ltm.h",
+        "lua.h",
+        "luaconf.h",
+        "lualib.h",
+        "lundump.h",
+        "lvm.h",
+        "lzio.h",
+        "main.c"
+      ],
+      "beforeExact": false,
+      "candidateExact": false,
+      "beforeDiffLines": 9859,
+      "candidateDiffLines": 9837,
+      "recordCount": 17350,
+      "hashes": {
+        "lmem.h": "8318a170a1d4bf21c3cb4deb1f8661f1dc7cf4eb688e4ec9a1e7ea16bfc3b5cf",
+        "llimits.h": "d588bdac3c8e1adc88df3dc92c950a1bfa29663d15f9221f58e2aa553b05a422",
+        "luaconf.h": "af243c94bee6d2601383e8b65ed66a0d1b4ab3b7418ff903fcd0679912160e3a",
+        "lzio.h": "9673f62eac2d0fe3010f9d23148be7b8113319fdf4c4490015cd9feae2ecaad4",
+        "lgc.h": "c83d3b8e31345c0aacd37442954a7f2434312ee48f98a8b9ae4fc8aad26d0c99",
+        "lualib.h": "4ea0f67d3e467f5d6a327616e22a3c2da8e03d47a3c3660916275f2842f521ea",
+        "lopnames.h": "fbdbebc96b136efc6165cba1ac2b311b0c52413aaef59ae9ec750748f13c9e9a",
+        "before.txt": "b100857f7d2ec44c064ffaad8f1b7b58518aedb55d908ce447ca9e8e6e1f5e13",
+        "classifications.json": "5840952523a3ea54337578df4f2fb79d9a9801a81474f6699fa18fd7bb513fe0",
+        "ldebug.h": "b0fd38f6461251ec481cf5633d622569cef939067e37cac23331d9f96b601702",
+        "lcode.h": "c5ad73fb12fd3e9f6b6a5f37fea5b60e4c09f8a262e9ac3ca85e8e047f745cea",
+        "lapi.h": "9522209670086adfbb11379416078a7f4dafe154043e320cd435fa1811aaabfb",
+        "ldo.h": "98846aab1dd474afb1573ee7a485d3dc73e0cb7d81de040b0d96319c254e8b42",
+        "expected.txt": "1365bf6673e9cc807589b6c7f120c8c682d48fcbf21630738a77473634c00a19",
+        "ljumptab.h": "6c3e9858b9dad03ccd61445ab0bff0eb6ddfa5e731e044f93350fe6c6b2ad8d5",
+        "llex.h": "5ce0302528260ed6a40ec3ebf5e27d3bc108242d9dca57e8cdbe80fe34e13410",
+        "ltm.h": "5b2f6e59951edeef6e71bebe5ac4351f4b3602ee0461729308b80dcee8cea910",
+        "lparser.h": "68c34ef2d6e5a227f7cff18436a42c6739b1470ce12f059f168d9bb69fc8d49c",
+        "lobject.h": "8539beae7dd9a08efc09b04d64c09663e9afc0f2ad342abc612bb000c0c9be70",
+        "lstate.h": "ac1f8464e0d0dc6c9d22220bc3b5ec682c91de81a661bfb5f971e22b8fce0a9a",
+        "lopcodes.h": "b3f511933be3039a4b92ba79601b2e5daf75b34f268bfc757adf3e24ea4f1ec9",
+        "main.c": "fdb4ce49c5acd9ea98beaa1a4d94d93a93bc202e4bffae73cdb305c839733ba1",
+        "lauxlib.h": "2d9e18e577a6062646268e7f7228264c28bd9b972c186e1af81b8357179c0ab4",
+        "lvm.h": "aba601b887236d5e135392e0c49370df3b5a9ac5c66ab2d44156b3244f2dcef3",
+        "candidate.diff": "578e67e8b797e649c4ab98d6c9079bdff6543a4bbd7e1253e0a7549dd759f53f",
+        "candidate.txt": "cd3550b4dae5f27ad9122438456ec29e74766c405d2e52025b6b6df7b5f20836",
+        "lstring.h": "a8cb0d737276f6a41071a0776ee1d8aa13cf02fa7c79ea096d202b14ea792e31",
+        "lua.h": "341014ee8b49570fc01c1fb2afc6a7decc853525636c74e7a6a9507a933aa62e",
+        "lfunc.h": "81dc02d55ae8000461ab90bb9689d2600ba51f2ea9ac9fb019386995c07e3e4a",
+        "lprefix.h": "626785d4eda75e9435f0ac21a780ae3b11f8b27dc36934e637a5c2305f906531",
+        "ltable.h": "1c8736b87aa408ef2afebfe693f46ae5424d658d798fb2a8a88b6868cf5569b5",
+        "lctype.h": "c800311872ecba642f6d013b290eda83ba6cd8df8061e25cdca1dd4adcbed8b5",
+        "lundump.h": "1137c0c9d8654ce223374d21c52a599fd1cc1ccb869801f87a27238a7bf55e8e",
+        "before.diff": "f570fcb5a2b4343e69d8c65002b66b787a83d58846c777a07f546ae1b39b177e"
+      }
+    },
+    {
+      "case": "lua_type_headers",
+      "oracleGroup": "regression",
+      "oracleCase": "lua_type_headers",
+      "path": "diagnostics/lua_type_headers",
+      "sourceFiles": [
+        "llimits.h",
+        "lprefix.h",
+        "lua.h",
+        "luaconf.h",
+        "main.c"
+      ],
+      "beforeExact": false,
+      "candidateExact": false,
+      "beforeDiffLines": 1182,
+      "candidateDiffLines": 710,
+      "recordCount": 3660,
+      "hashes": {
+        "llimits.h": "d588bdac3c8e1adc88df3dc92c950a1bfa29663d15f9221f58e2aa553b05a422",
+        "luaconf.h": "af243c94bee6d2601383e8b65ed66a0d1b4ab3b7418ff903fcd0679912160e3a",
+        "before.txt": "369ec5d545da7b903a5db982c22d8344c888b61a91de5ff1115b099a26c9536b",
+        "classifications.json": "5840952523a3ea54337578df4f2fb79d9a9801a81474f6699fa18fd7bb513fe0",
+        "expected.txt": "ec991ba981cfcb919effcb97600c6b7bcf7dba51ec04e113003a85d184802e1e",
+        "main.c": "51a80246097afd2abb098f31b4f6ea8581f976813b42160b0c980da61dbae299",
+        "candidate.diff": "83006929195a9bb4ca10de906710189554d5fed90cc6a7e32481f19098c24233",
+        "candidate.txt": "7f548e0221c225dbda5c675833bb23ebe5451ac206687363c52fe12d4c5d0a88",
+        "lua.h": "341014ee8b49570fc01c1fb2afc6a7decc853525636c74e7a6a9507a933aa62e",
+        "lprefix.h": "626785d4eda75e9435f0ac21a780ae3b11f8b27dc36934e637a5c2305f906531",
+        "before.diff": "1db442290b4d46e23e9d6cd5d72990e1cffc8d6f57ecf06f0362a006a7ba3718"
+      }
+    },
+    {
+      "case": "macro_underlying",
+      "oracleGroup": "regression",
+      "oracleCase": "macro_underlying",
+      "path": "diagnostics/macro_underlying",
+      "sourceFiles": [
+        "main.c"
+      ],
+      "beforeExact": false,
+      "candidateExact": false,
+      "beforeDiffLines": 60,
+      "candidateDiffLines": 60,
+      "recordCount": 404,
+      "hashes": {
+        "before.txt": "9092ced6d431a8f3ea684771ac351305b5d1f61a1756cfd8f8daa83bc577efe5",
+        "classifications.json": "abe2f7c96103bc46846e7dedf1a5cd47667d6615220e0a0d4e143bd710862b68",
+        "expected.txt": "3d1c0288ddb28abb3027df7f302637a344844d9796db065be7250ed15a7b98f1",
+        "main.c": "aca8362e4fff5664ae916001bf33983fd45e11ed32f15f26c408b4f3b6cb9698",
+        "candidate.diff": "aad5b4d0b11b4e0518d1d89faa3152ad59a1a0460caf9ea64099cd58e18502fa",
+        "candidate.txt": "9092ced6d431a8f3ea684771ac351305b5d1f61a1756cfd8f8daa83bc577efe5",
+        "before.diff": "e9a1baa65b821434b0a3f703a8e4cd3e32345837aa9eb62faa10dbcd21aa8441"
+      }
+    },
+    {
+      "case": "no_typedef_nested",
+      "oracleGroup": "regression",
+      "oracleCase": "no_typedef_nested",
+      "path": "cases/no_typedef_nested",
+      "sourceFiles": [
+        "main.c"
+      ],
+      "beforeExact": true,
+      "candidateExact": true,
+      "beforeDiffLines": 0,
+      "candidateDiffLines": 0,
+      "recordCount": 383,
+      "hashes": {
+        "before.txt": "980e6858172848f78e7f464fbcdb9639818f2b3dfeb97ac1f35c0a65a037266c",
+        "classifications.json": "8600c3f75dff28ad805041adf511afba9162dfb880e435db29c5405cee39f8cd",
+        "expected.txt": "980e6858172848f78e7f464fbcdb9639818f2b3dfeb97ac1f35c0a65a037266c",
+        "main.c": "acc4a155336c3cc96390379db9d221722343f465e6ebaaa695693ca238d4e7a5",
+        "candidate.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "candidate.txt": "980e6858172848f78e7f464fbcdb9639818f2b3dfeb97ac1f35c0a65a037266c",
+        "before.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "case": "plain_type_contexts",
+      "oracleGroup": "regression",
+      "oracleCase": "plain_type_contexts",
+      "path": "cases/plain_type_contexts",
+      "sourceFiles": [
+        "main.c"
+      ],
+      "beforeExact": true,
+      "candidateExact": true,
+      "beforeDiffLines": 0,
+      "candidateDiffLines": 0,
+      "recordCount": 404,
+      "hashes": {
+        "before.txt": "90e1dcf67171d376bb481b8fb08c292d103dd41d667239d782307f96ae849cfa",
+        "classifications.json": "abe2f7c96103bc46846e7dedf1a5cd47667d6615220e0a0d4e143bd710862b68",
+        "expected.txt": "90e1dcf67171d376bb481b8fb08c292d103dd41d667239d782307f96ae849cfa",
+        "main.c": "41145f29b090b0ea8a207c6d7909cb7f9757fe676d5136d0135ff1fcc363c78e",
+        "candidate.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "candidate.txt": "90e1dcf67171d376bb481b8fb08c292d103dd41d667239d782307f96ae849cfa",
+        "before.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "case": "undefined_underlying",
+      "oracleGroup": "regression",
+      "oracleCase": "undefined_underlying",
+      "path": "diagnostics/undefined_underlying",
+      "sourceFiles": [
+        "main.c"
+      ],
+      "beforeExact": false,
+      "candidateExact": false,
+      "beforeDiffLines": 42,
+      "candidateDiffLines": 42,
+      "recordCount": 399,
+      "hashes": {
+        "before.txt": "0bb5b9a50a88f495a6891b3f0d0b8a4a5827d74f63b121c1aa6defbc1d64a899",
+        "classifications.json": "abe2f7c96103bc46846e7dedf1a5cd47667d6615220e0a0d4e143bd710862b68",
+        "expected.txt": "2e64290e53fd482dad96acc1eb1af93abb1d90b0b9433594c5cc232d09b1db7c",
+        "main.c": "12c59df872a13717098090b2272da59030738f5608aeb06116f5ea75c32708fd",
+        "candidate.diff": "a210024951fd1d6b67b0c4ff69bd872f2aeb64e49fb1e90ee71f05eb0bb389d3",
+        "candidate.txt": "0bb5b9a50a88f495a6891b3f0d0b8a4a5827d74f63b121c1aa6defbc1d64a899",
+        "before.diff": "3d6e7ea605bc8a71ec21bd6c6c42576766c0ab2de2f90ee1e43eb9c37186b50e"
+      }
+    },
+    {
+      "case": "unsigned_undefined",
+      "oracleGroup": "regression",
+      "oracleCase": "unsigned_undefined",
+      "path": "diagnostics/unsigned_undefined",
+      "sourceFiles": [
+        "main.c"
+      ],
+      "beforeExact": false,
+      "candidateExact": false,
+      "beforeDiffLines": 525,
+      "candidateDiffLines": 71,
+      "recordCount": 386,
+      "hashes": {
+        "before.txt": "9092ced6d431a8f3ea684771ac351305b5d1f61a1756cfd8f8daa83bc577efe5",
+        "classifications.json": "8600c3f75dff28ad805041adf511afba9162dfb880e435db29c5405cee39f8cd",
+        "expected.txt": "27caa2bb2cdf236125d35da1f80cd0ce55095d9532d02fba6cabd7891b6d7c3d",
+        "main.c": "f0b3e0f21b11293d5b8f26393e2bd21e850f611eec2926124983d23940b23150",
+        "candidate.diff": "97b49e420b010b44501250e2ef93a20159ef97979778cbf8da2161e3e20fcdab",
+        "candidate.txt": "c57101d13736dc7775024efd38659d1f9176f1e0a9357305bbb263fba57de14d",
+        "before.diff": "c04015b52e60bd691b1c891653b81c69268efb5cd416c91377c0e6e151bbbab4"
+      }
+    },
+    {
+      "case": "const_unknown",
+      "oracleGroup": "boundaries",
+      "oracleCase": "const_unknown",
+      "path": "diagnostics/const_unknown",
+      "sourceFiles": [
+        "main.c"
+      ],
+      "beforeExact": false,
+      "candidateExact": false,
+      "beforeDiffLines": 41,
+      "candidateDiffLines": 41,
+      "recordCount": 202,
+      "hashes": {
+        "before.txt": "abd47b107a25036250374ad851651c4c4658b74e7b07cd08c864c6bc2d19ad49",
+        "classifications.json": "2a1a95701c359b64f9230fc3cb54c19de40fb17ef4f8c455f86059bc58a18af8",
+        "expected.txt": "4d31d1ab922c6a506b23632785463930a9bd56e9245553741466795aabb3af22",
+        "main.c": "de2a606eda58c8046d402d90f6e6d855e4963bf9faef361186781f51b718efc8",
+        "candidate.diff": "72fd4fe7115c456cd8d4893fa8614aef768e65ca10f7eca6afc333bf6f23f720",
+        "candidate.txt": "abd47b107a25036250374ad851651c4c4658b74e7b07cd08c864c6bc2d19ad49",
+        "before.diff": "4cc2a82a10153b6bca87b0ef8af258de27d9f7051d4d707031719d8a504cc438"
+      }
+    },
+    {
+      "case": "function_alias",
+      "oracleGroup": "boundaries",
+      "oracleCase": "function_alias",
+      "path": "cases/function_alias",
+      "sourceFiles": [
+        "main.c"
+      ],
+      "beforeExact": true,
+      "candidateExact": true,
+      "beforeDiffLines": 0,
+      "candidateDiffLines": 0,
+      "recordCount": 201,
+      "hashes": {
+        "before.txt": "733251a3fd9a42ec782d71c72626808eb14228d08fc080db0f006cd6ad86f2f3",
+        "classifications.json": "2a1a95701c359b64f9230fc3cb54c19de40fb17ef4f8c455f86059bc58a18af8",
+        "expected.txt": "733251a3fd9a42ec782d71c72626808eb14228d08fc080db0f006cd6ad86f2f3",
+        "main.c": "63ce44c9914fc8b0f0c996c30bead753a1e33d2ae66fb0b6fc4abc8a9a74ba73",
+        "candidate.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "candidate.txt": "733251a3fd9a42ec782d71c72626808eb14228d08fc080db0f006cd6ad86f2f3",
+        "before.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "case": "local_invalid",
+      "oracleGroup": "boundaries",
+      "oracleCase": "local_invalid",
+      "path": "diagnostics/local_invalid",
+      "sourceFiles": [
+        "main.c"
+      ],
+      "beforeExact": false,
+      "candidateExact": false,
+      "beforeDiffLines": 313,
+      "candidateDiffLines": 241,
+      "recordCount": 225,
+      "hashes": {
+        "before.txt": "095ac3104a3e853df5bde0b3e80e4915a64fd4ba651d1aa69b8ae1b68c85b248",
+        "classifications.json": "86bfebed37c805d7bb8ca572dd25646ed7c92403d1feab03722bc0d0a7687441",
+        "expected.txt": "1174bddea45689006f664c1e38e8f4a8c8b140b730deb7085d424938d6a1e5b5",
+        "main.c": "a950d7bc9c4e991bcad2cd49e4318d5f6f2600fc55f8f0b9840b38953d04f9aa",
+        "candidate.diff": "e007d1f9c318f4475d585f13ebad235e23e4c6f31a0cdb11525a438b9df0ca18",
+        "candidate.txt": "50dbbefd71a51ee91f69fd8fd794bb16aaf60b1a90e0633733cbb3d2da0467c3",
+        "before.diff": "429a47c864ef4da7f9c7a5c5a3cc57508b9d379d12a00423c9467ec9fd53f522"
+      }
+    },
+    {
+      "case": "long_double",
+      "oracleGroup": "boundaries",
+      "oracleCase": "long_double",
+      "path": "cases/long_double",
+      "sourceFiles": [
+        "main.c"
+      ],
+      "beforeExact": true,
+      "candidateExact": true,
+      "beforeDiffLines": 0,
+      "candidateDiffLines": 0,
+      "recordCount": 207,
+      "hashes": {
+        "before.txt": "f839bfd547e7d39c702af33ffb6ff485170d4be42d3ce4c2cf80c40266330b1b",
+        "classifications.json": "2a1a95701c359b64f9230fc3cb54c19de40fb17ef4f8c455f86059bc58a18af8",
+        "expected.txt": "f839bfd547e7d39c702af33ffb6ff485170d4be42d3ce4c2cf80c40266330b1b",
+        "main.c": "79b8501679c75a763d4d9582378adbffbe4f7ca2ccd43166601ef04185ddfbdc",
+        "candidate.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "candidate.txt": "f839bfd547e7d39c702af33ffb6ff485170d4be42d3ce4c2cf80c40266330b1b",
+        "before.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "case": "long_unknown",
+      "oracleGroup": "boundaries",
+      "oracleCase": "long_unknown",
+      "path": "diagnostics/long_unknown",
+      "sourceFiles": [
+        "main.c"
+      ],
+      "beforeExact": false,
+      "candidateExact": false,
+      "beforeDiffLines": 234,
+      "candidateDiffLines": 74,
+      "recordCount": 183,
+      "hashes": {
+        "before.txt": "718d09d19b5738fe25ef951dc4194b5f3d170910b766366d74bcfd0849592696",
+        "classifications.json": "86bfebed37c805d7bb8ca572dd25646ed7c92403d1feab03722bc0d0a7687441",
+        "expected.txt": "3e51b095a44dfe857d21b2d1d698658b3c46a633cb7daaa23fcb505c5c1fe712",
+        "main.c": "aab87ae0389428d2ef2b3b4a1dc23756ab199d19772c101ec234d3b8165c67d6",
+        "candidate.diff": "e7a6f4668eb0c61218594f43251dffbc6ad5fa4b0ab9ab23e0df2a2f608cf719",
+        "candidate.txt": "9e0755403101904cd334858f51747baac76e90e9d35323843fe05e94435f9e06",
+        "before.diff": "efd36fb32430ec5d3869d9b921c521a4c15fae91bdba10787373add0942d88a9"
+      }
+    },
+    {
+      "case": "signed_unknown",
+      "oracleGroup": "boundaries",
+      "oracleCase": "signed_unknown",
+      "path": "diagnostics/signed_unknown",
+      "sourceFiles": [
+        "main.c"
+      ],
+      "beforeExact": false,
+      "candidateExact": false,
+      "beforeDiffLines": 234,
+      "candidateDiffLines": 73,
+      "recordCount": 183,
+      "hashes": {
+        "before.txt": "dc283b59bbf215538d252534782926d9f8c96b8567719b1e0b5a25748644cc4a",
+        "classifications.json": "86bfebed37c805d7bb8ca572dd25646ed7c92403d1feab03722bc0d0a7687441",
+        "expected.txt": "a1cca00d9374de2a302c6aef0d954884e69136b755c5d31117a65c97c16ef71b",
+        "main.c": "eb9fdabe5ef47fda22a3185045cf4bdab1a6cc66995e166d1cffd3f487214d59",
+        "candidate.diff": "bb30904cf4a0bd289e7f1c7bfd922437deaa7cfb733e10ade3ab7aa75966a2fe",
+        "candidate.txt": "412e40c518d372709b7dff71b26b4a5e00add95926aaf31bdb455a39fdd98ae3",
+        "before.diff": "52a2bf932469ef5edc06ad84e5889d3d9ef6a39d28cc926f7f1c0409d2fd772e"
+      }
+    },
+    {
+      "case": "unsigned_char",
+      "oracleGroup": "boundaries",
+      "oracleCase": "unsigned_char",
+      "path": "cases/unsigned_char",
+      "sourceFiles": [
+        "main.c"
+      ],
+      "beforeExact": true,
+      "candidateExact": true,
+      "beforeDiffLines": 0,
+      "candidateDiffLines": 0,
+      "recordCount": 207,
+      "hashes": {
+        "before.txt": "b7929732a33be9c6388346c58d960dcf78fedcad92a0714fc63cb6f432687848",
+        "classifications.json": "2a1a95701c359b64f9230fc3cb54c19de40fb17ef4f8c455f86059bc58a18af8",
+        "expected.txt": "b7929732a33be9c6388346c58d960dcf78fedcad92a0714fc63cb6f432687848",
+        "main.c": "cc07af0169aa69588cc27d637416e6079e2bc628f4ac159ec8c1eb1e01befbce",
+        "candidate.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "candidate.txt": "b7929732a33be9c6388346c58d960dcf78fedcad92a0714fc63cb6f432687848",
+        "before.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "case": "unsigned_int",
+      "oracleGroup": "boundaries",
+      "oracleCase": "unsigned_int",
+      "path": "cases/unsigned_int",
+      "sourceFiles": [
+        "main.c"
+      ],
+      "beforeExact": true,
+      "candidateExact": true,
+      "beforeDiffLines": 0,
+      "candidateDiffLines": 0,
+      "recordCount": 207,
+      "hashes": {
+        "before.txt": "3135daad224e45c77ed42e6df17cf11739bb6adfb771b3580358abd6b167b87d",
+        "classifications.json": "2a1a95701c359b64f9230fc3cb54c19de40fb17ef4f8c455f86059bc58a18af8",
+        "expected.txt": "3135daad224e45c77ed42e6df17cf11739bb6adfb771b3580358abd6b167b87d",
+        "main.c": "fe33617b3497131adb5fb7947e7e0410b09396ee27f6b4403589b5b9ca370289",
+        "candidate.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "candidate.txt": "3135daad224e45c77ed42e6df17cf11739bb6adfb771b3580358abd6b167b87d",
+        "before.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "case": "unsigned_int128",
+      "oracleGroup": "boundaries",
+      "oracleCase": "unsigned_int128",
+      "path": "diagnostics/unsigned_int128",
+      "sourceFiles": [
+        "main.c"
+      ],
+      "beforeExact": false,
+      "candidateExact": false,
+      "beforeDiffLines": 234,
+      "candidateDiffLines": 73,
+      "recordCount": 183,
+      "hashes": {
+        "before.txt": "f5a927b7890007f35c2f6924ccd33eab6f64d00d66906cd7ffd6e7e6a5abd8b8",
+        "classifications.json": "86bfebed37c805d7bb8ca572dd25646ed7c92403d1feab03722bc0d0a7687441",
+        "expected.txt": "9b4ae59ab6e39160f56d98ec44ef5edd714e0b6f55e51c5ed42e6c7f11e4fc0e",
+        "main.c": "d56f92ba6fcd3ac43b9b830be127daad94138bb12f2bab2ff0b82e931be28430",
+        "candidate.diff": "d93d2089e9357471be7779298684fd849c7a4dc8809bc817c9f82940ffab99e8",
+        "candidate.txt": "39dab0e1eeae5bf11e7711bfbe132df9bc346f48bf7a55688e8a0cf5458bb717",
+        "before.diff": "7f35df92e157814d30d94df6671dc56514dfa919e77bc2a2f89d95b280dd6573"
+      }
+    },
+    {
+      "case": "unsigned_known_alias",
+      "oracleGroup": "boundaries",
+      "oracleCase": "unsigned_known_alias",
+      "path": "diagnostics/unsigned_known_alias",
+      "sourceFiles": [
+        "main.c"
+      ],
+      "beforeExact": false,
+      "candidateExact": false,
+      "beforeDiffLines": 237,
+      "candidateDiffLines": 75,
+      "recordCount": 189,
+      "hashes": {
+        "before.txt": "5ddc93295112b61cc56afe72044bd68398e9dd503f5a779d36800c8f7655c777",
+        "classifications.json": "86bfebed37c805d7bb8ca572dd25646ed7c92403d1feab03722bc0d0a7687441",
+        "expected.txt": "3d9e7e3c80c6c4366b86e1cdf407b1127b49d75688d9b9463789e1f6ff78bb82",
+        "main.c": "28f583d1e17a26cbc4ad72ea2020cb73ab36c64309ee75f069068c3612346ae9",
+        "candidate.diff": "029edcbecb879100a9afb2a7cb568b293860db04c874bec010ba4acedb2f3bda",
+        "candidate.txt": "1cd4c16ec68fdaba9200296e2ce6caa2f558da4474d8b140897de30733b2b1d2",
+        "before.diff": "b884902a98d537baf0fb3012e3c289d86adc19558788c0ce3f09bb6ac4d78797"
+      }
+    }
+  ],
+  "rawHashes": {
+    "raw/boundaries/live.stderr": "b3899f020c416c63f2869fcc940d25995591a16117f8343476c49b82fc5f0bea",
+    "raw/boundaries/live-run.json": "0cb804afe7e37994e378d05032cd1cf763276ed64ff2e8c7dd173a51fc598bc7",
+    "raw/boundaries/oracle.sc": "56431f14868678e64f9eb41026b44f1d3d7738404d28d2db62711b520c98c742",
+    "raw/boundaries/live.stdout": "32e06df8248a2a653b1e5131ebdb5516a6476410af7dbd5332fb51b987a4723b",
+    "raw/regression/live.stderr": "d8cd4897278ec59459e395462997eafd0a998adb730eb8fd94dbcf5c17dad66a",
+    "raw/regression/live-run.json": "8533bdee7f59ddd17a72ff64fffc84e4252b836219af692f2275171cd4f79074",
+    "raw/regression/oracle.sc": "56431f14868678e64f9eb41026b44f1d3d7738404d28d2db62711b520c98c742",
+    "raw/regression/live.stdout": "f1c1db82ebc79e8b948ad755d3b000a9e3f8b03d57a8ba19d8c8cef05b427395"
+  },
+  "validationHashes": {
+    "validation/relevant-tests.log": "007abc52e47153cba0153824bc18a15dd875d0930195cf0a1506d70a2296a9ba",
+    "validation/clippy.log": "e3672e682776e1494cbf76f9b61ec42160965ea6696428bae339421bb08a6547",
+    "validation/build-final.log": "ea0957a4e2f335f81223fe0b68d46289dad77f7a8ca1a15477a3e837c0e59a78",
+    "validation/prior-context-tests.log": "841800a10fadbbc0a90c2f74e109aebb210aa477a323dd4ae24b4e40c1502e58",
+    "validation/main308.log": "c105179d62065e9cbf9f398ff94754c29ec03add1206db7dff281cb4c07b6be6"
+  },
+  "summary": {
+    "projects": 18,
+    "beforeExact": 7,
+    "candidateExact": 7,
+    "diagnostics": 11
+  }
+}

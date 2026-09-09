@@ -1,0 +1,549 @@
+--- joern
++++ before
+@@ -10,7 +10,7 @@
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+   METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+ 
+-METHOD NAME=<operator>.cast FULL_NAME=<operator>.cast ORDER=0
++METHOD NAME=<operator>.multiplication FULL_NAME=<operator>.multiplication ORDER=0
+   METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+   BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+   METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+@@ -18,23 +18,13 @@
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+   METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+ 
+-METHOD NAME=<operator>.indirection FULL_NAME=<operator>.indirection ORDER=0
++METHOD NAME=<operator>.subtraction FULL_NAME=<operator>.subtraction ORDER=0
+   METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+   BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+   METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+-  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+-
+-METHOD NAME=<operator>.minus FULL_NAME=<operator>.minus ORDER=0
+-  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+-  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+-  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+-  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+-
+-METHOD NAME=<operator>.plus FULL_NAME=<operator>.plus ORDER=0
+-  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+-  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+-  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+-  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
++  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
++  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
++  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+ 
+ METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1
+   METHOD NAME=value CODE=int value(int x,int *p){return (T)+x + (T)-x + (T)*p + NEG(x);} FULL_NAME=value SIGNATURE=int(int,int*) ORDER=1
+@@ -43,29 +33,26 @@
+     METHOD_PARAMETER_IN NAME=p CODE=int *p TYPE_FULL_NAME=int* ORDER=2
+     METHOD_PARAMETER_OUT NAME=p CODE=int *p TYPE_FULL_NAME=int* ORDER=2
+     BLOCK CODE={return (T)+x + (T)-x + (T)*p + NEG(x);} TYPE_FULL_NAME=void ORDER=3
++      LOCAL NAME=T CODE=<unknown> T TYPE_FULL_NAME=ANY ORDER=0
+       RETURN CODE=return (T)+x + (T)-x + (T)*p + NEG(x); ORDER=1
+         CALL NAME=<operator>.addition CODE=(T)+x + (T)-x + (T)*p + NEG(x) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+           CALL NAME=<operator>.addition CODE=(T)+x + (T)-x + (T)*p TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+-            CALL NAME=<operator>.addition CODE=(T)+x + (T)-x TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+-              CALL NAME=<operator>.cast CODE=(T)+x TYPE_FULL_NAME=T METHOD_FULL_NAME=<operator>.cast ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+-                TYPE_REF CODE=T TYPE_FULL_NAME=T ORDER=1 ARGUMENT_INDEX=1
+-                CALL NAME=<operator>.plus CODE=+x TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.plus ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+-                  IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+-              CALL NAME=<operator>.cast CODE=(T)-x TYPE_FULL_NAME=T METHOD_FULL_NAME=<operator>.cast ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+-                TYPE_REF CODE=T TYPE_FULL_NAME=T ORDER=1 ARGUMENT_INDEX=1
+-                CALL NAME=<operator>.minus CODE=-x TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.minus ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+-                  IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+-            CALL NAME=<operator>.cast CODE=(T)*p TYPE_FULL_NAME=T METHOD_FULL_NAME=<operator>.cast ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+-              TYPE_REF CODE=T TYPE_FULL_NAME=T ORDER=1 ARGUMENT_INDEX=1
+-              CALL NAME=<operator>.indirection CODE=*p TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirection ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+-                IDENTIFIER NAME=p CODE=p TYPE_FULL_NAME=int* ORDER=1 ARGUMENT_INDEX=1
++            CALL NAME=<operator>.subtraction CODE=(T)+x + (T)-x TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.subtraction ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
++              CALL NAME=<operator>.addition CODE=(T)+x + (T) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
++                CALL NAME=<operator>.addition CODE=(T)+x TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
++                  IDENTIFIER NAME=T CODE=<unknown> T TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
++                  IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
++                IDENTIFIER NAME=T CODE=<unknown> T TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
++              IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
++            CALL NAME=<operator>.multiplication CODE=(T)*p TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.multiplication ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
++              IDENTIFIER NAME=T CODE=<unknown> T TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
++              IDENTIFIER NAME=p CODE=p TYPE_FULL_NAME=int* ORDER=2 ARGUMENT_INDEX=2
+           CALL NAME=NEG CODE=NEG(x) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=main.c:NEG:ANY(1) SIGNATURE=ANY(1) ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=INLINED
+             IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+             BLOCK TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+-              CALL NAME=<operator>.cast CODE=(T)-x TYPE_FULL_NAME=T METHOD_FULL_NAME=<operator>.cast ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+-                TYPE_REF CODE=T TYPE_FULL_NAME=T ORDER=1 ARGUMENT_INDEX=1
+-                CALL NAME=<operator>.minus CODE=-x TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.minus ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+-                  IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
++              CALL NAME=<operator>.subtraction CODE=(T) - x TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.subtraction ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
++                IDENTIFIER NAME=T CODE=<unknown> T TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
++                IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+     METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=4
+   BLOCK TYPE_FULL_NAME=ANY ORDER=1
+     TYPE_DECL NAME=T CODE=typedef int T; FULL_NAME=T ORDER=1
+@@ -84,29 +71,26 @@
+   METHOD_PARAMETER_IN NAME=p CODE=int *p TYPE_FULL_NAME=int* ORDER=2
+   METHOD_PARAMETER_OUT NAME=p CODE=int *p TYPE_FULL_NAME=int* ORDER=2
+   BLOCK CODE={return (T)+x + (T)-x + (T)*p + NEG(x);} TYPE_FULL_NAME=void ORDER=3
++    LOCAL NAME=T CODE=<unknown> T TYPE_FULL_NAME=ANY ORDER=0
+     RETURN CODE=return (T)+x + (T)-x + (T)*p + NEG(x); ORDER=1
+       CALL NAME=<operator>.addition CODE=(T)+x + (T)-x + (T)*p + NEG(x) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+         CALL NAME=<operator>.addition CODE=(T)+x + (T)-x + (T)*p TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+-          CALL NAME=<operator>.addition CODE=(T)+x + (T)-x TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+-            CALL NAME=<operator>.cast CODE=(T)+x TYPE_FULL_NAME=T METHOD_FULL_NAME=<operator>.cast ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+-              TYPE_REF CODE=T TYPE_FULL_NAME=T ORDER=1 ARGUMENT_INDEX=1
+-              CALL NAME=<operator>.plus CODE=+x TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.plus ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+-                IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+-            CALL NAME=<operator>.cast CODE=(T)-x TYPE_FULL_NAME=T METHOD_FULL_NAME=<operator>.cast ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+-              TYPE_REF CODE=T TYPE_FULL_NAME=T ORDER=1 ARGUMENT_INDEX=1
+-              CALL NAME=<operator>.minus CODE=-x TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.minus ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+-                IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+-          CALL NAME=<operator>.cast CODE=(T)*p TYPE_FULL_NAME=T METHOD_FULL_NAME=<operator>.cast ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+-            TYPE_REF CODE=T TYPE_FULL_NAME=T ORDER=1 ARGUMENT_INDEX=1
+-            CALL NAME=<operator>.indirection CODE=*p TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirection ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+-              IDENTIFIER NAME=p CODE=p TYPE_FULL_NAME=int* ORDER=1 ARGUMENT_INDEX=1
++          CALL NAME=<operator>.subtraction CODE=(T)+x + (T)-x TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.subtraction ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
++            CALL NAME=<operator>.addition CODE=(T)+x + (T) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
++              CALL NAME=<operator>.addition CODE=(T)+x TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
++                IDENTIFIER NAME=T CODE=<unknown> T TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
++                IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
++              IDENTIFIER NAME=T CODE=<unknown> T TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
++            IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
++          CALL NAME=<operator>.multiplication CODE=(T)*p TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.multiplication ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
++            IDENTIFIER NAME=T CODE=<unknown> T TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
++            IDENTIFIER NAME=p CODE=p TYPE_FULL_NAME=int* ORDER=2 ARGUMENT_INDEX=2
+         CALL NAME=NEG CODE=NEG(x) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=main.c:NEG:ANY(1) SIGNATURE=ANY(1) ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=INLINED
+           IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+           BLOCK TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+-            CALL NAME=<operator>.cast CODE=(T)-x TYPE_FULL_NAME=T METHOD_FULL_NAME=<operator>.cast ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+-              TYPE_REF CODE=T TYPE_FULL_NAME=T ORDER=1 ARGUMENT_INDEX=1
+-              CALL NAME=<operator>.minus CODE=-x TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.minus ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+-                IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
++            CALL NAME=<operator>.subtraction CODE=(T) - x TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.subtraction ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
++              IDENTIFIER NAME=T CODE=<unknown> T TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
++              IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=4
+ 
+ NODES|META_DATA LANGUAGE=NEWC
+@@ -131,76 +115,60 @@
+ NODES|TYPE NAME=value FULL_NAME=value TYPE_DECL_FULL_NAME=value
+ NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+ EDGES|ARGUMENT value#10 -> value#11
+-EDGES|ARGUMENT value#10 -> value#12
++EDGES|ARGUMENT value#10 -> value#16
++EDGES|ARGUMENT value#11 -> value#12
++EDGES|ARGUMENT value#11 -> value#15
+ EDGES|ARGUMENT value#12 -> value#13
+-EDGES|ARGUMENT value#14 -> value#15
+-EDGES|ARGUMENT value#14 -> value#16
+-EDGES|ARGUMENT value#16 -> value#17
+-EDGES|ARGUMENT value#18 -> value#19
+-EDGES|ARGUMENT value#18 -> value#20
++EDGES|ARGUMENT value#12 -> value#14
++EDGES|ARGUMENT value#17 -> value#18
++EDGES|ARGUMENT value#17 -> value#19
+ EDGES|ARGUMENT value#20 -> value#21
+-EDGES|ARGUMENT value#22 -> value#23
+-EDGES|ARGUMENT value#25 -> value#26
+-EDGES|ARGUMENT value#25 -> value#27
+-EDGES|ARGUMENT value#27 -> value#28
+-EDGES|ARGUMENT value#6 -> value#7
+-EDGES|ARGUMENT value#7 -> value#22
++EDGES|ARGUMENT value#23 -> value#24
++EDGES|ARGUMENT value#23 -> value#25
+ EDGES|ARGUMENT value#7 -> value#8
+-EDGES|ARGUMENT value#8 -> value#18
++EDGES|ARGUMENT value#8 -> value#20
+ EDGES|ARGUMENT value#8 -> value#9
+ EDGES|ARGUMENT value#9 -> value#10
+-EDGES|ARGUMENT value#9 -> value#14
+-EDGES|CALL value#10 -> <operator>.cast#0
+-EDGES|CALL value#12 -> <operator>.plus#0
+-EDGES|CALL value#14 -> <operator>.cast#0
+-EDGES|CALL value#16 -> <operator>.minus#0
+-EDGES|CALL value#18 -> <operator>.cast#0
+-EDGES|CALL value#20 -> <operator>.indirection#0
+-EDGES|CALL value#22 -> main.c:NEG:ANY(1)#0
+-EDGES|CALL value#25 -> <operator>.cast#0
+-EDGES|CALL value#27 -> <operator>.minus#0
+-EDGES|CALL value#7 -> <operator>.addition#0
++EDGES|ARGUMENT value#9 -> value#17
++EDGES|CALL value#10 -> <operator>.subtraction#0
++EDGES|CALL value#11 -> <operator>.addition#0
++EDGES|CALL value#12 -> <operator>.addition#0
++EDGES|CALL value#17 -> <operator>.multiplication#0
++EDGES|CALL value#20 -> main.c:NEG:ANY(1)#0
++EDGES|CALL value#23 -> <operator>.subtraction#0
+ EDGES|CALL value#8 -> <operator>.addition#0
+ EDGES|CALL value#9 -> <operator>.addition#0
+ EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+ EDGES|CFG <operator>.addition#0 -> <operator>.addition#5
+-EDGES|CFG <operator>.cast#0 -> <operator>.cast#5
+-EDGES|CFG <operator>.indirection#0 -> <operator>.indirection#4
+-EDGES|CFG <operator>.minus#0 -> <operator>.minus#4
+-EDGES|CFG <operator>.plus#0 -> <operator>.plus#4
+-EDGES|CFG main.c:<global>#0 -> main.c:<global>#33
+-EDGES|CFG main.c:<global>#1 -> value#11
+-EDGES|CFG main.c:<global>#33 -> main.c:<global>#34
++EDGES|CFG <operator>.multiplication#0 -> <operator>.multiplication#5
++EDGES|CFG <operator>.subtraction#0 -> <operator>.subtraction#5
++EDGES|CFG main.c:<global>#0 -> main.c:<global>#30
++EDGES|CFG main.c:<global>#1 -> value#13
++EDGES|CFG main.c:<global>#30 -> main.c:<global>#31
+ EDGES|CFG main.c:NEG:ANY(1)#0 -> main.c:NEG:ANY(1)#4
+-EDGES|CFG value#10 -> value#15
+-EDGES|CFG value#11 -> value#13
+-EDGES|CFG value#12 -> value#10
+-EDGES|CFG value#13 -> value#12
+-EDGES|CFG value#14 -> value#9
+-EDGES|CFG value#15 -> value#17
+-EDGES|CFG value#16 -> value#14
+-EDGES|CFG value#17 -> value#16
+-EDGES|CFG value#18 -> value#8
+-EDGES|CFG value#19 -> value#21
+-EDGES|CFG value#20 -> value#18
++EDGES|CFG value#10 -> value#18
++EDGES|CFG value#11 -> value#16
++EDGES|CFG value#12 -> value#15
++EDGES|CFG value#13 -> value#14
++EDGES|CFG value#14 -> value#12
++EDGES|CFG value#15 -> value#11
++EDGES|CFG value#16 -> value#10
++EDGES|CFG value#17 -> value#9
++EDGES|CFG value#18 -> value#19
++EDGES|CFG value#19 -> value#17
++EDGES|CFG value#20 -> value#24
++EDGES|CFG value#20 -> value#8
+ EDGES|CFG value#21 -> value#20
+-EDGES|CFG value#22 -> value#26
+-EDGES|CFG value#22 -> value#7
+-EDGES|CFG value#23 -> value#22
+-EDGES|CFG value#25 -> value#7
+-EDGES|CFG value#26 -> value#28
+-EDGES|CFG value#27 -> value#25
+-EDGES|CFG value#28 -> value#27
+-EDGES|CFG value#6 -> value#29
+-EDGES|CFG value#7 -> value#6
+-EDGES|CFG value#8 -> value#23
+-EDGES|CFG value#9 -> value#19
++EDGES|CFG value#23 -> value#8
++EDGES|CFG value#24 -> value#25
++EDGES|CFG value#25 -> value#23
++EDGES|CFG value#7 -> value#26
++EDGES|CFG value#8 -> value#7
++EDGES|CFG value#9 -> value#21
+ EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+ EDGES|CONTAINS <operator>.addition#0 -> <operator>.addition#2
+-EDGES|CONTAINS <operator>.cast#0 -> <operator>.cast#2
+-EDGES|CONTAINS <operator>.indirection#0 -> <operator>.indirection#2
+-EDGES|CONTAINS <operator>.minus#0 -> <operator>.minus#2
+-EDGES|CONTAINS <operator>.plus#0 -> <operator>.plus#2
++EDGES|CONTAINS <operator>.multiplication#0 -> <operator>.multiplication#2
++EDGES|CONTAINS <operator>.subtraction#0 -> <operator>.subtraction#2
+ EDGES|CONTAINS D:main.c:<global> -> D:value
+ EDGES|CONTAINS D:main.c:<global> -> main.c:<global>#0
+ EDGES|CONTAINS D:main.c:<global> -> main.c:NEG:ANY(1)#0
+@@ -211,9 +179,9 @@
+ EDGES|CONTAINS F:<includes> -> D:void
+ EDGES|CONTAINS F:main.c -> D:main.c:<global>
+ EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#1
+-EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#31
+-EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#32
+-EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#33
++EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#28
++EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#29
++EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#30
+ EDGES|CONTAINS main.c:<global>#1 -> value#10
+ EDGES|CONTAINS main.c:<global>#1 -> value#11
+ EDGES|CONTAINS main.c:<global>#1 -> value#12
+@@ -230,11 +198,7 @@
+ EDGES|CONTAINS main.c:<global>#1 -> value#23
+ EDGES|CONTAINS main.c:<global>#1 -> value#24
+ EDGES|CONTAINS main.c:<global>#1 -> value#25
+-EDGES|CONTAINS main.c:<global>#1 -> value#26
+-EDGES|CONTAINS main.c:<global>#1 -> value#27
+-EDGES|CONTAINS main.c:<global>#1 -> value#28
+ EDGES|CONTAINS main.c:<global>#1 -> value#5
+-EDGES|CONTAINS main.c:<global>#1 -> value#6
+ EDGES|CONTAINS main.c:<global>#1 -> value#7
+ EDGES|CONTAINS main.c:<global>#1 -> value#8
+ EDGES|CONTAINS main.c:<global>#1 -> value#9
+@@ -247,66 +211,56 @@
+ EDGES|EVAL_TYPE <operator>.addition#4 -> T:ANY
+ EDGES|EVAL_TYPE <operator>.addition#5 -> T:ANY
+ EDGES|EVAL_TYPE <operator>.addition#6 -> T:ANY
+-EDGES|EVAL_TYPE <operator>.cast#1 -> T:ANY
+-EDGES|EVAL_TYPE <operator>.cast#2 -> T:ANY
+-EDGES|EVAL_TYPE <operator>.cast#3 -> T:ANY
+-EDGES|EVAL_TYPE <operator>.cast#4 -> T:ANY
+-EDGES|EVAL_TYPE <operator>.cast#5 -> T:ANY
+-EDGES|EVAL_TYPE <operator>.cast#6 -> T:ANY
+-EDGES|EVAL_TYPE <operator>.indirection#1 -> T:ANY
+-EDGES|EVAL_TYPE <operator>.indirection#2 -> T:ANY
+-EDGES|EVAL_TYPE <operator>.indirection#3 -> T:ANY
+-EDGES|EVAL_TYPE <operator>.indirection#4 -> T:ANY
+-EDGES|EVAL_TYPE <operator>.minus#1 -> T:ANY
+-EDGES|EVAL_TYPE <operator>.minus#2 -> T:ANY
+-EDGES|EVAL_TYPE <operator>.minus#3 -> T:ANY
+-EDGES|EVAL_TYPE <operator>.minus#4 -> T:ANY
+-EDGES|EVAL_TYPE <operator>.plus#1 -> T:ANY
+-EDGES|EVAL_TYPE <operator>.plus#2 -> T:ANY
+-EDGES|EVAL_TYPE <operator>.plus#3 -> T:ANY
+-EDGES|EVAL_TYPE <operator>.plus#4 -> T:ANY
++EDGES|EVAL_TYPE <operator>.multiplication#1 -> T:ANY
++EDGES|EVAL_TYPE <operator>.multiplication#2 -> T:ANY
++EDGES|EVAL_TYPE <operator>.multiplication#3 -> T:ANY
++EDGES|EVAL_TYPE <operator>.multiplication#4 -> T:ANY
++EDGES|EVAL_TYPE <operator>.multiplication#5 -> T:ANY
++EDGES|EVAL_TYPE <operator>.multiplication#6 -> T:ANY
++EDGES|EVAL_TYPE <operator>.subtraction#1 -> T:ANY
++EDGES|EVAL_TYPE <operator>.subtraction#2 -> T:ANY
++EDGES|EVAL_TYPE <operator>.subtraction#3 -> T:ANY
++EDGES|EVAL_TYPE <operator>.subtraction#4 -> T:ANY
++EDGES|EVAL_TYPE <operator>.subtraction#5 -> T:ANY
++EDGES|EVAL_TYPE <operator>.subtraction#6 -> T:ANY
++EDGES|EVAL_TYPE main.c:<global>#28 -> T:ANY
++EDGES|EVAL_TYPE main.c:<global>#30 -> T:value
+ EDGES|EVAL_TYPE main.c:<global>#31 -> T:ANY
+-EDGES|EVAL_TYPE main.c:<global>#33 -> T:value
+-EDGES|EVAL_TYPE main.c:<global>#34 -> T:ANY
+ EDGES|EVAL_TYPE main.c:NEG:ANY(1)#1 -> T:ANY
+ EDGES|EVAL_TYPE main.c:NEG:ANY(1)#2 -> T:ANY
+ EDGES|EVAL_TYPE main.c:NEG:ANY(1)#3 -> T:ANY
+ EDGES|EVAL_TYPE main.c:NEG:ANY(1)#4 -> T:ANY
+ EDGES|EVAL_TYPE value#1 -> T:int
+-EDGES|EVAL_TYPE value#10 -> T:T
+-EDGES|EVAL_TYPE value#11 -> T:T
++EDGES|EVAL_TYPE value#10 -> T:ANY
++EDGES|EVAL_TYPE value#11 -> T:ANY
+ EDGES|EVAL_TYPE value#12 -> T:ANY
+-EDGES|EVAL_TYPE value#13 -> T:int
+-EDGES|EVAL_TYPE value#14 -> T:T
+-EDGES|EVAL_TYPE value#15 -> T:T
+-EDGES|EVAL_TYPE value#16 -> T:ANY
+-EDGES|EVAL_TYPE value#17 -> T:int
+-EDGES|EVAL_TYPE value#18 -> T:T
+-EDGES|EVAL_TYPE value#19 -> T:T
++EDGES|EVAL_TYPE value#13 -> T:ANY
++EDGES|EVAL_TYPE value#14 -> T:int
++EDGES|EVAL_TYPE value#15 -> T:ANY
++EDGES|EVAL_TYPE value#16 -> T:int
++EDGES|EVAL_TYPE value#17 -> T:ANY
++EDGES|EVAL_TYPE value#18 -> T:ANY
++EDGES|EVAL_TYPE value#19 -> T:int*
+ EDGES|EVAL_TYPE value#2 -> T:int
+ EDGES|EVAL_TYPE value#20 -> T:ANY
+-EDGES|EVAL_TYPE value#21 -> T:int*
++EDGES|EVAL_TYPE value#21 -> T:int
+ EDGES|EVAL_TYPE value#22 -> T:ANY
+-EDGES|EVAL_TYPE value#23 -> T:int
++EDGES|EVAL_TYPE value#23 -> T:ANY
+ EDGES|EVAL_TYPE value#24 -> T:ANY
+-EDGES|EVAL_TYPE value#25 -> T:T
+-EDGES|EVAL_TYPE value#26 -> T:T
+-EDGES|EVAL_TYPE value#27 -> T:ANY
+-EDGES|EVAL_TYPE value#28 -> T:int
+-EDGES|EVAL_TYPE value#29 -> T:int
++EDGES|EVAL_TYPE value#25 -> T:int
++EDGES|EVAL_TYPE value#26 -> T:int
+ EDGES|EVAL_TYPE value#3 -> T:int*
+ EDGES|EVAL_TYPE value#4 -> T:int*
+ EDGES|EVAL_TYPE value#5 -> T:void
+-EDGES|EVAL_TYPE value#7 -> T:ANY
++EDGES|EVAL_TYPE value#6 -> T:ANY
+ EDGES|EVAL_TYPE value#8 -> T:ANY
+ EDGES|EVAL_TYPE value#9 -> T:ANY
+ EDGES|PARAMETER_LINK <operator>.addition#1 -> <operator>.addition#3
+ EDGES|PARAMETER_LINK <operator>.addition#4 -> <operator>.addition#6
+-EDGES|PARAMETER_LINK <operator>.cast#1 -> <operator>.cast#3
+-EDGES|PARAMETER_LINK <operator>.cast#4 -> <operator>.cast#6
+-EDGES|PARAMETER_LINK <operator>.indirection#1 -> <operator>.indirection#3
+-EDGES|PARAMETER_LINK <operator>.minus#1 -> <operator>.minus#3
+-EDGES|PARAMETER_LINK <operator>.plus#1 -> <operator>.plus#3
++EDGES|PARAMETER_LINK <operator>.multiplication#1 -> <operator>.multiplication#3
++EDGES|PARAMETER_LINK <operator>.multiplication#4 -> <operator>.multiplication#6
++EDGES|PARAMETER_LINK <operator>.subtraction#1 -> <operator>.subtraction#3
++EDGES|PARAMETER_LINK <operator>.subtraction#4 -> <operator>.subtraction#6
+ EDGES|PARAMETER_LINK main.c:NEG:ANY(1)#1 -> main.c:NEG:ANY(1)#2
+ EDGES|PARAMETER_LINK value#1 -> value#2
+ EDGES|PARAMETER_LINK value#3 -> value#4
+@@ -314,16 +268,20 @@
+ EDGES|REF NB:<includes>:<global> -> NS:<global>
+ EDGES|REF NB:main.c:<global> -> NS:<global>
+ EDGES|REF T:ANY -> D:ANY
+-EDGES|REF T:T -> main.c:<global>#32
++EDGES|REF T:T -> main.c:<global>#29
+ EDGES|REF T:int -> D:int
+ EDGES|REF T:int* -> D:int*
+ EDGES|REF T:value -> D:value
+ EDGES|REF T:void -> D:void
+-EDGES|REF main.c:<global>#33 -> main.c:<global>#1
+-EDGES|REF value#13 -> value#1
+-EDGES|REF value#17 -> value#1
+-EDGES|REF value#21 -> value#3
+-EDGES|REF value#28 -> value#1
++EDGES|REF main.c:<global>#30 -> main.c:<global>#1
++EDGES|REF value#13 -> value#6
++EDGES|REF value#14 -> value#1
++EDGES|REF value#15 -> value#6
++EDGES|REF value#16 -> value#1
++EDGES|REF value#18 -> value#6
++EDGES|REF value#19 -> value#3
++EDGES|REF value#24 -> value#6
++EDGES|REF value#25 -> value#1
+ EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+ EDGES|SOURCE_FILE D:ANY -> F:<includes>
+ EDGES|SOURCE_FILE D:int -> F:<includes>
+@@ -336,86 +294,87 @@
+ EDGES|SOURCE_FILE NB:main.c:<global> -> F:main.c
+ EDGES|SOURCE_FILE main.c:<global>#0 -> F:main.c
+ EDGES|SOURCE_FILE main.c:<global>#1 -> F:main.c
+-EDGES|SOURCE_FILE main.c:<global>#32 -> F:main.c
++EDGES|SOURCE_FILE main.c:<global>#29 -> F:main.c
+ EDGES|SOURCE_FILE main.c:NEG:ANY(1)#0 -> F:main.c
+-FLOWS|REACHING_DEF[(T)*p] value#18 -> value#29
+-FLOWS|REACHING_DEF[(T)*p] value#18 -> value#8
+-FLOWS|REACHING_DEF[(T)+x + (T)-x + (T)*p + NEG(x)] value#7 -> value#29
+-FLOWS|REACHING_DEF[(T)+x + (T)-x + (T)*p + NEG(x)] value#7 -> value#6
+-FLOWS|REACHING_DEF[(T)+x + (T)-x + (T)*p] value#8 -> value#29
+-FLOWS|REACHING_DEF[(T)+x + (T)-x + (T)*p] value#8 -> value#7
+-FLOWS|REACHING_DEF[(T)+x + (T)-x] value#9 -> value#29
+-FLOWS|REACHING_DEF[(T)+x + (T)-x] value#9 -> value#8
+-FLOWS|REACHING_DEF[(T)+x] value#10 -> value#29
+-FLOWS|REACHING_DEF[(T)+x] value#10 -> value#9
+-FLOWS|REACHING_DEF[(T)-x] value#14 -> value#29
+-FLOWS|REACHING_DEF[(T)-x] value#14 -> value#9
+-FLOWS|REACHING_DEF[(T)-x] value#25 -> value#29
+-FLOWS|REACHING_DEF[*p] value#20 -> value#18
+-FLOWS|REACHING_DEF[*p] value#20 -> value#29
+-FLOWS|REACHING_DEF[*p] value#20 -> value#4
+-FLOWS|REACHING_DEF[+x] value#12 -> value#10
+-FLOWS|REACHING_DEF[+x] value#12 -> value#29
+-FLOWS|REACHING_DEF[-x] value#16 -> value#14
+-FLOWS|REACHING_DEF[-x] value#16 -> value#29
+-FLOWS|REACHING_DEF[-x] value#27 -> value#25
+-FLOWS|REACHING_DEF[-x] value#27 -> value#29
+-FLOWS|REACHING_DEF[<RET>] value#6 -> value#29
+-FLOWS|REACHING_DEF[NEG(x)] value#22 -> value#29
+-FLOWS|REACHING_DEF[NEG(x)] value#22 -> value#7
+-FLOWS|REACHING_DEF[T] value#11 -> value#10
+-FLOWS|REACHING_DEF[T] value#15 -> value#14
+-FLOWS|REACHING_DEF[T] value#19 -> value#18
+-FLOWS|REACHING_DEF[T] value#26 -> value#25
++FLOWS|REACHING_DEF[(T) - x] value#23 -> value#26
++FLOWS|REACHING_DEF[(T)*p] value#17 -> value#26
++FLOWS|REACHING_DEF[(T)*p] value#17 -> value#9
++FLOWS|REACHING_DEF[(T)+x + (T)-x + (T)*p + NEG(x)] value#8 -> value#26
++FLOWS|REACHING_DEF[(T)+x + (T)-x + (T)*p + NEG(x)] value#8 -> value#7
++FLOWS|REACHING_DEF[(T)+x + (T)-x + (T)*p] value#9 -> value#26
++FLOWS|REACHING_DEF[(T)+x + (T)-x + (T)*p] value#9 -> value#8
++FLOWS|REACHING_DEF[(T)+x + (T)-x] value#10 -> value#26
++FLOWS|REACHING_DEF[(T)+x + (T)-x] value#10 -> value#9
++FLOWS|REACHING_DEF[(T)+x + (T)] value#11 -> value#10
++FLOWS|REACHING_DEF[(T)+x + (T)] value#11 -> value#16
++FLOWS|REACHING_DEF[(T)+x + (T)] value#11 -> value#26
++FLOWS|REACHING_DEF[(T)+x] value#12 -> value#11
++FLOWS|REACHING_DEF[(T)+x] value#12 -> value#26
++FLOWS|REACHING_DEF[<RET>] value#7 -> value#26
++FLOWS|REACHING_DEF[<unknown> T] value#13 -> value#12
++FLOWS|REACHING_DEF[<unknown> T] value#13 -> value#15
++FLOWS|REACHING_DEF[<unknown> T] value#15 -> value#11
++FLOWS|REACHING_DEF[<unknown> T] value#15 -> value#18
++FLOWS|REACHING_DEF[<unknown> T] value#18 -> value#17
++FLOWS|REACHING_DEF[<unknown> T] value#18 -> value#19
++FLOWS|REACHING_DEF[<unknown> T] value#18 -> value#24
++FLOWS|REACHING_DEF[<unknown> T] value#18 -> value#26
++FLOWS|REACHING_DEF[<unknown> T] value#24 -> value#23
++FLOWS|REACHING_DEF[<unknown> T] value#24 -> value#25
++FLOWS|REACHING_DEF[<unknown> T] value#24 -> value#26
++FLOWS|REACHING_DEF[NEG(x)] value#20 -> value#26
++FLOWS|REACHING_DEF[NEG(x)] value#20 -> value#8
+ FLOWS|REACHING_DEF[] <operator>.addition#0 -> <operator>.addition#1
+ FLOWS|REACHING_DEF[] <operator>.addition#0 -> <operator>.addition#4
+-FLOWS|REACHING_DEF[] <operator>.cast#0 -> <operator>.cast#1
+-FLOWS|REACHING_DEF[] <operator>.cast#0 -> <operator>.cast#4
+-FLOWS|REACHING_DEF[] <operator>.indirection#0 -> <operator>.indirection#1
+-FLOWS|REACHING_DEF[] <operator>.minus#0 -> <operator>.minus#1
+-FLOWS|REACHING_DEF[] <operator>.plus#0 -> <operator>.plus#1
+-FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#33
++FLOWS|REACHING_DEF[] <operator>.multiplication#0 -> <operator>.multiplication#1
++FLOWS|REACHING_DEF[] <operator>.multiplication#0 -> <operator>.multiplication#4
++FLOWS|REACHING_DEF[] <operator>.subtraction#0 -> <operator>.subtraction#1
++FLOWS|REACHING_DEF[] <operator>.subtraction#0 -> <operator>.subtraction#4
++FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#30
+ FLOWS|REACHING_DEF[] main.c:<global>#1 -> value#1
+-FLOWS|REACHING_DEF[] main.c:<global>#1 -> value#11
+ FLOWS|REACHING_DEF[] main.c:<global>#1 -> value#13
++FLOWS|REACHING_DEF[] main.c:<global>#1 -> value#14
+ FLOWS|REACHING_DEF[] main.c:<global>#1 -> value#15
+-FLOWS|REACHING_DEF[] main.c:<global>#1 -> value#17
++FLOWS|REACHING_DEF[] main.c:<global>#1 -> value#16
++FLOWS|REACHING_DEF[] main.c:<global>#1 -> value#18
+ FLOWS|REACHING_DEF[] main.c:<global>#1 -> value#19
+ FLOWS|REACHING_DEF[] main.c:<global>#1 -> value#21
+-FLOWS|REACHING_DEF[] main.c:<global>#1 -> value#23
+-FLOWS|REACHING_DEF[] main.c:<global>#1 -> value#26
+-FLOWS|REACHING_DEF[] main.c:<global>#1 -> value#28
++FLOWS|REACHING_DEF[] main.c:<global>#1 -> value#24
++FLOWS|REACHING_DEF[] main.c:<global>#1 -> value#25
+ FLOWS|REACHING_DEF[] main.c:<global>#1 -> value#3
+ FLOWS|REACHING_DEF[] main.c:NEG:ANY(1)#0 -> main.c:NEG:ANY(1)#1
+ FLOWS|REACHING_DEF[p1] <operator>.addition#1 -> <operator>.addition#3
+ FLOWS|REACHING_DEF[p1] <operator>.addition#1 -> <operator>.addition#5
+-FLOWS|REACHING_DEF[p1] <operator>.cast#1 -> <operator>.cast#3
+-FLOWS|REACHING_DEF[p1] <operator>.cast#1 -> <operator>.cast#5
+-FLOWS|REACHING_DEF[p1] <operator>.indirection#1 -> <operator>.indirection#3
+-FLOWS|REACHING_DEF[p1] <operator>.indirection#1 -> <operator>.indirection#4
+-FLOWS|REACHING_DEF[p1] <operator>.minus#1 -> <operator>.minus#3
+-FLOWS|REACHING_DEF[p1] <operator>.minus#1 -> <operator>.minus#4
+-FLOWS|REACHING_DEF[p1] <operator>.plus#1 -> <operator>.plus#3
+-FLOWS|REACHING_DEF[p1] <operator>.plus#1 -> <operator>.plus#4
++FLOWS|REACHING_DEF[p1] <operator>.multiplication#1 -> <operator>.multiplication#3
++FLOWS|REACHING_DEF[p1] <operator>.multiplication#1 -> <operator>.multiplication#5
++FLOWS|REACHING_DEF[p1] <operator>.subtraction#1 -> <operator>.subtraction#3
++FLOWS|REACHING_DEF[p1] <operator>.subtraction#1 -> <operator>.subtraction#5
+ FLOWS|REACHING_DEF[p1] main.c:NEG:ANY(1)#1 -> main.c:NEG:ANY(1)#2
+ FLOWS|REACHING_DEF[p1] main.c:NEG:ANY(1)#1 -> main.c:NEG:ANY(1)#4
+ FLOWS|REACHING_DEF[p2] <operator>.addition#4 -> <operator>.addition#5
+ FLOWS|REACHING_DEF[p2] <operator>.addition#4 -> <operator>.addition#6
+-FLOWS|REACHING_DEF[p2] <operator>.cast#4 -> <operator>.cast#5
+-FLOWS|REACHING_DEF[p2] <operator>.cast#4 -> <operator>.cast#6
+-FLOWS|REACHING_DEF[p] value#3 -> value#21
+-FLOWS|REACHING_DEF[p] value#3 -> value#29
++FLOWS|REACHING_DEF[p2] <operator>.multiplication#4 -> <operator>.multiplication#5
++FLOWS|REACHING_DEF[p2] <operator>.multiplication#4 -> <operator>.multiplication#6
++FLOWS|REACHING_DEF[p2] <operator>.subtraction#4 -> <operator>.subtraction#5
++FLOWS|REACHING_DEF[p2] <operator>.subtraction#4 -> <operator>.subtraction#6
++FLOWS|REACHING_DEF[p] value#19 -> value#17
++FLOWS|REACHING_DEF[p] value#19 -> value#18
++FLOWS|REACHING_DEF[p] value#19 -> value#26
++FLOWS|REACHING_DEF[p] value#19 -> value#4
++FLOWS|REACHING_DEF[p] value#3 -> value#19
+ FLOWS|REACHING_DEF[p] value#3 -> value#4
+-FLOWS|REACHING_DEF[x] value#1 -> value#13
++FLOWS|REACHING_DEF[x] value#1 -> value#14
+ FLOWS|REACHING_DEF[x] value#1 -> value#2
+-FLOWS|REACHING_DEF[x] value#13 -> value#12
+-FLOWS|REACHING_DEF[x] value#13 -> value#17
+-FLOWS|REACHING_DEF[x] value#17 -> value#16
+-FLOWS|REACHING_DEF[x] value#17 -> value#23
+-FLOWS|REACHING_DEF[x] value#23 -> value#2
+-FLOWS|REACHING_DEF[x] value#23 -> value#22
+-FLOWS|REACHING_DEF[x] value#23 -> value#28
+-FLOWS|REACHING_DEF[x] value#23 -> value#29
+-FLOWS|REACHING_DEF[x] value#28 -> value#2
+-FLOWS|REACHING_DEF[x] value#28 -> value#27
+-FLOWS|REACHING_DEF[x] value#28 -> value#29
++FLOWS|REACHING_DEF[x] value#14 -> value#12
++FLOWS|REACHING_DEF[x] value#14 -> value#16
++FLOWS|REACHING_DEF[x] value#16 -> value#10
++FLOWS|REACHING_DEF[x] value#16 -> value#11
++FLOWS|REACHING_DEF[x] value#16 -> value#21
++FLOWS|REACHING_DEF[x] value#21 -> value#2
++FLOWS|REACHING_DEF[x] value#21 -> value#20
++FLOWS|REACHING_DEF[x] value#21 -> value#25
++FLOWS|REACHING_DEF[x] value#21 -> value#26
++FLOWS|REACHING_DEF[x] value#25 -> value#2
++FLOWS|REACHING_DEF[x] value#25 -> value#23
++FLOWS|REACHING_DEF[x] value#25 -> value#24
++FLOWS|REACHING_DEF[x] value#25 -> value#26
