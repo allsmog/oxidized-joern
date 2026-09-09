@@ -1,0 +1,281 @@
+{
+  "status": "PASS_WITH_FOUR_RETAINED_DIAGNOSTICS",
+  "sourceSha256": "8b132fab7d079a97e774b10d5b1f14c1a1df4f093ef8f437ebfcaadfdde33b3b",
+  "testSha256": "ed5345653b0df501199d54e6279231154d483bc371875ba955339006507859e1",
+  "sourceUnchanged": true,
+  "rawExtractionVerifiedProjects": 34,
+  "productionExactCases": [
+    "plain_call_control",
+    "if_true",
+    "if_else",
+    "if_elif",
+    "snprintf_defined",
+    "ifndef_control",
+    "inactive_phantoms",
+    "definition_positions",
+    "inactive_call_only",
+    "builtin_body_condition",
+    "header_positions",
+    "ifdef_elif",
+    "inactive_local_shadow",
+    "inactive_typedef_shadow",
+    "nested_conditionals",
+    "header_spaced_undef",
+    "plain_undef",
+    "spaced_undef",
+    "tab_undef",
+    "define_after_undef",
+    "inactive_undef",
+    "undef_source_order",
+    "unknown_undef",
+    "inactive_header_directives",
+    "inactive_header_source_order",
+    "inactive_macro_prefix",
+    "inactive_macro_return",
+    "conditional_duplicates",
+    "trailing_comment",
+    "unknown_directive"
+  ],
+  "diagnosticCases": [
+    "local_definition",
+    "comment_between",
+    "formfeed_space",
+    "spliced_keyword"
+  ],
+  "rawMatchingRecordsGained": 623,
+  "rawMatchingRecordsLost": 1,
+  "lossClassification": "local_definition ordinal collision; see ordinal-collision.json for full source/target/ancestor evidence",
+  "cases": [
+    {
+      "case": "definition_positions",
+      "rawMatchingRecordsGained": 49,
+      "rawMatchingRecordsLost": 0,
+      "lostRecords": []
+    },
+    {
+      "case": "if_elif",
+      "rawMatchingRecordsGained": 26,
+      "rawMatchingRecordsLost": 0,
+      "lostRecords": []
+    },
+    {
+      "case": "if_else",
+      "rawMatchingRecordsGained": 37,
+      "rawMatchingRecordsLost": 0,
+      "lostRecords": []
+    },
+    {
+      "case": "if_true",
+      "rawMatchingRecordsGained": 27,
+      "rawMatchingRecordsLost": 0,
+      "lostRecords": []
+    },
+    {
+      "case": "ifndef_control",
+      "rawMatchingRecordsGained": 0,
+      "rawMatchingRecordsLost": 0,
+      "lostRecords": []
+    },
+    {
+      "case": "inactive_call_only",
+      "rawMatchingRecordsGained": 0,
+      "rawMatchingRecordsLost": 0,
+      "lostRecords": []
+    },
+    {
+      "case": "inactive_phantoms",
+      "rawMatchingRecordsGained": 25,
+      "rawMatchingRecordsLost": 0,
+      "lostRecords": []
+    },
+    {
+      "case": "local_definition",
+      "rawMatchingRecordsGained": 17,
+      "rawMatchingRecordsLost": 1,
+      "lostRecords": [
+        {
+          "record": "FLOWS|REACHING_DEF[x] choose#1 -> choose#5",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "case": "plain_call_control",
+      "rawMatchingRecordsGained": 0,
+      "rawMatchingRecordsLost": 0,
+      "lostRecords": []
+    },
+    {
+      "case": "snprintf_defined",
+      "rawMatchingRecordsGained": 150,
+      "rawMatchingRecordsLost": 0,
+      "lostRecords": []
+    },
+    {
+      "case": "builtin_body_condition",
+      "rawMatchingRecordsGained": 23,
+      "rawMatchingRecordsLost": 0,
+      "lostRecords": []
+    },
+    {
+      "case": "header_positions",
+      "rawMatchingRecordsGained": 41,
+      "rawMatchingRecordsLost": 0,
+      "lostRecords": []
+    },
+    {
+      "case": "ifdef_elif",
+      "rawMatchingRecordsGained": 26,
+      "rawMatchingRecordsLost": 0,
+      "lostRecords": []
+    },
+    {
+      "case": "inactive_local_shadow",
+      "rawMatchingRecordsGained": 24,
+      "rawMatchingRecordsLost": 0,
+      "lostRecords": []
+    },
+    {
+      "case": "inactive_typedef_shadow",
+      "rawMatchingRecordsGained": 0,
+      "rawMatchingRecordsLost": 0,
+      "lostRecords": []
+    },
+    {
+      "case": "nested_conditionals",
+      "rawMatchingRecordsGained": 23,
+      "rawMatchingRecordsLost": 0,
+      "lostRecords": []
+    },
+    {
+      "case": "header_spaced_undef",
+      "rawMatchingRecordsGained": 0,
+      "rawMatchingRecordsLost": 0,
+      "lostRecords": []
+    },
+    {
+      "case": "plain_undef",
+      "rawMatchingRecordsGained": 0,
+      "rawMatchingRecordsLost": 0,
+      "lostRecords": []
+    },
+    {
+      "case": "spaced_undef",
+      "rawMatchingRecordsGained": 0,
+      "rawMatchingRecordsLost": 0,
+      "lostRecords": []
+    },
+    {
+      "case": "tab_undef",
+      "rawMatchingRecordsGained": 0,
+      "rawMatchingRecordsLost": 0,
+      "lostRecords": []
+    },
+    {
+      "case": "define_after_undef",
+      "rawMatchingRecordsGained": 26,
+      "rawMatchingRecordsLost": 0,
+      "lostRecords": []
+    },
+    {
+      "case": "inactive_undef",
+      "rawMatchingRecordsGained": 26,
+      "rawMatchingRecordsLost": 0,
+      "lostRecords": []
+    },
+    {
+      "case": "undef_source_order",
+      "rawMatchingRecordsGained": 31,
+      "rawMatchingRecordsLost": 0,
+      "lostRecords": []
+    },
+    {
+      "case": "unknown_undef",
+      "rawMatchingRecordsGained": 26,
+      "rawMatchingRecordsLost": 0,
+      "lostRecords": []
+    },
+    {
+      "case": "inactive_header_directives",
+      "rawMatchingRecordsGained": 5,
+      "rawMatchingRecordsLost": 0,
+      "lostRecords": []
+    },
+    {
+      "case": "inactive_header_source_order",
+      "rawMatchingRecordsGained": 15,
+      "rawMatchingRecordsLost": 0,
+      "lostRecords": []
+    },
+    {
+      "case": "inactive_macro_prefix",
+      "rawMatchingRecordsGained": 5,
+      "rawMatchingRecordsLost": 0,
+      "lostRecords": []
+    },
+    {
+      "case": "inactive_macro_return",
+      "rawMatchingRecordsGained": 10,
+      "rawMatchingRecordsLost": 0,
+      "lostRecords": []
+    },
+    {
+      "case": "conditional_duplicates",
+      "rawMatchingRecordsGained": 5,
+      "rawMatchingRecordsLost": 0,
+      "lostRecords": []
+    },
+    {
+      "case": "comment_between",
+      "rawMatchingRecordsGained": 0,
+      "rawMatchingRecordsLost": 0,
+      "lostRecords": []
+    },
+    {
+      "case": "formfeed_space",
+      "rawMatchingRecordsGained": 0,
+      "rawMatchingRecordsLost": 0,
+      "lostRecords": []
+    },
+    {
+      "case": "spliced_keyword",
+      "rawMatchingRecordsGained": 0,
+      "rawMatchingRecordsLost": 0,
+      "lostRecords": []
+    },
+    {
+      "case": "trailing_comment",
+      "rawMatchingRecordsGained": 6,
+      "rawMatchingRecordsLost": 0,
+      "lostRecords": []
+    },
+    {
+      "case": "unknown_directive",
+      "rawMatchingRecordsGained": 0,
+      "rawMatchingRecordsLost": 0,
+      "lostRecords": []
+    }
+  ],
+  "sourceByteInventory": {
+    "crlfFiles": [],
+    "formfeedFiles": [
+      "cases/formfeed_space/main.c"
+    ]
+  },
+  "validationLogs": {
+    "provenance/validation/tests-v4-final.log": "7e263a5a057f75979f20b67d53e3ceaad8a2e52126e139c492231bfde39b82de",
+    "provenance/validation/fmt-v4-final.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/validation/focused-v4-final.log": "732f8709061d724cd640264b21fd43373e980565d04652b172f4120e06f737da",
+    "provenance/validation/tests-v4.log": "0c677fb557c58caa1af9522fccc3c600a49092d3c59ac66a3cc55510a1cb5fe4",
+    "provenance/validation/tests-v4-corrected.log": "885edb6ea17b107e49dc0f9c317c1352eb9aff82b934f2a82d1a91e64d351f46",
+    "provenance/validation/tests-v3.log": "bb433e3e8370e5f5656f68bdee80820fa53ed6d2609e41a7aa2f1f5e5e28664c",
+    "provenance/validation/clippy-v4.log": "8f7a7e7b6f88665143f62737170ff417fe84c3582b70ada288f49f8d39f9ac6b",
+    "provenance/validation/tests-v2.log": "ea62a11c58edf5e1458b5101c38e77822f2b61aa36e8140b2a9a34f1717d0030",
+    "provenance/validation/main308-v4.log": "c105179d62065e9cbf9f398ff94754c29ec03add1206db7dff281cb4c07b6be6",
+    "provenance/validation/fmt-v4-expanded.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "provenance/validation/focused-v4-expanded.log": "fcbb0f1801d406fbf3ba1d996b6206953b016bf1ab834008e110b45788d0745c",
+    "provenance/validation/clippy-v4-final.log": "e95959b4f562ecc51bb60af140d2dbb1d228fad826f46428582fe978cfec63ce",
+    "provenance/validation/main308-live-v4.log": "715e0c188ca0e7a744ace60c9fa451649f34143022f2a1a163bd46303772dd68",
+    "provenance/validation/fmt-v4.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

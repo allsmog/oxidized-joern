@@ -1,0 +1,15 @@
+{
+  "plain_undef": {
+    "main.c": "#define FLAG 1\n#if 1\n#undef FLAG\n#endif\n#if defined(FLAG)\nint hidden(int x) {\n#if 1\n return x;\n#else\n return 0;\n#endif\n}\n#endif\nint visible(int x) { return x; }\n"
+  },
+  "spaced_undef": {
+    "main.c": "#define FLAG 1\n#if 1\n#    undef FLAG\n#endif\n#if defined(FLAG)\nint hidden(int x) {\n#if 1\n return x;\n#else\n return 0;\n#endif\n}\n#endif\nint visible(int x) { return x; }\n"
+  },
+  "tab_undef": {
+    "main.c": "#define FLAG 1\n#if 1\n#\tundef FLAG\n#endif\n#if defined(FLAG)\nint hidden(int x) {\n#if 1\n return x;\n#else\n return 0;\n#endif\n}\n#endif\nint visible(int x) { return x; }\n"
+  },
+  "header_spaced_undef": {
+    "api.h": "#define FLAG 1\n#  undef FLAG\n",
+    "main.c": "#include \"api.h\"\n#ifdef FLAG\nint hidden(int x) {\n#if 1\n return x;\n#endif\n}\n#endif\nint visible(int x) { return x; }\n"
+  }
+}

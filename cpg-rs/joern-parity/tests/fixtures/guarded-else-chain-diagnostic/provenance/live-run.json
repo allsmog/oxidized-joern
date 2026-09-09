@@ -1,0 +1,25 @@
+{
+  "command": [
+    "/Users/shayaunnejad/vibe-code/joern-oxidized/.local/astra-sprint/oracle/runtime/joern-cli/joern",
+    "--script",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/.local/guarded-else-chain-diagnosis/oracle.sc",
+    "--param",
+    "inputPath=/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/.local/guarded-else-chain-diagnosis/input"
+  ],
+  "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/.local/guarded-else-chain-diagnosis/oracle-workspace",
+  "exitCode": 0,
+  "seconds": 5.068243208006606,
+  "inputHashes": {
+    "guarded_chain": {
+      "main.c": "61dd6e19812557348f78c4161695e4894978bea732dccdfd5c8d7e9ea6cc2b2c"
+    },
+    "ordinary_chain": {
+      "main.c": "025fc2b8a4996fd8ba0f427201d28c8fc0092c459db5975724572e6ae3178c09"
+    }
+  },
+  "scriptSha256": "56431f14868678e64f9eb41026b44f1d3d7738404d28d2db62711b520c98c742",
+  "joernVersion": "4.0.555",
+  "officialArchiveSha256": "12989883d6b5aeacc97b2dc0ecc4e2951bf50e48cb244f8c8f333d11a8be0c7e",
+  "rawStdoutSha256": "f823be4a52f4f5bec35a0d124a9bb416b13a0c3a933b03da3bde0056b93b3d56",
+  "rawStderrSha256": "6630e78bf545007f279e7b0c292efcf9376e49742ea636b174836be7b5e736b4"
+}

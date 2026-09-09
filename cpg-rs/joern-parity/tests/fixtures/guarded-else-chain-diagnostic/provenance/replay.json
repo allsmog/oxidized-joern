@@ -1,0 +1,66 @@
+[
+  {
+    "variant": "old7",
+    "case": "guarded_chain",
+    "command": [
+      "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/seventh-batch/final-real-differential/bin/joern-parity",
+      "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/.local/guarded-else-chain-diagnosis/input/guarded_chain/main.c"
+    ],
+    "exitCode": 0,
+    "seconds": 0.017216583000845276,
+    "exact": false,
+    "binarySha256": "d4503d37b2a7a37df7c3d58520fea9d943530bce323bd1909032f102e9640f8b",
+    "inputSha256": "61dd6e19812557348f78c4161695e4894978bea732dccdfd5c8d7e9ea6cc2b2c",
+    "expectedSha256": "0686c612b792284185fb41bad90683440e29b1fc4af23a56330088603f724dae",
+    "actualSha256": "6c39cb3bee2418280cb0d345812d50c3bcef31315cde2efa50872a775fe94afd",
+    "diffSha256": "8b1201e4b65785837d032284e827ef0855295d27f51de9b3622e76dcdc9716d1"
+  },
+  {
+    "variant": "old7",
+    "case": "ordinary_chain",
+    "command": [
+      "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/seventh-batch/final-real-differential/bin/joern-parity",
+      "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/.local/guarded-else-chain-diagnosis/input/ordinary_chain/main.c"
+    ],
+    "exitCode": 0,
+    "seconds": 0.0040868750074878335,
+    "exact": true,
+    "binarySha256": "d4503d37b2a7a37df7c3d58520fea9d943530bce323bd1909032f102e9640f8b",
+    "inputSha256": "025fc2b8a4996fd8ba0f427201d28c8fc0092c459db5975724572e6ae3178c09",
+    "expectedSha256": "d1e6c51708ef94f2b0dd6390adb29c34dddebc7037d2f6b816f82a0e8e546efb",
+    "actualSha256": "d1e6c51708ef94f2b0dd6390adb29c34dddebc7037d2f6b816f82a0e8e546efb",
+    "diffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "variant": "current8",
+    "case": "guarded_chain",
+    "command": [
+      "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/eighth-batch/final-real-differential/bin/joern-parity",
+      "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/.local/guarded-else-chain-diagnosis/input/guarded_chain/main.c"
+    ],
+    "exitCode": 0,
+    "seconds": 0.007906333994469605,
+    "exact": false,
+    "binarySha256": "81a9d4c8c078496c2dc57b863cea8fb2a9538d72882408df08ca217dd7af6d9b",
+    "inputSha256": "61dd6e19812557348f78c4161695e4894978bea732dccdfd5c8d7e9ea6cc2b2c",
+    "expectedSha256": "0686c612b792284185fb41bad90683440e29b1fc4af23a56330088603f724dae",
+    "actualSha256": "4dcf9aa6ded453a09fdc4183fdf31e8052b20419ab960a25106708719f096583",
+    "diffSha256": "76d68b0fb339b323c765337b468638b2fd4cae53b08117f5a0ef30e41e813e77"
+  },
+  {
+    "variant": "current8",
+    "case": "ordinary_chain",
+    "command": [
+      "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/eighth-batch/final-real-differential/bin/joern-parity",
+      "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/.local/guarded-else-chain-diagnosis/input/ordinary_chain/main.c"
+    ],
+    "exitCode": 0,
+    "seconds": 0.0035449999995762482,
+    "exact": true,
+    "binarySha256": "81a9d4c8c078496c2dc57b863cea8fb2a9538d72882408df08ca217dd7af6d9b",
+    "inputSha256": "025fc2b8a4996fd8ba0f427201d28c8fc0092c459db5975724572e6ae3178c09",
+    "expectedSha256": "d1e6c51708ef94f2b0dd6390adb29c34dddebc7037d2f6b816f82a0e8e546efb",
+    "actualSha256": "d1e6c51708ef94f2b0dd6390adb29c34dddebc7037d2f6b816f82a0e8e546efb",
+    "diffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+]

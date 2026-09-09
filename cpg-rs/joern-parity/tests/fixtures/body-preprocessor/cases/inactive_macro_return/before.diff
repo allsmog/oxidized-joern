@@ -1,0 +1,82 @@
+--- joern
++++ before
+@@ -2,18 +2,18 @@
+   BLOCK TYPE_FULL_NAME=ANY ORDER=1
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+ 
+-METHOD NAME=hidden CODE=RET hidden(int x) { return x; } FULL_NAME=hidden SIGNATURE=unsigned long(int) ORDER=1
++METHOD NAME=hidden CODE=RET hidden(int x) { return x; } FULL_NAME=hidden SIGNATURE=RET(int) ORDER=1
+   METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+   METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+   BLOCK CODE={ return x; } TYPE_FULL_NAME=void ORDER=2
+-  METHOD_RETURN CODE=RET TYPE_FULL_NAME=unsigned long ORDER=3
++  METHOD_RETURN CODE=RET TYPE_FULL_NAME=RET ORDER=3
+ 
+ METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1
+-  METHOD NAME=hidden CODE=RET hidden(int x) { return x; } FULL_NAME=hidden SIGNATURE=unsigned long(int) ORDER=1
++  METHOD NAME=hidden CODE=RET hidden(int x) { return x; } FULL_NAME=hidden SIGNATURE=RET(int) ORDER=1
+     METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+     METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+     BLOCK CODE={ return x; } TYPE_FULL_NAME=void ORDER=2
+-    METHOD_RETURN CODE=RET TYPE_FULL_NAME=unsigned long ORDER=3
++    METHOD_RETURN CODE=RET TYPE_FULL_NAME=RET ORDER=3
+   BLOCK TYPE_FULL_NAME=ANY ORDER=1
+     METHOD_REF CODE=hidden TYPE_FULL_NAME=hidden METHOD_FULL_NAME=hidden ORDER=1
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+@@ -27,15 +27,15 @@
+ NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+ NODES|NAMESPACE NAME=<global>
+ NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
++NODES|TYPE_DECL NAME=RET FULL_NAME=RET CODE=RET IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE_DECL NAME=hidden FULL_NAME=hidden CODE=hidden AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+ NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE_DECL NAME=<global> FULL_NAME=main.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+-NODES|TYPE_DECL NAME=unsigned long FULL_NAME=unsigned long CODE=unsigned long IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
++NODES|TYPE NAME=RET FULL_NAME=RET TYPE_DECL_FULL_NAME=RET
+ NODES|TYPE NAME=hidden FULL_NAME=hidden TYPE_DECL_FULL_NAME=hidden
+ NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+-NODES|TYPE NAME=unsigned long FULL_NAME=unsigned long TYPE_DECL_FULL_NAME=unsigned long
+ NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+ EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+ EDGES|CFG hidden#0 -> hidden#4
+@@ -46,8 +46,8 @@
+ EDGES|CONTAINS D:main.c:<global> -> main.c:<global>#0
+ EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+ EDGES|CONTAINS F:<includes> -> D:ANY
++EDGES|CONTAINS F:<includes> -> D:RET
+ EDGES|CONTAINS F:<includes> -> D:int
+-EDGES|CONTAINS F:<includes> -> D:unsigned long
+ EDGES|CONTAINS F:<includes> -> D:void
+ EDGES|CONTAINS F:main.c -> D:main.c:<global>
+ EDGES|CONTAINS hidden#0 -> hidden#3
+@@ -59,7 +59,7 @@
+ EDGES|EVAL_TYPE hidden#1 -> T:int
+ EDGES|EVAL_TYPE hidden#2 -> T:int
+ EDGES|EVAL_TYPE hidden#3 -> T:void
+-EDGES|EVAL_TYPE hidden#4 -> T:unsigned long
++EDGES|EVAL_TYPE hidden#4 -> T:RET
+ EDGES|EVAL_TYPE main.c:<global>#6 -> T:ANY
+ EDGES|EVAL_TYPE main.c:<global>#7 -> T:hidden
+ EDGES|EVAL_TYPE main.c:<global>#8 -> T:ANY
+@@ -68,17 +68,17 @@
+ EDGES|REF NB:<includes>:<global> -> NS:<global>
+ EDGES|REF NB:main.c:<global> -> NS:<global>
+ EDGES|REF T:ANY -> D:ANY
++EDGES|REF T:RET -> D:RET
+ EDGES|REF T:hidden -> D:hidden
+ EDGES|REF T:int -> D:int
+-EDGES|REF T:unsigned long -> D:unsigned long
+ EDGES|REF T:void -> D:void
+ EDGES|REF main.c:<global>#7 -> hidden#0
+ EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+ EDGES|SOURCE_FILE D:ANY -> F:<includes>
++EDGES|SOURCE_FILE D:RET -> F:<includes>
+ EDGES|SOURCE_FILE D:hidden -> F:main.c
+ EDGES|SOURCE_FILE D:int -> F:<includes>
+ EDGES|SOURCE_FILE D:main.c:<global> -> F:main.c
+-EDGES|SOURCE_FILE D:unsigned long -> F:<includes>
+ EDGES|SOURCE_FILE D:void -> F:<includes>
+ EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
+ EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>

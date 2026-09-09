@@ -1,0 +1,33 @@
+METHOD NAME=crc_word CODE=local z_crc_t crc_word(z_word_t data) {\n    int k;\n    for (k = 0; k < W; k++)\n        data = (data >> 8) ^ crc_table[data & 0xff];\n    return (z_crc_t)data;\n} FULL_NAME=crc_word SIGNATURE=z_crc_t(z_word_t) ORDER=1
+  METHOD_PARAMETER_IN NAME=data CODE=z_word_t data TYPE_FULL_NAME=z_word_t ORDER=1
+  METHOD_PARAMETER_OUT NAME=data CODE=z_word_t data TYPE_FULL_NAME=z_word_t ORDER=1
+  BLOCK CODE={\n    int k;\n    for (k = 0; k < W; k++)\n        data = (data >> 8) ^ crc_table[data & 0xff];\n    return (z_crc_t)data;\n} TYPE_FULL_NAME=void ORDER=2
+    LOCAL NAME=crc_table CODE=<global> crc_table TYPE_FULL_NAME=FAR[256] ORDER=0
+    LOCAL NAME=k CODE=int k TYPE_FULL_NAME=int ORDER=1
+    CONTROL_STRUCTURE CODE=for (k = 0;k < W;k++) ORDER=2
+      CALL NAME=<operator>.assignment CODE=k = 0 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=k CODE=k TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+        LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+      CALL NAME=<operator>.lessThan CODE=k < W TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.lessThan ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=k CODE=k TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+        CALL NAME=W CODE=W TYPE_FULL_NAME=int METHOD_FULL_NAME=crc32.c:W:int(0) SIGNATURE=int(0) ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=INLINED
+          BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+            LITERAL CODE=4 TYPE_FULL_NAME=int ORDER=1
+      CALL NAME=<operator>.postIncrement CODE=k++ TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.postIncrement ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=k CODE=k TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+      CALL NAME=<operator>.assignment CODE=data = (data >> 8) ^ crc_table[data & 0xff] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=4 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=data CODE=data TYPE_FULL_NAME=z_word_t ORDER=1 ARGUMENT_INDEX=1
+        CALL NAME=<operator>.xor CODE=(data >> 8) ^ crc_table[data & 0xff] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.xor ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+          CALL NAME=<operator>.arithmeticShiftRight CODE=data >> 8 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.arithmeticShiftRight ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+            IDENTIFIER NAME=data CODE=data TYPE_FULL_NAME=z_word_t ORDER=1 ARGUMENT_INDEX=1
+            LITERAL CODE=8 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+          CALL NAME=<operator>.indirectIndexAccess CODE=crc_table[data & 0xff] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectIndexAccess ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+            IDENTIFIER NAME=crc_table CODE=<global> crc_table TYPE_FULL_NAME=FAR[256] ORDER=1 ARGUMENT_INDEX=1
+            CALL NAME=<operator>.and CODE=data & 0xff TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.and ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+              IDENTIFIER NAME=data CODE=data TYPE_FULL_NAME=z_word_t ORDER=1 ARGUMENT_INDEX=1
+              LITERAL CODE=0xff TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+    RETURN CODE=return (z_crc_t)data; ORDER=3
+      CALL NAME=<operator>.cast CODE=(z_crc_t)data TYPE_FULL_NAME=z_crc_t METHOD_FULL_NAME=<operator>.cast ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+        TYPE_REF CODE=z_crc_t TYPE_FULL_NAME=z_crc_t ORDER=1 ARGUMENT_INDEX=1
+        IDENTIFIER NAME=data CODE=data TYPE_FULL_NAME=z_word_t ORDER=2 ARGUMENT_INDEX=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=z_crc_t ORDER=3

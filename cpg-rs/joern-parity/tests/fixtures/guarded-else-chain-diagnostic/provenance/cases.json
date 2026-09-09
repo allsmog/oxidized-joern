@@ -1,0 +1,8 @@
+{
+  "guarded_chain": {
+    "main.c": "int choose(int base, int x) {\n int result;\n#if !defined(USE_OLD)\n if (base == 2)\n  result = x;\n else\n#endif\n if (base == 10)\n  result = 10;\n else\n  result = 0;\n return result;\n}\n"
+  },
+  "ordinary_chain": {
+    "main.c": "int choose(int base, int x) {\n int result;\n if (base == 2)\n  result = x;\n else\n if (base == 10)\n  result = 10;\n else\n  result = 0;\n return result;\n}\n"
+  }
+}

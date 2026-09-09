@@ -1218,41 +1218,8 @@ fn collect_type_sites(
             }
             "preproc_if" | "preproc_ifdef" | "preproc_elif" | "preproc_elifdef"
             | "preproc_else" => {
-                let take = if matches!(node.kind(), "preproc_if" | "preproc_elif") {
-                    let definitions = macros
-                        .iter()
-                        .map(|(name, def)| {
-                            (
-                                name.clone(),
-                                if def.params.is_some() {
-                                    name.clone()
-                                } else {
-                                    def.body.clone()
-                                },
-                            )
-                        })
-                        .collect();
-                    preproc_condition(node, bytes, &definitions)
-                } else if let Some(name) = node.child_by_field_name("name") {
-                    let negated = node.child(0).is_some_and(|directive| {
-                        matches!(directive.kind(), "#ifndef" | "#elifndef")
-                    });
-                    macros.contains_key(text(name, bytes)) != negated
-                } else {
-                    true
-                };
-                let alternative = node.child_by_field_name("alternative");
-                if take {
-                    for child in named_children(node) {
-                        if Some(child) != node.child_by_field_name("condition")
-                            && Some(child) != node.child_by_field_name("name")
-                            && Some(child) != alternative
-                        {
-                            visit(child, bytes, types, sites, macros);
-                        }
-                    }
-                } else if let Some(alternative) = alternative {
-                    visit(alternative, bytes, types, sites, macros);
+                for child in kept_preproc_children(node, bytes, macros) {
+                    visit(child, bytes, types, sites, macros);
                 }
             }
             "enumerator" => {
@@ -2684,7 +2651,7 @@ impl Ctx<'_> {
     /// a param or body declaration) and sizeof(T) type names.
     fn collect_phantoms(&mut self, body: Node, b: &[u8]) {
         let mut shadowed: Vec<String> = self.symbols.keys().cloned().collect();
-        collect_decl_names(body, b, &mut shadowed);
+        collect_decl_names(body, b, &self.macros, &mut shadowed);
         let mut seen = Vec::new();
         self.walk_phantoms(body, b, &shadowed, &mut seen);
         // VariableScopeManager prepends pending references. Its first resolved
@@ -2864,7 +2831,12 @@ impl Ctx<'_> {
                 if let Some(expr) = expansion_expr_node(tree.root_node()) {
                     let macros = std::mem::replace(&mut self.macros, Arc::new(HashMap::new()));
                     let mut expansion_shadowed = shadowed.to_vec();
-                    collect_decl_names(expr, source.as_bytes(), &mut expansion_shadowed);
+                    collect_decl_names(
+                        expr,
+                        source.as_bytes(),
+                        &self.macros,
+                        &mut expansion_shadowed,
+                    );
                     let previous_types =
                         self.enter_type_tree(expr, source.as_bytes(), self.typedefs_at(n));
                     self.walk_phantoms(expr, source.as_bytes(), &expansion_shadowed, seen);
@@ -2990,33 +2962,11 @@ impl Ctx<'_> {
                         continue;
                     }
                 }
-                // Preprocessor structure: only KEPT #ifdef branches contribute
-                // (and directive name identifiers never do).
-                "preproc_ifdef" => {
-                    let neg = n.child(0).map(|t| text(t, b) == "#ifndef").unwrap_or(false);
-                    let pname = n
-                        .child_by_field_name("name")
-                        .map(|x| text(x, b).to_string())
-                        .unwrap_or_default();
-                    let take = self.macros.contains_key(&pname) != neg;
-                    let mut cs = named_children(n);
-                    cs.reverse();
-                    for c in cs {
-                        match c.kind() {
-                            "identifier" => {}
-                            "preproc_else" => {
-                                if !take {
-                                    let mut es = named_children(c);
-                                    es.reverse();
-                                    for e in es {
-                                        stack.push(e);
-                                    }
-                                }
-                            }
-                            _ if take => stack.push(c),
-                            _ => {}
-                        }
-                    }
+                // Only the selected branch contributes pending references;
+                // directive condition identifiers are not C references.
+                "preproc_if" | "preproc_ifdef" | "preproc_elif" | "preproc_elifdef"
+                | "preproc_else" => {
+                    stack.extend(kept_preproc_children(n, b, &self.macros).into_iter().rev());
                     continue;
                 }
                 "preproc_def" | "preproc_function_def" | "preproc_include" => continue,
@@ -3131,29 +3081,10 @@ impl Ctx<'_> {
             }
             "if_statement" => self.emit_if(n, b, order, depth),
             "for_statement" => self.emit_for(n, b, order, depth),
-            "preproc_ifdef" => {
-                // #ifdef/#ifndef: CDT keeps or drops the guarded statements;
-                // they splice into the surrounding block when kept.
-                let neg = n.child(0).map(|t| text(t, b) == "#ifndef").unwrap_or(false);
-                let name = n
-                    .child_by_field_name("name")
-                    .map(|x| text(x, b).to_string())
-                    .unwrap_or_default();
-                let defined = self.macros.contains_key(&name);
-                let take = defined != neg;
-                for c in named_children(n) {
-                    match c.kind() {
-                        "identifier" => {}
-                        "preproc_else" => {
-                            if !take {
-                                for e in named_children(c) {
-                                    self.emit_stmt(e, b, order, depth);
-                                }
-                            }
-                        }
-                        _ if take => self.emit_stmt(c, b, order, depth),
-                        _ => {}
-                    }
+            "preproc_if" | "preproc_ifdef" | "preproc_elif" | "preproc_elifdef"
+            | "preproc_else" => {
+                for child in kept_preproc_children(n, b, &self.macros) {
+                    self.emit_stmt(child, b, order, depth);
                 }
             }
             "labeled_statement" => {
@@ -4979,8 +4910,14 @@ fn body_macro_context<'tree>(
         typedef_states: &mut HashMap<usize, TypeNameState>,
     ) {
         match node.kind() {
-            "declaration" | "type_definition" | "struct_specifier" | "union_specifier"
-            | "enum_specifier" => {
+            "declaration"
+            | "type_definition"
+            | "struct_specifier"
+            | "union_specifier"
+            | "enum_specifier"
+            | "function_definition" => {
+                // The declaration's header still expands in the surrounding
+                // context. It does not make an inactive function body active.
                 states.insert(node.id(), macros.clone());
                 typedef_states.insert(node.id(), typedefs.clone());
             }
@@ -5189,11 +5126,7 @@ fn body_macro_context<'tree>(
                 } else if let Some((name, definition)) = source_macro_definition(node, bytes, file)
                 {
                     Arc::make_mut(macros).insert(name, definition);
-                } else if node.kind() == "preproc_call"
-                    && node
-                        .child_by_field_name("directive")
-                        .is_some_and(|directive| text(directive, bytes).trim() == "#undef")
-                {
+                } else if is_undef_directive(node, bytes) {
                     if let Some(name) = node.child_by_field_name("argument") {
                         Arc::make_mut(macros).remove(text(name, bytes).trim());
                     }
@@ -5388,17 +5321,27 @@ fn source_macro_definition(node: Node, bytes: &[u8], file: &str) -> Option<(Stri
     ))
 }
 
+/// The directive token permits whitespace between `#` and `undef`.
+/// Keep recognition shared by the include walk and local source-effect tables.
+fn is_undef_directive(node: Node, bytes: &[u8]) -> bool {
+    node.kind() == "preproc_call"
+        && node
+            .child_by_field_name("directive")
+            .is_some_and(|directive| {
+                text(directive, bytes)
+                    .trim()
+                    .strip_prefix('#')
+                    .is_some_and(|name| name.trim() == "undef")
+            })
+}
+
 fn source_macro_effect(node: Node, b: &[u8]) -> Option<(String, Option<String>)> {
     if let Some((name, definition)) = source_macro_definition(node, b, "") {
         definition
             .params
             .is_none()
             .then_some((name, Some(definition.body)))
-    } else if node.kind() == "preproc_call"
-        && node
-            .child_by_field_name("directive")
-            .is_some_and(|directive| text(directive, b).trim() == "#undef")
-    {
+    } else if is_undef_directive(node, b) {
         let name = node.child_by_field_name("argument")?;
         Some((text(name, b).trim().to_string(), None))
     } else {
@@ -7546,7 +7489,16 @@ fn expansion_type(
     }
 }
 
-fn collect_decl_names(n: Node, b: &[u8], out: &mut Vec<String>) {
+fn collect_decl_names(n: Node, b: &[u8], macros: &MacroState, out: &mut Vec<String>) {
+    if matches!(
+        n.kind(),
+        "preproc_if" | "preproc_ifdef" | "preproc_elif" | "preproc_elifdef" | "preproc_else"
+    ) {
+        for child in kept_preproc_children(n, b, macros) {
+            collect_decl_names(child, b, macros, out);
+        }
+        return;
+    }
     if n.kind() == "declaration" {
         for d in named_children(n) {
             let name = innermost_id(d, b);
@@ -7556,7 +7508,7 @@ fn collect_decl_names(n: Node, b: &[u8], out: &mut Vec<String>) {
         }
     }
     for c in named_children(n) {
-        collect_decl_names(c, b, out);
+        collect_decl_names(c, b, macros, out);
     }
 }
 
@@ -7660,10 +7612,7 @@ fn active_translation_unit_items<'tree>(root: Node<'tree>, b: &[u8]) -> Vec<Node
                 items.push(node);
             }
             "preproc_call" => {
-                if node
-                    .child_by_field_name("directive")
-                    .is_some_and(|directive| text(directive, b).trim() == "#undef")
-                {
+                if is_undef_directive(node, b) {
                     if let Some(name) = node.child_by_field_name("argument") {
                         definitions.remove(text(name, b).trim());
                     }
@@ -7802,6 +7751,52 @@ fn preproc_payload(line: &str) -> &str {
         .trim_start();
     line.trim_start_matches(|c: char| c.is_ascii_alphabetic())
         .trim_start()
+}
+
+/// Statements and name discovery share the same selected body branch. The
+/// method's immutable macro snapshot already includes preceding source/header
+/// definitions; body-local directives are a separate, unsupported state update.
+fn kept_preproc_children<'tree>(
+    node: Node<'tree>,
+    bytes: &[u8],
+    macros: &MacroState,
+) -> Vec<Node<'tree>> {
+    let take = if matches!(node.kind(), "preproc_if" | "preproc_elif") {
+        let definitions = macros
+            .iter()
+            .map(|(name, definition)| {
+                (
+                    name.clone(),
+                    if definition.params.is_some() {
+                        name.clone()
+                    } else {
+                        definition.body.clone()
+                    },
+                )
+            })
+            .collect();
+        preproc_condition(node, bytes, &definitions)
+    } else if let Some(name) = node.child_by_field_name("name") {
+        let negated = node
+            .child(0)
+            .is_some_and(|directive| matches!(directive.kind(), "#ifndef" | "#elifndef"));
+        macros.contains_key(text(name, bytes)) != negated
+    } else {
+        true
+    };
+    let alternative = node.child_by_field_name("alternative");
+    if take {
+        let condition = node.child_by_field_name("condition");
+        let name = node.child_by_field_name("name");
+        named_children(node)
+            .into_iter()
+            .filter(|child| {
+                Some(*child) != condition && Some(*child) != name && Some(*child) != alternative
+            })
+            .collect()
+    } else {
+        alternative.into_iter().collect()
+    }
 }
 
 /// Expand object macro replacement tokens before parsing the condition. In
@@ -8150,6 +8145,27 @@ fn extract_code(rest: &str) -> String {
     tail[..i].to_string()
 }
 
+/// FULL_NAME may contain spaces in a filename or a macro return signature.
+/// Stop at a following property emitted by `Ctx::line`, rather than a word.
+fn extract_full_name(rest: &str) -> String {
+    // CODE precedes FULL_NAME and can itself contain property-like text.
+    let Some((_, tail)) = rest.rsplit_once(" FULL_NAME=") else {
+        return String::new();
+    };
+    let end = [
+        " METHOD_FULL_NAME=",
+        " SIGNATURE=",
+        " ORDER=",
+        " ARGUMENT_INDEX=",
+        " DISPATCH_TYPE=",
+    ]
+    .iter()
+    .filter_map(|key| tail.find(key))
+    .min()
+    .unwrap_or(tail.len());
+    tail[..end].to_string()
+}
+
 fn parse_dump_block(text: &str) -> Vec<DNode> {
     let mut arena: Vec<DNode> = Vec::new();
     let mut stack: Vec<(usize, usize)> = Vec::new(); // (depth, arena id)
@@ -8198,7 +8214,7 @@ fn parse_dump_block(text: &str) -> Vec<DNode> {
             code1: grab(" CODE="),
             fullcode: extract_code(rest),
             has_code: rest.contains(" CODE="),
-            full: grab(" FULL_NAME="),
+            full: extract_full_name(rest),
             has_arg: rest.contains(" ARGUMENT_INDEX="),
             arg_index,
             order: grab(" ORDER=").parse().unwrap_or(0),
@@ -9758,6 +9774,49 @@ mod preproc_tests {
             "A"
         );
         assert!(budget > 0);
+    }
+}
+
+#[cfg(test)]
+mod dump_property_tests {
+    use super::parse_dump_block;
+
+    #[test]
+    fn full_names_end_at_properties_or_end_of_line() {
+        for (line, expected) in [
+            (
+                "METHOD NAME=VALUE CODE=#define VALUE 2U FULL_NAME=a b.h:VALUE:unsigned int(0) SIGNATURE=unsigned int(0) ORDER=1",
+                "a b.h:VALUE:unsigned int(0)",
+            ),
+            (
+                "TYPE_DECL NAME=<global> FULL_NAME=a b.h:<global> ORDER=1",
+                "a b.h:<global>",
+            ),
+            (
+                "METHOD NAME=VALUE FULL_NAME=a X=b.h:VALUE:unsigned longint(1)",
+                "a X=b.h:VALUE:unsigned longint(1)",
+            ),
+            ("METHOD NAME=ordinary FULL_NAME=ordinary ORDER=1", "ordinary"),
+            (
+                "METHOD CODE=int invoke(int x){ /* FULL_NAME=invoke */ return x; } FULL_NAME=invoke SIGNATURE=int(int) ORDER=1",
+                "invoke",
+            ),
+            ("METHOD FULL_NAME= ORDER=1", ""),
+            ("CALL METHOD_FULL_NAME=other", ""),
+            ("BLOCK ORDER=1", ""),
+        ] {
+            assert_eq!(parse_dump_block(line)[0].full, expected, "{line}");
+        }
+        for property in [
+            "METHOD_FULL_NAME=next",
+            "SIGNATURE=unsigned int(1)",
+            "ORDER=1",
+            "ARGUMENT_INDEX=2",
+            "DISPATCH_TYPE=STATIC_DISPATCH",
+        ] {
+            let line = format!("METHOD FULL_NAME=é space x=value {property}");
+            assert_eq!(parse_dump_block(&line)[0].full, "é space x=value");
+        }
     }
 }
 

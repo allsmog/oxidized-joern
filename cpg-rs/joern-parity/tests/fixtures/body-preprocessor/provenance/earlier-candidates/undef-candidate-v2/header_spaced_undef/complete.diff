@@ -1,0 +1,122 @@
+--- joern
++++ undef-candidate-v2
+@@ -10,6 +10,8 @@
+   METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+   METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+   BLOCK CODE={\n#if 1\n return x;\n#endif\n} TYPE_FULL_NAME=void ORDER=2
++    RETURN CODE=return x; ORDER=1
++      IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+ 
+ METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1
+@@ -17,6 +19,8 @@
+     METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+     METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+     BLOCK CODE={\n#if 1\n return x;\n#endif\n} TYPE_FULL_NAME=void ORDER=2
++      RETURN CODE=return x; ORDER=1
++        IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1
+     METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+   METHOD NAME=visible CODE=int visible(int x) { return x; } FULL_NAME=visible SIGNATURE=int(int) ORDER=1
+     METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+@@ -60,14 +64,17 @@
+ NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+ NODES|TYPE NAME=visible FULL_NAME=visible TYPE_DECL_FULL_NAME=visible
+ NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
++EDGES|ARGUMENT hidden#4 -> hidden#5
+ EDGES|ARGUMENT visible#4 -> visible#5
+ EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+ EDGES|CFG api.h:<global>#0 -> api.h:<global>#2
+-EDGES|CFG hidden#0 -> hidden#4
+-EDGES|CFG main.c:<global>#0 -> main.c:<global>#14
+-EDGES|CFG main.c:<global>#14 -> main.c:<global>#15
+-EDGES|CFG main.c:<global>#15 -> main.c:<global>#16
+-EDGES|CFG main.c:<global>#6 -> visible#5
++EDGES|CFG hidden#0 -> hidden#5
++EDGES|CFG hidden#4 -> hidden#6
++EDGES|CFG hidden#5 -> hidden#4
++EDGES|CFG main.c:<global>#0 -> main.c:<global>#16
++EDGES|CFG main.c:<global>#16 -> main.c:<global>#17
++EDGES|CFG main.c:<global>#17 -> main.c:<global>#18
++EDGES|CFG main.c:<global>#8 -> visible#5
+ EDGES|CFG visible#4 -> visible#6
+ EDGES|CFG visible#5 -> visible#4
+ EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+@@ -83,14 +90,16 @@
+ EDGES|CONTAINS F:main.c -> D:main.c:<global>
+ EDGES|CONTAINS api.h:<global>#0 -> api.h:<global>#1
+ EDGES|CONTAINS hidden#0 -> hidden#3
++EDGES|CONTAINS hidden#0 -> hidden#4
++EDGES|CONTAINS hidden#0 -> hidden#5
+ EDGES|CONTAINS main.c:<global>#0 -> hidden#0
+-EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#13
+-EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#14
+ EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#15
+-EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#6
+-EDGES|CONTAINS main.c:<global>#6 -> visible#3
+-EDGES|CONTAINS main.c:<global>#6 -> visible#4
+-EDGES|CONTAINS main.c:<global>#6 -> visible#5
++EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#16
++EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#17
++EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#8
++EDGES|CONTAINS main.c:<global>#8 -> visible#3
++EDGES|CONTAINS main.c:<global>#8 -> visible#4
++EDGES|CONTAINS main.c:<global>#8 -> visible#5
+ EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+ EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+ EDGES|EVAL_TYPE api.h:<global>#1 -> T:ANY
+@@ -98,11 +107,12 @@
+ EDGES|EVAL_TYPE hidden#1 -> T:int
+ EDGES|EVAL_TYPE hidden#2 -> T:int
+ EDGES|EVAL_TYPE hidden#3 -> T:void
+-EDGES|EVAL_TYPE hidden#4 -> T:int
+-EDGES|EVAL_TYPE main.c:<global>#13 -> T:ANY
+-EDGES|EVAL_TYPE main.c:<global>#14 -> T:hidden
+-EDGES|EVAL_TYPE main.c:<global>#15 -> T:visible
+-EDGES|EVAL_TYPE main.c:<global>#16 -> T:ANY
++EDGES|EVAL_TYPE hidden#5 -> T:int
++EDGES|EVAL_TYPE hidden#6 -> T:int
++EDGES|EVAL_TYPE main.c:<global>#15 -> T:ANY
++EDGES|EVAL_TYPE main.c:<global>#16 -> T:hidden
++EDGES|EVAL_TYPE main.c:<global>#17 -> T:visible
++EDGES|EVAL_TYPE main.c:<global>#18 -> T:ANY
+ EDGES|EVAL_TYPE visible#1 -> T:int
+ EDGES|EVAL_TYPE visible#2 -> T:int
+ EDGES|EVAL_TYPE visible#3 -> T:void
+@@ -119,8 +129,9 @@
+ EDGES|REF T:int -> D:int
+ EDGES|REF T:visible -> D:visible
+ EDGES|REF T:void -> D:void
+-EDGES|REF main.c:<global>#14 -> hidden#0
+-EDGES|REF main.c:<global>#15 -> main.c:<global>#6
++EDGES|REF hidden#5 -> hidden#1
++EDGES|REF main.c:<global>#16 -> hidden#0
++EDGES|REF main.c:<global>#17 -> main.c:<global>#8
+ EDGES|REF visible#5 -> visible#1
+ EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+ EDGES|SOURCE_FILE D:ANY -> F:<includes>
+@@ -137,15 +148,19 @@
+ EDGES|SOURCE_FILE api.h:<global>#0 -> F:api.h
+ EDGES|SOURCE_FILE hidden#0 -> F:main.c
+ EDGES|SOURCE_FILE main.c:<global>#0 -> F:main.c
+-EDGES|SOURCE_FILE main.c:<global>#6 -> F:main.c
++EDGES|SOURCE_FILE main.c:<global>#8 -> F:main.c
++FLOWS|REACHING_DEF[<RET>] hidden#4 -> hidden#6
+ FLOWS|REACHING_DEF[<RET>] visible#4 -> visible#6
+ FLOWS|REACHING_DEF[] hidden#0 -> hidden#1
+-FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#14
+-FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#15
+-FLOWS|REACHING_DEF[] main.c:<global>#6 -> visible#1
+-FLOWS|REACHING_DEF[] main.c:<global>#6 -> visible#5
++FLOWS|REACHING_DEF[] hidden#0 -> hidden#5
++FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#16
++FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#17
++FLOWS|REACHING_DEF[] main.c:<global>#8 -> visible#1
++FLOWS|REACHING_DEF[] main.c:<global>#8 -> visible#5
+ FLOWS|REACHING_DEF[x] hidden#1 -> hidden#2
+-FLOWS|REACHING_DEF[x] hidden#1 -> hidden#4
++FLOWS|REACHING_DEF[x] hidden#1 -> hidden#5
++FLOWS|REACHING_DEF[x] hidden#1 -> hidden#6
++FLOWS|REACHING_DEF[x] hidden#5 -> hidden#4
+ FLOWS|REACHING_DEF[x] visible#1 -> visible#2
+ FLOWS|REACHING_DEF[x] visible#1 -> visible#5
+ FLOWS|REACHING_DEF[x] visible#1 -> visible#6

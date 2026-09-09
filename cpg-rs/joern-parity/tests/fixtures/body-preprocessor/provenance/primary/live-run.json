@@ -1,0 +1,50 @@
+{
+  "command": [
+    "/Users/shayaunnejad/vibe-code/joern-oxidized/.local/astra-sprint/oracle/runtime/joern-cli/joern",
+    "--script",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/body-preproc-next/oracle.sc",
+    "--param",
+    "inputPath=/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/body-preproc-next/input"
+  ],
+  "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/body-preproc-next/oracle-workspace",
+  "exitCode": 0,
+  "seconds": 12.271138791998965,
+  "inputHashes": {
+    "plain_call_control": {
+      "main.c": "eac74b391f5eab7cfa411720d6a3f6522b115ec5806b0c64c17dc959f2eeddb5"
+    },
+    "if_true": {
+      "main.c": "af784933662453a75dd2e732436217ac3162ce4f19d9ee33105e5ab1bcaed4f9"
+    },
+    "if_else": {
+      "main.c": "9fc848d24c97a5ccd496c2294342153c7345011cb53e0ece1961f4e9876415a6"
+    },
+    "if_elif": {
+      "main.c": "07781c94f401da35277c33f0ced73a38e911a0125dae699bb34ffd82261cdec4"
+    },
+    "snprintf_defined": {
+      "main.c": "f8998c5d56cc86c8df76bef9d5031db968790c0322e96c1a7359341bff622338"
+    },
+    "ifndef_control": {
+      "main.c": "cafdc75e151334d5218d34ce4fe85b2ccc849b276fc49afcf16192da06dd2010"
+    },
+    "inactive_phantoms": {
+      "main.c": "646bc353b45ebd8a04297df6038efaff132695b1d17a0b8ca1f26b5d1fc53c2f"
+    },
+    "definition_positions": {
+      "main.c": "8bb6c0b3916762e657623faf2ce4cea40fced3e366c82d0bbebb66498238e700"
+    },
+    "local_definition": {
+      "main.c": "5e4b9f11c86743b408483ceb47c5e1dc078c6b493018ec57095f58b6cbd7dd78"
+    },
+    "inactive_call_only": {
+      "main.c": "d187eb9745e9286cc53ee74259fde170dcdabe88c07b93dabab363374166b233"
+    }
+  },
+  "scriptSha256": "56431f14868678e64f9eb41026b44f1d3d7738404d28d2db62711b520c98c742",
+  "oracleCopiedUnchangedFrom": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/joern-parity/tests/fixtures/inactive-declaration-context/provenance/primary/oracle.sc",
+  "joernVersion": "4.0.555",
+  "archiveSha256": "12989883d6b5aeacc97b2dc0ecc4e2951bf50e48cb244f8c8f333d11a8be0c7e",
+  "rawStdoutSha256": "7e89aa04b929d73de83b6fda644f8370a8595052d5022c5316adab7b81fffecd",
+  "rawStderrSha256": "547f686b0b8ffbba1ea0f45d48e8cbdc267874ac20aafb23cb6e58468b960279"
+}

@@ -1,0 +1,14 @@
+{
+  "inactive_macro_prefix": {
+    "main.c": "#define LOCAL static\ntypedef int T;\n#if 0\nLOCAL T hidden(T x) { return x; }\n#endif\n"
+  },
+  "inactive_macro_return": {
+    "main.c": "#define RET unsigned long\n#if 0\nRET hidden(int x) { return x; }\n#endif\n"
+  },
+  "inactive_header_source_order": {
+    "main.c": "#define RET int\n#if 0\nRET early(int x) { return x; }\n#endif\n#undef RET\n#define RET long\n#if 0\nRET late(int x) { return x; }\n#endif\n"
+  },
+  "inactive_header_directives": {
+    "main.c": "#define RET int\n#if 0\n#undef RET\n#define RET long\nRET hidden(int x) { return x; }\n#endif\n"
+  }
+}

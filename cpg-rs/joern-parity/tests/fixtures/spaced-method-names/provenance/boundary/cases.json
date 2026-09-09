@@ -1,0 +1,40 @@
+{
+  "prefix_collision": {
+    "a b.h": "#define VALUE(x) ((x)+1)\n",
+    "main.c": "#include \"a b.h\"\nint a(int x){return x;}\nint invoke(int x){return VALUE(x);}\n"
+  },
+  "order_marker": {
+    "a ORDER=7.h": "#define VALUE(x) ((x)+1)\n",
+    "main.c": "#include \"a ORDER=7.h\"\nint a(int x){return x;}\nint invoke(int x){return VALUE(x);}\n"
+  },
+  "signature_marker": {
+    "a SIGNATURE=int.h": "#define VALUE(x) ((x)+1)\n",
+    "main.c": "#include \"a SIGNATURE=int.h\"\nint a(int x){return x;}\nint invoke(int x){return VALUE(x);}\n"
+  },
+  "fullname_marker": {
+    "a FULL_NAME=other.h": "#define VALUE(x) ((x)+1)\n",
+    "main.c": "#include \"a FULL_NAME=other.h\"\nint a(int x){return x;}\nint invoke(int x){return VALUE(x);}\n"
+  },
+  "code_marker": {
+    "main.c": "int other(int x){return x;}\nint invoke(int x){ /* FULL_NAME=other */ return x; }\n"
+  },
+  "quoted_code_marker": {
+    "main.c": "const char *other(void){return \"x\";}\nconst char *invoke(void){return \" FULL_NAME=other SIGNATURE=void ORDER=1\";}\n"
+  },
+  "new_prefix_collision": {
+    "a b.h": "#define VALUE(x) ((x)+1)\n",
+    "a b.h:VALUE:int(1) ORDER=decoy.h": "#define OTHER(x) ((x)+2)\n",
+    "main.c": "#include \"a b.h\"\n#include \"a b.h:VALUE:int(1) ORDER=decoy.h\"\nint invoke(int x){return VALUE(x)+OTHER(x);}\n"
+  },
+  "marker_in_macro_body": {
+    "main.c": "#define VALUE(x) ((x)+1) /* FULL_NAME=other */\nint other(int x){return x;}\nint invoke(int x){return VALUE(x);}\n"
+  },
+  "lowercase_marker_control": {
+    "a value=name.h": "#define VALUE(x) ((x)+1)\n",
+    "main.c": "#include \"a value=name.h\"\nint invoke(int x){return VALUE(x);}\n"
+  },
+  "underscore_marker": {
+    "a _=name.h": "#define VALUE(x) ((x)+1)\n",
+    "main.c": "#include \"a _=name.h\"\nint a(int x){return x;}\nint invoke(int x){return VALUE(x);}\n"
+  }
+}

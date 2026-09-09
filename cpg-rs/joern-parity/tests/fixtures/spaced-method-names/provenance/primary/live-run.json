@@ -1,0 +1,95 @@
+{
+  "command": [
+    "/Users/shayaunnejad/vibe-code/joern-oxidized/.local/astra-sprint/oracle/runtime/joern-cli/joern",
+    "--script",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-inactive-declarations/.local/spaced-method-names/oracle.sc",
+    "--param",
+    "inputPath=/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-inactive-declarations/.local/spaced-method-names/input"
+  ],
+  "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-inactive-declarations/.local/spaced-method-names/oracle-workspace",
+  "exitCode": 0,
+  "wallSeconds": 17.258957541998825,
+  "inputHashes": {
+    "ordinary_unsigned_returns": {
+      "main.c": "fd759ee3542fcd680996ff818ddfebd2df09ab73961161b9f30b75b1e3875f0c"
+    },
+    "object_unsigned_lower": {
+      "main.c": "2424cc752fbe5f4390cbee464f266c71f1d07c0cbc235aa335bd10a943830f54"
+    },
+    "function_unsigned_arg": {
+      "main.c": "82580df5b12b60be7f363ed0aa32df8be968659fc103b08be15b7f3a760e39b8"
+    },
+    "object_unsigned_long_lower": {
+      "main.c": "f3575d2e2164dc50ae906a9720d0c5b502e3c1206696b9c7470eba552e1610fd"
+    },
+    "function_unsigned_long_long_mixed": {
+      "main.c": "fc67a9f98f562d26459cad21b9e1b9302e3e657c1a562b439e13e484f7a5371d"
+    },
+    "object_long_double_control": {
+      "main.c": "3fa1a916a566b22b696fde13a622ebd395e3534034b09fcdd3dc020ef7abe165"
+    },
+    "negative_unsigned_control": {
+      "main.c": "81370a410409fc4fb309a843ec12cf74eaada9d2a38d60650ac26266db967d5a"
+    },
+    "spaced_header": {
+      "a b.h": "aa1feff6d1c86f6da1b3dfc77ee731a0482cb7926cea8a67a85ce2fbb3ad32a6",
+      "main.c": "ea66bc081cd73b4b2fef10dcaa184a7621ec41ba733f49e767bbb2995a366e53"
+    }
+  },
+  "scriptSha256": "56431f14868678e64f9eb41026b44f1d3d7738404d28d2db62711b520c98c742",
+  "sharedOracleSha256": "bd2e18fab06ecd7897d796f5b31dac6669dc45ecf70c54fb1d5cc0fe29f3c1ab",
+  "joernVersion": "4.0.555",
+  "officialArchiveSha256": "12989883d6b5aeacc97b2dc0ecc4e2951bf50e48cb244f8c8f333d11a8be0c7e",
+  "projects": [
+    {
+      "case": "function_unsigned_arg",
+      "canonicalLinesIncludingSeparators": 135,
+      "nonemptySelectedRecords": 131,
+      "expectedSha256": "5fe7356b4fa0c4595bdf80f7bf97e472b5a03d8675782c15e13444d8177d6ca3"
+    },
+    {
+      "case": "function_unsigned_long_long_mixed",
+      "canonicalLinesIncludingSeparators": 127,
+      "nonemptySelectedRecords": 123,
+      "expectedSha256": "c15e5eac60abb17979b4ea0defca3c3568f720b284f052a03d6f8488cb75156d"
+    },
+    {
+      "case": "negative_unsigned_control",
+      "canonicalLinesIncludingSeparators": 152,
+      "nonemptySelectedRecords": 147,
+      "expectedSha256": "7d4fbf08a90f964d977aa6304b86f1c014ed7d768c2446902006ede4ebfd5258"
+    },
+    {
+      "case": "object_long_double_control",
+      "canonicalLinesIncludingSeparators": 122,
+      "nonemptySelectedRecords": 118,
+      "expectedSha256": "42a2fd9e9f190cd8b004340a9843f944ea9f35534b7a2b0cac3ed831d2e3d154"
+    },
+    {
+      "case": "object_unsigned_long_lower",
+      "canonicalLinesIncludingSeparators": 127,
+      "nonemptySelectedRecords": 123,
+      "expectedSha256": "6268abaeec34f205463ad62ace1378a13ccb033a5ab1965d7647af6434e6dbee"
+    },
+    {
+      "case": "object_unsigned_lower",
+      "canonicalLinesIncludingSeparators": 122,
+      "nonemptySelectedRecords": 118,
+      "expectedSha256": "9711fe0dc60be482a61cf3a5fd6917369310ff0733b2622b8e95e3abcbb25d22"
+    },
+    {
+      "case": "ordinary_unsigned_returns",
+      "canonicalLinesIncludingSeparators": 216,
+      "nonemptySelectedRecords": 211,
+      "expectedSha256": "d7868df63ffba3b76a8cbbe7e6eb5bcf109749318f53cdd0ab743f9aa9fd8edf"
+    },
+    {
+      "case": "spaced_header",
+      "canonicalLinesIncludingSeparators": 139,
+      "nonemptySelectedRecords": 134,
+      "expectedSha256": "6ef1690b1cd9adaaa9eaf2327645d8656531e7eb5db785e4fcfc56f1a3b2d1f5"
+    }
+  ],
+  "rawStdoutSha256": "6cc3d121ef14713d5dd80b52ffa7496eee3f64cc87e8af5f2222e2137fe635f3",
+  "rawStderrSha256": "7653d16da3a1c43a9ac6204ed454a77bfc8c442074312079ce3f30408e3b17fd"
+}

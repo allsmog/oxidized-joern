@@ -1,0 +1,88 @@
+--- joern
++++ before
+@@ -6,8 +6,7 @@
+   METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+   METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+   BLOCK CODE={\n#if ENABLE\n#ifndef DROP\n return x;\n#else\n return discarded;\n#endif\n#else\n return other;\n#endif\n} TYPE_FULL_NAME=void ORDER=2
+-    RETURN CODE=return x; ORDER=1
+-      IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1
++    LOCAL NAME=other CODE=<unknown> other TYPE_FULL_NAME=ANY ORDER=0
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+ 
+ METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1
+@@ -15,8 +14,7 @@
+     METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+     METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+     BLOCK CODE={\n#if ENABLE\n#ifndef DROP\n return x;\n#else\n return discarded;\n#endif\n#else\n return other;\n#endif\n} TYPE_FULL_NAME=void ORDER=2
+-      RETURN CODE=return x; ORDER=1
+-        IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1
++      LOCAL NAME=other CODE=<unknown> other TYPE_FULL_NAME=ANY ORDER=0
+     METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+   BLOCK TYPE_FULL_NAME=ANY ORDER=1
+     METHOD_REF CODE=f TYPE_FULL_NAME=f METHOD_FULL_NAME=f ORDER=1
+@@ -39,13 +37,10 @@
+ NODES|TYPE NAME=f FULL_NAME=f TYPE_DECL_FULL_NAME=f
+ NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+ NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+-EDGES|ARGUMENT f#4 -> f#5
+ EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+ EDGES|CFG f#0 -> f#5
+-EDGES|CFG f#4 -> f#6
+-EDGES|CFG f#5 -> f#4
+-EDGES|CFG main.c:<global>#0 -> main.c:<global>#9
+-EDGES|CFG main.c:<global>#9 -> main.c:<global>#10
++EDGES|CFG main.c:<global>#0 -> main.c:<global>#8
++EDGES|CFG main.c:<global>#8 -> main.c:<global>#9
+ EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+ EDGES|CONTAINS D:main.c:<global> -> D:f
+ EDGES|CONTAINS D:main.c:<global> -> main.c:<global>#0
+@@ -55,21 +50,19 @@
+ EDGES|CONTAINS F:<includes> -> D:void
+ EDGES|CONTAINS F:main.c -> D:main.c:<global>
+ EDGES|CONTAINS f#0 -> f#3
+-EDGES|CONTAINS f#0 -> f#4
+-EDGES|CONTAINS f#0 -> f#5
+ EDGES|CONTAINS main.c:<global>#0 -> f#0
++EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#7
+ EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#8
+-EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#9
+ EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+ EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+ EDGES|EVAL_TYPE f#1 -> T:int
+ EDGES|EVAL_TYPE f#2 -> T:int
+ EDGES|EVAL_TYPE f#3 -> T:void
++EDGES|EVAL_TYPE f#4 -> T:ANY
+ EDGES|EVAL_TYPE f#5 -> T:int
+-EDGES|EVAL_TYPE f#6 -> T:int
+-EDGES|EVAL_TYPE main.c:<global>#10 -> T:ANY
+-EDGES|EVAL_TYPE main.c:<global>#8 -> T:ANY
+-EDGES|EVAL_TYPE main.c:<global>#9 -> T:f
++EDGES|EVAL_TYPE main.c:<global>#7 -> T:ANY
++EDGES|EVAL_TYPE main.c:<global>#8 -> T:f
++EDGES|EVAL_TYPE main.c:<global>#9 -> T:ANY
+ EDGES|PARAMETER_LINK f#1 -> f#2
+ EDGES|REF NB:<global> -> NS:<global>
+ EDGES|REF NB:<includes>:<global> -> NS:<global>
+@@ -78,8 +71,7 @@
+ EDGES|REF T:f -> D:f
+ EDGES|REF T:int -> D:int
+ EDGES|REF T:void -> D:void
+-EDGES|REF f#5 -> f#1
+-EDGES|REF main.c:<global>#9 -> f#0
++EDGES|REF main.c:<global>#8 -> f#0
+ EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+ EDGES|SOURCE_FILE D:ANY -> F:<includes>
+ EDGES|SOURCE_FILE D:f -> F:main.c
+@@ -91,11 +83,7 @@
+ EDGES|SOURCE_FILE NB:main.c:<global> -> F:main.c
+ EDGES|SOURCE_FILE f#0 -> F:main.c
+ EDGES|SOURCE_FILE main.c:<global>#0 -> F:main.c
+-FLOWS|REACHING_DEF[<RET>] f#4 -> f#6
+ FLOWS|REACHING_DEF[] f#0 -> f#1
+-FLOWS|REACHING_DEF[] f#0 -> f#5
+-FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#9
++FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#8
+ FLOWS|REACHING_DEF[x] f#1 -> f#2
+ FLOWS|REACHING_DEF[x] f#1 -> f#5
+-FLOWS|REACHING_DEF[x] f#1 -> f#6
+-FLOWS|REACHING_DEF[x] f#5 -> f#4

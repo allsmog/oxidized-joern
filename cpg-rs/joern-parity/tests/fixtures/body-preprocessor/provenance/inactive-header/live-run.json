@@ -1,0 +1,31 @@
+{
+  "command": [
+    "/Users/shayaunnejad/vibe-code/joern-oxidized/.local/astra-sprint/oracle/runtime/joern-cli/joern",
+    "--script",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/.local/body-preprocessor/inactive-header/oracle.sc",
+    "--param",
+    "inputPath=/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/.local/body-preprocessor/inactive-header/input"
+  ],
+  "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/.local/body-preprocessor/inactive-header/oracle-workspace",
+  "exitCode": 0,
+  "seconds": 7.261926457998925,
+  "inputHashes": {
+    "inactive_macro_prefix": {
+      "main.c": "912ee86625e132c2d0192e011fb8dd5ff6fd4e6d32ddc3ba5c994793371f5a80"
+    },
+    "inactive_macro_return": {
+      "main.c": "0c184c5c719ca715bc2b57710c8c8d97650af96960a1934cba4638e467cb8e25"
+    },
+    "inactive_header_source_order": {
+      "main.c": "18c471e241733aab7ec39e3f4d72f55dcbadd5c37efb5e3d0cbd6410231d064a"
+    },
+    "inactive_header_directives": {
+      "main.c": "fddfae80f877a0801b1db4fdfc1df1b3390ad28c08d6e42974494c0518a7af49"
+    }
+  },
+  "scriptSha256": "56431f14868678e64f9eb41026b44f1d3d7738404d28d2db62711b520c98c742",
+  "joernVersion": "4.0.555",
+  "officialArchiveSha256": "12989883d6b5aeacc97b2dc0ecc4e2951bf50e48cb244f8c8f333d11a8be0c7e",
+  "rawStdoutSha256": "eb6f1f8505f5ef216d4c67d727057fd87fa7cf9c16f247a1b52ace33d2666374",
+  "rawStderrSha256": "315b3b13267de7fb885521cbc0fabb92dda8bda41d2ddc843ca1b8822530a895"
+}

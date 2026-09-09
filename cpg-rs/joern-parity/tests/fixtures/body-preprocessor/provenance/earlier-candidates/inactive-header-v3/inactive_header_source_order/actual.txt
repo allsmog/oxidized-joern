@@ -1,0 +1,125 @@
+METHOD NAME=<global> CODE=<global> FULL_NAME=<includes>:<global> ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=early CODE=RET early(int x) { return x; } FULL_NAME=early SIGNATURE=RET(int) ORDER=1
+  METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+  BLOCK CODE={ return x; } TYPE_FULL_NAME=void ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=RET ORDER=3
+
+METHOD NAME=late CODE=RET late(int x) { return x; } FULL_NAME=late SIGNATURE=RET(int) ORDER=1
+  METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+  BLOCK CODE={ return x; } TYPE_FULL_NAME=void ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=RET ORDER=3
+
+METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1
+  METHOD NAME=early CODE=RET early(int x) { return x; } FULL_NAME=early SIGNATURE=RET(int) ORDER=1
+    METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+    METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+    BLOCK CODE={ return x; } TYPE_FULL_NAME=void ORDER=2
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=RET ORDER=3
+  METHOD NAME=late CODE=RET late(int x) { return x; } FULL_NAME=late SIGNATURE=RET(int) ORDER=1
+    METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+    METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+    BLOCK CODE={ return x; } TYPE_FULL_NAME=void ORDER=2
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=RET ORDER=3
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+    METHOD_REF CODE=early TYPE_FULL_NAME=early METHOD_FULL_NAME=early ORDER=1
+    METHOD_REF CODE=late TYPE_FULL_NAME=late METHOD_FULL_NAME=late ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+NODES|META_DATA LANGUAGE=NEWC
+NODES|FILE NAME=<includes> ORDER=1
+NODES|FILE NAME=<unknown> ORDER=0
+NODES|FILE NAME=main.c ORDER=0
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<global> FILENAME=<unknown> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<includes>:<global> FILENAME=<includes> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|NAMESPACE NAME=<global>
+NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=RET FULL_NAME=RET CODE=RET IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=early FULL_NAME=early CODE=early AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=late FULL_NAME=late CODE=late AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=<global> FULL_NAME=main.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+NODES|TYPE NAME=RET FULL_NAME=RET TYPE_DECL_FULL_NAME=RET
+NODES|TYPE NAME=early FULL_NAME=early TYPE_DECL_FULL_NAME=early
+NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+NODES|TYPE NAME=late FULL_NAME=late TYPE_DECL_FULL_NAME=late
+NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+EDGES|CFG early#0 -> early#4
+EDGES|CFG late#0 -> late#4
+EDGES|CFG main.c:<global>#0 -> main.c:<global>#12
+EDGES|CFG main.c:<global>#12 -> main.c:<global>#13
+EDGES|CFG main.c:<global>#13 -> main.c:<global>#14
+EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+EDGES|CONTAINS D:main.c:<global> -> D:early
+EDGES|CONTAINS D:main.c:<global> -> D:late
+EDGES|CONTAINS D:main.c:<global> -> main.c:<global>#0
+EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+EDGES|CONTAINS F:<includes> -> D:ANY
+EDGES|CONTAINS F:<includes> -> D:RET
+EDGES|CONTAINS F:<includes> -> D:int
+EDGES|CONTAINS F:<includes> -> D:void
+EDGES|CONTAINS F:main.c -> D:main.c:<global>
+EDGES|CONTAINS early#0 -> early#3
+EDGES|CONTAINS late#0 -> late#3
+EDGES|CONTAINS main.c:<global>#0 -> early#0
+EDGES|CONTAINS main.c:<global>#0 -> late#0
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#11
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#12
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#13
+EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+EDGES|EVAL_TYPE early#1 -> T:int
+EDGES|EVAL_TYPE early#2 -> T:int
+EDGES|EVAL_TYPE early#3 -> T:void
+EDGES|EVAL_TYPE early#4 -> T:RET
+EDGES|EVAL_TYPE late#1 -> T:int
+EDGES|EVAL_TYPE late#2 -> T:int
+EDGES|EVAL_TYPE late#3 -> T:void
+EDGES|EVAL_TYPE late#4 -> T:RET
+EDGES|EVAL_TYPE main.c:<global>#11 -> T:ANY
+EDGES|EVAL_TYPE main.c:<global>#12 -> T:early
+EDGES|EVAL_TYPE main.c:<global>#13 -> T:late
+EDGES|EVAL_TYPE main.c:<global>#14 -> T:ANY
+EDGES|PARAMETER_LINK early#1 -> early#2
+EDGES|PARAMETER_LINK late#1 -> late#2
+EDGES|REF NB:<global> -> NS:<global>
+EDGES|REF NB:<includes>:<global> -> NS:<global>
+EDGES|REF NB:main.c:<global> -> NS:<global>
+EDGES|REF T:ANY -> D:ANY
+EDGES|REF T:RET -> D:RET
+EDGES|REF T:early -> D:early
+EDGES|REF T:int -> D:int
+EDGES|REF T:late -> D:late
+EDGES|REF T:void -> D:void
+EDGES|REF main.c:<global>#12 -> early#0
+EDGES|REF main.c:<global>#13 -> late#0
+EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+EDGES|SOURCE_FILE D:ANY -> F:<includes>
+EDGES|SOURCE_FILE D:RET -> F:<includes>
+EDGES|SOURCE_FILE D:early -> F:main.c
+EDGES|SOURCE_FILE D:int -> F:<includes>
+EDGES|SOURCE_FILE D:late -> F:main.c
+EDGES|SOURCE_FILE D:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE D:void -> F:<includes>
+EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
+EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>
+EDGES|SOURCE_FILE NB:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE early#0 -> F:main.c
+EDGES|SOURCE_FILE late#0 -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#0 -> F:main.c
+FLOWS|REACHING_DEF[] early#0 -> early#1
+FLOWS|REACHING_DEF[] late#0 -> late#1
+FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#12
+FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#13
+FLOWS|REACHING_DEF[x] early#1 -> early#2
+FLOWS|REACHING_DEF[x] early#1 -> early#4
+FLOWS|REACHING_DEF[x] late#1 -> late#2
+FLOWS|REACHING_DEF[x] late#1 -> late#4

@@ -1,0 +1,7 @@
+
+running 2 tests
+test inactive_branches_and_directive_conditions_create_no_phantom_locals ... ok
+test active_body_branches_match_complete_live_graphs ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s
+

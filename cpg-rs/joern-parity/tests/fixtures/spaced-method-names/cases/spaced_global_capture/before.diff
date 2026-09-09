@@ -1,0 +1,19 @@
+--- joern
++++ before
+@@ -59,7 +59,6 @@
+ EDGES|CALL capture space.c:<global>#11 -> <operator>.assignment#0
+ EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+ EDGES|CFG <operator>.assignment#0 -> <operator>.assignment#5
+-EDGES|CFG capture space.c:<global>#0 -> capture space.c:<global>#12
+ EDGES|CFG capture space.c:<global>#1 -> read_global#6
+ EDGES|CFG capture space.c:<global>#11 -> capture space.c:<global>#14
+ EDGES|CFG capture space.c:<global>#12 -> capture space.c:<global>#13
+@@ -136,8 +135,6 @@
+ FLOWS|REACHING_DEF[<global> global] read_global#6 -> read_global#5
+ FLOWS|REACHING_DEF[] <operator>.assignment#0 -> <operator>.assignment#1
+ FLOWS|REACHING_DEF[] <operator>.assignment#0 -> <operator>.assignment#4
+-FLOWS|REACHING_DEF[] capture space.c:<global>#0 -> capture space.c:<global>#13
+-FLOWS|REACHING_DEF[] capture space.c:<global>#0 -> capture space.c:<global>#14
+ FLOWS|REACHING_DEF[] capture space.c:<global>#1 -> read_global#1
+ FLOWS|REACHING_DEF[] capture space.c:<global>#1 -> read_global#5
+ FLOWS|REACHING_DEF[] capture space.c:<global>#1 -> read_global#6

@@ -1,0 +1,400 @@
+METHOD NAME=gz_open CODE=local gzFile gz_open(const void *path, int fd, const char *mode) {\n    gz_statep state;\n    z_size_t len;\n    int oflag;\n#ifdef O_CLOEXEC\n    int cloexec = 0;\n#endif\n#ifdef O_EXCL\n    int exclusive = 0;\n#endif\n\n    /* check input */\n    if (path == NULL)\n        return NULL;\n\n    /* allocate gzFile structure to return */\n    state = (gz_statep)malloc(sizeof(gz_state));\n    if (state == NULL)\n        return NULL;\n    state->size = 0;            /* no buffers allocated yet */\n    state->want = GZBUFSIZE;    /* requested buffer size */\n    state->msg = NULL;          /* no error message yet */\n\n    /* interpret mode */\n    state->mode = GZ_NONE;\n    state->level = Z_DEFAULT_COMPRESSION;\n    state->strategy = Z_DEFAULT_STRATEGY;\n    state->direct = 0;\n    while (*mode) {\n        if (*mode >= '0' && *mode <= '9')\n            state->level = *mode - '0';\n        else\n            switch (*mode) {\n            case 'r':\n                state->mode = GZ_READ;\n                break;\n#ifndef NO_... FULL_NAME=gz_open SIGNATURE=gzFile(void*,int,char*) ORDER=1
+  METHOD_PARAMETER_IN NAME=path CODE=const void *path TYPE_FULL_NAME=void* ORDER=1
+  METHOD_PARAMETER_OUT NAME=path CODE=const void *path TYPE_FULL_NAME=void* ORDER=1
+  METHOD_PARAMETER_IN NAME=fd CODE=int fd TYPE_FULL_NAME=int ORDER=2
+  METHOD_PARAMETER_OUT NAME=fd CODE=int fd TYPE_FULL_NAME=int ORDER=2
+  METHOD_PARAMETER_IN NAME=mode CODE=const char *mode TYPE_FULL_NAME=char* ORDER=3
+  METHOD_PARAMETER_OUT NAME=mode CODE=const char *mode TYPE_FULL_NAME=char* ORDER=3
+  BLOCK CODE={\n    gz_statep state;\n    z_size_t len;\n    int oflag;\n#ifdef O_CLOEXEC\n    int cloexec = 0;\n#endif\n#ifdef O_EXCL\n    int exclusive = 0;\n#endif\n\n    /* check input */\n    if (path == NULL)\n        return NULL;\n\n    /* allocate gzFile structure to return */\n    state = (gz_statep)malloc(sizeof(gz_state));\n    if (state == NULL)\n        return NULL;\n    state->size = 0;            /* no buffers allocated yet */\n    state->want = GZBUFSIZE;    /* requested buffer size */\n    state->msg = NULL;          /* no error message yet */\n\n    /* interpret mode */\n    state->mode = GZ_NONE;\n    state->level = Z_DEFAULT_COMPRESSION;\n    state->strategy = Z_DEFAULT_STRATEGY;\n    state->direct = 0;\n    while (*mode) {\n        if (*mode >= '0' && *mode <= '9')\n            state->level = *mode - '0';\n        else\n            switch (*mode) {\n            case 'r':\n                state->mode = GZ_READ;\n                break;\n#ifndef NO_GZCOMPRESS\n            case 'w':\n                state->mode = GZ... TYPE_FULL_NAME=void ORDER=4
+    LOCAL NAME=NULL CODE=<unknown> NULL TYPE_FULL_NAME=ANY ORDER=0
+    LOCAL NAME=O_APPEND CODE=<unknown> O_APPEND TYPE_FULL_NAME=ANY ORDER=0
+    LOCAL NAME=O_TRUNC CODE=<unknown> O_TRUNC TYPE_FULL_NAME=ANY ORDER=0
+    LOCAL NAME=O_CREAT CODE=<unknown> O_CREAT TYPE_FULL_NAME=ANY ORDER=0
+    LOCAL NAME=O_WRONLY CODE=<unknown> O_WRONLY TYPE_FULL_NAME=ANY ORDER=0
+    LOCAL NAME=O_RDONLY CODE=<unknown> O_RDONLY TYPE_FULL_NAME=ANY ORDER=0
+    LOCAL NAME=gz_state CODE=gz_state TYPE_FULL_NAME=gz_state ORDER=0
+    LOCAL NAME=state CODE=gz_statep state TYPE_FULL_NAME=gz_statep ORDER=1
+    LOCAL NAME=len CODE=z_size_t len TYPE_FULL_NAME=z_size_t ORDER=2
+    LOCAL NAME=oflag CODE=int oflag TYPE_FULL_NAME=int ORDER=3
+    CONTROL_STRUCTURE CODE=if (path == NULL)\n        return NULL; ORDER=4
+      CALL NAME=<operator>.equals CODE=path == NULL TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.equals ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=path CODE=path TYPE_FULL_NAME=void* ORDER=1 ARGUMENT_INDEX=1
+        IDENTIFIER NAME=NULL CODE=<unknown> NULL TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+      BLOCK TYPE_FULL_NAME=ANY ORDER=2
+        RETURN CODE=return NULL; ORDER=1
+          IDENTIFIER NAME=NULL CODE=<unknown> NULL TYPE_FULL_NAME=ANY ORDER=1
+    CALL NAME=<operator>.assignment CODE=state = (gz_statep)malloc(sizeof(gz_state)) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=5 DISPATCH_TYPE=STATIC_DISPATCH
+      IDENTIFIER NAME=state CODE=state TYPE_FULL_NAME=gz_statep ORDER=1 ARGUMENT_INDEX=1
+      CALL NAME=<operator>.cast CODE=(gz_statep)malloc(sizeof(gz_state)) TYPE_FULL_NAME=gz_statep METHOD_FULL_NAME=<operator>.cast ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+        TYPE_REF CODE=gz_statep TYPE_FULL_NAME=gz_statep ORDER=1 ARGUMENT_INDEX=1
+        CALL NAME=malloc CODE=malloc(sizeof(gz_state)) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=malloc ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+          CALL NAME=<operator>.sizeOf CODE=sizeof(gz_state) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.sizeOf ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+            IDENTIFIER NAME=gz_state CODE=gz_state TYPE_FULL_NAME=gz_state ORDER=1 ARGUMENT_INDEX=1
+    CONTROL_STRUCTURE CODE=if (state == NULL)\n        return NULL; ORDER=6
+      CALL NAME=<operator>.equals CODE=state == NULL TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.equals ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=state CODE=state TYPE_FULL_NAME=gz_statep ORDER=1 ARGUMENT_INDEX=1
+        IDENTIFIER NAME=NULL CODE=<unknown> NULL TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+      BLOCK TYPE_FULL_NAME=ANY ORDER=2
+        RETURN CODE=return NULL; ORDER=1
+          IDENTIFIER NAME=NULL CODE=<unknown> NULL TYPE_FULL_NAME=ANY ORDER=1
+    CALL NAME=<operator>.assignment CODE=state->size = 0 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=7 DISPATCH_TYPE=STATIC_DISPATCH
+      CALL NAME=<operator>.indirectFieldAccess CODE=state->size TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=state CODE=state TYPE_FULL_NAME=gz_statep ORDER=1 ARGUMENT_INDEX=1
+        FIELD_IDENTIFIER CODE=size ORDER=2 ARGUMENT_INDEX=2
+      LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+    CALL NAME=<operator>.assignment CODE=state->want = GZBUFSIZE TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=8 DISPATCH_TYPE=STATIC_DISPATCH
+      CALL NAME=<operator>.indirectFieldAccess CODE=state->want TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=state CODE=state TYPE_FULL_NAME=gz_statep ORDER=1 ARGUMENT_INDEX=1
+        FIELD_IDENTIFIER CODE=want ORDER=2 ARGUMENT_INDEX=2
+      CALL NAME=GZBUFSIZE CODE=GZBUFSIZE TYPE_FULL_NAME=int METHOD_FULL_NAME=gzguts.h:GZBUFSIZE:int(0) SIGNATURE=int(0) ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=INLINED
+        BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+          LITERAL CODE=8192 TYPE_FULL_NAME=int ORDER=1
+    CALL NAME=<operator>.assignment CODE=state->msg = NULL TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=9 DISPATCH_TYPE=STATIC_DISPATCH
+      CALL NAME=<operator>.indirectFieldAccess CODE=state->msg TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=state CODE=state TYPE_FULL_NAME=gz_statep ORDER=1 ARGUMENT_INDEX=1
+        FIELD_IDENTIFIER CODE=msg ORDER=2 ARGUMENT_INDEX=2
+      IDENTIFIER NAME=NULL CODE=<unknown> NULL TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+    CALL NAME=<operator>.assignment CODE=state->mode = GZ_NONE TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=10 DISPATCH_TYPE=STATIC_DISPATCH
+      CALL NAME=<operator>.indirectFieldAccess CODE=state->mode TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=state CODE=state TYPE_FULL_NAME=gz_statep ORDER=1 ARGUMENT_INDEX=1
+        FIELD_IDENTIFIER CODE=mode ORDER=2 ARGUMENT_INDEX=2
+      CALL NAME=GZ_NONE CODE=GZ_NONE TYPE_FULL_NAME=int METHOD_FULL_NAME=gzguts.h:GZ_NONE:int(0) SIGNATURE=int(0) ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=INLINED
+        BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+          LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=1
+    CALL NAME=<operator>.assignment CODE=state->level = Z_DEFAULT_COMPRESSION TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=11 DISPATCH_TYPE=STATIC_DISPATCH
+      CALL NAME=<operator>.indirectFieldAccess CODE=state->level TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=state CODE=state TYPE_FULL_NAME=gz_statep ORDER=1 ARGUMENT_INDEX=1
+        FIELD_IDENTIFIER CODE=level ORDER=2 ARGUMENT_INDEX=2
+      CALL NAME=Z_DEFAULT_COMPRESSION CODE=Z_DEFAULT_COMPRESSION TYPE_FULL_NAME=ANY METHOD_FULL_NAME=zlib.h:Z_DEFAULT_COMPRESSION:ANY(0) SIGNATURE=ANY(0) ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=INLINED
+        BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+          CALL NAME=<operator>.minus CODE=-1 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.minus ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+            LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+    CALL NAME=<operator>.assignment CODE=state->strategy = Z_DEFAULT_STRATEGY TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=12 DISPATCH_TYPE=STATIC_DISPATCH
+      CALL NAME=<operator>.indirectFieldAccess CODE=state->strategy TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=state CODE=state TYPE_FULL_NAME=gz_statep ORDER=1 ARGUMENT_INDEX=1
+        FIELD_IDENTIFIER CODE=strategy ORDER=2 ARGUMENT_INDEX=2
+      CALL NAME=Z_DEFAULT_STRATEGY CODE=Z_DEFAULT_STRATEGY TYPE_FULL_NAME=int METHOD_FULL_NAME=zlib.h:Z_DEFAULT_STRATEGY:int(0) SIGNATURE=int(0) ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=INLINED
+        BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+          LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=1
+    CALL NAME=<operator>.assignment CODE=state->direct = 0 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=13 DISPATCH_TYPE=STATIC_DISPATCH
+      CALL NAME=<operator>.indirectFieldAccess CODE=state->direct TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=state CODE=state TYPE_FULL_NAME=gz_statep ORDER=1 ARGUMENT_INDEX=1
+        FIELD_IDENTIFIER CODE=direct ORDER=2 ARGUMENT_INDEX=2
+      LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+    CONTROL_STRUCTURE CODE=while (*mode) ORDER=14
+      CALL NAME=<operator>.indirection CODE=*mode TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirection ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=mode CODE=mode TYPE_FULL_NAME=char* ORDER=1 ARGUMENT_INDEX=1
+      BLOCK CODE={\n        if (*mode >= '0' && *mode <= '9')\n            state->level = *mode - '0';\n        else\n            switch (*mode) {\n            case 'r':\n                state->mode = GZ_READ;\n                break;\n#ifndef NO_GZCOMPRESS\n            case 'w':\n                state->mode = GZ_WRITE;\n                break;\n            case 'a':\n                state->mode = GZ_APPEND;\n                break;\n#endif\n            case '+':       /* can't read and write at the same time */\n                free(state);\n                return NULL;\n            case 'b':       /* ignore -- will request binary anyway */\n                break;\n#ifdef O_CLOEXEC\n            case 'e':\n                cloexec = 1;\n                break;\n#endif\n#ifdef O_EXCL\n            case 'x':\n                exclusive = 1;\n                break;\n#endif\n            case 'f':\n                state->strategy = Z_FILTERED;\n                break;\n            case 'h':\n                state->strategy = Z_HUFFMAN_ONLY;\n     ... TYPE_FULL_NAME=void ORDER=2
+        CONTROL_STRUCTURE CODE=if (*mode >= '0' && *mode <= '9')\n            state->level = *mode - '0';\n        else\n            switch (*mode) {\n            case 'r':\n                state->mode = GZ_READ;\n                break;\n#ifndef NO_GZCOMPRESS\n            case 'w':\n                state->mode = GZ_WRITE;\n                break;\n            case 'a':\n                state->mode = GZ_APPEND;\n                break;\n#endif\n            case '+':       /* can't read and write at the same time */\n                free(state);\n                return NULL;\n            case 'b':       /* ignore -- will request binary anyway */\n                break;\n#ifdef O_CLOEXEC\n            case 'e':\n                cloexec = 1;\n                break;\n#endif\n#ifdef O_EXCL\n            case 'x':\n                exclusive = 1;\n                break;\n#endif\n            case 'f':\n                state->strategy = Z_FILTERED;\n                break;\n            case 'h':\n                state->strategy = Z_HUFFMAN_ONLY;\n               ... ORDER=1
+          CALL NAME=<operator>.logicalAnd CODE=*mode >= '0' && *mode <= '9' TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.logicalAnd ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+            CALL NAME=<operator>.greaterEqualsThan CODE=*mode >= '0' TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.greaterEqualsThan ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+              CALL NAME=<operator>.indirection CODE=*mode TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirection ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                IDENTIFIER NAME=mode CODE=mode TYPE_FULL_NAME=char* ORDER=1 ARGUMENT_INDEX=1
+              LITERAL CODE='0' TYPE_FULL_NAME=char ORDER=2 ARGUMENT_INDEX=2
+            CALL NAME=<operator>.lessEqualsThan CODE=*mode <= '9' TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.lessEqualsThan ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+              CALL NAME=<operator>.indirection CODE=*mode TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirection ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                IDENTIFIER NAME=mode CODE=mode TYPE_FULL_NAME=char* ORDER=1 ARGUMENT_INDEX=1
+              LITERAL CODE='9' TYPE_FULL_NAME=char ORDER=2 ARGUMENT_INDEX=2
+          BLOCK TYPE_FULL_NAME=ANY ORDER=2
+            CALL NAME=<operator>.assignment CODE=state->level = *mode - '0' TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+              CALL NAME=<operator>.indirectFieldAccess CODE=state->level TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                IDENTIFIER NAME=state CODE=state TYPE_FULL_NAME=gz_statep ORDER=1 ARGUMENT_INDEX=1
+                FIELD_IDENTIFIER CODE=level ORDER=2 ARGUMENT_INDEX=2
+              CALL NAME=<operator>.subtraction CODE=*mode - '0' TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.subtraction ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+                CALL NAME=<operator>.indirection CODE=*mode TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirection ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                  IDENTIFIER NAME=mode CODE=mode TYPE_FULL_NAME=char* ORDER=1 ARGUMENT_INDEX=1
+                LITERAL CODE='0' TYPE_FULL_NAME=char ORDER=2 ARGUMENT_INDEX=2
+          CONTROL_STRUCTURE CODE=else ORDER=3
+            BLOCK TYPE_FULL_NAME=ANY ORDER=1
+              CONTROL_STRUCTURE CODE=switch (*mode) {\n            case 'r':\n                state->mode = GZ_READ;\n                break;\n#ifndef NO_GZCOMPRESS\n            case 'w':\n                state->mode = GZ_WRITE;\n                break;\n            case 'a':\n                state->mode = GZ_APPEND;\n                break;\n#endif\n            case '+':       /* can't read and write at the same time */\n                free(state);\n                return NULL;\n            case 'b':       /* ignore -- will request binary anyway */\n                break;\n#ifdef O_CLOEXEC\n            case 'e':\n                cloexec = 1;\n                break;\n#endif\n#ifdef O_EXCL\n            case 'x':\n                exclusive = 1;\n                break;\n#endif\n            case 'f':\n                state->strategy = Z_FILTERED;\n                break;\n            case 'h':\n                state->strategy = Z_HUFFMAN_ONLY;\n                break;\n            case 'R':\n                state->strategy = Z_RLE;\n                break;\n     ... ORDER=1
+                CALL NAME=<operator>.indirection CODE=*mode TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirection ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+                  IDENTIFIER NAME=mode CODE=mode TYPE_FULL_NAME=char* ORDER=1 ARGUMENT_INDEX=1
+                BLOCK CODE={\n            case 'r':\n                state->mode = GZ_READ;\n                break;\n#ifndef NO_GZCOMPRESS\n            case 'w':\n                state->mode = GZ_WRITE;\n                break;\n            case 'a':\n                state->mode = GZ_APPEND;\n                break;\n#endif\n            case '+':       /* can't read and write at the same time */\n                free(state);\n                return NULL;\n            case 'b':       /* ignore -- will request binary anyway */\n                break;\n#ifdef O_CLOEXEC\n            case 'e':\n                cloexec = 1;\n                break;\n#endif\n#ifdef O_EXCL\n            case 'x':\n                exclusive = 1;\n                break;\n#endif\n            case 'f':\n                state->strategy = Z_FILTERED;\n                break;\n            case 'h':\n                state->strategy = Z_HUFFMAN_ONLY;\n                break;\n            case 'R':\n                state->strategy = Z_RLE;\n                break;\n            case 'F'... TYPE_FULL_NAME=void ORDER=2
+                  JUMP_TARGET NAME=case CODE=case 'r': ORDER=1
+                  LITERAL CODE='r' TYPE_FULL_NAME=char ORDER=2
+                  CALL NAME=<operator>.assignment CODE=state->mode = GZ_READ TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH
+                    CALL NAME=<operator>.indirectFieldAccess CODE=state->mode TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                      IDENTIFIER NAME=state CODE=state TYPE_FULL_NAME=gz_statep ORDER=1 ARGUMENT_INDEX=1
+                      FIELD_IDENTIFIER CODE=mode ORDER=2 ARGUMENT_INDEX=2
+                    CALL NAME=GZ_READ CODE=GZ_READ TYPE_FULL_NAME=int METHOD_FULL_NAME=gzguts.h:GZ_READ:int(0) SIGNATURE=int(0) ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=INLINED
+                      BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+                        LITERAL CODE=7247 TYPE_FULL_NAME=int ORDER=1
+                  CONTROL_STRUCTURE CODE=break; ORDER=4
+                  JUMP_TARGET NAME=case CODE=case 'w': ORDER=5
+                  LITERAL CODE='w' TYPE_FULL_NAME=char ORDER=6
+                  CALL NAME=<operator>.assignment CODE=state->mode = GZ_WRITE TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=7 DISPATCH_TYPE=STATIC_DISPATCH
+                    CALL NAME=<operator>.indirectFieldAccess CODE=state->mode TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                      IDENTIFIER NAME=state CODE=state TYPE_FULL_NAME=gz_statep ORDER=1 ARGUMENT_INDEX=1
+                      FIELD_IDENTIFIER CODE=mode ORDER=2 ARGUMENT_INDEX=2
+                    CALL NAME=GZ_WRITE CODE=GZ_WRITE TYPE_FULL_NAME=int METHOD_FULL_NAME=gzguts.h:GZ_WRITE:int(0) SIGNATURE=int(0) ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=INLINED
+                      BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+                        LITERAL CODE=31153 TYPE_FULL_NAME=int ORDER=1
+                  CONTROL_STRUCTURE CODE=break; ORDER=8
+                  JUMP_TARGET NAME=case CODE=case 'a': ORDER=9
+                  LITERAL CODE='a' TYPE_FULL_NAME=char ORDER=10
+                  CALL NAME=<operator>.assignment CODE=state->mode = GZ_APPEND TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=11 DISPATCH_TYPE=STATIC_DISPATCH
+                    CALL NAME=<operator>.indirectFieldAccess CODE=state->mode TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                      IDENTIFIER NAME=state CODE=state TYPE_FULL_NAME=gz_statep ORDER=1 ARGUMENT_INDEX=1
+                      FIELD_IDENTIFIER CODE=mode ORDER=2 ARGUMENT_INDEX=2
+                    CALL NAME=GZ_APPEND CODE=GZ_APPEND TYPE_FULL_NAME=int METHOD_FULL_NAME=gzguts.h:GZ_APPEND:int(0) SIGNATURE=int(0) ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=INLINED
+                      BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+                        LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=1
+                  CONTROL_STRUCTURE CODE=break; ORDER=12
+                  JUMP_TARGET NAME=case CODE=case '+': ORDER=13
+                  LITERAL CODE='+' TYPE_FULL_NAME=char ORDER=14
+                  CALL NAME=free CODE=free(state) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=free ORDER=15 DISPATCH_TYPE=STATIC_DISPATCH
+                    IDENTIFIER NAME=state CODE=state TYPE_FULL_NAME=gz_statep ORDER=1 ARGUMENT_INDEX=1
+                  RETURN CODE=return NULL; ORDER=16
+                    IDENTIFIER NAME=NULL CODE=<unknown> NULL TYPE_FULL_NAME=ANY ORDER=1
+                  JUMP_TARGET NAME=case CODE=case 'b': ORDER=17
+                  LITERAL CODE='b' TYPE_FULL_NAME=char ORDER=18
+                  CONTROL_STRUCTURE CODE=break; ORDER=19
+                  JUMP_TARGET NAME=case CODE=case 'f': ORDER=20
+                  LITERAL CODE='f' TYPE_FULL_NAME=char ORDER=21
+                  CALL NAME=<operator>.assignment CODE=state->strategy = Z_FILTERED TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=22 DISPATCH_TYPE=STATIC_DISPATCH
+                    CALL NAME=<operator>.indirectFieldAccess CODE=state->strategy TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                      IDENTIFIER NAME=state CODE=state TYPE_FULL_NAME=gz_statep ORDER=1 ARGUMENT_INDEX=1
+                      FIELD_IDENTIFIER CODE=strategy ORDER=2 ARGUMENT_INDEX=2
+                    CALL NAME=Z_FILTERED CODE=Z_FILTERED TYPE_FULL_NAME=int METHOD_FULL_NAME=zlib.h:Z_FILTERED:int(0) SIGNATURE=int(0) ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=INLINED
+                      BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+                        LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=1
+                  CONTROL_STRUCTURE CODE=break; ORDER=23
+                  JUMP_TARGET NAME=case CODE=case 'h': ORDER=24
+                  LITERAL CODE='h' TYPE_FULL_NAME=char ORDER=25
+                  CALL NAME=<operator>.assignment CODE=state->strategy = Z_HUFFMAN_ONLY TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=26 DISPATCH_TYPE=STATIC_DISPATCH
+                    CALL NAME=<operator>.indirectFieldAccess CODE=state->strategy TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                      IDENTIFIER NAME=state CODE=state TYPE_FULL_NAME=gz_statep ORDER=1 ARGUMENT_INDEX=1
+                      FIELD_IDENTIFIER CODE=strategy ORDER=2 ARGUMENT_INDEX=2
+                    CALL NAME=Z_HUFFMAN_ONLY CODE=Z_HUFFMAN_ONLY TYPE_FULL_NAME=int METHOD_FULL_NAME=zlib.h:Z_HUFFMAN_ONLY:int(0) SIGNATURE=int(0) ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=INLINED
+                      BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+                        LITERAL CODE=2 TYPE_FULL_NAME=int ORDER=1
+                  CONTROL_STRUCTURE CODE=break; ORDER=27
+                  JUMP_TARGET NAME=case CODE=case 'R': ORDER=28
+                  LITERAL CODE='R' TYPE_FULL_NAME=char ORDER=29
+                  CALL NAME=<operator>.assignment CODE=state->strategy = Z_RLE TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=30 DISPATCH_TYPE=STATIC_DISPATCH
+                    CALL NAME=<operator>.indirectFieldAccess CODE=state->strategy TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                      IDENTIFIER NAME=state CODE=state TYPE_FULL_NAME=gz_statep ORDER=1 ARGUMENT_INDEX=1
+                      FIELD_IDENTIFIER CODE=strategy ORDER=2 ARGUMENT_INDEX=2
+                    CALL NAME=Z_RLE CODE=Z_RLE TYPE_FULL_NAME=int METHOD_FULL_NAME=zlib.h:Z_RLE:int(0) SIGNATURE=int(0) ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=INLINED
+                      BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+                        LITERAL CODE=3 TYPE_FULL_NAME=int ORDER=1
+                  CONTROL_STRUCTURE CODE=break; ORDER=31
+                  JUMP_TARGET NAME=case CODE=case 'F': ORDER=32
+                  LITERAL CODE='F' TYPE_FULL_NAME=char ORDER=33
+                  CALL NAME=<operator>.assignment CODE=state->strategy = Z_FIXED TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=34 DISPATCH_TYPE=STATIC_DISPATCH
+                    CALL NAME=<operator>.indirectFieldAccess CODE=state->strategy TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                      IDENTIFIER NAME=state CODE=state TYPE_FULL_NAME=gz_statep ORDER=1 ARGUMENT_INDEX=1
+                      FIELD_IDENTIFIER CODE=strategy ORDER=2 ARGUMENT_INDEX=2
+                    CALL NAME=Z_FIXED CODE=Z_FIXED TYPE_FULL_NAME=int METHOD_FULL_NAME=zlib.h:Z_FIXED:int(0) SIGNATURE=int(0) ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=INLINED
+                      BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+                        LITERAL CODE=4 TYPE_FULL_NAME=int ORDER=1
+                  CONTROL_STRUCTURE CODE=break; ORDER=35
+                  JUMP_TARGET NAME=case CODE=case 'T': ORDER=36
+                  LITERAL CODE='T' TYPE_FULL_NAME=char ORDER=37
+                  CALL NAME=<operator>.assignment CODE=state->direct = 1 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=38 DISPATCH_TYPE=STATIC_DISPATCH
+                    CALL NAME=<operator>.indirectFieldAccess CODE=state->direct TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                      IDENTIFIER NAME=state CODE=state TYPE_FULL_NAME=gz_statep ORDER=1 ARGUMENT_INDEX=1
+                      FIELD_IDENTIFIER CODE=direct ORDER=2 ARGUMENT_INDEX=2
+                    LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+                  CONTROL_STRUCTURE CODE=break; ORDER=39
+                  JUMP_TARGET NAME=default CODE=default: ORDER=40
+        CALL NAME=<operator>.postIncrement CODE=mode++ TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.postIncrement ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=mode CODE=mode TYPE_FULL_NAME=char* ORDER=1 ARGUMENT_INDEX=1
+    CONTROL_STRUCTURE CODE=if (state->mode == GZ_NONE) {\n        free(state);\n        return NULL;\n    } ORDER=15
+      CALL NAME=<operator>.equals CODE=state->mode == GZ_NONE TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.equals ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+        CALL NAME=<operator>.indirectFieldAccess CODE=state->mode TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=state CODE=state TYPE_FULL_NAME=gz_statep ORDER=1 ARGUMENT_INDEX=1
+          FIELD_IDENTIFIER CODE=mode ORDER=2 ARGUMENT_INDEX=2
+        CALL NAME=GZ_NONE CODE=GZ_NONE TYPE_FULL_NAME=int METHOD_FULL_NAME=gzguts.h:GZ_NONE:int(0) SIGNATURE=int(0) ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=INLINED
+          BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+            LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=1
+      BLOCK CODE={\n        free(state);\n        return NULL;\n    } TYPE_FULL_NAME=void ORDER=2
+        CALL NAME=free CODE=free(state) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=free ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=state CODE=state TYPE_FULL_NAME=gz_statep ORDER=1 ARGUMENT_INDEX=1
+        RETURN CODE=return NULL; ORDER=2
+          IDENTIFIER NAME=NULL CODE=<unknown> NULL TYPE_FULL_NAME=ANY ORDER=1
+    CONTROL_STRUCTURE CODE=if (state->mode == GZ_READ) {\n        if (state->direct) {\n            free(state);\n            return NULL;\n        }\n        state->direct = 1;      /* for empty file */\n    } ORDER=16
+      CALL NAME=<operator>.equals CODE=state->mode == GZ_READ TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.equals ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+        CALL NAME=<operator>.indirectFieldAccess CODE=state->mode TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=state CODE=state TYPE_FULL_NAME=gz_statep ORDER=1 ARGUMENT_INDEX=1
+          FIELD_IDENTIFIER CODE=mode ORDER=2 ARGUMENT_INDEX=2
+        CALL NAME=GZ_READ CODE=GZ_READ TYPE_FULL_NAME=int METHOD_FULL_NAME=gzguts.h:GZ_READ:int(0) SIGNATURE=int(0) ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=INLINED
+          BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+            LITERAL CODE=7247 TYPE_FULL_NAME=int ORDER=1
+      BLOCK CODE={\n        if (state->direct) {\n            free(state);\n            return NULL;\n        }\n        state->direct = 1;      /* for empty file */\n    } TYPE_FULL_NAME=void ORDER=2
+        CONTROL_STRUCTURE CODE=if (state->direct) {\n            free(state);\n            return NULL;\n        } ORDER=1
+          CALL NAME=<operator>.indirectFieldAccess CODE=state->direct TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+            IDENTIFIER NAME=state CODE=state TYPE_FULL_NAME=gz_statep ORDER=1 ARGUMENT_INDEX=1
+            FIELD_IDENTIFIER CODE=direct ORDER=2 ARGUMENT_INDEX=2
+          BLOCK CODE={\n            free(state);\n            return NULL;\n        } TYPE_FULL_NAME=void ORDER=2
+            CALL NAME=free CODE=free(state) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=free ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+              IDENTIFIER NAME=state CODE=state TYPE_FULL_NAME=gz_statep ORDER=1 ARGUMENT_INDEX=1
+            RETURN CODE=return NULL; ORDER=2
+              IDENTIFIER NAME=NULL CODE=<unknown> NULL TYPE_FULL_NAME=ANY ORDER=1
+        CALL NAME=<operator>.assignment CODE=state->direct = 1 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+          CALL NAME=<operator>.indirectFieldAccess CODE=state->direct TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+            IDENTIFIER NAME=state CODE=state TYPE_FULL_NAME=gz_statep ORDER=1 ARGUMENT_INDEX=1
+            FIELD_IDENTIFIER CODE=direct ORDER=2 ARGUMENT_INDEX=2
+          LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+    CALL NAME=<operator>.assignment CODE=len = strlen((const char *)path) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=17 DISPATCH_TYPE=STATIC_DISPATCH
+      IDENTIFIER NAME=len CODE=len TYPE_FULL_NAME=z_size_t ORDER=1 ARGUMENT_INDEX=1
+      CALL NAME=strlen CODE=strlen((const char *)path) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=strlen ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+        CALL NAME=<operator>.cast CODE=(const char *)path TYPE_FULL_NAME=char METHOD_FULL_NAME=<operator>.cast ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+          TYPE_REF CODE=const char * TYPE_FULL_NAME=char ORDER=1 ARGUMENT_INDEX=1
+          IDENTIFIER NAME=path CODE=path TYPE_FULL_NAME=void* ORDER=2 ARGUMENT_INDEX=2
+    CALL NAME=<operator>.assignment CODE=state->path = (char *)malloc(len + 1) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=18 DISPATCH_TYPE=STATIC_DISPATCH
+      CALL NAME=<operator>.indirectFieldAccess CODE=state->path TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=state CODE=state TYPE_FULL_NAME=gz_statep ORDER=1 ARGUMENT_INDEX=1
+        FIELD_IDENTIFIER CODE=path ORDER=2 ARGUMENT_INDEX=2
+      CALL NAME=<operator>.cast CODE=(char *)malloc(len + 1) TYPE_FULL_NAME=char METHOD_FULL_NAME=<operator>.cast ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+        TYPE_REF CODE=char * TYPE_FULL_NAME=char ORDER=1 ARGUMENT_INDEX=1
+        CALL NAME=malloc CODE=malloc(len + 1) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=malloc ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+          CALL NAME=<operator>.addition CODE=len + 1 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+            IDENTIFIER NAME=len CODE=len TYPE_FULL_NAME=z_size_t ORDER=1 ARGUMENT_INDEX=1
+            LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+    CONTROL_STRUCTURE CODE=if (state->path == NULL) {\n        free(state);\n        return NULL;\n    } ORDER=19
+      CALL NAME=<operator>.equals CODE=state->path == NULL TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.equals ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+        CALL NAME=<operator>.indirectFieldAccess CODE=state->path TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=state CODE=state TYPE_FULL_NAME=gz_statep ORDER=1 ARGUMENT_INDEX=1
+          FIELD_IDENTIFIER CODE=path ORDER=2 ARGUMENT_INDEX=2
+        IDENTIFIER NAME=NULL CODE=<unknown> NULL TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+      BLOCK CODE={\n        free(state);\n        return NULL;\n    } TYPE_FULL_NAME=void ORDER=2
+        CALL NAME=free CODE=free(state) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=free ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=state CODE=state TYPE_FULL_NAME=gz_statep ORDER=1 ARGUMENT_INDEX=1
+        RETURN CODE=return NULL; ORDER=2
+          IDENTIFIER NAME=NULL CODE=<unknown> NULL TYPE_FULL_NAME=ANY ORDER=1
+    CALL NAME=<operator>.cast CODE=(void)snprintf(state->path, len + 1, "%s", (const char *)path) TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.cast ORDER=20 DISPATCH_TYPE=STATIC_DISPATCH
+      TYPE_REF CODE=void TYPE_FULL_NAME=void ORDER=1 ARGUMENT_INDEX=1
+      CALL NAME=snprintf CODE=snprintf(state->path, len + 1, "%s", (const char *)path) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=snprintf ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+        CALL NAME=<operator>.indirectFieldAccess CODE=state->path TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=state CODE=state TYPE_FULL_NAME=gz_statep ORDER=1 ARGUMENT_INDEX=1
+          FIELD_IDENTIFIER CODE=path ORDER=2 ARGUMENT_INDEX=2
+        CALL NAME=<operator>.addition CODE=len + 1 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=len CODE=len TYPE_FULL_NAME=z_size_t ORDER=1 ARGUMENT_INDEX=1
+          LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+        LITERAL CODE="%s" TYPE_FULL_NAME=char* ORDER=3 ARGUMENT_INDEX=3
+        CALL NAME=<operator>.cast CODE=(const char *)path TYPE_FULL_NAME=char METHOD_FULL_NAME=<operator>.cast ORDER=4 ARGUMENT_INDEX=4 DISPATCH_TYPE=STATIC_DISPATCH
+          TYPE_REF CODE=const char * TYPE_FULL_NAME=char ORDER=1 ARGUMENT_INDEX=1
+          IDENTIFIER NAME=path CODE=path TYPE_FULL_NAME=void* ORDER=2 ARGUMENT_INDEX=2
+    CALL NAME=<operator>.assignment CODE=oflag =\n#ifdef O_LARGEFILE\n        O_LARGEFILE |\n#endif\n#ifdef O_BINARY\n        O_BINARY |\n#endif\n#ifdef O_CLOEXEC\n        (cloexec ? O_CLOEXEC : 0) |\n#endif\n        (state->mode == GZ_READ ?\n         O_RDONLY :\n         (O_WRONLY | O_CREAT |\n#ifdef O_EXCL\n          (exclusive ? O_EXCL : 0) |\n#endif\n          (state->mode == GZ_WRITE ?\n           O_TRUNC :\n           O_APPEND))) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=21 DISPATCH_TYPE=STATIC_DISPATCH
+      IDENTIFIER NAME=oflag CODE=oflag TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+      CALL NAME=<operator>.conditional CODE=state->mode == GZ_READ ?\n         O_RDONLY :\n         (O_WRONLY | O_CREAT |\n#ifdef O_EXCL\n          (exclusive ? O_EXCL : 0) |\n#endif\n          (state->mode == GZ_WRITE ?\n           O_TRUNC :\n           O_APPEND)) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.conditional ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+        CALL NAME=<operator>.equals CODE=state->mode == GZ_READ TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.equals ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+          CALL NAME=<operator>.indirectFieldAccess CODE=state->mode TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+            IDENTIFIER NAME=state CODE=state TYPE_FULL_NAME=gz_statep ORDER=1 ARGUMENT_INDEX=1
+            FIELD_IDENTIFIER CODE=mode ORDER=2 ARGUMENT_INDEX=2
+          CALL NAME=GZ_READ CODE=GZ_READ TYPE_FULL_NAME=int METHOD_FULL_NAME=gzguts.h:GZ_READ:int(0) SIGNATURE=int(0) ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=INLINED
+            BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+              LITERAL CODE=7247 TYPE_FULL_NAME=int ORDER=1
+        IDENTIFIER NAME=O_RDONLY CODE=<unknown> O_RDONLY TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+        CALL NAME=<operator>.or CODE=O_WRONLY | O_CREAT |\n#ifdef O_EXCL\n          (exclusive ? O_EXCL : 0) |\n#endif\n          (state->mode == GZ_WRITE ?\n           O_TRUNC :\n           O_APPEND) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.or ORDER=3 ARGUMENT_INDEX=3 DISPATCH_TYPE=STATIC_DISPATCH
+          CALL NAME=<operator>.or CODE=O_WRONLY | O_CREAT TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.or ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+            IDENTIFIER NAME=O_WRONLY CODE=<unknown> O_WRONLY TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+            IDENTIFIER NAME=O_CREAT CODE=<unknown> O_CREAT TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+          CALL NAME=<operator>.conditional CODE=state->mode == GZ_WRITE ?\n           O_TRUNC :\n           O_APPEND TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.conditional ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+            CALL NAME=<operator>.equals CODE=state->mode == GZ_WRITE TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.equals ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+              CALL NAME=<operator>.indirectFieldAccess CODE=state->mode TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                IDENTIFIER NAME=state CODE=state TYPE_FULL_NAME=gz_statep ORDER=1 ARGUMENT_INDEX=1
+                FIELD_IDENTIFIER CODE=mode ORDER=2 ARGUMENT_INDEX=2
+              CALL NAME=GZ_WRITE CODE=GZ_WRITE TYPE_FULL_NAME=int METHOD_FULL_NAME=gzguts.h:GZ_WRITE:int(0) SIGNATURE=int(0) ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=INLINED
+                BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+                  LITERAL CODE=31153 TYPE_FULL_NAME=int ORDER=1
+            IDENTIFIER NAME=O_TRUNC CODE=<unknown> O_TRUNC TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+            IDENTIFIER NAME=O_APPEND CODE=<unknown> O_APPEND TYPE_FULL_NAME=ANY ORDER=3 ARGUMENT_INDEX=3
+    CALL NAME=<operator>.assignment CODE=state->fd = fd > -1 ? fd : (\n#ifdef WIDECHAR\n        fd == -2 ? _wopen(path, oflag, 0666) :\n#endif\n        open((const char *)path, oflag, 0666)) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=22 DISPATCH_TYPE=STATIC_DISPATCH
+      CALL NAME=<operator>.indirectFieldAccess CODE=state->fd TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=state CODE=state TYPE_FULL_NAME=gz_statep ORDER=1 ARGUMENT_INDEX=1
+        FIELD_IDENTIFIER CODE=fd ORDER=2 ARGUMENT_INDEX=2
+      CALL NAME=<operator>.conditional CODE=fd > -1 ? fd : (\n#ifdef WIDECHAR\n        fd == -2 ? _wopen(path, oflag, 0666) :\n#endif\n        open((const char *)path, oflag, 0666)) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.conditional ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+        CALL NAME=<operator>.greaterThan CODE=fd > -1 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.greaterThan ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=fd CODE=fd TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+          CALL NAME=<operator>.minus CODE=-1 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.minus ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+            LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+        IDENTIFIER NAME=fd CODE=fd TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+        CALL NAME=open CODE=open((const char *)path, oflag, 0666) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=open ORDER=3 ARGUMENT_INDEX=3 DISPATCH_TYPE=STATIC_DISPATCH
+          CALL NAME=<operator>.cast CODE=(const char *)path TYPE_FULL_NAME=char METHOD_FULL_NAME=<operator>.cast ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+            TYPE_REF CODE=const char * TYPE_FULL_NAME=char ORDER=1 ARGUMENT_INDEX=1
+            IDENTIFIER NAME=path CODE=path TYPE_FULL_NAME=void* ORDER=2 ARGUMENT_INDEX=2
+          IDENTIFIER NAME=oflag CODE=oflag TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+          LITERAL CODE=0666 TYPE_FULL_NAME=int ORDER=3 ARGUMENT_INDEX=3
+    CONTROL_STRUCTURE CODE=if (state->fd == -1) {\n        free(state->path);\n        free(state);\n        return NULL;\n    } ORDER=23
+      CALL NAME=<operator>.equals CODE=state->fd == -1 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.equals ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+        CALL NAME=<operator>.indirectFieldAccess CODE=state->fd TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=state CODE=state TYPE_FULL_NAME=gz_statep ORDER=1 ARGUMENT_INDEX=1
+          FIELD_IDENTIFIER CODE=fd ORDER=2 ARGUMENT_INDEX=2
+        CALL NAME=<operator>.minus CODE=-1 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.minus ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+          LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+      BLOCK CODE={\n        free(state->path);\n        free(state);\n        return NULL;\n    } TYPE_FULL_NAME=void ORDER=2
+        CALL NAME=free CODE=free(state->path) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=free ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+          CALL NAME=<operator>.indirectFieldAccess CODE=state->path TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+            IDENTIFIER NAME=state CODE=state TYPE_FULL_NAME=gz_statep ORDER=1 ARGUMENT_INDEX=1
+            FIELD_IDENTIFIER CODE=path ORDER=2 ARGUMENT_INDEX=2
+        CALL NAME=free CODE=free(state) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=free ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=state CODE=state TYPE_FULL_NAME=gz_statep ORDER=1 ARGUMENT_INDEX=1
+        RETURN CODE=return NULL; ORDER=3
+          IDENTIFIER NAME=NULL CODE=<unknown> NULL TYPE_FULL_NAME=ANY ORDER=1
+    CONTROL_STRUCTURE CODE=if (state->mode == GZ_APPEND) {\n        LSEEK(state->fd, 0, SEEK_END);  /* so gzoffset() is correct */\n        state->mode = GZ_WRITE;         /* simplify later checks */\n    } ORDER=24
+      CALL NAME=<operator>.equals CODE=state->mode == GZ_APPEND TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.equals ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+        CALL NAME=<operator>.indirectFieldAccess CODE=state->mode TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=state CODE=state TYPE_FULL_NAME=gz_statep ORDER=1 ARGUMENT_INDEX=1
+          FIELD_IDENTIFIER CODE=mode ORDER=2 ARGUMENT_INDEX=2
+        CALL NAME=GZ_APPEND CODE=GZ_APPEND TYPE_FULL_NAME=int METHOD_FULL_NAME=gzguts.h:GZ_APPEND:int(0) SIGNATURE=int(0) ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=INLINED
+          BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+            LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=1
+      BLOCK CODE={\n        LSEEK(state->fd, 0, SEEK_END);  /* so gzoffset() is correct */\n        state->mode = GZ_WRITE;         /* simplify later checks */\n    } TYPE_FULL_NAME=void ORDER=2
+        CALL NAME=lseek CODE=lseek(state->fd, 0, 2) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=lseek ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+          CALL NAME=<operator>.indirectFieldAccess CODE=state->fd TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+            IDENTIFIER NAME=state CODE=state TYPE_FULL_NAME=gz_statep ORDER=1 ARGUMENT_INDEX=1
+            FIELD_IDENTIFIER CODE=fd ORDER=2 ARGUMENT_INDEX=2
+          LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+          CALL NAME=SEEK_END CODE=SEEK_END TYPE_FULL_NAME=int METHOD_FULL_NAME=zconf.h:SEEK_END:int(0) SIGNATURE=int(0) ORDER=3 ARGUMENT_INDEX=3 DISPATCH_TYPE=INLINED
+            BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+              LITERAL CODE=2 TYPE_FULL_NAME=int ORDER=1
+        CALL NAME=<operator>.assignment CODE=state->mode = GZ_WRITE TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+          CALL NAME=<operator>.indirectFieldAccess CODE=state->mode TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+            IDENTIFIER NAME=state CODE=state TYPE_FULL_NAME=gz_statep ORDER=1 ARGUMENT_INDEX=1
+            FIELD_IDENTIFIER CODE=mode ORDER=2 ARGUMENT_INDEX=2
+          CALL NAME=GZ_WRITE CODE=GZ_WRITE TYPE_FULL_NAME=int METHOD_FULL_NAME=gzguts.h:GZ_WRITE:int(0) SIGNATURE=int(0) ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=INLINED
+            BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+              LITERAL CODE=31153 TYPE_FULL_NAME=int ORDER=1
+    CONTROL_STRUCTURE CODE=if (state->mode == GZ_READ) {\n        state->start = LSEEK(state->fd, 0, SEEK_CUR);\n        if (state->start == -1) state->start = 0;\n    } ORDER=25
+      CALL NAME=<operator>.equals CODE=state->mode == GZ_READ TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.equals ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+        CALL NAME=<operator>.indirectFieldAccess CODE=state->mode TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=state CODE=state TYPE_FULL_NAME=gz_statep ORDER=1 ARGUMENT_INDEX=1
+          FIELD_IDENTIFIER CODE=mode ORDER=2 ARGUMENT_INDEX=2
+        CALL NAME=GZ_READ CODE=GZ_READ TYPE_FULL_NAME=int METHOD_FULL_NAME=gzguts.h:GZ_READ:int(0) SIGNATURE=int(0) ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=INLINED
+          BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+            LITERAL CODE=7247 TYPE_FULL_NAME=int ORDER=1
+      BLOCK CODE={\n        state->start = LSEEK(state->fd, 0, SEEK_CUR);\n        if (state->start == -1) state->start = 0;\n    } TYPE_FULL_NAME=void ORDER=2
+        CALL NAME=<operator>.assignment CODE=state->start = LSEEK(state->fd, 0, SEEK_CUR) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+          CALL NAME=<operator>.indirectFieldAccess CODE=state->start TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+            IDENTIFIER NAME=state CODE=state TYPE_FULL_NAME=gz_statep ORDER=1 ARGUMENT_INDEX=1
+            FIELD_IDENTIFIER CODE=start ORDER=2 ARGUMENT_INDEX=2
+          CALL NAME=lseek CODE=lseek(state->fd, 0, 1) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=lseek ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+            CALL NAME=<operator>.indirectFieldAccess CODE=state->fd TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+              IDENTIFIER NAME=state CODE=state TYPE_FULL_NAME=gz_statep ORDER=1 ARGUMENT_INDEX=1
+              FIELD_IDENTIFIER CODE=fd ORDER=2 ARGUMENT_INDEX=2
+            LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+            CALL NAME=SEEK_CUR CODE=SEEK_CUR TYPE_FULL_NAME=int METHOD_FULL_NAME=zconf.h:SEEK_CUR:int(0) SIGNATURE=int(0) ORDER=3 ARGUMENT_INDEX=3 DISPATCH_TYPE=INLINED
+              BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+                LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=1
+        CONTROL_STRUCTURE CODE=if (state->start == -1) state->start = 0; ORDER=2
+          CALL NAME=<operator>.equals CODE=state->start == -1 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.equals ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+            CALL NAME=<operator>.indirectFieldAccess CODE=state->start TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+              IDENTIFIER NAME=state CODE=state TYPE_FULL_NAME=gz_statep ORDER=1 ARGUMENT_INDEX=1
+              FIELD_IDENTIFIER CODE=start ORDER=2 ARGUMENT_INDEX=2
+            CALL NAME=<operator>.minus CODE=-1 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.minus ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+              LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+          BLOCK TYPE_FULL_NAME=ANY ORDER=2
+            CALL NAME=<operator>.assignment CODE=state->start = 0 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+              CALL NAME=<operator>.indirectFieldAccess CODE=state->start TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                IDENTIFIER NAME=state CODE=state TYPE_FULL_NAME=gz_statep ORDER=1 ARGUMENT_INDEX=1
+                FIELD_IDENTIFIER CODE=start ORDER=2 ARGUMENT_INDEX=2
+              LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+    CALL NAME=gz_reset CODE=gz_reset(state) TYPE_FULL_NAME=void METHOD_FULL_NAME=gz_reset ORDER=26 DISPATCH_TYPE=STATIC_DISPATCH
+      IDENTIFIER NAME=state CODE=state TYPE_FULL_NAME=gz_statep ORDER=1 ARGUMENT_INDEX=1
+    RETURN CODE=return (gzFile)state; ORDER=27
+      CALL NAME=<operator>.cast CODE=(gzFile)state TYPE_FULL_NAME=gzFile METHOD_FULL_NAME=<operator>.cast ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+        TYPE_REF CODE=gzFile TYPE_FULL_NAME=gzFile ORDER=1 ARGUMENT_INDEX=1
+        IDENTIFIER NAME=state CODE=state TYPE_FULL_NAME=gz_statep ORDER=2 ARGUMENT_INDEX=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=gzFile ORDER=5

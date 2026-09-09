@@ -1,0 +1,32 @@
+{
+  "command": [
+    "/Users/shayaunnejad/vibe-code/joern-oxidized/.local/astra-sprint/oracle/runtime/joern-cli/joern",
+    "--script",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/.local/body-preprocessor/undef-boundaries/oracle.sc",
+    "--param",
+    "inputPath=/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/.local/body-preprocessor/undef-boundaries/input"
+  ],
+  "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/.local/body-preprocessor/undef-boundaries/oracle-workspace",
+  "exitCode": 0,
+  "seconds": 7.63887712500582,
+  "inputHashes": {
+    "plain_undef": {
+      "main.c": "1beb332996059084858d26452f389b0b6bb43936e58dbae76136ccda191a9eed"
+    },
+    "spaced_undef": {
+      "main.c": "0c0e092748ee2161ff7f6d727867d909bce54a29c1146508a324f3a5260bbd1b"
+    },
+    "tab_undef": {
+      "main.c": "132d7e84c61e3c1bf1023eceb01d450f0befb4ae62ea3a18cbee0c7c06ca2dce"
+    },
+    "header_spaced_undef": {
+      "api.h": "6c686dcdd3f90c301989a4ac9103932d8822f2e92867542b894bcce8451ec515",
+      "main.c": "6cd550aa5afc505d95318f9a086ec54e89ca2846c03fa60836367c9d544683b2"
+    }
+  },
+  "scriptSha256": "56431f14868678e64f9eb41026b44f1d3d7738404d28d2db62711b520c98c742",
+  "joernVersion": "4.0.555",
+  "officialArchiveSha256": "12989883d6b5aeacc97b2dc0ecc4e2951bf50e48cb244f8c8f333d11a8be0c7e",
+  "rawStdoutSha256": "0acf4c771918871a3e1c024976f469e6d7b8d2da5b36f94e34cf6e9e5168fa10",
+  "rawStderrSha256": "a3763d0655a4ea0a238d3135f9d85340b5828ff1307cd42a6f468fdd94e07210"
+}

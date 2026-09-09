@@ -1,0 +1,88 @@
+--- joern
++++ before
+@@ -6,8 +6,6 @@
+   METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+   METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+   BLOCK CODE={\n#if 1\n return x;\n#else\n return 0;\n#endif\n} TYPE_FULL_NAME=void ORDER=2
+-    RETURN CODE=return x; ORDER=1
+-      IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+ 
+ METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1
+@@ -15,8 +13,6 @@
+     METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+     METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+     BLOCK CODE={\n#if 1\n return x;\n#else\n return 0;\n#endif\n} TYPE_FULL_NAME=void ORDER=2
+-      RETURN CODE=return x; ORDER=1
+-        IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1
+     METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+   BLOCK TYPE_FULL_NAME=ANY ORDER=1
+     METHOD_REF CODE=kept TYPE_FULL_NAME=kept METHOD_FULL_NAME=kept ORDER=1
+@@ -39,13 +35,10 @@
+ NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+ NODES|TYPE NAME=kept FULL_NAME=kept TYPE_DECL_FULL_NAME=kept
+ NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+-EDGES|ARGUMENT kept#4 -> kept#5
+ EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+-EDGES|CFG kept#0 -> kept#5
+-EDGES|CFG kept#4 -> kept#6
+-EDGES|CFG kept#5 -> kept#4
+-EDGES|CFG main.c:<global>#0 -> main.c:<global>#9
+-EDGES|CFG main.c:<global>#9 -> main.c:<global>#10
++EDGES|CFG kept#0 -> kept#4
++EDGES|CFG main.c:<global>#0 -> main.c:<global>#7
++EDGES|CFG main.c:<global>#7 -> main.c:<global>#8
+ EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+ EDGES|CONTAINS D:main.c:<global> -> D:kept
+ EDGES|CONTAINS D:main.c:<global> -> main.c:<global>#0
+@@ -55,21 +48,18 @@
+ EDGES|CONTAINS F:<includes> -> D:void
+ EDGES|CONTAINS F:main.c -> D:main.c:<global>
+ EDGES|CONTAINS kept#0 -> kept#3
+-EDGES|CONTAINS kept#0 -> kept#4
+-EDGES|CONTAINS kept#0 -> kept#5
+ EDGES|CONTAINS main.c:<global>#0 -> kept#0
+-EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#8
+-EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#9
++EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#6
++EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#7
+ EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+ EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+ EDGES|EVAL_TYPE kept#1 -> T:int
+ EDGES|EVAL_TYPE kept#2 -> T:int
+ EDGES|EVAL_TYPE kept#3 -> T:void
+-EDGES|EVAL_TYPE kept#5 -> T:int
+-EDGES|EVAL_TYPE kept#6 -> T:int
+-EDGES|EVAL_TYPE main.c:<global>#10 -> T:ANY
++EDGES|EVAL_TYPE kept#4 -> T:int
++EDGES|EVAL_TYPE main.c:<global>#6 -> T:ANY
++EDGES|EVAL_TYPE main.c:<global>#7 -> T:kept
+ EDGES|EVAL_TYPE main.c:<global>#8 -> T:ANY
+-EDGES|EVAL_TYPE main.c:<global>#9 -> T:kept
+ EDGES|PARAMETER_LINK kept#1 -> kept#2
+ EDGES|REF NB:<global> -> NS:<global>
+ EDGES|REF NB:<includes>:<global> -> NS:<global>
+@@ -78,8 +68,7 @@
+ EDGES|REF T:int -> D:int
+ EDGES|REF T:kept -> D:kept
+ EDGES|REF T:void -> D:void
+-EDGES|REF kept#5 -> kept#1
+-EDGES|REF main.c:<global>#9 -> kept#0
++EDGES|REF main.c:<global>#7 -> kept#0
+ EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+ EDGES|SOURCE_FILE D:ANY -> F:<includes>
+ EDGES|SOURCE_FILE D:int -> F:<includes>
+@@ -91,11 +80,7 @@
+ EDGES|SOURCE_FILE NB:main.c:<global> -> F:main.c
+ EDGES|SOURCE_FILE kept#0 -> F:main.c
+ EDGES|SOURCE_FILE main.c:<global>#0 -> F:main.c
+-FLOWS|REACHING_DEF[<RET>] kept#4 -> kept#6
+ FLOWS|REACHING_DEF[] kept#0 -> kept#1
+-FLOWS|REACHING_DEF[] kept#0 -> kept#5
+-FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#9
++FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#7
+ FLOWS|REACHING_DEF[x] kept#1 -> kept#2
+-FLOWS|REACHING_DEF[x] kept#1 -> kept#5
+-FLOWS|REACHING_DEF[x] kept#1 -> kept#6
+-FLOWS|REACHING_DEF[x] kept#5 -> kept#4
++FLOWS|REACHING_DEF[x] kept#1 -> kept#4

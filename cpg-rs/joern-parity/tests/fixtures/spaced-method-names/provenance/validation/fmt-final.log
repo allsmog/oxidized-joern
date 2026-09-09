@@ -1,0 +1,8 @@
+Diff in /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-inactive-declarations/cpg-rs/joern-parity/tests/spaced_method_names.rs:72:
+     }
+ }
+ 
+-
+ #[test]
+ fn method_prefix_collision_cannot_steal_header_or_macro_entry_edges() {
+     let dump = cpg_lang_c::import::canonical_dump(&build_case("prefix_collision"));

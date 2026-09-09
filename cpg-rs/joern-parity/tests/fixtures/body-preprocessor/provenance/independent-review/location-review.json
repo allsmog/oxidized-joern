@@ -1,0 +1,110 @@
+{
+  "status": "PASS_BOUNDED_LINE_ASSERTIONS",
+  "source": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/.local/body-preprocessor/location-improvement/input/conditional_duplicates/locations.c",
+    "sha256": "dc9a677f1553fdcf7188329042e1d3691249cab9bcd9fbb93ca7a2f0e6077377"
+  },
+  "raw": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/.local/body-preprocessor/location-improvement/live.stdout",
+    "sha256": "e0b96ff88c60de934cca9ba41c457d7bd942ce743ed379aed916598b154c58ff"
+  },
+  "reference": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/.local/body-preprocessor/location-improvement/input/conditional_duplicates/expected.txt",
+    "sha256": "ccb274b0aac243a9ccd4d61de4fe5a1d25c9950341837d47b85d694a0fe82055"
+  },
+  "rawExtractionExact": true,
+  "runs": [
+    {
+      "variant": "baseline",
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/seventh-batch/final-real-differential/bin/joern-parity",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/.local/body-preprocessor/location-improvement/input/conditional_duplicates/locations.c"
+      ],
+      "exitCode": 0,
+      "binary": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/seventh-batch/final-real-differential/bin/joern-parity",
+        "sha256": "d4503d37b2a7a37df7c3d58520fea9d943530bce323bd1909032f102e9640f8b"
+      },
+      "stdout": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/eighth-body-review/conditional-duplicates/baseline.txt",
+        "sha256": "f02331cfe1f30f961acb9fa1a802ff068b31420f786a928dcb140f36ed80f71d"
+      },
+      "fullExact": false
+    },
+    {
+      "variant": "candidate",
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/eighth-body-review/frozen-v4/joern-parity",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/.local/body-preprocessor/location-improvement/input/conditional_duplicates/locations.c"
+      ],
+      "exitCode": 0,
+      "binary": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/eighth-body-review/frozen-v4/joern-parity",
+        "sha256": "575397f4a349231a559641e6ca12e76ed4fc42e6e1bc77e8ffeb12cb30f48b4a"
+      },
+      "stdout": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/eighth-body-review/conditional-duplicates/candidate.txt",
+        "sha256": "ccb274b0aac243a9ccd4d61de4fe5a1d25c9950341837d47b85d694a0fe82055"
+      },
+      "fullExact": true
+    }
+  ],
+  "liveLocationRecords": [
+    "LOC|same#3 BLOCK CODE={\\n  return x;\\n} LINE_NUMBER=3 COLUMN_NUMBER=17",
+    "LOC|same<duplicate>0#3 BLOCK CODE={\\n  return x + 1;\\n} LINE_NUMBER=8 COLUMN_NUMBER=17",
+    "LOC|same<duplicate>1#3 BLOCK CODE={\\n  return x + 2;\\n} LINE_NUMBER=13 COLUMN_NUMBER=17",
+    "LOC|locations.c:<global>#22 BLOCK LINE_NUMBER=1 COLUMN_NUMBER=1",
+    "LOC|<includes>:<global>#1 BLOCK ",
+    "LOC|<operator>.addition#2 BLOCK ",
+    "LOC|same<duplicate>1#5 CALL NAME=<operator>.addition CODE=x + 2 LINE_NUMBER=14 COLUMN_NUMBER=10",
+    "LOC|F:locations.c FILE NAME=locations.c",
+    "LOC|F:<includes> FILE NAME=<includes>",
+    "LOC|F:<unknown> FILE NAME=<unknown>",
+    "LOC|same#5 IDENTIFIER NAME=x CODE=x LINE_NUMBER=4 COLUMN_NUMBER=10",
+    "LOC|same<duplicate>1#6 IDENTIFIER NAME=x CODE=x LINE_NUMBER=14 COLUMN_NUMBER=10",
+    "LOC|same<duplicate>1#7 LITERAL CODE=2 LINE_NUMBER=14 COLUMN_NUMBER=14",
+    "LOC|locations.c:<global>#1 METHOD NAME=same CODE=int same(int x) {\\n  return x;\\n} LINE_NUMBER=3 COLUMN_NUMBER=1",
+    "LOC|locations.c:<global>#0 METHOD NAME=<global> CODE=<global> LINE_NUMBER=1 COLUMN_NUMBER=1",
+    "LOC|locations.c:<global>#8 METHOD NAME=same CODE=int same(int x) {\\n  return x + 1;\\n} LINE_NUMBER=8 COLUMN_NUMBER=1",
+    "LOC|locations.c:<global>#13 METHOD NAME=same CODE=int same(int x) {\\n  return x + 2;\\n} LINE_NUMBER=13 COLUMN_NUMBER=1",
+    "LOC|<includes>:<global>#0 METHOD NAME=<global> CODE=<global> LINE_NUMBER=1",
+    "LOC|<operator>.addition#0 METHOD NAME=<operator>.addition",
+    "LOC|same#1 METHOD_PARAMETER_IN NAME=x CODE=int x LINE_NUMBER=3 COLUMN_NUMBER=10",
+    "LOC|same<duplicate>0#1 METHOD_PARAMETER_IN NAME=x CODE=int x LINE_NUMBER=8 COLUMN_NUMBER=10",
+    "LOC|same<duplicate>1#1 METHOD_PARAMETER_IN NAME=x CODE=int x LINE_NUMBER=13 COLUMN_NUMBER=10",
+    "LOC|<operator>.addition#1 METHOD_PARAMETER_IN NAME=p1 CODE=p1",
+    "LOC|<operator>.addition#4 METHOD_PARAMETER_IN NAME=p2 CODE=p2",
+    "LOC|same#2 METHOD_PARAMETER_OUT NAME=x CODE=int x LINE_NUMBER=3 COLUMN_NUMBER=10",
+    "LOC|same<duplicate>0#2 METHOD_PARAMETER_OUT NAME=x CODE=int x LINE_NUMBER=8 COLUMN_NUMBER=10",
+    "LOC|same<duplicate>1#2 METHOD_PARAMETER_OUT NAME=x CODE=int x LINE_NUMBER=13 COLUMN_NUMBER=10",
+    "LOC|<operator>.addition#3 METHOD_PARAMETER_OUT NAME=p1 CODE=p1",
+    "LOC|<operator>.addition#6 METHOD_PARAMETER_OUT NAME=p2 CODE=p2",
+    "LOC|locations.c:<global>#23 METHOD_REF CODE=same LINE_NUMBER=3 COLUMN_NUMBER=1",
+    "LOC|locations.c:<global>#24 METHOD_REF CODE=same LINE_NUMBER=8 COLUMN_NUMBER=1",
+    "LOC|locations.c:<global>#25 METHOD_REF CODE=same LINE_NUMBER=13 COLUMN_NUMBER=1",
+    "LOC|same#6 METHOD_RETURN CODE=RET LINE_NUMBER=3 COLUMN_NUMBER=1",
+    "LOC|same<duplicate>0#4 METHOD_RETURN CODE=RET LINE_NUMBER=8 COLUMN_NUMBER=1",
+    "LOC|same<duplicate>1#8 METHOD_RETURN CODE=RET LINE_NUMBER=13 COLUMN_NUMBER=1",
+    "LOC|locations.c:<global>#26 METHOD_RETURN CODE=RET LINE_NUMBER=1 COLUMN_NUMBER=1",
+    "LOC|<includes>:<global>#2 METHOD_RETURN CODE=RET LINE_NUMBER=1",
+    "LOC|<operator>.addition#5 METHOD_RETURN CODE=RET",
+    "LOC|NS:<global> NAMESPACE NAME=<global>",
+    "LOC|NB:<global> NAMESPACE_BLOCK NAME=<global>",
+    "LOC|NB:locations.c:<global> NAMESPACE_BLOCK NAME=<global>",
+    "LOC|NB:<includes>:<global> NAMESPACE_BLOCK NAME=<global>",
+    "LOC|same#4 RETURN CODE=return x; LINE_NUMBER=4 COLUMN_NUMBER=3",
+    "LOC|same<duplicate>1#4 RETURN CODE=return x + 2; LINE_NUMBER=14 COLUMN_NUMBER=3",
+    "LOC|D:same TYPE_DECL NAME=same CODE=same LINE_NUMBER=3 COLUMN_NUMBER=1",
+    "LOC|D:same<duplicate>0 TYPE_DECL NAME=same CODE=same LINE_NUMBER=8 COLUMN_NUMBER=1",
+    "LOC|D:same<duplicate>1 TYPE_DECL NAME=same CODE=same LINE_NUMBER=13 COLUMN_NUMBER=1",
+    "LOC|D:locations.c:<global> TYPE_DECL NAME=<global> CODE=<global> LINE_NUMBER=1 COLUMN_NUMBER=1",
+    "LOC|D:ANY TYPE_DECL NAME=ANY CODE=ANY",
+    "LOC|D:int TYPE_DECL NAME=int CODE=int",
+    "LOC|D:void TYPE_DECL NAME=void CODE=void"
+  ],
+  "independentTestLog": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/eighth-body-review/location-tests.log",
+    "sha256": "511f93be1acab6f2764813f2c1491ab9ed913e96f46358ea127e70ff69fbc539"
+  },
+  "scope": "The current production test verifies separate source lines3/8/13 for same-name methods, associated parameters and METHOD_RETURNs. The inactive line8 agrees with retained live metadata (baseline used7). No complete column-number parity claim."
+}

@@ -1,0 +1,107 @@
+METHOD NAME=<global> CODE=<global> FULL_NAME=<includes>:<global> ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1
+  METHOD NAME=render CODE=void render(char *p, int n) {\n#if !defined(NO_snprintf) && !defined(NO_vsnprintf)\n    (void)snprintf(p, n, "%d", n);\n#else\n    sprintf(p, "%d", n);\n#endif\n} FULL_NAME=render SIGNATURE=void(char*,int) ORDER=1
+    METHOD_PARAMETER_IN NAME=p CODE=char *p TYPE_FULL_NAME=char* ORDER=1
+    METHOD_PARAMETER_OUT NAME=p CODE=char *p TYPE_FULL_NAME=char* ORDER=1
+    METHOD_PARAMETER_IN NAME=n CODE=int n TYPE_FULL_NAME=int ORDER=2
+    METHOD_PARAMETER_OUT NAME=n CODE=int n TYPE_FULL_NAME=int ORDER=2
+    BLOCK CODE={\n#if !defined(NO_snprintf) && !defined(NO_vsnprintf)\n    (void)snprintf(p, n, "%d", n);\n#else\n    sprintf(p, "%d", n);\n#endif\n} TYPE_FULL_NAME=void ORDER=3
+      LOCAL NAME=NO_vsnprintf CODE=<unknown> NO_vsnprintf TYPE_FULL_NAME=ANY ORDER=0
+      LOCAL NAME=NO_snprintf CODE=<unknown> NO_snprintf TYPE_FULL_NAME=ANY ORDER=0
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=4
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+    METHOD_REF CODE=render TYPE_FULL_NAME=render METHOD_FULL_NAME=render ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=render CODE=void render(char *p, int n) {\n#if !defined(NO_snprintf) && !defined(NO_vsnprintf)\n    (void)snprintf(p, n, "%d", n);\n#else\n    sprintf(p, "%d", n);\n#endif\n} FULL_NAME=render SIGNATURE=void(char*,int) ORDER=1
+  METHOD_PARAMETER_IN NAME=p CODE=char *p TYPE_FULL_NAME=char* ORDER=1
+  METHOD_PARAMETER_OUT NAME=p CODE=char *p TYPE_FULL_NAME=char* ORDER=1
+  METHOD_PARAMETER_IN NAME=n CODE=int n TYPE_FULL_NAME=int ORDER=2
+  METHOD_PARAMETER_OUT NAME=n CODE=int n TYPE_FULL_NAME=int ORDER=2
+  BLOCK CODE={\n#if !defined(NO_snprintf) && !defined(NO_vsnprintf)\n    (void)snprintf(p, n, "%d", n);\n#else\n    sprintf(p, "%d", n);\n#endif\n} TYPE_FULL_NAME=void ORDER=3
+    LOCAL NAME=NO_vsnprintf CODE=<unknown> NO_vsnprintf TYPE_FULL_NAME=ANY ORDER=0
+    LOCAL NAME=NO_snprintf CODE=<unknown> NO_snprintf TYPE_FULL_NAME=ANY ORDER=0
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=4
+
+NODES|META_DATA LANGUAGE=NEWC
+NODES|FILE NAME=<includes> ORDER=1
+NODES|FILE NAME=<unknown> ORDER=0
+NODES|FILE NAME=main.c ORDER=0
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<global> FILENAME=<unknown> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<includes>:<global> FILENAME=<includes> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|NAMESPACE NAME=<global>
+NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=char* FULL_NAME=char* CODE=char* IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=<global> FULL_NAME=main.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=render FULL_NAME=render CODE=render AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+NODES|TYPE NAME=char* FULL_NAME=char* TYPE_DECL_FULL_NAME=char*
+NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+NODES|TYPE NAME=render FULL_NAME=render TYPE_DECL_FULL_NAME=render
+NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+EDGES|CFG main.c:<global>#0 -> main.c:<global>#11
+EDGES|CFG main.c:<global>#1 -> render#8
+EDGES|CFG main.c:<global>#11 -> main.c:<global>#12
+EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+EDGES|CONTAINS D:main.c:<global> -> D:render
+EDGES|CONTAINS D:main.c:<global> -> main.c:<global>#0
+EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+EDGES|CONTAINS F:<includes> -> D:ANY
+EDGES|CONTAINS F:<includes> -> D:char*
+EDGES|CONTAINS F:<includes> -> D:int
+EDGES|CONTAINS F:<includes> -> D:void
+EDGES|CONTAINS F:main.c -> D:main.c:<global>
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#1
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#10
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#11
+EDGES|CONTAINS main.c:<global>#1 -> render#5
+EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+EDGES|EVAL_TYPE main.c:<global>#10 -> T:ANY
+EDGES|EVAL_TYPE main.c:<global>#11 -> T:render
+EDGES|EVAL_TYPE main.c:<global>#12 -> T:ANY
+EDGES|EVAL_TYPE render#1 -> T:char*
+EDGES|EVAL_TYPE render#2 -> T:char*
+EDGES|EVAL_TYPE render#3 -> T:int
+EDGES|EVAL_TYPE render#4 -> T:int
+EDGES|EVAL_TYPE render#5 -> T:void
+EDGES|EVAL_TYPE render#6 -> T:ANY
+EDGES|EVAL_TYPE render#7 -> T:ANY
+EDGES|EVAL_TYPE render#8 -> T:void
+EDGES|PARAMETER_LINK render#1 -> render#2
+EDGES|PARAMETER_LINK render#3 -> render#4
+EDGES|REF NB:<global> -> NS:<global>
+EDGES|REF NB:<includes>:<global> -> NS:<global>
+EDGES|REF NB:main.c:<global> -> NS:<global>
+EDGES|REF T:ANY -> D:ANY
+EDGES|REF T:char* -> D:char*
+EDGES|REF T:int -> D:int
+EDGES|REF T:render -> D:render
+EDGES|REF T:void -> D:void
+EDGES|REF main.c:<global>#11 -> main.c:<global>#1
+EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+EDGES|SOURCE_FILE D:ANY -> F:<includes>
+EDGES|SOURCE_FILE D:char* -> F:<includes>
+EDGES|SOURCE_FILE D:int -> F:<includes>
+EDGES|SOURCE_FILE D:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE D:render -> F:main.c
+EDGES|SOURCE_FILE D:void -> F:<includes>
+EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
+EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>
+EDGES|SOURCE_FILE NB:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#0 -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#1 -> F:main.c
+FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#11
+FLOWS|REACHING_DEF[] main.c:<global>#1 -> render#1
+FLOWS|REACHING_DEF[] main.c:<global>#1 -> render#3
+FLOWS|REACHING_DEF[n] render#3 -> render#4
+FLOWS|REACHING_DEF[n] render#3 -> render#8
+FLOWS|REACHING_DEF[p] render#1 -> render#2
+FLOWS|REACHING_DEF[p] render#1 -> render#8
