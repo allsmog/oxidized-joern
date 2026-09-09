@@ -1,0 +1,74 @@
+{
+  "case": "base_qualified_pointer",
+  "status": "COMPLETE_BOUND_COMPARISON",
+  "exitCode": 0,
+  "timedOut": false,
+  "processError": null,
+  "command": [
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/tenth-batch/repaired-final-real-differential/bin/joern-parity",
+    "--production",
+    "main.c"
+  ],
+  "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/base_qualified_pointer/input",
+  "seconds": 0.018149874988012016,
+  "inputBefore": {
+    "files": {
+      "main.c": {
+        "kind": "file",
+        "sha256": "683671d135a3d3d8385a92bba5f8fc1b87e1650c0b698282ee8416a11d110e0d",
+        "bytes": 90
+      }
+    },
+    "directories": []
+  },
+  "inputAfter": {
+    "files": {
+      "main.c": {
+        "kind": "file",
+        "sha256": "683671d135a3d3d8385a92bba5f8fc1b87e1650c0b698282ee8416a11d110e0d",
+        "bytes": 90
+      }
+    },
+    "directories": []
+  },
+  "bindingErrors": [],
+  "expected": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/base_qualified_pointer/expected.txt",
+    "sha256": "53b149c0c3b91fc21969901c294099353666c6e0842f621bf49d596a9017cb5c",
+    "bytes": 6775
+  },
+  "actual": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/base_qualified_pointer/actual.txt",
+    "sha256": "fbaa5726235b4fef3793f017331847ece1bd623819660858f4a7405b5e55d00b",
+    "bytes": 6787
+  },
+  "stderr": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/base_qualified_pointer/stderr.txt",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0
+  },
+  "completeDiff": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/base_qualified_pointer/complete.diff",
+    "sha256": "62163afd06c279c6f790dbf26700466fd8e48da83cfa4acd64e349afdf606ab5",
+    "bytes": 3835
+  },
+  "byteExact": false,
+  "exact": false,
+  "completeProducer": true,
+  "multiplicities": {
+    "includingSeparators": {
+      "expected": 118,
+      "actual": 118,
+      "matching": 111,
+      "missing": 7,
+      "extra": 7
+    },
+    "nonempty": {
+      "expected": 115,
+      "actual": 115,
+      "matching": 108,
+      "missing": 7,
+      "extra": 7
+    }
+  }
+}

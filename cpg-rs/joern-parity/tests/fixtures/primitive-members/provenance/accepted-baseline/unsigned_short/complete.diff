@@ -1,0 +1,63 @@
+--- complete-live-reference
++++ accepted-tenth-production
+@@ -4,7 +4,7 @@
+ 
+ METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1
+   TYPE_DECL NAME=Record CODE=struct Record {\n    unsigned short value;\n} FULL_NAME=Record ORDER=1
+-    MEMBER NAME=value CODE=value TYPE_FULL_NAME=shortunsigned ORDER=1
++    MEMBER NAME=value CODE=value TYPE_FULL_NAME=unsigned short ORDER=1
+   METHOD NAME=ordinary CODE=int ordinary(void) {\n    return 7;\n} FULL_NAME=ordinary SIGNATURE=int(void) ORDER=1
+     METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+     METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+@@ -38,13 +38,13 @@
+ NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE_DECL NAME=<global> FULL_NAME=main.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+ NODES|TYPE_DECL NAME=ordinary FULL_NAME=ordinary CODE=ordinary AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+-NODES|TYPE_DECL NAME=shortunsigned FULL_NAME=shortunsigned CODE=shortunsigned IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
++NODES|TYPE_DECL NAME=unsigned short FULL_NAME=unsigned short CODE=unsigned short IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+ NODES|TYPE NAME=Record FULL_NAME=Record TYPE_DECL_FULL_NAME=Record
+ NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+ NODES|TYPE NAME=ordinary FULL_NAME=ordinary TYPE_DECL_FULL_NAME=ordinary
+-NODES|TYPE NAME=shortunsigned FULL_NAME=shortunsigned TYPE_DECL_FULL_NAME=shortunsigned
++NODES|TYPE NAME=unsigned short FULL_NAME=unsigned short TYPE_DECL_FULL_NAME=unsigned short
+ NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+ EDGES|ARGUMENT ordinary#4 -> ordinary#5
+ EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+@@ -60,7 +60,7 @@
+ EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+ EDGES|CONTAINS F:<includes> -> D:ANY
+ EDGES|CONTAINS F:<includes> -> D:int
+-EDGES|CONTAINS F:<includes> -> D:shortunsigned
++EDGES|CONTAINS F:<includes> -> D:unsigned short
+ EDGES|CONTAINS F:<includes> -> D:void
+ EDGES|CONTAINS F:main.c -> D:main.c:<global>
+ EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#1
+@@ -77,7 +77,7 @@
+ EDGES|EVAL_TYPE main.c:<global>#11 -> T:Record
+ EDGES|EVAL_TYPE main.c:<global>#12 -> T:ordinary
+ EDGES|EVAL_TYPE main.c:<global>#13 -> T:ANY
+-EDGES|EVAL_TYPE main.c:<global>#2 -> T:shortunsigned
++EDGES|EVAL_TYPE main.c:<global>#2 -> T:unsigned short
+ EDGES|EVAL_TYPE ordinary#1 -> T:void
+ EDGES|EVAL_TYPE ordinary#2 -> T:void
+ EDGES|EVAL_TYPE ordinary#3 -> T:void
+@@ -91,7 +91,7 @@
+ EDGES|REF T:Record -> main.c:<global>#1
+ EDGES|REF T:int -> D:int
+ EDGES|REF T:ordinary -> D:ordinary
+-EDGES|REF T:shortunsigned -> D:shortunsigned
++EDGES|REF T:unsigned short -> D:unsigned short
+ EDGES|REF T:void -> D:void
+ EDGES|REF main.c:<global>#12 -> main.c:<global>#3
+ EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+@@ -99,7 +99,7 @@
+ EDGES|SOURCE_FILE D:int -> F:<includes>
+ EDGES|SOURCE_FILE D:main.c:<global> -> F:main.c
+ EDGES|SOURCE_FILE D:ordinary -> F:main.c
+-EDGES|SOURCE_FILE D:shortunsigned -> F:<includes>
++EDGES|SOURCE_FILE D:unsigned short -> F:<includes>
+ EDGES|SOURCE_FILE D:void -> F:<includes>
+ EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
+ EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>

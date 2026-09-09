@@ -1,0 +1,330 @@
+METHOD NAME=<global> CODE=<global> FULL_NAME=<includes>:<global> ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.assignment FULL_NAME=<operator>.assignment ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.notEquals FULL_NAME=<operator>.notEquals ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.pointerCall FULL_NAME=<operator>.pointerCall ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=for_callbacks CODE=unsigned long for_callbacks(unsigned long value) { for (unsigned short (*target)(unsigned short) = 0; value; value = 0) { target(value); } return target(value); } FULL_NAME=for_callbacks SIGNATURE=unsigned long(longunsigned) ORDER=1
+  METHOD_PARAMETER_IN NAME=value CODE=unsigned long value TYPE_FULL_NAME=longunsigned ORDER=1
+  METHOD_PARAMETER_OUT NAME=value CODE=unsigned long value TYPE_FULL_NAME=longunsigned ORDER=1
+  BLOCK CODE={ for (unsigned short (*target)(unsigned short) = 0; value; value = 0) { target(value); } return target(value); } TYPE_FULL_NAME=void ORDER=2
+    CONTROL_STRUCTURE CODE=for (unsigned short (*target)(unsigned short) = 0;value;value = 0) ORDER=1
+      LOCAL NAME=target CODE=unsigned short (*target)(unsigned short) = 0; TYPE_FULL_NAME=unsigned shortint(*)(unsignedshortint) ORDER=1
+      CALL NAME=<operator>.assignment CODE=(*target)(unsigned short) = 0 TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=target CODE= TYPE_FULL_NAME=unsigned shortint(*)(unsignedshortint) ORDER=1 ARGUMENT_INDEX=1
+        LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+      CALL NAME=<operator>.notEquals CODE=value != 0 TYPE_FULL_NAME=int METHOD_FULL_NAME=<operator>.notEquals ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=longunsigned ORDER=1 ARGUMENT_INDEX=1
+        LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+      CALL NAME=<operator>.assignment CODE=value = 0 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=4 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=longunsigned ORDER=1 ARGUMENT_INDEX=1
+        LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+      BLOCK CODE={ target(value); } TYPE_FULL_NAME=void ORDER=5
+        CALL NAME=<operator>.pointerCall CODE=target(value) TYPE_FULL_NAME=unsigned shortint METHOD_FULL_NAME=<operator>.pointerCall ORDER=1 DISPATCH_TYPE=DYNAMIC_DISPATCH
+          IDENTIFIER NAME=target CODE=target TYPE_FULL_NAME=unsigned shortint(*)(unsignedshortint) ORDER=1
+          IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=longunsigned ORDER=2 ARGUMENT_INDEX=1
+    RETURN CODE=return target(value); ORDER=2
+      CALL NAME=target CODE=target(value) TYPE_FULL_NAME=unsigned longint METHOD_FULL_NAME=target ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=longunsigned ORDER=1 ARGUMENT_INDEX=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=unsigned long ORDER=3
+
+METHOD NAME=<global> CODE=<global> FULL_NAME=for_callbacks.c:<global> ORDER=1
+  METHOD NAME=for_callbacks CODE=unsigned long for_callbacks(unsigned long value) { for (unsigned short (*target)(unsigned short) = 0; value; value = 0) { target(value); } return target(value); } FULL_NAME=for_callbacks SIGNATURE=unsigned long(longunsigned) ORDER=1
+    METHOD_PARAMETER_IN NAME=value CODE=unsigned long value TYPE_FULL_NAME=longunsigned ORDER=1
+    METHOD_PARAMETER_OUT NAME=value CODE=unsigned long value TYPE_FULL_NAME=longunsigned ORDER=1
+    BLOCK CODE={ for (unsigned short (*target)(unsigned short) = 0; value; value = 0) { target(value); } return target(value); } TYPE_FULL_NAME=void ORDER=2
+      CONTROL_STRUCTURE CODE=for (unsigned short (*target)(unsigned short) = 0;value;value = 0) ORDER=1
+        LOCAL NAME=target CODE=unsigned short (*target)(unsigned short) = 0; TYPE_FULL_NAME=unsigned shortint(*)(unsignedshortint) ORDER=1
+        CALL NAME=<operator>.assignment CODE=(*target)(unsigned short) = 0 TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=target CODE= TYPE_FULL_NAME=unsigned shortint(*)(unsignedshortint) ORDER=1 ARGUMENT_INDEX=1
+          LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+        CALL NAME=<operator>.notEquals CODE=value != 0 TYPE_FULL_NAME=int METHOD_FULL_NAME=<operator>.notEquals ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=longunsigned ORDER=1 ARGUMENT_INDEX=1
+          LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+        CALL NAME=<operator>.assignment CODE=value = 0 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=4 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=longunsigned ORDER=1 ARGUMENT_INDEX=1
+          LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+        BLOCK CODE={ target(value); } TYPE_FULL_NAME=void ORDER=5
+          CALL NAME=<operator>.pointerCall CODE=target(value) TYPE_FULL_NAME=unsigned shortint METHOD_FULL_NAME=<operator>.pointerCall ORDER=1 DISPATCH_TYPE=DYNAMIC_DISPATCH
+            IDENTIFIER NAME=target CODE=target TYPE_FULL_NAME=unsigned shortint(*)(unsignedshortint) ORDER=1
+            IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=longunsigned ORDER=2 ARGUMENT_INDEX=1
+      RETURN CODE=return target(value); ORDER=2
+        CALL NAME=target CODE=target(value) TYPE_FULL_NAME=unsigned longint METHOD_FULL_NAME=target ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=longunsigned ORDER=1 ARGUMENT_INDEX=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=unsigned long ORDER=3
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+    METHOD_REF CODE=for_callbacks TYPE_FULL_NAME=for_callbacks METHOD_FULL_NAME=for_callbacks ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=target CODE=unsigned long target(unsigned long value); FULL_NAME=target SIGNATURE=longunsigned(longunsigned) ORDER=1
+  METHOD_PARAMETER_IN NAME=value CODE=unsigned long value TYPE_FULL_NAME=longunsigned ORDER=1
+  METHOD_PARAMETER_OUT NAME=value CODE=unsigned long value TYPE_FULL_NAME=longunsigned ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=longunsigned ORDER=3
+
+NODES|META_DATA LANGUAGE=NEWC
+NODES|FILE NAME=<includes> ORDER=1
+NODES|FILE NAME=<unknown> ORDER=0
+NODES|FILE NAME=for_callbacks.c ORDER=0
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<global> FILENAME=<unknown> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<includes>:<global> FILENAME=<includes> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=for_callbacks.c:<global> FILENAME=for_callbacks.c ORDER=1
+NODES|NAMESPACE NAME=<global>
+NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=for_callbacks FULL_NAME=for_callbacks CODE=for_callbacks AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=for_callbacks.c:<global> FILENAME=for_callbacks.c ORDER=1
+NODES|TYPE_DECL NAME=<global> FULL_NAME=for_callbacks.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=for_callbacks.c:<global> FILENAME=for_callbacks.c ORDER=1
+NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=longunsigned FULL_NAME=longunsigned CODE=longunsigned IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=unsigned long FULL_NAME=unsigned long CODE=unsigned long IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=unsigned longint FULL_NAME=unsigned longint CODE=unsigned longint IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=unsigned shortint FULL_NAME=unsigned shortint CODE=unsigned shortint IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=unsigned shortint(*)(unsignedshortint) FULL_NAME=unsigned shortint(*)(unsignedshortint) CODE=unsigned shortint(*)(unsignedshortint) IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+NODES|TYPE NAME=for_callbacks FULL_NAME=for_callbacks TYPE_DECL_FULL_NAME=for_callbacks
+NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+NODES|TYPE NAME=longunsigned FULL_NAME=longunsigned TYPE_DECL_FULL_NAME=longunsigned
+NODES|TYPE NAME=unsigned long FULL_NAME=unsigned long TYPE_DECL_FULL_NAME=unsigned long
+NODES|TYPE NAME=unsigned longint FULL_NAME=unsigned longint TYPE_DECL_FULL_NAME=unsigned longint
+NODES|TYPE NAME=unsigned shortint FULL_NAME=unsigned shortint TYPE_DECL_FULL_NAME=unsigned shortint
+NODES|TYPE NAME=unsigned shortint(*)(unsignedshortint) FULL_NAME=unsigned shortint(*)(unsignedshortint) TYPE_DECL_FULL_NAME=unsigned shortint(*)(unsignedshortint)
+NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+EDGES|ARGUMENT for_callbacks#12 -> for_callbacks#13
+EDGES|ARGUMENT for_callbacks#12 -> for_callbacks#14
+EDGES|ARGUMENT for_callbacks#16 -> for_callbacks#18
+EDGES|ARGUMENT for_callbacks#19 -> for_callbacks#20
+EDGES|ARGUMENT for_callbacks#20 -> for_callbacks#21
+EDGES|ARGUMENT for_callbacks#6 -> for_callbacks#7
+EDGES|ARGUMENT for_callbacks#6 -> for_callbacks#8
+EDGES|ARGUMENT for_callbacks#9 -> for_callbacks#10
+EDGES|ARGUMENT for_callbacks#9 -> for_callbacks#11
+EDGES|CALL for_callbacks#12 -> <operator>.assignment#0
+EDGES|CALL for_callbacks#20 -> target#0
+EDGES|CALL for_callbacks#6 -> <operator>.assignment#0
+EDGES|CALL for_callbacks#9 -> <operator>.notEquals#0
+EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+EDGES|CFG <operator>.assignment#0 -> <operator>.assignment#5
+EDGES|CFG <operator>.notEquals#0 -> <operator>.notEquals#5
+EDGES|CFG <operator>.pointerCall#0 -> <operator>.pointerCall#4
+EDGES|CFG for_callbacks#0 -> for_callbacks#7
+EDGES|CFG for_callbacks#10 -> for_callbacks#11
+EDGES|CFG for_callbacks#11 -> for_callbacks#9
+EDGES|CFG for_callbacks#12 -> for_callbacks#10
+EDGES|CFG for_callbacks#13 -> for_callbacks#14
+EDGES|CFG for_callbacks#14 -> for_callbacks#12
+EDGES|CFG for_callbacks#16 -> for_callbacks#13
+EDGES|CFG for_callbacks#17 -> for_callbacks#18
+EDGES|CFG for_callbacks#18 -> for_callbacks#16
+EDGES|CFG for_callbacks#19 -> for_callbacks#22
+EDGES|CFG for_callbacks#20 -> for_callbacks#19
+EDGES|CFG for_callbacks#21 -> for_callbacks#20
+EDGES|CFG for_callbacks#6 -> for_callbacks#10
+EDGES|CFG for_callbacks#7 -> for_callbacks#8
+EDGES|CFG for_callbacks#8 -> for_callbacks#6
+EDGES|CFG for_callbacks#9 -> for_callbacks#17
+EDGES|CFG for_callbacks#9 -> for_callbacks#21
+EDGES|CFG for_callbacks.c:<global>#0 -> for_callbacks.c:<global>#25
+EDGES|CFG for_callbacks.c:<global>#25 -> for_callbacks.c:<global>#26
+EDGES|CFG target#0 -> target#4
+EDGES|CONDITION for_callbacks#4 -> for_callbacks#9
+EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+EDGES|CONTAINS <operator>.assignment#0 -> <operator>.assignment#2
+EDGES|CONTAINS <operator>.notEquals#0 -> <operator>.notEquals#2
+EDGES|CONTAINS <operator>.pointerCall#0 -> <operator>.pointerCall#2
+EDGES|CONTAINS D:for_callbacks.c:<global> -> D:for_callbacks
+EDGES|CONTAINS D:for_callbacks.c:<global> -> for_callbacks.c:<global>#0
+EDGES|CONTAINS D:for_callbacks.c:<global> -> target#0
+EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+EDGES|CONTAINS F:<includes> -> D:ANY
+EDGES|CONTAINS F:<includes> -> D:int
+EDGES|CONTAINS F:<includes> -> D:longunsigned
+EDGES|CONTAINS F:<includes> -> D:unsigned long
+EDGES|CONTAINS F:<includes> -> D:unsigned longint
+EDGES|CONTAINS F:<includes> -> D:unsigned shortint
+EDGES|CONTAINS F:<includes> -> D:unsigned shortint(*)(unsignedshortint)
+EDGES|CONTAINS F:<includes> -> D:void
+EDGES|CONTAINS F:for_callbacks.c -> D:for_callbacks.c:<global>
+EDGES|CONTAINS for_callbacks#0 -> for_callbacks#10
+EDGES|CONTAINS for_callbacks#0 -> for_callbacks#11
+EDGES|CONTAINS for_callbacks#0 -> for_callbacks#12
+EDGES|CONTAINS for_callbacks#0 -> for_callbacks#13
+EDGES|CONTAINS for_callbacks#0 -> for_callbacks#14
+EDGES|CONTAINS for_callbacks#0 -> for_callbacks#15
+EDGES|CONTAINS for_callbacks#0 -> for_callbacks#16
+EDGES|CONTAINS for_callbacks#0 -> for_callbacks#17
+EDGES|CONTAINS for_callbacks#0 -> for_callbacks#18
+EDGES|CONTAINS for_callbacks#0 -> for_callbacks#19
+EDGES|CONTAINS for_callbacks#0 -> for_callbacks#20
+EDGES|CONTAINS for_callbacks#0 -> for_callbacks#21
+EDGES|CONTAINS for_callbacks#0 -> for_callbacks#3
+EDGES|CONTAINS for_callbacks#0 -> for_callbacks#4
+EDGES|CONTAINS for_callbacks#0 -> for_callbacks#6
+EDGES|CONTAINS for_callbacks#0 -> for_callbacks#7
+EDGES|CONTAINS for_callbacks#0 -> for_callbacks#8
+EDGES|CONTAINS for_callbacks#0 -> for_callbacks#9
+EDGES|CONTAINS for_callbacks.c:<global>#0 -> for_callbacks#0
+EDGES|CONTAINS for_callbacks.c:<global>#0 -> for_callbacks.c:<global>#24
+EDGES|CONTAINS for_callbacks.c:<global>#0 -> for_callbacks.c:<global>#25
+EDGES|CONTAINS target#0 -> target#3
+EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#6 -> T:ANY
+EDGES|EVAL_TYPE <operator>.notEquals#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.notEquals#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.notEquals#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.notEquals#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.notEquals#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.notEquals#6 -> T:ANY
+EDGES|EVAL_TYPE <operator>.pointerCall#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.pointerCall#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.pointerCall#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.pointerCall#4 -> T:ANY
+EDGES|EVAL_TYPE for_callbacks#1 -> T:longunsigned
+EDGES|EVAL_TYPE for_callbacks#10 -> T:longunsigned
+EDGES|EVAL_TYPE for_callbacks#11 -> T:int
+EDGES|EVAL_TYPE for_callbacks#12 -> T:ANY
+EDGES|EVAL_TYPE for_callbacks#13 -> T:longunsigned
+EDGES|EVAL_TYPE for_callbacks#14 -> T:int
+EDGES|EVAL_TYPE for_callbacks#15 -> T:void
+EDGES|EVAL_TYPE for_callbacks#16 -> T:unsigned shortint
+EDGES|EVAL_TYPE for_callbacks#17 -> T:unsigned shortint(*)(unsignedshortint)
+EDGES|EVAL_TYPE for_callbacks#18 -> T:longunsigned
+EDGES|EVAL_TYPE for_callbacks#2 -> T:longunsigned
+EDGES|EVAL_TYPE for_callbacks#20 -> T:unsigned longint
+EDGES|EVAL_TYPE for_callbacks#21 -> T:longunsigned
+EDGES|EVAL_TYPE for_callbacks#22 -> T:unsigned long
+EDGES|EVAL_TYPE for_callbacks#3 -> T:void
+EDGES|EVAL_TYPE for_callbacks#5 -> T:unsigned shortint(*)(unsignedshortint)
+EDGES|EVAL_TYPE for_callbacks#6 -> T:void
+EDGES|EVAL_TYPE for_callbacks#7 -> T:unsigned shortint(*)(unsignedshortint)
+EDGES|EVAL_TYPE for_callbacks#8 -> T:int
+EDGES|EVAL_TYPE for_callbacks#9 -> T:int
+EDGES|EVAL_TYPE for_callbacks.c:<global>#24 -> T:ANY
+EDGES|EVAL_TYPE for_callbacks.c:<global>#25 -> T:for_callbacks
+EDGES|EVAL_TYPE for_callbacks.c:<global>#26 -> T:ANY
+EDGES|EVAL_TYPE target#1 -> T:longunsigned
+EDGES|EVAL_TYPE target#2 -> T:longunsigned
+EDGES|EVAL_TYPE target#3 -> T:ANY
+EDGES|EVAL_TYPE target#4 -> T:longunsigned
+EDGES|FOR_BODY for_callbacks#4 -> for_callbacks#15
+EDGES|FOR_INIT for_callbacks#4 -> for_callbacks#6
+EDGES|FOR_UPDATE for_callbacks#4 -> for_callbacks#12
+EDGES|PARAMETER_LINK <operator>.assignment#1 -> <operator>.assignment#3
+EDGES|PARAMETER_LINK <operator>.assignment#4 -> <operator>.assignment#6
+EDGES|PARAMETER_LINK <operator>.notEquals#1 -> <operator>.notEquals#3
+EDGES|PARAMETER_LINK <operator>.notEquals#4 -> <operator>.notEquals#6
+EDGES|PARAMETER_LINK <operator>.pointerCall#1 -> <operator>.pointerCall#3
+EDGES|PARAMETER_LINK for_callbacks#1 -> for_callbacks#2
+EDGES|PARAMETER_LINK target#1 -> target#2
+EDGES|REF NB:<global> -> NS:<global>
+EDGES|REF NB:<includes>:<global> -> NS:<global>
+EDGES|REF NB:for_callbacks.c:<global> -> NS:<global>
+EDGES|REF T:ANY -> D:ANY
+EDGES|REF T:for_callbacks -> D:for_callbacks
+EDGES|REF T:int -> D:int
+EDGES|REF T:longunsigned -> D:longunsigned
+EDGES|REF T:unsigned long -> D:unsigned long
+EDGES|REF T:unsigned longint -> D:unsigned longint
+EDGES|REF T:unsigned shortint -> D:unsigned shortint
+EDGES|REF T:unsigned shortint(*)(unsignedshortint) -> D:unsigned shortint(*)(unsignedshortint)
+EDGES|REF T:void -> D:void
+EDGES|REF for_callbacks#10 -> for_callbacks#1
+EDGES|REF for_callbacks#13 -> for_callbacks#1
+EDGES|REF for_callbacks#17 -> for_callbacks#5
+EDGES|REF for_callbacks#18 -> for_callbacks#1
+EDGES|REF for_callbacks#21 -> for_callbacks#1
+EDGES|REF for_callbacks#7 -> for_callbacks#5
+EDGES|REF for_callbacks.c:<global>#25 -> for_callbacks#0
+EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+EDGES|SOURCE_FILE D:ANY -> F:<includes>
+EDGES|SOURCE_FILE D:for_callbacks -> F:for_callbacks.c
+EDGES|SOURCE_FILE D:for_callbacks.c:<global> -> F:for_callbacks.c
+EDGES|SOURCE_FILE D:int -> F:<includes>
+EDGES|SOURCE_FILE D:longunsigned -> F:<includes>
+EDGES|SOURCE_FILE D:unsigned long -> F:<includes>
+EDGES|SOURCE_FILE D:unsigned longint -> F:<includes>
+EDGES|SOURCE_FILE D:unsigned shortint -> F:<includes>
+EDGES|SOURCE_FILE D:unsigned shortint(*)(unsignedshortint) -> F:<includes>
+EDGES|SOURCE_FILE D:void -> F:<includes>
+EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
+EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>
+EDGES|SOURCE_FILE NB:for_callbacks.c:<global> -> F:for_callbacks.c
+EDGES|SOURCE_FILE for_callbacks#0 -> F:for_callbacks.c
+EDGES|SOURCE_FILE for_callbacks.c:<global>#0 -> F:for_callbacks.c
+EDGES|SOURCE_FILE target#0 -> F:for_callbacks.c
+FLOWS|REACHING_DEF[(*target)(unsigned short) = 0] for_callbacks#6 -> for_callbacks#22
+FLOWS|REACHING_DEF[0] for_callbacks#11 -> for_callbacks#10
+FLOWS|REACHING_DEF[0] for_callbacks#11 -> for_callbacks#9
+FLOWS|REACHING_DEF[0] for_callbacks#14 -> for_callbacks#12
+FLOWS|REACHING_DEF[0] for_callbacks#14 -> for_callbacks#13
+FLOWS|REACHING_DEF[0] for_callbacks#8 -> for_callbacks#6
+FLOWS|REACHING_DEF[<RET>] for_callbacks#19 -> for_callbacks#22
+FLOWS|REACHING_DEF[] <operator>.assignment#0 -> <operator>.assignment#1
+FLOWS|REACHING_DEF[] <operator>.assignment#0 -> <operator>.assignment#4
+FLOWS|REACHING_DEF[] <operator>.notEquals#0 -> <operator>.notEquals#1
+FLOWS|REACHING_DEF[] <operator>.notEquals#0 -> <operator>.notEquals#4
+FLOWS|REACHING_DEF[] <operator>.pointerCall#0 -> <operator>.pointerCall#1
+FLOWS|REACHING_DEF[] for_callbacks#0 -> for_callbacks#1
+FLOWS|REACHING_DEF[] for_callbacks#0 -> for_callbacks#10
+FLOWS|REACHING_DEF[] for_callbacks#0 -> for_callbacks#11
+FLOWS|REACHING_DEF[] for_callbacks#0 -> for_callbacks#14
+FLOWS|REACHING_DEF[] for_callbacks#0 -> for_callbacks#17
+FLOWS|REACHING_DEF[] for_callbacks#0 -> for_callbacks#18
+FLOWS|REACHING_DEF[] for_callbacks#0 -> for_callbacks#21
+FLOWS|REACHING_DEF[] for_callbacks#0 -> for_callbacks#8
+FLOWS|REACHING_DEF[] for_callbacks#7 -> for_callbacks#22
+FLOWS|REACHING_DEF[] for_callbacks#7 -> for_callbacks#6
+FLOWS|REACHING_DEF[] for_callbacks.c:<global>#0 -> for_callbacks.c:<global>#25
+FLOWS|REACHING_DEF[] target#0 -> target#1
+FLOWS|REACHING_DEF[p1] <operator>.assignment#1 -> <operator>.assignment#3
+FLOWS|REACHING_DEF[p1] <operator>.assignment#1 -> <operator>.assignment#5
+FLOWS|REACHING_DEF[p1] <operator>.notEquals#1 -> <operator>.notEquals#3
+FLOWS|REACHING_DEF[p1] <operator>.notEquals#1 -> <operator>.notEquals#5
+FLOWS|REACHING_DEF[p1] <operator>.pointerCall#1 -> <operator>.pointerCall#3
+FLOWS|REACHING_DEF[p1] <operator>.pointerCall#1 -> <operator>.pointerCall#4
+FLOWS|REACHING_DEF[p2] <operator>.assignment#4 -> <operator>.assignment#5
+FLOWS|REACHING_DEF[p2] <operator>.assignment#4 -> <operator>.assignment#6
+FLOWS|REACHING_DEF[p2] <operator>.notEquals#4 -> <operator>.notEquals#5
+FLOWS|REACHING_DEF[p2] <operator>.notEquals#4 -> <operator>.notEquals#6
+FLOWS|REACHING_DEF[target(value)] for_callbacks#20 -> for_callbacks#19
+FLOWS|REACHING_DEF[target(value)] for_callbacks#20 -> for_callbacks#22
+FLOWS|REACHING_DEF[value != 0] for_callbacks#9 -> for_callbacks#22
+FLOWS|REACHING_DEF[value = 0] for_callbacks#12 -> for_callbacks#22
+FLOWS|REACHING_DEF[value] for_callbacks#1 -> for_callbacks#10
+FLOWS|REACHING_DEF[value] for_callbacks#1 -> for_callbacks#2
+FLOWS|REACHING_DEF[value] for_callbacks#10 -> for_callbacks#18
+FLOWS|REACHING_DEF[value] for_callbacks#10 -> for_callbacks#21
+FLOWS|REACHING_DEF[value] for_callbacks#10 -> for_callbacks#9
+FLOWS|REACHING_DEF[value] for_callbacks#13 -> for_callbacks#10
+FLOWS|REACHING_DEF[value] for_callbacks#13 -> for_callbacks#12
+FLOWS|REACHING_DEF[value] for_callbacks#18 -> for_callbacks#16
+FLOWS|REACHING_DEF[value] for_callbacks#21 -> for_callbacks#2
+FLOWS|REACHING_DEF[value] for_callbacks#21 -> for_callbacks#20
+FLOWS|REACHING_DEF[value] for_callbacks#21 -> for_callbacks#22
+FLOWS|REACHING_DEF[value] target#1 -> target#2
+FLOWS|REACHING_DEF[value] target#1 -> target#4

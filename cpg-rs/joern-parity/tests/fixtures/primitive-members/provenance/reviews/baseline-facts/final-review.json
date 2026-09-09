@@ -1,0 +1,2709 @@
+{
+  "status": "PASS_BOUND_COMPLETE_FROZEN_TENTH_BASELINE_MEASUREMENT",
+  "baselineRun": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/run.json",
+    "sha256": "584ca9ae5fa97f60600fc31c2491c64e88831f5369346cc0df395d7e55015efd",
+    "bytes": 120057
+  },
+  "acceptedSourceAndDocsCommit": "f235a0f898c4e19fda90998b903f57741b776ec7",
+  "baselineBinarySha256": "ca569f9d75143d9c20e7c8054c8bbf7949640e6eb0213fba806e8224b0994141",
+  "projects": 19,
+  "newProjects": 17,
+  "retainedAnchorProjects": 2,
+  "sourceFiles": 20,
+  "exactProjects": 2,
+  "nonexactProjects": 17,
+  "totals": {
+    "includingSeparators": {
+      "expected": 3493,
+      "actual": 3473,
+      "matching": 3347,
+      "missing": 146,
+      "extra": 126
+    },
+    "nonempty": {
+      "expected": 3423,
+      "actual": 3403,
+      "matching": 3277,
+      "missing": 146,
+      "extra": 126
+    }
+  },
+  "memberRowsCompared": 35,
+  "allMemberNameCodeOrderPreserved": true,
+  "findings": [
+    "Sixteen nonexact projects differ in MEMBER TYPE_FULL_NAME and corresponding type nodes/relations; full complete graphs remain recorded without filtering.",
+    "The nonprimitive scalar control already matches all six MEMBER records but lacks four external TYPE/TYPE_DECL pairs and their twelve relations: Record.Choice, Record.Inner, struct_value, union_value.",
+    "const is dropped from measured MEMBER types; volatile is retained. Pointer qualifier location changes CODE but both measured pointer types are shortunsigned*.",
+    "Both tiny anchors are full-reference identical to accepted retained references, while each Rust baseline graph still differs by seven known member-type/scaffold records."
+  ],
+  "cases": [
+    {
+      "case": "base_qualified_pointer",
+      "exact": false,
+      "multiplicities": {
+        "includingSeparators": {
+          "expected": 118,
+          "actual": 118,
+          "matching": 111,
+          "missing": 7,
+          "extra": 7
+        },
+        "nonempty": {
+          "expected": 115,
+          "actual": 115,
+          "matching": 108,
+          "missing": 7,
+          "extra": 7
+        }
+      },
+      "expectedMembers": [
+        {
+          "line": 7,
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPXZhbHVlIENPREU9KnZhbHVlIFRZUEVfRlVMTF9OQU1FPXNob3J0dW5zaWduZWQqIE9SREVSPTE=",
+          "text": "    MEMBER NAME=value CODE=*value TYPE_FULL_NAME=shortunsigned* ORDER=1"
+        }
+      ],
+      "baselineMembers": [
+        {
+          "line": 7,
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPXZhbHVlIENPREU9KnZhbHVlIFRZUEVfRlVMTF9OQU1FPXVuc2lnbmVkIHNob3J0KiBPUkRFUj0x",
+          "text": "    MEMBER NAME=value CODE=*value TYPE_FULL_NAME=unsigned short* ORDER=1"
+        }
+      ],
+      "memberNameCodeOrderPreserved": true,
+      "missingCompleteRecords": [
+        {
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPXZhbHVlIENPREU9KnZhbHVlIFRZUEVfRlVMTF9OQU1FPXNob3J0dW5zaWduZWQqIE9SREVSPTE=",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8Q09OVEFJTlMgRjo8aW5jbHVkZXM+IC0+IEQ6c2hvcnR1bnNpZ25lZCo=",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8RVZBTF9UWVBFIG1haW4uYzo8Z2xvYmFsPiMyIC0+IFQ6c2hvcnR1bnNpZ25lZCo=",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8UkVGIFQ6c2hvcnR1bnNpZ25lZCogLT4gRDpzaG9ydHVuc2lnbmVkKg==",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8U09VUkNFX0ZJTEUgRDpzaG9ydHVuc2lnbmVkKiAtPiBGOjxpbmNsdWRlcz4=",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "Tk9ERVN8VFlQRSBOQU1FPXNob3J0dW5zaWduZWQqIEZVTExfTkFNRT1zaG9ydHVuc2lnbmVkKiBUWVBFX0RFQ0xfRlVMTF9OQU1FPXNob3J0dW5zaWduZWQq",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "Tk9ERVN8VFlQRV9ERUNMIE5BTUU9c2hvcnR1bnNpZ25lZCogRlVMTF9OQU1FPXNob3J0dW5zaWduZWQqIENPREU9c2hvcnR1bnNpZ25lZCogSVNfRVhURVJOQUw9dHJ1ZSBBU1RfUEFSRU5UX1RZUEU9TkFNRVNQQUNFX0JMT0NLIEFTVF9QQVJFTlRfRlVMTF9OQU1FPTxpbmNsdWRlcz46PGdsb2JhbD4gRklMRU5BTUU9PGluY2x1ZGVzPg==",
+          "multiplicity": 1
+        }
+      ],
+      "extraCompleteRecords": [
+        {
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPXZhbHVlIENPREU9KnZhbHVlIFRZUEVfRlVMTF9OQU1FPXVuc2lnbmVkIHNob3J0KiBPUkRFUj0x",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8Q09OVEFJTlMgRjo8aW5jbHVkZXM+IC0+IEQ6dW5zaWduZWQgc2hvcnQq",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8RVZBTF9UWVBFIG1haW4uYzo8Z2xvYmFsPiMyIC0+IFQ6dW5zaWduZWQgc2hvcnQq",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8UkVGIFQ6dW5zaWduZWQgc2hvcnQqIC0+IEQ6dW5zaWduZWQgc2hvcnQq",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8U09VUkNFX0ZJTEUgRDp1bnNpZ25lZCBzaG9ydCogLT4gRjo8aW5jbHVkZXM+",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "Tk9ERVN8VFlQRSBOQU1FPXVuc2lnbmVkIHNob3J0KiBGVUxMX05BTUU9dW5zaWduZWQgc2hvcnQqIFRZUEVfREVDTF9GVUxMX05BTUU9dW5zaWduZWQgc2hvcnQq",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "Tk9ERVN8VFlQRV9ERUNMIE5BTUU9dW5zaWduZWQgc2hvcnQqIEZVTExfTkFNRT11bnNpZ25lZCBzaG9ydCogQ09ERT11bnNpZ25lZCBzaG9ydCogSVNfRVhURVJOQUw9dHJ1ZSBBU1RfUEFSRU5UX1RZUEU9TkFNRVNQQUNFX0JMT0NLIEFTVF9QQVJFTlRfRlVMTF9OQU1FPTxpbmNsdWRlcz46PGdsb2JhbD4gRklMRU5BTUU9PGluY2x1ZGVzPg==",
+          "multiplicity": 1
+        }
+      ],
+      "fullRun": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/base_qualified_pointer/run.json",
+        "sha256": "c73d3e703787b8d8747fa404355045e703c4b0c04086b24a6dae2e6e9f9cb9e3",
+        "bytes": 2670
+      }
+    },
+    {
+      "case": "const_unsigned_short",
+      "exact": false,
+      "multiplicities": {
+        "includingSeparators": {
+          "expected": 118,
+          "actual": 118,
+          "matching": 111,
+          "missing": 7,
+          "extra": 7
+        },
+        "nonempty": {
+          "expected": 115,
+          "actual": 115,
+          "matching": 108,
+          "missing": 7,
+          "extra": 7
+        }
+      },
+      "expectedMembers": [
+        {
+          "line": 7,
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPXZhbHVlIENPREU9dmFsdWUgVFlQRV9GVUxMX05BTUU9c2hvcnR1bnNpZ25lZCBPUkRFUj0x",
+          "text": "    MEMBER NAME=value CODE=value TYPE_FULL_NAME=shortunsigned ORDER=1"
+        }
+      ],
+      "baselineMembers": [
+        {
+          "line": 7,
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPXZhbHVlIENPREU9dmFsdWUgVFlQRV9GVUxMX05BTUU9dW5zaWduZWQgc2hvcnQgT1JERVI9MQ==",
+          "text": "    MEMBER NAME=value CODE=value TYPE_FULL_NAME=unsigned short ORDER=1"
+        }
+      ],
+      "memberNameCodeOrderPreserved": true,
+      "missingCompleteRecords": [
+        {
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPXZhbHVlIENPREU9dmFsdWUgVFlQRV9GVUxMX05BTUU9c2hvcnR1bnNpZ25lZCBPUkRFUj0x",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8Q09OVEFJTlMgRjo8aW5jbHVkZXM+IC0+IEQ6c2hvcnR1bnNpZ25lZA==",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8RVZBTF9UWVBFIG1haW4uYzo8Z2xvYmFsPiMyIC0+IFQ6c2hvcnR1bnNpZ25lZA==",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8UkVGIFQ6c2hvcnR1bnNpZ25lZCAtPiBEOnNob3J0dW5zaWduZWQ=",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8U09VUkNFX0ZJTEUgRDpzaG9ydHVuc2lnbmVkIC0+IEY6PGluY2x1ZGVzPg==",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "Tk9ERVN8VFlQRSBOQU1FPXNob3J0dW5zaWduZWQgRlVMTF9OQU1FPXNob3J0dW5zaWduZWQgVFlQRV9ERUNMX0ZVTExfTkFNRT1zaG9ydHVuc2lnbmVk",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "Tk9ERVN8VFlQRV9ERUNMIE5BTUU9c2hvcnR1bnNpZ25lZCBGVUxMX05BTUU9c2hvcnR1bnNpZ25lZCBDT0RFPXNob3J0dW5zaWduZWQgSVNfRVhURVJOQUw9dHJ1ZSBBU1RfUEFSRU5UX1RZUEU9TkFNRVNQQUNFX0JMT0NLIEFTVF9QQVJFTlRfRlVMTF9OQU1FPTxpbmNsdWRlcz46PGdsb2JhbD4gRklMRU5BTUU9PGluY2x1ZGVzPg==",
+          "multiplicity": 1
+        }
+      ],
+      "extraCompleteRecords": [
+        {
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPXZhbHVlIENPREU9dmFsdWUgVFlQRV9GVUxMX05BTUU9dW5zaWduZWQgc2hvcnQgT1JERVI9MQ==",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8Q09OVEFJTlMgRjo8aW5jbHVkZXM+IC0+IEQ6dW5zaWduZWQgc2hvcnQ=",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8RVZBTF9UWVBFIG1haW4uYzo8Z2xvYmFsPiMyIC0+IFQ6dW5zaWduZWQgc2hvcnQ=",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8UkVGIFQ6dW5zaWduZWQgc2hvcnQgLT4gRDp1bnNpZ25lZCBzaG9ydA==",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8U09VUkNFX0ZJTEUgRDp1bnNpZ25lZCBzaG9ydCAtPiBGOjxpbmNsdWRlcz4=",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "Tk9ERVN8VFlQRSBOQU1FPXVuc2lnbmVkIHNob3J0IEZVTExfTkFNRT11bnNpZ25lZCBzaG9ydCBUWVBFX0RFQ0xfRlVMTF9OQU1FPXVuc2lnbmVkIHNob3J0",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "Tk9ERVN8VFlQRV9ERUNMIE5BTUU9dW5zaWduZWQgc2hvcnQgRlVMTF9OQU1FPXVuc2lnbmVkIHNob3J0IENPREU9dW5zaWduZWQgc2hvcnQgSVNfRVhURVJOQUw9dHJ1ZSBBU1RfUEFSRU5UX1RZUEU9TkFNRVNQQUNFX0JMT0NLIEFTVF9QQVJFTlRfRlVMTF9OQU1FPTxpbmNsdWRlcz46PGdsb2JhbD4gRklMRU5BTUU9PGluY2x1ZGVzPg==",
+          "multiplicity": 1
+        }
+      ],
+      "fullRun": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/const_unsigned_short/run.json",
+        "sha256": "2c9d971d8b0228689ee3af0d6052e94aa330292c1c25a1a8b59b1f48a38f405a",
+        "bytes": 2658
+      }
+    },
+    {
+      "case": "mixed_declarator_shapes",
+      "exact": false,
+      "multiplicities": {
+        "includingSeparators": {
+          "expected": 179,
+          "actual": 179,
+          "matching": 158,
+          "missing": 21,
+          "extra": 21
+        },
+        "nonempty": {
+          "expected": 174,
+          "actual": 174,
+          "matching": 153,
+          "missing": 21,
+          "extra": 21
+        }
+      },
+      "expectedMembers": [
+        {
+          "line": 21,
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPXNjYWxhciBDT0RFPXNjYWxhciBUWVBFX0ZVTExfTkFNRT1zaG9ydHVuc2lnbmVkIE9SREVSPTE=",
+          "text": "    MEMBER NAME=scalar CODE=scalar TYPE_FULL_NAME=shortunsigned ORDER=1"
+        },
+        {
+          "line": 22,
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPXBvaW50ZXIgQ09ERT0qcG9pbnRlciBUWVBFX0ZVTExfTkFNRT1zaG9ydHVuc2lnbmVkKiBPUkRFUj0y",
+          "text": "    MEMBER NAME=pointer CODE=*pointer TYPE_FULL_NAME=shortunsigned* ORDER=2"
+        },
+        {
+          "line": 23,
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPXRhYmxlIENPREU9dGFibGVbM10gVFlQRV9GVUxMX05BTUU9c2hvcnR1bnNpZ25lZFszXSBPUkRFUj0z",
+          "text": "    MEMBER NAME=table CODE=table[3] TYPE_FULL_NAME=shortunsigned[3] ORDER=3"
+        }
+      ],
+      "baselineMembers": [
+        {
+          "line": 21,
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPXNjYWxhciBDT0RFPXNjYWxhciBUWVBFX0ZVTExfTkFNRT11bnNpZ25lZCBzaG9ydCBPUkRFUj0x",
+          "text": "    MEMBER NAME=scalar CODE=scalar TYPE_FULL_NAME=unsigned short ORDER=1"
+        },
+        {
+          "line": 22,
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPXBvaW50ZXIgQ09ERT0qcG9pbnRlciBUWVBFX0ZVTExfTkFNRT11bnNpZ25lZCBzaG9ydCogT1JERVI9Mg==",
+          "text": "    MEMBER NAME=pointer CODE=*pointer TYPE_FULL_NAME=unsigned short* ORDER=2"
+        },
+        {
+          "line": 23,
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPXRhYmxlIENPREU9dGFibGVbM10gVFlQRV9GVUxMX05BTUU9dW5zaWduZWQgc2hvcnRbM10gT1JERVI9Mw==",
+          "text": "    MEMBER NAME=table CODE=table[3] TYPE_FULL_NAME=unsigned short[3] ORDER=3"
+        }
+      ],
+      "memberNameCodeOrderPreserved": true,
+      "missingCompleteRecords": [
+        {
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPXBvaW50ZXIgQ09ERT0qcG9pbnRlciBUWVBFX0ZVTExfTkFNRT1zaG9ydHVuc2lnbmVkKiBPUkRFUj0y",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPXNjYWxhciBDT0RFPXNjYWxhciBUWVBFX0ZVTExfTkFNRT1zaG9ydHVuc2lnbmVkIE9SREVSPTE=",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPXRhYmxlIENPREU9dGFibGVbM10gVFlQRV9GVUxMX05BTUU9c2hvcnR1bnNpZ25lZFszXSBPUkRFUj0z",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8Q09OVEFJTlMgRjo8aW5jbHVkZXM+IC0+IEQ6c2hvcnR1bnNpZ25lZA==",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8Q09OVEFJTlMgRjo8aW5jbHVkZXM+IC0+IEQ6c2hvcnR1bnNpZ25lZCo=",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8Q09OVEFJTlMgRjo8aW5jbHVkZXM+IC0+IEQ6c2hvcnR1bnNpZ25lZFszXQ==",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8RVZBTF9UWVBFIG1haW4uYzo8Z2xvYmFsPiMyIC0+IFQ6c2hvcnR1bnNpZ25lZA==",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8RVZBTF9UWVBFIG1haW4uYzo8Z2xvYmFsPiMzIC0+IFQ6c2hvcnR1bnNpZ25lZCo=",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8RVZBTF9UWVBFIG1haW4uYzo8Z2xvYmFsPiM0IC0+IFQ6c2hvcnR1bnNpZ25lZFszXQ==",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8UkVGIFQ6c2hvcnR1bnNpZ25lZCAtPiBEOnNob3J0dW5zaWduZWQ=",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8UkVGIFQ6c2hvcnR1bnNpZ25lZCogLT4gRDpzaG9ydHVuc2lnbmVkKg==",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8UkVGIFQ6c2hvcnR1bnNpZ25lZFszXSAtPiBEOnNob3J0dW5zaWduZWRbM10=",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8U09VUkNFX0ZJTEUgRDpzaG9ydHVuc2lnbmVkIC0+IEY6PGluY2x1ZGVzPg==",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8U09VUkNFX0ZJTEUgRDpzaG9ydHVuc2lnbmVkKiAtPiBGOjxpbmNsdWRlcz4=",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8U09VUkNFX0ZJTEUgRDpzaG9ydHVuc2lnbmVkWzNdIC0+IEY6PGluY2x1ZGVzPg==",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "Tk9ERVN8VFlQRSBOQU1FPXNob3J0dW5zaWduZWQgRlVMTF9OQU1FPXNob3J0dW5zaWduZWQgVFlQRV9ERUNMX0ZVTExfTkFNRT1zaG9ydHVuc2lnbmVk",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "Tk9ERVN8VFlQRSBOQU1FPXNob3J0dW5zaWduZWQqIEZVTExfTkFNRT1zaG9ydHVuc2lnbmVkKiBUWVBFX0RFQ0xfRlVMTF9OQU1FPXNob3J0dW5zaWduZWQq",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "Tk9ERVN8VFlQRSBOQU1FPXNob3J0dW5zaWduZWRbM10gRlVMTF9OQU1FPXNob3J0dW5zaWduZWRbM10gVFlQRV9ERUNMX0ZVTExfTkFNRT1zaG9ydHVuc2lnbmVkWzNd",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "Tk9ERVN8VFlQRV9ERUNMIE5BTUU9c2hvcnR1bnNpZ25lZCBGVUxMX05BTUU9c2hvcnR1bnNpZ25lZCBDT0RFPXNob3J0dW5zaWduZWQgSVNfRVhURVJOQUw9dHJ1ZSBBU1RfUEFSRU5UX1RZUEU9TkFNRVNQQUNFX0JMT0NLIEFTVF9QQVJFTlRfRlVMTF9OQU1FPTxpbmNsdWRlcz46PGdsb2JhbD4gRklMRU5BTUU9PGluY2x1ZGVzPg==",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "Tk9ERVN8VFlQRV9ERUNMIE5BTUU9c2hvcnR1bnNpZ25lZCogRlVMTF9OQU1FPXNob3J0dW5zaWduZWQqIENPREU9c2hvcnR1bnNpZ25lZCogSVNfRVhURVJOQUw9dHJ1ZSBBU1RfUEFSRU5UX1RZUEU9TkFNRVNQQUNFX0JMT0NLIEFTVF9QQVJFTlRfRlVMTF9OQU1FPTxpbmNsdWRlcz46PGdsb2JhbD4gRklMRU5BTUU9PGluY2x1ZGVzPg==",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "Tk9ERVN8VFlQRV9ERUNMIE5BTUU9c2hvcnR1bnNpZ25lZFszXSBGVUxMX05BTUU9c2hvcnR1bnNpZ25lZFszXSBDT0RFPXNob3J0dW5zaWduZWRbM10gSVNfRVhURVJOQUw9dHJ1ZSBBU1RfUEFSRU5UX1RZUEU9TkFNRVNQQUNFX0JMT0NLIEFTVF9QQVJFTlRfRlVMTF9OQU1FPTxpbmNsdWRlcz46PGdsb2JhbD4gRklMRU5BTUU9PGluY2x1ZGVzPg==",
+          "multiplicity": 1
+        }
+      ],
+      "extraCompleteRecords": [
+        {
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPXBvaW50ZXIgQ09ERT0qcG9pbnRlciBUWVBFX0ZVTExfTkFNRT11bnNpZ25lZCBzaG9ydCogT1JERVI9Mg==",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPXNjYWxhciBDT0RFPXNjYWxhciBUWVBFX0ZVTExfTkFNRT11bnNpZ25lZCBzaG9ydCBPUkRFUj0x",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPXRhYmxlIENPREU9dGFibGVbM10gVFlQRV9GVUxMX05BTUU9dW5zaWduZWQgc2hvcnRbM10gT1JERVI9Mw==",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8Q09OVEFJTlMgRjo8aW5jbHVkZXM+IC0+IEQ6dW5zaWduZWQgc2hvcnQ=",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8Q09OVEFJTlMgRjo8aW5jbHVkZXM+IC0+IEQ6dW5zaWduZWQgc2hvcnQq",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8Q09OVEFJTlMgRjo8aW5jbHVkZXM+IC0+IEQ6dW5zaWduZWQgc2hvcnRbM10=",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8RVZBTF9UWVBFIG1haW4uYzo8Z2xvYmFsPiMyIC0+IFQ6dW5zaWduZWQgc2hvcnQ=",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8RVZBTF9UWVBFIG1haW4uYzo8Z2xvYmFsPiMzIC0+IFQ6dW5zaWduZWQgc2hvcnQq",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8RVZBTF9UWVBFIG1haW4uYzo8Z2xvYmFsPiM0IC0+IFQ6dW5zaWduZWQgc2hvcnRbM10=",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8UkVGIFQ6dW5zaWduZWQgc2hvcnQgLT4gRDp1bnNpZ25lZCBzaG9ydA==",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8UkVGIFQ6dW5zaWduZWQgc2hvcnQqIC0+IEQ6dW5zaWduZWQgc2hvcnQq",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8UkVGIFQ6dW5zaWduZWQgc2hvcnRbM10gLT4gRDp1bnNpZ25lZCBzaG9ydFszXQ==",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8U09VUkNFX0ZJTEUgRDp1bnNpZ25lZCBzaG9ydCAtPiBGOjxpbmNsdWRlcz4=",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8U09VUkNFX0ZJTEUgRDp1bnNpZ25lZCBzaG9ydCogLT4gRjo8aW5jbHVkZXM+",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8U09VUkNFX0ZJTEUgRDp1bnNpZ25lZCBzaG9ydFszXSAtPiBGOjxpbmNsdWRlcz4=",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "Tk9ERVN8VFlQRSBOQU1FPXVuc2lnbmVkIHNob3J0IEZVTExfTkFNRT11bnNpZ25lZCBzaG9ydCBUWVBFX0RFQ0xfRlVMTF9OQU1FPXVuc2lnbmVkIHNob3J0",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "Tk9ERVN8VFlQRSBOQU1FPXVuc2lnbmVkIHNob3J0KiBGVUxMX05BTUU9dW5zaWduZWQgc2hvcnQqIFRZUEVfREVDTF9GVUxMX05BTUU9dW5zaWduZWQgc2hvcnQq",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "Tk9ERVN8VFlQRSBOQU1FPXVuc2lnbmVkIHNob3J0WzNdIEZVTExfTkFNRT11bnNpZ25lZCBzaG9ydFszXSBUWVBFX0RFQ0xfRlVMTF9OQU1FPXVuc2lnbmVkIHNob3J0WzNd",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "Tk9ERVN8VFlQRV9ERUNMIE5BTUU9dW5zaWduZWQgc2hvcnQgRlVMTF9OQU1FPXVuc2lnbmVkIHNob3J0IENPREU9dW5zaWduZWQgc2hvcnQgSVNfRVhURVJOQUw9dHJ1ZSBBU1RfUEFSRU5UX1RZUEU9TkFNRVNQQUNFX0JMT0NLIEFTVF9QQVJFTlRfRlVMTF9OQU1FPTxpbmNsdWRlcz46PGdsb2JhbD4gRklMRU5BTUU9PGluY2x1ZGVzPg==",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "Tk9ERVN8VFlQRV9ERUNMIE5BTUU9dW5zaWduZWQgc2hvcnQqIEZVTExfTkFNRT11bnNpZ25lZCBzaG9ydCogQ09ERT11bnNpZ25lZCBzaG9ydCogSVNfRVhURVJOQUw9dHJ1ZSBBU1RfUEFSRU5UX1RZUEU9TkFNRVNQQUNFX0JMT0NLIEFTVF9QQVJFTlRfRlVMTF9OQU1FPTxpbmNsdWRlcz46PGdsb2JhbD4gRklMRU5BTUU9PGluY2x1ZGVzPg==",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "Tk9ERVN8VFlQRV9ERUNMIE5BTUU9dW5zaWduZWQgc2hvcnRbM10gRlVMTF9OQU1FPXVuc2lnbmVkIHNob3J0WzNdIENPREU9dW5zaWduZWQgc2hvcnRbM10gSVNfRVhURVJOQUw9dHJ1ZSBBU1RfUEFSRU5UX1RZUEU9TkFNRVNQQUNFX0JMT0NLIEFTVF9QQVJFTlRfRlVMTF9OQU1FPTxpbmNsdWRlcz46PGdsb2JhbD4gRklMRU5BTUU9PGluY2x1ZGVzPg==",
+          "multiplicity": 1
+        }
+      ],
+      "fullRun": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/mixed_declarator_shapes/run.json",
+        "sha256": "8918bc25d33e009b9aa7793c80c776e8b88153f734d4748b36992683c38bcbca",
+        "bytes": 2684
+      }
+    },
+    {
+      "case": "nonprimitive_scalar_control",
+      "exact": false,
+      "multiplicities": {
+        "includingSeparators": {
+          "expected": 181,
+          "actual": 161,
+          "matching": 161,
+          "missing": 20,
+          "extra": 0
+        },
+        "nonempty": {
+          "expected": 178,
+          "actual": 158,
+          "matching": 158,
+          "missing": 20,
+          "extra": 0
+        }
+      },
+      "expectedMembers": [
+        {
+          "line": 7,
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPWl0ZW0gQ09ERT1pdGVtIFRZUEVfRlVMTF9OQU1FPWludCBPUkRFUj0x",
+          "text": "    MEMBER NAME=item CODE=item TYPE_FULL_NAME=int ORDER=1"
+        },
+        {
+          "line": 9,
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPWludGVnZXJfdmFsdWUgQ09ERT1pbnRlZ2VyX3ZhbHVlIFRZUEVfRlVMTF9OQU1FPWludCBPUkRFUj0x",
+          "text": "    MEMBER NAME=integer_value CODE=integer_value TYPE_FULL_NAME=int ORDER=1"
+        },
+        {
+          "line": 10,
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPWZsb2F0aW5nX3ZhbHVlIENPREU9ZmxvYXRpbmdfdmFsdWUgVFlQRV9GVUxMX05BTUU9ZG91YmxlIE9SREVSPTI=",
+          "text": "    MEMBER NAME=floating_value CODE=floating_value TYPE_FULL_NAME=double ORDER=2"
+        },
+        {
+          "line": 12,
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPXN0cnVjdF92YWx1ZSBDT0RFPXN0cnVjdF92YWx1ZSBUWVBFX0ZVTExfTkFNRT1Jbm5lciBPUkRFUj0x",
+          "text": "    MEMBER NAME=struct_value CODE=struct_value TYPE_FULL_NAME=Inner ORDER=1"
+        },
+        {
+          "line": 13,
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPXVuaW9uX3ZhbHVlIENPREU9dW5pb25fdmFsdWUgVFlQRV9GVUxMX05BTUU9dW5pb25DaG9pY2UgT1JERVI9Mg==",
+          "text": "    MEMBER NAME=union_value CODE=union_value TYPE_FULL_NAME=unionChoice ORDER=2"
+        },
+        {
+          "line": 14,
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPWFsaWFzX3ZhbHVlIENPREU9YWxpYXNfdmFsdWUgVFlQRV9GVUxMX05BTUU9QWxpYXMgT1JERVI9Mw==",
+          "text": "    MEMBER NAME=alias_value CODE=alias_value TYPE_FULL_NAME=Alias ORDER=3"
+        }
+      ],
+      "baselineMembers": [
+        {
+          "line": 7,
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPWl0ZW0gQ09ERT1pdGVtIFRZUEVfRlVMTF9OQU1FPWludCBPUkRFUj0x",
+          "text": "    MEMBER NAME=item CODE=item TYPE_FULL_NAME=int ORDER=1"
+        },
+        {
+          "line": 9,
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPWludGVnZXJfdmFsdWUgQ09ERT1pbnRlZ2VyX3ZhbHVlIFRZUEVfRlVMTF9OQU1FPWludCBPUkRFUj0x",
+          "text": "    MEMBER NAME=integer_value CODE=integer_value TYPE_FULL_NAME=int ORDER=1"
+        },
+        {
+          "line": 10,
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPWZsb2F0aW5nX3ZhbHVlIENPREU9ZmxvYXRpbmdfdmFsdWUgVFlQRV9GVUxMX05BTUU9ZG91YmxlIE9SREVSPTI=",
+          "text": "    MEMBER NAME=floating_value CODE=floating_value TYPE_FULL_NAME=double ORDER=2"
+        },
+        {
+          "line": 12,
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPXN0cnVjdF92YWx1ZSBDT0RFPXN0cnVjdF92YWx1ZSBUWVBFX0ZVTExfTkFNRT1Jbm5lciBPUkRFUj0x",
+          "text": "    MEMBER NAME=struct_value CODE=struct_value TYPE_FULL_NAME=Inner ORDER=1"
+        },
+        {
+          "line": 13,
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPXVuaW9uX3ZhbHVlIENPREU9dW5pb25fdmFsdWUgVFlQRV9GVUxMX05BTUU9dW5pb25DaG9pY2UgT1JERVI9Mg==",
+          "text": "    MEMBER NAME=union_value CODE=union_value TYPE_FULL_NAME=unionChoice ORDER=2"
+        },
+        {
+          "line": 14,
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPWFsaWFzX3ZhbHVlIENPREU9YWxpYXNfdmFsdWUgVFlQRV9GVUxMX05BTUU9QWxpYXMgT1JERVI9Mw==",
+          "text": "    MEMBER NAME=alias_value CODE=alias_value TYPE_FULL_NAME=Alias ORDER=3"
+        }
+      ],
+      "memberNameCodeOrderPreserved": true,
+      "missingCompleteRecords": [
+        {
+          "rawBase64": "RURHRVN8Q09OVEFJTlMgRjo8aW5jbHVkZXM+IC0+IEQ6UmVjb3JkLkNob2ljZQ==",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8Q09OVEFJTlMgRjo8aW5jbHVkZXM+IC0+IEQ6UmVjb3JkLklubmVy",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8Q09OVEFJTlMgRjo8aW5jbHVkZXM+IC0+IEQ6c3RydWN0X3ZhbHVl",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8Q09OVEFJTlMgRjo8aW5jbHVkZXM+IC0+IEQ6dW5pb25fdmFsdWU=",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8UkVGIFQ6UmVjb3JkLkNob2ljZSAtPiBEOlJlY29yZC5DaG9pY2U=",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8UkVGIFQ6UmVjb3JkLklubmVyIC0+IEQ6UmVjb3JkLklubmVy",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8UkVGIFQ6c3RydWN0X3ZhbHVlIC0+IEQ6c3RydWN0X3ZhbHVl",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8UkVGIFQ6dW5pb25fdmFsdWUgLT4gRDp1bmlvbl92YWx1ZQ==",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8U09VUkNFX0ZJTEUgRDpSZWNvcmQuQ2hvaWNlIC0+IEY6PGluY2x1ZGVzPg==",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8U09VUkNFX0ZJTEUgRDpSZWNvcmQuSW5uZXIgLT4gRjo8aW5jbHVkZXM+",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8U09VUkNFX0ZJTEUgRDpzdHJ1Y3RfdmFsdWUgLT4gRjo8aW5jbHVkZXM+",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8U09VUkNFX0ZJTEUgRDp1bmlvbl92YWx1ZSAtPiBGOjxpbmNsdWRlcz4=",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "Tk9ERVN8VFlQRSBOQU1FPUNob2ljZSBGVUxMX05BTUU9UmVjb3JkLkNob2ljZSBUWVBFX0RFQ0xfRlVMTF9OQU1FPVJlY29yZC5DaG9pY2U=",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "Tk9ERVN8VFlQRSBOQU1FPUlubmVyIEZVTExfTkFNRT1SZWNvcmQuSW5uZXIgVFlQRV9ERUNMX0ZVTExfTkFNRT1SZWNvcmQuSW5uZXI=",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "Tk9ERVN8VFlQRSBOQU1FPXN0cnVjdF92YWx1ZSBGVUxMX05BTUU9c3RydWN0X3ZhbHVlIFRZUEVfREVDTF9GVUxMX05BTUU9c3RydWN0X3ZhbHVl",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "Tk9ERVN8VFlQRSBOQU1FPXVuaW9uX3ZhbHVlIEZVTExfTkFNRT11bmlvbl92YWx1ZSBUWVBFX0RFQ0xfRlVMTF9OQU1FPXVuaW9uX3ZhbHVl",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "Tk9ERVN8VFlQRV9ERUNMIE5BTUU9Q2hvaWNlIEZVTExfTkFNRT1SZWNvcmQuQ2hvaWNlIENPREU9Q2hvaWNlIElTX0VYVEVSTkFMPXRydWUgQVNUX1BBUkVOVF9UWVBFPU5BTUVTUEFDRV9CTE9DSyBBU1RfUEFSRU5UX0ZVTExfTkFNRT08aW5jbHVkZXM+OjxnbG9iYWw+IEZJTEVOQU1FPTxpbmNsdWRlcz4=",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "Tk9ERVN8VFlQRV9ERUNMIE5BTUU9SW5uZXIgRlVMTF9OQU1FPVJlY29yZC5Jbm5lciBDT0RFPUlubmVyIElTX0VYVEVSTkFMPXRydWUgQVNUX1BBUkVOVF9UWVBFPU5BTUVTUEFDRV9CTE9DSyBBU1RfUEFSRU5UX0ZVTExfTkFNRT08aW5jbHVkZXM+OjxnbG9iYWw+IEZJTEVOQU1FPTxpbmNsdWRlcz4=",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "Tk9ERVN8VFlQRV9ERUNMIE5BTUU9c3RydWN0X3ZhbHVlIEZVTExfTkFNRT1zdHJ1Y3RfdmFsdWUgQ09ERT1zdHJ1Y3RfdmFsdWUgSVNfRVhURVJOQUw9dHJ1ZSBBU1RfUEFSRU5UX1RZUEU9TkFNRVNQQUNFX0JMT0NLIEFTVF9QQVJFTlRfRlVMTF9OQU1FPTxpbmNsdWRlcz46PGdsb2JhbD4gRklMRU5BTUU9PGluY2x1ZGVzPg==",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "Tk9ERVN8VFlQRV9ERUNMIE5BTUU9dW5pb25fdmFsdWUgRlVMTF9OQU1FPXVuaW9uX3ZhbHVlIENPREU9dW5pb25fdmFsdWUgSVNfRVhURVJOQUw9dHJ1ZSBBU1RfUEFSRU5UX1RZUEU9TkFNRVNQQUNFX0JMT0NLIEFTVF9QQVJFTlRfRlVMTF9OQU1FPTxpbmNsdWRlcz46PGdsb2JhbD4gRklMRU5BTUU9PGluY2x1ZGVzPg==",
+          "multiplicity": 1
+        }
+      ],
+      "extraCompleteRecords": [],
+      "fullRun": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/nonprimitive_scalar_control/run.json",
+        "sha256": "820242d9d9a5e8dbf2c2a0f772cbd6714c2284bbd169b5bb9dd367bef9df9b9e",
+        "bytes": 2705
+      }
+    },
+    {
+      "case": "ordinary_numeric_control",
+      "exact": true,
+      "multiplicities": {
+        "includingSeparators": {
+          "expected": 120,
+          "actual": 120,
+          "matching": 120,
+          "missing": 0,
+          "extra": 0
+        },
+        "nonempty": {
+          "expected": 117,
+          "actual": 117,
+          "matching": 117,
+          "missing": 0,
+          "extra": 0
+        }
+      },
+      "expectedMembers": [
+        {
+          "line": 7,
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPWludGVnZXJfdmFsdWUgQ09ERT1pbnRlZ2VyX3ZhbHVlIFRZUEVfRlVMTF9OQU1FPWludCBPUkRFUj0x",
+          "text": "    MEMBER NAME=integer_value CODE=integer_value TYPE_FULL_NAME=int ORDER=1"
+        },
+        {
+          "line": 8,
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPWZsb2F0aW5nX3ZhbHVlIENPREU9ZmxvYXRpbmdfdmFsdWUgVFlQRV9GVUxMX05BTUU9ZG91YmxlIE9SREVSPTI=",
+          "text": "    MEMBER NAME=floating_value CODE=floating_value TYPE_FULL_NAME=double ORDER=2"
+        }
+      ],
+      "baselineMembers": [
+        {
+          "line": 7,
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPWludGVnZXJfdmFsdWUgQ09ERT1pbnRlZ2VyX3ZhbHVlIFRZUEVfRlVMTF9OQU1FPWludCBPUkRFUj0x",
+          "text": "    MEMBER NAME=integer_value CODE=integer_value TYPE_FULL_NAME=int ORDER=1"
+        },
+        {
+          "line": 8,
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPWZsb2F0aW5nX3ZhbHVlIENPREU9ZmxvYXRpbmdfdmFsdWUgVFlQRV9GVUxMX05BTUU9ZG91YmxlIE9SREVSPTI=",
+          "text": "    MEMBER NAME=floating_value CODE=floating_value TYPE_FULL_NAME=double ORDER=2"
+        }
+      ],
+      "memberNameCodeOrderPreserved": true,
+      "missingCompleteRecords": [],
+      "extraCompleteRecords": [],
+      "fullRun": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/ordinary_numeric_control/run.json",
+        "sha256": "2cffa1c9e3b54965690737d4b88354627f626aa599ce9977ab14a93fbcde169c",
+        "bytes": 2679
+      }
+    },
+    {
+      "case": "pointer_qualified_pointer",
+      "exact": false,
+      "multiplicities": {
+        "includingSeparators": {
+          "expected": 118,
+          "actual": 118,
+          "matching": 111,
+          "missing": 7,
+          "extra": 7
+        },
+        "nonempty": {
+          "expected": 115,
+          "actual": 115,
+          "matching": 108,
+          "missing": 7,
+          "extra": 7
+        }
+      },
+      "expectedMembers": [
+        {
+          "line": 7,
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPXZhbHVlIENPREU9KiBjb25zdCB2YWx1ZSBUWVBFX0ZVTExfTkFNRT1zaG9ydHVuc2lnbmVkKiBPUkRFUj0x",
+          "text": "    MEMBER NAME=value CODE=* const value TYPE_FULL_NAME=shortunsigned* ORDER=1"
+        }
+      ],
+      "baselineMembers": [
+        {
+          "line": 7,
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPXZhbHVlIENPREU9KiBjb25zdCB2YWx1ZSBUWVBFX0ZVTExfTkFNRT11bnNpZ25lZCBzaG9ydCogT1JERVI9MQ==",
+          "text": "    MEMBER NAME=value CODE=* const value TYPE_FULL_NAME=unsigned short* ORDER=1"
+        }
+      ],
+      "memberNameCodeOrderPreserved": true,
+      "missingCompleteRecords": [
+        {
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPXZhbHVlIENPREU9KiBjb25zdCB2YWx1ZSBUWVBFX0ZVTExfTkFNRT1zaG9ydHVuc2lnbmVkKiBPUkRFUj0x",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8Q09OVEFJTlMgRjo8aW5jbHVkZXM+IC0+IEQ6c2hvcnR1bnNpZ25lZCo=",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8RVZBTF9UWVBFIG1haW4uYzo8Z2xvYmFsPiMyIC0+IFQ6c2hvcnR1bnNpZ25lZCo=",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8UkVGIFQ6c2hvcnR1bnNpZ25lZCogLT4gRDpzaG9ydHVuc2lnbmVkKg==",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8U09VUkNFX0ZJTEUgRDpzaG9ydHVuc2lnbmVkKiAtPiBGOjxpbmNsdWRlcz4=",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "Tk9ERVN8VFlQRSBOQU1FPXNob3J0dW5zaWduZWQqIEZVTExfTkFNRT1zaG9ydHVuc2lnbmVkKiBUWVBFX0RFQ0xfRlVMTF9OQU1FPXNob3J0dW5zaWduZWQq",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "Tk9ERVN8VFlQRV9ERUNMIE5BTUU9c2hvcnR1bnNpZ25lZCogRlVMTF9OQU1FPXNob3J0dW5zaWduZWQqIENPREU9c2hvcnR1bnNpZ25lZCogSVNfRVhURVJOQUw9dHJ1ZSBBU1RfUEFSRU5UX1RZUEU9TkFNRVNQQUNFX0JMT0NLIEFTVF9QQVJFTlRfRlVMTF9OQU1FPTxpbmNsdWRlcz46PGdsb2JhbD4gRklMRU5BTUU9PGluY2x1ZGVzPg==",
+          "multiplicity": 1
+        }
+      ],
+      "extraCompleteRecords": [
+        {
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPXZhbHVlIENPREU9KiBjb25zdCB2YWx1ZSBUWVBFX0ZVTExfTkFNRT11bnNpZ25lZCBzaG9ydCogT1JERVI9MQ==",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8Q09OVEFJTlMgRjo8aW5jbHVkZXM+IC0+IEQ6dW5zaWduZWQgc2hvcnQq",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8RVZBTF9UWVBFIG1haW4uYzo8Z2xvYmFsPiMyIC0+IFQ6dW5zaWduZWQgc2hvcnQq",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8UkVGIFQ6dW5zaWduZWQgc2hvcnQqIC0+IEQ6dW5zaWduZWQgc2hvcnQq",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8U09VUkNFX0ZJTEUgRDp1bnNpZ25lZCBzaG9ydCogLT4gRjo8aW5jbHVkZXM+",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "Tk9ERVN8VFlQRSBOQU1FPXVuc2lnbmVkIHNob3J0KiBGVUxMX05BTUU9dW5zaWduZWQgc2hvcnQqIFRZUEVfREVDTF9GVUxMX05BTUU9dW5zaWduZWQgc2hvcnQq",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "Tk9ERVN8VFlQRV9ERUNMIE5BTUU9dW5zaWduZWQgc2hvcnQqIEZVTExfTkFNRT11bnNpZ25lZCBzaG9ydCogQ09ERT11bnNpZ25lZCBzaG9ydCogSVNfRVhURVJOQUw9dHJ1ZSBBU1RfUEFSRU5UX1RZUEU9TkFNRVNQQUNFX0JMT0NLIEFTVF9QQVJFTlRfRlVMTF9OQU1FPTxpbmNsdWRlcz46PGdsb2JhbD4gRklMRU5BTUU9PGluY2x1ZGVzPg==",
+          "multiplicity": 1
+        }
+      ],
+      "fullRun": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/pointer_qualified_pointer/run.json",
+        "sha256": "0dcdee60d3d8c408f7a11162c35e8dec546ab47c5a10ca238e1f5b595e454f4d",
+        "bytes": 2688
+      }
+    },
+    {
+      "case": "short_int_unsigned",
+      "exact": false,
+      "multiplicities": {
+        "includingSeparators": {
+          "expected": 118,
+          "actual": 118,
+          "matching": 111,
+          "missing": 7,
+          "extra": 7
+        },
+        "nonempty": {
+          "expected": 115,
+          "actual": 115,
+          "matching": 108,
+          "missing": 7,
+          "extra": 7
+        }
+      },
+      "expectedMembers": [
+        {
+          "line": 7,
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPXZhbHVlIENPREU9dmFsdWUgVFlQRV9GVUxMX05BTUU9c2hvcnQgdW5zaWduZWQgaW50IE9SREVSPTE=",
+          "text": "    MEMBER NAME=value CODE=value TYPE_FULL_NAME=short unsigned int ORDER=1"
+        }
+      ],
+      "baselineMembers": [
+        {
+          "line": 7,
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPXZhbHVlIENPREU9dmFsdWUgVFlQRV9GVUxMX05BTUU9c2hvcnQgaW50IHVuc2lnbmVkIE9SREVSPTE=",
+          "text": "    MEMBER NAME=value CODE=value TYPE_FULL_NAME=short int unsigned ORDER=1"
+        }
+      ],
+      "memberNameCodeOrderPreserved": true,
+      "missingCompleteRecords": [
+        {
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPXZhbHVlIENPREU9dmFsdWUgVFlQRV9GVUxMX05BTUU9c2hvcnQgdW5zaWduZWQgaW50IE9SREVSPTE=",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8Q09OVEFJTlMgRjo8aW5jbHVkZXM+IC0+IEQ6c2hvcnQgdW5zaWduZWQgaW50",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8RVZBTF9UWVBFIG1haW4uYzo8Z2xvYmFsPiMyIC0+IFQ6c2hvcnQgdW5zaWduZWQgaW50",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8UkVGIFQ6c2hvcnQgdW5zaWduZWQgaW50IC0+IEQ6c2hvcnQgdW5zaWduZWQgaW50",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8U09VUkNFX0ZJTEUgRDpzaG9ydCB1bnNpZ25lZCBpbnQgLT4gRjo8aW5jbHVkZXM+",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "Tk9ERVN8VFlQRSBOQU1FPXNob3J0IHVuc2lnbmVkIGludCBGVUxMX05BTUU9c2hvcnQgdW5zaWduZWQgaW50IFRZUEVfREVDTF9GVUxMX05BTUU9c2hvcnQgdW5zaWduZWQgaW50",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "Tk9ERVN8VFlQRV9ERUNMIE5BTUU9c2hvcnQgdW5zaWduZWQgaW50IEZVTExfTkFNRT1zaG9ydCB1bnNpZ25lZCBpbnQgQ09ERT1zaG9ydCB1bnNpZ25lZCBpbnQgSVNfRVhURVJOQUw9dHJ1ZSBBU1RfUEFSRU5UX1RZUEU9TkFNRVNQQUNFX0JMT0NLIEFTVF9QQVJFTlRfRlVMTF9OQU1FPTxpbmNsdWRlcz46PGdsb2JhbD4gRklMRU5BTUU9PGluY2x1ZGVzPg==",
+          "multiplicity": 1
+        }
+      ],
+      "extraCompleteRecords": [
+        {
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPXZhbHVlIENPREU9dmFsdWUgVFlQRV9GVUxMX05BTUU9c2hvcnQgaW50IHVuc2lnbmVkIE9SREVSPTE=",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8Q09OVEFJTlMgRjo8aW5jbHVkZXM+IC0+IEQ6c2hvcnQgaW50IHVuc2lnbmVk",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8RVZBTF9UWVBFIG1haW4uYzo8Z2xvYmFsPiMyIC0+IFQ6c2hvcnQgaW50IHVuc2lnbmVk",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8UkVGIFQ6c2hvcnQgaW50IHVuc2lnbmVkIC0+IEQ6c2hvcnQgaW50IHVuc2lnbmVk",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8U09VUkNFX0ZJTEUgRDpzaG9ydCBpbnQgdW5zaWduZWQgLT4gRjo8aW5jbHVkZXM+",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "Tk9ERVN8VFlQRSBOQU1FPXNob3J0IGludCB1bnNpZ25lZCBGVUxMX05BTUU9c2hvcnQgaW50IHVuc2lnbmVkIFRZUEVfREVDTF9GVUxMX05BTUU9c2hvcnQgaW50IHVuc2lnbmVk",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "Tk9ERVN8VFlQRV9ERUNMIE5BTUU9c2hvcnQgaW50IHVuc2lnbmVkIEZVTExfTkFNRT1zaG9ydCBpbnQgdW5zaWduZWQgQ09ERT1zaG9ydCBpbnQgdW5zaWduZWQgSVNfRVhURVJOQUw9dHJ1ZSBBU1RfUEFSRU5UX1RZUEU9TkFNRVNQQUNFX0JMT0NLIEFTVF9QQVJFTlRfRlVMTF9OQU1FPTxpbmNsdWRlcz46PGdsb2JhbD4gRklMRU5BTUU9PGluY2x1ZGVzPg==",
+          "multiplicity": 1
+        }
+      ],
+      "fullRun": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/short_int_unsigned/run.json",
+        "sha256": "6b1746b9d6dc0c64dbb041428a0328a257df9cab9428db3e0552b31894ca61dc",
+        "bytes": 2646
+      }
+    },
+    {
+      "case": "short_unsigned",
+      "exact": false,
+      "multiplicities": {
+        "includingSeparators": {
+          "expected": 118,
+          "actual": 118,
+          "matching": 111,
+          "missing": 7,
+          "extra": 7
+        },
+        "nonempty": {
+          "expected": 115,
+          "actual": 115,
+          "matching": 108,
+          "missing": 7,
+          "extra": 7
+        }
+      },
+      "expectedMembers": [
+        {
+          "line": 7,
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPXZhbHVlIENPREU9dmFsdWUgVFlQRV9GVUxMX05BTUU9c2hvcnR1bnNpZ25lZCBPUkRFUj0x",
+          "text": "    MEMBER NAME=value CODE=value TYPE_FULL_NAME=shortunsigned ORDER=1"
+        }
+      ],
+      "baselineMembers": [
+        {
+          "line": 7,
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPXZhbHVlIENPREU9dmFsdWUgVFlQRV9GVUxMX05BTUU9c2hvcnQgdW5zaWduZWQgT1JERVI9MQ==",
+          "text": "    MEMBER NAME=value CODE=value TYPE_FULL_NAME=short unsigned ORDER=1"
+        }
+      ],
+      "memberNameCodeOrderPreserved": true,
+      "missingCompleteRecords": [
+        {
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPXZhbHVlIENPREU9dmFsdWUgVFlQRV9GVUxMX05BTUU9c2hvcnR1bnNpZ25lZCBPUkRFUj0x",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8Q09OVEFJTlMgRjo8aW5jbHVkZXM+IC0+IEQ6c2hvcnR1bnNpZ25lZA==",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8RVZBTF9UWVBFIG1haW4uYzo8Z2xvYmFsPiMyIC0+IFQ6c2hvcnR1bnNpZ25lZA==",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8UkVGIFQ6c2hvcnR1bnNpZ25lZCAtPiBEOnNob3J0dW5zaWduZWQ=",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8U09VUkNFX0ZJTEUgRDpzaG9ydHVuc2lnbmVkIC0+IEY6PGluY2x1ZGVzPg==",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "Tk9ERVN8VFlQRSBOQU1FPXNob3J0dW5zaWduZWQgRlVMTF9OQU1FPXNob3J0dW5zaWduZWQgVFlQRV9ERUNMX0ZVTExfTkFNRT1zaG9ydHVuc2lnbmVk",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "Tk9ERVN8VFlQRV9ERUNMIE5BTUU9c2hvcnR1bnNpZ25lZCBGVUxMX05BTUU9c2hvcnR1bnNpZ25lZCBDT0RFPXNob3J0dW5zaWduZWQgSVNfRVhURVJOQUw9dHJ1ZSBBU1RfUEFSRU5UX1RZUEU9TkFNRVNQQUNFX0JMT0NLIEFTVF9QQVJFTlRfRlVMTF9OQU1FPTxpbmNsdWRlcz46PGdsb2JhbD4gRklMRU5BTUU9PGluY2x1ZGVzPg==",
+          "multiplicity": 1
+        }
+      ],
+      "extraCompleteRecords": [
+        {
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPXZhbHVlIENPREU9dmFsdWUgVFlQRV9GVUxMX05BTUU9c2hvcnQgdW5zaWduZWQgT1JERVI9MQ==",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8Q09OVEFJTlMgRjo8aW5jbHVkZXM+IC0+IEQ6c2hvcnQgdW5zaWduZWQ=",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8RVZBTF9UWVBFIG1haW4uYzo8Z2xvYmFsPiMyIC0+IFQ6c2hvcnQgdW5zaWduZWQ=",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8UkVGIFQ6c2hvcnQgdW5zaWduZWQgLT4gRDpzaG9ydCB1bnNpZ25lZA==",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8U09VUkNFX0ZJTEUgRDpzaG9ydCB1bnNpZ25lZCAtPiBGOjxpbmNsdWRlcz4=",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "Tk9ERVN8VFlQRSBOQU1FPXNob3J0IHVuc2lnbmVkIEZVTExfTkFNRT1zaG9ydCB1bnNpZ25lZCBUWVBFX0RFQ0xfRlVMTF9OQU1FPXNob3J0IHVuc2lnbmVk",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "Tk9ERVN8VFlQRV9ERUNMIE5BTUU9c2hvcnQgdW5zaWduZWQgRlVMTF9OQU1FPXNob3J0IHVuc2lnbmVkIENPREU9c2hvcnQgdW5zaWduZWQgSVNfRVhURVJOQUw9dHJ1ZSBBU1RfUEFSRU5UX1RZUEU9TkFNRVNQQUNFX0JMT0NLIEFTVF9QQVJFTlRfRlVMTF9OQU1FPTxpbmNsdWRlcz46PGdsb2JhbD4gRklMRU5BTUU9PGluY2x1ZGVzPg==",
+          "multiplicity": 1
+        }
+      ],
+      "fullRun": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/short_unsigned/run.json",
+        "sha256": "f2f4867b493f3c9b7cf181b21c9ddea991a94c995ddda7d910d817fc9df620fc",
+        "bytes": 2622
+      }
+    },
+    {
+      "case": "signed_char",
+      "exact": false,
+      "multiplicities": {
+        "includingSeparators": {
+          "expected": 118,
+          "actual": 118,
+          "matching": 111,
+          "missing": 7,
+          "extra": 7
+        },
+        "nonempty": {
+          "expected": 115,
+          "actual": 115,
+          "matching": 108,
+          "missing": 7,
+          "extra": 7
+        }
+      },
+      "expectedMembers": [
+        {
+          "line": 7,
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPXZhbHVlIENPREU9dmFsdWUgVFlQRV9GVUxMX05BTUU9c2lnbmVkY2hhciBPUkRFUj0x",
+          "text": "    MEMBER NAME=value CODE=value TYPE_FULL_NAME=signedchar ORDER=1"
+        }
+      ],
+      "baselineMembers": [
+        {
+          "line": 7,
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPXZhbHVlIENPREU9dmFsdWUgVFlQRV9GVUxMX05BTUU9c2lnbmVkIGNoYXIgT1JERVI9MQ==",
+          "text": "    MEMBER NAME=value CODE=value TYPE_FULL_NAME=signed char ORDER=1"
+        }
+      ],
+      "memberNameCodeOrderPreserved": true,
+      "missingCompleteRecords": [
+        {
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPXZhbHVlIENPREU9dmFsdWUgVFlQRV9GVUxMX05BTUU9c2lnbmVkY2hhciBPUkRFUj0x",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8Q09OVEFJTlMgRjo8aW5jbHVkZXM+IC0+IEQ6c2lnbmVkY2hhcg==",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8RVZBTF9UWVBFIG1haW4uYzo8Z2xvYmFsPiMyIC0+IFQ6c2lnbmVkY2hhcg==",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8UkVGIFQ6c2lnbmVkY2hhciAtPiBEOnNpZ25lZGNoYXI=",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8U09VUkNFX0ZJTEUgRDpzaWduZWRjaGFyIC0+IEY6PGluY2x1ZGVzPg==",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "Tk9ERVN8VFlQRSBOQU1FPXNpZ25lZGNoYXIgRlVMTF9OQU1FPXNpZ25lZGNoYXIgVFlQRV9ERUNMX0ZVTExfTkFNRT1zaWduZWRjaGFy",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "Tk9ERVN8VFlQRV9ERUNMIE5BTUU9c2lnbmVkY2hhciBGVUxMX05BTUU9c2lnbmVkY2hhciBDT0RFPXNpZ25lZGNoYXIgSVNfRVhURVJOQUw9dHJ1ZSBBU1RfUEFSRU5UX1RZUEU9TkFNRVNQQUNFX0JMT0NLIEFTVF9QQVJFTlRfRlVMTF9OQU1FPTxpbmNsdWRlcz46PGdsb2JhbD4gRklMRU5BTUU9PGluY2x1ZGVzPg==",
+          "multiplicity": 1
+        }
+      ],
+      "extraCompleteRecords": [
+        {
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPXZhbHVlIENPREU9dmFsdWUgVFlQRV9GVUxMX05BTUU9c2lnbmVkIGNoYXIgT1JERVI9MQ==",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8Q09OVEFJTlMgRjo8aW5jbHVkZXM+IC0+IEQ6c2lnbmVkIGNoYXI=",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8RVZBTF9UWVBFIG1haW4uYzo8Z2xvYmFsPiMyIC0+IFQ6c2lnbmVkIGNoYXI=",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8UkVGIFQ6c2lnbmVkIGNoYXIgLT4gRDpzaWduZWQgY2hhcg==",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8U09VUkNFX0ZJTEUgRDpzaWduZWQgY2hhciAtPiBGOjxpbmNsdWRlcz4=",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "Tk9ERVN8VFlQRSBOQU1FPXNpZ25lZCBjaGFyIEZVTExfTkFNRT1zaWduZWQgY2hhciBUWVBFX0RFQ0xfRlVMTF9OQU1FPXNpZ25lZCBjaGFy",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "Tk9ERVN8VFlQRV9ERUNMIE5BTUU9c2lnbmVkIGNoYXIgRlVMTF9OQU1FPXNpZ25lZCBjaGFyIENPREU9c2lnbmVkIGNoYXIgSVNfRVhURVJOQUw9dHJ1ZSBBU1RfUEFSRU5UX1RZUEU9TkFNRVNQQUNFX0JMT0NLIEFTVF9QQVJFTlRfRlVMTF9OQU1FPTxpbmNsdWRlcz46PGdsb2JhbD4gRklMRU5BTUU9PGluY2x1ZGVzPg==",
+          "multiplicity": 1
+        }
+      ],
+      "fullRun": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/signed_char/run.json",
+        "sha256": "0d7ca8e0479c733f1edc839837aa48888d8051c67b57fd0fe350960422bd6413",
+        "bytes": 2604
+      }
+    },
+    {
+      "case": "signed_short",
+      "exact": false,
+      "multiplicities": {
+        "includingSeparators": {
+          "expected": 118,
+          "actual": 118,
+          "matching": 111,
+          "missing": 7,
+          "extra": 7
+        },
+        "nonempty": {
+          "expected": 115,
+          "actual": 115,
+          "matching": 108,
+          "missing": 7,
+          "extra": 7
+        }
+      },
+      "expectedMembers": [
+        {
+          "line": 7,
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPXZhbHVlIENPREU9dmFsdWUgVFlQRV9GVUxMX05BTUU9c2hvcnRzaWduZWQgT1JERVI9MQ==",
+          "text": "    MEMBER NAME=value CODE=value TYPE_FULL_NAME=shortsigned ORDER=1"
+        }
+      ],
+      "baselineMembers": [
+        {
+          "line": 7,
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPXZhbHVlIENPREU9dmFsdWUgVFlQRV9GVUxMX05BTUU9c2lnbmVkIHNob3J0IE9SREVSPTE=",
+          "text": "    MEMBER NAME=value CODE=value TYPE_FULL_NAME=signed short ORDER=1"
+        }
+      ],
+      "memberNameCodeOrderPreserved": true,
+      "missingCompleteRecords": [
+        {
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPXZhbHVlIENPREU9dmFsdWUgVFlQRV9GVUxMX05BTUU9c2hvcnRzaWduZWQgT1JERVI9MQ==",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8Q09OVEFJTlMgRjo8aW5jbHVkZXM+IC0+IEQ6c2hvcnRzaWduZWQ=",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8RVZBTF9UWVBFIG1haW4uYzo8Z2xvYmFsPiMyIC0+IFQ6c2hvcnRzaWduZWQ=",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8UkVGIFQ6c2hvcnRzaWduZWQgLT4gRDpzaG9ydHNpZ25lZA==",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8U09VUkNFX0ZJTEUgRDpzaG9ydHNpZ25lZCAtPiBGOjxpbmNsdWRlcz4=",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "Tk9ERVN8VFlQRSBOQU1FPXNob3J0c2lnbmVkIEZVTExfTkFNRT1zaG9ydHNpZ25lZCBUWVBFX0RFQ0xfRlVMTF9OQU1FPXNob3J0c2lnbmVk",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "Tk9ERVN8VFlQRV9ERUNMIE5BTUU9c2hvcnRzaWduZWQgRlVMTF9OQU1FPXNob3J0c2lnbmVkIENPREU9c2hvcnRzaWduZWQgSVNfRVhURVJOQUw9dHJ1ZSBBU1RfUEFSRU5UX1RZUEU9TkFNRVNQQUNFX0JMT0NLIEFTVF9QQVJFTlRfRlVMTF9OQU1FPTxpbmNsdWRlcz46PGdsb2JhbD4gRklMRU5BTUU9PGluY2x1ZGVzPg==",
+          "multiplicity": 1
+        }
+      ],
+      "extraCompleteRecords": [
+        {
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPXZhbHVlIENPREU9dmFsdWUgVFlQRV9GVUxMX05BTUU9c2lnbmVkIHNob3J0IE9SREVSPTE=",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8Q09OVEFJTlMgRjo8aW5jbHVkZXM+IC0+IEQ6c2lnbmVkIHNob3J0",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8RVZBTF9UWVBFIG1haW4uYzo8Z2xvYmFsPiMyIC0+IFQ6c2lnbmVkIHNob3J0",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8UkVGIFQ6c2lnbmVkIHNob3J0IC0+IEQ6c2lnbmVkIHNob3J0",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8U09VUkNFX0ZJTEUgRDpzaWduZWQgc2hvcnQgLT4gRjo8aW5jbHVkZXM+",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "Tk9ERVN8VFlQRSBOQU1FPXNpZ25lZCBzaG9ydCBGVUxMX05BTUU9c2lnbmVkIHNob3J0IFRZUEVfREVDTF9GVUxMX05BTUU9c2lnbmVkIHNob3J0",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "Tk9ERVN8VFlQRV9ERUNMIE5BTUU9c2lnbmVkIHNob3J0IEZVTExfTkFNRT1zaWduZWQgc2hvcnQgQ09ERT1zaWduZWQgc2hvcnQgSVNfRVhURVJOQUw9dHJ1ZSBBU1RfUEFSRU5UX1RZUEU9TkFNRVNQQUNFX0JMT0NLIEFTVF9QQVJFTlRfRlVMTF9OQU1FPTxpbmNsdWRlcz46PGdsb2JhbD4gRklMRU5BTUU9PGluY2x1ZGVzPg==",
+          "multiplicity": 1
+        }
+      ],
+      "fullRun": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/signed_short/run.json",
+        "sha256": "255e010f41d7f1f2806d2cd15ea6fd0dfe5a50e43b1833ddd966d0637ca4444d",
+        "bytes": 2610
+      }
+    },
+    {
+      "case": "tiny_fixedtables_include",
+      "exact": false,
+      "multiplicities": {
+        "includingSeparators": {
+          "expected": 734,
+          "actual": 734,
+          "matching": 727,
+          "missing": 7,
+          "extra": 7
+        },
+        "nonempty": {
+          "expected": 726,
+          "actual": 726,
+          "matching": 719,
+          "missing": 7,
+          "extra": 7
+        }
+      },
+      "expectedMembers": [
+        {
+          "line": 111,
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPW9wIENPREU9b3AgVFlQRV9GVUxMX05BTUU9dW5zaWduZWQgY2hhciBPUkRFUj0x",
+          "text": "    MEMBER NAME=op CODE=op TYPE_FULL_NAME=unsigned char ORDER=1"
+        },
+        {
+          "line": 112,
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPWJpdHMgQ09ERT1iaXRzIFRZUEVfRlVMTF9OQU1FPXVuc2lnbmVkIGNoYXIgT1JERVI9Mg==",
+          "text": "    MEMBER NAME=bits CODE=bits TYPE_FULL_NAME=unsigned char ORDER=2"
+        },
+        {
+          "line": 113,
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPXZhbHVlIENPREU9dmFsdWUgVFlQRV9GVUxMX05BTUU9c2hvcnR1bnNpZ25lZCBPUkRFUj0z",
+          "text": "    MEMBER NAME=value CODE=value TYPE_FULL_NAME=shortunsigned ORDER=3"
+        },
+        {
+          "line": 116,
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPWxlbiBDT0RFPSpsZW4gVFlQRV9GVUxMX05BTUU9Q29kZSogT1JERVI9MQ==",
+          "text": "    MEMBER NAME=len CODE=*len TYPE_FULL_NAME=Code* ORDER=1"
+        },
+        {
+          "line": 117,
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPWRpc3QgQ09ERT0qZGlzdCBUWVBFX0ZVTExfTkFNRT1Db2RlKiBPUkRFUj0y",
+          "text": "    MEMBER NAME=dist CODE=*dist TYPE_FULL_NAME=Code* ORDER=2"
+        }
+      ],
+      "baselineMembers": [
+        {
+          "line": 111,
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPW9wIENPREU9b3AgVFlQRV9GVUxMX05BTUU9dW5zaWduZWQgY2hhciBPUkRFUj0x",
+          "text": "    MEMBER NAME=op CODE=op TYPE_FULL_NAME=unsigned char ORDER=1"
+        },
+        {
+          "line": 112,
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPWJpdHMgQ09ERT1iaXRzIFRZUEVfRlVMTF9OQU1FPXVuc2lnbmVkIGNoYXIgT1JERVI9Mg==",
+          "text": "    MEMBER NAME=bits CODE=bits TYPE_FULL_NAME=unsigned char ORDER=2"
+        },
+        {
+          "line": 113,
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPXZhbHVlIENPREU9dmFsdWUgVFlQRV9GVUxMX05BTUU9dW5zaWduZWQgc2hvcnQgT1JERVI9Mw==",
+          "text": "    MEMBER NAME=value CODE=value TYPE_FULL_NAME=unsigned short ORDER=3"
+        },
+        {
+          "line": 116,
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPWxlbiBDT0RFPSpsZW4gVFlQRV9GVUxMX05BTUU9Q29kZSogT1JERVI9MQ==",
+          "text": "    MEMBER NAME=len CODE=*len TYPE_FULL_NAME=Code* ORDER=1"
+        },
+        {
+          "line": 117,
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPWRpc3QgQ09ERT0qZGlzdCBUWVBFX0ZVTExfTkFNRT1Db2RlKiBPUkRFUj0y",
+          "text": "    MEMBER NAME=dist CODE=*dist TYPE_FULL_NAME=Code* ORDER=2"
+        }
+      ],
+      "memberNameCodeOrderPreserved": true,
+      "missingCompleteRecords": [
+        {
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPXZhbHVlIENPREU9dmFsdWUgVFlQRV9GVUxMX05BTUU9c2hvcnR1bnNpZ25lZCBPUkRFUj0z",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8Q09OVEFJTlMgRjo8aW5jbHVkZXM+IC0+IEQ6c2hvcnR1bnNpZ25lZA==",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8RVZBTF9UWVBFIG1haW4uYzo8Z2xvYmFsPiM0IC0+IFQ6c2hvcnR1bnNpZ25lZA==",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8UkVGIFQ6c2hvcnR1bnNpZ25lZCAtPiBEOnNob3J0dW5zaWduZWQ=",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8U09VUkNFX0ZJTEUgRDpzaG9ydHVuc2lnbmVkIC0+IEY6PGluY2x1ZGVzPg==",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "Tk9ERVN8VFlQRSBOQU1FPXNob3J0dW5zaWduZWQgRlVMTF9OQU1FPXNob3J0dW5zaWduZWQgVFlQRV9ERUNMX0ZVTExfTkFNRT1zaG9ydHVuc2lnbmVk",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "Tk9ERVN8VFlQRV9ERUNMIE5BTUU9c2hvcnR1bnNpZ25lZCBGVUxMX05BTUU9c2hvcnR1bnNpZ25lZCBDT0RFPXNob3J0dW5zaWduZWQgSVNfRVhURVJOQUw9dHJ1ZSBBU1RfUEFSRU5UX1RZUEU9TkFNRVNQQUNFX0JMT0NLIEFTVF9QQVJFTlRfRlVMTF9OQU1FPTxpbmNsdWRlcz46PGdsb2JhbD4gRklMRU5BTUU9PGluY2x1ZGVzPg==",
+          "multiplicity": 1
+        }
+      ],
+      "extraCompleteRecords": [
+        {
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPXZhbHVlIENPREU9dmFsdWUgVFlQRV9GVUxMX05BTUU9dW5zaWduZWQgc2hvcnQgT1JERVI9Mw==",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8Q09OVEFJTlMgRjo8aW5jbHVkZXM+IC0+IEQ6dW5zaWduZWQgc2hvcnQ=",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8RVZBTF9UWVBFIG1haW4uYzo8Z2xvYmFsPiM0IC0+IFQ6dW5zaWduZWQgc2hvcnQ=",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8UkVGIFQ6dW5zaWduZWQgc2hvcnQgLT4gRDp1bnNpZ25lZCBzaG9ydA==",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8U09VUkNFX0ZJTEUgRDp1bnNpZ25lZCBzaG9ydCAtPiBGOjxpbmNsdWRlcz4=",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "Tk9ERVN8VFlQRSBOQU1FPXVuc2lnbmVkIHNob3J0IEZVTExfTkFNRT11bnNpZ25lZCBzaG9ydCBUWVBFX0RFQ0xfRlVMTF9OQU1FPXVuc2lnbmVkIHNob3J0",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "Tk9ERVN8VFlQRV9ERUNMIE5BTUU9dW5zaWduZWQgc2hvcnQgRlVMTF9OQU1FPXVuc2lnbmVkIHNob3J0IENPREU9dW5zaWduZWQgc2hvcnQgSVNfRVhURVJOQUw9dHJ1ZSBBU1RfUEFSRU5UX1RZUEU9TkFNRVNQQUNFX0JMT0NLIEFTVF9QQVJFTlRfRlVMTF9OQU1FPTxpbmNsdWRlcz46PGdsb2JhbD4gRklMRU5BTUU9PGluY2x1ZGVzPg==",
+          "multiplicity": 1
+        }
+      ],
+      "fullRun": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/tiny_fixedtables_include/run.json",
+        "sha256": "d401eb0182de9ab96ce580980008bb0f34f0aaabdd044e4d1aef7282edb21a3f",
+        "bytes": 3017
+      }
+    },
+    {
+      "case": "tiny_fixedtables_inline",
+      "exact": false,
+      "multiplicities": {
+        "includingSeparators": {
+          "expected": 580,
+          "actual": 580,
+          "matching": 573,
+          "missing": 7,
+          "extra": 7
+        },
+        "nonempty": {
+          "expected": 573,
+          "actual": 573,
+          "matching": 566,
+          "missing": 7,
+          "extra": 7
+        }
+      },
+      "expectedMembers": [
+        {
+          "line": 87,
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPW9wIENPREU9b3AgVFlQRV9GVUxMX05BTUU9dW5zaWduZWQgY2hhciBPUkRFUj0x",
+          "text": "    MEMBER NAME=op CODE=op TYPE_FULL_NAME=unsigned char ORDER=1"
+        },
+        {
+          "line": 88,
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPWJpdHMgQ09ERT1iaXRzIFRZUEVfRlVMTF9OQU1FPXVuc2lnbmVkIGNoYXIgT1JERVI9Mg==",
+          "text": "    MEMBER NAME=bits CODE=bits TYPE_FULL_NAME=unsigned char ORDER=2"
+        },
+        {
+          "line": 89,
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPXZhbHVlIENPREU9dmFsdWUgVFlQRV9GVUxMX05BTUU9c2hvcnR1bnNpZ25lZCBPUkRFUj0z",
+          "text": "    MEMBER NAME=value CODE=value TYPE_FULL_NAME=shortunsigned ORDER=3"
+        },
+        {
+          "line": 92,
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPWxlbiBDT0RFPSpsZW4gVFlQRV9GVUxMX05BTUU9Q29kZSogT1JERVI9MQ==",
+          "text": "    MEMBER NAME=len CODE=*len TYPE_FULL_NAME=Code* ORDER=1"
+        },
+        {
+          "line": 93,
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPWRpc3QgQ09ERT0qZGlzdCBUWVBFX0ZVTExfTkFNRT1Db2RlKiBPUkRFUj0y",
+          "text": "    MEMBER NAME=dist CODE=*dist TYPE_FULL_NAME=Code* ORDER=2"
+        }
+      ],
+      "baselineMembers": [
+        {
+          "line": 87,
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPW9wIENPREU9b3AgVFlQRV9GVUxMX05BTUU9dW5zaWduZWQgY2hhciBPUkRFUj0x",
+          "text": "    MEMBER NAME=op CODE=op TYPE_FULL_NAME=unsigned char ORDER=1"
+        },
+        {
+          "line": 88,
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPWJpdHMgQ09ERT1iaXRzIFRZUEVfRlVMTF9OQU1FPXVuc2lnbmVkIGNoYXIgT1JERVI9Mg==",
+          "text": "    MEMBER NAME=bits CODE=bits TYPE_FULL_NAME=unsigned char ORDER=2"
+        },
+        {
+          "line": 89,
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPXZhbHVlIENPREU9dmFsdWUgVFlQRV9GVUxMX05BTUU9dW5zaWduZWQgc2hvcnQgT1JERVI9Mw==",
+          "text": "    MEMBER NAME=value CODE=value TYPE_FULL_NAME=unsigned short ORDER=3"
+        },
+        {
+          "line": 92,
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPWxlbiBDT0RFPSpsZW4gVFlQRV9GVUxMX05BTUU9Q29kZSogT1JERVI9MQ==",
+          "text": "    MEMBER NAME=len CODE=*len TYPE_FULL_NAME=Code* ORDER=1"
+        },
+        {
+          "line": 93,
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPWRpc3QgQ09ERT0qZGlzdCBUWVBFX0ZVTExfTkFNRT1Db2RlKiBPUkRFUj0y",
+          "text": "    MEMBER NAME=dist CODE=*dist TYPE_FULL_NAME=Code* ORDER=2"
+        }
+      ],
+      "memberNameCodeOrderPreserved": true,
+      "missingCompleteRecords": [
+        {
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPXZhbHVlIENPREU9dmFsdWUgVFlQRV9GVUxMX05BTUU9c2hvcnR1bnNpZ25lZCBPUkRFUj0z",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8Q09OVEFJTlMgRjo8aW5jbHVkZXM+IC0+IEQ6c2hvcnR1bnNpZ25lZA==",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8RVZBTF9UWVBFIG1haW4uYzo8Z2xvYmFsPiM0IC0+IFQ6c2hvcnR1bnNpZ25lZA==",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8UkVGIFQ6c2hvcnR1bnNpZ25lZCAtPiBEOnNob3J0dW5zaWduZWQ=",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8U09VUkNFX0ZJTEUgRDpzaG9ydHVuc2lnbmVkIC0+IEY6PGluY2x1ZGVzPg==",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "Tk9ERVN8VFlQRSBOQU1FPXNob3J0dW5zaWduZWQgRlVMTF9OQU1FPXNob3J0dW5zaWduZWQgVFlQRV9ERUNMX0ZVTExfTkFNRT1zaG9ydHVuc2lnbmVk",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "Tk9ERVN8VFlQRV9ERUNMIE5BTUU9c2hvcnR1bnNpZ25lZCBGVUxMX05BTUU9c2hvcnR1bnNpZ25lZCBDT0RFPXNob3J0dW5zaWduZWQgSVNfRVhURVJOQUw9dHJ1ZSBBU1RfUEFSRU5UX1RZUEU9TkFNRVNQQUNFX0JMT0NLIEFTVF9QQVJFTlRfRlVMTF9OQU1FPTxpbmNsdWRlcz46PGdsb2JhbD4gRklMRU5BTUU9PGluY2x1ZGVzPg==",
+          "multiplicity": 1
+        }
+      ],
+      "extraCompleteRecords": [
+        {
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPXZhbHVlIENPREU9dmFsdWUgVFlQRV9GVUxMX05BTUU9dW5zaWduZWQgc2hvcnQgT1JERVI9Mw==",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8Q09OVEFJTlMgRjo8aW5jbHVkZXM+IC0+IEQ6dW5zaWduZWQgc2hvcnQ=",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8RVZBTF9UWVBFIG1haW4uYzo8Z2xvYmFsPiM0IC0+IFQ6dW5zaWduZWQgc2hvcnQ=",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8UkVGIFQ6dW5zaWduZWQgc2hvcnQgLT4gRDp1bnNpZ25lZCBzaG9ydA==",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8U09VUkNFX0ZJTEUgRDp1bnNpZ25lZCBzaG9ydCAtPiBGOjxpbmNsdWRlcz4=",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "Tk9ERVN8VFlQRSBOQU1FPXVuc2lnbmVkIHNob3J0IEZVTExfTkFNRT11bnNpZ25lZCBzaG9ydCBUWVBFX0RFQ0xfRlVMTF9OQU1FPXVuc2lnbmVkIHNob3J0",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "Tk9ERVN8VFlQRV9ERUNMIE5BTUU9dW5zaWduZWQgc2hvcnQgRlVMTF9OQU1FPXVuc2lnbmVkIHNob3J0IENPREU9dW5zaWduZWQgc2hvcnQgSVNfRVhURVJOQUw9dHJ1ZSBBU1RfUEFSRU5UX1RZUEU9TkFNRVNQQUNFX0JMT0NLIEFTVF9QQVJFTlRfRlVMTF9OQU1FPTxpbmNsdWRlcz46PGdsb2JhbD4gRklMRU5BTUU9PGluY2x1ZGVzPg==",
+          "multiplicity": 1
+        }
+      ],
+      "fullRun": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/tiny_fixedtables_inline/run.json",
+        "sha256": "e63eb7ed7af6d781dd676dc71f9e0bdfb627147aa632f9851e607950b6267ef6",
+        "bytes": 2680
+      }
+    },
+    {
+      "case": "unsigned_char",
+      "exact": true,
+      "multiplicities": {
+        "includingSeparators": {
+          "expected": 118,
+          "actual": 118,
+          "matching": 118,
+          "missing": 0,
+          "extra": 0
+        },
+        "nonempty": {
+          "expected": 115,
+          "actual": 115,
+          "matching": 115,
+          "missing": 0,
+          "extra": 0
+        }
+      },
+      "expectedMembers": [
+        {
+          "line": 7,
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPXZhbHVlIENPREU9dmFsdWUgVFlQRV9GVUxMX05BTUU9dW5zaWduZWQgY2hhciBPUkRFUj0x",
+          "text": "    MEMBER NAME=value CODE=value TYPE_FULL_NAME=unsigned char ORDER=1"
+        }
+      ],
+      "baselineMembers": [
+        {
+          "line": 7,
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPXZhbHVlIENPREU9dmFsdWUgVFlQRV9GVUxMX05BTUU9dW5zaWduZWQgY2hhciBPUkRFUj0x",
+          "text": "    MEMBER NAME=value CODE=value TYPE_FULL_NAME=unsigned char ORDER=1"
+        }
+      ],
+      "memberNameCodeOrderPreserved": true,
+      "missingCompleteRecords": [],
+      "extraCompleteRecords": [],
+      "fullRun": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/unsigned_char/run.json",
+        "sha256": "2c264e0a039391768a094320128c47da06b87c41adf736f6c022a8f9b0875f35",
+        "bytes": 2610
+      }
+    },
+    {
+      "case": "unsigned_long_long_int",
+      "exact": false,
+      "multiplicities": {
+        "includingSeparators": {
+          "expected": 118,
+          "actual": 118,
+          "matching": 111,
+          "missing": 7,
+          "extra": 7
+        },
+        "nonempty": {
+          "expected": 115,
+          "actual": 115,
+          "matching": 108,
+          "missing": 7,
+          "extra": 7
+        }
+      },
+      "expectedMembers": [
+        {
+          "line": 7,
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPXZhbHVlIENPREU9dmFsdWUgVFlQRV9GVUxMX05BTUU9bG9uZ2xvbmcgdW5zaWduZWQgaW50IE9SREVSPTE=",
+          "text": "    MEMBER NAME=value CODE=value TYPE_FULL_NAME=longlong unsigned int ORDER=1"
+        }
+      ],
+      "baselineMembers": [
+        {
+          "line": 7,
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPXZhbHVlIENPREU9dmFsdWUgVFlQRV9GVUxMX05BTUU9dW5zaWduZWQgbG9uZyBsb25nIGludCBPUkRFUj0x",
+          "text": "    MEMBER NAME=value CODE=value TYPE_FULL_NAME=unsigned long long int ORDER=1"
+        }
+      ],
+      "memberNameCodeOrderPreserved": true,
+      "missingCompleteRecords": [
+        {
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPXZhbHVlIENPREU9dmFsdWUgVFlQRV9GVUxMX05BTUU9bG9uZ2xvbmcgdW5zaWduZWQgaW50IE9SREVSPTE=",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8Q09OVEFJTlMgRjo8aW5jbHVkZXM+IC0+IEQ6bG9uZ2xvbmcgdW5zaWduZWQgaW50",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8RVZBTF9UWVBFIG1haW4uYzo8Z2xvYmFsPiMyIC0+IFQ6bG9uZ2xvbmcgdW5zaWduZWQgaW50",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8UkVGIFQ6bG9uZ2xvbmcgdW5zaWduZWQgaW50IC0+IEQ6bG9uZ2xvbmcgdW5zaWduZWQgaW50",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8U09VUkNFX0ZJTEUgRDpsb25nbG9uZyB1bnNpZ25lZCBpbnQgLT4gRjo8aW5jbHVkZXM+",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "Tk9ERVN8VFlQRSBOQU1FPWxvbmdsb25nIHVuc2lnbmVkIGludCBGVUxMX05BTUU9bG9uZ2xvbmcgdW5zaWduZWQgaW50IFRZUEVfREVDTF9GVUxMX05BTUU9bG9uZ2xvbmcgdW5zaWduZWQgaW50",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "Tk9ERVN8VFlQRV9ERUNMIE5BTUU9bG9uZ2xvbmcgdW5zaWduZWQgaW50IEZVTExfTkFNRT1sb25nbG9uZyB1bnNpZ25lZCBpbnQgQ09ERT1sb25nbG9uZyB1bnNpZ25lZCBpbnQgSVNfRVhURVJOQUw9dHJ1ZSBBU1RfUEFSRU5UX1RZUEU9TkFNRVNQQUNFX0JMT0NLIEFTVF9QQVJFTlRfRlVMTF9OQU1FPTxpbmNsdWRlcz46PGdsb2JhbD4gRklMRU5BTUU9PGluY2x1ZGVzPg==",
+          "multiplicity": 1
+        }
+      ],
+      "extraCompleteRecords": [
+        {
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPXZhbHVlIENPREU9dmFsdWUgVFlQRV9GVUxMX05BTUU9dW5zaWduZWQgbG9uZyBsb25nIGludCBPUkRFUj0x",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8Q09OVEFJTlMgRjo8aW5jbHVkZXM+IC0+IEQ6dW5zaWduZWQgbG9uZyBsb25nIGludA==",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8RVZBTF9UWVBFIG1haW4uYzo8Z2xvYmFsPiMyIC0+IFQ6dW5zaWduZWQgbG9uZyBsb25nIGludA==",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8UkVGIFQ6dW5zaWduZWQgbG9uZyBsb25nIGludCAtPiBEOnVuc2lnbmVkIGxvbmcgbG9uZyBpbnQ=",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8U09VUkNFX0ZJTEUgRDp1bnNpZ25lZCBsb25nIGxvbmcgaW50IC0+IEY6PGluY2x1ZGVzPg==",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "Tk9ERVN8VFlQRSBOQU1FPXVuc2lnbmVkIGxvbmcgbG9uZyBpbnQgRlVMTF9OQU1FPXVuc2lnbmVkIGxvbmcgbG9uZyBpbnQgVFlQRV9ERUNMX0ZVTExfTkFNRT11bnNpZ25lZCBsb25nIGxvbmcgaW50",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "Tk9ERVN8VFlQRV9ERUNMIE5BTUU9dW5zaWduZWQgbG9uZyBsb25nIGludCBGVUxMX05BTUU9dW5zaWduZWQgbG9uZyBsb25nIGludCBDT0RFPXVuc2lnbmVkIGxvbmcgbG9uZyBpbnQgSVNfRVhURVJOQUw9dHJ1ZSBBU1RfUEFSRU5UX1RZUEU9TkFNRVNQQUNFX0JMT0NLIEFTVF9QQVJFTlRfRlVMTF9OQU1FPTxpbmNsdWRlcz46PGdsb2JhbD4gRklMRU5BTUU9PGluY2x1ZGVzPg==",
+          "multiplicity": 1
+        }
+      ],
+      "fullRun": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/unsigned_long_long_int/run.json",
+        "sha256": "c831b0521dd505c857249e7bac560853dedafd767fb6939d3ae95bcf66d5b2f4",
+        "bytes": 2670
+      }
+    },
+    {
+      "case": "unsigned_short",
+      "exact": false,
+      "multiplicities": {
+        "includingSeparators": {
+          "expected": 118,
+          "actual": 118,
+          "matching": 111,
+          "missing": 7,
+          "extra": 7
+        },
+        "nonempty": {
+          "expected": 115,
+          "actual": 115,
+          "matching": 108,
+          "missing": 7,
+          "extra": 7
+        }
+      },
+      "expectedMembers": [
+        {
+          "line": 7,
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPXZhbHVlIENPREU9dmFsdWUgVFlQRV9GVUxMX05BTUU9c2hvcnR1bnNpZ25lZCBPUkRFUj0x",
+          "text": "    MEMBER NAME=value CODE=value TYPE_FULL_NAME=shortunsigned ORDER=1"
+        }
+      ],
+      "baselineMembers": [
+        {
+          "line": 7,
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPXZhbHVlIENPREU9dmFsdWUgVFlQRV9GVUxMX05BTUU9dW5zaWduZWQgc2hvcnQgT1JERVI9MQ==",
+          "text": "    MEMBER NAME=value CODE=value TYPE_FULL_NAME=unsigned short ORDER=1"
+        }
+      ],
+      "memberNameCodeOrderPreserved": true,
+      "missingCompleteRecords": [
+        {
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPXZhbHVlIENPREU9dmFsdWUgVFlQRV9GVUxMX05BTUU9c2hvcnR1bnNpZ25lZCBPUkRFUj0x",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8Q09OVEFJTlMgRjo8aW5jbHVkZXM+IC0+IEQ6c2hvcnR1bnNpZ25lZA==",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8RVZBTF9UWVBFIG1haW4uYzo8Z2xvYmFsPiMyIC0+IFQ6c2hvcnR1bnNpZ25lZA==",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8UkVGIFQ6c2hvcnR1bnNpZ25lZCAtPiBEOnNob3J0dW5zaWduZWQ=",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8U09VUkNFX0ZJTEUgRDpzaG9ydHVuc2lnbmVkIC0+IEY6PGluY2x1ZGVzPg==",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "Tk9ERVN8VFlQRSBOQU1FPXNob3J0dW5zaWduZWQgRlVMTF9OQU1FPXNob3J0dW5zaWduZWQgVFlQRV9ERUNMX0ZVTExfTkFNRT1zaG9ydHVuc2lnbmVk",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "Tk9ERVN8VFlQRV9ERUNMIE5BTUU9c2hvcnR1bnNpZ25lZCBGVUxMX05BTUU9c2hvcnR1bnNpZ25lZCBDT0RFPXNob3J0dW5zaWduZWQgSVNfRVhURVJOQUw9dHJ1ZSBBU1RfUEFSRU5UX1RZUEU9TkFNRVNQQUNFX0JMT0NLIEFTVF9QQVJFTlRfRlVMTF9OQU1FPTxpbmNsdWRlcz46PGdsb2JhbD4gRklMRU5BTUU9PGluY2x1ZGVzPg==",
+          "multiplicity": 1
+        }
+      ],
+      "extraCompleteRecords": [
+        {
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPXZhbHVlIENPREU9dmFsdWUgVFlQRV9GVUxMX05BTUU9dW5zaWduZWQgc2hvcnQgT1JERVI9MQ==",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8Q09OVEFJTlMgRjo8aW5jbHVkZXM+IC0+IEQ6dW5zaWduZWQgc2hvcnQ=",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8RVZBTF9UWVBFIG1haW4uYzo8Z2xvYmFsPiMyIC0+IFQ6dW5zaWduZWQgc2hvcnQ=",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8UkVGIFQ6dW5zaWduZWQgc2hvcnQgLT4gRDp1bnNpZ25lZCBzaG9ydA==",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8U09VUkNFX0ZJTEUgRDp1bnNpZ25lZCBzaG9ydCAtPiBGOjxpbmNsdWRlcz4=",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "Tk9ERVN8VFlQRSBOQU1FPXVuc2lnbmVkIHNob3J0IEZVTExfTkFNRT11bnNpZ25lZCBzaG9ydCBUWVBFX0RFQ0xfRlVMTF9OQU1FPXVuc2lnbmVkIHNob3J0",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "Tk9ERVN8VFlQRV9ERUNMIE5BTUU9dW5zaWduZWQgc2hvcnQgRlVMTF9OQU1FPXVuc2lnbmVkIHNob3J0IENPREU9dW5zaWduZWQgc2hvcnQgSVNfRVhURVJOQUw9dHJ1ZSBBU1RfUEFSRU5UX1RZUEU9TkFNRVNQQUNFX0JMT0NLIEFTVF9QQVJFTlRfRlVMTF9OQU1FPTxpbmNsdWRlcz46PGdsb2JhbD4gRklMRU5BTUU9PGluY2x1ZGVzPg==",
+          "multiplicity": 1
+        }
+      ],
+      "fullRun": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/unsigned_short/run.json",
+        "sha256": "94c4988b93355601feef08e987c387c08ff9dc2539afa4d0fe75a0637bb514c8",
+        "bytes": 2621
+      }
+    },
+    {
+      "case": "unsigned_short_array",
+      "exact": false,
+      "multiplicities": {
+        "includingSeparators": {
+          "expected": 165,
+          "actual": 165,
+          "matching": 158,
+          "missing": 7,
+          "extra": 7
+        },
+        "nonempty": {
+          "expected": 160,
+          "actual": 160,
+          "matching": 153,
+          "missing": 7,
+          "extra": 7
+        }
+      },
+      "expectedMembers": [
+        {
+          "line": 21,
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPXZhbHVlIENPREU9dmFsdWVbM10gVFlQRV9GVUxMX05BTUU9c2hvcnR1bnNpZ25lZFszXSBPUkRFUj0x",
+          "text": "    MEMBER NAME=value CODE=value[3] TYPE_FULL_NAME=shortunsigned[3] ORDER=1"
+        }
+      ],
+      "baselineMembers": [
+        {
+          "line": 21,
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPXZhbHVlIENPREU9dmFsdWVbM10gVFlQRV9GVUxMX05BTUU9dW5zaWduZWQgc2hvcnRbM10gT1JERVI9MQ==",
+          "text": "    MEMBER NAME=value CODE=value[3] TYPE_FULL_NAME=unsigned short[3] ORDER=1"
+        }
+      ],
+      "memberNameCodeOrderPreserved": true,
+      "missingCompleteRecords": [
+        {
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPXZhbHVlIENPREU9dmFsdWVbM10gVFlQRV9GVUxMX05BTUU9c2hvcnR1bnNpZ25lZFszXSBPUkRFUj0x",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8Q09OVEFJTlMgRjo8aW5jbHVkZXM+IC0+IEQ6c2hvcnR1bnNpZ25lZFszXQ==",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8RVZBTF9UWVBFIG1haW4uYzo8Z2xvYmFsPiMyIC0+IFQ6c2hvcnR1bnNpZ25lZFszXQ==",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8UkVGIFQ6c2hvcnR1bnNpZ25lZFszXSAtPiBEOnNob3J0dW5zaWduZWRbM10=",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8U09VUkNFX0ZJTEUgRDpzaG9ydHVuc2lnbmVkWzNdIC0+IEY6PGluY2x1ZGVzPg==",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "Tk9ERVN8VFlQRSBOQU1FPXNob3J0dW5zaWduZWRbM10gRlVMTF9OQU1FPXNob3J0dW5zaWduZWRbM10gVFlQRV9ERUNMX0ZVTExfTkFNRT1zaG9ydHVuc2lnbmVkWzNd",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "Tk9ERVN8VFlQRV9ERUNMIE5BTUU9c2hvcnR1bnNpZ25lZFszXSBGVUxMX05BTUU9c2hvcnR1bnNpZ25lZFszXSBDT0RFPXNob3J0dW5zaWduZWRbM10gSVNfRVhURVJOQUw9dHJ1ZSBBU1RfUEFSRU5UX1RZUEU9TkFNRVNQQUNFX0JMT0NLIEFTVF9QQVJFTlRfRlVMTF9OQU1FPTxpbmNsdWRlcz46PGdsb2JhbD4gRklMRU5BTUU9PGluY2x1ZGVzPg==",
+          "multiplicity": 1
+        }
+      ],
+      "extraCompleteRecords": [
+        {
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPXZhbHVlIENPREU9dmFsdWVbM10gVFlQRV9GVUxMX05BTUU9dW5zaWduZWQgc2hvcnRbM10gT1JERVI9MQ==",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8Q09OVEFJTlMgRjo8aW5jbHVkZXM+IC0+IEQ6dW5zaWduZWQgc2hvcnRbM10=",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8RVZBTF9UWVBFIG1haW4uYzo8Z2xvYmFsPiMyIC0+IFQ6dW5zaWduZWQgc2hvcnRbM10=",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8UkVGIFQ6dW5zaWduZWQgc2hvcnRbM10gLT4gRDp1bnNpZ25lZCBzaG9ydFszXQ==",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8U09VUkNFX0ZJTEUgRDp1bnNpZ25lZCBzaG9ydFszXSAtPiBGOjxpbmNsdWRlcz4=",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "Tk9ERVN8VFlQRSBOQU1FPXVuc2lnbmVkIHNob3J0WzNdIEZVTExfTkFNRT11bnNpZ25lZCBzaG9ydFszXSBUWVBFX0RFQ0xfRlVMTF9OQU1FPXVuc2lnbmVkIHNob3J0WzNd",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "Tk9ERVN8VFlQRV9ERUNMIE5BTUU9dW5zaWduZWQgc2hvcnRbM10gRlVMTF9OQU1FPXVuc2lnbmVkIHNob3J0WzNdIENPREU9dW5zaWduZWQgc2hvcnRbM10gSVNfRVhURVJOQUw9dHJ1ZSBBU1RfUEFSRU5UX1RZUEU9TkFNRVNQQUNFX0JMT0NLIEFTVF9QQVJFTlRfRlVMTF9OQU1FPTxpbmNsdWRlcz46PGdsb2JhbD4gRklMRU5BTUU9PGluY2x1ZGVzPg==",
+          "multiplicity": 1
+        }
+      ],
+      "fullRun": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/unsigned_short_array/run.json",
+        "sha256": "47241bb53e916c31befca6ddb23166585c58a5dbd9af23bc066b2ecd769b7ac5",
+        "bytes": 2658
+      }
+    },
+    {
+      "case": "unsigned_short_int",
+      "exact": false,
+      "multiplicities": {
+        "includingSeparators": {
+          "expected": 118,
+          "actual": 118,
+          "matching": 111,
+          "missing": 7,
+          "extra": 7
+        },
+        "nonempty": {
+          "expected": 115,
+          "actual": 115,
+          "matching": 108,
+          "missing": 7,
+          "extra": 7
+        }
+      },
+      "expectedMembers": [
+        {
+          "line": 7,
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPXZhbHVlIENPREU9dmFsdWUgVFlQRV9GVUxMX05BTUU9c2hvcnQgdW5zaWduZWQgaW50IE9SREVSPTE=",
+          "text": "    MEMBER NAME=value CODE=value TYPE_FULL_NAME=short unsigned int ORDER=1"
+        }
+      ],
+      "baselineMembers": [
+        {
+          "line": 7,
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPXZhbHVlIENPREU9dmFsdWUgVFlQRV9GVUxMX05BTUU9dW5zaWduZWQgc2hvcnQgaW50IE9SREVSPTE=",
+          "text": "    MEMBER NAME=value CODE=value TYPE_FULL_NAME=unsigned short int ORDER=1"
+        }
+      ],
+      "memberNameCodeOrderPreserved": true,
+      "missingCompleteRecords": [
+        {
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPXZhbHVlIENPREU9dmFsdWUgVFlQRV9GVUxMX05BTUU9c2hvcnQgdW5zaWduZWQgaW50IE9SREVSPTE=",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8Q09OVEFJTlMgRjo8aW5jbHVkZXM+IC0+IEQ6c2hvcnQgdW5zaWduZWQgaW50",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8RVZBTF9UWVBFIG1haW4uYzo8Z2xvYmFsPiMyIC0+IFQ6c2hvcnQgdW5zaWduZWQgaW50",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8UkVGIFQ6c2hvcnQgdW5zaWduZWQgaW50IC0+IEQ6c2hvcnQgdW5zaWduZWQgaW50",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8U09VUkNFX0ZJTEUgRDpzaG9ydCB1bnNpZ25lZCBpbnQgLT4gRjo8aW5jbHVkZXM+",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "Tk9ERVN8VFlQRSBOQU1FPXNob3J0IHVuc2lnbmVkIGludCBGVUxMX05BTUU9c2hvcnQgdW5zaWduZWQgaW50IFRZUEVfREVDTF9GVUxMX05BTUU9c2hvcnQgdW5zaWduZWQgaW50",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "Tk9ERVN8VFlQRV9ERUNMIE5BTUU9c2hvcnQgdW5zaWduZWQgaW50IEZVTExfTkFNRT1zaG9ydCB1bnNpZ25lZCBpbnQgQ09ERT1zaG9ydCB1bnNpZ25lZCBpbnQgSVNfRVhURVJOQUw9dHJ1ZSBBU1RfUEFSRU5UX1RZUEU9TkFNRVNQQUNFX0JMT0NLIEFTVF9QQVJFTlRfRlVMTF9OQU1FPTxpbmNsdWRlcz46PGdsb2JhbD4gRklMRU5BTUU9PGluY2x1ZGVzPg==",
+          "multiplicity": 1
+        }
+      ],
+      "extraCompleteRecords": [
+        {
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPXZhbHVlIENPREU9dmFsdWUgVFlQRV9GVUxMX05BTUU9dW5zaWduZWQgc2hvcnQgaW50IE9SREVSPTE=",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8Q09OVEFJTlMgRjo8aW5jbHVkZXM+IC0+IEQ6dW5zaWduZWQgc2hvcnQgaW50",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8RVZBTF9UWVBFIG1haW4uYzo8Z2xvYmFsPiMyIC0+IFQ6dW5zaWduZWQgc2hvcnQgaW50",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8UkVGIFQ6dW5zaWduZWQgc2hvcnQgaW50IC0+IEQ6dW5zaWduZWQgc2hvcnQgaW50",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8U09VUkNFX0ZJTEUgRDp1bnNpZ25lZCBzaG9ydCBpbnQgLT4gRjo8aW5jbHVkZXM+",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "Tk9ERVN8VFlQRSBOQU1FPXVuc2lnbmVkIHNob3J0IGludCBGVUxMX05BTUU9dW5zaWduZWQgc2hvcnQgaW50IFRZUEVfREVDTF9GVUxMX05BTUU9dW5zaWduZWQgc2hvcnQgaW50",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "Tk9ERVN8VFlQRV9ERUNMIE5BTUU9dW5zaWduZWQgc2hvcnQgaW50IEZVTExfTkFNRT11bnNpZ25lZCBzaG9ydCBpbnQgQ09ERT11bnNpZ25lZCBzaG9ydCBpbnQgSVNfRVhURVJOQUw9dHJ1ZSBBU1RfUEFSRU5UX1RZUEU9TkFNRVNQQUNFX0JMT0NLIEFTVF9QQVJFTlRfRlVMTF9OQU1FPTxpbmNsdWRlcz46PGdsb2JhbD4gRklMRU5BTUU9PGluY2x1ZGVzPg==",
+          "multiplicity": 1
+        }
+      ],
+      "fullRun": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/unsigned_short_int/run.json",
+        "sha256": "acedc31410cea4626ebc1ab78dcfcb76ceb9172fbbb07ba9fcb59ae85f7f07aa",
+        "bytes": 2646
+      }
+    },
+    {
+      "case": "unsigned_short_pointer",
+      "exact": false,
+      "multiplicities": {
+        "includingSeparators": {
+          "expected": 118,
+          "actual": 118,
+          "matching": 111,
+          "missing": 7,
+          "extra": 7
+        },
+        "nonempty": {
+          "expected": 115,
+          "actual": 115,
+          "matching": 108,
+          "missing": 7,
+          "extra": 7
+        }
+      },
+      "expectedMembers": [
+        {
+          "line": 7,
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPXZhbHVlIENPREU9KnZhbHVlIFRZUEVfRlVMTF9OQU1FPXNob3J0dW5zaWduZWQqIE9SREVSPTE=",
+          "text": "    MEMBER NAME=value CODE=*value TYPE_FULL_NAME=shortunsigned* ORDER=1"
+        }
+      ],
+      "baselineMembers": [
+        {
+          "line": 7,
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPXZhbHVlIENPREU9KnZhbHVlIFRZUEVfRlVMTF9OQU1FPXVuc2lnbmVkIHNob3J0KiBPUkRFUj0x",
+          "text": "    MEMBER NAME=value CODE=*value TYPE_FULL_NAME=unsigned short* ORDER=1"
+        }
+      ],
+      "memberNameCodeOrderPreserved": true,
+      "missingCompleteRecords": [
+        {
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPXZhbHVlIENPREU9KnZhbHVlIFRZUEVfRlVMTF9OQU1FPXNob3J0dW5zaWduZWQqIE9SREVSPTE=",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8Q09OVEFJTlMgRjo8aW5jbHVkZXM+IC0+IEQ6c2hvcnR1bnNpZ25lZCo=",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8RVZBTF9UWVBFIG1haW4uYzo8Z2xvYmFsPiMyIC0+IFQ6c2hvcnR1bnNpZ25lZCo=",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8UkVGIFQ6c2hvcnR1bnNpZ25lZCogLT4gRDpzaG9ydHVuc2lnbmVkKg==",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8U09VUkNFX0ZJTEUgRDpzaG9ydHVuc2lnbmVkKiAtPiBGOjxpbmNsdWRlcz4=",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "Tk9ERVN8VFlQRSBOQU1FPXNob3J0dW5zaWduZWQqIEZVTExfTkFNRT1zaG9ydHVuc2lnbmVkKiBUWVBFX0RFQ0xfRlVMTF9OQU1FPXNob3J0dW5zaWduZWQq",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "Tk9ERVN8VFlQRV9ERUNMIE5BTUU9c2hvcnR1bnNpZ25lZCogRlVMTF9OQU1FPXNob3J0dW5zaWduZWQqIENPREU9c2hvcnR1bnNpZ25lZCogSVNfRVhURVJOQUw9dHJ1ZSBBU1RfUEFSRU5UX1RZUEU9TkFNRVNQQUNFX0JMT0NLIEFTVF9QQVJFTlRfRlVMTF9OQU1FPTxpbmNsdWRlcz46PGdsb2JhbD4gRklMRU5BTUU9PGluY2x1ZGVzPg==",
+          "multiplicity": 1
+        }
+      ],
+      "extraCompleteRecords": [
+        {
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPXZhbHVlIENPREU9KnZhbHVlIFRZUEVfRlVMTF9OQU1FPXVuc2lnbmVkIHNob3J0KiBPUkRFUj0x",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8Q09OVEFJTlMgRjo8aW5jbHVkZXM+IC0+IEQ6dW5zaWduZWQgc2hvcnQq",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8RVZBTF9UWVBFIG1haW4uYzo8Z2xvYmFsPiMyIC0+IFQ6dW5zaWduZWQgc2hvcnQq",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8UkVGIFQ6dW5zaWduZWQgc2hvcnQqIC0+IEQ6dW5zaWduZWQgc2hvcnQq",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8U09VUkNFX0ZJTEUgRDp1bnNpZ25lZCBzaG9ydCogLT4gRjo8aW5jbHVkZXM+",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "Tk9ERVN8VFlQRSBOQU1FPXVuc2lnbmVkIHNob3J0KiBGVUxMX05BTUU9dW5zaWduZWQgc2hvcnQqIFRZUEVfREVDTF9GVUxMX05BTUU9dW5zaWduZWQgc2hvcnQq",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "Tk9ERVN8VFlQRV9ERUNMIE5BTUU9dW5zaWduZWQgc2hvcnQqIEZVTExfTkFNRT11bnNpZ25lZCBzaG9ydCogQ09ERT11bnNpZ25lZCBzaG9ydCogSVNfRVhURVJOQUw9dHJ1ZSBBU1RfUEFSRU5UX1RZUEU9TkFNRVNQQUNFX0JMT0NLIEFTVF9QQVJFTlRfRlVMTF9OQU1FPTxpbmNsdWRlcz46PGdsb2JhbD4gRklMRU5BTUU9PGluY2x1ZGVzPg==",
+          "multiplicity": 1
+        }
+      ],
+      "fullRun": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/unsigned_short_pointer/run.json",
+        "sha256": "be1576fa2f70deba2a1533f2c1100e6861a7e6bb2f844cc89a54b45740f93e89",
+        "bytes": 2670
+      }
+    },
+    {
+      "case": "volatile_unsigned_short",
+      "exact": false,
+      "multiplicities": {
+        "includingSeparators": {
+          "expected": 118,
+          "actual": 118,
+          "matching": 111,
+          "missing": 7,
+          "extra": 7
+        },
+        "nonempty": {
+          "expected": 115,
+          "actual": 115,
+          "matching": 108,
+          "missing": 7,
+          "extra": 7
+        }
+      },
+      "expectedMembers": [
+        {
+          "line": 7,
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPXZhbHVlIENPREU9dmFsdWUgVFlQRV9GVUxMX05BTUU9dm9sYXRpbGUgc2hvcnR1bnNpZ25lZCBPUkRFUj0x",
+          "text": "    MEMBER NAME=value CODE=value TYPE_FULL_NAME=volatile shortunsigned ORDER=1"
+        }
+      ],
+      "baselineMembers": [
+        {
+          "line": 7,
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPXZhbHVlIENPREU9dmFsdWUgVFlQRV9GVUxMX05BTUU9dW5zaWduZWQgc2hvcnQgT1JERVI9MQ==",
+          "text": "    MEMBER NAME=value CODE=value TYPE_FULL_NAME=unsigned short ORDER=1"
+        }
+      ],
+      "memberNameCodeOrderPreserved": true,
+      "missingCompleteRecords": [
+        {
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPXZhbHVlIENPREU9dmFsdWUgVFlQRV9GVUxMX05BTUU9dm9sYXRpbGUgc2hvcnR1bnNpZ25lZCBPUkRFUj0x",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8Q09OVEFJTlMgRjo8aW5jbHVkZXM+IC0+IEQ6dm9sYXRpbGUgc2hvcnR1bnNpZ25lZA==",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8RVZBTF9UWVBFIG1haW4uYzo8Z2xvYmFsPiMyIC0+IFQ6dm9sYXRpbGUgc2hvcnR1bnNpZ25lZA==",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8UkVGIFQ6dm9sYXRpbGUgc2hvcnR1bnNpZ25lZCAtPiBEOnZvbGF0aWxlIHNob3J0dW5zaWduZWQ=",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8U09VUkNFX0ZJTEUgRDp2b2xhdGlsZSBzaG9ydHVuc2lnbmVkIC0+IEY6PGluY2x1ZGVzPg==",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "Tk9ERVN8VFlQRSBOQU1FPXZvbGF0aWxlIHNob3J0dW5zaWduZWQgRlVMTF9OQU1FPXZvbGF0aWxlIHNob3J0dW5zaWduZWQgVFlQRV9ERUNMX0ZVTExfTkFNRT12b2xhdGlsZSBzaG9ydHVuc2lnbmVk",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "Tk9ERVN8VFlQRV9ERUNMIE5BTUU9dm9sYXRpbGUgc2hvcnR1bnNpZ25lZCBGVUxMX05BTUU9dm9sYXRpbGUgc2hvcnR1bnNpZ25lZCBDT0RFPXZvbGF0aWxlIHNob3J0dW5zaWduZWQgSVNfRVhURVJOQUw9dHJ1ZSBBU1RfUEFSRU5UX1RZUEU9TkFNRVNQQUNFX0JMT0NLIEFTVF9QQVJFTlRfRlVMTF9OQU1FPTxpbmNsdWRlcz46PGdsb2JhbD4gRklMRU5BTUU9PGluY2x1ZGVzPg==",
+          "multiplicity": 1
+        }
+      ],
+      "extraCompleteRecords": [
+        {
+          "rawBase64": "ICAgIE1FTUJFUiBOQU1FPXZhbHVlIENPREU9dmFsdWUgVFlQRV9GVUxMX05BTUU9dW5zaWduZWQgc2hvcnQgT1JERVI9MQ==",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8Q09OVEFJTlMgRjo8aW5jbHVkZXM+IC0+IEQ6dW5zaWduZWQgc2hvcnQ=",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8RVZBTF9UWVBFIG1haW4uYzo8Z2xvYmFsPiMyIC0+IFQ6dW5zaWduZWQgc2hvcnQ=",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8UkVGIFQ6dW5zaWduZWQgc2hvcnQgLT4gRDp1bnNpZ25lZCBzaG9ydA==",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "RURHRVN8U09VUkNFX0ZJTEUgRDp1bnNpZ25lZCBzaG9ydCAtPiBGOjxpbmNsdWRlcz4=",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "Tk9ERVN8VFlQRSBOQU1FPXVuc2lnbmVkIHNob3J0IEZVTExfTkFNRT11bnNpZ25lZCBzaG9ydCBUWVBFX0RFQ0xfRlVMTF9OQU1FPXVuc2lnbmVkIHNob3J0",
+          "multiplicity": 1
+        },
+        {
+          "rawBase64": "Tk9ERVN8VFlQRV9ERUNMIE5BTUU9dW5zaWduZWQgc2hvcnQgRlVMTF9OQU1FPXVuc2lnbmVkIHNob3J0IENPREU9dW5zaWduZWQgc2hvcnQgSVNfRVhURVJOQUw9dHJ1ZSBBU1RfUEFSRU5UX1RZUEU9TkFNRVNQQUNFX0JMT0NLIEFTVF9QQVJFTlRfRlVMTF9OQU1FPTxpbmNsdWRlcz46PGdsb2JhbD4gRklMRU5BTUU9PGluY2x1ZGVzPg==",
+          "multiplicity": 1
+        }
+      ],
+      "fullRun": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/volatile_unsigned_short/run.json",
+        "sha256": "ecf5e2bd2c9f33bb2bca429423d9305a31bd4daa1f363c3f89823bf1a48f3f80",
+        "bytes": 2676
+      }
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/run.json",
+      "sha256": "584ca9ae5fa97f60600fc31c2491c64e88831f5369346cc0df395d7e55015efd",
+      "bytes": 120057
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-review-v1/review.py",
+      "sha256": "12b4d2793807188fb8ecac80946c9fc2d2ae5e21317a1691a87953ba60230069",
+      "bytes": 5581
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/base_qualified_pointer/expected.txt",
+      "sha256": "53b149c0c3b91fc21969901c294099353666c6e0842f621bf49d596a9017cb5c",
+      "bytes": 6775
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/base_qualified_pointer/actual.txt",
+      "sha256": "fbaa5726235b4fef3793f017331847ece1bd623819660858f4a7405b5e55d00b",
+      "bytes": 6787
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/base_qualified_pointer/stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/base_qualified_pointer/complete.diff",
+      "sha256": "62163afd06c279c6f790dbf26700466fd8e48da83cfa4acd64e349afdf606ab5",
+      "bytes": 3835
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/base_qualified_pointer/run.json",
+      "sha256": "c73d3e703787b8d8747fa404355045e703c4b0c04086b24a6dae2e6e9f9cb9e3",
+      "bytes": 2670
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/base_qualified_pointer/input/main.c",
+      "sha256": "683671d135a3d3d8385a92bba5f8fc1b87e1650c0b698282ee8416a11d110e0d",
+      "bytes": 90
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/const_unsigned_short/expected.txt",
+      "sha256": "7ffc36c68f07466a0ab2f31de41b75a9f73e7e130ddf547cbc96d1b4fa774284",
+      "bytes": 6759
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/const_unsigned_short/actual.txt",
+      "sha256": "41381915fe3da9041f17b5b93d2cb9b2ebe5df5372f2f8807d2c557a38034fbf",
+      "bytes": 6771
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/const_unsigned_short/stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/const_unsigned_short/complete.diff",
+      "sha256": "041297bf684a78c504e14700a85880d5d0140594646d1e91335eebe1f669384b",
+      "bytes": 3808
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/const_unsigned_short/run.json",
+      "sha256": "2c9d971d8b0228689ee3af0d6052e94aa330292c1c25a1a8b59b1f48a38f405a",
+      "bytes": 2658
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/const_unsigned_short/input/main.c",
+      "sha256": "57e3d6a3da034eaeda3da20d1ba518bac47a740b3aa62c4f5bf16def20bbc385",
+      "bytes": 89
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/mixed_declarator_shapes/expected.txt",
+      "sha256": "1d3402f00cd066767d6a87552aa217b8292a66629c72309165bafaa1a8d4ff0d",
+      "bytes": 10918
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/mixed_declarator_shapes/actual.txt",
+      "sha256": "11aaaca3111248fd6db26a5a93cef887572c7667f643269e8d8004011d24ba44",
+      "bytes": 10954
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/mixed_declarator_shapes/stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/mixed_declarator_shapes/complete.diff",
+      "sha256": "391ade50c9dd0ea3b5818ff64dfe5d58e64023d08d5c6837dc4c74f873ad9689",
+      "bytes": 6366
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/mixed_declarator_shapes/run.json",
+      "sha256": "8918bc25d33e009b9aa7793c80c776e8b88153f734d4748b36992683c38bcbca",
+      "bytes": 2684
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/mixed_declarator_shapes/input/main.c",
+      "sha256": "78a9ab60868e0c24ba739ac8c1ed1cffb97913d16e6c14a8da5e985a0976dfe7",
+      "bytes": 104
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/nonprimitive_scalar_control/expected.txt",
+      "sha256": "d01b88fb2012eb6671de933e8be87c445c1cc7d951aeee509276ddd6373dd34c",
+      "bytes": 11430
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/nonprimitive_scalar_control/actual.txt",
+      "sha256": "2193e03adf6e49107881f79b1006f5787adfa5d2084cd57bf9dc59120045a3bd",
+      "bytes": 9840
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/nonprimitive_scalar_control/stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/nonprimitive_scalar_control/complete.diff",
+      "sha256": "92a7c9040eb34d49935b08ec227955012a2481c97c13475ab6539ece90a87ebf",
+      "bytes": 5254
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/nonprimitive_scalar_control/run.json",
+      "sha256": "820242d9d9a5e8dbf2c2a0f772cbd6714c2284bbd169b5bb9dd367bef9df9b9e",
+      "bytes": 2705
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/nonprimitive_scalar_control/input/main.c",
+      "sha256": "30f7610f6251619e111dccd66822d2b620b131a00520a94432f29a23737cbcee",
+      "bytes": 260
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/ordinary_numeric_control/expected.txt",
+      "sha256": "4528adacb40f21e1aa33eb4195cfb87470e8f5a3a288a1678486d1800c63aef1",
+      "bytes": 6960
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/ordinary_numeric_control/actual.txt",
+      "sha256": "4528adacb40f21e1aa33eb4195cfb87470e8f5a3a288a1678486d1800c63aef1",
+      "bytes": 6960
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/ordinary_numeric_control/stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/ordinary_numeric_control/complete.diff",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/ordinary_numeric_control/run.json",
+      "sha256": "2cffa1c9e3b54965690737d4b88354627f626aa599ce9977ab14a93fbcde169c",
+      "bytes": 2679
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/ordinary_numeric_control/input/main.c",
+      "sha256": "ca63fcf93080419061d59acd5f7cefe2818a399a29190125a011d7397e52caa6",
+      "bytes": 114
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/pointer_qualified_pointer/expected.txt",
+      "sha256": "1efb5791f73bc51f3d36709eb8f61cd5e9850b3b01fe4687ff8a64f26e01b625",
+      "bytes": 6785
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/pointer_qualified_pointer/actual.txt",
+      "sha256": "103bb7bd2403c9dfb79594295cd790c013c2d71366d813f9e4c606fbfe500fb6",
+      "bytes": 6797
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/pointer_qualified_pointer/stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/pointer_qualified_pointer/complete.diff",
+      "sha256": "cb14bd218f9b181c8458831df38352c53c73af5e6f59121dc34c6fae9c2ea806",
+      "bytes": 3850
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/pointer_qualified_pointer/run.json",
+      "sha256": "0dcdee60d3d8c408f7a11162c35e8dec546ab47c5a10ca238e1f5b595e454f4d",
+      "bytes": 2688
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/pointer_qualified_pointer/input/main.c",
+      "sha256": "ce703562d1d768702fd9d0f4177d315a354346fd5924b53feca86633ab49dd29",
+      "bytes": 91
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/short_int_unsigned/expected.txt",
+      "sha256": "92cfd06fee6b3bcb4a94e9eb9f76234322feb6f521fafbbcd7ab928d2d4b92e0",
+      "bytes": 6813
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/short_int_unsigned/actual.txt",
+      "sha256": "5614d64321db129964d63ba14ccae2c83a982e8c40dc1f526fc1384a3cd7cfa4",
+      "bytes": 6813
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/short_int_unsigned/stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/short_int_unsigned/complete.diff",
+      "sha256": "954a19d613bf7755f8904e64d377ff9092cdc9e621f476f1b36e4af0e1b0dd21",
+      "bytes": 3914
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/short_int_unsigned/run.json",
+      "sha256": "6b1746b9d6dc0c64dbb041428a0328a257df9cab9428db3e0552b31894ca61dc",
+      "bytes": 2646
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/short_int_unsigned/input/main.c",
+      "sha256": "0c049f5c6fd7eb24665d96d4ff592154b323a755cc58e92d5fe0a499dd596648",
+      "bytes": 87
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/short_unsigned/expected.txt",
+      "sha256": "33b6a8ed56ff9b624cfa8bf0410d5bd9372fcdbf1cb41fde895ef129446ba90f",
+      "bytes": 6741
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/short_unsigned/actual.txt",
+      "sha256": "cde860a27c45998c02c762c349ddc9ff5a45706790dfeb486fdc892eb24aaa79",
+      "bytes": 6753
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/short_unsigned/stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/short_unsigned/complete.diff",
+      "sha256": "69ccb10d20db3d8924a4e32bd7551419ba6b870f3914d465b3f4f4a586c73c73",
+      "bytes": 3802
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/short_unsigned/run.json",
+      "sha256": "f2f4867b493f3c9b7cf181b21c9ddea991a94c995ddda7d910d817fc9df620fc",
+      "bytes": 2622
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/short_unsigned/input/main.c",
+      "sha256": "5fb6e70b45823d56203bd1b7c9e35750e574fd671788cf67cad78b17bb7c10a2",
+      "bytes": 83
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/signed_char/expected.txt",
+      "sha256": "01213a09ac6d7a925b92e76fa1e9424a8c6e1d1f60201de3f0701c987ac794aa",
+      "bytes": 6696
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/signed_char/actual.txt",
+      "sha256": "450ee58b73fd4e3bb70e91538302fd1c334b3e04a5b9262ddfb36e617c8cb5e8",
+      "bytes": 6708
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/signed_char/stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/signed_char/complete.diff",
+      "sha256": "d018f7e332649cac95b53499e550e18d6ab7531aff5516d9b6b558de2ac06469",
+      "bytes": 3727
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/signed_char/run.json",
+      "sha256": "0d7ca8e0479c733f1edc839837aa48888d8051c67b57fd0fe350960422bd6413",
+      "bytes": 2604
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/signed_char/input/main.c",
+      "sha256": "65222d14e53a108d3e98d3e3efa30aeda2b6df4dbed97b88e92698dee74d32c0",
+      "bytes": 80
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/signed_short/expected.txt",
+      "sha256": "d1a36fa051100458c9a44e8cafb4499d361950fe1e5f8ff5fd4f0b2e9aa22d39",
+      "bytes": 6711
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/signed_short/actual.txt",
+      "sha256": "6c8bd98f1ee2c25500259d0c66bc8e6d716075b2c4dc5de8eedb3a3100911cc0",
+      "bytes": 6723
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/signed_short/stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/signed_short/complete.diff",
+      "sha256": "3b30c4a4c3de6923fa58d043ad6de2288f9caa5afcaaf0434081390add7d1227",
+      "bytes": 3752
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/signed_short/run.json",
+      "sha256": "255e010f41d7f1f2806d2cd15ea6fd0dfe5a50e43b1833ddd966d0637ca4444d",
+      "bytes": 2610
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/signed_short/input/main.c",
+      "sha256": "da4b39f4cbd65496ecfcfe1a217413da07c5d35378b3a80ba7bc4fecec5dae79",
+      "bytes": 81
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/tiny_fixedtables_include/expected.txt",
+      "sha256": "fc4a1360d6f10152edb364c346a47ae73d2df2460fe5ef12da2d2e79cbb7dd3f",
+      "bytes": 48334
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/tiny_fixedtables_include/actual.txt",
+      "sha256": "3b15e5adbaa6fba426e00c4b695cafb905e530dc4627573646e3388279393796",
+      "bytes": 48346
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/tiny_fixedtables_include/stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/tiny_fixedtables_include/complete.diff",
+      "sha256": "36996d3c082240ccd6549302cfee5a39f874c526076144e4b5f3eeee109c940f",
+      "bytes": 4534
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/tiny_fixedtables_include/run.json",
+      "sha256": "d401eb0182de9ab96ce580980008bb0f34f0aaabdd044e4d1aef7282edb21a3f",
+      "bytes": 3017
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/tiny_fixedtables_include/input/fixed.h",
+      "sha256": "3039380a12e6dba1fb44314f13292d1b5ec6744aa80eff5599566a29ea94ea86",
+      "bytes": 98
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/tiny_fixedtables_include/input/main.c",
+      "sha256": "7203039d3be732abfb9abaad7177eaa77efa51d6e9fa58d58733346eb6cb4dda",
+      "bytes": 254
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/tiny_fixedtables_inline/expected.txt",
+      "sha256": "6d613c7085ab54541cc1d9fa83494748e33fe70bfc5c541ee39f12aa8046cadd",
+      "bytes": 38652
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/tiny_fixedtables_inline/actual.txt",
+      "sha256": "7fc32775a3481703dbe3d002b091e4c68c04bea03c0b2d808c6711e06307fb55",
+      "bytes": 38664
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/tiny_fixedtables_inline/stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/tiny_fixedtables_inline/complete.diff",
+      "sha256": "a5f05aaf52d924d87606869ed0b62a9e497b013fafb060607f82c7d0be338aec",
+      "bytes": 4493
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/tiny_fixedtables_inline/run.json",
+      "sha256": "e63eb7ed7af6d781dd676dc71f9e0bdfb627147aa632f9851e607950b6267ef6",
+      "bytes": 2680
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/tiny_fixedtables_inline/input/main.c",
+      "sha256": "8af2a0a9531deec50f16e8c125de4000c0636b443b11628e232bb9e9413d2a6f",
+      "bytes": 333
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/unsigned_char/expected.txt",
+      "sha256": "4a794f1b11f8d0b222bdc91d3e45abe0c55ecbdbaf64db736a95f91828aec8d4",
+      "bytes": 6738
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/unsigned_char/actual.txt",
+      "sha256": "4a794f1b11f8d0b222bdc91d3e45abe0c55ecbdbaf64db736a95f91828aec8d4",
+      "bytes": 6738
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/unsigned_char/stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/unsigned_char/complete.diff",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/unsigned_char/run.json",
+      "sha256": "2c264e0a039391768a094320128c47da06b87c41adf736f6c022a8f9b0875f35",
+      "bytes": 2610
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/unsigned_char/input/main.c",
+      "sha256": "ab73e292cafb2ac78baf257cb5a3710955bcfb9f71d82078478916590e813721",
+      "bytes": 82
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/unsigned_long_long_int/expected.txt",
+      "sha256": "8cdd2dbee080157990c124b09867988f64b4c790a00ab92b5be48b270c61a720",
+      "bytes": 6861
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/unsigned_long_long_int/actual.txt",
+      "sha256": "f85a47d40520d00231233b3234bf711a871491b288e9118737e3d0250f78478c",
+      "bytes": 6873
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/unsigned_long_long_int/stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/unsigned_long_long_int/complete.diff",
+      "sha256": "2286508aacc18d40951e5c083d1dc9679e13c530918b32cf5fa3ee0ba468b2bd",
+      "bytes": 4380
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/unsigned_long_long_int/run.json",
+      "sha256": "c831b0521dd505c857249e7bac560853dedafd767fb6939d3ae95bcf66d5b2f4",
+      "bytes": 2670
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/unsigned_long_long_int/input/main.c",
+      "sha256": "c772a4b67dd1cfb5cf2943b6d97525c24063c4a476c33a2fba23664f480bae26",
+      "bytes": 91
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/unsigned_short/expected.txt",
+      "sha256": "67200ecf8fbbbf5beacd4025936a0f959c30ede649497118d7510d2bea4f7b88",
+      "bytes": 6741
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/unsigned_short/actual.txt",
+      "sha256": "99a38cf210662b412e3cae339c3ecab70a46b00473554191fff08e4ba622019a",
+      "bytes": 6753
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/unsigned_short/stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/unsigned_short/complete.diff",
+      "sha256": "457a2d49ce10c904c1bbcbaf5bc5deb52f3a2b940f97788db302bb9a68113a36",
+      "bytes": 3802
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/unsigned_short/run.json",
+      "sha256": "94c4988b93355601feef08e987c387c08ff9dc2539afa4d0fe75a0637bb514c8",
+      "bytes": 2621
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/unsigned_short/input/main.c",
+      "sha256": "15c28619bfdeb3b65e60afb2011092c2c52d425ef4f4b67be09083a3657aea47",
+      "bytes": 83
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/unsigned_short_array/expected.txt",
+      "sha256": "500f0b8fd015d905346cdc8b0d9dea88b91ecb24bf068504ff9ddb59b1916ef0",
+      "bytes": 9763
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/unsigned_short_array/actual.txt",
+      "sha256": "05bbf56f6e7e62880c9d2ed791e5d9ee6e12021997dde484d6eff81f87622b36",
+      "bytes": 9775
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/unsigned_short_array/stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/unsigned_short_array/complete.diff",
+      "sha256": "30438cf102fd9e6185b2459f537a1ecec64d34f5e2d16111d3b2a8c1f6fc2087",
+      "bytes": 3945
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/unsigned_short_array/run.json",
+      "sha256": "47241bb53e916c31befca6ddb23166585c58a5dbd9af23bc066b2ecd769b7ac5",
+      "bytes": 2658
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/unsigned_short_array/input/main.c",
+      "sha256": "e30c69af8869ef328c2de4270ab270fc6a23211fac7b55533efadd02ccc3aa49",
+      "bytes": 86
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/unsigned_short_int/expected.txt",
+      "sha256": "2f53a7bf0e015f6d42627dde4d6c54bafcd2e55b0b81a3f2b80b70f9a46cf3d1",
+      "bytes": 6813
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/unsigned_short_int/actual.txt",
+      "sha256": "837530af832de745ef82ac69484e1aa20fc4a712dd159cd2bbfc65bcdb6d0de6",
+      "bytes": 6813
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/unsigned_short_int/stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/unsigned_short_int/complete.diff",
+      "sha256": "902f819283312533c98c20344d26df7b82bb9b991bed029f691217a75312b131",
+      "bytes": 3914
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/unsigned_short_int/run.json",
+      "sha256": "acedc31410cea4626ebc1ab78dcfcb76ceb9172fbbb07ba9fcb59ae85f7f07aa",
+      "bytes": 2646
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/unsigned_short_int/input/main.c",
+      "sha256": "76277bee00be9bb521ee0bc24c5127ef632678fc3e0aa233f4bba4de713fed85",
+      "bytes": 87
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/unsigned_short_pointer/expected.txt",
+      "sha256": "75c4b6060b1e8d56e967c641dd7050a696c00ab95b37b284633ca58ad5fdb0f9",
+      "bytes": 6757
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/unsigned_short_pointer/actual.txt",
+      "sha256": "056956ce53a8af9468f0d835629ead78fb3f211db183fa59c04958ac528fa800",
+      "bytes": 6769
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/unsigned_short_pointer/stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/unsigned_short_pointer/complete.diff",
+      "sha256": "999700c5fb5c91b3b7c7efbb6b87976d6fd6583aa7ab215ff4cac0dac0b28d30",
+      "bytes": 3829
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/unsigned_short_pointer/run.json",
+      "sha256": "be1576fa2f70deba2a1533f2c1100e6861a7e6bb2f844cc89a54b45740f93e89",
+      "bytes": 2670
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/unsigned_short_pointer/input/main.c",
+      "sha256": "7b5de0d2a5dc3eb44e456043dd90fba8820cb2f3c7c839919a8b3eec34c1a97e",
+      "bytes": 84
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/volatile_unsigned_short/expected.txt",
+      "sha256": "3dc76afa755430aab0204df9f9ef02f714b67b2468229d70a316746460e2e8d9",
+      "bytes": 6876
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/volatile_unsigned_short/actual.txt",
+      "sha256": "599fde6e4b6ea50c1480760d5a46d18363005bafb1c4ec089d4c57d392648ac7",
+      "bytes": 6780
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/volatile_unsigned_short/stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/volatile_unsigned_short/complete.diff",
+      "sha256": "99764449d58c2fe0863ff0dbf67c842a12c951bea89fcfde97fa33885f815810",
+      "bytes": 4101
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/volatile_unsigned_short/run.json",
+      "sha256": "ecf5e2bd2c9f33bb2bca429423d9305a31bd4daa1f363c3f89823bf1a48f3f80",
+      "bytes": 2676
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/volatile_unsigned_short/input/main.c",
+      "sha256": "e80f725b99b57290699d3daf7f4bb116df52d666ad1c6973bea83f82d0675d64",
+      "bytes": 92
+    }
+  ],
+  "scope": "Measured complete references and accepted baseline only; no implementation, producer performance claim, filtered parity gate, or overall port-completion claim."
+}

@@ -1,0 +1,60 @@
+{
+  "base_qualified_pointer": {
+    "main.c": "struct Record {\n    const unsigned short *value;\n};\n\nint ordinary(void) {\n    return 7;\n}\n"
+  },
+  "const_unsigned_short": {
+    "main.c": "struct Record {\n    const unsigned short value;\n};\n\nint ordinary(void) {\n    return 7;\n}\n"
+  },
+  "mixed_declarator_shapes": {
+    "main.c": "struct Record {\n    unsigned short scalar, *pointer, table[3];\n};\n\nint ordinary(void) {\n    return 7;\n}\n"
+  },
+  "nonprimitive_scalar_control": {
+    "main.c": "struct Inner {\n    int item;\n};\nunion Choice {\n    int integer_value;\n    double floating_value;\n};\ntypedef int Alias;\nstruct Record {\n    struct Inner struct_value;\n    union Choice union_value;\n    Alias alias_value;\n};\n\nint ordinary(void) {\n    return 7;\n}\n"
+  },
+  "ordinary_numeric_control": {
+    "main.c": "struct NumericRecord {\n    int integer_value;\n    double floating_value;\n};\n\nint ordinary(void) {\n    return 7;\n}\n"
+  },
+  "pointer_qualified_pointer": {
+    "main.c": "struct Record {\n    unsigned short * const value;\n};\n\nint ordinary(void) {\n    return 7;\n}\n"
+  },
+  "short_int_unsigned": {
+    "main.c": "struct Record {\n    short int unsigned value;\n};\n\nint ordinary(void) {\n    return 7;\n}\n"
+  },
+  "short_unsigned": {
+    "main.c": "struct Record {\n    short unsigned value;\n};\n\nint ordinary(void) {\n    return 7;\n}\n"
+  },
+  "signed_char": {
+    "main.c": "struct Record {\n    signed char value;\n};\n\nint ordinary(void) {\n    return 7;\n}\n"
+  },
+  "signed_short": {
+    "main.c": "struct Record {\n    signed short value;\n};\n\nint ordinary(void) {\n    return 7;\n}\n"
+  },
+  "tiny_fixedtables_include": {
+    "fixed.h": "static const Code lenfix[2] = {{1, 2, 3}, {4, 5, 6}};\nstatic const Code distfix[1] = {{7, 8, 9}};\n",
+    "main.c": "typedef struct Entry {\n unsigned char op;\n unsigned char bits;\n unsigned short value;\n} Code;\nstruct State { const Code *len; const Code *dist; };\nvoid fixedtables(struct State *state) {\n#include \"fixed.h\"\n state->len = lenfix;\n state->dist = distfix;\n}\n"
+  },
+  "tiny_fixedtables_inline": {
+    "main.c": "typedef struct Entry {\n unsigned char op;\n unsigned char bits;\n unsigned short value;\n} Code;\nstruct State { const Code *len; const Code *dist; };\nvoid fixedtables(struct State *state) {\nstatic const Code lenfix[2] = {{1, 2, 3}, {4, 5, 6}};\nstatic const Code distfix[1] = {{7, 8, 9}};\n state->len = lenfix;\n state->dist = distfix;\n}\n"
+  },
+  "unsigned_char": {
+    "main.c": "struct Record {\n    unsigned char value;\n};\n\nint ordinary(void) {\n    return 7;\n}\n"
+  },
+  "unsigned_long_long_int": {
+    "main.c": "struct Record {\n    unsigned long long int value;\n};\n\nint ordinary(void) {\n    return 7;\n}\n"
+  },
+  "unsigned_short": {
+    "main.c": "struct Record {\n    unsigned short value;\n};\n\nint ordinary(void) {\n    return 7;\n}\n"
+  },
+  "unsigned_short_array": {
+    "main.c": "struct Record {\n    unsigned short value[3];\n};\n\nint ordinary(void) {\n    return 7;\n}\n"
+  },
+  "unsigned_short_int": {
+    "main.c": "struct Record {\n    unsigned short int value;\n};\n\nint ordinary(void) {\n    return 7;\n}\n"
+  },
+  "unsigned_short_pointer": {
+    "main.c": "struct Record {\n    unsigned short *value;\n};\n\nint ordinary(void) {\n    return 7;\n}\n"
+  },
+  "volatile_unsigned_short": {
+    "main.c": "struct Record {\n    volatile unsigned short value;\n};\n\nint ordinary(void) {\n    return 7;\n}\n"
+  }
+}

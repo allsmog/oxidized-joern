@@ -1,0 +1,71 @@
+{
+  "case": "volatile_unsigned_short",
+  "retainedAnchor": false,
+  "command": [
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/frozen-v1/joern-parity",
+    "--production",
+    "main.c"
+  ],
+  "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/volatile_unsigned_short/input",
+  "seconds": 0.003827582986559719,
+  "exitCode": 0,
+  "timeout": false,
+  "error": null,
+  "beforeExact": false,
+  "candidateExact": true,
+  "beforeCandidateIdentical": false,
+  "inputHashes": {
+    "main.c": "e80f725b99b57290699d3daf7f4bb116df52d666ad1c6973bea83f82d0675d64"
+  },
+  "counts": {
+    "includingSeparators": {
+      "expected": 119,
+      "before": 119,
+      "candidate": 119,
+      "matchingBefore": 112,
+      "matchingCandidate": 119,
+      "gained": 7,
+      "lost": 0,
+      "lostRecords": {},
+      "gainedRecords": {
+        "    MEMBER NAME=value CODE=value TYPE_FULL_NAME=volatile shortunsigned ORDER=1": 1,
+        "NODES|TYPE_DECL NAME=volatile shortunsigned FULL_NAME=volatile shortunsigned CODE=volatile shortunsigned IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>": 1,
+        "NODES|TYPE NAME=volatile shortunsigned FULL_NAME=volatile shortunsigned TYPE_DECL_FULL_NAME=volatile shortunsigned": 1,
+        "EDGES|CONTAINS F:<includes> -> D:volatile shortunsigned": 1,
+        "EDGES|EVAL_TYPE main.c:<global>#2 -> T:volatile shortunsigned": 1,
+        "EDGES|REF T:volatile shortunsigned -> D:volatile shortunsigned": 1,
+        "EDGES|SOURCE_FILE D:volatile shortunsigned -> F:<includes>": 1
+      }
+    },
+    "nonempty": {
+      "expected": 115,
+      "before": 115,
+      "candidate": 115,
+      "matchingBefore": 108,
+      "matchingCandidate": 115,
+      "gained": 7,
+      "lost": 0,
+      "lostRecords": {},
+      "gainedRecords": {
+        "    MEMBER NAME=value CODE=value TYPE_FULL_NAME=volatile shortunsigned ORDER=1": 1,
+        "NODES|TYPE_DECL NAME=volatile shortunsigned FULL_NAME=volatile shortunsigned CODE=volatile shortunsigned IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>": 1,
+        "NODES|TYPE NAME=volatile shortunsigned FULL_NAME=volatile shortunsigned TYPE_DECL_FULL_NAME=volatile shortunsigned": 1,
+        "EDGES|CONTAINS F:<includes> -> D:volatile shortunsigned": 1,
+        "EDGES|EVAL_TYPE main.c:<global>#2 -> T:volatile shortunsigned": 1,
+        "EDGES|REF T:volatile shortunsigned -> D:volatile shortunsigned": 1,
+        "EDGES|SOURCE_FILE D:volatile shortunsigned -> F:<includes>": 1
+      }
+    }
+  },
+  "files": {
+    "actual.txt": "3dc76afa755430aab0204df9f9ef02f714b67b2468229d70a316746460e2e8d9",
+    "before-candidate.diff": "61878466e0d8f693a8d611237af245a510a3bc2ac0a731c3f0fd13002036a43f",
+    "before.txt": "599fde6e4b6ea50c1480760d5a46d18363005bafb1c4ec089d4c57d392648ac7",
+    "expected-before.diff": "2fa0621b11de84914cb3bf7fdf5a678c01a0ef100c7109848532e825f05edc5b",
+    "expected-candidate.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "expected.txt": "3dc76afa755430aab0204df9f9ef02f714b67b2468229d70a316746460e2e8d9",
+    "input/main.c": "e80f725b99b57290699d3daf7f4bb116df52d666ad1c6973bea83f82d0675d64",
+    "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout.txt": "3dc76afa755430aab0204df9f9ef02f714b67b2468229d70a316746460e2e8d9"
+  }
+}

@@ -1,0 +1,71 @@
+{
+  "case": "short_unsigned",
+  "retainedAnchor": false,
+  "command": [
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/frozen-v1/joern-parity",
+    "--production",
+    "main.c"
+  ],
+  "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/short_unsigned/input",
+  "seconds": 0.004579375003231689,
+  "exitCode": 0,
+  "timeout": false,
+  "error": null,
+  "beforeExact": false,
+  "candidateExact": true,
+  "beforeCandidateIdentical": false,
+  "inputHashes": {
+    "main.c": "5fb6e70b45823d56203bd1b7c9e35750e574fd671788cf67cad78b17bb7c10a2"
+  },
+  "counts": {
+    "includingSeparators": {
+      "expected": 119,
+      "before": 119,
+      "candidate": 119,
+      "matchingBefore": 112,
+      "matchingCandidate": 119,
+      "gained": 7,
+      "lost": 0,
+      "lostRecords": {},
+      "gainedRecords": {
+        "    MEMBER NAME=value CODE=value TYPE_FULL_NAME=shortunsigned ORDER=1": 1,
+        "NODES|TYPE_DECL NAME=shortunsigned FULL_NAME=shortunsigned CODE=shortunsigned IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>": 1,
+        "NODES|TYPE NAME=shortunsigned FULL_NAME=shortunsigned TYPE_DECL_FULL_NAME=shortunsigned": 1,
+        "EDGES|CONTAINS F:<includes> -> D:shortunsigned": 1,
+        "EDGES|EVAL_TYPE main.c:<global>#2 -> T:shortunsigned": 1,
+        "EDGES|REF T:shortunsigned -> D:shortunsigned": 1,
+        "EDGES|SOURCE_FILE D:shortunsigned -> F:<includes>": 1
+      }
+    },
+    "nonempty": {
+      "expected": 115,
+      "before": 115,
+      "candidate": 115,
+      "matchingBefore": 108,
+      "matchingCandidate": 115,
+      "gained": 7,
+      "lost": 0,
+      "lostRecords": {},
+      "gainedRecords": {
+        "    MEMBER NAME=value CODE=value TYPE_FULL_NAME=shortunsigned ORDER=1": 1,
+        "NODES|TYPE_DECL NAME=shortunsigned FULL_NAME=shortunsigned CODE=shortunsigned IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>": 1,
+        "NODES|TYPE NAME=shortunsigned FULL_NAME=shortunsigned TYPE_DECL_FULL_NAME=shortunsigned": 1,
+        "EDGES|CONTAINS F:<includes> -> D:shortunsigned": 1,
+        "EDGES|EVAL_TYPE main.c:<global>#2 -> T:shortunsigned": 1,
+        "EDGES|REF T:shortunsigned -> D:shortunsigned": 1,
+        "EDGES|SOURCE_FILE D:shortunsigned -> F:<includes>": 1
+      }
+    }
+  },
+  "files": {
+    "actual.txt": "33b6a8ed56ff9b624cfa8bf0410d5bd9372fcdbf1cb41fde895ef129446ba90f",
+    "before-candidate.diff": "93d7b31264aa731624e38e083287b6e6517e95bfdf8d7c699bdb7d117316a3f0",
+    "before.txt": "cde860a27c45998c02c762c349ddc9ff5a45706790dfeb486fdc892eb24aaa79",
+    "expected-before.diff": "1f4a262f5aeeb14436cbb593f69780257bd30d6088727ad90a23a8925439f9a3",
+    "expected-candidate.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "expected.txt": "33b6a8ed56ff9b624cfa8bf0410d5bd9372fcdbf1cb41fde895ef129446ba90f",
+    "input/main.c": "5fb6e70b45823d56203bd1b7c9e35750e574fd671788cf67cad78b17bb7c10a2",
+    "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout.txt": "33b6a8ed56ff9b624cfa8bf0410d5bd9372fcdbf1cb41fde895ef129446ba90f"
+  }
+}

@@ -1,0 +1,74 @@
+--- complete-live-reference
++++ accepted-tenth-production
+@@ -48,29 +48,21 @@
+ NODES|TYPE_DECL NAME=Choice FULL_NAME=Choice CODE=union Choice {\n    int integer_value;\n    double floating_value;\n} AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=main.c ORDER=1
+ NODES|TYPE_DECL NAME=Inner FULL_NAME=Inner CODE=struct Inner {\n    int item;\n} AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=main.c ORDER=1
+ NODES|TYPE_DECL NAME=Record FULL_NAME=Record CODE=struct Record {\n    struct Inner struct_value;\n    union Choice union_value;\n    Alias alias_value;\n} AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=main.c ORDER=1
+-NODES|TYPE_DECL NAME=Choice FULL_NAME=Record.Choice CODE=Choice IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+-NODES|TYPE_DECL NAME=Inner FULL_NAME=Record.Inner CODE=Inner IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE_DECL NAME=double FULL_NAME=double CODE=double IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE_DECL NAME=<global> FULL_NAME=main.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+ NODES|TYPE_DECL NAME=ordinary FULL_NAME=ordinary CODE=ordinary AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+-NODES|TYPE_DECL NAME=struct_value FULL_NAME=struct_value CODE=struct_value IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE_DECL NAME=unionChoice FULL_NAME=unionChoice CODE=unionChoice IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+-NODES|TYPE_DECL NAME=union_value FULL_NAME=union_value CODE=union_value IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+ NODES|TYPE NAME=Alias FULL_NAME=Alias TYPE_DECL_FULL_NAME=Alias
+ NODES|TYPE NAME=Choice FULL_NAME=Choice TYPE_DECL_FULL_NAME=Choice
+ NODES|TYPE NAME=Inner FULL_NAME=Inner TYPE_DECL_FULL_NAME=Inner
+ NODES|TYPE NAME=Record FULL_NAME=Record TYPE_DECL_FULL_NAME=Record
+-NODES|TYPE NAME=Choice FULL_NAME=Record.Choice TYPE_DECL_FULL_NAME=Record.Choice
+-NODES|TYPE NAME=Inner FULL_NAME=Record.Inner TYPE_DECL_FULL_NAME=Record.Inner
+ NODES|TYPE NAME=double FULL_NAME=double TYPE_DECL_FULL_NAME=double
+ NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+ NODES|TYPE NAME=ordinary FULL_NAME=ordinary TYPE_DECL_FULL_NAME=ordinary
+-NODES|TYPE NAME=struct_value FULL_NAME=struct_value TYPE_DECL_FULL_NAME=struct_value
+ NODES|TYPE NAME=unionChoice FULL_NAME=unionChoice TYPE_DECL_FULL_NAME=unionChoice
+-NODES|TYPE NAME=union_value FULL_NAME=union_value TYPE_DECL_FULL_NAME=union_value
+ NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+ EDGES|ARGUMENT ordinary#4 -> ordinary#5
+ EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+@@ -87,13 +79,9 @@
+ EDGES|CONTAINS D:main.c:<global> -> main.c:<global>#0
+ EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+ EDGES|CONTAINS F:<includes> -> D:ANY
+-EDGES|CONTAINS F:<includes> -> D:Record.Choice
+-EDGES|CONTAINS F:<includes> -> D:Record.Inner
+ EDGES|CONTAINS F:<includes> -> D:double
+ EDGES|CONTAINS F:<includes> -> D:int
+-EDGES|CONTAINS F:<includes> -> D:struct_value
+ EDGES|CONTAINS F:<includes> -> D:unionChoice
+-EDGES|CONTAINS F:<includes> -> D:union_value
+ EDGES|CONTAINS F:<includes> -> D:void
+ EDGES|CONTAINS F:main.c -> D:main.c:<global>
+ EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#1
+@@ -137,27 +125,19 @@
+ EDGES|REF T:Choice -> main.c:<global>#3
+ EDGES|REF T:Inner -> main.c:<global>#1
+ EDGES|REF T:Record -> main.c:<global>#6
+-EDGES|REF T:Record.Choice -> D:Record.Choice
+-EDGES|REF T:Record.Inner -> D:Record.Inner
+ EDGES|REF T:double -> D:double
+ EDGES|REF T:int -> D:int
+ EDGES|REF T:ordinary -> D:ordinary
+-EDGES|REF T:struct_value -> D:struct_value
+ EDGES|REF T:unionChoice -> D:unionChoice
+-EDGES|REF T:union_value -> D:union_value
+ EDGES|REF T:void -> D:void
+ EDGES|REF main.c:<global>#22 -> main.c:<global>#10
+ EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+ EDGES|SOURCE_FILE D:ANY -> F:<includes>
+-EDGES|SOURCE_FILE D:Record.Choice -> F:<includes>
+-EDGES|SOURCE_FILE D:Record.Inner -> F:<includes>
+ EDGES|SOURCE_FILE D:double -> F:<includes>
+ EDGES|SOURCE_FILE D:int -> F:<includes>
+ EDGES|SOURCE_FILE D:main.c:<global> -> F:main.c
+ EDGES|SOURCE_FILE D:ordinary -> F:main.c
+-EDGES|SOURCE_FILE D:struct_value -> F:<includes>
+ EDGES|SOURCE_FILE D:unionChoice -> F:<includes>
+-EDGES|SOURCE_FILE D:union_value -> F:<includes>
+ EDGES|SOURCE_FILE D:void -> F:<includes>
+ EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
+ EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>

@@ -1,0 +1,1153 @@
+METHOD NAME=<global> CODE=<global> FULL_NAME=<includes>:<global> ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.assignment FULL_NAME=<operator>.assignment ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.pointerCall FULL_NAME=<operator>.pointerCall ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=call_bool CODE=_Bool call_bool(_Bool value) { return external_bool(value); } FULL_NAME=call_bool SIGNATURE=bool(_Bool) ORDER=1
+  METHOD_PARAMETER_IN NAME=value CODE=_Bool value TYPE_FULL_NAME=_Bool ORDER=1
+  METHOD_PARAMETER_OUT NAME=value CODE=_Bool value TYPE_FULL_NAME=_Bool ORDER=1
+  BLOCK CODE={ return external_bool(value); } TYPE_FULL_NAME=void ORDER=2
+    RETURN CODE=return external_bool(value); ORDER=1
+      CALL NAME=external_bool CODE=external_bool(value) TYPE_FULL_NAME=_Bool METHOD_FULL_NAME=external_bool ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=_Bool ORDER=1 ARGUMENT_INDEX=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=bool ORDER=3
+
+METHOD NAME=call_long_double CODE=long double call_long_double(long double value) { return external_long_double(value); } FULL_NAME=call_long_double SIGNATURE=longdouble(longdouble) ORDER=1
+  METHOD_PARAMETER_IN NAME=value CODE=long double value TYPE_FULL_NAME=longdouble ORDER=1
+  METHOD_PARAMETER_OUT NAME=value CODE=long double value TYPE_FULL_NAME=longdouble ORDER=1
+  BLOCK CODE={ return external_long_double(value); } TYPE_FULL_NAME=void ORDER=2
+    RETURN CODE=return external_long_double(value); ORDER=1
+      CALL NAME=external_long_double CODE=external_long_double(value) TYPE_FULL_NAME=longdouble METHOD_FULL_NAME=external_long_double ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=longdouble ORDER=1 ARGUMENT_INDEX=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=longdouble ORDER=3
+
+METHOD NAME=call_ulong CODE=unsigned long call_ulong(unsigned long value) { return external_ulong(value); } FULL_NAME=call_ulong SIGNATURE=unsigned long(longunsigned) ORDER=1
+  METHOD_PARAMETER_IN NAME=value CODE=unsigned long value TYPE_FULL_NAME=longunsigned ORDER=1
+  METHOD_PARAMETER_OUT NAME=value CODE=unsigned long value TYPE_FULL_NAME=longunsigned ORDER=1
+  BLOCK CODE={ return external_ulong(value); } TYPE_FULL_NAME=void ORDER=2
+    RETURN CODE=return external_ulong(value); ORDER=1
+      CALL NAME=external_ulong CODE=external_ulong(value) TYPE_FULL_NAME=unsigned longint METHOD_FULL_NAME=external_ulong ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=longunsigned ORDER=1 ARGUMENT_INDEX=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=unsigned long ORDER=3
+
+METHOD NAME=call_ulong_int CODE=unsigned long int call_ulong_int(unsigned long int value) { return external_ulong_int(value); } FULL_NAME=call_ulong_int SIGNATURE=unsigned longint(long unsigned int) ORDER=1
+  METHOD_PARAMETER_IN NAME=value CODE=unsigned long int value TYPE_FULL_NAME=long unsigned int ORDER=1
+  METHOD_PARAMETER_OUT NAME=value CODE=unsigned long int value TYPE_FULL_NAME=long unsigned int ORDER=1
+  BLOCK CODE={ return external_ulong_int(value); } TYPE_FULL_NAME=void ORDER=2
+    RETURN CODE=return external_ulong_int(value); ORDER=1
+      CALL NAME=external_ulong_int CODE=external_ulong_int(value) TYPE_FULL_NAME=unsigned longint METHOD_FULL_NAME=external_ulong_int ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=long unsigned int ORDER=1 ARGUMENT_INDEX=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=unsigned longint ORDER=3
+
+METHOD NAME=call_ulong_ptr CODE=unsigned long *call_ulong_ptr(unsigned long *value) { return external_ulong_ptr(value); } FULL_NAME=call_ulong_ptr SIGNATURE=unsigned long*(longunsigned*) ORDER=1
+  METHOD_PARAMETER_IN NAME=value CODE=unsigned long *value TYPE_FULL_NAME=longunsigned* ORDER=1
+  METHOD_PARAMETER_OUT NAME=value CODE=unsigned long *value TYPE_FULL_NAME=longunsigned* ORDER=1
+  BLOCK CODE={ return external_ulong_ptr(value); } TYPE_FULL_NAME=void ORDER=2
+    RETURN CODE=return external_ulong_ptr(value); ORDER=1
+      CALL NAME=external_ulong_ptr CODE=external_ulong_ptr(value) TYPE_FULL_NAME=unsigned longint* METHOD_FULL_NAME=external_ulong_ptr ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=longunsigned* ORDER=1 ARGUMENT_INDEX=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=unsigned long* ORDER=3
+
+METHOD NAME=callback_local CODE=unsigned long callback_local(unsigned long value) { unsigned long (*local_callback)(unsigned long) = global_callback; return local_callback(value); } FULL_NAME=callback_local SIGNATURE=unsigned long(longunsigned) ORDER=1
+  METHOD_PARAMETER_IN NAME=value CODE=unsigned long value TYPE_FULL_NAME=longunsigned ORDER=1
+  METHOD_PARAMETER_OUT NAME=value CODE=unsigned long value TYPE_FULL_NAME=longunsigned ORDER=1
+  BLOCK CODE={ unsigned long (*local_callback)(unsigned long) = global_callback; return local_callback(value); } TYPE_FULL_NAME=void ORDER=2
+    LOCAL NAME=global_callback CODE=<global> global_callback TYPE_FULL_NAME=unsigned longint(*)(unsignedlongint) ORDER=0
+    LOCAL NAME=local_callback CODE=unsigned long (*local_callback)(unsigned long) = global_callback; TYPE_FULL_NAME=unsigned longint(*)(unsignedlongint) ORDER=1
+    CALL NAME=<operator>.assignment CODE=(*local_callback)(unsigned long) = global_callback TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+      IDENTIFIER NAME=local_callback CODE= TYPE_FULL_NAME=unsigned longint(*)(unsignedlongint) ORDER=1 ARGUMENT_INDEX=1
+      IDENTIFIER NAME=global_callback CODE=<global> global_callback TYPE_FULL_NAME=unsigned longint(*)(unsignedlongint) ORDER=2 ARGUMENT_INDEX=2
+    RETURN CODE=return local_callback(value); ORDER=3
+      CALL NAME=<operator>.pointerCall CODE=local_callback(value) TYPE_FULL_NAME=unsigned longint METHOD_FULL_NAME=<operator>.pointerCall ORDER=1 DISPATCH_TYPE=DYNAMIC_DISPATCH
+        IDENTIFIER NAME=local_callback CODE=local_callback TYPE_FULL_NAME=unsigned longint(*)(unsignedlongint) ORDER=1
+        IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=longunsigned ORDER=2 ARGUMENT_INDEX=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=unsigned long ORDER=3
+
+METHOD NAME=callback_parameter CODE=unsigned long callback_parameter(unsigned long (*callback)(unsigned long), unsigned long value) { return callback(value); } FULL_NAME=callback_parameter SIGNATURE=unsigned long(longunsigned,longunsigned) ORDER=1
+  METHOD_PARAMETER_IN NAME=callback CODE=unsigned long (*callback)(unsigned long) TYPE_FULL_NAME=longunsigned ORDER=1
+  METHOD_PARAMETER_OUT NAME=callback CODE=unsigned long (*callback)(unsigned long) TYPE_FULL_NAME=longunsigned ORDER=1
+  METHOD_PARAMETER_IN NAME=value CODE=unsigned long value TYPE_FULL_NAME=longunsigned ORDER=2
+  METHOD_PARAMETER_OUT NAME=value CODE=unsigned long value TYPE_FULL_NAME=longunsigned ORDER=2
+  BLOCK CODE={ return callback(value); } TYPE_FULL_NAME=void ORDER=3
+    RETURN CODE=return callback(value); ORDER=1
+      CALL NAME=<operator>.pointerCall CODE=callback(value) TYPE_FULL_NAME=unsigned longint METHOD_FULL_NAME=<operator>.pointerCall ORDER=1 DISPATCH_TYPE=DYNAMIC_DISPATCH
+        IDENTIFIER NAME=callback CODE=callback TYPE_FULL_NAME=longunsigned ORDER=1
+        IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=longunsigned ORDER=2 ARGUMENT_INDEX=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=unsigned long ORDER=4
+
+METHOD NAME=const_pointer CODE=const unsigned long *const_pointer(const unsigned long *value) { const unsigned long *local = value; return local; } FULL_NAME=const_pointer SIGNATURE=unsigned long*(longunsigned*) ORDER=1
+  METHOD_PARAMETER_IN NAME=value CODE=const unsigned long *value TYPE_FULL_NAME=longunsigned* ORDER=1
+  METHOD_PARAMETER_OUT NAME=value CODE=const unsigned long *value TYPE_FULL_NAME=longunsigned* ORDER=1
+  BLOCK CODE={ const unsigned long *local = value; return local; } TYPE_FULL_NAME=void ORDER=2
+    LOCAL NAME=local CODE=const unsigned long *local TYPE_FULL_NAME=longunsigned* ORDER=1
+    CALL NAME=<operator>.assignment CODE=*local = value TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+      IDENTIFIER NAME=local CODE=local TYPE_FULL_NAME=longunsigned* ORDER=1 ARGUMENT_INDEX=1
+      IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=longunsigned* ORDER=2 ARGUMENT_INDEX=2
+    RETURN CODE=return local; ORDER=3
+      IDENTIFIER NAME=local CODE=local TYPE_FULL_NAME=longunsigned* ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=unsigned long* ORDER=3
+
+METHOD NAME=cv_pointer CODE=const volatile unsigned long *cv_pointer(const volatile unsigned long *value) { const volatile unsigned long *local = value; return local; } FULL_NAME=cv_pointer SIGNATURE=volatile unsigned long*(volatile longunsigned*) ORDER=1
+  METHOD_PARAMETER_IN NAME=value CODE=const volatile unsigned long *value TYPE_FULL_NAME=volatile longunsigned* ORDER=1
+  METHOD_PARAMETER_OUT NAME=value CODE=const volatile unsigned long *value TYPE_FULL_NAME=volatile longunsigned* ORDER=1
+  BLOCK CODE={ const volatile unsigned long *local = value; return local; } TYPE_FULL_NAME=void ORDER=2
+    LOCAL NAME=local CODE=const volatile unsigned long *local TYPE_FULL_NAME=volatile longunsigned* ORDER=1
+    CALL NAME=<operator>.assignment CODE=*local = value TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+      IDENTIFIER NAME=local CODE=local TYPE_FULL_NAME=volatile longunsigned* ORDER=1 ARGUMENT_INDEX=1
+      IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=volatile longunsigned* ORDER=2 ARGUMENT_INDEX=2
+    RETURN CODE=return local; ORDER=3
+      IDENTIFIER NAME=local CODE=local TYPE_FULL_NAME=volatile longunsigned* ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=volatile unsigned long* ORDER=3
+
+METHOD NAME=external_bool CODE=_Bool external_bool(_Bool value); FULL_NAME=external_bool SIGNATURE=_Bool(_Bool) ORDER=1
+  METHOD_PARAMETER_IN NAME=value CODE=_Bool value TYPE_FULL_NAME=_Bool ORDER=1
+  METHOD_PARAMETER_OUT NAME=value CODE=_Bool value TYPE_FULL_NAME=_Bool ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=_Bool ORDER=3
+
+METHOD NAME=external_long_double CODE=long double external_long_double(long double value); FULL_NAME=external_long_double SIGNATURE=longdouble(longdouble) ORDER=1
+  METHOD_PARAMETER_IN NAME=value CODE=long double value TYPE_FULL_NAME=longdouble ORDER=1
+  METHOD_PARAMETER_OUT NAME=value CODE=long double value TYPE_FULL_NAME=longdouble ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=longdouble ORDER=3
+
+METHOD NAME=external_ulong CODE=unsigned long external_ulong(unsigned long value); FULL_NAME=external_ulong SIGNATURE=longunsigned(longunsigned) ORDER=1
+  METHOD_PARAMETER_IN NAME=value CODE=unsigned long value TYPE_FULL_NAME=longunsigned ORDER=1
+  METHOD_PARAMETER_OUT NAME=value CODE=unsigned long value TYPE_FULL_NAME=longunsigned ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=longunsigned ORDER=3
+
+METHOD NAME=external_ulong_int CODE=unsigned long int external_ulong_int(unsigned long int value); FULL_NAME=external_ulong_int SIGNATURE=long unsigned int(long unsigned int) ORDER=1
+  METHOD_PARAMETER_IN NAME=value CODE=unsigned long int value TYPE_FULL_NAME=long unsigned int ORDER=1
+  METHOD_PARAMETER_OUT NAME=value CODE=unsigned long int value TYPE_FULL_NAME=long unsigned int ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=long unsigned int ORDER=3
+
+METHOD NAME=external_ulong_ptr CODE=unsigned long *external_ulong_ptr(unsigned long *value); FULL_NAME=external_ulong_ptr SIGNATURE=longunsigned*(longunsigned*) ORDER=1
+  METHOD_PARAMETER_IN NAME=value CODE=unsigned long *value TYPE_FULL_NAME=longunsigned* ORDER=1
+  METHOD_PARAMETER_OUT NAME=value CODE=unsigned long *value TYPE_FULL_NAME=longunsigned* ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=longunsigned* ORDER=3
+
+METHOD NAME=pointer_local CODE=unsigned long *pointer_local(unsigned long *value) { unsigned long *local = value; return local; } FULL_NAME=pointer_local SIGNATURE=unsigned long*(longunsigned*) ORDER=1
+  METHOD_PARAMETER_IN NAME=value CODE=unsigned long *value TYPE_FULL_NAME=longunsigned* ORDER=1
+  METHOD_PARAMETER_OUT NAME=value CODE=unsigned long *value TYPE_FULL_NAME=longunsigned* ORDER=1
+  BLOCK CODE={ unsigned long *local = value; return local; } TYPE_FULL_NAME=void ORDER=2
+    LOCAL NAME=local CODE=unsigned long *local TYPE_FULL_NAME=longunsigned* ORDER=1
+    CALL NAME=<operator>.assignment CODE=*local = value TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+      IDENTIFIER NAME=local CODE=local TYPE_FULL_NAME=longunsigned* ORDER=1 ARGUMENT_INDEX=1
+      IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=longunsigned* ORDER=2 ARGUMENT_INDEX=2
+    RETURN CODE=return local; ORDER=3
+      IDENTIFIER NAME=local CODE=local TYPE_FULL_NAME=longunsigned* ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=unsigned long* ORDER=3
+
+METHOD NAME=qualifier_objects CODE=void qualifier_objects(int * const p, int * volatile q) { int * const cp = p; int * volatile vq = q; } FULL_NAME=qualifier_objects SIGNATURE=void(int*,int*) ORDER=1
+  METHOD_PARAMETER_IN NAME=p CODE=int * const p TYPE_FULL_NAME=int* ORDER=1
+  METHOD_PARAMETER_OUT NAME=p CODE=int * const p TYPE_FULL_NAME=int* ORDER=1
+  METHOD_PARAMETER_IN NAME=q CODE=int * volatile q TYPE_FULL_NAME=int* ORDER=2
+  METHOD_PARAMETER_OUT NAME=q CODE=int * volatile q TYPE_FULL_NAME=int* ORDER=2
+  BLOCK CODE={ int * const cp = p; int * volatile vq = q; } TYPE_FULL_NAME=void ORDER=3
+    LOCAL NAME=cp CODE=int * const cp TYPE_FULL_NAME=int* ORDER=1
+    CALL NAME=<operator>.assignment CODE=* const cp = p TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+      IDENTIFIER NAME=cp CODE=cp TYPE_FULL_NAME=int* ORDER=1 ARGUMENT_INDEX=1
+      IDENTIFIER NAME=p CODE=p TYPE_FULL_NAME=int* ORDER=2 ARGUMENT_INDEX=2
+    LOCAL NAME=vq CODE=int * volatile vq TYPE_FULL_NAME=int* ORDER=3
+    CALL NAME=<operator>.assignment CODE=* volatile vq = q TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=4 DISPATCH_TYPE=STATIC_DISPATCH
+      IDENTIFIER NAME=vq CODE=vq TYPE_FULL_NAME=int* ORDER=1 ARGUMENT_INDEX=1
+      IDENTIFIER NAME=q CODE=q TYPE_FULL_NAME=int* ORDER=2 ARGUMENT_INDEX=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=4
+
+METHOD NAME=<global> CODE=<global> FULL_NAME=roles.c:<global> ORDER=1
+  METHOD NAME=call_ulong CODE=unsigned long call_ulong(unsigned long value) { return external_ulong(value); } FULL_NAME=call_ulong SIGNATURE=unsigned long(longunsigned) ORDER=1
+    METHOD_PARAMETER_IN NAME=value CODE=unsigned long value TYPE_FULL_NAME=longunsigned ORDER=1
+    METHOD_PARAMETER_OUT NAME=value CODE=unsigned long value TYPE_FULL_NAME=longunsigned ORDER=1
+    BLOCK CODE={ return external_ulong(value); } TYPE_FULL_NAME=void ORDER=2
+      RETURN CODE=return external_ulong(value); ORDER=1
+        CALL NAME=external_ulong CODE=external_ulong(value) TYPE_FULL_NAME=unsigned longint METHOD_FULL_NAME=external_ulong ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=longunsigned ORDER=1 ARGUMENT_INDEX=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=unsigned long ORDER=3
+  METHOD NAME=call_ulong_ptr CODE=unsigned long *call_ulong_ptr(unsigned long *value) { return external_ulong_ptr(value); } FULL_NAME=call_ulong_ptr SIGNATURE=unsigned long*(longunsigned*) ORDER=1
+    METHOD_PARAMETER_IN NAME=value CODE=unsigned long *value TYPE_FULL_NAME=longunsigned* ORDER=1
+    METHOD_PARAMETER_OUT NAME=value CODE=unsigned long *value TYPE_FULL_NAME=longunsigned* ORDER=1
+    BLOCK CODE={ return external_ulong_ptr(value); } TYPE_FULL_NAME=void ORDER=2
+      RETURN CODE=return external_ulong_ptr(value); ORDER=1
+        CALL NAME=external_ulong_ptr CODE=external_ulong_ptr(value) TYPE_FULL_NAME=unsigned longint* METHOD_FULL_NAME=external_ulong_ptr ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=longunsigned* ORDER=1 ARGUMENT_INDEX=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=unsigned long* ORDER=3
+  METHOD NAME=call_ulong_int CODE=unsigned long int call_ulong_int(unsigned long int value) { return external_ulong_int(value); } FULL_NAME=call_ulong_int SIGNATURE=unsigned longint(long unsigned int) ORDER=1
+    METHOD_PARAMETER_IN NAME=value CODE=unsigned long int value TYPE_FULL_NAME=long unsigned int ORDER=1
+    METHOD_PARAMETER_OUT NAME=value CODE=unsigned long int value TYPE_FULL_NAME=long unsigned int ORDER=1
+    BLOCK CODE={ return external_ulong_int(value); } TYPE_FULL_NAME=void ORDER=2
+      RETURN CODE=return external_ulong_int(value); ORDER=1
+        CALL NAME=external_ulong_int CODE=external_ulong_int(value) TYPE_FULL_NAME=unsigned longint METHOD_FULL_NAME=external_ulong_int ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=long unsigned int ORDER=1 ARGUMENT_INDEX=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=unsigned longint ORDER=3
+  METHOD NAME=call_bool CODE=_Bool call_bool(_Bool value) { return external_bool(value); } FULL_NAME=call_bool SIGNATURE=bool(_Bool) ORDER=1
+    METHOD_PARAMETER_IN NAME=value CODE=_Bool value TYPE_FULL_NAME=_Bool ORDER=1
+    METHOD_PARAMETER_OUT NAME=value CODE=_Bool value TYPE_FULL_NAME=_Bool ORDER=1
+    BLOCK CODE={ return external_bool(value); } TYPE_FULL_NAME=void ORDER=2
+      RETURN CODE=return external_bool(value); ORDER=1
+        CALL NAME=external_bool CODE=external_bool(value) TYPE_FULL_NAME=_Bool METHOD_FULL_NAME=external_bool ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=_Bool ORDER=1 ARGUMENT_INDEX=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=bool ORDER=3
+  METHOD NAME=call_long_double CODE=long double call_long_double(long double value) { return external_long_double(value); } FULL_NAME=call_long_double SIGNATURE=longdouble(longdouble) ORDER=1
+    METHOD_PARAMETER_IN NAME=value CODE=long double value TYPE_FULL_NAME=longdouble ORDER=1
+    METHOD_PARAMETER_OUT NAME=value CODE=long double value TYPE_FULL_NAME=longdouble ORDER=1
+    BLOCK CODE={ return external_long_double(value); } TYPE_FULL_NAME=void ORDER=2
+      RETURN CODE=return external_long_double(value); ORDER=1
+        CALL NAME=external_long_double CODE=external_long_double(value) TYPE_FULL_NAME=longdouble METHOD_FULL_NAME=external_long_double ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=longdouble ORDER=1 ARGUMENT_INDEX=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=longdouble ORDER=3
+  METHOD NAME=pointer_local CODE=unsigned long *pointer_local(unsigned long *value) { unsigned long *local = value; return local; } FULL_NAME=pointer_local SIGNATURE=unsigned long*(longunsigned*) ORDER=1
+    METHOD_PARAMETER_IN NAME=value CODE=unsigned long *value TYPE_FULL_NAME=longunsigned* ORDER=1
+    METHOD_PARAMETER_OUT NAME=value CODE=unsigned long *value TYPE_FULL_NAME=longunsigned* ORDER=1
+    BLOCK CODE={ unsigned long *local = value; return local; } TYPE_FULL_NAME=void ORDER=2
+      LOCAL NAME=local CODE=unsigned long *local TYPE_FULL_NAME=longunsigned* ORDER=1
+      CALL NAME=<operator>.assignment CODE=*local = value TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=local CODE=local TYPE_FULL_NAME=longunsigned* ORDER=1 ARGUMENT_INDEX=1
+        IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=longunsigned* ORDER=2 ARGUMENT_INDEX=2
+      RETURN CODE=return local; ORDER=3
+        IDENTIFIER NAME=local CODE=local TYPE_FULL_NAME=longunsigned* ORDER=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=unsigned long* ORDER=3
+  METHOD NAME=const_pointer CODE=const unsigned long *const_pointer(const unsigned long *value) { const unsigned long *local = value; return local; } FULL_NAME=const_pointer SIGNATURE=unsigned long*(longunsigned*) ORDER=1
+    METHOD_PARAMETER_IN NAME=value CODE=const unsigned long *value TYPE_FULL_NAME=longunsigned* ORDER=1
+    METHOD_PARAMETER_OUT NAME=value CODE=const unsigned long *value TYPE_FULL_NAME=longunsigned* ORDER=1
+    BLOCK CODE={ const unsigned long *local = value; return local; } TYPE_FULL_NAME=void ORDER=2
+      LOCAL NAME=local CODE=const unsigned long *local TYPE_FULL_NAME=longunsigned* ORDER=1
+      CALL NAME=<operator>.assignment CODE=*local = value TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=local CODE=local TYPE_FULL_NAME=longunsigned* ORDER=1 ARGUMENT_INDEX=1
+        IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=longunsigned* ORDER=2 ARGUMENT_INDEX=2
+      RETURN CODE=return local; ORDER=3
+        IDENTIFIER NAME=local CODE=local TYPE_FULL_NAME=longunsigned* ORDER=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=unsigned long* ORDER=3
+  METHOD NAME=volatile_pointer CODE=volatile unsigned long *volatile_pointer(volatile unsigned long *value) { volatile unsigned long *local = value; return local; } FULL_NAME=volatile_pointer SIGNATURE=volatile unsigned long*(volatile longunsigned*) ORDER=1
+    METHOD_PARAMETER_IN NAME=value CODE=volatile unsigned long *value TYPE_FULL_NAME=volatile longunsigned* ORDER=1
+    METHOD_PARAMETER_OUT NAME=value CODE=volatile unsigned long *value TYPE_FULL_NAME=volatile longunsigned* ORDER=1
+    BLOCK CODE={ volatile unsigned long *local = value; return local; } TYPE_FULL_NAME=void ORDER=2
+      LOCAL NAME=local CODE=volatile unsigned long *local TYPE_FULL_NAME=volatile longunsigned* ORDER=1
+      CALL NAME=<operator>.assignment CODE=*local = value TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=local CODE=local TYPE_FULL_NAME=volatile longunsigned* ORDER=1 ARGUMENT_INDEX=1
+        IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=volatile longunsigned* ORDER=2 ARGUMENT_INDEX=2
+      RETURN CODE=return local; ORDER=3
+        IDENTIFIER NAME=local CODE=local TYPE_FULL_NAME=volatile longunsigned* ORDER=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=volatile unsigned long* ORDER=3
+  METHOD NAME=cv_pointer CODE=const volatile unsigned long *cv_pointer(const volatile unsigned long *value) { const volatile unsigned long *local = value; return local; } FULL_NAME=cv_pointer SIGNATURE=volatile unsigned long*(volatile longunsigned*) ORDER=1
+    METHOD_PARAMETER_IN NAME=value CODE=const volatile unsigned long *value TYPE_FULL_NAME=volatile longunsigned* ORDER=1
+    METHOD_PARAMETER_OUT NAME=value CODE=const volatile unsigned long *value TYPE_FULL_NAME=volatile longunsigned* ORDER=1
+    BLOCK CODE={ const volatile unsigned long *local = value; return local; } TYPE_FULL_NAME=void ORDER=2
+      LOCAL NAME=local CODE=const volatile unsigned long *local TYPE_FULL_NAME=volatile longunsigned* ORDER=1
+      CALL NAME=<operator>.assignment CODE=*local = value TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=local CODE=local TYPE_FULL_NAME=volatile longunsigned* ORDER=1 ARGUMENT_INDEX=1
+        IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=volatile longunsigned* ORDER=2 ARGUMENT_INDEX=2
+      RETURN CODE=return local; ORDER=3
+        IDENTIFIER NAME=local CODE=local TYPE_FULL_NAME=volatile longunsigned* ORDER=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=volatile unsigned long* ORDER=3
+  METHOD NAME=callback_local CODE=unsigned long callback_local(unsigned long value) { unsigned long (*local_callback)(unsigned long) = global_callback; return local_callback(value); } FULL_NAME=callback_local SIGNATURE=unsigned long(longunsigned) ORDER=1
+    METHOD_PARAMETER_IN NAME=value CODE=unsigned long value TYPE_FULL_NAME=longunsigned ORDER=1
+    METHOD_PARAMETER_OUT NAME=value CODE=unsigned long value TYPE_FULL_NAME=longunsigned ORDER=1
+    BLOCK CODE={ unsigned long (*local_callback)(unsigned long) = global_callback; return local_callback(value); } TYPE_FULL_NAME=void ORDER=2
+      LOCAL NAME=global_callback CODE=<global> global_callback TYPE_FULL_NAME=unsigned longint(*)(unsignedlongint) ORDER=0
+      LOCAL NAME=local_callback CODE=unsigned long (*local_callback)(unsigned long) = global_callback; TYPE_FULL_NAME=unsigned longint(*)(unsignedlongint) ORDER=1
+      CALL NAME=<operator>.assignment CODE=(*local_callback)(unsigned long) = global_callback TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=local_callback CODE= TYPE_FULL_NAME=unsigned longint(*)(unsignedlongint) ORDER=1 ARGUMENT_INDEX=1
+        IDENTIFIER NAME=global_callback CODE=<global> global_callback TYPE_FULL_NAME=unsigned longint(*)(unsignedlongint) ORDER=2 ARGUMENT_INDEX=2
+      RETURN CODE=return local_callback(value); ORDER=3
+        CALL NAME=<operator>.pointerCall CODE=local_callback(value) TYPE_FULL_NAME=unsigned longint METHOD_FULL_NAME=<operator>.pointerCall ORDER=1 DISPATCH_TYPE=DYNAMIC_DISPATCH
+          IDENTIFIER NAME=local_callback CODE=local_callback TYPE_FULL_NAME=unsigned longint(*)(unsignedlongint) ORDER=1
+          IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=longunsigned ORDER=2 ARGUMENT_INDEX=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=unsigned long ORDER=3
+  METHOD NAME=callback_parameter CODE=unsigned long callback_parameter(unsigned long (*callback)(unsigned long), unsigned long value) { return callback(value); } FULL_NAME=callback_parameter SIGNATURE=unsigned long(longunsigned,longunsigned) ORDER=1
+    METHOD_PARAMETER_IN NAME=callback CODE=unsigned long (*callback)(unsigned long) TYPE_FULL_NAME=longunsigned ORDER=1
+    METHOD_PARAMETER_OUT NAME=callback CODE=unsigned long (*callback)(unsigned long) TYPE_FULL_NAME=longunsigned ORDER=1
+    METHOD_PARAMETER_IN NAME=value CODE=unsigned long value TYPE_FULL_NAME=longunsigned ORDER=2
+    METHOD_PARAMETER_OUT NAME=value CODE=unsigned long value TYPE_FULL_NAME=longunsigned ORDER=2
+    BLOCK CODE={ return callback(value); } TYPE_FULL_NAME=void ORDER=3
+      RETURN CODE=return callback(value); ORDER=1
+        CALL NAME=<operator>.pointerCall CODE=callback(value) TYPE_FULL_NAME=unsigned longint METHOD_FULL_NAME=<operator>.pointerCall ORDER=1 DISPATCH_TYPE=DYNAMIC_DISPATCH
+          IDENTIFIER NAME=callback CODE=callback TYPE_FULL_NAME=longunsigned ORDER=1
+          IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=longunsigned ORDER=2 ARGUMENT_INDEX=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=unsigned long ORDER=4
+  METHOD NAME=qualifier_objects CODE=void qualifier_objects(int * const p, int * volatile q) { int * const cp = p; int * volatile vq = q; } FULL_NAME=qualifier_objects SIGNATURE=void(int*,int*) ORDER=1
+    METHOD_PARAMETER_IN NAME=p CODE=int * const p TYPE_FULL_NAME=int* ORDER=1
+    METHOD_PARAMETER_OUT NAME=p CODE=int * const p TYPE_FULL_NAME=int* ORDER=1
+    METHOD_PARAMETER_IN NAME=q CODE=int * volatile q TYPE_FULL_NAME=int* ORDER=2
+    METHOD_PARAMETER_OUT NAME=q CODE=int * volatile q TYPE_FULL_NAME=int* ORDER=2
+    BLOCK CODE={ int * const cp = p; int * volatile vq = q; } TYPE_FULL_NAME=void ORDER=3
+      LOCAL NAME=cp CODE=int * const cp TYPE_FULL_NAME=int* ORDER=1
+      CALL NAME=<operator>.assignment CODE=* const cp = p TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=cp CODE=cp TYPE_FULL_NAME=int* ORDER=1 ARGUMENT_INDEX=1
+        IDENTIFIER NAME=p CODE=p TYPE_FULL_NAME=int* ORDER=2 ARGUMENT_INDEX=2
+      LOCAL NAME=vq CODE=int * volatile vq TYPE_FULL_NAME=int* ORDER=3
+      CALL NAME=<operator>.assignment CODE=* volatile vq = q TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=4 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=vq CODE=vq TYPE_FULL_NAME=int* ORDER=1 ARGUMENT_INDEX=1
+        IDENTIFIER NAME=q CODE=q TYPE_FULL_NAME=int* ORDER=2 ARGUMENT_INDEX=2
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=4
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+    METHOD_REF CODE=call_ulong TYPE_FULL_NAME=call_ulong METHOD_FULL_NAME=call_ulong ORDER=1
+    METHOD_REF CODE=call_ulong_ptr TYPE_FULL_NAME=call_ulong_ptr METHOD_FULL_NAME=call_ulong_ptr ORDER=2
+    METHOD_REF CODE=call_ulong_int TYPE_FULL_NAME=call_ulong_int METHOD_FULL_NAME=call_ulong_int ORDER=3
+    METHOD_REF CODE=call_bool TYPE_FULL_NAME=call_bool METHOD_FULL_NAME=call_bool ORDER=4
+    METHOD_REF CODE=call_long_double TYPE_FULL_NAME=call_long_double METHOD_FULL_NAME=call_long_double ORDER=5
+    METHOD_REF CODE=pointer_local TYPE_FULL_NAME=pointer_local METHOD_FULL_NAME=pointer_local ORDER=6
+    METHOD_REF CODE=const_pointer TYPE_FULL_NAME=const_pointer METHOD_FULL_NAME=const_pointer ORDER=7
+    METHOD_REF CODE=volatile_pointer TYPE_FULL_NAME=volatile_pointer METHOD_FULL_NAME=volatile_pointer ORDER=8
+    METHOD_REF CODE=cv_pointer TYPE_FULL_NAME=cv_pointer METHOD_FULL_NAME=cv_pointer ORDER=9
+    LOCAL NAME=global_callback CODE=unsigned long (*global_callback)(unsigned long); TYPE_FULL_NAME=unsigned longint(*)(unsignedlongint) ORDER=10
+    METHOD_REF CODE=callback_local TYPE_FULL_NAME=callback_local METHOD_FULL_NAME=callback_local ORDER=11
+    METHOD_REF CODE=callback_parameter TYPE_FULL_NAME=callback_parameter METHOD_FULL_NAME=callback_parameter ORDER=12
+    METHOD_REF CODE=qualifier_objects TYPE_FULL_NAME=qualifier_objects METHOD_FULL_NAME=qualifier_objects ORDER=13
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=volatile_pointer CODE=volatile unsigned long *volatile_pointer(volatile unsigned long *value) { volatile unsigned long *local = value; return local; } FULL_NAME=volatile_pointer SIGNATURE=volatile unsigned long*(volatile longunsigned*) ORDER=1
+  METHOD_PARAMETER_IN NAME=value CODE=volatile unsigned long *value TYPE_FULL_NAME=volatile longunsigned* ORDER=1
+  METHOD_PARAMETER_OUT NAME=value CODE=volatile unsigned long *value TYPE_FULL_NAME=volatile longunsigned* ORDER=1
+  BLOCK CODE={ volatile unsigned long *local = value; return local; } TYPE_FULL_NAME=void ORDER=2
+    LOCAL NAME=local CODE=volatile unsigned long *local TYPE_FULL_NAME=volatile longunsigned* ORDER=1
+    CALL NAME=<operator>.assignment CODE=*local = value TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+      IDENTIFIER NAME=local CODE=local TYPE_FULL_NAME=volatile longunsigned* ORDER=1 ARGUMENT_INDEX=1
+      IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=volatile longunsigned* ORDER=2 ARGUMENT_INDEX=2
+    RETURN CODE=return local; ORDER=3
+      IDENTIFIER NAME=local CODE=local TYPE_FULL_NAME=volatile longunsigned* ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=volatile unsigned long* ORDER=3
+
+NODES|META_DATA LANGUAGE=NEWC
+NODES|FILE NAME=<includes> ORDER=1
+NODES|FILE NAME=<unknown> ORDER=0
+NODES|FILE NAME=roles.c ORDER=0
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<global> FILENAME=<unknown> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<includes>:<global> FILENAME=<includes> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=roles.c:<global> FILENAME=roles.c ORDER=1
+NODES|NAMESPACE NAME=<global>
+NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=_Bool FULL_NAME=_Bool CODE=_Bool IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=bool FULL_NAME=bool CODE=bool IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=call_bool FULL_NAME=call_bool CODE=call_bool AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=roles.c:<global> FILENAME=roles.c ORDER=1
+NODES|TYPE_DECL NAME=call_long_double FULL_NAME=call_long_double CODE=call_long_double AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=roles.c:<global> FILENAME=roles.c ORDER=1
+NODES|TYPE_DECL NAME=call_ulong FULL_NAME=call_ulong CODE=call_ulong AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=roles.c:<global> FILENAME=roles.c ORDER=1
+NODES|TYPE_DECL NAME=call_ulong_int FULL_NAME=call_ulong_int CODE=call_ulong_int AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=roles.c:<global> FILENAME=roles.c ORDER=1
+NODES|TYPE_DECL NAME=call_ulong_ptr FULL_NAME=call_ulong_ptr CODE=call_ulong_ptr AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=roles.c:<global> FILENAME=roles.c ORDER=1
+NODES|TYPE_DECL NAME=callback_local FULL_NAME=callback_local CODE=callback_local AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=roles.c:<global> FILENAME=roles.c ORDER=1
+NODES|TYPE_DECL NAME=callback_parameter FULL_NAME=callback_parameter CODE=callback_parameter AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=roles.c:<global> FILENAME=roles.c ORDER=1
+NODES|TYPE_DECL NAME=const_pointer FULL_NAME=const_pointer CODE=const_pointer AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=roles.c:<global> FILENAME=roles.c ORDER=1
+NODES|TYPE_DECL NAME=cv_pointer FULL_NAME=cv_pointer CODE=cv_pointer AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=roles.c:<global> FILENAME=roles.c ORDER=1
+NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=int* FULL_NAME=int* CODE=int* IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=long unsigned int FULL_NAME=long unsigned int CODE=long unsigned int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=longdouble FULL_NAME=longdouble CODE=longdouble IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=longunsigned FULL_NAME=longunsigned CODE=longunsigned IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=longunsigned* FULL_NAME=longunsigned* CODE=longunsigned* IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=pointer_local FULL_NAME=pointer_local CODE=pointer_local AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=roles.c:<global> FILENAME=roles.c ORDER=1
+NODES|TYPE_DECL NAME=qualifier_objects FULL_NAME=qualifier_objects CODE=qualifier_objects AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=roles.c:<global> FILENAME=roles.c ORDER=1
+NODES|TYPE_DECL NAME=<global> FULL_NAME=roles.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=roles.c:<global> FILENAME=roles.c ORDER=1
+NODES|TYPE_DECL NAME=unsigned long FULL_NAME=unsigned long CODE=unsigned long IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=unsigned long* FULL_NAME=unsigned long* CODE=unsigned long* IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=unsigned longint FULL_NAME=unsigned longint CODE=unsigned longint IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=unsigned longint(*)(unsignedlongint) FULL_NAME=unsigned longint(*)(unsignedlongint) CODE=unsigned longint(*)(unsignedlongint) IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=unsigned longint* FULL_NAME=unsigned longint* CODE=unsigned longint* IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=volatile FULL_NAME=volatile CODE=volatile IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=volatile longunsigned* FULL_NAME=volatile longunsigned* CODE=volatile longunsigned* IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=volatile unsigned long* FULL_NAME=volatile unsigned long* CODE=volatile unsigned long* IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=volatile_pointer FULL_NAME=volatile_pointer CODE=volatile_pointer AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=roles.c:<global> FILENAME=roles.c ORDER=1
+NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+NODES|TYPE NAME=_Bool FULL_NAME=_Bool TYPE_DECL_FULL_NAME=_Bool
+NODES|TYPE NAME=bool FULL_NAME=bool TYPE_DECL_FULL_NAME=bool
+NODES|TYPE NAME=call_bool FULL_NAME=call_bool TYPE_DECL_FULL_NAME=call_bool
+NODES|TYPE NAME=call_long_double FULL_NAME=call_long_double TYPE_DECL_FULL_NAME=call_long_double
+NODES|TYPE NAME=call_ulong FULL_NAME=call_ulong TYPE_DECL_FULL_NAME=call_ulong
+NODES|TYPE NAME=call_ulong_int FULL_NAME=call_ulong_int TYPE_DECL_FULL_NAME=call_ulong_int
+NODES|TYPE NAME=call_ulong_ptr FULL_NAME=call_ulong_ptr TYPE_DECL_FULL_NAME=call_ulong_ptr
+NODES|TYPE NAME=callback_local FULL_NAME=callback_local TYPE_DECL_FULL_NAME=callback_local
+NODES|TYPE NAME=callback_parameter FULL_NAME=callback_parameter TYPE_DECL_FULL_NAME=callback_parameter
+NODES|TYPE NAME=const_pointer FULL_NAME=const_pointer TYPE_DECL_FULL_NAME=const_pointer
+NODES|TYPE NAME=cv_pointer FULL_NAME=cv_pointer TYPE_DECL_FULL_NAME=cv_pointer
+NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+NODES|TYPE NAME=int* FULL_NAME=int* TYPE_DECL_FULL_NAME=int*
+NODES|TYPE NAME=long unsigned int FULL_NAME=long unsigned int TYPE_DECL_FULL_NAME=long unsigned int
+NODES|TYPE NAME=longdouble FULL_NAME=longdouble TYPE_DECL_FULL_NAME=longdouble
+NODES|TYPE NAME=longunsigned FULL_NAME=longunsigned TYPE_DECL_FULL_NAME=longunsigned
+NODES|TYPE NAME=longunsigned* FULL_NAME=longunsigned* TYPE_DECL_FULL_NAME=longunsigned*
+NODES|TYPE NAME=pointer_local FULL_NAME=pointer_local TYPE_DECL_FULL_NAME=pointer_local
+NODES|TYPE NAME=qualifier_objects FULL_NAME=qualifier_objects TYPE_DECL_FULL_NAME=qualifier_objects
+NODES|TYPE NAME=unsigned long FULL_NAME=unsigned long TYPE_DECL_FULL_NAME=unsigned long
+NODES|TYPE NAME=unsigned long* FULL_NAME=unsigned long* TYPE_DECL_FULL_NAME=unsigned long*
+NODES|TYPE NAME=unsigned longint FULL_NAME=unsigned longint TYPE_DECL_FULL_NAME=unsigned longint
+NODES|TYPE NAME=unsigned longint(*)(unsignedlongint) FULL_NAME=unsigned longint(*)(unsignedlongint) TYPE_DECL_FULL_NAME=unsigned longint(*)(unsignedlongint)
+NODES|TYPE NAME=unsigned longint* FULL_NAME=unsigned longint* TYPE_DECL_FULL_NAME=unsigned longint*
+NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+NODES|TYPE NAME=volatile FULL_NAME=volatile TYPE_DECL_FULL_NAME=volatile
+NODES|TYPE NAME=volatile longunsigned* FULL_NAME=volatile longunsigned* TYPE_DECL_FULL_NAME=volatile longunsigned*
+NODES|TYPE NAME=volatile unsigned long* FULL_NAME=volatile unsigned long* TYPE_DECL_FULL_NAME=volatile unsigned long*
+NODES|TYPE NAME=volatile_pointer FULL_NAME=volatile_pointer TYPE_DECL_FULL_NAME=volatile_pointer
+EDGES|ARGUMENT call_bool#4 -> call_bool#5
+EDGES|ARGUMENT call_bool#5 -> call_bool#6
+EDGES|ARGUMENT call_long_double#4 -> call_long_double#5
+EDGES|ARGUMENT call_long_double#5 -> call_long_double#6
+EDGES|ARGUMENT call_ulong#4 -> call_ulong#5
+EDGES|ARGUMENT call_ulong#5 -> call_ulong#6
+EDGES|ARGUMENT call_ulong_int#4 -> call_ulong_int#5
+EDGES|ARGUMENT call_ulong_int#5 -> call_ulong_int#6
+EDGES|ARGUMENT call_ulong_ptr#4 -> call_ulong_ptr#5
+EDGES|ARGUMENT call_ulong_ptr#5 -> call_ulong_ptr#6
+EDGES|ARGUMENT callback_local#10 -> callback_local#12
+EDGES|ARGUMENT callback_local#6 -> callback_local#7
+EDGES|ARGUMENT callback_local#6 -> callback_local#8
+EDGES|ARGUMENT callback_local#9 -> callback_local#10
+EDGES|ARGUMENT callback_parameter#6 -> callback_parameter#7
+EDGES|ARGUMENT callback_parameter#7 -> callback_parameter#9
+EDGES|ARGUMENT const_pointer#5 -> const_pointer#6
+EDGES|ARGUMENT const_pointer#5 -> const_pointer#7
+EDGES|ARGUMENT const_pointer#8 -> const_pointer#9
+EDGES|ARGUMENT cv_pointer#5 -> cv_pointer#6
+EDGES|ARGUMENT cv_pointer#5 -> cv_pointer#7
+EDGES|ARGUMENT cv_pointer#8 -> cv_pointer#9
+EDGES|ARGUMENT pointer_local#5 -> pointer_local#6
+EDGES|ARGUMENT pointer_local#5 -> pointer_local#7
+EDGES|ARGUMENT pointer_local#8 -> pointer_local#9
+EDGES|ARGUMENT qualifier_objects#11 -> qualifier_objects#12
+EDGES|ARGUMENT qualifier_objects#11 -> qualifier_objects#13
+EDGES|ARGUMENT qualifier_objects#7 -> qualifier_objects#8
+EDGES|ARGUMENT qualifier_objects#7 -> qualifier_objects#9
+EDGES|ARGUMENT volatile_pointer#5 -> volatile_pointer#6
+EDGES|ARGUMENT volatile_pointer#5 -> volatile_pointer#7
+EDGES|ARGUMENT volatile_pointer#8 -> volatile_pointer#9
+EDGES|CALL call_bool#5 -> external_bool#0
+EDGES|CALL call_long_double#5 -> external_long_double#0
+EDGES|CALL call_ulong#5 -> external_ulong#0
+EDGES|CALL call_ulong_int#5 -> external_ulong_int#0
+EDGES|CALL call_ulong_ptr#5 -> external_ulong_ptr#0
+EDGES|CALL callback_local#6 -> <operator>.assignment#0
+EDGES|CALL const_pointer#5 -> <operator>.assignment#0
+EDGES|CALL cv_pointer#5 -> <operator>.assignment#0
+EDGES|CALL pointer_local#5 -> <operator>.assignment#0
+EDGES|CALL qualifier_objects#11 -> <operator>.assignment#0
+EDGES|CALL qualifier_objects#7 -> <operator>.assignment#0
+EDGES|CALL volatile_pointer#5 -> <operator>.assignment#0
+EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+EDGES|CFG <operator>.assignment#0 -> <operator>.assignment#5
+EDGES|CFG <operator>.pointerCall#0 -> <operator>.pointerCall#4
+EDGES|CFG call_bool#0 -> call_bool#6
+EDGES|CFG call_bool#4 -> call_bool#7
+EDGES|CFG call_bool#5 -> call_bool#4
+EDGES|CFG call_bool#6 -> call_bool#5
+EDGES|CFG call_long_double#0 -> call_long_double#6
+EDGES|CFG call_long_double#4 -> call_long_double#7
+EDGES|CFG call_long_double#5 -> call_long_double#4
+EDGES|CFG call_long_double#6 -> call_long_double#5
+EDGES|CFG call_ulong#0 -> call_ulong#6
+EDGES|CFG call_ulong#4 -> call_ulong#7
+EDGES|CFG call_ulong#5 -> call_ulong#4
+EDGES|CFG call_ulong#6 -> call_ulong#5
+EDGES|CFG call_ulong_int#0 -> call_ulong_int#6
+EDGES|CFG call_ulong_int#4 -> call_ulong_int#7
+EDGES|CFG call_ulong_int#5 -> call_ulong_int#4
+EDGES|CFG call_ulong_int#6 -> call_ulong_int#5
+EDGES|CFG call_ulong_ptr#0 -> call_ulong_ptr#6
+EDGES|CFG call_ulong_ptr#4 -> call_ulong_ptr#7
+EDGES|CFG call_ulong_ptr#5 -> call_ulong_ptr#4
+EDGES|CFG call_ulong_ptr#6 -> call_ulong_ptr#5
+EDGES|CFG callback_local#0 -> callback_local#7
+EDGES|CFG callback_local#10 -> callback_local#9
+EDGES|CFG callback_local#11 -> callback_local#12
+EDGES|CFG callback_local#12 -> callback_local#10
+EDGES|CFG callback_local#6 -> callback_local#11
+EDGES|CFG callback_local#7 -> callback_local#8
+EDGES|CFG callback_local#8 -> callback_local#6
+EDGES|CFG callback_local#9 -> callback_local#13
+EDGES|CFG callback_parameter#0 -> callback_parameter#8
+EDGES|CFG callback_parameter#6 -> callback_parameter#10
+EDGES|CFG callback_parameter#7 -> callback_parameter#6
+EDGES|CFG callback_parameter#8 -> callback_parameter#9
+EDGES|CFG callback_parameter#9 -> callback_parameter#7
+EDGES|CFG const_pointer#0 -> const_pointer#6
+EDGES|CFG const_pointer#5 -> const_pointer#9
+EDGES|CFG const_pointer#6 -> const_pointer#7
+EDGES|CFG const_pointer#7 -> const_pointer#5
+EDGES|CFG const_pointer#8 -> const_pointer#10
+EDGES|CFG const_pointer#9 -> const_pointer#8
+EDGES|CFG cv_pointer#0 -> cv_pointer#6
+EDGES|CFG cv_pointer#5 -> cv_pointer#9
+EDGES|CFG cv_pointer#6 -> cv_pointer#7
+EDGES|CFG cv_pointer#7 -> cv_pointer#5
+EDGES|CFG cv_pointer#8 -> cv_pointer#10
+EDGES|CFG cv_pointer#9 -> cv_pointer#8
+EDGES|CFG external_bool#0 -> external_bool#4
+EDGES|CFG external_long_double#0 -> external_long_double#4
+EDGES|CFG external_ulong#0 -> external_ulong#4
+EDGES|CFG external_ulong_int#0 -> external_ulong_int#4
+EDGES|CFG external_ulong_ptr#0 -> external_ulong_ptr#4
+EDGES|CFG pointer_local#0 -> pointer_local#6
+EDGES|CFG pointer_local#5 -> pointer_local#9
+EDGES|CFG pointer_local#6 -> pointer_local#7
+EDGES|CFG pointer_local#7 -> pointer_local#5
+EDGES|CFG pointer_local#8 -> pointer_local#10
+EDGES|CFG pointer_local#9 -> pointer_local#8
+EDGES|CFG qualifier_objects#0 -> qualifier_objects#8
+EDGES|CFG qualifier_objects#11 -> qualifier_objects#14
+EDGES|CFG qualifier_objects#12 -> qualifier_objects#13
+EDGES|CFG qualifier_objects#13 -> qualifier_objects#11
+EDGES|CFG qualifier_objects#7 -> qualifier_objects#12
+EDGES|CFG qualifier_objects#8 -> qualifier_objects#9
+EDGES|CFG qualifier_objects#9 -> qualifier_objects#7
+EDGES|CFG roles.c:<global>#0 -> roles.c:<global>#126
+EDGES|CFG roles.c:<global>#126 -> roles.c:<global>#127
+EDGES|CFG roles.c:<global>#127 -> roles.c:<global>#128
+EDGES|CFG roles.c:<global>#128 -> roles.c:<global>#129
+EDGES|CFG roles.c:<global>#129 -> roles.c:<global>#130
+EDGES|CFG roles.c:<global>#130 -> roles.c:<global>#131
+EDGES|CFG roles.c:<global>#131 -> roles.c:<global>#132
+EDGES|CFG roles.c:<global>#132 -> roles.c:<global>#133
+EDGES|CFG roles.c:<global>#133 -> roles.c:<global>#134
+EDGES|CFG roles.c:<global>#134 -> roles.c:<global>#136
+EDGES|CFG roles.c:<global>#136 -> roles.c:<global>#137
+EDGES|CFG roles.c:<global>#137 -> roles.c:<global>#138
+EDGES|CFG roles.c:<global>#138 -> roles.c:<global>#139
+EDGES|CFG roles.c:<global>#63 -> volatile_pointer#6
+EDGES|CFG volatile_pointer#5 -> volatile_pointer#9
+EDGES|CFG volatile_pointer#6 -> volatile_pointer#7
+EDGES|CFG volatile_pointer#7 -> volatile_pointer#5
+EDGES|CFG volatile_pointer#8 -> volatile_pointer#10
+EDGES|CFG volatile_pointer#9 -> volatile_pointer#8
+EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+EDGES|CONTAINS <operator>.assignment#0 -> <operator>.assignment#2
+EDGES|CONTAINS <operator>.pointerCall#0 -> <operator>.pointerCall#2
+EDGES|CONTAINS D:roles.c:<global> -> D:call_bool
+EDGES|CONTAINS D:roles.c:<global> -> D:call_long_double
+EDGES|CONTAINS D:roles.c:<global> -> D:call_ulong
+EDGES|CONTAINS D:roles.c:<global> -> D:call_ulong_int
+EDGES|CONTAINS D:roles.c:<global> -> D:call_ulong_ptr
+EDGES|CONTAINS D:roles.c:<global> -> D:callback_local
+EDGES|CONTAINS D:roles.c:<global> -> D:callback_parameter
+EDGES|CONTAINS D:roles.c:<global> -> D:const_pointer
+EDGES|CONTAINS D:roles.c:<global> -> D:cv_pointer
+EDGES|CONTAINS D:roles.c:<global> -> D:pointer_local
+EDGES|CONTAINS D:roles.c:<global> -> D:qualifier_objects
+EDGES|CONTAINS D:roles.c:<global> -> D:volatile_pointer
+EDGES|CONTAINS D:roles.c:<global> -> external_bool#0
+EDGES|CONTAINS D:roles.c:<global> -> external_long_double#0
+EDGES|CONTAINS D:roles.c:<global> -> external_ulong#0
+EDGES|CONTAINS D:roles.c:<global> -> external_ulong_int#0
+EDGES|CONTAINS D:roles.c:<global> -> external_ulong_ptr#0
+EDGES|CONTAINS D:roles.c:<global> -> roles.c:<global>#0
+EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+EDGES|CONTAINS F:<includes> -> D:ANY
+EDGES|CONTAINS F:<includes> -> D:_Bool
+EDGES|CONTAINS F:<includes> -> D:bool
+EDGES|CONTAINS F:<includes> -> D:int
+EDGES|CONTAINS F:<includes> -> D:int*
+EDGES|CONTAINS F:<includes> -> D:long unsigned int
+EDGES|CONTAINS F:<includes> -> D:longdouble
+EDGES|CONTAINS F:<includes> -> D:longunsigned
+EDGES|CONTAINS F:<includes> -> D:longunsigned*
+EDGES|CONTAINS F:<includes> -> D:unsigned long
+EDGES|CONTAINS F:<includes> -> D:unsigned long*
+EDGES|CONTAINS F:<includes> -> D:unsigned longint
+EDGES|CONTAINS F:<includes> -> D:unsigned longint(*)(unsignedlongint)
+EDGES|CONTAINS F:<includes> -> D:unsigned longint*
+EDGES|CONTAINS F:<includes> -> D:void
+EDGES|CONTAINS F:<includes> -> D:volatile
+EDGES|CONTAINS F:<includes> -> D:volatile longunsigned*
+EDGES|CONTAINS F:<includes> -> D:volatile unsigned long*
+EDGES|CONTAINS F:roles.c -> D:roles.c:<global>
+EDGES|CONTAINS call_bool#0 -> call_bool#3
+EDGES|CONTAINS call_bool#0 -> call_bool#4
+EDGES|CONTAINS call_bool#0 -> call_bool#5
+EDGES|CONTAINS call_bool#0 -> call_bool#6
+EDGES|CONTAINS call_long_double#0 -> call_long_double#3
+EDGES|CONTAINS call_long_double#0 -> call_long_double#4
+EDGES|CONTAINS call_long_double#0 -> call_long_double#5
+EDGES|CONTAINS call_long_double#0 -> call_long_double#6
+EDGES|CONTAINS call_ulong#0 -> call_ulong#3
+EDGES|CONTAINS call_ulong#0 -> call_ulong#4
+EDGES|CONTAINS call_ulong#0 -> call_ulong#5
+EDGES|CONTAINS call_ulong#0 -> call_ulong#6
+EDGES|CONTAINS call_ulong_int#0 -> call_ulong_int#3
+EDGES|CONTAINS call_ulong_int#0 -> call_ulong_int#4
+EDGES|CONTAINS call_ulong_int#0 -> call_ulong_int#5
+EDGES|CONTAINS call_ulong_int#0 -> call_ulong_int#6
+EDGES|CONTAINS call_ulong_ptr#0 -> call_ulong_ptr#3
+EDGES|CONTAINS call_ulong_ptr#0 -> call_ulong_ptr#4
+EDGES|CONTAINS call_ulong_ptr#0 -> call_ulong_ptr#5
+EDGES|CONTAINS call_ulong_ptr#0 -> call_ulong_ptr#6
+EDGES|CONTAINS callback_local#0 -> callback_local#10
+EDGES|CONTAINS callback_local#0 -> callback_local#11
+EDGES|CONTAINS callback_local#0 -> callback_local#12
+EDGES|CONTAINS callback_local#0 -> callback_local#3
+EDGES|CONTAINS callback_local#0 -> callback_local#6
+EDGES|CONTAINS callback_local#0 -> callback_local#7
+EDGES|CONTAINS callback_local#0 -> callback_local#8
+EDGES|CONTAINS callback_local#0 -> callback_local#9
+EDGES|CONTAINS callback_parameter#0 -> callback_parameter#5
+EDGES|CONTAINS callback_parameter#0 -> callback_parameter#6
+EDGES|CONTAINS callback_parameter#0 -> callback_parameter#7
+EDGES|CONTAINS callback_parameter#0 -> callback_parameter#8
+EDGES|CONTAINS callback_parameter#0 -> callback_parameter#9
+EDGES|CONTAINS const_pointer#0 -> const_pointer#3
+EDGES|CONTAINS const_pointer#0 -> const_pointer#5
+EDGES|CONTAINS const_pointer#0 -> const_pointer#6
+EDGES|CONTAINS const_pointer#0 -> const_pointer#7
+EDGES|CONTAINS const_pointer#0 -> const_pointer#8
+EDGES|CONTAINS const_pointer#0 -> const_pointer#9
+EDGES|CONTAINS cv_pointer#0 -> cv_pointer#3
+EDGES|CONTAINS cv_pointer#0 -> cv_pointer#5
+EDGES|CONTAINS cv_pointer#0 -> cv_pointer#6
+EDGES|CONTAINS cv_pointer#0 -> cv_pointer#7
+EDGES|CONTAINS cv_pointer#0 -> cv_pointer#8
+EDGES|CONTAINS cv_pointer#0 -> cv_pointer#9
+EDGES|CONTAINS external_bool#0 -> external_bool#3
+EDGES|CONTAINS external_long_double#0 -> external_long_double#3
+EDGES|CONTAINS external_ulong#0 -> external_ulong#3
+EDGES|CONTAINS external_ulong_int#0 -> external_ulong_int#3
+EDGES|CONTAINS external_ulong_ptr#0 -> external_ulong_ptr#3
+EDGES|CONTAINS pointer_local#0 -> pointer_local#3
+EDGES|CONTAINS pointer_local#0 -> pointer_local#5
+EDGES|CONTAINS pointer_local#0 -> pointer_local#6
+EDGES|CONTAINS pointer_local#0 -> pointer_local#7
+EDGES|CONTAINS pointer_local#0 -> pointer_local#8
+EDGES|CONTAINS pointer_local#0 -> pointer_local#9
+EDGES|CONTAINS qualifier_objects#0 -> qualifier_objects#11
+EDGES|CONTAINS qualifier_objects#0 -> qualifier_objects#12
+EDGES|CONTAINS qualifier_objects#0 -> qualifier_objects#13
+EDGES|CONTAINS qualifier_objects#0 -> qualifier_objects#5
+EDGES|CONTAINS qualifier_objects#0 -> qualifier_objects#7
+EDGES|CONTAINS qualifier_objects#0 -> qualifier_objects#8
+EDGES|CONTAINS qualifier_objects#0 -> qualifier_objects#9
+EDGES|CONTAINS roles.c:<global>#0 -> call_bool#0
+EDGES|CONTAINS roles.c:<global>#0 -> call_long_double#0
+EDGES|CONTAINS roles.c:<global>#0 -> call_ulong#0
+EDGES|CONTAINS roles.c:<global>#0 -> call_ulong_int#0
+EDGES|CONTAINS roles.c:<global>#0 -> call_ulong_ptr#0
+EDGES|CONTAINS roles.c:<global>#0 -> callback_local#0
+EDGES|CONTAINS roles.c:<global>#0 -> callback_parameter#0
+EDGES|CONTAINS roles.c:<global>#0 -> const_pointer#0
+EDGES|CONTAINS roles.c:<global>#0 -> cv_pointer#0
+EDGES|CONTAINS roles.c:<global>#0 -> pointer_local#0
+EDGES|CONTAINS roles.c:<global>#0 -> qualifier_objects#0
+EDGES|CONTAINS roles.c:<global>#0 -> roles.c:<global>#125
+EDGES|CONTAINS roles.c:<global>#0 -> roles.c:<global>#126
+EDGES|CONTAINS roles.c:<global>#0 -> roles.c:<global>#127
+EDGES|CONTAINS roles.c:<global>#0 -> roles.c:<global>#128
+EDGES|CONTAINS roles.c:<global>#0 -> roles.c:<global>#129
+EDGES|CONTAINS roles.c:<global>#0 -> roles.c:<global>#130
+EDGES|CONTAINS roles.c:<global>#0 -> roles.c:<global>#131
+EDGES|CONTAINS roles.c:<global>#0 -> roles.c:<global>#132
+EDGES|CONTAINS roles.c:<global>#0 -> roles.c:<global>#133
+EDGES|CONTAINS roles.c:<global>#0 -> roles.c:<global>#134
+EDGES|CONTAINS roles.c:<global>#0 -> roles.c:<global>#136
+EDGES|CONTAINS roles.c:<global>#0 -> roles.c:<global>#137
+EDGES|CONTAINS roles.c:<global>#0 -> roles.c:<global>#138
+EDGES|CONTAINS roles.c:<global>#0 -> roles.c:<global>#63
+EDGES|CONTAINS roles.c:<global>#63 -> volatile_pointer#3
+EDGES|CONTAINS roles.c:<global>#63 -> volatile_pointer#5
+EDGES|CONTAINS roles.c:<global>#63 -> volatile_pointer#6
+EDGES|CONTAINS roles.c:<global>#63 -> volatile_pointer#7
+EDGES|CONTAINS roles.c:<global>#63 -> volatile_pointer#8
+EDGES|CONTAINS roles.c:<global>#63 -> volatile_pointer#9
+EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#6 -> T:ANY
+EDGES|EVAL_TYPE <operator>.pointerCall#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.pointerCall#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.pointerCall#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.pointerCall#4 -> T:ANY
+EDGES|EVAL_TYPE call_bool#1 -> T:_Bool
+EDGES|EVAL_TYPE call_bool#2 -> T:_Bool
+EDGES|EVAL_TYPE call_bool#3 -> T:void
+EDGES|EVAL_TYPE call_bool#5 -> T:_Bool
+EDGES|EVAL_TYPE call_bool#6 -> T:_Bool
+EDGES|EVAL_TYPE call_bool#7 -> T:bool
+EDGES|EVAL_TYPE call_long_double#1 -> T:longdouble
+EDGES|EVAL_TYPE call_long_double#2 -> T:longdouble
+EDGES|EVAL_TYPE call_long_double#3 -> T:void
+EDGES|EVAL_TYPE call_long_double#5 -> T:longdouble
+EDGES|EVAL_TYPE call_long_double#6 -> T:longdouble
+EDGES|EVAL_TYPE call_long_double#7 -> T:longdouble
+EDGES|EVAL_TYPE call_ulong#1 -> T:longunsigned
+EDGES|EVAL_TYPE call_ulong#2 -> T:longunsigned
+EDGES|EVAL_TYPE call_ulong#3 -> T:void
+EDGES|EVAL_TYPE call_ulong#5 -> T:unsigned longint
+EDGES|EVAL_TYPE call_ulong#6 -> T:longunsigned
+EDGES|EVAL_TYPE call_ulong#7 -> T:unsigned long
+EDGES|EVAL_TYPE call_ulong_int#1 -> T:long unsigned int
+EDGES|EVAL_TYPE call_ulong_int#2 -> T:long unsigned int
+EDGES|EVAL_TYPE call_ulong_int#3 -> T:void
+EDGES|EVAL_TYPE call_ulong_int#5 -> T:unsigned longint
+EDGES|EVAL_TYPE call_ulong_int#6 -> T:long unsigned int
+EDGES|EVAL_TYPE call_ulong_int#7 -> T:unsigned longint
+EDGES|EVAL_TYPE call_ulong_ptr#1 -> T:longunsigned*
+EDGES|EVAL_TYPE call_ulong_ptr#2 -> T:longunsigned*
+EDGES|EVAL_TYPE call_ulong_ptr#3 -> T:void
+EDGES|EVAL_TYPE call_ulong_ptr#5 -> T:unsigned longint*
+EDGES|EVAL_TYPE call_ulong_ptr#6 -> T:longunsigned*
+EDGES|EVAL_TYPE call_ulong_ptr#7 -> T:unsigned long*
+EDGES|EVAL_TYPE callback_local#1 -> T:longunsigned
+EDGES|EVAL_TYPE callback_local#10 -> T:unsigned longint
+EDGES|EVAL_TYPE callback_local#11 -> T:unsigned longint(*)(unsignedlongint)
+EDGES|EVAL_TYPE callback_local#12 -> T:longunsigned
+EDGES|EVAL_TYPE callback_local#13 -> T:unsigned long
+EDGES|EVAL_TYPE callback_local#2 -> T:longunsigned
+EDGES|EVAL_TYPE callback_local#3 -> T:void
+EDGES|EVAL_TYPE callback_local#4 -> T:unsigned longint(*)(unsignedlongint)
+EDGES|EVAL_TYPE callback_local#5 -> T:unsigned longint(*)(unsignedlongint)
+EDGES|EVAL_TYPE callback_local#6 -> T:void
+EDGES|EVAL_TYPE callback_local#7 -> T:unsigned longint(*)(unsignedlongint)
+EDGES|EVAL_TYPE callback_local#8 -> T:unsigned longint(*)(unsignedlongint)
+EDGES|EVAL_TYPE callback_parameter#1 -> T:longunsigned
+EDGES|EVAL_TYPE callback_parameter#10 -> T:unsigned long
+EDGES|EVAL_TYPE callback_parameter#2 -> T:longunsigned
+EDGES|EVAL_TYPE callback_parameter#3 -> T:longunsigned
+EDGES|EVAL_TYPE callback_parameter#4 -> T:longunsigned
+EDGES|EVAL_TYPE callback_parameter#5 -> T:void
+EDGES|EVAL_TYPE callback_parameter#7 -> T:unsigned longint
+EDGES|EVAL_TYPE callback_parameter#8 -> T:longunsigned
+EDGES|EVAL_TYPE callback_parameter#9 -> T:longunsigned
+EDGES|EVAL_TYPE const_pointer#1 -> T:longunsigned*
+EDGES|EVAL_TYPE const_pointer#10 -> T:unsigned long*
+EDGES|EVAL_TYPE const_pointer#2 -> T:longunsigned*
+EDGES|EVAL_TYPE const_pointer#3 -> T:void
+EDGES|EVAL_TYPE const_pointer#4 -> T:longunsigned*
+EDGES|EVAL_TYPE const_pointer#5 -> T:void
+EDGES|EVAL_TYPE const_pointer#6 -> T:longunsigned*
+EDGES|EVAL_TYPE const_pointer#7 -> T:longunsigned*
+EDGES|EVAL_TYPE const_pointer#9 -> T:longunsigned*
+EDGES|EVAL_TYPE cv_pointer#1 -> T:volatile longunsigned*
+EDGES|EVAL_TYPE cv_pointer#10 -> T:volatile unsigned long*
+EDGES|EVAL_TYPE cv_pointer#2 -> T:volatile longunsigned*
+EDGES|EVAL_TYPE cv_pointer#3 -> T:void
+EDGES|EVAL_TYPE cv_pointer#4 -> T:volatile longunsigned*
+EDGES|EVAL_TYPE cv_pointer#5 -> T:void
+EDGES|EVAL_TYPE cv_pointer#6 -> T:volatile longunsigned*
+EDGES|EVAL_TYPE cv_pointer#7 -> T:volatile longunsigned*
+EDGES|EVAL_TYPE cv_pointer#9 -> T:volatile longunsigned*
+EDGES|EVAL_TYPE external_bool#1 -> T:_Bool
+EDGES|EVAL_TYPE external_bool#2 -> T:_Bool
+EDGES|EVAL_TYPE external_bool#3 -> T:ANY
+EDGES|EVAL_TYPE external_bool#4 -> T:_Bool
+EDGES|EVAL_TYPE external_long_double#1 -> T:longdouble
+EDGES|EVAL_TYPE external_long_double#2 -> T:longdouble
+EDGES|EVAL_TYPE external_long_double#3 -> T:ANY
+EDGES|EVAL_TYPE external_long_double#4 -> T:longdouble
+EDGES|EVAL_TYPE external_ulong#1 -> T:longunsigned
+EDGES|EVAL_TYPE external_ulong#2 -> T:longunsigned
+EDGES|EVAL_TYPE external_ulong#3 -> T:ANY
+EDGES|EVAL_TYPE external_ulong#4 -> T:longunsigned
+EDGES|EVAL_TYPE external_ulong_int#1 -> T:long unsigned int
+EDGES|EVAL_TYPE external_ulong_int#2 -> T:long unsigned int
+EDGES|EVAL_TYPE external_ulong_int#3 -> T:ANY
+EDGES|EVAL_TYPE external_ulong_int#4 -> T:long unsigned int
+EDGES|EVAL_TYPE external_ulong_ptr#1 -> T:longunsigned*
+EDGES|EVAL_TYPE external_ulong_ptr#2 -> T:longunsigned*
+EDGES|EVAL_TYPE external_ulong_ptr#3 -> T:ANY
+EDGES|EVAL_TYPE external_ulong_ptr#4 -> T:longunsigned*
+EDGES|EVAL_TYPE pointer_local#1 -> T:longunsigned*
+EDGES|EVAL_TYPE pointer_local#10 -> T:unsigned long*
+EDGES|EVAL_TYPE pointer_local#2 -> T:longunsigned*
+EDGES|EVAL_TYPE pointer_local#3 -> T:void
+EDGES|EVAL_TYPE pointer_local#4 -> T:longunsigned*
+EDGES|EVAL_TYPE pointer_local#5 -> T:void
+EDGES|EVAL_TYPE pointer_local#6 -> T:longunsigned*
+EDGES|EVAL_TYPE pointer_local#7 -> T:longunsigned*
+EDGES|EVAL_TYPE pointer_local#9 -> T:longunsigned*
+EDGES|EVAL_TYPE qualifier_objects#1 -> T:int*
+EDGES|EVAL_TYPE qualifier_objects#10 -> T:int*
+EDGES|EVAL_TYPE qualifier_objects#11 -> T:void
+EDGES|EVAL_TYPE qualifier_objects#12 -> T:int*
+EDGES|EVAL_TYPE qualifier_objects#13 -> T:int*
+EDGES|EVAL_TYPE qualifier_objects#14 -> T:void
+EDGES|EVAL_TYPE qualifier_objects#2 -> T:int*
+EDGES|EVAL_TYPE qualifier_objects#3 -> T:int*
+EDGES|EVAL_TYPE qualifier_objects#4 -> T:int*
+EDGES|EVAL_TYPE qualifier_objects#5 -> T:void
+EDGES|EVAL_TYPE qualifier_objects#6 -> T:int*
+EDGES|EVAL_TYPE qualifier_objects#7 -> T:void
+EDGES|EVAL_TYPE qualifier_objects#8 -> T:int*
+EDGES|EVAL_TYPE qualifier_objects#9 -> T:int*
+EDGES|EVAL_TYPE roles.c:<global>#125 -> T:ANY
+EDGES|EVAL_TYPE roles.c:<global>#126 -> T:call_ulong
+EDGES|EVAL_TYPE roles.c:<global>#127 -> T:call_ulong_ptr
+EDGES|EVAL_TYPE roles.c:<global>#128 -> T:call_ulong_int
+EDGES|EVAL_TYPE roles.c:<global>#129 -> T:call_bool
+EDGES|EVAL_TYPE roles.c:<global>#130 -> T:call_long_double
+EDGES|EVAL_TYPE roles.c:<global>#131 -> T:pointer_local
+EDGES|EVAL_TYPE roles.c:<global>#132 -> T:const_pointer
+EDGES|EVAL_TYPE roles.c:<global>#133 -> T:volatile_pointer
+EDGES|EVAL_TYPE roles.c:<global>#134 -> T:cv_pointer
+EDGES|EVAL_TYPE roles.c:<global>#135 -> T:unsigned longint(*)(unsignedlongint)
+EDGES|EVAL_TYPE roles.c:<global>#136 -> T:callback_local
+EDGES|EVAL_TYPE roles.c:<global>#137 -> T:callback_parameter
+EDGES|EVAL_TYPE roles.c:<global>#138 -> T:qualifier_objects
+EDGES|EVAL_TYPE roles.c:<global>#139 -> T:ANY
+EDGES|EVAL_TYPE volatile_pointer#1 -> T:volatile longunsigned*
+EDGES|EVAL_TYPE volatile_pointer#10 -> T:volatile unsigned long*
+EDGES|EVAL_TYPE volatile_pointer#2 -> T:volatile longunsigned*
+EDGES|EVAL_TYPE volatile_pointer#3 -> T:void
+EDGES|EVAL_TYPE volatile_pointer#4 -> T:volatile longunsigned*
+EDGES|EVAL_TYPE volatile_pointer#5 -> T:void
+EDGES|EVAL_TYPE volatile_pointer#6 -> T:volatile longunsigned*
+EDGES|EVAL_TYPE volatile_pointer#7 -> T:volatile longunsigned*
+EDGES|EVAL_TYPE volatile_pointer#9 -> T:volatile longunsigned*
+EDGES|PARAMETER_LINK <operator>.assignment#1 -> <operator>.assignment#3
+EDGES|PARAMETER_LINK <operator>.assignment#4 -> <operator>.assignment#6
+EDGES|PARAMETER_LINK <operator>.pointerCall#1 -> <operator>.pointerCall#3
+EDGES|PARAMETER_LINK call_bool#1 -> call_bool#2
+EDGES|PARAMETER_LINK call_long_double#1 -> call_long_double#2
+EDGES|PARAMETER_LINK call_ulong#1 -> call_ulong#2
+EDGES|PARAMETER_LINK call_ulong_int#1 -> call_ulong_int#2
+EDGES|PARAMETER_LINK call_ulong_ptr#1 -> call_ulong_ptr#2
+EDGES|PARAMETER_LINK callback_local#1 -> callback_local#2
+EDGES|PARAMETER_LINK callback_parameter#1 -> callback_parameter#2
+EDGES|PARAMETER_LINK callback_parameter#3 -> callback_parameter#4
+EDGES|PARAMETER_LINK const_pointer#1 -> const_pointer#2
+EDGES|PARAMETER_LINK cv_pointer#1 -> cv_pointer#2
+EDGES|PARAMETER_LINK external_bool#1 -> external_bool#2
+EDGES|PARAMETER_LINK external_long_double#1 -> external_long_double#2
+EDGES|PARAMETER_LINK external_ulong#1 -> external_ulong#2
+EDGES|PARAMETER_LINK external_ulong_int#1 -> external_ulong_int#2
+EDGES|PARAMETER_LINK external_ulong_ptr#1 -> external_ulong_ptr#2
+EDGES|PARAMETER_LINK pointer_local#1 -> pointer_local#2
+EDGES|PARAMETER_LINK qualifier_objects#1 -> qualifier_objects#2
+EDGES|PARAMETER_LINK qualifier_objects#3 -> qualifier_objects#4
+EDGES|PARAMETER_LINK volatile_pointer#1 -> volatile_pointer#2
+EDGES|REF NB:<global> -> NS:<global>
+EDGES|REF NB:<includes>:<global> -> NS:<global>
+EDGES|REF NB:roles.c:<global> -> NS:<global>
+EDGES|REF T:ANY -> D:ANY
+EDGES|REF T:_Bool -> D:_Bool
+EDGES|REF T:bool -> D:bool
+EDGES|REF T:call_bool -> D:call_bool
+EDGES|REF T:call_long_double -> D:call_long_double
+EDGES|REF T:call_ulong -> D:call_ulong
+EDGES|REF T:call_ulong_int -> D:call_ulong_int
+EDGES|REF T:call_ulong_ptr -> D:call_ulong_ptr
+EDGES|REF T:callback_local -> D:callback_local
+EDGES|REF T:callback_parameter -> D:callback_parameter
+EDGES|REF T:const_pointer -> D:const_pointer
+EDGES|REF T:cv_pointer -> D:cv_pointer
+EDGES|REF T:int -> D:int
+EDGES|REF T:int* -> D:int*
+EDGES|REF T:long unsigned int -> D:long unsigned int
+EDGES|REF T:longdouble -> D:longdouble
+EDGES|REF T:longunsigned -> D:longunsigned
+EDGES|REF T:longunsigned* -> D:longunsigned*
+EDGES|REF T:pointer_local -> D:pointer_local
+EDGES|REF T:qualifier_objects -> D:qualifier_objects
+EDGES|REF T:unsigned long -> D:unsigned long
+EDGES|REF T:unsigned long* -> D:unsigned long*
+EDGES|REF T:unsigned longint -> D:unsigned longint
+EDGES|REF T:unsigned longint(*)(unsignedlongint) -> D:unsigned longint(*)(unsignedlongint)
+EDGES|REF T:unsigned longint* -> D:unsigned longint*
+EDGES|REF T:void -> D:void
+EDGES|REF T:volatile -> D:volatile
+EDGES|REF T:volatile longunsigned* -> D:volatile longunsigned*
+EDGES|REF T:volatile unsigned long* -> D:volatile unsigned long*
+EDGES|REF T:volatile_pointer -> D:volatile_pointer
+EDGES|REF call_bool#6 -> call_bool#1
+EDGES|REF call_long_double#6 -> call_long_double#1
+EDGES|REF call_ulong#6 -> call_ulong#1
+EDGES|REF call_ulong_int#6 -> call_ulong_int#1
+EDGES|REF call_ulong_ptr#6 -> call_ulong_ptr#1
+EDGES|REF callback_local#11 -> callback_local#5
+EDGES|REF callback_local#12 -> callback_local#1
+EDGES|REF callback_local#7 -> callback_local#5
+EDGES|REF callback_local#8 -> callback_local#4
+EDGES|REF callback_parameter#8 -> callback_parameter#1
+EDGES|REF callback_parameter#9 -> callback_parameter#3
+EDGES|REF const_pointer#6 -> const_pointer#4
+EDGES|REF const_pointer#7 -> const_pointer#1
+EDGES|REF const_pointer#9 -> const_pointer#4
+EDGES|REF cv_pointer#6 -> cv_pointer#4
+EDGES|REF cv_pointer#7 -> cv_pointer#1
+EDGES|REF cv_pointer#9 -> cv_pointer#4
+EDGES|REF pointer_local#6 -> pointer_local#4
+EDGES|REF pointer_local#7 -> pointer_local#1
+EDGES|REF pointer_local#9 -> pointer_local#4
+EDGES|REF qualifier_objects#12 -> qualifier_objects#10
+EDGES|REF qualifier_objects#13 -> qualifier_objects#3
+EDGES|REF qualifier_objects#8 -> qualifier_objects#6
+EDGES|REF qualifier_objects#9 -> qualifier_objects#1
+EDGES|REF roles.c:<global>#126 -> call_ulong#0
+EDGES|REF roles.c:<global>#127 -> call_ulong_ptr#0
+EDGES|REF roles.c:<global>#128 -> call_ulong_int#0
+EDGES|REF roles.c:<global>#129 -> call_bool#0
+EDGES|REF roles.c:<global>#130 -> call_long_double#0
+EDGES|REF roles.c:<global>#131 -> pointer_local#0
+EDGES|REF roles.c:<global>#132 -> const_pointer#0
+EDGES|REF roles.c:<global>#133 -> roles.c:<global>#63
+EDGES|REF roles.c:<global>#134 -> cv_pointer#0
+EDGES|REF roles.c:<global>#136 -> callback_local#0
+EDGES|REF roles.c:<global>#137 -> callback_parameter#0
+EDGES|REF roles.c:<global>#138 -> qualifier_objects#0
+EDGES|REF volatile_pointer#6 -> volatile_pointer#4
+EDGES|REF volatile_pointer#7 -> volatile_pointer#1
+EDGES|REF volatile_pointer#9 -> volatile_pointer#4
+EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+EDGES|SOURCE_FILE D:ANY -> F:<includes>
+EDGES|SOURCE_FILE D:_Bool -> F:<includes>
+EDGES|SOURCE_FILE D:bool -> F:<includes>
+EDGES|SOURCE_FILE D:call_bool -> F:roles.c
+EDGES|SOURCE_FILE D:call_long_double -> F:roles.c
+EDGES|SOURCE_FILE D:call_ulong -> F:roles.c
+EDGES|SOURCE_FILE D:call_ulong_int -> F:roles.c
+EDGES|SOURCE_FILE D:call_ulong_ptr -> F:roles.c
+EDGES|SOURCE_FILE D:callback_local -> F:roles.c
+EDGES|SOURCE_FILE D:callback_parameter -> F:roles.c
+EDGES|SOURCE_FILE D:const_pointer -> F:roles.c
+EDGES|SOURCE_FILE D:cv_pointer -> F:roles.c
+EDGES|SOURCE_FILE D:int -> F:<includes>
+EDGES|SOURCE_FILE D:int* -> F:<includes>
+EDGES|SOURCE_FILE D:long unsigned int -> F:<includes>
+EDGES|SOURCE_FILE D:longdouble -> F:<includes>
+EDGES|SOURCE_FILE D:longunsigned -> F:<includes>
+EDGES|SOURCE_FILE D:longunsigned* -> F:<includes>
+EDGES|SOURCE_FILE D:pointer_local -> F:roles.c
+EDGES|SOURCE_FILE D:qualifier_objects -> F:roles.c
+EDGES|SOURCE_FILE D:roles.c:<global> -> F:roles.c
+EDGES|SOURCE_FILE D:unsigned long -> F:<includes>
+EDGES|SOURCE_FILE D:unsigned long* -> F:<includes>
+EDGES|SOURCE_FILE D:unsigned longint -> F:<includes>
+EDGES|SOURCE_FILE D:unsigned longint(*)(unsignedlongint) -> F:<includes>
+EDGES|SOURCE_FILE D:unsigned longint* -> F:<includes>
+EDGES|SOURCE_FILE D:void -> F:<includes>
+EDGES|SOURCE_FILE D:volatile -> F:<includes>
+EDGES|SOURCE_FILE D:volatile longunsigned* -> F:<includes>
+EDGES|SOURCE_FILE D:volatile unsigned long* -> F:<includes>
+EDGES|SOURCE_FILE D:volatile_pointer -> F:roles.c
+EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
+EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>
+EDGES|SOURCE_FILE NB:roles.c:<global> -> F:roles.c
+EDGES|SOURCE_FILE call_bool#0 -> F:roles.c
+EDGES|SOURCE_FILE call_long_double#0 -> F:roles.c
+EDGES|SOURCE_FILE call_ulong#0 -> F:roles.c
+EDGES|SOURCE_FILE call_ulong_int#0 -> F:roles.c
+EDGES|SOURCE_FILE call_ulong_ptr#0 -> F:roles.c
+EDGES|SOURCE_FILE callback_local#0 -> F:roles.c
+EDGES|SOURCE_FILE callback_parameter#0 -> F:roles.c
+EDGES|SOURCE_FILE const_pointer#0 -> F:roles.c
+EDGES|SOURCE_FILE cv_pointer#0 -> F:roles.c
+EDGES|SOURCE_FILE external_bool#0 -> F:roles.c
+EDGES|SOURCE_FILE external_long_double#0 -> F:roles.c
+EDGES|SOURCE_FILE external_ulong#0 -> F:roles.c
+EDGES|SOURCE_FILE external_ulong_int#0 -> F:roles.c
+EDGES|SOURCE_FILE external_ulong_ptr#0 -> F:roles.c
+EDGES|SOURCE_FILE pointer_local#0 -> F:roles.c
+EDGES|SOURCE_FILE qualifier_objects#0 -> F:roles.c
+EDGES|SOURCE_FILE roles.c:<global>#0 -> F:roles.c
+EDGES|SOURCE_FILE roles.c:<global>#63 -> F:roles.c
+FLOWS|REACHING_DEF[(*local_callback)(unsigned long) = global_callback] callback_local#6 -> callback_local#13
+FLOWS|REACHING_DEF[* const cp = p] qualifier_objects#7 -> qualifier_objects#14
+FLOWS|REACHING_DEF[* volatile vq = q] qualifier_objects#11 -> qualifier_objects#14
+FLOWS|REACHING_DEF[*local = value] const_pointer#5 -> const_pointer#10
+FLOWS|REACHING_DEF[*local = value] cv_pointer#5 -> cv_pointer#10
+FLOWS|REACHING_DEF[*local = value] pointer_local#5 -> pointer_local#10
+FLOWS|REACHING_DEF[*local = value] volatile_pointer#5 -> volatile_pointer#10
+FLOWS|REACHING_DEF[<RET>] call_bool#4 -> call_bool#7
+FLOWS|REACHING_DEF[<RET>] call_long_double#4 -> call_long_double#7
+FLOWS|REACHING_DEF[<RET>] call_ulong#4 -> call_ulong#7
+FLOWS|REACHING_DEF[<RET>] call_ulong_int#4 -> call_ulong_int#7
+FLOWS|REACHING_DEF[<RET>] call_ulong_ptr#4 -> call_ulong_ptr#7
+FLOWS|REACHING_DEF[<RET>] callback_local#9 -> callback_local#13
+FLOWS|REACHING_DEF[<RET>] callback_parameter#6 -> callback_parameter#10
+FLOWS|REACHING_DEF[<RET>] const_pointer#8 -> const_pointer#10
+FLOWS|REACHING_DEF[<RET>] cv_pointer#8 -> cv_pointer#10
+FLOWS|REACHING_DEF[<RET>] pointer_local#8 -> pointer_local#10
+FLOWS|REACHING_DEF[<RET>] volatile_pointer#8 -> volatile_pointer#10
+FLOWS|REACHING_DEF[<global> global_callback] callback_local#8 -> callback_local#13
+FLOWS|REACHING_DEF[<global> global_callback] callback_local#8 -> callback_local#6
+FLOWS|REACHING_DEF[<global> global_callback] callback_local#8 -> callback_local#7
+FLOWS|REACHING_DEF[] <operator>.assignment#0 -> <operator>.assignment#1
+FLOWS|REACHING_DEF[] <operator>.assignment#0 -> <operator>.assignment#4
+FLOWS|REACHING_DEF[] <operator>.pointerCall#0 -> <operator>.pointerCall#1
+FLOWS|REACHING_DEF[] call_bool#0 -> call_bool#1
+FLOWS|REACHING_DEF[] call_bool#0 -> call_bool#6
+FLOWS|REACHING_DEF[] call_long_double#0 -> call_long_double#1
+FLOWS|REACHING_DEF[] call_long_double#0 -> call_long_double#6
+FLOWS|REACHING_DEF[] call_ulong#0 -> call_ulong#1
+FLOWS|REACHING_DEF[] call_ulong#0 -> call_ulong#6
+FLOWS|REACHING_DEF[] call_ulong_int#0 -> call_ulong_int#1
+FLOWS|REACHING_DEF[] call_ulong_int#0 -> call_ulong_int#6
+FLOWS|REACHING_DEF[] call_ulong_ptr#0 -> call_ulong_ptr#1
+FLOWS|REACHING_DEF[] call_ulong_ptr#0 -> call_ulong_ptr#6
+FLOWS|REACHING_DEF[] callback_local#0 -> callback_local#1
+FLOWS|REACHING_DEF[] callback_local#0 -> callback_local#11
+FLOWS|REACHING_DEF[] callback_local#0 -> callback_local#12
+FLOWS|REACHING_DEF[] callback_local#0 -> callback_local#8
+FLOWS|REACHING_DEF[] callback_local#7 -> callback_local#13
+FLOWS|REACHING_DEF[] callback_local#7 -> callback_local#6
+FLOWS|REACHING_DEF[] callback_parameter#0 -> callback_parameter#1
+FLOWS|REACHING_DEF[] callback_parameter#0 -> callback_parameter#3
+FLOWS|REACHING_DEF[] callback_parameter#0 -> callback_parameter#8
+FLOWS|REACHING_DEF[] callback_parameter#0 -> callback_parameter#9
+FLOWS|REACHING_DEF[] const_pointer#0 -> const_pointer#1
+FLOWS|REACHING_DEF[] const_pointer#0 -> const_pointer#7
+FLOWS|REACHING_DEF[] const_pointer#0 -> const_pointer#9
+FLOWS|REACHING_DEF[] cv_pointer#0 -> cv_pointer#1
+FLOWS|REACHING_DEF[] cv_pointer#0 -> cv_pointer#7
+FLOWS|REACHING_DEF[] cv_pointer#0 -> cv_pointer#9
+FLOWS|REACHING_DEF[] external_bool#0 -> external_bool#1
+FLOWS|REACHING_DEF[] external_long_double#0 -> external_long_double#1
+FLOWS|REACHING_DEF[] external_ulong#0 -> external_ulong#1
+FLOWS|REACHING_DEF[] external_ulong_int#0 -> external_ulong_int#1
+FLOWS|REACHING_DEF[] external_ulong_ptr#0 -> external_ulong_ptr#1
+FLOWS|REACHING_DEF[] pointer_local#0 -> pointer_local#1
+FLOWS|REACHING_DEF[] pointer_local#0 -> pointer_local#7
+FLOWS|REACHING_DEF[] pointer_local#0 -> pointer_local#9
+FLOWS|REACHING_DEF[] qualifier_objects#0 -> qualifier_objects#1
+FLOWS|REACHING_DEF[] qualifier_objects#0 -> qualifier_objects#13
+FLOWS|REACHING_DEF[] qualifier_objects#0 -> qualifier_objects#3
+FLOWS|REACHING_DEF[] qualifier_objects#0 -> qualifier_objects#9
+FLOWS|REACHING_DEF[] roles.c:<global>#0 -> roles.c:<global>#126
+FLOWS|REACHING_DEF[] roles.c:<global>#0 -> roles.c:<global>#127
+FLOWS|REACHING_DEF[] roles.c:<global>#0 -> roles.c:<global>#128
+FLOWS|REACHING_DEF[] roles.c:<global>#0 -> roles.c:<global>#129
+FLOWS|REACHING_DEF[] roles.c:<global>#0 -> roles.c:<global>#130
+FLOWS|REACHING_DEF[] roles.c:<global>#0 -> roles.c:<global>#131
+FLOWS|REACHING_DEF[] roles.c:<global>#0 -> roles.c:<global>#132
+FLOWS|REACHING_DEF[] roles.c:<global>#0 -> roles.c:<global>#133
+FLOWS|REACHING_DEF[] roles.c:<global>#0 -> roles.c:<global>#134
+FLOWS|REACHING_DEF[] roles.c:<global>#0 -> roles.c:<global>#136
+FLOWS|REACHING_DEF[] roles.c:<global>#0 -> roles.c:<global>#137
+FLOWS|REACHING_DEF[] roles.c:<global>#0 -> roles.c:<global>#138
+FLOWS|REACHING_DEF[] roles.c:<global>#63 -> volatile_pointer#1
+FLOWS|REACHING_DEF[] roles.c:<global>#63 -> volatile_pointer#7
+FLOWS|REACHING_DEF[] roles.c:<global>#63 -> volatile_pointer#9
+FLOWS|REACHING_DEF[callback(value)] callback_parameter#7 -> callback_parameter#10
+FLOWS|REACHING_DEF[callback(value)] callback_parameter#7 -> callback_parameter#6
+FLOWS|REACHING_DEF[callback] callback_parameter#1 -> callback_parameter#10
+FLOWS|REACHING_DEF[callback] callback_parameter#1 -> callback_parameter#2
+FLOWS|REACHING_DEF[cp] qualifier_objects#8 -> qualifier_objects#14
+FLOWS|REACHING_DEF[cp] qualifier_objects#8 -> qualifier_objects#7
+FLOWS|REACHING_DEF[external_bool(value)] call_bool#5 -> call_bool#4
+FLOWS|REACHING_DEF[external_bool(value)] call_bool#5 -> call_bool#7
+FLOWS|REACHING_DEF[external_long_double(value)] call_long_double#5 -> call_long_double#4
+FLOWS|REACHING_DEF[external_long_double(value)] call_long_double#5 -> call_long_double#7
+FLOWS|REACHING_DEF[external_ulong(value)] call_ulong#5 -> call_ulong#4
+FLOWS|REACHING_DEF[external_ulong(value)] call_ulong#5 -> call_ulong#7
+FLOWS|REACHING_DEF[external_ulong_int(value)] call_ulong_int#5 -> call_ulong_int#4
+FLOWS|REACHING_DEF[external_ulong_int(value)] call_ulong_int#5 -> call_ulong_int#7
+FLOWS|REACHING_DEF[external_ulong_ptr(value)] call_ulong_ptr#5 -> call_ulong_ptr#4
+FLOWS|REACHING_DEF[external_ulong_ptr(value)] call_ulong_ptr#5 -> call_ulong_ptr#7
+FLOWS|REACHING_DEF[local] const_pointer#6 -> const_pointer#10
+FLOWS|REACHING_DEF[local] const_pointer#6 -> const_pointer#5
+FLOWS|REACHING_DEF[local] const_pointer#6 -> const_pointer#9
+FLOWS|REACHING_DEF[local] const_pointer#9 -> const_pointer#8
+FLOWS|REACHING_DEF[local] cv_pointer#6 -> cv_pointer#10
+FLOWS|REACHING_DEF[local] cv_pointer#6 -> cv_pointer#5
+FLOWS|REACHING_DEF[local] cv_pointer#6 -> cv_pointer#9
+FLOWS|REACHING_DEF[local] cv_pointer#9 -> cv_pointer#8
+FLOWS|REACHING_DEF[local] pointer_local#6 -> pointer_local#10
+FLOWS|REACHING_DEF[local] pointer_local#6 -> pointer_local#5
+FLOWS|REACHING_DEF[local] pointer_local#6 -> pointer_local#9
+FLOWS|REACHING_DEF[local] pointer_local#9 -> pointer_local#8
+FLOWS|REACHING_DEF[local] volatile_pointer#6 -> volatile_pointer#10
+FLOWS|REACHING_DEF[local] volatile_pointer#6 -> volatile_pointer#5
+FLOWS|REACHING_DEF[local] volatile_pointer#6 -> volatile_pointer#9
+FLOWS|REACHING_DEF[local] volatile_pointer#9 -> volatile_pointer#8
+FLOWS|REACHING_DEF[local_callback(value)] callback_local#10 -> callback_local#13
+FLOWS|REACHING_DEF[local_callback(value)] callback_local#10 -> callback_local#9
+FLOWS|REACHING_DEF[p1] <operator>.assignment#1 -> <operator>.assignment#3
+FLOWS|REACHING_DEF[p1] <operator>.assignment#1 -> <operator>.assignment#5
+FLOWS|REACHING_DEF[p1] <operator>.pointerCall#1 -> <operator>.pointerCall#3
+FLOWS|REACHING_DEF[p1] <operator>.pointerCall#1 -> <operator>.pointerCall#4
+FLOWS|REACHING_DEF[p2] <operator>.assignment#4 -> <operator>.assignment#5
+FLOWS|REACHING_DEF[p2] <operator>.assignment#4 -> <operator>.assignment#6
+FLOWS|REACHING_DEF[p] qualifier_objects#1 -> qualifier_objects#2
+FLOWS|REACHING_DEF[p] qualifier_objects#1 -> qualifier_objects#9
+FLOWS|REACHING_DEF[p] qualifier_objects#9 -> qualifier_objects#14
+FLOWS|REACHING_DEF[p] qualifier_objects#9 -> qualifier_objects#2
+FLOWS|REACHING_DEF[p] qualifier_objects#9 -> qualifier_objects#7
+FLOWS|REACHING_DEF[p] qualifier_objects#9 -> qualifier_objects#8
+FLOWS|REACHING_DEF[q] qualifier_objects#13 -> qualifier_objects#11
+FLOWS|REACHING_DEF[q] qualifier_objects#13 -> qualifier_objects#12
+FLOWS|REACHING_DEF[q] qualifier_objects#13 -> qualifier_objects#14
+FLOWS|REACHING_DEF[q] qualifier_objects#13 -> qualifier_objects#4
+FLOWS|REACHING_DEF[q] qualifier_objects#3 -> qualifier_objects#13
+FLOWS|REACHING_DEF[q] qualifier_objects#3 -> qualifier_objects#4
+FLOWS|REACHING_DEF[value] call_bool#1 -> call_bool#2
+FLOWS|REACHING_DEF[value] call_bool#1 -> call_bool#6
+FLOWS|REACHING_DEF[value] call_bool#6 -> call_bool#2
+FLOWS|REACHING_DEF[value] call_bool#6 -> call_bool#5
+FLOWS|REACHING_DEF[value] call_bool#6 -> call_bool#7
+FLOWS|REACHING_DEF[value] call_long_double#1 -> call_long_double#2
+FLOWS|REACHING_DEF[value] call_long_double#1 -> call_long_double#6
+FLOWS|REACHING_DEF[value] call_long_double#6 -> call_long_double#2
+FLOWS|REACHING_DEF[value] call_long_double#6 -> call_long_double#5
+FLOWS|REACHING_DEF[value] call_long_double#6 -> call_long_double#7
+FLOWS|REACHING_DEF[value] call_ulong#1 -> call_ulong#2
+FLOWS|REACHING_DEF[value] call_ulong#1 -> call_ulong#6
+FLOWS|REACHING_DEF[value] call_ulong#6 -> call_ulong#2
+FLOWS|REACHING_DEF[value] call_ulong#6 -> call_ulong#5
+FLOWS|REACHING_DEF[value] call_ulong#6 -> call_ulong#7
+FLOWS|REACHING_DEF[value] call_ulong_int#1 -> call_ulong_int#2
+FLOWS|REACHING_DEF[value] call_ulong_int#1 -> call_ulong_int#6
+FLOWS|REACHING_DEF[value] call_ulong_int#6 -> call_ulong_int#2
+FLOWS|REACHING_DEF[value] call_ulong_int#6 -> call_ulong_int#5
+FLOWS|REACHING_DEF[value] call_ulong_int#6 -> call_ulong_int#7
+FLOWS|REACHING_DEF[value] call_ulong_ptr#1 -> call_ulong_ptr#2
+FLOWS|REACHING_DEF[value] call_ulong_ptr#1 -> call_ulong_ptr#6
+FLOWS|REACHING_DEF[value] call_ulong_ptr#6 -> call_ulong_ptr#2
+FLOWS|REACHING_DEF[value] call_ulong_ptr#6 -> call_ulong_ptr#5
+FLOWS|REACHING_DEF[value] call_ulong_ptr#6 -> call_ulong_ptr#7
+FLOWS|REACHING_DEF[value] callback_local#1 -> callback_local#12
+FLOWS|REACHING_DEF[value] callback_local#1 -> callback_local#2
+FLOWS|REACHING_DEF[value] callback_local#12 -> callback_local#10
+FLOWS|REACHING_DEF[value] callback_local#12 -> callback_local#13
+FLOWS|REACHING_DEF[value] callback_local#12 -> callback_local#2
+FLOWS|REACHING_DEF[value] callback_parameter#3 -> callback_parameter#4
+FLOWS|REACHING_DEF[value] callback_parameter#3 -> callback_parameter#9
+FLOWS|REACHING_DEF[value] callback_parameter#9 -> callback_parameter#10
+FLOWS|REACHING_DEF[value] callback_parameter#9 -> callback_parameter#4
+FLOWS|REACHING_DEF[value] callback_parameter#9 -> callback_parameter#7
+FLOWS|REACHING_DEF[value] const_pointer#1 -> const_pointer#2
+FLOWS|REACHING_DEF[value] const_pointer#1 -> const_pointer#7
+FLOWS|REACHING_DEF[value] const_pointer#7 -> const_pointer#10
+FLOWS|REACHING_DEF[value] const_pointer#7 -> const_pointer#2
+FLOWS|REACHING_DEF[value] const_pointer#7 -> const_pointer#5
+FLOWS|REACHING_DEF[value] const_pointer#7 -> const_pointer#6
+FLOWS|REACHING_DEF[value] cv_pointer#1 -> cv_pointer#2
+FLOWS|REACHING_DEF[value] cv_pointer#1 -> cv_pointer#7
+FLOWS|REACHING_DEF[value] cv_pointer#7 -> cv_pointer#10
+FLOWS|REACHING_DEF[value] cv_pointer#7 -> cv_pointer#2
+FLOWS|REACHING_DEF[value] cv_pointer#7 -> cv_pointer#5
+FLOWS|REACHING_DEF[value] cv_pointer#7 -> cv_pointer#6
+FLOWS|REACHING_DEF[value] external_bool#1 -> external_bool#2
+FLOWS|REACHING_DEF[value] external_bool#1 -> external_bool#4
+FLOWS|REACHING_DEF[value] external_long_double#1 -> external_long_double#2
+FLOWS|REACHING_DEF[value] external_long_double#1 -> external_long_double#4
+FLOWS|REACHING_DEF[value] external_ulong#1 -> external_ulong#2
+FLOWS|REACHING_DEF[value] external_ulong#1 -> external_ulong#4
+FLOWS|REACHING_DEF[value] external_ulong_int#1 -> external_ulong_int#2
+FLOWS|REACHING_DEF[value] external_ulong_int#1 -> external_ulong_int#4
+FLOWS|REACHING_DEF[value] external_ulong_ptr#1 -> external_ulong_ptr#2
+FLOWS|REACHING_DEF[value] external_ulong_ptr#1 -> external_ulong_ptr#4
+FLOWS|REACHING_DEF[value] pointer_local#1 -> pointer_local#2
+FLOWS|REACHING_DEF[value] pointer_local#1 -> pointer_local#7
+FLOWS|REACHING_DEF[value] pointer_local#7 -> pointer_local#10
+FLOWS|REACHING_DEF[value] pointer_local#7 -> pointer_local#2
+FLOWS|REACHING_DEF[value] pointer_local#7 -> pointer_local#5
+FLOWS|REACHING_DEF[value] pointer_local#7 -> pointer_local#6
+FLOWS|REACHING_DEF[value] volatile_pointer#1 -> volatile_pointer#2
+FLOWS|REACHING_DEF[value] volatile_pointer#1 -> volatile_pointer#7
+FLOWS|REACHING_DEF[value] volatile_pointer#7 -> volatile_pointer#10
+FLOWS|REACHING_DEF[value] volatile_pointer#7 -> volatile_pointer#2
+FLOWS|REACHING_DEF[value] volatile_pointer#7 -> volatile_pointer#5
+FLOWS|REACHING_DEF[value] volatile_pointer#7 -> volatile_pointer#6
+FLOWS|REACHING_DEF[vq] qualifier_objects#12 -> qualifier_objects#11
+FLOWS|REACHING_DEF[vq] qualifier_objects#12 -> qualifier_objects#14

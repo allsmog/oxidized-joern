@@ -1,0 +1,12 @@
+{
+  "status": "FROZEN_IMPLEMENTATION_PLAN_PRODUCERS_HELD",
+  "files": {
+    "PLAN.md": "ec19860ef5be0d5350d6bee4899523bddd458e145690dc0242f935510625f29e",
+    "preflight.json": "6a9a9c1e7d6ce10aa841dc2dbabbf8b3423adaae70951f723bc5fd49b441c414",
+    "prepare.py": "02cedc25e67053fe68bb1f237746fa6272c44534962e2d7263a76df5418ea721",
+    "preservation-inventory.json": "bbaf5deb4204acc2c1b996f27a1beaaac0b8abcc1cd421f8924fce1543ce5cd7",
+    "source-map.json": "d4ad5a254fa82009a36b70a77f8a59e69c9fc72d5bd63f2ec9e4c586ede8f2c8"
+  },
+  "fileCount": 5,
+  "baselineCommit": "f235a0f898c4e19fda90998b903f57741b776ec7"
+}

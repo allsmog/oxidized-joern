@@ -1,0 +1,55 @@
+{
+  "case": "nonprimitive_scalar_control",
+  "retainedAnchor": false,
+  "command": [
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/frozen-v1/joern-parity",
+    "--production",
+    "main.c"
+  ],
+  "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/nonprimitive_scalar_control/input",
+  "seconds": 0.005865499988431111,
+  "exitCode": 0,
+  "timeout": false,
+  "error": null,
+  "beforeExact": false,
+  "candidateExact": false,
+  "beforeCandidateIdentical": true,
+  "inputHashes": {
+    "main.c": "30f7610f6251619e111dccd66822d2b620b131a00520a94432f29a23737cbcee"
+  },
+  "counts": {
+    "includingSeparators": {
+      "expected": 182,
+      "before": 162,
+      "candidate": 162,
+      "matchingBefore": 162,
+      "matchingCandidate": 162,
+      "gained": 0,
+      "lost": 0,
+      "lostRecords": {},
+      "gainedRecords": {}
+    },
+    "nonempty": {
+      "expected": 178,
+      "before": 158,
+      "candidate": 158,
+      "matchingBefore": 158,
+      "matchingCandidate": 158,
+      "gained": 0,
+      "lost": 0,
+      "lostRecords": {},
+      "gainedRecords": {}
+    }
+  },
+  "files": {
+    "actual.txt": "2193e03adf6e49107881f79b1006f5787adfa5d2084cd57bf9dc59120045a3bd",
+    "before-candidate.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "before.txt": "2193e03adf6e49107881f79b1006f5787adfa5d2084cd57bf9dc59120045a3bd",
+    "expected-before.diff": "340cce6526020b965801a1afc19ab81cdd676c4d04ac00985f4a5f9dad76b0a4",
+    "expected-candidate.diff": "9a74faa46a83cbddef0a1445a190629e6cebea7918994ea1f37cd836d65e303d",
+    "expected.txt": "d01b88fb2012eb6671de933e8be87c445c1cc7d951aeee509276ddd6373dd34c",
+    "input/main.c": "30f7610f6251619e111dccd66822d2b620b131a00520a94432f29a23737cbcee",
+    "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout.txt": "2193e03adf6e49107881f79b1006f5787adfa5d2084cd57bf9dc59120045a3bd"
+  }
+}

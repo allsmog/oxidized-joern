@@ -1,0 +1,601 @@
+--- live
++++ accepted-tenth
+@@ -133,11 +133,15 @@
+         IDENTIFIER NAME=first_table CODE=first_table TYPE_FULL_NAME=int[3] ORDER=1 ARGUMENT_INDEX=1
+         CALL NAME=<operator>.alloc CODE=first_table[N] = {N} TYPE_FULL_NAME=int[3] METHOD_FULL_NAME=<operator>.alloc ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+           IDENTIFIER NAME=int[3] CODE=int[3] TYPE_FULL_NAME=int[3] ORDER=1 ARGUMENT_INDEX=1
+-          LITERAL CODE=3 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
++          CALL NAME=N CODE=N TYPE_FULL_NAME=int METHOD_FULL_NAME=main.c:N:int(0) SIGNATURE=int(0) ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=INLINED
++            BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
++              LITERAL CODE=3 TYPE_FULL_NAME=int ORDER=1
+       CALL NAME=<operator>.assignment CODE=first_table[N] = {N} TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH
+         IDENTIFIER NAME=first_table CODE=first_table TYPE_FULL_NAME=int[3] ORDER=1 ARGUMENT_INDEX=1
+         CALL NAME=<operator>.arrayInitializer CODE={N} TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.arrayInitializer ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+-          LITERAL CODE=3 TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
++          CALL NAME=N CODE=N TYPE_FULL_NAME=int METHOD_FULL_NAME=main.c:N:int(0) SIGNATURE=int(0) ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=INLINED
++            BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
++              LITERAL CODE=3 TYPE_FULL_NAME=int ORDER=1
+       LOCAL NAME=last_table CODE=static int last_table[N] TYPE_FULL_NAME=int[4] ORDER=4
+       CALL NAME=<operator>.assignment CODE=last_table[N] = {N} TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=5 DISPATCH_TYPE=STATIC_DISPATCH
+         IDENTIFIER NAME=last_table CODE=last_table TYPE_FULL_NAME=int[4] ORDER=1 ARGUMENT_INDEX=1
+@@ -172,7 +176,6 @@
+ 
+ METHOD NAME=<global> CODE=<global> FULL_NAME=nested/table.h:<global> ORDER=1
+   BLOCK TYPE_FULL_NAME=ANY ORDER=1
+-    LOCAL NAME=N CODE=<unknown> N TYPE_FULL_NAME=ANY ORDER=0
+     LOCAL NAME=first_table CODE=static int first_table[N] TYPE_FULL_NAME=int[N] ORDER=1
+     CALL NAME=<operator>.assignment CODE=first_table[N] = {N} TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+       IDENTIFIER NAME=first_table CODE=first_table TYPE_FULL_NAME=int[N] ORDER=1 ARGUMENT_INDEX=1
+@@ -204,11 +207,15 @@
+       IDENTIFIER NAME=first_table CODE=first_table TYPE_FULL_NAME=int[3] ORDER=1 ARGUMENT_INDEX=1
+       CALL NAME=<operator>.alloc CODE=first_table[N] = {N} TYPE_FULL_NAME=int[3] METHOD_FULL_NAME=<operator>.alloc ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+         IDENTIFIER NAME=int[3] CODE=int[3] TYPE_FULL_NAME=int[3] ORDER=1 ARGUMENT_INDEX=1
+-        LITERAL CODE=3 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
++        CALL NAME=N CODE=N TYPE_FULL_NAME=int METHOD_FULL_NAME=main.c:N:int(0) SIGNATURE=int(0) ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=INLINED
++          BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
++            LITERAL CODE=3 TYPE_FULL_NAME=int ORDER=1
+     CALL NAME=<operator>.assignment CODE=first_table[N] = {N} TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH
+       IDENTIFIER NAME=first_table CODE=first_table TYPE_FULL_NAME=int[3] ORDER=1 ARGUMENT_INDEX=1
+       CALL NAME=<operator>.arrayInitializer CODE={N} TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.arrayInitializer ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+-        LITERAL CODE=3 TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
++        CALL NAME=N CODE=N TYPE_FULL_NAME=int METHOD_FULL_NAME=main.c:N:int(0) SIGNATURE=int(0) ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=INLINED
++          BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
++            LITERAL CODE=3 TYPE_FULL_NAME=int ORDER=1
+     LOCAL NAME=last_table CODE=static int last_table[N] TYPE_FULL_NAME=int[4] ORDER=4
+     CALL NAME=<operator>.assignment CODE=last_table[N] = {N} TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=5 DISPATCH_TYPE=STATIC_DISPATCH
+       IDENTIFIER NAME=last_table CODE=last_table TYPE_FULL_NAME=int[4] ORDER=1 ARGUMENT_INDEX=1
+@@ -287,29 +294,29 @@
+ EDGES|ARGUMENT first#5 -> first#7
+ EDGES|ARGUMENT first#7 -> first#8
+ EDGES|ARGUMENT first#7 -> first#9
+-EDGES|ARGUMENT nested/table.h:<global>#11 -> nested/table.h:<global>#12
+-EDGES|ARGUMENT nested/table.h:<global>#4 -> nested/table.h:<global>#5
+-EDGES|ARGUMENT nested/table.h:<global>#4 -> nested/table.h:<global>#6
+-EDGES|ARGUMENT nested/table.h:<global>#6 -> nested/table.h:<global>#7
+-EDGES|ARGUMENT nested/table.h:<global>#9 -> nested/table.h:<global>#10
+-EDGES|ARGUMENT nested/table.h:<global>#9 -> nested/table.h:<global>#11
+-EDGES|ARGUMENT second#10 -> second#11
+-EDGES|ARGUMENT second#10 -> second#12
++EDGES|ARGUMENT nested/table.h:<global>#10 -> nested/table.h:<global>#11
++EDGES|ARGUMENT nested/table.h:<global>#3 -> nested/table.h:<global>#4
++EDGES|ARGUMENT nested/table.h:<global>#3 -> nested/table.h:<global>#5
++EDGES|ARGUMENT nested/table.h:<global>#5 -> nested/table.h:<global>#6
++EDGES|ARGUMENT nested/table.h:<global>#8 -> nested/table.h:<global>#10
++EDGES|ARGUMENT nested/table.h:<global>#8 -> nested/table.h:<global>#9
+ EDGES|ARGUMENT second#12 -> second#13
+-EDGES|ARGUMENT second#15 -> second#16
+-EDGES|ARGUMENT second#15 -> second#17
+-EDGES|ARGUMENT second#17 -> second#18
+-EDGES|ARGUMENT second#17 -> second#19
+-EDGES|ARGUMENT second#22 -> second#23
+-EDGES|ARGUMENT second#22 -> second#24
+-EDGES|ARGUMENT second#24 -> second#25
++EDGES|ARGUMENT second#12 -> second#14
++EDGES|ARGUMENT second#14 -> second#15
++EDGES|ARGUMENT second#19 -> second#20
++EDGES|ARGUMENT second#19 -> second#21
++EDGES|ARGUMENT second#21 -> second#22
++EDGES|ARGUMENT second#21 -> second#23
++EDGES|ARGUMENT second#26 -> second#27
++EDGES|ARGUMENT second#26 -> second#28
+ EDGES|ARGUMENT second#28 -> second#29
+-EDGES|ARGUMENT second#29 -> second#30
+-EDGES|ARGUMENT second#29 -> second#33
+-EDGES|ARGUMENT second#30 -> second#31
+-EDGES|ARGUMENT second#30 -> second#32
++EDGES|ARGUMENT second#32 -> second#33
+ EDGES|ARGUMENT second#33 -> second#34
+-EDGES|ARGUMENT second#33 -> second#35
++EDGES|ARGUMENT second#33 -> second#37
++EDGES|ARGUMENT second#34 -> second#35
++EDGES|ARGUMENT second#34 -> second#36
++EDGES|ARGUMENT second#37 -> second#38
++EDGES|ARGUMENT second#37 -> second#39
+ EDGES|ARGUMENT second#5 -> second#6
+ EDGES|ARGUMENT second#5 -> second#7
+ EDGES|ARGUMENT second#7 -> second#8
+@@ -329,24 +336,26 @@
+ EDGES|CALL first#5 -> <operator>.assignment#0
+ EDGES|CALL first#7 -> <operator>.alloc#0
+ EDGES|CALL first#9 -> main.c:N:int(0)#0
+-EDGES|CALL nested/table.h:<global>#11 -> <operator>.arrayInitializer#0
+-EDGES|CALL nested/table.h:<global>#12 -> nested/table.h:N:int(0)#0
+-EDGES|CALL nested/table.h:<global>#4 -> <operator>.assignment#0
+-EDGES|CALL nested/table.h:<global>#6 -> <operator>.arrayInitializer#0
+-EDGES|CALL nested/table.h:<global>#9 -> <operator>.assignment#0
+-EDGES|CALL second#10 -> <operator>.assignment#0
+-EDGES|CALL second#12 -> <operator>.arrayInitializer#0
+-EDGES|CALL second#15 -> <operator>.assignment#0
+-EDGES|CALL second#17 -> <operator>.alloc#0
+-EDGES|CALL second#19 -> nested/table.h:N:int(0)#0
+-EDGES|CALL second#22 -> <operator>.assignment#0
+-EDGES|CALL second#24 -> <operator>.arrayInitializer#0
+-EDGES|CALL second#25 -> nested/table.h:N:int(0)#0
+-EDGES|CALL second#29 -> <operator>.addition#0
+-EDGES|CALL second#30 -> <operator>.indirectIndexAccess#0
+-EDGES|CALL second#33 -> <operator>.indirectIndexAccess#0
++EDGES|CALL nested/table.h:<global>#10 -> <operator>.arrayInitializer#0
++EDGES|CALL nested/table.h:<global>#11 -> nested/table.h:N:int(0)#0
++EDGES|CALL nested/table.h:<global>#3 -> <operator>.assignment#0
++EDGES|CALL nested/table.h:<global>#5 -> <operator>.arrayInitializer#0
++EDGES|CALL nested/table.h:<global>#8 -> <operator>.assignment#0
++EDGES|CALL second#12 -> <operator>.assignment#0
++EDGES|CALL second#14 -> <operator>.arrayInitializer#0
++EDGES|CALL second#15 -> main.c:N:int(0)#0
++EDGES|CALL second#19 -> <operator>.assignment#0
++EDGES|CALL second#21 -> <operator>.alloc#0
++EDGES|CALL second#23 -> nested/table.h:N:int(0)#0
++EDGES|CALL second#26 -> <operator>.assignment#0
++EDGES|CALL second#28 -> <operator>.arrayInitializer#0
++EDGES|CALL second#29 -> nested/table.h:N:int(0)#0
++EDGES|CALL second#33 -> <operator>.addition#0
++EDGES|CALL second#34 -> <operator>.indirectIndexAccess#0
++EDGES|CALL second#37 -> <operator>.indirectIndexAccess#0
+ EDGES|CALL second#5 -> <operator>.assignment#0
+ EDGES|CALL second#7 -> <operator>.alloc#0
++EDGES|CALL second#9 -> main.c:N:int(0)#0
+ EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+ EDGES|CFG <operator>.addition#0 -> <operator>.addition#5
+ EDGES|CFG <operator>.alloc#0 -> <operator>.alloc#5
+@@ -388,53 +397,57 @@
+ EDGES|CFG first#8 -> first#9
+ EDGES|CFG first#9 -> first#11
+ EDGES|CFG first#9 -> first#7
+-EDGES|CFG main.c:<global>#0 -> main.c:<global>#80
++EDGES|CFG main.c:<global>#0 -> main.c:<global>#84
+ EDGES|CFG main.c:<global>#42 -> second#6
+-EDGES|CFG main.c:<global>#80 -> main.c:<global>#81
+-EDGES|CFG main.c:<global>#81 -> main.c:<global>#82
++EDGES|CFG main.c:<global>#84 -> main.c:<global>#85
++EDGES|CFG main.c:<global>#85 -> main.c:<global>#86
+ EDGES|CFG main.c:N:int(0)#0 -> main.c:N:int(0)#2
+-EDGES|CFG nested/table.h:<global>#0 -> nested/table.h:<global>#5
+-EDGES|CFG nested/table.h:<global>#10 -> nested/table.h:<global>#12
+-EDGES|CFG nested/table.h:<global>#11 -> nested/table.h:<global>#9
+-EDGES|CFG nested/table.h:<global>#12 -> nested/table.h:<global>#11
+-EDGES|CFG nested/table.h:<global>#12 -> nested/table.h:<global>#14
+-EDGES|CFG nested/table.h:<global>#14 -> nested/table.h:<global>#11
+-EDGES|CFG nested/table.h:<global>#4 -> nested/table.h:<global>#10
+-EDGES|CFG nested/table.h:<global>#5 -> nested/table.h:<global>#7
+-EDGES|CFG nested/table.h:<global>#6 -> nested/table.h:<global>#4
+-EDGES|CFG nested/table.h:<global>#7 -> nested/table.h:<global>#6
+-EDGES|CFG nested/table.h:<global>#9 -> nested/table.h:<global>#15
++EDGES|CFG nested/table.h:<global>#0 -> nested/table.h:<global>#4
++EDGES|CFG nested/table.h:<global>#10 -> nested/table.h:<global>#8
++EDGES|CFG nested/table.h:<global>#11 -> nested/table.h:<global>#10
++EDGES|CFG nested/table.h:<global>#11 -> nested/table.h:<global>#13
++EDGES|CFG nested/table.h:<global>#13 -> nested/table.h:<global>#10
++EDGES|CFG nested/table.h:<global>#3 -> nested/table.h:<global>#9
++EDGES|CFG nested/table.h:<global>#4 -> nested/table.h:<global>#6
++EDGES|CFG nested/table.h:<global>#5 -> nested/table.h:<global>#3
++EDGES|CFG nested/table.h:<global>#6 -> nested/table.h:<global>#5
++EDGES|CFG nested/table.h:<global>#8 -> nested/table.h:<global>#14
++EDGES|CFG nested/table.h:<global>#9 -> nested/table.h:<global>#11
+ EDGES|CFG nested/table.h:N:int(0)#0 -> nested/table.h:N:int(0)#2
+ EDGES|CFG repeat.h:<global>#0 -> repeat.h:<global>#2
+-EDGES|CFG second#10 -> second#16
+-EDGES|CFG second#11 -> second#13
+-EDGES|CFG second#12 -> second#10
+-EDGES|CFG second#13 -> second#12
+-EDGES|CFG second#15 -> second#23
+-EDGES|CFG second#16 -> second#18
+-EDGES|CFG second#17 -> second#15
+-EDGES|CFG second#18 -> second#19
+-EDGES|CFG second#19 -> second#17
+-EDGES|CFG second#19 -> second#21
+-EDGES|CFG second#21 -> second#17
+-EDGES|CFG second#22 -> second#31
++EDGES|CFG second#11 -> second#7
++EDGES|CFG second#12 -> second#20
++EDGES|CFG second#13 -> second#15
++EDGES|CFG second#14 -> second#12
++EDGES|CFG second#15 -> second#14
++EDGES|CFG second#15 -> second#17
++EDGES|CFG second#17 -> second#14
++EDGES|CFG second#19 -> second#27
++EDGES|CFG second#20 -> second#22
++EDGES|CFG second#21 -> second#19
++EDGES|CFG second#22 -> second#23
++EDGES|CFG second#23 -> second#21
+ EDGES|CFG second#23 -> second#25
+-EDGES|CFG second#24 -> second#22
+-EDGES|CFG second#25 -> second#24
+-EDGES|CFG second#25 -> second#27
+-EDGES|CFG second#27 -> second#24
+-EDGES|CFG second#28 -> second#36
++EDGES|CFG second#25 -> second#21
++EDGES|CFG second#26 -> second#35
++EDGES|CFG second#27 -> second#29
++EDGES|CFG second#28 -> second#26
+ EDGES|CFG second#29 -> second#28
+-EDGES|CFG second#30 -> second#34
+-EDGES|CFG second#31 -> second#32
+-EDGES|CFG second#32 -> second#30
+-EDGES|CFG second#33 -> second#29
+-EDGES|CFG second#34 -> second#35
+-EDGES|CFG second#35 -> second#33
+-EDGES|CFG second#5 -> second#11
++EDGES|CFG second#29 -> second#31
++EDGES|CFG second#31 -> second#28
++EDGES|CFG second#32 -> second#40
++EDGES|CFG second#33 -> second#32
++EDGES|CFG second#34 -> second#38
++EDGES|CFG second#35 -> second#36
++EDGES|CFG second#36 -> second#34
++EDGES|CFG second#37 -> second#33
++EDGES|CFG second#38 -> second#39
++EDGES|CFG second#39 -> second#37
++EDGES|CFG second#5 -> second#13
+ EDGES|CFG second#6 -> second#8
+ EDGES|CFG second#7 -> second#5
+ EDGES|CFG second#8 -> second#9
++EDGES|CFG second#9 -> second#11
+ EDGES|CFG second#9 -> second#7
+ EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+ EDGES|CONTAINS <operator>.addition#0 -> <operator>.addition#2
+@@ -497,17 +510,17 @@
+ EDGES|CONTAINS first#0 -> first#9
+ EDGES|CONTAINS main.c:<global>#0 -> first#0
+ EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#42
+-EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#79
+-EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#80
+-EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#81
++EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#83
++EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#84
++EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#85
+ EDGES|CONTAINS main.c:<global>#42 -> second#10
+ EDGES|CONTAINS main.c:<global>#42 -> second#11
+ EDGES|CONTAINS main.c:<global>#42 -> second#12
+ EDGES|CONTAINS main.c:<global>#42 -> second#13
++EDGES|CONTAINS main.c:<global>#42 -> second#14
+ EDGES|CONTAINS main.c:<global>#42 -> second#15
+ EDGES|CONTAINS main.c:<global>#42 -> second#16
+ EDGES|CONTAINS main.c:<global>#42 -> second#17
+-EDGES|CONTAINS main.c:<global>#42 -> second#18
+ EDGES|CONTAINS main.c:<global>#42 -> second#19
+ EDGES|CONTAINS main.c:<global>#42 -> second#20
+ EDGES|CONTAINS main.c:<global>#42 -> second#21
+@@ -526,6 +539,10 @@
+ EDGES|CONTAINS main.c:<global>#42 -> second#33
+ EDGES|CONTAINS main.c:<global>#42 -> second#34
+ EDGES|CONTAINS main.c:<global>#42 -> second#35
++EDGES|CONTAINS main.c:<global>#42 -> second#36
++EDGES|CONTAINS main.c:<global>#42 -> second#37
++EDGES|CONTAINS main.c:<global>#42 -> second#38
++EDGES|CONTAINS main.c:<global>#42 -> second#39
+ EDGES|CONTAINS main.c:<global>#42 -> second#5
+ EDGES|CONTAINS main.c:<global>#42 -> second#6
+ EDGES|CONTAINS main.c:<global>#42 -> second#7
+@@ -537,11 +554,11 @@
+ EDGES|CONTAINS nested/table.h:<global>#0 -> nested/table.h:<global>#11
+ EDGES|CONTAINS nested/table.h:<global>#0 -> nested/table.h:<global>#12
+ EDGES|CONTAINS nested/table.h:<global>#0 -> nested/table.h:<global>#13
+-EDGES|CONTAINS nested/table.h:<global>#0 -> nested/table.h:<global>#14
++EDGES|CONTAINS nested/table.h:<global>#0 -> nested/table.h:<global>#3
+ EDGES|CONTAINS nested/table.h:<global>#0 -> nested/table.h:<global>#4
+ EDGES|CONTAINS nested/table.h:<global>#0 -> nested/table.h:<global>#5
+ EDGES|CONTAINS nested/table.h:<global>#0 -> nested/table.h:<global>#6
+-EDGES|CONTAINS nested/table.h:<global>#0 -> nested/table.h:<global>#7
++EDGES|CONTAINS nested/table.h:<global>#0 -> nested/table.h:<global>#8
+ EDGES|CONTAINS nested/table.h:<global>#0 -> nested/table.h:<global>#9
+ EDGES|CONTAINS nested/table.h:N:int(0)#0 -> nested/table.h:N:int(0)#1
+ EDGES|CONTAINS repeat.h:<global>#0 -> repeat.h:<global>#1
+@@ -614,61 +631,64 @@
+ EDGES|EVAL_TYPE first#7 -> T:int[2]
+ EDGES|EVAL_TYPE first#8 -> T:int[2]
+ EDGES|EVAL_TYPE first#9 -> T:int
+-EDGES|EVAL_TYPE main.c:<global>#79 -> T:ANY
+-EDGES|EVAL_TYPE main.c:<global>#80 -> T:first
+-EDGES|EVAL_TYPE main.c:<global>#81 -> T:second
+-EDGES|EVAL_TYPE main.c:<global>#82 -> T:ANY
++EDGES|EVAL_TYPE main.c:<global>#83 -> T:ANY
++EDGES|EVAL_TYPE main.c:<global>#84 -> T:first
++EDGES|EVAL_TYPE main.c:<global>#85 -> T:second
++EDGES|EVAL_TYPE main.c:<global>#86 -> T:ANY
+ EDGES|EVAL_TYPE main.c:N:int(0)#1 -> T:ANY
+ EDGES|EVAL_TYPE main.c:N:int(0)#2 -> T:int
+ EDGES|EVAL_TYPE nested/table.h:<global>#1 -> T:ANY
+-EDGES|EVAL_TYPE nested/table.h:<global>#10 -> T:int[4]
+-EDGES|EVAL_TYPE nested/table.h:<global>#11 -> T:ANY
+-EDGES|EVAL_TYPE nested/table.h:<global>#12 -> T:int
+-EDGES|EVAL_TYPE nested/table.h:<global>#13 -> T:ANY
+-EDGES|EVAL_TYPE nested/table.h:<global>#14 -> T:int
+-EDGES|EVAL_TYPE nested/table.h:<global>#15 -> T:ANY
+-EDGES|EVAL_TYPE nested/table.h:<global>#2 -> T:ANY
+-EDGES|EVAL_TYPE nested/table.h:<global>#3 -> T:int[N]
+-EDGES|EVAL_TYPE nested/table.h:<global>#4 -> T:void
+-EDGES|EVAL_TYPE nested/table.h:<global>#5 -> T:int[N]
++EDGES|EVAL_TYPE nested/table.h:<global>#10 -> T:ANY
++EDGES|EVAL_TYPE nested/table.h:<global>#11 -> T:int
++EDGES|EVAL_TYPE nested/table.h:<global>#12 -> T:ANY
++EDGES|EVAL_TYPE nested/table.h:<global>#13 -> T:int
++EDGES|EVAL_TYPE nested/table.h:<global>#14 -> T:ANY
++EDGES|EVAL_TYPE nested/table.h:<global>#2 -> T:int[N]
++EDGES|EVAL_TYPE nested/table.h:<global>#3 -> T:void
++EDGES|EVAL_TYPE nested/table.h:<global>#4 -> T:int[N]
++EDGES|EVAL_TYPE nested/table.h:<global>#5 -> T:ANY
+ EDGES|EVAL_TYPE nested/table.h:<global>#6 -> T:ANY
+-EDGES|EVAL_TYPE nested/table.h:<global>#7 -> T:ANY
+-EDGES|EVAL_TYPE nested/table.h:<global>#8 -> T:int[4]
+-EDGES|EVAL_TYPE nested/table.h:<global>#9 -> T:void
++EDGES|EVAL_TYPE nested/table.h:<global>#7 -> T:int[4]
++EDGES|EVAL_TYPE nested/table.h:<global>#8 -> T:void
++EDGES|EVAL_TYPE nested/table.h:<global>#9 -> T:int[4]
+ EDGES|EVAL_TYPE nested/table.h:N:int(0)#1 -> T:ANY
+ EDGES|EVAL_TYPE nested/table.h:N:int(0)#2 -> T:int
+ EDGES|EVAL_TYPE repeat.h:<global>#1 -> T:ANY
+ EDGES|EVAL_TYPE repeat.h:<global>#2 -> T:ANY
+ EDGES|EVAL_TYPE second#1 -> T:void
+-EDGES|EVAL_TYPE second#10 -> T:void
+-EDGES|EVAL_TYPE second#11 -> T:int[3]
+-EDGES|EVAL_TYPE second#12 -> T:ANY
+-EDGES|EVAL_TYPE second#13 -> T:int
+-EDGES|EVAL_TYPE second#14 -> T:int[4]
+-EDGES|EVAL_TYPE second#15 -> T:void
+-EDGES|EVAL_TYPE second#16 -> T:int[4]
+-EDGES|EVAL_TYPE second#17 -> T:int[4]
++EDGES|EVAL_TYPE second#10 -> T:ANY
++EDGES|EVAL_TYPE second#11 -> T:int
++EDGES|EVAL_TYPE second#12 -> T:void
++EDGES|EVAL_TYPE second#13 -> T:int[3]
++EDGES|EVAL_TYPE second#14 -> T:ANY
++EDGES|EVAL_TYPE second#15 -> T:int
++EDGES|EVAL_TYPE second#16 -> T:ANY
++EDGES|EVAL_TYPE second#17 -> T:int
+ EDGES|EVAL_TYPE second#18 -> T:int[4]
+-EDGES|EVAL_TYPE second#19 -> T:int
++EDGES|EVAL_TYPE second#19 -> T:void
+ EDGES|EVAL_TYPE second#2 -> T:void
+-EDGES|EVAL_TYPE second#20 -> T:ANY
+-EDGES|EVAL_TYPE second#21 -> T:int
+-EDGES|EVAL_TYPE second#22 -> T:void
+-EDGES|EVAL_TYPE second#23 -> T:int[4]
++EDGES|EVAL_TYPE second#20 -> T:int[4]
++EDGES|EVAL_TYPE second#21 -> T:int[4]
++EDGES|EVAL_TYPE second#22 -> T:int[4]
++EDGES|EVAL_TYPE second#23 -> T:int
+ EDGES|EVAL_TYPE second#24 -> T:ANY
+ EDGES|EVAL_TYPE second#25 -> T:int
+-EDGES|EVAL_TYPE second#26 -> T:ANY
+-EDGES|EVAL_TYPE second#27 -> T:int
+-EDGES|EVAL_TYPE second#29 -> T:ANY
++EDGES|EVAL_TYPE second#26 -> T:void
++EDGES|EVAL_TYPE second#27 -> T:int[4]
++EDGES|EVAL_TYPE second#28 -> T:ANY
++EDGES|EVAL_TYPE second#29 -> T:int
+ EDGES|EVAL_TYPE second#3 -> T:void
+ EDGES|EVAL_TYPE second#30 -> T:ANY
+-EDGES|EVAL_TYPE second#31 -> T:int[3]
+-EDGES|EVAL_TYPE second#32 -> T:int
++EDGES|EVAL_TYPE second#31 -> T:int
+ EDGES|EVAL_TYPE second#33 -> T:ANY
+-EDGES|EVAL_TYPE second#34 -> T:int[4]
+-EDGES|EVAL_TYPE second#35 -> T:int
++EDGES|EVAL_TYPE second#34 -> T:ANY
++EDGES|EVAL_TYPE second#35 -> T:int[3]
+ EDGES|EVAL_TYPE second#36 -> T:int
++EDGES|EVAL_TYPE second#37 -> T:ANY
++EDGES|EVAL_TYPE second#38 -> T:int[4]
++EDGES|EVAL_TYPE second#39 -> T:int
+ EDGES|EVAL_TYPE second#4 -> T:int[3]
++EDGES|EVAL_TYPE second#40 -> T:int
+ EDGES|EVAL_TYPE second#5 -> T:void
+ EDGES|EVAL_TYPE second#6 -> T:int[3]
+ EDGES|EVAL_TYPE second#7 -> T:int[3]
+@@ -705,16 +725,15 @@
+ EDGES|REF first#35 -> first#4
+ EDGES|REF first#38 -> first#18
+ EDGES|REF first#6 -> first#4
+-EDGES|REF main.c:<global>#80 -> first#0
+-EDGES|REF main.c:<global>#81 -> main.c:<global>#42
+-EDGES|REF nested/table.h:<global>#10 -> nested/table.h:<global>#8
+-EDGES|REF nested/table.h:<global>#5 -> nested/table.h:<global>#3
+-EDGES|REF nested/table.h:<global>#7 -> nested/table.h:<global>#2
+-EDGES|REF second#11 -> second#4
+-EDGES|REF second#16 -> second#14
+-EDGES|REF second#23 -> second#14
+-EDGES|REF second#31 -> second#4
+-EDGES|REF second#34 -> second#14
++EDGES|REF main.c:<global>#84 -> first#0
++EDGES|REF main.c:<global>#85 -> main.c:<global>#42
++EDGES|REF nested/table.h:<global>#4 -> nested/table.h:<global>#2
++EDGES|REF nested/table.h:<global>#9 -> nested/table.h:<global>#7
++EDGES|REF second#13 -> second#4
++EDGES|REF second#20 -> second#18
++EDGES|REF second#27 -> second#18
++EDGES|REF second#35 -> second#4
++EDGES|REF second#38 -> second#18
+ EDGES|REF second#6 -> second#4
+ EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+ EDGES|SOURCE_FILE D:ANY -> F:<includes>
+@@ -741,23 +760,22 @@
+ EDGES|SOURCE_FILE nested/table.h:<global>#0 -> F:nested/table.h
+ EDGES|SOURCE_FILE nested/table.h:N:int(0)#0 -> F:nested/table.h
+ EDGES|SOURCE_FILE repeat.h:<global>#0 -> F:repeat.h
+-FLOWS|REACHING_DEF[3] second#13 -> second#12
+-FLOWS|REACHING_DEF[3] second#9 -> second#7
+ FLOWS|REACHING_DEF[<RET>] first#32 -> first#40
+-FLOWS|REACHING_DEF[<RET>] second#28 -> second#36
+-FLOWS|REACHING_DEF[<unknown> N] nested/table.h:<global>#7 -> nested/table.h:<global>#12
+-FLOWS|REACHING_DEF[<unknown> N] nested/table.h:<global>#7 -> nested/table.h:<global>#15
+-FLOWS|REACHING_DEF[<unknown> N] nested/table.h:<global>#7 -> nested/table.h:<global>#6
++FLOWS|REACHING_DEF[<RET>] second#32 -> second#40
++FLOWS|REACHING_DEF[<unknown> N] nested/table.h:<global>#6 -> nested/table.h:<global>#14
++FLOWS|REACHING_DEF[<unknown> N] nested/table.h:<global>#6 -> nested/table.h:<global>#5
+ FLOWS|REACHING_DEF[N] first#15 -> first#14
+ FLOWS|REACHING_DEF[N] first#23 -> first#21
+ FLOWS|REACHING_DEF[N] first#29 -> first#28
+ FLOWS|REACHING_DEF[N] first#29 -> first#40
+ FLOWS|REACHING_DEF[N] first#9 -> first#7
+-FLOWS|REACHING_DEF[N] nested/table.h:<global>#12 -> nested/table.h:<global>#11
+-FLOWS|REACHING_DEF[N] nested/table.h:<global>#12 -> nested/table.h:<global>#15
+-FLOWS|REACHING_DEF[N] second#19 -> second#17
+-FLOWS|REACHING_DEF[N] second#25 -> second#24
+-FLOWS|REACHING_DEF[N] second#25 -> second#36
++FLOWS|REACHING_DEF[N] nested/table.h:<global>#11 -> nested/table.h:<global>#10
++FLOWS|REACHING_DEF[N] nested/table.h:<global>#11 -> nested/table.h:<global>#14
++FLOWS|REACHING_DEF[N] second#15 -> second#14
++FLOWS|REACHING_DEF[N] second#23 -> second#21
++FLOWS|REACHING_DEF[N] second#29 -> second#28
++FLOWS|REACHING_DEF[N] second#29 -> second#40
++FLOWS|REACHING_DEF[N] second#9 -> second#7
+ FLOWS|REACHING_DEF[] <operator>.addition#0 -> <operator>.addition#1
+ FLOWS|REACHING_DEF[] <operator>.addition#0 -> <operator>.addition#4
+ FLOWS|REACHING_DEF[] <operator>.alloc#0 -> <operator>.alloc#1
+@@ -784,39 +802,41 @@
+ FLOWS|REACHING_DEF[] first#0 -> first#9
+ FLOWS|REACHING_DEF[] first#1 -> first#2
+ FLOWS|REACHING_DEF[] first#1 -> first#40
+-FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#80
+-FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#81
++FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#84
++FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#85
+ FLOWS|REACHING_DEF[] main.c:<global>#42 -> second#1
+-FLOWS|REACHING_DEF[] main.c:<global>#42 -> second#13
+-FLOWS|REACHING_DEF[] main.c:<global>#42 -> second#18
+-FLOWS|REACHING_DEF[] main.c:<global>#42 -> second#19
+-FLOWS|REACHING_DEF[] main.c:<global>#42 -> second#21
++FLOWS|REACHING_DEF[] main.c:<global>#42 -> second#11
++FLOWS|REACHING_DEF[] main.c:<global>#42 -> second#15
++FLOWS|REACHING_DEF[] main.c:<global>#42 -> second#17
++FLOWS|REACHING_DEF[] main.c:<global>#42 -> second#22
++FLOWS|REACHING_DEF[] main.c:<global>#42 -> second#23
+ FLOWS|REACHING_DEF[] main.c:<global>#42 -> second#25
+-FLOWS|REACHING_DEF[] main.c:<global>#42 -> second#27
++FLOWS|REACHING_DEF[] main.c:<global>#42 -> second#29
+ FLOWS|REACHING_DEF[] main.c:<global>#42 -> second#31
+-FLOWS|REACHING_DEF[] main.c:<global>#42 -> second#32
+-FLOWS|REACHING_DEF[] main.c:<global>#42 -> second#34
+ FLOWS|REACHING_DEF[] main.c:<global>#42 -> second#35
++FLOWS|REACHING_DEF[] main.c:<global>#42 -> second#36
++FLOWS|REACHING_DEF[] main.c:<global>#42 -> second#38
++FLOWS|REACHING_DEF[] main.c:<global>#42 -> second#39
+ FLOWS|REACHING_DEF[] main.c:<global>#42 -> second#8
+ FLOWS|REACHING_DEF[] main.c:<global>#42 -> second#9
+-FLOWS|REACHING_DEF[] nested/table.h:<global>#0 -> nested/table.h:<global>#12
+-FLOWS|REACHING_DEF[] nested/table.h:<global>#0 -> nested/table.h:<global>#14
+-FLOWS|REACHING_DEF[] nested/table.h:<global>#0 -> nested/table.h:<global>#7
++FLOWS|REACHING_DEF[] nested/table.h:<global>#0 -> nested/table.h:<global>#11
++FLOWS|REACHING_DEF[] nested/table.h:<global>#0 -> nested/table.h:<global>#13
++FLOWS|REACHING_DEF[] nested/table.h:<global>#0 -> nested/table.h:<global>#6
+ FLOWS|REACHING_DEF[] second#1 -> second#2
+-FLOWS|REACHING_DEF[] second#1 -> second#36
++FLOWS|REACHING_DEF[] second#1 -> second#40
+ FLOWS|REACHING_DEF[first_table[0] + last_table[3]] first#33 -> first#32
+ FLOWS|REACHING_DEF[first_table[0] + last_table[3]] first#33 -> first#40
+ FLOWS|REACHING_DEF[first_table[0]] first#34 -> first#33
+ FLOWS|REACHING_DEF[first_table[0]] first#34 -> first#40
+-FLOWS|REACHING_DEF[first_table[2] + last_table[3]] second#29 -> second#28
+-FLOWS|REACHING_DEF[first_table[2] + last_table[3]] second#29 -> second#36
+-FLOWS|REACHING_DEF[first_table[2]] second#30 -> second#29
+-FLOWS|REACHING_DEF[first_table[2]] second#30 -> second#36
++FLOWS|REACHING_DEF[first_table[2] + last_table[3]] second#33 -> second#32
++FLOWS|REACHING_DEF[first_table[2] + last_table[3]] second#33 -> second#40
++FLOWS|REACHING_DEF[first_table[2]] second#34 -> second#33
++FLOWS|REACHING_DEF[first_table[2]] second#34 -> second#40
+ FLOWS|REACHING_DEF[first_table[N] = {N}] first#12 -> first#40
+ FLOWS|REACHING_DEF[first_table[N] = {N}] first#7 -> first#5
+ FLOWS|REACHING_DEF[first_table[N] = {N}] first#7 -> first#6
+-FLOWS|REACHING_DEF[first_table[N] = {N}] nested/table.h:<global>#4 -> nested/table.h:<global>#15
+-FLOWS|REACHING_DEF[first_table[N] = {N}] second#10 -> second#36
++FLOWS|REACHING_DEF[first_table[N] = {N}] nested/table.h:<global>#3 -> nested/table.h:<global>#14
++FLOWS|REACHING_DEF[first_table[N] = {N}] second#12 -> second#40
+ FLOWS|REACHING_DEF[first_table[N] = {N}] second#7 -> second#5
+ FLOWS|REACHING_DEF[first_table[N] = {N}] second#7 -> second#6
+ FLOWS|REACHING_DEF[first_table] first#13 -> first#12
+@@ -824,47 +844,48 @@
+ FLOWS|REACHING_DEF[first_table] first#13 -> first#35
+ FLOWS|REACHING_DEF[first_table] first#13 -> first#40
+ FLOWS|REACHING_DEF[first_table] first#6 -> first#5
+-FLOWS|REACHING_DEF[first_table] nested/table.h:<global>#5 -> nested/table.h:<global>#15
+-FLOWS|REACHING_DEF[first_table] nested/table.h:<global>#5 -> nested/table.h:<global>#4
+-FLOWS|REACHING_DEF[first_table] second#11 -> second#10
+-FLOWS|REACHING_DEF[first_table] second#11 -> second#30
+-FLOWS|REACHING_DEF[first_table] second#11 -> second#31
+-FLOWS|REACHING_DEF[first_table] second#11 -> second#36
++FLOWS|REACHING_DEF[first_table] nested/table.h:<global>#4 -> nested/table.h:<global>#14
++FLOWS|REACHING_DEF[first_table] nested/table.h:<global>#4 -> nested/table.h:<global>#3
++FLOWS|REACHING_DEF[first_table] second#13 -> second#12
++FLOWS|REACHING_DEF[first_table] second#13 -> second#34
++FLOWS|REACHING_DEF[first_table] second#13 -> second#35
++FLOWS|REACHING_DEF[first_table] second#13 -> second#40
+ FLOWS|REACHING_DEF[first_table] second#6 -> second#5
+ FLOWS|REACHING_DEF[int[2]] first#8 -> first#40
+ FLOWS|REACHING_DEF[int[2]] first#8 -> first#7
+ FLOWS|REACHING_DEF[int[2]] first#8 -> first#9
+-FLOWS|REACHING_DEF[int[3]] second#8 -> second#36
++FLOWS|REACHING_DEF[int[3]] second#8 -> second#40
+ FLOWS|REACHING_DEF[int[3]] second#8 -> second#7
++FLOWS|REACHING_DEF[int[3]] second#8 -> second#9
+ FLOWS|REACHING_DEF[int[4]] first#22 -> first#21
+ FLOWS|REACHING_DEF[int[4]] first#22 -> first#23
+ FLOWS|REACHING_DEF[int[4]] first#22 -> first#40
+-FLOWS|REACHING_DEF[int[4]] second#18 -> second#17
+-FLOWS|REACHING_DEF[int[4]] second#18 -> second#19
+-FLOWS|REACHING_DEF[int[4]] second#18 -> second#36
++FLOWS|REACHING_DEF[int[4]] second#22 -> second#21
++FLOWS|REACHING_DEF[int[4]] second#22 -> second#23
++FLOWS|REACHING_DEF[int[4]] second#22 -> second#40
+ FLOWS|REACHING_DEF[last_table[3]] first#37 -> first#33
+ FLOWS|REACHING_DEF[last_table[3]] first#37 -> first#40
+-FLOWS|REACHING_DEF[last_table[3]] second#33 -> second#29
+-FLOWS|REACHING_DEF[last_table[3]] second#33 -> second#36
++FLOWS|REACHING_DEF[last_table[3]] second#37 -> second#33
++FLOWS|REACHING_DEF[last_table[3]] second#37 -> second#40
+ FLOWS|REACHING_DEF[last_table[N] = {N}] first#21 -> first#19
+ FLOWS|REACHING_DEF[last_table[N] = {N}] first#21 -> first#20
+ FLOWS|REACHING_DEF[last_table[N] = {N}] first#26 -> first#40
+-FLOWS|REACHING_DEF[last_table[N] = {N}] nested/table.h:<global>#9 -> nested/table.h:<global>#15
+-FLOWS|REACHING_DEF[last_table[N] = {N}] second#17 -> second#15
+-FLOWS|REACHING_DEF[last_table[N] = {N}] second#17 -> second#16
+-FLOWS|REACHING_DEF[last_table[N] = {N}] second#22 -> second#36
++FLOWS|REACHING_DEF[last_table[N] = {N}] nested/table.h:<global>#8 -> nested/table.h:<global>#14
++FLOWS|REACHING_DEF[last_table[N] = {N}] second#21 -> second#19
++FLOWS|REACHING_DEF[last_table[N] = {N}] second#21 -> second#20
++FLOWS|REACHING_DEF[last_table[N] = {N}] second#26 -> second#40
+ FLOWS|REACHING_DEF[last_table] first#20 -> first#19
+ FLOWS|REACHING_DEF[last_table] first#27 -> first#26
+ FLOWS|REACHING_DEF[last_table] first#27 -> first#37
+ FLOWS|REACHING_DEF[last_table] first#27 -> first#38
+ FLOWS|REACHING_DEF[last_table] first#27 -> first#40
+-FLOWS|REACHING_DEF[last_table] nested/table.h:<global>#10 -> nested/table.h:<global>#15
+-FLOWS|REACHING_DEF[last_table] nested/table.h:<global>#10 -> nested/table.h:<global>#9
+-FLOWS|REACHING_DEF[last_table] second#16 -> second#15
+-FLOWS|REACHING_DEF[last_table] second#23 -> second#22
+-FLOWS|REACHING_DEF[last_table] second#23 -> second#33
+-FLOWS|REACHING_DEF[last_table] second#23 -> second#34
+-FLOWS|REACHING_DEF[last_table] second#23 -> second#36
++FLOWS|REACHING_DEF[last_table] nested/table.h:<global>#9 -> nested/table.h:<global>#14
++FLOWS|REACHING_DEF[last_table] nested/table.h:<global>#9 -> nested/table.h:<global>#8
++FLOWS|REACHING_DEF[last_table] second#20 -> second#19
++FLOWS|REACHING_DEF[last_table] second#27 -> second#26
++FLOWS|REACHING_DEF[last_table] second#27 -> second#37
++FLOWS|REACHING_DEF[last_table] second#27 -> second#38
++FLOWS|REACHING_DEF[last_table] second#27 -> second#40
+ FLOWS|REACHING_DEF[p1] <operator>.addition#1 -> <operator>.addition#3
+ FLOWS|REACHING_DEF[p1] <operator>.addition#1 -> <operator>.addition#5
+ FLOWS|REACHING_DEF[p1] <operator>.alloc#1 -> <operator>.alloc#3
+@@ -888,13 +909,13 @@
+ FLOWS|REACHING_DEF[{N}] first#28 -> first#26
+ FLOWS|REACHING_DEF[{N}] first#28 -> first#27
+ FLOWS|REACHING_DEF[{N}] first#28 -> first#40
+-FLOWS|REACHING_DEF[{N}] nested/table.h:<global>#11 -> nested/table.h:<global>#10
+-FLOWS|REACHING_DEF[{N}] nested/table.h:<global>#11 -> nested/table.h:<global>#15
+-FLOWS|REACHING_DEF[{N}] nested/table.h:<global>#11 -> nested/table.h:<global>#9
+-FLOWS|REACHING_DEF[{N}] nested/table.h:<global>#6 -> nested/table.h:<global>#4
+-FLOWS|REACHING_DEF[{N}] nested/table.h:<global>#6 -> nested/table.h:<global>#5
+-FLOWS|REACHING_DEF[{N}] second#12 -> second#10
+-FLOWS|REACHING_DEF[{N}] second#12 -> second#11
+-FLOWS|REACHING_DEF[{N}] second#24 -> second#22
+-FLOWS|REACHING_DEF[{N}] second#24 -> second#23
+-FLOWS|REACHING_DEF[{N}] second#24 -> second#36
++FLOWS|REACHING_DEF[{N}] nested/table.h:<global>#10 -> nested/table.h:<global>#14
++FLOWS|REACHING_DEF[{N}] nested/table.h:<global>#10 -> nested/table.h:<global>#8
++FLOWS|REACHING_DEF[{N}] nested/table.h:<global>#10 -> nested/table.h:<global>#9
++FLOWS|REACHING_DEF[{N}] nested/table.h:<global>#5 -> nested/table.h:<global>#3
++FLOWS|REACHING_DEF[{N}] nested/table.h:<global>#5 -> nested/table.h:<global>#4
++FLOWS|REACHING_DEF[{N}] second#14 -> second#12
++FLOWS|REACHING_DEF[{N}] second#14 -> second#13
++FLOWS|REACHING_DEF[{N}] second#28 -> second#26
++FLOWS|REACHING_DEF[{N}] second#28 -> second#27
++FLOWS|REACHING_DEF[{N}] second#28 -> second#40

@@ -1,0 +1,118 @@
+METHOD NAME=<global> CODE=<global> FULL_NAME=<includes>:<global> ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1
+  TYPE_DECL NAME=Record CODE=struct Record {\n    unsigned short *value;\n} FULL_NAME=Record ORDER=1
+    MEMBER NAME=value CODE=*value TYPE_FULL_NAME=shortunsigned* ORDER=1
+  METHOD NAME=ordinary CODE=int ordinary(void) {\n    return 7;\n} FULL_NAME=ordinary SIGNATURE=int(void) ORDER=1
+    METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    BLOCK CODE={\n    return 7;\n} TYPE_FULL_NAME=void ORDER=2
+      RETURN CODE=return 7; ORDER=1
+        LITERAL CODE=7 TYPE_FULL_NAME=int ORDER=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+    TYPE_REF CODE=struct Record {\n    unsigned short *value;\n} TYPE_FULL_NAME=Record ORDER=1
+    METHOD_REF CODE=ordinary TYPE_FULL_NAME=ordinary METHOD_FULL_NAME=ordinary ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=ordinary CODE=int ordinary(void) {\n    return 7;\n} FULL_NAME=ordinary SIGNATURE=int(void) ORDER=1
+  METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  BLOCK CODE={\n    return 7;\n} TYPE_FULL_NAME=void ORDER=2
+    RETURN CODE=return 7; ORDER=1
+      LITERAL CODE=7 TYPE_FULL_NAME=int ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+
+NODES|META_DATA LANGUAGE=NEWC
+NODES|FILE NAME=<includes> ORDER=1
+NODES|FILE NAME=<unknown> ORDER=0
+NODES|FILE NAME=main.c ORDER=0
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<global> FILENAME=<unknown> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<includes>:<global> FILENAME=<includes> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|NAMESPACE NAME=<global>
+NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=Record FULL_NAME=Record CODE=struct Record {\n    unsigned short *value;\n} AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=<global> FULL_NAME=main.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=ordinary FULL_NAME=ordinary CODE=ordinary AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=shortunsigned* FULL_NAME=shortunsigned* CODE=shortunsigned* IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+NODES|TYPE NAME=Record FULL_NAME=Record TYPE_DECL_FULL_NAME=Record
+NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+NODES|TYPE NAME=ordinary FULL_NAME=ordinary TYPE_DECL_FULL_NAME=ordinary
+NODES|TYPE NAME=shortunsigned* FULL_NAME=shortunsigned* TYPE_DECL_FULL_NAME=shortunsigned*
+NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+EDGES|ARGUMENT ordinary#4 -> ordinary#5
+EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+EDGES|CFG main.c:<global>#0 -> main.c:<global>#11
+EDGES|CFG main.c:<global>#11 -> main.c:<global>#12
+EDGES|CFG main.c:<global>#12 -> main.c:<global>#13
+EDGES|CFG main.c:<global>#3 -> ordinary#5
+EDGES|CFG ordinary#4 -> ordinary#6
+EDGES|CFG ordinary#5 -> ordinary#4
+EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+EDGES|CONTAINS D:main.c:<global> -> D:ordinary
+EDGES|CONTAINS D:main.c:<global> -> main.c:<global>#0
+EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+EDGES|CONTAINS F:<includes> -> D:ANY
+EDGES|CONTAINS F:<includes> -> D:int
+EDGES|CONTAINS F:<includes> -> D:shortunsigned*
+EDGES|CONTAINS F:<includes> -> D:void
+EDGES|CONTAINS F:main.c -> D:main.c:<global>
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#1
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#10
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#11
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#12
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#3
+EDGES|CONTAINS main.c:<global>#3 -> ordinary#3
+EDGES|CONTAINS main.c:<global>#3 -> ordinary#4
+EDGES|CONTAINS main.c:<global>#3 -> ordinary#5
+EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+EDGES|EVAL_TYPE main.c:<global>#10 -> T:ANY
+EDGES|EVAL_TYPE main.c:<global>#11 -> T:Record
+EDGES|EVAL_TYPE main.c:<global>#12 -> T:ordinary
+EDGES|EVAL_TYPE main.c:<global>#13 -> T:ANY
+EDGES|EVAL_TYPE main.c:<global>#2 -> T:shortunsigned*
+EDGES|EVAL_TYPE ordinary#1 -> T:void
+EDGES|EVAL_TYPE ordinary#2 -> T:void
+EDGES|EVAL_TYPE ordinary#3 -> T:void
+EDGES|EVAL_TYPE ordinary#5 -> T:int
+EDGES|EVAL_TYPE ordinary#6 -> T:int
+EDGES|PARAMETER_LINK ordinary#1 -> ordinary#2
+EDGES|REF NB:<global> -> NS:<global>
+EDGES|REF NB:<includes>:<global> -> NS:<global>
+EDGES|REF NB:main.c:<global> -> NS:<global>
+EDGES|REF T:ANY -> D:ANY
+EDGES|REF T:Record -> main.c:<global>#1
+EDGES|REF T:int -> D:int
+EDGES|REF T:ordinary -> D:ordinary
+EDGES|REF T:shortunsigned* -> D:shortunsigned*
+EDGES|REF T:void -> D:void
+EDGES|REF main.c:<global>#12 -> main.c:<global>#3
+EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+EDGES|SOURCE_FILE D:ANY -> F:<includes>
+EDGES|SOURCE_FILE D:int -> F:<includes>
+EDGES|SOURCE_FILE D:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE D:ordinary -> F:main.c
+EDGES|SOURCE_FILE D:shortunsigned* -> F:<includes>
+EDGES|SOURCE_FILE D:void -> F:<includes>
+EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
+EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>
+EDGES|SOURCE_FILE NB:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#0 -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#1 -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#3 -> F:main.c
+FLOWS|REACHING_DEF[7] ordinary#5 -> ordinary#4
+FLOWS|REACHING_DEF[<RET>] ordinary#4 -> ordinary#6
+FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#11
+FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#12
+FLOWS|REACHING_DEF[] main.c:<global>#3 -> ordinary#1
+FLOWS|REACHING_DEF[] main.c:<global>#3 -> ordinary#4
+FLOWS|REACHING_DEF[] main.c:<global>#3 -> ordinary#5
+FLOWS|REACHING_DEF[] ordinary#1 -> ordinary#2
+FLOWS|REACHING_DEF[] ordinary#1 -> ordinary#6

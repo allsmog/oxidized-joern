@@ -2651,11 +2651,7 @@ impl Ctx<'_> {
             if f.kind() != "field_declaration" {
                 continue;
             }
-            let ty = normalize_type(
-                &f.child_by_field_name("type")
-                    .map(|t| text(t, b).to_string())
-                    .unwrap_or("ANY".into()),
-            );
+            let ty = declaration_type(f, b, TypeRole::Declaration);
             for d in named_children(f) {
                 if matches!(
                     d.kind(),

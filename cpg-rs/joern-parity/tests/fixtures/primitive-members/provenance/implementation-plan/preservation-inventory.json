@@ -1,0 +1,1926 @@
+{
+  "status": "SOURCE_AND_REFERENCE_BINDINGS_ONLY_NO_REPLAYS",
+  "baseline": "f235a0f898c4e19fda90998b903f57741b776ec7",
+  "groups": [
+    {
+      "family": "primitive-roles",
+      "caseCount": 39,
+      "test": "cpg-rs/joern-parity/tests/primitive_roles.rs",
+      "testSha256": "6161c7dc80df3522f95809646edf189482d4d03d6b6b2b6a6dd2174e4bec5665",
+      "plannedCompleteReplay": true,
+      "cases": [
+        {
+          "case": "callback_parameters",
+          "root": "cpg-rs/joern-parity/tests/fixtures/primitive-roles/callback_parameters",
+          "inputs": {
+            "callback_parameters.c": "cf0722b166c99a61f8a2a824c25c2e8918315cf677fd273366244b3d2b664f6b"
+          },
+          "referenceSha256": "26c2ce35f6f3b85b64d3f80ef28676d1e4ba12297f2f7840a3de05623ba248fa"
+        },
+        {
+          "case": "for_callbacks",
+          "root": "cpg-rs/joern-parity/tests/fixtures/primitive-roles/for_callbacks",
+          "inputs": {
+            "for_callbacks.c": "f57bf81e0127188170cf658370caa3ebfa61b3a920413a2909237c852ac34dc6"
+          },
+          "referenceSha256": "07b72772135aa54bd81d5fce6b8dcd5de1bd4eaeda975b97c84c60626f8191fa"
+        },
+        {
+          "case": "paren_calls",
+          "root": "cpg-rs/joern-parity/tests/fixtures/primitive-roles/paren_calls",
+          "inputs": {
+            "paren_calls.c": "7e81a67d3f46ef9c1bbfafc0ed3f6cfe24a7a3a37a9301faefbb4344b9c84bad"
+          },
+          "referenceSha256": "b727f977f7737b385a47053063f2eda93b2d7617f44de57bdd0c2d1a6a2dd3d1"
+        },
+        {
+          "case": "pointers",
+          "root": "cpg-rs/joern-parity/tests/fixtures/primitive-roles/pointers",
+          "inputs": {
+            "roles.c": "8b52910e41f4447540379545b37e3cff7e9ac74e7a4bed69875653eee7de8d68"
+          },
+          "referenceSha256": "0dce087fe040583e0f11f36924f11431fd024946103aed0a10dcb194bf876e4c"
+        },
+        {
+          "case": "type_00",
+          "root": "cpg-rs/joern-parity/tests/fixtures/primitive-roles/type_00",
+          "inputs": {
+            "types.c": "4ad38d45c23370aadc4c8939d2f079b9d805fc98f67320c66dc22b6cfeb5d19e"
+          },
+          "referenceSha256": "1a45713ea9dc32e4125cc1af240e23310763c910dac502fa39322bc971eb70c7"
+        },
+        {
+          "case": "type_01",
+          "root": "cpg-rs/joern-parity/tests/fixtures/primitive-roles/type_01",
+          "inputs": {
+            "types.c": "b1a869626a1c3222d50863e62f9bd99a3c5e9370ce6f580858dc1828e219e414"
+          },
+          "referenceSha256": "579d526e7065ed6aa08510ecefac50400c30279db9a88ecb8ce6e40bd116e324"
+        },
+        {
+          "case": "type_02",
+          "root": "cpg-rs/joern-parity/tests/fixtures/primitive-roles/type_02",
+          "inputs": {
+            "types.c": "e3b9b0ff20da0f9bb4578aedb579a9f1b1402877a52f6f81d6e346a28007b9d2"
+          },
+          "referenceSha256": "14c987ed362246603807ab0957e554e1bfbb478e2e2fdd0d790a7f8ea71b2d43"
+        },
+        {
+          "case": "type_03",
+          "root": "cpg-rs/joern-parity/tests/fixtures/primitive-roles/type_03",
+          "inputs": {
+            "types.c": "02a765d171f535614ec1fa1532700776ea4cc593aea6997404bb07f6a95a3243"
+          },
+          "referenceSha256": "c15b39b0bc37af96540bfb520adde7c6fcb2ea34b8b746182578fa4163a3c940"
+        },
+        {
+          "case": "type_04",
+          "root": "cpg-rs/joern-parity/tests/fixtures/primitive-roles/type_04",
+          "inputs": {
+            "types.c": "718ca4e627ca152b387d6570e9f3ec67eb967100345a69d6197996eeeea4c2e0"
+          },
+          "referenceSha256": "793fcf43d12e157f15a469c60e9c75f785d28f828d1b4bddd47defd9c8560037"
+        },
+        {
+          "case": "type_05",
+          "root": "cpg-rs/joern-parity/tests/fixtures/primitive-roles/type_05",
+          "inputs": {
+            "types.c": "7c5ef52d9447a22c577ae1de93096eb24e33672173e0a54ef64ff8211671ee07"
+          },
+          "referenceSha256": "896dfb20eef546bb45922ec9e514191a0fafaff92bb8364fada2298cf8e31af5"
+        },
+        {
+          "case": "type_06",
+          "root": "cpg-rs/joern-parity/tests/fixtures/primitive-roles/type_06",
+          "inputs": {
+            "types.c": "655308e9cadd0e8d2f8d36fa9cc9a864c2d5fba5eb01aa8fa0a6dd2c2fca508a"
+          },
+          "referenceSha256": "5dba5cb03a858c698b44137192d9e78250916f3ae3c73bf6b2430aabd4b621f7"
+        },
+        {
+          "case": "type_07",
+          "root": "cpg-rs/joern-parity/tests/fixtures/primitive-roles/type_07",
+          "inputs": {
+            "types.c": "598291e01c27588b481f2c95d21f2a83068ad1401ae481b59fb9b8cec2616d6c"
+          },
+          "referenceSha256": "ffbe2f12e67b2d80573ed0c449cf4ff5169cc7619da2afefc9cbddbdcae66206"
+        },
+        {
+          "case": "type_08",
+          "root": "cpg-rs/joern-parity/tests/fixtures/primitive-roles/type_08",
+          "inputs": {
+            "types.c": "f9367b98e40382e15c1b44857692ec85d2dd6f6a830251da8976af74001c47c6"
+          },
+          "referenceSha256": "9d8e6edf2c27856e5d6640e13f7e283d6d141de8899eab9034100307510b3c12"
+        },
+        {
+          "case": "type_09",
+          "root": "cpg-rs/joern-parity/tests/fixtures/primitive-roles/type_09",
+          "inputs": {
+            "types.c": "69275af051f46fea951ae1464134f8fe73cd63a5b08dd868eb5afea36aadb736"
+          },
+          "referenceSha256": "d747d7d498ce1f2c31ba7806f4eee043f758cda63375ddfc35f6786a40b5a17b"
+        },
+        {
+          "case": "type_10",
+          "root": "cpg-rs/joern-parity/tests/fixtures/primitive-roles/type_10",
+          "inputs": {
+            "types.c": "7fa0c2365d9b85e85f9a4c3ddff7c12673c4141e9e6484eeebdd93949f04342d"
+          },
+          "referenceSha256": "c6aa0b4d039257cb552170db1466549dad25f8d5c52540151492e19ea8d90960"
+        },
+        {
+          "case": "type_11",
+          "root": "cpg-rs/joern-parity/tests/fixtures/primitive-roles/type_11",
+          "inputs": {
+            "types.c": "a8b51a11f3790feaaab59c77a9aa669e91309b5dd82a68bf8cf5bf514f50b6d6"
+          },
+          "referenceSha256": "4c92d1a476ae4ca6a943b1ff106c1adc51cc5f8eda25fa60ffec5678ac4108d8"
+        },
+        {
+          "case": "type_12",
+          "root": "cpg-rs/joern-parity/tests/fixtures/primitive-roles/type_12",
+          "inputs": {
+            "types.c": "9c3820605e907da9987a8d9cb39acda3fa9eb1f6f37b270ac31912122994cd7a"
+          },
+          "referenceSha256": "3960a5f1491287733fe6f8c3f171e687d3123e993745ae076749f71fbf0cee58"
+        },
+        {
+          "case": "type_13",
+          "root": "cpg-rs/joern-parity/tests/fixtures/primitive-roles/type_13",
+          "inputs": {
+            "types.c": "cfea20c30fa2a626f221c62e42dbf1521e3583ca0922f0d528c04eb7c57487a2"
+          },
+          "referenceSha256": "fe46f5a5140a8c05d53e61c3952a55981b16ecb1ad2ba7ff10fa2191cf451e37"
+        },
+        {
+          "case": "type_14",
+          "root": "cpg-rs/joern-parity/tests/fixtures/primitive-roles/type_14",
+          "inputs": {
+            "types.c": "eb1470b846102d88144a9acfc1c090fbe24c0cd84ca83041a7cb031d6ea7e659"
+          },
+          "referenceSha256": "bcb386ee3602e16207235f6050de03930ea020e534b1e1611c298571f5ef897c"
+        },
+        {
+          "case": "type_15",
+          "root": "cpg-rs/joern-parity/tests/fixtures/primitive-roles/type_15",
+          "inputs": {
+            "types.c": "ba57dd206d3c7666f46b7ec94e0d9c9b90f254e5231d282e517961e2c21344a0"
+          },
+          "referenceSha256": "5ba7504105fc02fd0efa99a1399710efc6b6f7bda6ccbf17300ec754c94828d4"
+        },
+        {
+          "case": "type_16",
+          "root": "cpg-rs/joern-parity/tests/fixtures/primitive-roles/type_16",
+          "inputs": {
+            "types.c": "5d8a2f6fbe7f1db23692276aee0fb7902dfa46a0fe73b3a364f8f0f0473e3209"
+          },
+          "referenceSha256": "92fced393601cbb07180e0e1a4cc57ebb70f854d88e39a5b06ca74ab57ec548f"
+        },
+        {
+          "case": "type_17",
+          "root": "cpg-rs/joern-parity/tests/fixtures/primitive-roles/type_17",
+          "inputs": {
+            "types.c": "79f2470dbc42a85be7fe8d7cab0342450b54b0aa6cf82512f6c7484000864a86"
+          },
+          "referenceSha256": "35bd090d973948a9135c858205711361cc4f9edf1689e064bf9e9e878ad87889"
+        },
+        {
+          "case": "type_18",
+          "root": "cpg-rs/joern-parity/tests/fixtures/primitive-roles/type_18",
+          "inputs": {
+            "types.c": "d88cd8e226c8618a844ac4509d685a575bfe36dafab35bc33dbf50c5f154a495"
+          },
+          "referenceSha256": "6975564057bc026cc156447779d8c0b6a094f5a2df79ef89795e3aefd3efdb4a"
+        },
+        {
+          "case": "type_19",
+          "root": "cpg-rs/joern-parity/tests/fixtures/primitive-roles/type_19",
+          "inputs": {
+            "types.c": "9cc899f63b0cb121f8856b408fb61ed1b92fcd2a4af74e16ce17a3b1a7b5c89f"
+          },
+          "referenceSha256": "4a9773520b026765ccc0db63b1534d4c42c153125c7405ef97f1569dad746b8b"
+        },
+        {
+          "case": "type_20",
+          "root": "cpg-rs/joern-parity/tests/fixtures/primitive-roles/type_20",
+          "inputs": {
+            "types.c": "be708cf2153dfbba900ffd377eb3de986f0ca4e0ed8f5cdf8261d300370f7d57"
+          },
+          "referenceSha256": "cee7298ab4acf353122acb3cf18c89d287709d5c523a57ce71d7ac27622cbba8"
+        },
+        {
+          "case": "type_21",
+          "root": "cpg-rs/joern-parity/tests/fixtures/primitive-roles/type_21",
+          "inputs": {
+            "types.c": "806e6c0b018448f582b699231dbcaef446d08da4784328a89d9d15d0a29e3349"
+          },
+          "referenceSha256": "cfdf8a49b2d678bc4e20b182574ba8d9a42842d6d16dd45fcdd25225145ee513"
+        },
+        {
+          "case": "type_22",
+          "root": "cpg-rs/joern-parity/tests/fixtures/primitive-roles/type_22",
+          "inputs": {
+            "types.c": "dbe2dd28e2612633d91eae6924700c63d03f622fae413b3c70c357817d1f2de6"
+          },
+          "referenceSha256": "da958998d73998733bba34be75c58fd567be5b6c480ee5cacfb9f412bedb3f2a"
+        },
+        {
+          "case": "type_23",
+          "root": "cpg-rs/joern-parity/tests/fixtures/primitive-roles/type_23",
+          "inputs": {
+            "types.c": "9313e83873d66a91990ee0de20ab1430b30c0cd06c894539dab20a79d1168d4b"
+          },
+          "referenceSha256": "022c97c7fad43bce5e3eb7a1e6fa9e83c600f33b06c074f6121d0d4bd8dd0b6c"
+        },
+        {
+          "case": "type_24",
+          "root": "cpg-rs/joern-parity/tests/fixtures/primitive-roles/type_24",
+          "inputs": {
+            "types.c": "b1bc3d6b178ac6b7066abc069ada4b2bb43a1cd86723f0f8e3615aa656a4a79d"
+          },
+          "referenceSha256": "0fc27d17e94f26458790e568689dff6d6478547ed7846aace0c963c5c983c5da"
+        },
+        {
+          "case": "type_25",
+          "root": "cpg-rs/joern-parity/tests/fixtures/primitive-roles/type_25",
+          "inputs": {
+            "types.c": "fa57c5a39a1904a27868c844b02077f7737187bc315ee44c36f513eb9bcfc029"
+          },
+          "referenceSha256": "736707858594a410161ee429c75d76038b0be7fb7fc25375554ff870b10a8c4f"
+        },
+        {
+          "case": "type_26",
+          "root": "cpg-rs/joern-parity/tests/fixtures/primitive-roles/type_26",
+          "inputs": {
+            "types.c": "9eab37efb4ae8d63d55ac2ce6183fd28f9645f6caf21abe8cfbb410e29f3b178"
+          },
+          "referenceSha256": "f845a0defe4f1530b9cb4234fd835182deda75fba30edd073a816a6aa96e55d0"
+        },
+        {
+          "case": "type_27",
+          "root": "cpg-rs/joern-parity/tests/fixtures/primitive-roles/type_27",
+          "inputs": {
+            "types.c": "b18671f1c2769507dd427a6041a3d6321476a977b3924f1aac5e2c50406a1d1e"
+          },
+          "referenceSha256": "b0d3698fc7926a784fa931ed1881c4a2422a33c34bfc39f8589bf61fd568efc7"
+        },
+        {
+          "case": "type_28",
+          "root": "cpg-rs/joern-parity/tests/fixtures/primitive-roles/type_28",
+          "inputs": {
+            "types.c": "22290e8aae9a4505bd6942f74bbd55bbc9d0c96733c5518240eb231abb2bf3e3"
+          },
+          "referenceSha256": "d7b911340b3a6005b30451fd83f77fc118d899fbc7ccf41dbfe675d390644166"
+        },
+        {
+          "case": "type_29",
+          "root": "cpg-rs/joern-parity/tests/fixtures/primitive-roles/type_29",
+          "inputs": {
+            "types.c": "636440087c7283fb518d51149a8786b57d1636af4c2921ecd9357b43e0ba4cc1"
+          },
+          "referenceSha256": "c4f1607462f1ac8a78ffd1de65f3eb2fc32024e0117660c252e0c4bac3218bfb"
+        },
+        {
+          "case": "type_30",
+          "root": "cpg-rs/joern-parity/tests/fixtures/primitive-roles/type_30",
+          "inputs": {
+            "types.c": "4b7f0daed9c63538a116c1abf2f3eb8460f52294cf043e80cc97fc261fbfa758"
+          },
+          "referenceSha256": "fe701fba7bfc768fb8eb3f9bf090a01f9607556dc5c96af56eff9ad5ae80cb22"
+        },
+        {
+          "case": "type_31",
+          "root": "cpg-rs/joern-parity/tests/fixtures/primitive-roles/type_31",
+          "inputs": {
+            "types.c": "07b573082b7a49c1495b38761cf98f07f3058a08a2d49550e43c149e343c4af0"
+          },
+          "referenceSha256": "fe54901ea2b251fc3e193fe77e423b9309cce0979713a9bf4ad77b11049667b7"
+        },
+        {
+          "case": "type_32",
+          "root": "cpg-rs/joern-parity/tests/fixtures/primitive-roles/type_32",
+          "inputs": {
+            "types.c": "c33360413170a5dc470f67601c109c209b6a339042706f9fd7f0ba85eee3b5ac"
+          },
+          "referenceSha256": "fb0e834c632c403ef1d84e954cf3331269d7162508a08aca56171ac650762dde"
+        },
+        {
+          "case": "type_33",
+          "root": "cpg-rs/joern-parity/tests/fixtures/primitive-roles/type_33",
+          "inputs": {
+            "types.c": "483b9375abb159907d40acb6703a66a3bcdd7cc6c42238d548a7d62a5edca96c"
+          },
+          "referenceSha256": "676073584c40def69bd68b4cdc1a4fb518b73a07b8354110073ca5510217f3d5"
+        },
+        {
+          "case": "type_34",
+          "root": "cpg-rs/joern-parity/tests/fixtures/primitive-roles/type_34",
+          "inputs": {
+            "types.c": "22435c4902cb3547641836b454a3fa2cdb2ef40b3b869b9cbbe713b56d4ef2b7"
+          },
+          "referenceSha256": "a148e9d999b5ded60d58ce44cfcbd1870398b44ea24e24cb221b71b9888b1d99"
+        }
+      ]
+    },
+    {
+      "family": "typedef-aggregates",
+      "caseCount": 26,
+      "test": "cpg-rs/joern-parity/tests/typedef_aggregates.rs",
+      "testSha256": "3f3234f0ff17aab45caaf248083f0c4bf097420c2f81b32e8e5d4503596529b8",
+      "plannedCompleteReplay": true,
+      "cases": [
+        {
+          "case": "alias_existing",
+          "root": "cpg-rs/joern-parity/tests/fixtures/typedef-aggregates/cases/alias_existing",
+          "inputs": {
+            "input/main.c": "9517ec2ffbbe6d98b98a62b6d17df5a0b1b4dc345ad92f19881d818eaf905c6b"
+          },
+          "referenceSha256": "ef0d0af07bbbe8f0e6a992921f1199023958df6168482973efecb68b883fd7f1"
+        },
+        {
+          "case": "anonymous_array",
+          "root": "cpg-rs/joern-parity/tests/fixtures/typedef-aggregates/cases/anonymous_array",
+          "inputs": {
+            "input/main.c": "b6bb688943c3eb309bb26a0f5688995df8cb094fd3c9495a615bbfb8551d52e6"
+          },
+          "referenceSha256": "3536871f30014840613df828730ac6141ffdfd5bc631f3f390eada51986748bd"
+        },
+        {
+          "case": "anonymous_macro",
+          "root": "cpg-rs/joern-parity/tests/fixtures/typedef-aggregates/cases/anonymous_macro",
+          "inputs": {
+            "input/main.c": "6ca1f41e4021addcd186d82230c01418a938c5f718daca2a4cbcc11c32c917ed"
+          },
+          "referenceSha256": "be964debe12d9fd0a482bc50d97fa1079c6ea58ac1d74c7ab43cdfd42df14038"
+        },
+        {
+          "case": "anonymous_plain",
+          "root": "cpg-rs/joern-parity/tests/fixtures/typedef-aggregates/cases/anonymous_plain",
+          "inputs": {
+            "input/main.c": "e5980248a22a2e7ff776dc94a90e7caf04da1340b3c4ede6be704f384bbc7ccb"
+          },
+          "referenceSha256": "72a792ddc0947fccd868c7e249dd8e2d42602cff5dde808dc4d8344e4040d92d"
+        },
+        {
+          "case": "anonymous_union",
+          "root": "cpg-rs/joern-parity/tests/fixtures/typedef-aggregates/cases/anonymous_union",
+          "inputs": {
+            "input/main.c": "ddc9146ccddd661dc6df1d10c96618678361a2870c06baca6f21b7148289f706"
+          },
+          "referenceSha256": "c54f1a44a93680e15cddda7678ceccb246c560cab9613c32b8c13aad99c6c29c"
+        },
+        {
+          "case": "array_alias",
+          "root": "cpg-rs/joern-parity/tests/fixtures/typedef-aggregates/cases/array_alias",
+          "inputs": {
+            "input/main.c": "be9a6da2e7be96a9615327f52f17b32f7672fa76646879ff3ab90461363eac0d"
+          },
+          "referenceSha256": "6c3710d2dc5ec003bd64ecfc8653e75023588edb323c5c34f124c971ba3d7075"
+        },
+        {
+          "case": "conditional_aggregate",
+          "root": "cpg-rs/joern-parity/tests/fixtures/typedef-aggregates/cases/conditional_aggregate",
+          "inputs": {
+            "input/main.c": "24f66cb5db42840192fe281785ce4d2eb806679ebb644296971fc9b267f4265e"
+          },
+          "referenceSha256": "ffc53d68fbdb5753734311057ca243953f193f69b7f426baf304650d38b259eb"
+        },
+        {
+          "case": "dimension_parenthesized",
+          "root": "cpg-rs/joern-parity/tests/fixtures/typedef-aggregates/cases/dimension_parenthesized",
+          "inputs": {
+            "input/main.c": "a74027814ab468a241d929e4f0aa8716ac79a8a0043f1dbd48aa01e5280e10fb"
+          },
+          "referenceSha256": "4d4fbe1095c82a00313b55daf7ab95ff6292985ae9a9ae33d048b18fbff65a00"
+        },
+        {
+          "case": "function_macro_size",
+          "root": "cpg-rs/joern-parity/tests/fixtures/typedef-aggregates/cases/function_macro_size",
+          "inputs": {
+            "input/main.c": "d8abb444f37a1c65ea6815018c95626c2f68a9148743d8d7e58e14b7ae948396"
+          },
+          "referenceSha256": "152b2edb28c2853ec14e9ebf97b68c56a6bb2d9c4d768a7213976acd7481c486"
+        },
+        {
+          "case": "header_size",
+          "root": "cpg-rs/joern-parity/tests/fixtures/typedef-aggregates/cases/header_size",
+          "inputs": {
+            "input/defs.h": "38352b080a97afbdaa86fcb4b7857cc510d5591f1b410d8fe2c6f3db2d0818ac",
+            "input/main.c": "29c75511592b142f30e082c8a8325afda6130a49c3008094b9ded99d4c62c572"
+          },
+          "referenceSha256": "9c1add22ea5b389cb4490629e42e12824d11422d0466f134ba871e27bd137401"
+        },
+        {
+          "case": "lua_rn",
+          "root": "cpg-rs/joern-parity/tests/fixtures/typedef-aggregates/cases/lua_rn",
+          "inputs": {
+            "input/main.c": "542649bdbc0dcf804345efa1dfacc907abb20298ea9b93a6d31e518992f6f616"
+          },
+          "referenceSha256": "af03cea1dbadde38e9a6886e936262d0a6713e64d92c9c2918e88a28f28bc76c"
+        },
+        {
+          "case": "macro_expression",
+          "root": "cpg-rs/joern-parity/tests/fixtures/typedef-aggregates/cases/macro_expression",
+          "inputs": {
+            "input/main.c": "998e490bf508660fd9a0614584c09e0ccb8d7e46fe8af682a3716b69ec723c8d"
+          },
+          "referenceSha256": "d1ecf57c666f3faad922cc2670ac6f7d57ffbeac804d838426bc8f17313a00c8"
+        },
+        {
+          "case": "macro_parenthesized",
+          "root": "cpg-rs/joern-parity/tests/fixtures/typedef-aggregates/cases/macro_parenthesized",
+          "inputs": {
+            "input/main.c": "d9258f00cbd1c0faedfd5400d02264251733ff258680cb4d20bba058c70b9083"
+          },
+          "referenceSha256": "985f88b7d8befa30d170d06ba3e62dcf401848905eb9b53cf0a46f53b98ae985"
+        },
+        {
+          "case": "macro_source_order",
+          "root": "cpg-rs/joern-parity/tests/fixtures/typedef-aggregates/cases/macro_source_order",
+          "inputs": {
+            "input/main.c": "f89f5ce83e368f09085c760eda05a3f76840957d4a8d11c0b19fc29f097ff888"
+          },
+          "referenceSha256": "28ddf592e8c40c4c50bd2c845208a3939c46ba755ffbe3c0b6962e90ed5d44a9"
+        },
+        {
+          "case": "multidimensional",
+          "root": "cpg-rs/joern-parity/tests/fixtures/typedef-aggregates/cases/multidimensional",
+          "inputs": {
+            "input/main.c": "cf16c2a69f5905415daad7b8a549291a955707dd626c3272f6b89ff7464f53db"
+          },
+          "referenceSha256": "3e43205e25177d0a10547bcc71ab03362d3a712f93e0a5e6bcb19adecda55300"
+        },
+        {
+          "case": "multiple_aliases",
+          "root": "cpg-rs/joern-parity/tests/fixtures/typedef-aggregates/cases/multiple_aliases",
+          "inputs": {
+            "input/main.c": "b5b8c2817619c72189c7e415fe8020300b7a054af88af13ef90faec886481bdb"
+          },
+          "referenceSha256": "6a0c24dc58aa83ae98f184acacb9dc7ed3fc6e9251b095adc624f6a3c99dfd72"
+        },
+        {
+          "case": "named_macro",
+          "root": "cpg-rs/joern-parity/tests/fixtures/typedef-aggregates/cases/named_macro",
+          "inputs": {
+            "input/main.c": "c63586cf41ad14c2d58ff7cf4feb3e4f41daad217ece95f316b9be3dc656e0d1"
+          },
+          "referenceSha256": "5a82a55c60bf8ad688e51894b44d681143479078041d825a10ea358115a4d918"
+        },
+        {
+          "case": "named_multiple",
+          "root": "cpg-rs/joern-parity/tests/fixtures/typedef-aggregates/cases/named_multiple",
+          "inputs": {
+            "input/main.c": "9e3436122576facfa5c28fdd37eaff0e26cc28fa1cbdb3a82d153d5cdcebafc2"
+          },
+          "referenceSha256": "efc87aea3087e5af10ab9eb479fe1301be26677ffef1ee8af4f41cee8e403746"
+        },
+        {
+          "case": "named_pointer",
+          "root": "cpg-rs/joern-parity/tests/fixtures/typedef-aggregates/cases/named_pointer",
+          "inputs": {
+            "input/main.c": "8f513561519c1387922cdbcfbb7583f47f3ee40c279c60154fe511148f5f82a0"
+          },
+          "referenceSha256": "5118a4688bfd95d7a888222229e5b5449c3657d73958d011b10b0f2b050288ff"
+        },
+        {
+          "case": "ordinary_multidimensional",
+          "root": "cpg-rs/joern-parity/tests/fixtures/typedef-aggregates/cases/ordinary_multidimensional",
+          "inputs": {
+            "input/main.c": "be71c0d59b9cd3b04f6aa16ae0413f3a7126fac32a5334e4cda390f00b10ba52"
+          },
+          "referenceSha256": "63448934006ae36f4fb080740c16b13814db7ae517eac306a83efb927845cbdc"
+        },
+        {
+          "case": "plain_alias",
+          "root": "cpg-rs/joern-parity/tests/fixtures/typedef-aggregates/cases/plain_alias",
+          "inputs": {
+            "input/main.c": "5d55c663d44936896894ed51c9e9b9492556a32b1ef1a3a549785f2d1b100a1e"
+          },
+          "referenceSha256": "89b8766e2391e28c9735c10cdc41cc46ccb204ffa36603cbf371b25a1e454110"
+        },
+        {
+          "case": "pointer_alias",
+          "root": "cpg-rs/joern-parity/tests/fixtures/typedef-aggregates/cases/pointer_alias",
+          "inputs": {
+            "input/main.c": "1a497ea02761740dc0939a694e1a46b0a9449f5863a2aaae41d2829441208bb9"
+          },
+          "referenceSha256": "3f111d65d91c6b714d39a9a9b58b728db68f24ccdf9c2556810e65877c8cc65f"
+        },
+        {
+          "case": "pointer_first",
+          "root": "cpg-rs/joern-parity/tests/fixtures/typedef-aggregates/cases/pointer_first",
+          "inputs": {
+            "input/main.c": "d9b5acbe9daccd8bc12df20c4b4f30cc425578f1d218e08921401f5ce05607b5"
+          },
+          "referenceSha256": "a1c2921c156cfc063dbaffaeac18479babb4e32f232e9b3a179aa42542265403"
+        },
+        {
+          "case": "qualified_pointer_member",
+          "root": "cpg-rs/joern-parity/tests/fixtures/typedef-aggregates/cases/qualified_pointer_member",
+          "inputs": {
+            "input/main.c": "1e71dbc35677fe8d38f6725c9f7c963ba6db5a498425cbfcfb70d9da3c3f8b83"
+          },
+          "referenceSha256": "220b120b67da211c8baf960c54d8f96b665b43706c5789ecf27ee846127b364f"
+        },
+        {
+          "case": "same_tag_alias",
+          "root": "cpg-rs/joern-parity/tests/fixtures/typedef-aggregates/cases/same_tag_alias",
+          "inputs": {
+            "input/main.c": "06642f089eb85dd2156002473fb59f5d1afbf040e48a5c671da5126648836dad"
+          },
+          "referenceSha256": "5c759e6d279d77583d49ba22796af70a235792e13d3ae3d13d6006d1803ea20d"
+        },
+        {
+          "case": "tagged_array",
+          "root": "cpg-rs/joern-parity/tests/fixtures/typedef-aggregates/cases/tagged_array",
+          "inputs": {
+            "input/main.c": "76fc3aa2f6527262758bc1d67d89ae473cf0a4ebbbc89f45d13fb5ac255d5d70"
+          },
+          "referenceSha256": "a3189e40ce8b847df7e510b47ffcd791b624e117c8bf0954bc5372b02cfb9881"
+        }
+      ]
+    },
+    {
+      "family": "array-initializers",
+      "caseCount": 69,
+      "test": "cpg-rs/joern-parity/tests/array_initializers.rs",
+      "testSha256": "c831fc85ed9fd97a16620399c4f5bdef1c78e0c75a874228a0f54ce12bb0e4e2",
+      "plannedCompleteReplay": true,
+      "cases": [
+        {
+          "case": "array_flows",
+          "root": "cpg-rs/joern-parity/tests/fixtures/array-initializers/cases/array_flows",
+          "inputs": {
+            "arrays.c": "305a102f2af6eb6f9160871ee591041f6f00c46dbd415882660e93b0aeccced9"
+          },
+          "referenceSha256": "3b5b5446ca350536608ec821d192dce249aee93d62f4536b3e024a18e4963d85"
+        },
+        {
+          "case": "array_parameter",
+          "root": "cpg-rs/joern-parity/tests/fixtures/array-initializers/cases/array_parameter",
+          "inputs": {
+            "arrays.c": "a8055a05949d73c2f125fdf8235b91bc24ca73966f32abefd5dc5a0922c72fb7"
+          },
+          "referenceSha256": "430f1b18523767b4ab30b03c65dc7fafbe4103cb5d1b817539e3211e5a566fae"
+        },
+        {
+          "case": "callback_array",
+          "root": "cpg-rs/joern-parity/tests/fixtures/array-initializers/cases/callback_array",
+          "inputs": {
+            "arrays.c": "ed63239fd350a6725f3884e0b56cd89ce5656a241237877d2a186a3c8cc0c710"
+          },
+          "referenceSha256": "2129f9afc500d2f34690a7040c611bcbf26e0f30c63e03c95b7b90247d59f00a"
+        },
+        {
+          "case": "commented_brace",
+          "root": "cpg-rs/joern-parity/tests/fixtures/array-initializers/cases/commented_brace",
+          "inputs": {
+            "arrays.c": "2416d28feec6897a020c3e522683f888b552ceed7e1cabca6549d52d5be4839a"
+          },
+          "referenceSha256": "47894ed27a45bb19784aacaa3573086eaa119232ecd6983ff9f56added899d18"
+        },
+        {
+          "case": "compound_literal",
+          "root": "cpg-rs/joern-parity/tests/fixtures/array-initializers/cases/compound_literal",
+          "inputs": {
+            "arrays.c": "3045e6659cf050c5e9100e51743ccbad45160691bd18333eef9f2e2967e4e75f"
+          },
+          "referenceSha256": "71460f346e561608ac33c01da8d89f0ef6aa2941594fbbb5aca80d3294ddd933"
+        },
+        {
+          "case": "concat_string",
+          "root": "cpg-rs/joern-parity/tests/fixtures/array-initializers/cases/concat_string",
+          "inputs": {
+            "arrays.c": "6b36453b517e284c8fa4519a24d414a86650f643f2a39d7744cf4f73dd1d2d6d"
+          },
+          "referenceSha256": "c25ec0145ac6dcc84efeabed0bcd4939e5a6811a65002e9681c4f9b2f33e3539"
+        },
+        {
+          "case": "for_multiple",
+          "root": "cpg-rs/joern-parity/tests/fixtures/array-initializers/cases/for_multiple",
+          "inputs": {
+            "arrays.c": "2dc32dca6bb14d71bc7187f37c909fa989fa2de5eb6d1f3d1a4326522bdfbb18"
+          },
+          "referenceSha256": "36533c0305c12412c1c951a99310e3d923d45e0f70ed1be77a9b3c0e32fad17f"
+        },
+        {
+          "case": "for_unsized",
+          "root": "cpg-rs/joern-parity/tests/fixtures/array-initializers/cases/for_unsized",
+          "inputs": {
+            "arrays.c": "cae996ca0a88ae1fcfe0ed2b7075f28edd4cce932d6ac6dbda20e02b95e59501"
+          },
+          "referenceSha256": "cf7055b965f534fde8d0b45a78cf0c7cebd35c92c3e12edfeb485fe7098b75cd"
+        },
+        {
+          "case": "global_char_brace",
+          "root": "cpg-rs/joern-parity/tests/fixtures/array-initializers/cases/global_char_brace",
+          "inputs": {
+            "arrays.c": "5ab88417e0ec252881d6f6514eca13b4c04b8ee5e34bd4e8b68cc2c7fe7055fe"
+          },
+          "referenceSha256": "a90b195a48b224551cda89db0007de6e9c8264fb894c27c85bef00008b3ae0d1"
+        },
+        {
+          "case": "global_char_sized_string",
+          "root": "cpg-rs/joern-parity/tests/fixtures/array-initializers/cases/global_char_sized_string",
+          "inputs": {
+            "arrays.c": "4d94e8d6c70b47d078fb012099637ff826f3e38f27ffd539e1e4b5ccbedb544d"
+          },
+          "referenceSha256": "87fa6a309a6686299599fd7d64dd79cc8762cda03d2eec42f624963a478d2c0f"
+        },
+        {
+          "case": "global_char_unsized_string",
+          "root": "cpg-rs/joern-parity/tests/fixtures/array-initializers/cases/global_char_unsized_string",
+          "inputs": {
+            "arrays.c": "9940334b1c22e405bd9e8dff846c89da1c5912688a70d0a89d9da612d10e9fd8"
+          },
+          "referenceSha256": "9491d545cbe5df55e66e2de0baa20d353cf300c651a47f27a284f48f283e1ec8"
+        },
+        {
+          "case": "global_const_brace",
+          "root": "cpg-rs/joern-parity/tests/fixtures/array-initializers/cases/global_const_brace",
+          "inputs": {
+            "arrays.c": "2097a2e7e3514f01e1b2703ec72e04508579d45baa6c9bd32156b57f237a6efd"
+          },
+          "referenceSha256": "70faceeaca24ab0aa3435aca07550225018289c60a39382f215f55df9bfb92ca"
+        },
+        {
+          "case": "global_designated",
+          "root": "cpg-rs/joern-parity/tests/fixtures/array-initializers/cases/global_designated",
+          "inputs": {
+            "arrays.c": "8893e2edf544f50517a3da8aa585f4e2165b859bb1badc3334dd0a5b21edfaf7"
+          },
+          "referenceSha256": "4e8c1bc1eedb774e781a4094eb2e417160b3ff5e28158a1cf6f2f854f1c342c3"
+        },
+        {
+          "case": "global_double_brace",
+          "root": "cpg-rs/joern-parity/tests/fixtures/array-initializers/cases/global_double_brace",
+          "inputs": {
+            "arrays.c": "bf009954857013262e4b0ecf62b6b076d2c35806c9040da92c50311749be5b18"
+          },
+          "referenceSha256": "29bee7642b31a39d0e1b1f452c88cac96cf4955ff5577fa2093fe92cf6b3a351"
+        },
+        {
+          "case": "global_empty_brace",
+          "root": "cpg-rs/joern-parity/tests/fixtures/array-initializers/cases/global_empty_brace",
+          "inputs": {
+            "arrays.c": "c8e0ed99d8e1e590452cbfc18cc60d86e48d49159b02a0f3b9e43728c78af564"
+          },
+          "referenceSha256": "fc6d0295804de4b4d81fb476522cfe5e7102d20db3fe0688ea024ef716a3d2f6"
+        },
+        {
+          "case": "global_flat_multidim",
+          "root": "cpg-rs/joern-parity/tests/fixtures/array-initializers/cases/global_flat_multidim",
+          "inputs": {
+            "arrays.c": "84881f54a747b10f1d654cb1e82ed254f0f815e23e1b04edb3ed92f441a495f8"
+          },
+          "referenceSha256": "15bb0b6584a43b265757e2074692c93f337198b6e37b60486cc12f5de07399ac"
+        },
+        {
+          "case": "global_int_sized_brace",
+          "root": "cpg-rs/joern-parity/tests/fixtures/array-initializers/cases/global_int_sized_brace",
+          "inputs": {
+            "arrays.c": "ce1166e664a64c6f6a9578b75ff83c964b006b26b604123b3880ecda6088f6c1"
+          },
+          "referenceSha256": "af7354f5125e3c43a3701604f547b62367d2b4e6808be09eb273faf80d6fb5a5"
+        },
+        {
+          "case": "global_int_unsized_brace",
+          "root": "cpg-rs/joern-parity/tests/fixtures/array-initializers/cases/global_int_unsized_brace",
+          "inputs": {
+            "arrays.c": "3d3d15a3068911fbfe3fbf8466ce4f24c40c92491bbdfd73315dfef4750bef7e"
+          },
+          "referenceSha256": "5b69886c40b1b86b0454ba528a3da5e30d8e5bf280bbda17dc334a700dbcb202"
+        },
+        {
+          "case": "global_long_brace",
+          "root": "cpg-rs/joern-parity/tests/fixtures/array-initializers/cases/global_long_brace",
+          "inputs": {
+            "arrays.c": "f58a57af3b32154d3d07935c76103616fe0697c51e45de14387383efe4df013f"
+          },
+          "referenceSha256": "730fa706d5f209bb2fbcc260539c3c33ba0e139591267d21ea04568986af92bd"
+        },
+        {
+          "case": "global_nested_brace",
+          "root": "cpg-rs/joern-parity/tests/fixtures/array-initializers/cases/global_nested_brace",
+          "inputs": {
+            "arrays.c": "77d947bea676eead843986eec893822c928b525a246b3e53c1c37d4ea54369f4"
+          },
+          "referenceSha256": "c01a02ce028caa5829cf1de7db72bac816e78ccdca1998576b65d5cd2df6b136"
+        },
+        {
+          "case": "global_nested_designated",
+          "root": "cpg-rs/joern-parity/tests/fixtures/array-initializers/cases/global_nested_designated",
+          "inputs": {
+            "arrays.c": "a13c7a9a9113ed26740bae8ff341b5e62f40aef8466a7271736442f7f458384a"
+          },
+          "referenceSha256": "e3ad235065ec542183df1052a7b940435400d1891b0038e98ca418875767946a"
+        },
+        {
+          "case": "global_pointer_elements",
+          "root": "cpg-rs/joern-parity/tests/fixtures/array-initializers/cases/global_pointer_elements",
+          "inputs": {
+            "arrays.c": "2b2e5a7fb9aabd77e78f12a58a771a6e449de2d64fddf4aa749559eb2e7ec4f8"
+          },
+          "referenceSha256": "f4904b50be684cef54bbcd77ae2e4edfb3eab5f190dc0f6c1c418db2b95fd5fb"
+        },
+        {
+          "case": "global_sized_noinit",
+          "root": "cpg-rs/joern-parity/tests/fixtures/array-initializers/cases/global_sized_noinit",
+          "inputs": {
+            "arrays.c": "a84fa74bffb754e960365e4a6246c790ba3e00d83ec1a7f7ebc86507f559cbd3"
+          },
+          "referenceSha256": "cc290318003fef661790431744196dcdfc703c8f8a2ab4feb97b8300d964b4d2"
+        },
+        {
+          "case": "global_string_rows",
+          "root": "cpg-rs/joern-parity/tests/fixtures/array-initializers/cases/global_string_rows",
+          "inputs": {
+            "arrays.c": "fb8930432d9456acf9d3410e70367ba9f7b8cee4c7772b73c5902edacbfaf759"
+          },
+          "referenceSha256": "83f662915ac995977a482b85e8795e0562100449f8f5f265e9976a6b246b014f"
+        },
+        {
+          "case": "global_trailing_brace",
+          "root": "cpg-rs/joern-parity/tests/fixtures/array-initializers/cases/global_trailing_brace",
+          "inputs": {
+            "arrays.c": "6e5e4e20c382e1222c67000075981ea88878b4d3f53ebf895694792e14d2a69a"
+          },
+          "referenceSha256": "94dbda1ff40a54d8d04c68be8921799f167e9f160241231c162545aab793dd54"
+        },
+        {
+          "case": "global_uchar_brace",
+          "root": "cpg-rs/joern-parity/tests/fixtures/array-initializers/cases/global_uchar_brace",
+          "inputs": {
+            "arrays.c": "920875638c725050fd511a038638836d0fda4bb2cb1770fc6c26db0831197fb5"
+          },
+          "referenceSha256": "f2069b318d1050b77be034dd7f7b8203dd790aa9636265dbba40bc6e215aa5a7"
+        },
+        {
+          "case": "global_unsized_multidim",
+          "root": "cpg-rs/joern-parity/tests/fixtures/array-initializers/cases/global_unsized_multidim",
+          "inputs": {
+            "arrays.c": "a2caafaa153d05c32e2c8af16176e37d0d806d5814e0f5270d53879ad234541b"
+          },
+          "referenceSha256": "10f1e755c1c77fc0ada7497d6e7df31ab820c307fb3faaf8dd6fd6d31cb8221a"
+        },
+        {
+          "case": "global_unsized_noinit",
+          "root": "cpg-rs/joern-parity/tests/fixtures/array-initializers/cases/global_unsized_noinit",
+          "inputs": {
+            "arrays.c": "20608f1fe00a233aeb9da8ec6897154e00cbcfe164247aab3e0f9d414098cfd6"
+          },
+          "referenceSha256": "f0d48a7a7bf1abf997bdc2459d1d8dfdb470873c6e28819f0b06b77bf1bbc4bb"
+        },
+        {
+          "case": "local_char_brace",
+          "root": "cpg-rs/joern-parity/tests/fixtures/array-initializers/cases/local_char_brace",
+          "inputs": {
+            "arrays.c": "d1af30a7251303f7f9aebc2a9e0e7c1a8d30bd3180ddb82ce5fb239bd46abe8c"
+          },
+          "referenceSha256": "cbfb1ff6ffe2aefc86f05c72d869c248117ec8dc2ff5ae88dfc46e9cae3865c1"
+        },
+        {
+          "case": "local_char_sized_string",
+          "root": "cpg-rs/joern-parity/tests/fixtures/array-initializers/cases/local_char_sized_string",
+          "inputs": {
+            "arrays.c": "e66525744e1dfbd00dcc9fae65fb40ce2b0068c2a2623bc19b588189d7598c4f"
+          },
+          "referenceSha256": "c3242350bc6b7d4d7fce7fac4fc92507fae4a3155b0a9dd2e221cefe263cb04b"
+        },
+        {
+          "case": "local_char_unsized_string",
+          "root": "cpg-rs/joern-parity/tests/fixtures/array-initializers/cases/local_char_unsized_string",
+          "inputs": {
+            "arrays.c": "21b43cd7e098aeca3f6fc493b745ce4cd754c85a8efc358e5a476e3da27207b6"
+          },
+          "referenceSha256": "3496629dfd3c63f4fc30e9990fdfd240eb9fe29eb3ebfb1ac8897909b6407914"
+        },
+        {
+          "case": "local_const_brace",
+          "root": "cpg-rs/joern-parity/tests/fixtures/array-initializers/cases/local_const_brace",
+          "inputs": {
+            "arrays.c": "66fc1adce049a31153f93504339e7fb79d95c17de3fb15c9bd22831921c72508"
+          },
+          "referenceSha256": "4b908ed1b3d729f93574f9210537c6100baec4f25fae349fa818df34cf644147"
+        },
+        {
+          "case": "local_designated",
+          "root": "cpg-rs/joern-parity/tests/fixtures/array-initializers/cases/local_designated",
+          "inputs": {
+            "arrays.c": "c160486de83791a51569e91598e718db8bec7f22f4c7c3eb41ea3ef61ddc036d"
+          },
+          "referenceSha256": "8ad34fa79a65807c27d0cbd1427adf50b384e6e28e05c5f321352e66517a0628"
+        },
+        {
+          "case": "local_double_brace",
+          "root": "cpg-rs/joern-parity/tests/fixtures/array-initializers/cases/local_double_brace",
+          "inputs": {
+            "arrays.c": "38b2dd9a65648ca0199a456621b839fd9e6d1bab9d04bbf0f0ac8a632574c10f"
+          },
+          "referenceSha256": "d9fcd49a8b03ce9aabc8324b71ad92530f27f1040927b04935ad00b3ca9a623a"
+        },
+        {
+          "case": "local_empty_brace",
+          "root": "cpg-rs/joern-parity/tests/fixtures/array-initializers/cases/local_empty_brace",
+          "inputs": {
+            "arrays.c": "b3a5572bf9060793bd2ae95113551daee9aff9e0a70301605b931ad3543b74cc"
+          },
+          "referenceSha256": "6211aa8fc459cf99b89005d96464b26b3a9cbebb58a1607c5c9505cd957b3ed3"
+        },
+        {
+          "case": "local_flat_multidim",
+          "root": "cpg-rs/joern-parity/tests/fixtures/array-initializers/cases/local_flat_multidim",
+          "inputs": {
+            "arrays.c": "2e41c3a52c6e354ff160f3b16bb658b30f44c0c591d199c994b7fb9bd02f53d7"
+          },
+          "referenceSha256": "452e286891339f103f78ec3e0bd64bd010b73aa63d870dcf5fa39ee7a6a02e8e"
+        },
+        {
+          "case": "local_int_sized_brace",
+          "root": "cpg-rs/joern-parity/tests/fixtures/array-initializers/cases/local_int_sized_brace",
+          "inputs": {
+            "arrays.c": "e3015267592fddd4f9bca97155bf9fb71ae745b8e951f7b81a05a38af6cbcb3e"
+          },
+          "referenceSha256": "638b9cab63abf5e6370eaae613145fa9c70b8180f612a5c67011fa9974986528"
+        },
+        {
+          "case": "local_int_unsized_brace",
+          "root": "cpg-rs/joern-parity/tests/fixtures/array-initializers/cases/local_int_unsized_brace",
+          "inputs": {
+            "arrays.c": "b64e029b72b98d082ae423c28a3a82d751f5f089a46126d75e6da551b5ed1c76"
+          },
+          "referenceSha256": "eab46829ad3a9e8be40d0e91ff13a60e1a5ccbd3ff87ac301b5b0ed7c077412c"
+        },
+        {
+          "case": "local_long_brace",
+          "root": "cpg-rs/joern-parity/tests/fixtures/array-initializers/cases/local_long_brace",
+          "inputs": {
+            "arrays.c": "1c78dd1bd7ae72dacfb36478c84eae4cb217cfd60ddc2be7b41d52da32d77356"
+          },
+          "referenceSha256": "8f1f60906dd10633abc6236a9274069703bc527991ddffc167ded2a1b5749340"
+        },
+        {
+          "case": "local_multiple",
+          "root": "cpg-rs/joern-parity/tests/fixtures/array-initializers/cases/local_multiple",
+          "inputs": {
+            "arrays.c": "a9e765c3d5c00f5e2cebf2e2ed0e4eb9c2d3a7203cfb5a76564c3bea4ad41ea5"
+          },
+          "referenceSha256": "b1206d6aa3178bb6b7dcd1fb7ebc12fc247d9ae3937f5617c6ce4a3cd5dc734d"
+        },
+        {
+          "case": "local_nested_brace",
+          "root": "cpg-rs/joern-parity/tests/fixtures/array-initializers/cases/local_nested_brace",
+          "inputs": {
+            "arrays.c": "082ac7f87bcd366fe1baa64c84e7fa1fafdb2e930e4e51127e6156493ca49af6"
+          },
+          "referenceSha256": "ec63980fa9cb76696098c5f79362be9c640225265e3a7bdadc4569de45cc6bf4"
+        },
+        {
+          "case": "local_nested_designated",
+          "root": "cpg-rs/joern-parity/tests/fixtures/array-initializers/cases/local_nested_designated",
+          "inputs": {
+            "arrays.c": "137b9208b333181d50b4d7da56c10983cc2fba872120720ee8701d0b5b8f5607"
+          },
+          "referenceSha256": "ae01254ed3c55b82c136e724b4c155c17d718b80249a066f85cd006c0967ca6a"
+        },
+        {
+          "case": "local_pointer_elements",
+          "root": "cpg-rs/joern-parity/tests/fixtures/array-initializers/cases/local_pointer_elements",
+          "inputs": {
+            "arrays.c": "6822233bf8b0f1ecad4bac15202a83d5720d7104586a865b7b93104a349c66cf"
+          },
+          "referenceSha256": "6d0b8e5d9af19e19109fb4b317b7edcf6ac1eaf8ca0dfeb937c07acf8b4893a0"
+        },
+        {
+          "case": "local_pointer_to_array",
+          "root": "cpg-rs/joern-parity/tests/fixtures/array-initializers/cases/local_pointer_to_array",
+          "inputs": {
+            "arrays.c": "80537b68c8f3e334d6948111e4013eb24d850f0c412315570728f61d14a2feb3"
+          },
+          "referenceSha256": "703654a43f033e575c8bf8db3c69d0f1cdb1b86644e962d99540a3fab7da26d9"
+        },
+        {
+          "case": "local_pointer_to_array_init",
+          "root": "cpg-rs/joern-parity/tests/fixtures/array-initializers/cases/local_pointer_to_array_init",
+          "inputs": {
+            "arrays.c": "24a1913fa2e1aaa694abc30ba4df0ef0bec2d2fd643ed98e80e3d8c0d2dce509"
+          },
+          "referenceSha256": "724fe7b1d785e445b6d9ed73c4259027ff169a614b43d25524dcecb25124ed6c"
+        },
+        {
+          "case": "local_range",
+          "root": "cpg-rs/joern-parity/tests/fixtures/array-initializers/cases/local_range",
+          "inputs": {
+            "arrays.c": "c67b08d5be1cf8bfe49168ad880387e28110b8e394a0d1ed4489053845ca68ec"
+          },
+          "referenceSha256": "a526bdf539875b82ffc76e57720dbb55462ff5c741c58d11e7662b79833c4666"
+        },
+        {
+          "case": "local_size_expr",
+          "root": "cpg-rs/joern-parity/tests/fixtures/array-initializers/cases/local_size_expr",
+          "inputs": {
+            "arrays.c": "6f0719a523e72b49fc5c0c27cab7c931c48e857e43cefdf5a95bff6e954791e2"
+          },
+          "referenceSha256": "20c03204f5596e76ebb5fa037ad680d9d459b0b13adb38686314a3f7d8e93b88"
+        },
+        {
+          "case": "local_sized_noinit",
+          "root": "cpg-rs/joern-parity/tests/fixtures/array-initializers/cases/local_sized_noinit",
+          "inputs": {
+            "arrays.c": "f8a21a8a7adc47aefd3ec43e3c2fb61691f83cc84a62c6a8037bcf4db897d25f"
+          },
+          "referenceSha256": "88fb3da811653499114e5323c94836b8a0b5ee43c55cb2340ffdee35ab812a95"
+        },
+        {
+          "case": "local_static",
+          "root": "cpg-rs/joern-parity/tests/fixtures/array-initializers/cases/local_static",
+          "inputs": {
+            "arrays.c": "7acf6126e6217e6789d6a20f6ab9e7802c6fd565f66100d8704f07d9309bafc3"
+          },
+          "referenceSha256": "77d0a52e6ca59c461849597ef27880f6bfdc79dff8c98d90a887eb6d678dfd82"
+        },
+        {
+          "case": "local_string_rows",
+          "root": "cpg-rs/joern-parity/tests/fixtures/array-initializers/cases/local_string_rows",
+          "inputs": {
+            "arrays.c": "38b696639b09f2dcd99290c4540236d7977d2d39fd10534b54f7357986df8629"
+          },
+          "referenceSha256": "8d6243bd2f3441dad21cc9d8286cfaaed38ec44e7424eca79f4242fdfb192fb9"
+        },
+        {
+          "case": "local_trailing_brace",
+          "root": "cpg-rs/joern-parity/tests/fixtures/array-initializers/cases/local_trailing_brace",
+          "inputs": {
+            "arrays.c": "f52131994748f2a9be6326f53e0af904c763d38cd70066e36a25dc28658c045b"
+          },
+          "referenceSha256": "8efed7acfc907682e784fc563c2582bd9e8ced4f0fc05dcfcaf72dd0b2473fb6"
+        },
+        {
+          "case": "local_uchar_brace",
+          "root": "cpg-rs/joern-parity/tests/fixtures/array-initializers/cases/local_uchar_brace",
+          "inputs": {
+            "arrays.c": "f95ec994fa63119a8c59b34f7f20e03f3828a04c24849d92e565a34506c830f7"
+          },
+          "referenceSha256": "d5e0c1daa86ad7baa0d2890800a632b60c1ae080175a5f6082b39b4667d94b60"
+        },
+        {
+          "case": "local_unsized_multidim",
+          "root": "cpg-rs/joern-parity/tests/fixtures/array-initializers/cases/local_unsized_multidim",
+          "inputs": {
+            "arrays.c": "a44434c6ab2764498eac12ffe9e308286574c96d59a2a8d8bf6e97e84174626c"
+          },
+          "referenceSha256": "d10af28a5e4bbfccf898395b7c93b2a1363f68dd168c0f94a1343bc54706e025"
+        },
+        {
+          "case": "local_unsized_noinit",
+          "root": "cpg-rs/joern-parity/tests/fixtures/array-initializers/cases/local_unsized_noinit",
+          "inputs": {
+            "arrays.c": "bc5f8cd46b4daab4d66c18ae554f79b40b5c0f233065b3e69de6233c000a11b7"
+          },
+          "referenceSha256": "5cf7b8b08178bb01fd757d1f7b86021348a1a63a609da1cb1c5840a96f8d5043"
+        },
+        {
+          "case": "location_overlap",
+          "root": "cpg-rs/joern-parity/tests/fixtures/array-initializers/cases/location_overlap",
+          "inputs": {
+            "arrays.c": "2ff98edfe11a0a9da158f91352b73a961d3e260dec4a2fbcc3cf2293c34f97ea"
+          },
+          "referenceSha256": "acfc2ce7b7560df249ace67afddeaf799092dee4c721c9f9e913e074a98ab82d"
+        },
+        {
+          "case": "mixed_noinit",
+          "root": "cpg-rs/joern-parity/tests/fixtures/array-initializers/cases/mixed_noinit",
+          "inputs": {
+            "arrays.c": "1f72fb407e98e199bf1626edf019ec88a415dd95d8659781ec1d444e39836bcd"
+          },
+          "referenceSha256": "e39aca86b1660b3af9b232e41533267e38e403a853c7600204ea9c48df0b1c61"
+        },
+        {
+          "case": "nested_array_dims",
+          "root": "cpg-rs/joern-parity/tests/fixtures/array-initializers/cases/nested_array_dims",
+          "inputs": {
+            "arrays.c": "bce0c0f81739086904e8932492cac33bf583e79d0418d86cc26f9abca08f17d1"
+          },
+          "referenceSha256": "7c64986e458a275fc5f4fd82d0afeab7180983bd182185af6bcf4a8e462876db"
+        },
+        {
+          "case": "nested_pointer_array",
+          "root": "cpg-rs/joern-parity/tests/fixtures/array-initializers/cases/nested_pointer_array",
+          "inputs": {
+            "arrays.c": "e5b3b7156449f81e80ad318e18650b4654931a533f5f5d53980c69bc1b09905b"
+          },
+          "referenceSha256": "77a27447f7595341e858a1edfcb32d715a535e8c4b071f05092b1c41d1895403"
+        },
+        {
+          "case": "parameter_types",
+          "root": "cpg-rs/joern-parity/tests/fixtures/array-initializers/cases/parameter_types",
+          "inputs": {
+            "arrays.c": "1b22150013d2ddd67ef052c73089da8a1f3f9b32fcdce144c00bad682910528b"
+          },
+          "referenceSha256": "c66eea949a4540cfe7ad357b06a6880002ae438f03ae6021457b6f67a2570e6c"
+        },
+        {
+          "case": "parenthesized_pointer",
+          "root": "cpg-rs/joern-parity/tests/fixtures/array-initializers/cases/parenthesized_pointer",
+          "inputs": {
+            "arrays.c": "59173f6bfdcba313643a51ad6e45f421a9ace661448dddc922aef6223a9e0230"
+          },
+          "referenceSha256": "fbb7ab7e16812e72db7449d8814ab34c846b7641460056e3b3e40389a282f4a8"
+        },
+        {
+          "case": "parenthesized_scalar",
+          "root": "cpg-rs/joern-parity/tests/fixtures/array-initializers/cases/parenthesized_scalar",
+          "inputs": {
+            "arrays.c": "dc5e3ae222b2a17a58169abab837cfbcfb19b2cdc4e68323861d3de4cea095fd"
+          },
+          "referenceSha256": "813d23640f4bc0184ff193e293699a4c36236b27f2fdbd6cc034e6bd4af40f0a"
+        },
+        {
+          "case": "pointer_array",
+          "root": "cpg-rs/joern-parity/tests/fixtures/array-initializers/cases/pointer_array",
+          "inputs": {
+            "arrays.c": "5009a0b1517085db6cc396d5e9e031e3bf6c0cfb8103b5a1367fea5ce0ecbdc2"
+          },
+          "referenceSha256": "c3be86ecdb23062e4e98a3551963c1d2c32e075270568c62aebad93b0456e66f"
+        },
+        {
+          "case": "pointer_multidim",
+          "root": "cpg-rs/joern-parity/tests/fixtures/array-initializers/cases/pointer_multidim",
+          "inputs": {
+            "arrays.c": "8447dea73a2051ecfb81fecc14fb18c8f657adcc0e2cd86c3040415c285c2ee7"
+          },
+          "referenceSha256": "fd6e94b4220c7523347a67e63edf7d651c2ffa50cdd8201a5d1978daa6703569"
+        },
+        {
+          "case": "pointer_to_array",
+          "root": "cpg-rs/joern-parity/tests/fixtures/array-initializers/cases/pointer_to_array",
+          "inputs": {
+            "arrays.c": "954d13dd6f8adbc76e8bb2732db9e8b9a27a9903f445f064d0b7cc908c63fd23"
+          },
+          "referenceSha256": "cd6d47d1cdb0719b2f31460f56dfccdc25e388cda4c9318f068b9d97132706db"
+        },
+        {
+          "case": "pointer_to_array_init",
+          "root": "cpg-rs/joern-parity/tests/fixtures/array-initializers/cases/pointer_to_array_init",
+          "inputs": {
+            "arrays.c": "112b8794a5756f310bd757ea0269ce067c7f0ae298168dd79afba931e6ce6ddc"
+          },
+          "referenceSha256": "2b26c806833b76055434b3e511b5e356f4976ace97eff8d0104098f092e4f6a6"
+        },
+        {
+          "case": "range_designator",
+          "root": "cpg-rs/joern-parity/tests/fixtures/array-initializers/cases/range_designator",
+          "inputs": {
+            "arrays.c": "4b675a6ad348fcea78e133fbce311347429a49a2c963d342765c14080a023a74"
+          },
+          "referenceSha256": "8764851f0c1b51af388a7146d07445548c23383780da59ecc9437311d4a1af30"
+        },
+        {
+          "case": "scalar_brace",
+          "root": "cpg-rs/joern-parity/tests/fixtures/array-initializers/cases/scalar_brace",
+          "inputs": {
+            "arrays.c": "810ce88864b02d126f62af9fffcd692aae390d3c3a3a5524d3b3dd54ee8979c9"
+          },
+          "referenceSha256": "b8b509db80c96b993170d063aaba325811e86ba2f6d067d82921a2b76b5f0760"
+        },
+        {
+          "case": "source_lines",
+          "root": "cpg-rs/joern-parity/tests/fixtures/array-initializers/cases/source_lines",
+          "inputs": {
+            "arrays.c": "07fef63720e24263ef249f08d0ebb61aeac4024120c0bfa8dc66ff133fa5cf60"
+          },
+          "referenceSha256": "2f7a7be5f7c8b533debaf65a5795fc53f3e0d28e4335d0aeb872f6005c82a0e1"
+        },
+        {
+          "case": "wide_string",
+          "root": "cpg-rs/joern-parity/tests/fixtures/array-initializers/cases/wide_string",
+          "inputs": {
+            "arrays.c": "be9e0e838ad9ba7b62fa98de0e5b9c91011aed11094d4f0c1152ea3a8d1b5134"
+          },
+          "referenceSha256": "397a790691f13bcc9ceab5ef5df45dd748726c2a9849638b22878ead15dd4acd"
+        }
+      ]
+    },
+    {
+      "family": "body-includes",
+      "caseCount": 14,
+      "test": "cpg-rs/joern-parity/tests/body_includes.rs",
+      "testSha256": "9f76d0d576884e9fac89cafaf5654ce478828470cf97ed9f0d08f70a311e79a4",
+      "plannedCompleteReplay": true,
+      "cases": [
+        {
+          "case": "body_include_macro_only",
+          "root": "cpg-rs/joern-parity/tests/fixtures/body-includes/cases/body_include_macro_only",
+          "inputs": {
+            "api.h": "39c6a0ef8f0732115cce55a2ccc6edaa9f16cd4f0d45fb43ed5e4fe0b6849ee3",
+            "main.c": "18895073d0db98c33aa9c6aaa7924c07e99610f9efede43a31e34715d60319e5"
+          },
+          "referenceSha256": "c158364df1717bdc80e6d94d22b9567689d8c7d8d8517a96eabc44b8a993f49a"
+        },
+        {
+          "case": "guarded_nested_relative_include",
+          "root": "cpg-rs/joern-parity/tests/fixtures/body-includes/cases/guarded_nested_relative_include",
+          "inputs": {
+            "headers/api.h": "4212ba295d8db18bad200705c0f44cd0268d53f02388ba498ef218783af832b9",
+            "headers/leaf values.h": "4a1886cf47df5e5da7c13efecd2ec4233db0a08e0e9bcc9c6caaa276f015f3f1",
+            "main.c": "88fd0f5da7a18648c6cb6eb85382212b6130d95e9090b3992eb04c1e0af826d4"
+          },
+          "referenceSha256": "43156ea80dd53d452190969c4a313d5cc2a295a77806a8329511ca71885aa5cb"
+        },
+        {
+          "case": "inactive_body_include",
+          "root": "cpg-rs/joern-parity/tests/fixtures/body-includes/cases/inactive_body_include",
+          "inputs": {
+            "inactive.h": "e6be797d4b0e670eb494b4dd9050eb1042f56b832f8218b2a8905b2ab1ac5d7d",
+            "main.c": "6f9fc5b3121682bbce24044f2bedfc75774968c616951955ea4f0c0bb9ba76a6"
+          },
+          "referenceSha256": "dee62aa4096c4c46c16ebb0a91c5906c1f6786a8b5483d6508ad2837a6a80f3e"
+        },
+        {
+          "case": "included_call_origin",
+          "root": "cpg-rs/joern-parity/tests/fixtures/body-includes/cases/included_call_origin",
+          "inputs": {
+            "api.h": "3064f0f3d560eb7f40dfe541d055b10025f6a6f82d2e8ee2f3dd57915d1205d2",
+            "main.c": "205780cf31cc2024bab2bdf052a8242d00d1faa3dab0a203f1b511133e18eba2"
+          },
+          "referenceSha256": "ede00de3f22c2caff78996f3bdbed91ba716cbf206b9aa17da6dbac113d1f2a9"
+        },
+        {
+          "case": "inline_call_origin",
+          "root": "cpg-rs/joern-parity/tests/fixtures/body-includes/cases/inline_call_origin",
+          "inputs": {
+            "main.c": "7383be649c1b401ba51209a1c8dd51fef9e8269f8cab79fa985fc71474614faa"
+          },
+          "referenceSha256": "208ef8ac9a5ed8db304690a3d4b3e46555b578e757b56c0a89c4f2df4e503ec4"
+        },
+        {
+          "case": "nested_scope_typedef_macro",
+          "root": "cpg-rs/joern-parity/tests/fixtures/body-includes/cases/nested_scope_typedef_macro",
+          "inputs": {
+            "main.c": "15477e5092143e0b32762327e15d6323a40786dc7444d23868fdb300c85a2b72",
+            "scope.h": "0180b80ae57402852b44fe3f0a26dc6d93a91123f1d0e869b0d4d339e9271bdd"
+          },
+          "referenceSha256": "e73d9af14f883513c4f5f343a0a0c84257d4e0d700186565927958f9c4bb66a1"
+        },
+        {
+          "case": "primitive_static_array_include",
+          "root": "cpg-rs/joern-parity/tests/fixtures/body-includes/cases/primitive_static_array_include",
+          "inputs": {
+            "main.c": "ef12857b61998de6a68ac326cb8005363a62cf1d35e93da452c63700bc6e71ff",
+            "table.h": "01722e7790931e4dffd1479a5bca2487679e42b6ea367e58798b1a37977aca51"
+          },
+          "referenceSha256": "7a413043d5f75a93899094c5efd86725bad67c504e81b463d5530af182c8759c"
+        },
+        {
+          "case": "primitive_static_array_inline",
+          "root": "cpg-rs/joern-parity/tests/fixtures/body-includes/cases/primitive_static_array_inline",
+          "inputs": {
+            "main.c": "eb948f536a5a05c904ea98da790f9a48729a7b6f0cd3ad7454de45e564758128"
+          },
+          "referenceSha256": "d709ab346526f395dbab7d12c694fe3f16b6f05dc0c288d4cfc05b6da32a3a70"
+        },
+        {
+          "case": "repeated_include_context",
+          "root": "cpg-rs/joern-parity/tests/fixtures/body-includes/cases/repeated_include_context",
+          "inputs": {
+            "main.c": "3978e883bd0aaf3d326144a6cd78a87a525f590207de23552f98049932b3e20f",
+            "nested/table.h": "3bb7ed86169716c309a9d27e0016132128da26348425a566436c287738a3c15a",
+            "repeat.h": "19dcabefdf697b3ed835d49328b7d35d218acf0dffa5f64c96235d93a9cafb84"
+          },
+          "referenceSha256": "febd4ffe0c249f8dbd0f4fac596f35b065914292f1d1e886f1d691a1c87ffaba"
+        },
+        {
+          "case": "tiny_fixedtables_include",
+          "root": "cpg-rs/joern-parity/tests/fixtures/body-includes/cases/tiny_fixedtables_include",
+          "inputs": {
+            "fixed.h": "3039380a12e6dba1fb44314f13292d1b5ec6744aa80eff5599566a29ea94ea86",
+            "main.c": "7203039d3be732abfb9abaad7177eaa77efa51d6e9fa58d58733346eb6cb4dda"
+          },
+          "referenceSha256": "fc4a1360d6f10152edb364c346a47ae73d2df2460fe5ef12da2d2e79cbb7dd3f"
+        },
+        {
+          "case": "tiny_fixedtables_inline",
+          "root": "cpg-rs/joern-parity/tests/fixtures/body-includes/cases/tiny_fixedtables_inline",
+          "inputs": {
+            "main.c": "8af2a0a9531deec50f16e8c125de4000c0636b443b11628e232bb9e9413d2a6f"
+          },
+          "referenceSha256": "6d613c7085ab54541cc1d9fa83494748e33fe70bfc5c541ee39f12aa8046cadd"
+        },
+        {
+          "case": "unresolved_header_controls",
+          "root": "cpg-rs/joern-parity/tests/fixtures/body-includes/cases/unresolved_header_controls",
+          "inputs": {
+            "decoys/missing-system.h": "26fb8a822fc16e65f00ab026f77d90c83eae8b1224749241467a16131d6cf2c9",
+            "decoys/missing.h": "34a841d961784ae753f6d50c9addf13918ab1ccedc4f043e3c485a43cd722495",
+            "main.c": "5c95fbe23189d58962a246715705b7072c989f997d3c32c52951e37529178540"
+          },
+          "referenceSha256": "11f5a05e9c4c5f9ed1420f7ddd69e503c800596a00374b71f6c6adabbbdd9635"
+        },
+        {
+          "case": "used_scalar_include",
+          "root": "cpg-rs/joern-parity/tests/fixtures/body-includes/cases/used_scalar_include",
+          "inputs": {
+            "main.c": "5d296e0bff001e708d474a0d9fd6b262d47da11f197e1322007fc116a641d252",
+            "value.h": "9078af34397a7ca8248cdc31c60670042893dc4abe485490ce0cb400f4d7df32"
+          },
+          "referenceSha256": "a0e7f199b0f8c6f197508cc6f998f509ea515ff368cbe3048f8eb021fbee14ad"
+        },
+        {
+          "case": "used_scalar_inline",
+          "root": "cpg-rs/joern-parity/tests/fixtures/body-includes/cases/used_scalar_inline",
+          "inputs": {
+            "main.c": "4f6acf89c5ef6ed3f224fbb4f7c737f69219c98ac6fc15a312831b699a991221"
+          },
+          "referenceSha256": "f4104faa7c7c5d9b0d23a34be8e6834d3e7a5a72b2f7312c43c2e8b78aea7dc6"
+        }
+      ]
+    },
+    {
+      "family": "array-dimension-macros",
+      "caseCount": 4,
+      "test": "cpg-rs/joern-parity/tests/array_dimension_macros.rs",
+      "testSha256": "ef768790da95ff3ff49aa4dcc00b745d70f58027e4ebe53c43d453fb08b64977",
+      "plannedCompleteReplay": true,
+      "cases": [
+        {
+          "case": "bare_macro",
+          "root": "cpg-rs/joern-parity/tests/fixtures/array-dimension-macros/cases/bare_macro",
+          "inputs": {
+            "main.c": "8afa523c658dcca3169bdde8ffd77954c6553e84f0a7cbdb5448868892318077"
+          },
+          "referenceSha256": "d746557ebaab9b82965a2a20b8f25fd4fc2e5ba67895adcc280cce1cec439260"
+        },
+        {
+          "case": "binary_macro",
+          "root": "cpg-rs/joern-parity/tests/fixtures/array-dimension-macros/cases/binary_macro",
+          "inputs": {
+            "main.c": "8da3a68392558d8838fa8074c58022b9df57a98f2bf2ad32803e18b1c2931c74"
+          },
+          "referenceSha256": "c561375e48835ef513e37e298c29e2067737854163f26512ab704f53eae6d224"
+        },
+        {
+          "case": "parenthesized_macro",
+          "root": "cpg-rs/joern-parity/tests/fixtures/array-dimension-macros/cases/parenthesized_macro",
+          "inputs": {
+            "main.c": "7c3989e3ecc0f82ecc24e215daa162b45afe4f88971aac27240f357abaad1c45"
+          },
+          "referenceSha256": "08130cca1e81cd61ac03c9a5c988bd7e108b4368b74ce598ca0fe1041152ae46"
+        },
+        {
+          "case": "unary_macro",
+          "root": "cpg-rs/joern-parity/tests/fixtures/array-dimension-macros/cases/unary_macro",
+          "inputs": {
+            "main.c": "a70cfaa22d1ca206e7ac909f1d4916f6db91985e813446b54e34c6abd6545db6"
+          },
+          "referenceSha256": "3968d5812b22f0b914b5e242870383827592ec8ae04772a0efd6a0643e899f26"
+        }
+      ]
+    },
+    {
+      "family": "body-macro-state",
+      "caseCount": 76,
+      "test": "cpg-rs/joern-parity/tests/body_macro_state.rs",
+      "testSha256": "2b36d9d5ace7e8b7cde363bbffd247f00985ff8030c97db7a75ba6c4f8acd19c",
+      "plannedCompleteReplay": true,
+      "cases": [
+        {
+          "case": "block_macro_typedef_separation",
+          "root": "cpg-rs/joern-parity/tests/fixtures/body-macro-state/cases/block_macro_typedef_separation",
+          "inputs": {
+            "main.c": "9ff8d024419a14a16b13da384bab9dfa8971dc29367a7a34820fe871cee187d5"
+          },
+          "referenceSha256": "8dfd0cfc2321f3a1db049382a218d4bccf6283de4489ea132010d68363897f7b"
+        },
+        {
+          "case": "body_include_macro_only",
+          "root": "cpg-rs/joern-parity/tests/fixtures/body-macro-state/cases/body_include_macro_only",
+          "inputs": {
+            "api.h": "39c6a0ef8f0732115cce55a2ccc6edaa9f16cd4f0d45fb43ed5e4fe0b6849ee3",
+            "main.c": "18895073d0db98c33aa9c6aaa7924c07e99610f9efede43a31e34715d60319e5"
+          },
+          "referenceSha256": "c158364df1717bdc80e6d94d22b9567689d8c7d8d8517a96eabc44b8a993f49a"
+        },
+        {
+          "case": "body_macro_later_prototype",
+          "root": "cpg-rs/joern-parity/tests/fixtures/body-macro-state/cases/body_macro_later_prototype",
+          "inputs": {
+            "main.c": "be6a3b9a6f39e874657c3f9e38bf6318a949dda3a44c523589b796514b0bdac2"
+          },
+          "referenceSha256": "fd806253886e096f9c347842ed5a228cce8a7c694f0876aec1ccd46dfe958658"
+        },
+        {
+          "case": "body_state_then_include",
+          "root": "cpg-rs/joern-parity/tests/fixtures/body-macro-state/cases/body_state_then_include",
+          "inputs": {
+            "api.h": "9dc974d4444114f759132e2e04ce3d95297a358f35032f780d7f950580f06443",
+            "main.c": "003a30b80183427fdc5e694c1d66b11e90f6cfe758a48264bae7b7055b9a8840"
+          },
+          "referenceSha256": "251de29563c3ca9bbcf717dca96fdd68fc22724992a50802ea45298647442583"
+        },
+        {
+          "case": "body_typedef_does_not_escape",
+          "root": "cpg-rs/joern-parity/tests/fixtures/body-macro-state/cases/body_typedef_does_not_escape",
+          "inputs": {
+            "main.c": "277c7773c8ed445fc69ccfdfb27d0b1d5d820e32bcb51f7a1d57d8eaa26e24ac"
+          },
+          "referenceSha256": "1acfd8b30eff9932d4c80db207f3aaf46fa389ba183c3f92e9a47b9dd7f389a3"
+        },
+        {
+          "case": "branch_condition_entry_state",
+          "root": "cpg-rs/joern-parity/tests/fixtures/body-macro-state/cases/branch_condition_entry_state",
+          "inputs": {
+            "main.c": "ca6780bef76a0434fdc7a5f75639280458456f03c00dc8b44640d1d038e61dde"
+          },
+          "referenceSha256": "91abd763935d2faa5d86c475737147724af3e7a54be12b4d0588e5af2fc95d04"
+        },
+        {
+          "case": "cast_type",
+          "root": "cpg-rs/joern-parity/tests/fixtures/body-macro-state/cases/cast_type",
+          "inputs": {
+            "main.c": "6360c0c2e189600981cc92df6532ffaa02d74e83cb0594f59342420278276384"
+          },
+          "referenceSha256": "336b265bf07079b32b5fa606ea0bee708dec6edf5728ad9db086ea035421085a"
+        },
+        {
+          "case": "character_literal",
+          "root": "cpg-rs/joern-parity/tests/fixtures/body-macro-state/cases/character_literal",
+          "inputs": {
+            "main.c": "d6b11c62cd953af0274ab3df0106a627d507a6468eda660fa0d70794c1ffbc8b"
+          },
+          "referenceSha256": "c7f3f2062dbca109ab831a2c0768c93939703e620813b8c5332f3b6b773ddefb"
+        },
+        {
+          "case": "comma_tail",
+          "root": "cpg-rs/joern-parity/tests/fixtures/body-macro-state/cases/comma_tail",
+          "inputs": {
+            "main.c": "28049dc793519446d8e97ebe2758ed6c51e0832be3d2fe91ecb3b19eca4f8346"
+          },
+          "referenceSha256": "c8e83ccd4a48b387cc394e9794061087bff5a414b324318921c103a044b98745"
+        },
+        {
+          "case": "condition_function_and_defined",
+          "root": "cpg-rs/joern-parity/tests/fixtures/body-macro-state/cases/condition_function_and_defined",
+          "inputs": {
+            "main.c": "9827e85190391e9055b5eca6e355a04f49efb79161b1a712501fadcfa3ea0cdd"
+          },
+          "referenceSha256": "61fc46aab4c42f9fd15bbecf15f1818cc9c9d5c06676182aa9dce2bcd8dbadc4"
+        },
+        {
+          "case": "conditional_before_redefine",
+          "root": "cpg-rs/joern-parity/tests/fixtures/body-macro-state/cases/conditional_before_redefine",
+          "inputs": {
+            "main.c": "e07f73cbeae1a555469263493c0e9f359a30e91339fb0dc39a74e8511d52329c"
+          },
+          "referenceSha256": "0df887fb62b4c432e3e15efcd8e718bf1e82c75842868e5ac9861d2740e2560f"
+        },
+        {
+          "case": "conditional_local_typedef",
+          "root": "cpg-rs/joern-parity/tests/fixtures/body-macro-state/cases/conditional_local_typedef",
+          "inputs": {
+            "main.c": "2cc7eee69d4790e6465147e56c976b960da648e36e2a38bf3c83fc44a1549e0e"
+          },
+          "referenceSha256": "f6572ce3338c133fff0bd4d5ab93569d37b7616071e14ad4fd19e8d64d91115f"
+        },
+        {
+          "case": "cross_function_state",
+          "root": "cpg-rs/joern-parity/tests/fixtures/body-macro-state/cases/cross_function_state",
+          "inputs": {
+            "main.c": "f976c907536f435c7b8ccf786fd0a02f51989d61cff36250a62463fe28452534"
+          },
+          "referenceSha256": "897ce63f842d7b806990cdbbb2416e86c851131d0c58ea8eebbd90c3819a86c3"
+        },
+        {
+          "case": "deferred_full_name_literal",
+          "root": "cpg-rs/joern-parity/tests/fixtures/body-macro-state/cases/deferred_full_name_literal",
+          "inputs": {
+            "api.h": "9313885ae7f29e87c31882a352bfe60f303796aedbb0a3b40ef6dc64037c8dc3",
+            "main.c": "8983979c5217cd67b1c16f8d1b533e6d453928101f1e8d68440967c0ba15b481"
+          },
+          "referenceSha256": "c25f09289b059a979adddcaba94719f3a84678184a1e9a4be9d3804dc826fdd8"
+        },
+        {
+          "case": "deferred_full_name_spaces",
+          "root": "cpg-rs/joern-parity/tests/fixtures/body-macro-state/cases/deferred_full_name_spaces",
+          "inputs": {
+            "api header.h": "9313885ae7f29e87c31882a352bfe60f303796aedbb0a3b40ef6dc64037c8dc3",
+            "main.c": "4d73e94d0a034059ccbf3ecffb0edf154a9102b7fbcb0feb33a3aca419d37b66"
+          },
+          "referenceSha256": "369f74ebb48c924503fd81c8edd2dadfa6196c40ccd201345d15894f23bd9592"
+        },
+        {
+          "case": "defined_before_redefine",
+          "root": "cpg-rs/joern-parity/tests/fixtures/body-macro-state/cases/defined_before_redefine",
+          "inputs": {
+            "main.c": "835117fcd3b85fd5e093e004133dd3b374629075ca329acc855f82b13e88c593"
+          },
+          "referenceSha256": "07eb7586f6344a23f9802efe413dbf893f1c74b4c7123e80d9ad3d1bef58445d"
+        },
+        {
+          "case": "disabled_function_tail",
+          "root": "cpg-rs/joern-parity/tests/fixtures/body-macro-state/cases/disabled_function_tail",
+          "inputs": {
+            "main.c": "8a239d6a8f9a4a22afd24b85d7f641bf0f3b9a845b19cd1a1620dace312afa95"
+          },
+          "referenceSha256": "d10bb267477933e70f757867058fb1b6659ed01d63fd95558d1eb739e664a109"
+        },
+        {
+          "case": "duplicate_clinit_tag",
+          "root": "cpg-rs/joern-parity/tests/fixtures/body-macro-state/cases/duplicate_clinit_tag",
+          "inputs": {
+            "a.c": "2d336c1f8f11a904ebf5ff1581816548619a326835a89ea349687fca626445ab",
+            "b.c": "c406b50515fe961b3fe270eff57c6904c0669d5b804c049760f787240f8a2af2"
+          },
+          "referenceSha256": "79bc96282d7e9711dc1bfa8dd96044b3e1eb7e17f4f6cd0074c0ea990990b5b4"
+        },
+        {
+          "case": "earlier_function_condition",
+          "root": "cpg-rs/joern-parity/tests/fixtures/body-macro-state/cases/earlier_function_condition",
+          "inputs": {
+            "main.c": "2d57f01b02fc9943584451bf2b5b0589ec0575afb9e20868aeebcc6970bf3704"
+          },
+          "referenceSha256": "72189103d915cb0206682e1607de14b3e2c03068f4314b62310e2814e8d80bea"
+        },
+        {
+          "case": "elif_definition",
+          "root": "cpg-rs/joern-parity/tests/fixtures/body-macro-state/cases/elif_definition",
+          "inputs": {
+            "main.c": "4bbe900f4b80fcddea8d4221af64d6f548406cdc614d75e626e7782f877fbdc6"
+          },
+          "referenceSha256": "a1654d7b24375f7998e7cbad21fa649c20cc60899e5b4dba1c01ccad3f131d24"
+        },
+        {
+          "case": "file_level_condition",
+          "root": "cpg-rs/joern-parity/tests/fixtures/body-macro-state/cases/file_level_condition",
+          "inputs": {
+            "main.c": "03d946c2a14a8503b54d594720ce273cec82fe33cdc56a131c9c08932b06559b"
+          },
+          "referenceSha256": "b465f24684bda7cc39bb63fe50ec819014fa6c018efc044751c881aea4b9bba0"
+        },
+        {
+          "case": "formal_list_redefined",
+          "root": "cpg-rs/joern-parity/tests/fixtures/body-macro-state/cases/formal_list_redefined",
+          "inputs": {
+            "main.c": "4caee4b582d5655504d78e9028080324fb3cc42961a5f71288ac02fc1608f2ca"
+          },
+          "referenceSha256": "97240d96ac9bf156a6af5d99adb89f479546e6d5bdd261fa4c66ac26fa33f273"
+        },
+        {
+          "case": "function_wrap_redefinition",
+          "root": "cpg-rs/joern-parity/tests/fixtures/body-macro-state/cases/function_wrap_redefinition",
+          "inputs": {
+            "main.c": "571d0ea899f43c773bc2ae69b4b402fd87654b6453b293aca1a2da1ab731a02c"
+          },
+          "referenceSha256": "9ab10869fef80aefbf814979f7570ea6a3c2fa3dbae1a2622f5cfe4a3b45d86d"
+        },
+        {
+          "case": "global_before_function",
+          "root": "cpg-rs/joern-parity/tests/fixtures/body-macro-state/cases/global_before_function",
+          "inputs": {
+            "main.c": "8fa8dfcd6d603b301d1701a009b8b0337469e16911ce33a465a962407854e18f"
+          },
+          "referenceSha256": "01398c83c37332854d56e90832378f2c38ceb0c0c6c16429885ef5dfad622e38"
+        },
+        {
+          "case": "header_after_body_undef",
+          "root": "cpg-rs/joern-parity/tests/fixtures/body-macro-state/cases/header_after_body_undef",
+          "inputs": {
+            "api.h": "0f6614af9f8923b667d0a9d22dd146bb5c541b10ef075ce755f8051597a6779e",
+            "main.c": "3c2f20484db3efcee95ff5bc4891b151e3f8cd33b350cc8a3949f233ee06eafa"
+          },
+          "referenceSha256": "da7cf6ae8c8a4acb89f907a446f528744d84308443f85c6ca8f90a19d4df7f67"
+        },
+        {
+          "case": "header_entry_before_body",
+          "root": "cpg-rs/joern-parity/tests/fixtures/body-macro-state/cases/header_entry_before_body",
+          "inputs": {
+            "main.c": "ba1ad7248e0bd6be16ba572e12927f542f152041acf2c84e652be5878f4b814d"
+          },
+          "referenceSha256": "bc065844724c6ff796107c453b66d2945acd9dfcb76b2b91ed6414edc249ef87"
+        },
+        {
+          "case": "header_event_tie_after",
+          "root": "cpg-rs/joern-parity/tests/fixtures/body-macro-state/cases/header_event_tie_after",
+          "inputs": {
+            "api.h": "131c651f587e33d4865092b51b15078d561460ae2546252da319e47003dc7314",
+            "main.c": "3c2f20484db3efcee95ff5bc4891b151e3f8cd33b350cc8a3949f233ee06eafa"
+          },
+          "referenceSha256": "9fc92774be54ab173650a4ecefaf16fb796028b29bf765e4775e0f054c40ba52"
+        },
+        {
+          "case": "header_event_tie_before",
+          "root": "cpg-rs/joern-parity/tests/fixtures/body-macro-state/cases/header_event_tie_before",
+          "inputs": {
+            "api.h": "9b6045f27b4cc4035e512fcc4c89caf312b15f35abb163f260fd5528888b3f8f",
+            "main.c": "d7e2bdc5330fcd657fc95455f74bb3fbb8aab5f6a3719156dd3d0aac9fceeccd"
+          },
+          "referenceSha256": "475475af54d05ceaff4865ed463b59978e1564d83039d649b68375be34356ffe"
+        },
+        {
+          "case": "header_redefined",
+          "root": "cpg-rs/joern-parity/tests/fixtures/body-macro-state/cases/header_redefined",
+          "inputs": {
+            "api.h": "9313885ae7f29e87c31882a352bfe60f303796aedbb0a3b40ef6dc64037c8dc3",
+            "main.c": "ab95184ab8d1acda54f313e09a82deef305d035c19e72c3d27e7d9aae87e27fe"
+          },
+          "referenceSha256": "4bb2816e3084d19794a21910406539088b23ece3031ee369623b9f77af0b4685"
+        },
+        {
+          "case": "header_then_local_undef",
+          "root": "cpg-rs/joern-parity/tests/fixtures/body-macro-state/cases/header_then_local_undef",
+          "inputs": {
+            "main.c": "57d8ea5cc1a0af6d0f967dc18e40345ff5a7c8c022b8305eafe37f5c9cc80b3f",
+            "switch.h": "7d406f17bc190d8bc555a2d3d3e3c4eea926d3427db073ca8e8ef62cab1fb32e"
+          },
+          "referenceSha256": "75c9b8f2f7b29594e800e15354b099793be0fe1f7c60729befc0769d71749400"
+        },
+        {
+          "case": "inactive_and_shortcircuit",
+          "root": "cpg-rs/joern-parity/tests/fixtures/body-macro-state/cases/inactive_and_shortcircuit",
+          "inputs": {
+            "main.c": "2b39d8200bae3c4c6b56516868c5ce84576a203fc27da949fe2b42e4227e1df5"
+          },
+          "referenceSha256": "7d9827e44eba416ae6038388c7abc8b74720b33bd5c189578233eeb10762b0c0"
+        },
+        {
+          "case": "inactive_effects",
+          "root": "cpg-rs/joern-parity/tests/fixtures/body-macro-state/cases/inactive_effects",
+          "inputs": {
+            "main.c": "d892debdf34ad365c4fcf5e926b21a6bb6bb965b29c24650f3840f0f2b731cf3"
+          },
+          "referenceSha256": "2b36c816be5e6281a3126a37f018828007a6e3989282331c4acfd4f346519c87"
+        },
+        {
+          "case": "inactive_function_effects",
+          "root": "cpg-rs/joern-parity/tests/fixtures/body-macro-state/cases/inactive_function_effects",
+          "inputs": {
+            "main.c": "352132c6d1fd737dfe3e5eb684824b629a11707c6719111f39522381221c72c9"
+          },
+          "referenceSha256": "f8f943b6f89d5e917b2c9c2f1094f12260384d855d35c9ae42bb8d00ffd88843"
+        },
+        {
+          "case": "inactive_typedef_shadow",
+          "root": "cpg-rs/joern-parity/tests/fixtures/body-macro-state/cases/inactive_typedef_shadow",
+          "inputs": {
+            "main.c": "0b0455ad63f9f00c75900c81d2df64a9e7259ec8b2bf8534dee9eacdcab7ba0e"
+          },
+          "referenceSha256": "874c354fcc3838f1136795f84d18c2352cb079369b491e6275ccb459134d4828"
+        },
+        {
+          "case": "include_multiple_effects",
+          "root": "cpg-rs/joern-parity/tests/fixtures/body-macro-state/cases/include_multiple_effects",
+          "inputs": {
+            "api.h": "721d9a31abbf3d24dcaf8117c0b364b65f52d6be043670e0a82c3b8652fd4c8f",
+            "main.c": "4339c8184d9d6fd43d365855f93c62071edae105335bca47a1b97c8c158e9eb0"
+          },
+          "referenceSha256": "c887d1dd84c73209a188ca8320a5f72c6fb3bc06f44c3944e69b63742325e495"
+        },
+        {
+          "case": "intervening_nonmatching",
+          "root": "cpg-rs/joern-parity/tests/fixtures/body-macro-state/cases/intervening_nonmatching",
+          "inputs": {
+            "main.c": "9ed88d6cba6157e2fec4f097ec51852f14293c8afc2061d0dc56bc41daa4b9a7"
+          },
+          "referenceSha256": "b2939ecd5039b3c6bc81aafa32fe0a37bace6164a749cfd10e417dff1e01f6ae"
+        },
+        {
+          "case": "local_conditional_prototype",
+          "root": "cpg-rs/joern-parity/tests/fixtures/body-macro-state/cases/local_conditional_prototype",
+          "inputs": {
+            "main.c": "720cd1f238c3e72973f1599f6d6c35bfff347d1ed5c039bf479d820effe83a59"
+          },
+          "referenceSha256": "5965da8ee2d55040671d2b476294162ea991977cbb300a3a754d9b624a7c7954"
+        },
+        {
+          "case": "local_definition",
+          "root": "cpg-rs/joern-parity/tests/fixtures/body-macro-state/cases/local_definition",
+          "inputs": {
+            "main.c": "5e4b9f11c86743b408483ceb47c5e1dc078c6b493018ec57095f58b6cbd7dd78"
+          },
+          "referenceSha256": "1e3dca8eea1a14311a33a386f3f15e73d72d9a3241ca9daadfa884f8f46ed790"
+        },
+        {
+          "case": "local_function_macro",
+          "root": "cpg-rs/joern-parity/tests/fixtures/body-macro-state/cases/local_function_macro",
+          "inputs": {
+            "main.c": "8d24f9d0ec77db568dbd637230a9fcee07adefe0ec00cc194a94032dd56efddd"
+          },
+          "referenceSha256": "6efd91eb51c60b887cd193d04f7dcea58b5cdbacae906b5ae35b2016f23f582a"
+        },
+        {
+          "case": "local_inactive_prototype",
+          "root": "cpg-rs/joern-parity/tests/fixtures/body-macro-state/cases/local_inactive_prototype",
+          "inputs": {
+            "main.c": "b6d28af84d0484c0a9376fc5b23f54d28d1f325cb2f36e3049e12419d0369b0a"
+          },
+          "referenceSha256": "79521dc03b956d56e7631237e8a5cbdac6eb63234b255e18a4fc2e6d4900cbe2"
+        },
+        {
+          "case": "local_inactive_prototype_header",
+          "root": "cpg-rs/joern-parity/tests/fixtures/body-macro-state/cases/local_inactive_prototype_header",
+          "inputs": {
+            "api.h": "8eba3452b9d93584713139fb4ccf381deac6ca576dcfd9980607c1d5f70fdc98",
+            "main.c": "87d025e3192f6c3ce1bddc6c176ac7cb9a4e218cd6ee80ac92d75b96722fe8f7"
+          },
+          "referenceSha256": "19ea1d158be2a27ff5c5acbb022cd2e1de56ac8ae64b0eb9aaa4bd09212bb131"
+        },
+        {
+          "case": "local_macro_prototype",
+          "root": "cpg-rs/joern-parity/tests/fixtures/body-macro-state/cases/local_macro_prototype",
+          "inputs": {
+            "main.c": "700b8962634c0371467c9600dcdadcd2778e85e1e48956d3e4d850f43a2c572e"
+          },
+          "referenceSha256": "548e4d7a861de690ffe0236325988780fa6ef7cd7599c9a7951386ca0f271b1b"
+        },
+        {
+          "case": "local_redefinition",
+          "root": "cpg-rs/joern-parity/tests/fixtures/body-macro-state/cases/local_redefinition",
+          "inputs": {
+            "main.c": "7788d90026e01941a1ea99ae2df86678dfab465a87d1b65a115c838c4796d956"
+          },
+          "referenceSha256": "9be3c4b13a1523ccea111ebff9bfa0493c440adefd2bc849b6c51729b9f88245"
+        },
+        {
+          "case": "local_type_macro",
+          "root": "cpg-rs/joern-parity/tests/fixtures/body-macro-state/cases/local_type_macro",
+          "inputs": {
+            "main.c": "6670a53e36fe87a285d7768f0cd049c963c03359c34019f3b6829a9fe6538052"
+          },
+          "referenceSha256": "ecc65a942c029179e2fdc5c202fb85b7983ec2aee750720fb23c0101b298d065"
+        },
+        {
+          "case": "local_undef",
+          "root": "cpg-rs/joern-parity/tests/fixtures/body-macro-state/cases/local_undef",
+          "inputs": {
+            "main.c": "02f06beebd22b4ec69fb5f132b5e7f58ae46b18cdf22f8119e9525851ff1a4f3"
+          },
+          "referenceSha256": "e2ada46940c0fc2243bf2c9d96107b0f2bb0ea54b7688c59ea947aa90cbbc81f"
+        },
+        {
+          "case": "mixed_global_method_order",
+          "root": "cpg-rs/joern-parity/tests/fixtures/body-macro-state/cases/mixed_global_method_order",
+          "inputs": {
+            "main.c": "ea98f5d983935e31a28e4fd53a9211f45802f3e0b643c816a93c3014174350e5"
+          },
+          "referenceSha256": "5d190ba9d3236ea4da83d8940e62da44021b9c850d050896c18fd46ec622254b"
+        },
+        {
+          "case": "nested_block_persistence",
+          "root": "cpg-rs/joern-parity/tests/fixtures/body-macro-state/cases/nested_block_persistence",
+          "inputs": {
+            "main.c": "1d9400dfdcb3d7da8a60269dbddbc2d3ce5c8009c6760d104857dd3509ffa505"
+          },
+          "referenceSha256": "9e30f34bed13c5508d0f887fb76900c204d8d1e54addbd1eab078dacc23beea7"
+        },
+        {
+          "case": "nested_copied_arguments",
+          "root": "cpg-rs/joern-parity/tests/fixtures/body-macro-state/cases/nested_copied_arguments",
+          "inputs": {
+            "main.c": "d7800b7e1fe82c5828fab49ab45b1a196b633b226928d0f3f0e7f2c619afff35"
+          },
+          "referenceSha256": "479ed66dc08319ad1db91cfd5d0a6f65977f8cc33e7ca6f13394b3e3302bccac"
+        },
+        {
+          "case": "nested_function_control",
+          "root": "cpg-rs/joern-parity/tests/fixtures/body-macro-state/cases/nested_function_control",
+          "inputs": {
+            "main.c": "87ebcce1a37fffd2bcc1f96cc0c9afec8bad635b91be2a0938eaede0ac4e9566"
+          },
+          "referenceSha256": "4640958862a6930d7944ced87480b658e3d85434a65e4042fcc136ee175597cb"
+        },
+        {
+          "case": "nested_function_macro_persistence",
+          "root": "cpg-rs/joern-parity/tests/fixtures/body-macro-state/cases/nested_function_macro_persistence",
+          "inputs": {
+            "main.c": "eba946bb8b43f1ec811fc74aca8998017ad53e55a0579085bfabc388df31b8e3"
+          },
+          "referenceSha256": "8dbb4d90a52512d55b38c9cf318d4fadb4120aa69159d7dc486f94b5107bc673"
+        },
+        {
+          "case": "no_backwards_leak",
+          "root": "cpg-rs/joern-parity/tests/fixtures/body-macro-state/cases/no_backwards_leak",
+          "inputs": {
+            "main.c": "7a6e8a655788219e2d7d38e4cc5c8589f1536af2eb8a4c687f859d13840d55e3"
+          },
+          "referenceSha256": "8a2b7fba4433f6d70fe1ac1330d711e82d8798713997df46553165ed1994c3ca"
+        },
+        {
+          "case": "object_call",
+          "root": "cpg-rs/joern-parity/tests/fixtures/body-macro-state/cases/object_call",
+          "inputs": {
+            "main.c": "56681ad9656e7d98ba30cd0a671aaaaec4f7cefc9916bb30fe5e84861992df97"
+          },
+          "referenceSha256": "e48eac677550f8f7c003e1c8a26c20cbcfd0848b1efdc0f3f9f43295e27b091f"
+        },
+        {
+          "case": "object_cycle",
+          "root": "cpg-rs/joern-parity/tests/fixtures/body-macro-state/cases/object_cycle",
+          "inputs": {
+            "main.c": "b205c59503d4b3f40ac4b04f97143d66b14a77fc12373ca0cc0f7b43f6addec8"
+          },
+          "referenceSha256": "e288d0b92509da1572a02b4b3763ce14add6520af671a8dc3b110f198f82927a"
+        },
+        {
+          "case": "object_function_alias",
+          "root": "cpg-rs/joern-parity/tests/fixtures/body-macro-state/cases/object_function_alias",
+          "inputs": {
+            "main.c": "40e2b559ee9bf13d4d4b029977696857be9969bb2f77a10f3c9d472bfcb3e1f8"
+          },
+          "referenceSha256": "07b05d91baf511ad687b1eb9aa493dfbb75c07b931e5fdeb7c2cb8446d65b53b"
+        },
+        {
+          "case": "object_nested_argument",
+          "root": "cpg-rs/joern-parity/tests/fixtures/body-macro-state/cases/object_nested_argument",
+          "inputs": {
+            "main.c": "e10dd4c061f49251c7cf161bfd147696cf876cc14647c0b383cb00aa48d39896"
+          },
+          "referenceSha256": "e77d329a619524d999a485b0dbe03b9dc48bf360102dfb4ba8cd8d85f66fe75c"
+        },
+        {
+          "case": "object_redefinition",
+          "root": "cpg-rs/joern-parity/tests/fixtures/body-macro-state/cases/object_redefinition",
+          "inputs": {
+            "main.c": "f47a1b7cfa844c6ed1888cfb94c7f6d1a39b580cb61ff85430e0dfefcfda6f70"
+          },
+          "referenceSha256": "b60063063fa134c4cc91708ef2dd87c83191d89eeae4fc5f346ab515aaebaf7f"
+        },
+        {
+          "case": "object_to_function",
+          "root": "cpg-rs/joern-parity/tests/fixtures/body-macro-state/cases/object_to_function",
+          "inputs": {
+            "main.c": "e7ad3d034e1ee679661de57c77fa1ab0e56e89628499eb585c7faa432fb79058"
+          },
+          "referenceSha256": "1c46b3e3cd38444dd86bc02824c94cb0b81297c1eb166d88ccaf14f31c4a7b22"
+        },
+        {
+          "case": "ordinary_control",
+          "root": "cpg-rs/joern-parity/tests/fixtures/body-macro-state/cases/ordinary_control",
+          "inputs": {
+            "main.c": "d9692b3f307bc9aa63a0bae3f6054ddaf2ed123b2dd7db59df9c8c4e1cc2219d"
+          },
+          "referenceSha256": "7b8ac224592d50c321110745945c287e83c16fc099cdbbb98a6ab4758c669625"
+        },
+        {
+          "case": "ordinary_references_redefined",
+          "root": "cpg-rs/joern-parity/tests/fixtures/body-macro-state/cases/ordinary_references_redefined",
+          "inputs": {
+            "main.c": "9069ed8acfdfb35a4d58f707dd7c18434a9c4a123dd60889c07ec74a4953419c"
+          },
+          "referenceSha256": "509bb76175f00639afde249067794280377dd3cef729a78b84f164065c5123c8"
+        },
+        {
+          "case": "outer_nested_body_argument",
+          "root": "cpg-rs/joern-parity/tests/fixtures/body-macro-state/cases/outer_nested_body_argument",
+          "inputs": {
+            "main.c": "c4988e7d4685323b2ff3b6435cad1f1f70507358b4cc842f775130a1314f6d39"
+          },
+          "referenceSha256": "361ada5d5c493cf3bd81d96541e693fedd249f641c162e6421265225b8a780cf"
+        },
+        {
+          "case": "parenthesized_tail",
+          "root": "cpg-rs/joern-parity/tests/fixtures/body-macro-state/cases/parenthesized_tail",
+          "inputs": {
+            "main.c": "f6ce67b800427d9e074a647074cc2beebf80d4b943781af427bb4abc63e65bc2"
+          },
+          "referenceSha256": "01335de35e1395493cfca666f4746a0cfe5a321be7603d2e70f31943a2d7e636"
+        },
+        {
+          "case": "prefixed_quoted",
+          "root": "cpg-rs/joern-parity/tests/fixtures/body-macro-state/cases/prefixed_quoted",
+          "inputs": {
+            "main.c": "9a1de16b815e679485ff42419d51751e48522473c3e68a395afd54e8669fadb1"
+          },
+          "referenceSha256": "c4292b1dbdb434b3a989d96ea75735f2ea60898f969344ce3c33b888a6d3a960"
+        },
+        {
+          "case": "quoted_body",
+          "root": "cpg-rs/joern-parity/tests/fixtures/body-macro-state/cases/quoted_body",
+          "inputs": {
+            "main.c": "75acd23ca80415ee49a065c251c0e5d90f5156178c3ba8cf7ecf00aa1684b41f"
+          },
+          "referenceSha256": "35884becc042692977427d48c6567febab9a21fc8b914f7207f43379426c1d99"
+        },
+        {
+          "case": "quoted_global",
+          "root": "cpg-rs/joern-parity/tests/fixtures/body-macro-state/cases/quoted_global",
+          "inputs": {
+            "main.c": "8ea896a40fee1e43447af47825ef2a56f41807365b98a01e79a4d99c650d5258"
+          },
+          "referenceSha256": "9d1fdb0108e75717c16c3dfbc8166a85bed98eff2cab75868b8abc4b9eef386b"
+        },
+        {
+          "case": "recovery_after_redefinition",
+          "root": "cpg-rs/joern-parity/tests/fixtures/body-macro-state/cases/recovery_after_redefinition",
+          "inputs": {
+            "main.c": "df03300eab9f3bfefbbed4703fb086f21e2d923633ddf549a6da56a0471d0f20"
+          },
+          "referenceSha256": "534dad90f2c6e3f426313d3caf9f1b8cc2aff99da4ee65e3f2e4bff29e37e746"
+        },
+        {
+          "case": "recovery_entry_macros",
+          "root": "cpg-rs/joern-parity/tests/fixtures/body-macro-state/cases/recovery_entry_macros",
+          "inputs": {
+            "main.c": "3738b2aad94b9cf223084470b99faa34013576a976f27d0e50ca566f866c4116"
+          },
+          "referenceSha256": "c33f0b2f66222b41325dbcee78a7eff8fb20a583cb364ba074dc3fab5d0efebe"
+        },
+        {
+          "case": "runtime_arms_lexical_order",
+          "root": "cpg-rs/joern-parity/tests/fixtures/body-macro-state/cases/runtime_arms_lexical_order",
+          "inputs": {
+            "main.c": "813800749f49894246046e6869c964c01ad3b29cd03acbd54d62c0bf7642f173"
+          },
+          "referenceSha256": "7dc65ebaff2997a57453d6dfa22ce6cdd06c108dc348b91a2d184dfe3a944b26"
+        },
+        {
+          "case": "runtime_if_directive",
+          "root": "cpg-rs/joern-parity/tests/fixtures/body-macro-state/cases/runtime_if_directive",
+          "inputs": {
+            "main.c": "7ec14c2c8bc1dbb5397e8d498d80b90be4ffa1a87ec4b4eefd26a370efbd9092"
+          },
+          "referenceSha256": "5917b5036b7f53a232bb37c665bab0c3b4a7abdb27418f2f003f306d97a9f8e9"
+        },
+        {
+          "case": "selected_arm_definition",
+          "root": "cpg-rs/joern-parity/tests/fixtures/body-macro-state/cases/selected_arm_definition",
+          "inputs": {
+            "main.c": "def66e87ae0324f3457239584fc013c09175c969b1c050fa4d19ff82b85a7f52"
+          },
+          "referenceSha256": "adaa3273efb123b566fa0266a61a12cb252a1a099f6adee64ffee728180f7ae6"
+        },
+        {
+          "case": "sizeof_array",
+          "root": "cpg-rs/joern-parity/tests/fixtures/body-macro-state/cases/sizeof_array",
+          "inputs": {
+            "main.c": "4e7fd438bb6af8395892d56d0b0a3f9ff65932c882b816cf087de9e4db00dd56"
+          },
+          "referenceSha256": "6541eeee773acf76b1986fef95eb1a6d7d01df4c0e592e920e3342287aef1f19"
+        },
+        {
+          "case": "sizeof_array_plain",
+          "root": "cpg-rs/joern-parity/tests/fixtures/body-macro-state/cases/sizeof_array_plain",
+          "inputs": {
+            "main.c": "ba3ad7ce536accd26cc1ef55e296ec0a16acedd0d4cbb5f544c349fe9755e3bd"
+          },
+          "referenceSha256": "84deb0cf6033a5b4a56aaf237ec848d231d199ccaecbb81a651c96e590098642"
+        },
+        {
+          "case": "sizeof_type",
+          "root": "cpg-rs/joern-parity/tests/fixtures/body-macro-state/cases/sizeof_type",
+          "inputs": {
+            "main.c": "a1f067d9f777ce36304c6eef9f419ed3bde04368c6be6f5dc9d142c42588d59f"
+          },
+          "referenceSha256": "f72d52e77c67c664c179aadbea474dd15ad28d44d28593d4bd8b295fff325f06"
+        },
+        {
+          "case": "spaced_inactive_typedef_shadow",
+          "root": "cpg-rs/joern-parity/tests/fixtures/body-macro-state/cases/spaced_inactive_typedef_shadow",
+          "inputs": {
+            "main.c": "ff065662e7b3d3524e461e0c77859b02492121ac1bf4cb68755edb4bd64644d4"
+          },
+          "referenceSha256": "e269ea6d3d5793a0ea99857adfe0f5809da14d259f0b14afd41ac14bd4d06ad4"
+        },
+        {
+          "case": "trailing_comment",
+          "root": "cpg-rs/joern-parity/tests/fixtures/body-macro-state/cases/trailing_comment",
+          "inputs": {
+            "main.c": "054f937fdd8e1d294b0eeea28f1c2f05467cb7441d713d11443cfe73d978fc26"
+          },
+          "referenceSha256": "2a52c78744c824653edab56505aae02ead75c2293f14a080f9fd89bd4a81f698"
+        },
+        {
+          "case": "transitive_function",
+          "root": "cpg-rs/joern-parity/tests/fixtures/body-macro-state/cases/transitive_function",
+          "inputs": {
+            "main.c": "44593da3edc55a1af963dfc9ad0f6fcd2f04883952c393bbb51619822743c932"
+          },
+          "referenceSha256": "9ad2f0342daaa8a4c441b80fedc58a3d0abdd6bed82613ac2157ef058ba73cb3"
+        },
+        {
+          "case": "transitive_ordinary",
+          "root": "cpg-rs/joern-parity/tests/fixtures/body-macro-state/cases/transitive_ordinary",
+          "inputs": {
+            "main.c": "2978cc02f2a1cdf1fc5970c6c5d9a89f09c884f659193d0251fd241c2cec71d7"
+          },
+          "referenceSha256": "f616f9dfdd6a9040ec1bd12bc4bf6bb429d90d7fe210425af91731f2eceff15f"
+        }
+      ]
+    }
+  ],
+  "groupCaseInstances": 228,
+  "memberTypesDiagnostic": {
+    "cpg-rs/joern-parity/tests/fixtures/array-initializers/diagnostics/member_types/arrays.c": "de4911c0e986952e4be1acf1426e2915769d24ba6dca19ff5450f46723e54e4c",
+    "cpg-rs/joern-parity/tests/fixtures/array-initializers/diagnostics/member_types/baseline.txt": "cad15cf5e50cd65fbf3e406333437dfbca936f0839c95665892efb6e01bee463",
+    "cpg-rs/joern-parity/tests/fixtures/array-initializers/diagnostics/member_types/candidate.diff": "9d5ede45580ef5948b5bd4b120ea47565de72da4b5592a6fa9a9b8c80c26ba4a",
+    "cpg-rs/joern-parity/tests/fixtures/array-initializers/diagnostics/member_types/candidate.txt": "cad15cf5e50cd65fbf3e406333437dfbca936f0839c95665892efb6e01bee463",
+    "cpg-rs/joern-parity/tests/fixtures/array-initializers/diagnostics/member_types/expected.txt": "1c115c101d2a696d63efd9fdfdb3fcd8251dd2f5c366c4ceab7db21e9c7132d5"
+  },
+  "mainGate": {
+    "cpg-rs/joern-parity/oracle.sc": "bd2e18fab06ecd7897d796f5b31dac6669dc45ecf70c54fb1d5cc0fe29f3c1ab",
+    "cpg-rs/joern-parity/oracle_all.txt": "0cd3403a367ae297f2ddf60b70684f0b84cd81c9e2ca0c149f6663749df70abf",
+    "cpg-rs/joern-parity/check.sh": "4e70680cda0c2191c2356398df7b2ea30f7180c6e54666fa0a37276b59bf36aa",
+    "cpg-rs/joern-parity/test_check.py": "56422be68bf01305a1365895c8d8d910347cb682f6a582ea714e5a43ee7e23c7"
+  },
+  "caseCountsAreNotGateCounts": true,
+  "diagnosticRule": "Replay all retained references against accepted-tenth baseline and future candidate. Do not call every case exact; body-includes/body-macro-state retain diagnostics beyond their exact production gates."
+}

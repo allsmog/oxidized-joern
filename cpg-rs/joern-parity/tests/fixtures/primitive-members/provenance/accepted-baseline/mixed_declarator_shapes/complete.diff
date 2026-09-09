@@ -1,0 +1,94 @@
+--- complete-live-reference
++++ accepted-tenth-production
+@@ -18,9 +18,9 @@
+ 
+ METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1
+   TYPE_DECL NAME=Record CODE=struct Record {\n    unsigned short scalar, *pointer, table[3];\n} FULL_NAME=Record ORDER=1
+-    MEMBER NAME=scalar CODE=scalar TYPE_FULL_NAME=shortunsigned ORDER=1
+-    MEMBER NAME=pointer CODE=*pointer TYPE_FULL_NAME=shortunsigned* ORDER=2
+-    MEMBER NAME=table CODE=table[3] TYPE_FULL_NAME=shortunsigned[3] ORDER=3
++    MEMBER NAME=scalar CODE=scalar TYPE_FULL_NAME=unsigned short ORDER=1
++    MEMBER NAME=pointer CODE=*pointer TYPE_FULL_NAME=unsigned short* ORDER=2
++    MEMBER NAME=table CODE=table[3] TYPE_FULL_NAME=unsigned short[3] ORDER=3
+     METHOD NAME=<clinit> CODE=<clinit> FULL_NAME=Record.<clinit>:Record() ORDER=4
+       BLOCK ORDER=1
+         CALL NAME=<operator>.arrayInitializer CODE=table[3] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.arrayInitializer ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+@@ -61,17 +61,17 @@
+ NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE_DECL NAME=<global> FULL_NAME=main.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+ NODES|TYPE_DECL NAME=ordinary FULL_NAME=ordinary CODE=ordinary AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+-NODES|TYPE_DECL NAME=shortunsigned FULL_NAME=shortunsigned CODE=shortunsigned IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+-NODES|TYPE_DECL NAME=shortunsigned* FULL_NAME=shortunsigned* CODE=shortunsigned* IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+-NODES|TYPE_DECL NAME=shortunsigned[3] FULL_NAME=shortunsigned[3] CODE=shortunsigned[3] IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
++NODES|TYPE_DECL NAME=unsigned short FULL_NAME=unsigned short CODE=unsigned short IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
++NODES|TYPE_DECL NAME=unsigned short* FULL_NAME=unsigned short* CODE=unsigned short* IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
++NODES|TYPE_DECL NAME=unsigned short[3] FULL_NAME=unsigned short[3] CODE=unsigned short[3] IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+ NODES|TYPE NAME=Record FULL_NAME=Record TYPE_DECL_FULL_NAME=Record
+ NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+ NODES|TYPE NAME=ordinary FULL_NAME=ordinary TYPE_DECL_FULL_NAME=ordinary
+-NODES|TYPE NAME=shortunsigned FULL_NAME=shortunsigned TYPE_DECL_FULL_NAME=shortunsigned
+-NODES|TYPE NAME=shortunsigned* FULL_NAME=shortunsigned* TYPE_DECL_FULL_NAME=shortunsigned*
+-NODES|TYPE NAME=shortunsigned[3] FULL_NAME=shortunsigned[3] TYPE_DECL_FULL_NAME=shortunsigned[3]
++NODES|TYPE NAME=unsigned short FULL_NAME=unsigned short TYPE_DECL_FULL_NAME=unsigned short
++NODES|TYPE NAME=unsigned short* FULL_NAME=unsigned short* TYPE_DECL_FULL_NAME=unsigned short*
++NODES|TYPE NAME=unsigned short[3] FULL_NAME=unsigned short[3] TYPE_DECL_FULL_NAME=unsigned short[3]
+ NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+ EDGES|ARGUMENT Record.<clinit>:Record()#2 -> Record.<clinit>:Record()#3
+ EDGES|ARGUMENT ordinary#4 -> ordinary#5
+@@ -94,9 +94,9 @@
+ EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+ EDGES|CONTAINS F:<includes> -> D:ANY
+ EDGES|CONTAINS F:<includes> -> D:int
+-EDGES|CONTAINS F:<includes> -> D:shortunsigned
+-EDGES|CONTAINS F:<includes> -> D:shortunsigned*
+-EDGES|CONTAINS F:<includes> -> D:shortunsigned[3]
++EDGES|CONTAINS F:<includes> -> D:unsigned short
++EDGES|CONTAINS F:<includes> -> D:unsigned short*
++EDGES|CONTAINS F:<includes> -> D:unsigned short[3]
+ EDGES|CONTAINS F:<includes> -> D:void
+ EDGES|CONTAINS F:main.c -> D:main.c:<global>
+ EDGES|CONTAINS Record.<clinit>:Record()#0 -> Record.<clinit>:Record()#1
+@@ -121,12 +121,12 @@
+ EDGES|EVAL_TYPE Record.<clinit>:Record()#3 -> T:int
+ EDGES|EVAL_TYPE Record.<clinit>:Record()#6 -> T:Record
+ EDGES|EVAL_TYPE main.c:<global>#19 -> T:ANY
+-EDGES|EVAL_TYPE main.c:<global>#2 -> T:shortunsigned
++EDGES|EVAL_TYPE main.c:<global>#2 -> T:unsigned short
+ EDGES|EVAL_TYPE main.c:<global>#20 -> T:Record
+ EDGES|EVAL_TYPE main.c:<global>#21 -> T:ordinary
+ EDGES|EVAL_TYPE main.c:<global>#22 -> T:ANY
+-EDGES|EVAL_TYPE main.c:<global>#3 -> T:shortunsigned*
+-EDGES|EVAL_TYPE main.c:<global>#4 -> T:shortunsigned[3]
++EDGES|EVAL_TYPE main.c:<global>#3 -> T:unsigned short*
++EDGES|EVAL_TYPE main.c:<global>#4 -> T:unsigned short[3]
+ EDGES|EVAL_TYPE ordinary#1 -> T:void
+ EDGES|EVAL_TYPE ordinary#2 -> T:void
+ EDGES|EVAL_TYPE ordinary#3 -> T:void
+@@ -141,9 +141,9 @@
+ EDGES|REF T:Record -> main.c:<global>#1
+ EDGES|REF T:int -> D:int
+ EDGES|REF T:ordinary -> D:ordinary
+-EDGES|REF T:shortunsigned -> D:shortunsigned
+-EDGES|REF T:shortunsigned* -> D:shortunsigned*
+-EDGES|REF T:shortunsigned[3] -> D:shortunsigned[3]
++EDGES|REF T:unsigned short -> D:unsigned short
++EDGES|REF T:unsigned short* -> D:unsigned short*
++EDGES|REF T:unsigned short[3] -> D:unsigned short[3]
+ EDGES|REF T:void -> D:void
+ EDGES|REF main.c:<global>#21 -> main.c:<global>#12
+ EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+@@ -151,9 +151,9 @@
+ EDGES|SOURCE_FILE D:int -> F:<includes>
+ EDGES|SOURCE_FILE D:main.c:<global> -> F:main.c
+ EDGES|SOURCE_FILE D:ordinary -> F:main.c
+-EDGES|SOURCE_FILE D:shortunsigned -> F:<includes>
+-EDGES|SOURCE_FILE D:shortunsigned* -> F:<includes>
+-EDGES|SOURCE_FILE D:shortunsigned[3] -> F:<includes>
++EDGES|SOURCE_FILE D:unsigned short -> F:<includes>
++EDGES|SOURCE_FILE D:unsigned short* -> F:<includes>
++EDGES|SOURCE_FILE D:unsigned short[3] -> F:<includes>
+ EDGES|SOURCE_FILE D:void -> F:<includes>
+ EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
+ EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>

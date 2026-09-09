@@ -1,0 +1,6 @@
+{
+  "status": "HELD_PENDING_REFERENCE_AND_BASELINE_BINDINGS",
+  "parentBaselineHoldReleased": true,
+  "approvedReferenceReceiptSha256": "aeef8f13e1f03f46daec5df5d6c8ac9fba026ff71334dc3f59d8d50e3386033f",
+  "producerStarted": false
+}

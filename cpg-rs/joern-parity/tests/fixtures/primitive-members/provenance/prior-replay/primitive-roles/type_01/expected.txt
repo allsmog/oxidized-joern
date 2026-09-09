@@ -1,0 +1,292 @@
+METHOD NAME=<global> CODE=<global> FULL_NAME=<includes>:<global> ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.assignment FULL_NAME=<operator>.assignment ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=call_definition CODE=signed char call_definition(signed char value) { return identity(value); } FULL_NAME=call_definition SIGNATURE=signedchar(signedchar) ORDER=1
+  METHOD_PARAMETER_IN NAME=value CODE=signed char value TYPE_FULL_NAME=signedchar ORDER=1
+  METHOD_PARAMETER_OUT NAME=value CODE=signed char value TYPE_FULL_NAME=signedchar ORDER=1
+  BLOCK CODE={ return identity(value); } TYPE_FULL_NAME=void ORDER=2
+    RETURN CODE=return identity(value); ORDER=1
+      CALL NAME=identity CODE=identity(value) TYPE_FULL_NAME=signedchar METHOD_FULL_NAME=identity ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=signedchar ORDER=1 ARGUMENT_INDEX=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=signedchar ORDER=3
+
+METHOD NAME=call_prototype CODE=signed char call_prototype(signed char value) { return declared(value); } FULL_NAME=call_prototype SIGNATURE=signedchar(signedchar) ORDER=1
+  METHOD_PARAMETER_IN NAME=value CODE=signed char value TYPE_FULL_NAME=signedchar ORDER=1
+  METHOD_PARAMETER_OUT NAME=value CODE=signed char value TYPE_FULL_NAME=signedchar ORDER=1
+  BLOCK CODE={ return declared(value); } TYPE_FULL_NAME=void ORDER=2
+    RETURN CODE=return declared(value); ORDER=1
+      CALL NAME=declared CODE=declared(value) TYPE_FULL_NAME=signedchar METHOD_FULL_NAME=declared ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=signedchar ORDER=1 ARGUMENT_INDEX=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=signedchar ORDER=3
+
+METHOD NAME=declared CODE=signed char declared(signed char value); FULL_NAME=declared SIGNATURE=signedchar(signedchar) ORDER=1
+  METHOD_PARAMETER_IN NAME=value CODE=signed char value TYPE_FULL_NAME=signedchar ORDER=1
+  METHOD_PARAMETER_OUT NAME=value CODE=signed char value TYPE_FULL_NAME=signedchar ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=signedchar ORDER=3
+
+METHOD NAME=identity CODE=signed char identity(signed char value) { signed char local = value; return local; } FULL_NAME=identity SIGNATURE=signedchar(signedchar) ORDER=1
+  METHOD_PARAMETER_IN NAME=value CODE=signed char value TYPE_FULL_NAME=signedchar ORDER=1
+  METHOD_PARAMETER_OUT NAME=value CODE=signed char value TYPE_FULL_NAME=signedchar ORDER=1
+  BLOCK CODE={ signed char local = value; return local; } TYPE_FULL_NAME=void ORDER=2
+    LOCAL NAME=local CODE=signed char local TYPE_FULL_NAME=signedchar ORDER=1
+    CALL NAME=<operator>.assignment CODE=local = value TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+      IDENTIFIER NAME=local CODE=local TYPE_FULL_NAME=signedchar ORDER=1 ARGUMENT_INDEX=1
+      IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=signedchar ORDER=2 ARGUMENT_INDEX=2
+    RETURN CODE=return local; ORDER=3
+      IDENTIFIER NAME=local CODE=local TYPE_FULL_NAME=signedchar ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=signedchar ORDER=3
+
+METHOD NAME=<global> CODE=<global> FULL_NAME=types.c:<global> ORDER=1
+  METHOD NAME=identity CODE=signed char identity(signed char value) { signed char local = value; return local; } FULL_NAME=identity SIGNATURE=signedchar(signedchar) ORDER=1
+    METHOD_PARAMETER_IN NAME=value CODE=signed char value TYPE_FULL_NAME=signedchar ORDER=1
+    METHOD_PARAMETER_OUT NAME=value CODE=signed char value TYPE_FULL_NAME=signedchar ORDER=1
+    BLOCK CODE={ signed char local = value; return local; } TYPE_FULL_NAME=void ORDER=2
+      LOCAL NAME=local CODE=signed char local TYPE_FULL_NAME=signedchar ORDER=1
+      CALL NAME=<operator>.assignment CODE=local = value TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=local CODE=local TYPE_FULL_NAME=signedchar ORDER=1 ARGUMENT_INDEX=1
+        IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=signedchar ORDER=2 ARGUMENT_INDEX=2
+      RETURN CODE=return local; ORDER=3
+        IDENTIFIER NAME=local CODE=local TYPE_FULL_NAME=signedchar ORDER=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=signedchar ORDER=3
+  METHOD NAME=call_definition CODE=signed char call_definition(signed char value) { return identity(value); } FULL_NAME=call_definition SIGNATURE=signedchar(signedchar) ORDER=1
+    METHOD_PARAMETER_IN NAME=value CODE=signed char value TYPE_FULL_NAME=signedchar ORDER=1
+    METHOD_PARAMETER_OUT NAME=value CODE=signed char value TYPE_FULL_NAME=signedchar ORDER=1
+    BLOCK CODE={ return identity(value); } TYPE_FULL_NAME=void ORDER=2
+      RETURN CODE=return identity(value); ORDER=1
+        CALL NAME=identity CODE=identity(value) TYPE_FULL_NAME=signedchar METHOD_FULL_NAME=identity ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=signedchar ORDER=1 ARGUMENT_INDEX=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=signedchar ORDER=3
+  METHOD NAME=call_prototype CODE=signed char call_prototype(signed char value) { return declared(value); } FULL_NAME=call_prototype SIGNATURE=signedchar(signedchar) ORDER=1
+    METHOD_PARAMETER_IN NAME=value CODE=signed char value TYPE_FULL_NAME=signedchar ORDER=1
+    METHOD_PARAMETER_OUT NAME=value CODE=signed char value TYPE_FULL_NAME=signedchar ORDER=1
+    BLOCK CODE={ return declared(value); } TYPE_FULL_NAME=void ORDER=2
+      RETURN CODE=return declared(value); ORDER=1
+        CALL NAME=declared CODE=declared(value) TYPE_FULL_NAME=signedchar METHOD_FULL_NAME=declared ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=signedchar ORDER=1 ARGUMENT_INDEX=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=signedchar ORDER=3
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+    METHOD_REF CODE=identity TYPE_FULL_NAME=identity METHOD_FULL_NAME=identity ORDER=1
+    METHOD_REF CODE=call_definition TYPE_FULL_NAME=call_definition METHOD_FULL_NAME=call_definition ORDER=2
+    METHOD_REF CODE=call_prototype TYPE_FULL_NAME=call_prototype METHOD_FULL_NAME=call_prototype ORDER=3
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+NODES|META_DATA LANGUAGE=NEWC
+NODES|FILE NAME=<includes> ORDER=1
+NODES|FILE NAME=<unknown> ORDER=0
+NODES|FILE NAME=types.c ORDER=0
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<global> FILENAME=<unknown> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<includes>:<global> FILENAME=<includes> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=types.c:<global> FILENAME=types.c ORDER=1
+NODES|NAMESPACE NAME=<global>
+NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=call_definition FULL_NAME=call_definition CODE=call_definition AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=types.c:<global> FILENAME=types.c ORDER=1
+NODES|TYPE_DECL NAME=call_prototype FULL_NAME=call_prototype CODE=call_prototype AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=types.c:<global> FILENAME=types.c ORDER=1
+NODES|TYPE_DECL NAME=identity FULL_NAME=identity CODE=identity AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=types.c:<global> FILENAME=types.c ORDER=1
+NODES|TYPE_DECL NAME=signedchar FULL_NAME=signedchar CODE=signedchar IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=<global> FULL_NAME=types.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=types.c:<global> FILENAME=types.c ORDER=1
+NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+NODES|TYPE NAME=call_definition FULL_NAME=call_definition TYPE_DECL_FULL_NAME=call_definition
+NODES|TYPE NAME=call_prototype FULL_NAME=call_prototype TYPE_DECL_FULL_NAME=call_prototype
+NODES|TYPE NAME=identity FULL_NAME=identity TYPE_DECL_FULL_NAME=identity
+NODES|TYPE NAME=signedchar FULL_NAME=signedchar TYPE_DECL_FULL_NAME=signedchar
+NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+EDGES|ARGUMENT call_definition#4 -> call_definition#5
+EDGES|ARGUMENT call_definition#5 -> call_definition#6
+EDGES|ARGUMENT call_prototype#4 -> call_prototype#5
+EDGES|ARGUMENT call_prototype#5 -> call_prototype#6
+EDGES|ARGUMENT identity#5 -> identity#6
+EDGES|ARGUMENT identity#5 -> identity#7
+EDGES|ARGUMENT identity#8 -> identity#9
+EDGES|CALL call_definition#5 -> identity#0
+EDGES|CALL call_prototype#5 -> declared#0
+EDGES|CALL identity#5 -> <operator>.assignment#0
+EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+EDGES|CFG <operator>.assignment#0 -> <operator>.assignment#5
+EDGES|CFG call_definition#0 -> call_definition#6
+EDGES|CFG call_definition#4 -> call_definition#7
+EDGES|CFG call_definition#5 -> call_definition#4
+EDGES|CFG call_definition#6 -> call_definition#5
+EDGES|CFG call_prototype#0 -> call_prototype#6
+EDGES|CFG call_prototype#4 -> call_prototype#7
+EDGES|CFG call_prototype#5 -> call_prototype#4
+EDGES|CFG call_prototype#6 -> call_prototype#5
+EDGES|CFG declared#0 -> declared#4
+EDGES|CFG identity#0 -> identity#6
+EDGES|CFG identity#5 -> identity#9
+EDGES|CFG identity#6 -> identity#7
+EDGES|CFG identity#7 -> identity#5
+EDGES|CFG identity#8 -> identity#10
+EDGES|CFG identity#9 -> identity#8
+EDGES|CFG types.c:<global>#0 -> types.c:<global>#29
+EDGES|CFG types.c:<global>#29 -> types.c:<global>#30
+EDGES|CFG types.c:<global>#30 -> types.c:<global>#31
+EDGES|CFG types.c:<global>#31 -> types.c:<global>#32
+EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+EDGES|CONTAINS <operator>.assignment#0 -> <operator>.assignment#2
+EDGES|CONTAINS D:types.c:<global> -> D:call_definition
+EDGES|CONTAINS D:types.c:<global> -> D:call_prototype
+EDGES|CONTAINS D:types.c:<global> -> D:identity
+EDGES|CONTAINS D:types.c:<global> -> declared#0
+EDGES|CONTAINS D:types.c:<global> -> types.c:<global>#0
+EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+EDGES|CONTAINS F:<includes> -> D:ANY
+EDGES|CONTAINS F:<includes> -> D:signedchar
+EDGES|CONTAINS F:<includes> -> D:void
+EDGES|CONTAINS F:types.c -> D:types.c:<global>
+EDGES|CONTAINS call_definition#0 -> call_definition#3
+EDGES|CONTAINS call_definition#0 -> call_definition#4
+EDGES|CONTAINS call_definition#0 -> call_definition#5
+EDGES|CONTAINS call_definition#0 -> call_definition#6
+EDGES|CONTAINS call_prototype#0 -> call_prototype#3
+EDGES|CONTAINS call_prototype#0 -> call_prototype#4
+EDGES|CONTAINS call_prototype#0 -> call_prototype#5
+EDGES|CONTAINS call_prototype#0 -> call_prototype#6
+EDGES|CONTAINS declared#0 -> declared#3
+EDGES|CONTAINS identity#0 -> identity#3
+EDGES|CONTAINS identity#0 -> identity#5
+EDGES|CONTAINS identity#0 -> identity#6
+EDGES|CONTAINS identity#0 -> identity#7
+EDGES|CONTAINS identity#0 -> identity#8
+EDGES|CONTAINS identity#0 -> identity#9
+EDGES|CONTAINS types.c:<global>#0 -> call_definition#0
+EDGES|CONTAINS types.c:<global>#0 -> call_prototype#0
+EDGES|CONTAINS types.c:<global>#0 -> identity#0
+EDGES|CONTAINS types.c:<global>#0 -> types.c:<global>#28
+EDGES|CONTAINS types.c:<global>#0 -> types.c:<global>#29
+EDGES|CONTAINS types.c:<global>#0 -> types.c:<global>#30
+EDGES|CONTAINS types.c:<global>#0 -> types.c:<global>#31
+EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#6 -> T:ANY
+EDGES|EVAL_TYPE call_definition#1 -> T:signedchar
+EDGES|EVAL_TYPE call_definition#2 -> T:signedchar
+EDGES|EVAL_TYPE call_definition#3 -> T:void
+EDGES|EVAL_TYPE call_definition#5 -> T:signedchar
+EDGES|EVAL_TYPE call_definition#6 -> T:signedchar
+EDGES|EVAL_TYPE call_definition#7 -> T:signedchar
+EDGES|EVAL_TYPE call_prototype#1 -> T:signedchar
+EDGES|EVAL_TYPE call_prototype#2 -> T:signedchar
+EDGES|EVAL_TYPE call_prototype#3 -> T:void
+EDGES|EVAL_TYPE call_prototype#5 -> T:signedchar
+EDGES|EVAL_TYPE call_prototype#6 -> T:signedchar
+EDGES|EVAL_TYPE call_prototype#7 -> T:signedchar
+EDGES|EVAL_TYPE declared#1 -> T:signedchar
+EDGES|EVAL_TYPE declared#2 -> T:signedchar
+EDGES|EVAL_TYPE declared#3 -> T:ANY
+EDGES|EVAL_TYPE declared#4 -> T:signedchar
+EDGES|EVAL_TYPE identity#1 -> T:signedchar
+EDGES|EVAL_TYPE identity#10 -> T:signedchar
+EDGES|EVAL_TYPE identity#2 -> T:signedchar
+EDGES|EVAL_TYPE identity#3 -> T:void
+EDGES|EVAL_TYPE identity#4 -> T:signedchar
+EDGES|EVAL_TYPE identity#5 -> T:void
+EDGES|EVAL_TYPE identity#6 -> T:signedchar
+EDGES|EVAL_TYPE identity#7 -> T:signedchar
+EDGES|EVAL_TYPE identity#9 -> T:signedchar
+EDGES|EVAL_TYPE types.c:<global>#28 -> T:ANY
+EDGES|EVAL_TYPE types.c:<global>#29 -> T:identity
+EDGES|EVAL_TYPE types.c:<global>#30 -> T:call_definition
+EDGES|EVAL_TYPE types.c:<global>#31 -> T:call_prototype
+EDGES|EVAL_TYPE types.c:<global>#32 -> T:ANY
+EDGES|PARAMETER_LINK <operator>.assignment#1 -> <operator>.assignment#3
+EDGES|PARAMETER_LINK <operator>.assignment#4 -> <operator>.assignment#6
+EDGES|PARAMETER_LINK call_definition#1 -> call_definition#2
+EDGES|PARAMETER_LINK call_prototype#1 -> call_prototype#2
+EDGES|PARAMETER_LINK declared#1 -> declared#2
+EDGES|PARAMETER_LINK identity#1 -> identity#2
+EDGES|REF NB:<global> -> NS:<global>
+EDGES|REF NB:<includes>:<global> -> NS:<global>
+EDGES|REF NB:types.c:<global> -> NS:<global>
+EDGES|REF T:ANY -> D:ANY
+EDGES|REF T:call_definition -> D:call_definition
+EDGES|REF T:call_prototype -> D:call_prototype
+EDGES|REF T:identity -> D:identity
+EDGES|REF T:signedchar -> D:signedchar
+EDGES|REF T:void -> D:void
+EDGES|REF call_definition#6 -> call_definition#1
+EDGES|REF call_prototype#6 -> call_prototype#1
+EDGES|REF identity#6 -> identity#4
+EDGES|REF identity#7 -> identity#1
+EDGES|REF identity#9 -> identity#4
+EDGES|REF types.c:<global>#29 -> identity#0
+EDGES|REF types.c:<global>#30 -> call_definition#0
+EDGES|REF types.c:<global>#31 -> call_prototype#0
+EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+EDGES|SOURCE_FILE D:ANY -> F:<includes>
+EDGES|SOURCE_FILE D:call_definition -> F:types.c
+EDGES|SOURCE_FILE D:call_prototype -> F:types.c
+EDGES|SOURCE_FILE D:identity -> F:types.c
+EDGES|SOURCE_FILE D:signedchar -> F:<includes>
+EDGES|SOURCE_FILE D:types.c:<global> -> F:types.c
+EDGES|SOURCE_FILE D:void -> F:<includes>
+EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
+EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>
+EDGES|SOURCE_FILE NB:types.c:<global> -> F:types.c
+EDGES|SOURCE_FILE call_definition#0 -> F:types.c
+EDGES|SOURCE_FILE call_prototype#0 -> F:types.c
+EDGES|SOURCE_FILE declared#0 -> F:types.c
+EDGES|SOURCE_FILE identity#0 -> F:types.c
+EDGES|SOURCE_FILE types.c:<global>#0 -> F:types.c
+FLOWS|REACHING_DEF[<RET>] call_definition#4 -> call_definition#7
+FLOWS|REACHING_DEF[<RET>] call_prototype#4 -> call_prototype#7
+FLOWS|REACHING_DEF[<RET>] identity#8 -> identity#10
+FLOWS|REACHING_DEF[] <operator>.assignment#0 -> <operator>.assignment#1
+FLOWS|REACHING_DEF[] <operator>.assignment#0 -> <operator>.assignment#4
+FLOWS|REACHING_DEF[] call_definition#0 -> call_definition#1
+FLOWS|REACHING_DEF[] call_definition#0 -> call_definition#6
+FLOWS|REACHING_DEF[] call_prototype#0 -> call_prototype#1
+FLOWS|REACHING_DEF[] call_prototype#0 -> call_prototype#6
+FLOWS|REACHING_DEF[] declared#0 -> declared#1
+FLOWS|REACHING_DEF[] identity#0 -> identity#1
+FLOWS|REACHING_DEF[] identity#0 -> identity#7
+FLOWS|REACHING_DEF[] identity#0 -> identity#9
+FLOWS|REACHING_DEF[] types.c:<global>#0 -> types.c:<global>#29
+FLOWS|REACHING_DEF[] types.c:<global>#0 -> types.c:<global>#30
+FLOWS|REACHING_DEF[] types.c:<global>#0 -> types.c:<global>#31
+FLOWS|REACHING_DEF[declared(value)] call_prototype#5 -> call_prototype#4
+FLOWS|REACHING_DEF[declared(value)] call_prototype#5 -> call_prototype#7
+FLOWS|REACHING_DEF[identity(value)] call_definition#5 -> call_definition#4
+FLOWS|REACHING_DEF[identity(value)] call_definition#5 -> call_definition#7
+FLOWS|REACHING_DEF[local = value] identity#5 -> identity#10
+FLOWS|REACHING_DEF[local] identity#6 -> identity#10
+FLOWS|REACHING_DEF[local] identity#6 -> identity#5
+FLOWS|REACHING_DEF[local] identity#6 -> identity#9
+FLOWS|REACHING_DEF[local] identity#9 -> identity#8
+FLOWS|REACHING_DEF[p1] <operator>.assignment#1 -> <operator>.assignment#3
+FLOWS|REACHING_DEF[p1] <operator>.assignment#1 -> <operator>.assignment#5
+FLOWS|REACHING_DEF[p2] <operator>.assignment#4 -> <operator>.assignment#5
+FLOWS|REACHING_DEF[p2] <operator>.assignment#4 -> <operator>.assignment#6
+FLOWS|REACHING_DEF[value] call_definition#1 -> call_definition#2
+FLOWS|REACHING_DEF[value] call_definition#1 -> call_definition#6
+FLOWS|REACHING_DEF[value] call_definition#6 -> call_definition#2
+FLOWS|REACHING_DEF[value] call_definition#6 -> call_definition#5
+FLOWS|REACHING_DEF[value] call_definition#6 -> call_definition#7
+FLOWS|REACHING_DEF[value] call_prototype#1 -> call_prototype#2
+FLOWS|REACHING_DEF[value] call_prototype#1 -> call_prototype#6
+FLOWS|REACHING_DEF[value] call_prototype#6 -> call_prototype#2
+FLOWS|REACHING_DEF[value] call_prototype#6 -> call_prototype#5
+FLOWS|REACHING_DEF[value] call_prototype#6 -> call_prototype#7
+FLOWS|REACHING_DEF[value] declared#1 -> declared#2
+FLOWS|REACHING_DEF[value] declared#1 -> declared#4
+FLOWS|REACHING_DEF[value] identity#1 -> identity#2
+FLOWS|REACHING_DEF[value] identity#1 -> identity#7
+FLOWS|REACHING_DEF[value] identity#7 -> identity#10
+FLOWS|REACHING_DEF[value] identity#7 -> identity#2
+FLOWS|REACHING_DEF[value] identity#7 -> identity#5
+FLOWS|REACHING_DEF[value] identity#7 -> identity#6
