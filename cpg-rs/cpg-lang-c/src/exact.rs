@@ -12,21 +12,48 @@ use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
 use tree_sitter::{Node, Parser};
 
+struct SourceUnit {
+    file: String,
+    src: String,
+    tree: tree_sitter::Tree,
+}
+
 pub fn canonical_dump_paths(paths: &[String]) -> String {
-    let sources: Vec<(String, String)> = paths
+    canonical_dump_sources(&read_sources_from_paths(paths).expect("read exact C inputs"))
+}
+
+/// Retain source names relative to the common input directory. Flattening
+/// filenames loses quoted include targets and conflates equal basenames.
+pub fn read_sources_from_paths(paths: &[String]) -> std::io::Result<Vec<(String, String)>> {
+    let paths: Vec<std::path::PathBuf> = paths
+        .iter()
+        .map(std::path::absolute)
+        .collect::<std::io::Result<_>>()?;
+    let Some(first) = paths.first() else {
+        return Ok(Vec::new());
+    };
+    let mut root = first.parent().expect("input file parent").to_path_buf();
+    for path in &paths[1..] {
+        while !path.starts_with(&root) {
+            if !root.pop() {
+                break;
+            }
+        }
+    }
+    paths
         .iter()
         .map(|path| {
-            let source = std::fs::read_to_string(path)
-                .unwrap_or_else(|e| panic!("read exact C input {path}: {e}"));
-            let file = std::path::Path::new(path)
-                .file_name()
-                .unwrap_or_else(|| panic!("input has no filename: {path}"))
+            let source = std::fs::read_to_string(path).map_err(|error| {
+                std::io::Error::new(error.kind(), format!("{}: {error}", path.display()))
+            })?;
+            let file = path
+                .strip_prefix(&root)
+                .expect("common input directory")
                 .to_string_lossy()
                 .into_owned();
-            (file, source)
+            Ok((file, source))
         })
-        .collect();
-    canonical_dump_sources(&sources)
+        .collect()
 }
 
 pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
@@ -35,16 +62,11 @@ pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
         .set_language(&tree_sitter_c::LANGUAGE.into())
         .unwrap();
 
-    struct Unit {
-        file: String,
-        src: String,
-        tree: tree_sitter::Tree,
-    }
-    let units: Vec<Unit> = sources
+    let units: Vec<SourceUnit> = sources
         .iter()
         .map(|(file, src)| {
             let tree = parser.parse(src, None).unwrap();
-            Unit {
+            SourceUnit {
                 file: file.clone(),
                 src: src.clone(),
                 tree,
@@ -248,6 +270,7 @@ pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
     let mut stub_uses: HashMap<String, usize> = HashMap::new();
     let mut edges: Vec<(String, String, String)> = Vec::new();
     let mut placements: HashMap<String, Vec<(String, usize)>> = HashMap::new();
+    let mut macro_method_files = HashMap::new();
     let mut used_macros: std::collections::BTreeMap<String, (String, String, usize, String)> =
         std::collections::BTreeMap::new();
     // #include directives become IMPORT nodes that consume earlier sibling
@@ -266,8 +289,7 @@ pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
     for u in &units {
         let b = u.src.as_bytes();
         let root = u.tree.root_node();
-        let active_items = active_translation_unit_items(root, b);
-        let active_ids: HashSet<usize> = active_items.iter().map(Node::id).collect();
+        let (active_items, macros, macro_states) = body_macro_context(root, b, &u.file, &units);
         let active_methods: HashSet<usize> = active_items
             .iter()
             .filter(|node| node.kind() == "function_definition")
@@ -279,73 +301,6 @@ pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
         let mut function_call_types: HashMap<String, String> = HashMap::new();
         let mut function_full_names: HashMap<String, String> = HashMap::new();
         let mut globals: HashMap<String, String> = HashMap::new();
-        let mut macros: Arc<HashMap<String, MacroDef>> = Arc::new(HashMap::new());
-        let mut macro_states: HashMap<usize, Arc<HashMap<String, MacroDef>>> = HashMap::new();
-        for f in translation_unit_items(root) {
-            if matches!(
-                f.kind(),
-                "function_definition"
-                    | "declaration"
-                    | "struct_specifier"
-                    | "union_specifier"
-                    | "enum_specifier"
-            ) {
-                macro_states.insert(f.id(), macros.clone());
-            }
-            if !active_ids.contains(&f.id()) {
-                continue;
-            }
-            match f.kind() {
-                "preproc_def" => {
-                    let name = f
-                        .child_by_field_name("name")
-                        .map(|x| text(x, b).to_string())
-                        .unwrap_or_default();
-                    let body = preproc_macro_body(f, b);
-                    Arc::make_mut(&mut macros).insert(
-                        name,
-                        MacroDef {
-                            params: None,
-                            body,
-                            directive: text(f, b).trim_end().to_string(),
-                        },
-                    );
-                }
-                "preproc_function_def" => {
-                    let name = f
-                        .child_by_field_name("name")
-                        .map(|x| text(x, b).to_string())
-                        .unwrap_or_default();
-                    let params = f
-                        .child_by_field_name("parameters")
-                        .map(|ps| {
-                            named_children(ps)
-                                .iter()
-                                .map(|p| text(*p, b).to_string())
-                                .collect()
-                        })
-                        .unwrap_or_default();
-                    let body = preproc_macro_body(f, b);
-                    Arc::make_mut(&mut macros).insert(
-                        name,
-                        MacroDef {
-                            params: Some(params),
-                            body,
-                            directive: text(f, b).trim_end().to_string(),
-                        },
-                    );
-                }
-                "preproc_call"
-                    if f.child_by_field_name("directive")
-                        .is_some_and(|directive| text(directive, b).trim() == "#undef") =>
-                {
-                    if let Some(name) = f.child_by_field_name("argument") {
-                        Arc::make_mut(&mut macros).remove(text(name, b).trim());
-                    }
-                }
-                _ => {}
-            }
-        }
         let mut enumerators: Vec<String> = Vec::new();
         for f in translation_unit_items(root) {
             if f.kind() == "enum_specifier" {
@@ -428,6 +383,8 @@ pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
             macro_states: &macro_states,
             unknown_declaration_prefixes: &unknown_declaration_prefixes,
             file: u.file.clone(),
+            copying_macro_argument: false,
+            macro_method_files: &mut macro_method_files,
             used_macros: &mut used_macros,
             symbols: HashMap::new(),
             symbol_call_types: HashMap::new(),
@@ -439,6 +396,7 @@ pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
             out: String::new(),
             block: String::new(),
             line_no: 0,
+            argument_count: 0,
             suppress_below: None,
             ctx_stack: Vec::new(),
             parent_stack: Vec::new(),
@@ -510,6 +468,8 @@ pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
         macro_states: &empty_macro_states,
         unknown_declaration_prefixes: &unknown_declaration_prefixes,
         file: String::new(),
+        copying_macro_argument: false,
+        macro_method_files: &mut macro_method_files,
         used_macros: &mut used_macros,
         symbols: HashMap::new(),
         symbol_call_types: HashMap::new(),
@@ -521,6 +481,7 @@ pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
         out: String::new(),
         block: String::new(),
         line_no: 0,
+        argument_count: 0,
         suppress_below: None,
         ctx_stack: Vec::new(),
         parent_stack: Vec::new(),
@@ -716,10 +677,10 @@ pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
             format!("F:{f}"),
         ));
     }
-    // Macro methods: SOURCE_FILE to their defining file and CONTAINS from the
-    // file-global TYPE_DECL.
+    // Macro identity uses the defining file; Joern registers the stub beneath
+    // the first calling translation unit and uses that unit for SOURCE_FILE.
     for full in used_macros.keys() {
-        if let Some(file) = full.split(':').next() {
+        if let Some(file) = macro_method_files.get(full) {
             edges.push((
                 "SOURCE_FILE".into(),
                 format!("M:{full}"),
@@ -851,14 +812,17 @@ fn count_members(n: Node) -> i64 {
         .sum()
 }
 
-/// An in-file #define. CDT expands these; invocations become INLINED calls
+/// A source #define, including supplied headers. Expanded invocations become INLINED calls
 /// and each *used* macro also gets a METHOD whose CODE is the directive.
 #[derive(Clone)]
 struct MacroDef {
     params: Option<Vec<String>>, // None = object-like
     body: String,
     directive: String,
+    file: String,
 }
+
+type MacroState = Arc<HashMap<String, MacroDef>>;
 
 /// Per-function emission context.
 struct Ctx<'a> {
@@ -876,10 +840,12 @@ struct Ctx<'a> {
     ambiguous_functions: &'a HashSet<String>,
     globals: &'a HashMap<String, String>,
     enumerators: &'a Vec<String>,
-    macros: Arc<HashMap<String, MacroDef>>,
-    macro_states: &'a HashMap<usize, Arc<HashMap<String, MacroDef>>>,
+    macros: MacroState,
+    macro_states: &'a HashMap<usize, MacroState>,
     unknown_declaration_prefixes: &'a HashMap<usize, String>,
     file: String,
+    copying_macro_argument: bool,
+    macro_method_files: &'a mut HashMap<String, String>,
     // used macros: full_name -> (name, directive, nparams, ret type)
     used_macros: &'a mut std::collections::BTreeMap<String, (String, String, usize, String)>,
     symbols: HashMap<String, String>, // local/param name -> declaration type
@@ -901,6 +867,7 @@ struct Ctx<'a> {
     // first-wins assignment across sorted method walks.
     block: String,
     line_no: usize,
+    argument_count: usize,
     suppress_below: Option<usize>, // depth of a nested METHOD whose interior is foreign
     ctx_stack: Vec<(usize, String)>, // CONTAINS contexts: (depth, src addr)
     parent_stack: Vec<(usize, String, String, bool)>, // (depth, label, addr, inlined)
@@ -991,6 +958,13 @@ impl Ctx<'_> {
         while self.ctx_stack.last().is_some_and(|t| t.0 >= depth) {
             self.ctx_stack.pop();
         }
+        if let Some((_, parent_label, _, parent_inlined)) = self.parent_stack.last() {
+            if (parent_label == "CALL" && p.arg.is_some() && !(*parent_inlined && label == "BLOCK"))
+                || parent_label == "RETURN"
+            {
+                self.argument_count += 1;
+            }
+        }
         if !suppressed {
             if let ("METHOD" | "TYPE_DECL", Some(f)) = (label, &p.full) {
                 let key = if label == "METHOD" {
@@ -1042,7 +1016,7 @@ impl Ctx<'_> {
                 .parent_stack
                 .last()
                 .is_some_and(|(_, pl, _, pi)| *pi && pl == "CALL");
-            if label == "IDENTIFIER" && !under_inlined_call {
+            if label == "IDENTIFIER" && !under_inlined_call && !self.copying_macro_argument {
                 if let Some(n) = &p.name {
                     if let Some(i) = self.sym_line.get(n) {
                         let dst = format!("{}#{}", self.block, i);
@@ -1792,24 +1766,41 @@ impl Ctx<'_> {
         name: &str,
         code: &str,
         arg_nodes: &[Node],
-        _site: Node,
+        site: Node,
         b: &[u8],
         depth: usize,
         order: i64,
         arg: Option<i64>,
     ) {
-        let (params, body, directive) = {
+        let (params, body, directive, defining_file) = {
             let m = &self.macros[name];
             (
                 m.params.clone().unwrap_or_default(),
                 m.body.clone(),
                 m.directive.clone(),
+                m.file.clone(),
             )
         };
         let arg_texts: Vec<String> = arg_nodes.iter().map(|a| text(*a, b).to_string()).collect();
-        let expansion = substitute(&body, &params, &arg_texts);
-        let ret = expansion_type(&expansion, &self.symbols, self.functions);
-        let full = format!("{}:{name}:{ret}({})", self.file, params.len());
+        let replacement = substitute(&body, &params, &arg_texts);
+        let expansion = expand_body_expression(
+            &replacement,
+            &self.macros,
+            &mut HashSet::from([name.to_string()]),
+            &mut 65_536,
+        );
+        let ret = if site
+            .parent()
+            .is_some_and(|parent| parent.kind() == "expression_statement")
+        {
+            "ANY".to_string()
+        } else {
+            expansion_type(&expansion, &self.symbols, self.globals)
+        };
+        let full = format!("{defining_file}:{name}:{ret}({})", params.len());
+        self.macro_method_files
+            .entry(full.clone())
+            .or_insert_with(|| self.file.clone());
         self.used_macros.entry(full.clone()).or_insert((
             name.to_string(),
             directive,
@@ -1822,35 +1813,102 @@ impl Ctx<'_> {
             P {
                 name: Some(name.to_string()),
                 code: Some(code.to_string()),
-                tfn: Some(ret),
+                tfn: Some(ret.clone()),
                 mfn: Some(full),
-                sig: Some(format!(
-                    "{}({})",
-                    expansion_type(&expansion, &self.symbols, self.functions),
-                    params.len()
-                )),
+                sig: Some(format!("{ret}({})", params.len())),
                 order: Some(order),
                 arg,
                 dispatch: Some("INLINED".into()),
                 ..Default::default()
             },
         );
-        for (i, a) in arg_nodes.iter().enumerate() {
-            let k = (i + 1) as i64;
-            self.emit_expr(*a, b, depth + 1, k, Some(k));
+        let expansion_source = format!("void __m() {{ {expansion}; }}");
+        let mut parser = Parser::new();
+        parser
+            .set_language(&tree_sitter_c::LANGUAGE.into())
+            .unwrap();
+        let tree = parser.parse(&expansion_source, None).unwrap();
+        let mut candidates = vec![tree.root_node()];
+        let mut expression_nodes = Vec::new();
+        while let Some(node) = candidates.pop() {
+            if !matches!(node.kind(), "parenthesized_expression" | "field_identifier") {
+                expression_nodes.push(node);
+            }
+            candidates.extend(named_children(node).into_iter().rev());
         }
-        let bk = (arg_nodes.len() + 1) as i64;
+        let before_args = self.argument_count;
+        let mut emitted_args = 0;
+        for (i, a) in arg_nodes.iter().enumerate() {
+            let normalized = macro_argument_match_code(*a, b);
+            let found = expression_nodes.iter().find(|node| {
+                let raw = text(**node, expansion_source.as_bytes());
+                if node.kind() == "identifier" {
+                    if node.parent().is_some_and(|parent| {
+                        parent.kind() == "call_expression"
+                            && parent.child_by_field_name("function") == Some(**node)
+                    }) {
+                        return false;
+                    }
+                    if self.globals.contains_key(raw) {
+                        format!("<global> {raw}") == normalized
+                    } else if self.symbols.contains_key(raw)
+                        || self.enumerators.iter().any(|name| name == raw)
+                    {
+                        raw == normalized
+                    } else {
+                        format!("<unknown> {raw}") == normalized
+                    }
+                } else {
+                    raw == normalized
+                        && matches!(
+                            node.kind(),
+                            "call_expression"
+                                | "binary_expression"
+                                | "unary_expression"
+                                | "pointer_expression"
+                                | "update_expression"
+                                | "cast_expression"
+                                | "subscript_expression"
+                                | "field_expression"
+                                | "conditional_expression"
+                                | "number_literal"
+                                | "string_literal"
+                                | "char_literal"
+                                | "sizeof_expression"
+                        )
+                }
+            });
+            if let Some(node) = found {
+                emitted_args += 1;
+                let was_copying = self.copying_macro_argument;
+                self.copying_macro_argument = true;
+                let macros = std::mem::replace(&mut self.macros, Arc::new(HashMap::new()));
+                self.emit_expr(
+                    *node,
+                    expansion_source.as_bytes(),
+                    depth + 1,
+                    emitted_args,
+                    Some((i + 1) as i64),
+                );
+                self.macros = macros;
+                self.copying_macro_argument = was_copying;
+            }
+        }
+        // MacroHandler counts descendant ARGUMENT edges in copied subtrees.
+        let expansion_index = (self.argument_count - before_args) as i64 + 1;
         self.line(
             depth + 1,
             "BLOCK",
             P {
                 tfn: Some("ANY".into()),
-                order: Some(bk),
-                arg: Some(bk),
+                order: Some(emitted_args + 1),
+                arg: Some(expansion_index),
                 ..Default::default()
             },
         );
+        let macros = std::mem::replace(&mut self.macros, Arc::new(HashMap::new()));
         self.emit_expansion(&expansion, depth + 2);
+        self.macros = macros;
     }
 
     /// Parse a macro expansion as an expression and emit it (ORDER=1, no
@@ -1953,9 +2011,65 @@ impl Ctx<'_> {
     fn collect_phantoms(&mut self, body: Node, b: &[u8]) {
         let mut shadowed: Vec<String> = self.symbols.keys().cloned().collect();
         collect_decl_names(body, b, &mut shadowed);
-        let mut seen: Vec<String> = Vec::new();
+        let mut seen = Vec::new();
+        self.walk_phantoms(body, b, &shadowed, &mut seen);
+    }
+
+    fn walk_phantoms(&mut self, body: Node, b: &[u8], shadowed: &[String], seen: &mut Vec<String>) {
         let mut stack = vec![body];
         while let Some(n) = stack.pop() {
+            let invocation = if n.kind() == "identifier" {
+                self.macros
+                    .get(text(n, b))
+                    .filter(|m| m.params.is_none())
+                    .map(|m| (text(n, b).to_string(), m.clone(), Vec::new()))
+            } else if n.kind() == "call_expression" {
+                n.child_by_field_name("function").and_then(|f| {
+                    self.macros
+                        .get(text(f, b))
+                        .filter(|m| m.params.is_some())
+                        .map(|m| {
+                            (
+                                text(f, b).to_string(),
+                                m.clone(),
+                                n.child_by_field_name("arguments")
+                                    .map(named_children)
+                                    .unwrap_or_default()
+                                    .into_iter()
+                                    .map(|arg| text(arg, b).to_string())
+                                    .collect(),
+                            )
+                        })
+                })
+            } else {
+                None
+            };
+            if let Some((name, definition, args)) = invocation {
+                let replacement = substitute(
+                    &definition.body,
+                    definition.params.as_deref().unwrap_or_default(),
+                    &args,
+                );
+                let expansion = expand_body_expression(
+                    &replacement,
+                    &self.macros,
+                    &mut HashSet::from([name]),
+                    &mut 65_536,
+                );
+                let source = format!("void __m() {{ {expansion}; }}");
+                let mut parser = Parser::new();
+                parser
+                    .set_language(&tree_sitter_c::LANGUAGE.into())
+                    .unwrap();
+                let tree = parser.parse(&source, None).unwrap();
+                if let Some(expr) = expansion_expr_node(tree.root_node()) {
+                    let macros = std::mem::replace(&mut self.macros, Arc::new(HashMap::new()));
+                    self.walk_phantoms(expr, source.as_bytes(), shadowed, seen);
+                    self.macros = macros;
+                }
+                continue;
+            }
+
             if !prototype_headers(n, b).is_empty() {
                 continue;
             }
@@ -2665,7 +2779,7 @@ impl Ctx<'_> {
         // of a primitive object's type (`unsigned char c = 0` registers
         // `unsigned`, as pinned by memcmp.c). A declaration without an explicit
         // initializer, including an array's implicit allocation, does not take
-        // that path. Check each declarator so an initialized function pointer
+        // that path. Check each declarator so an initialized nested pointer declarator
         // cannot register the base of an uninitialized ordinary neighbor.
         // Keep nonprimitive registration: tags also register their base via
         // independent paths (`struct Packet *p` still needs a Packet TYPE).
@@ -2675,7 +2789,11 @@ impl Ctx<'_> {
             .unwrap_or("ANY");
         let primitive = primitive_type(raw_type, TypeRole::Declaration).is_some();
         if items.iter().any(|item| {
-            (!primitive || item.init.is_some()) && find_function_declarator(item.decl).is_none()
+            if primitive {
+                item.init.is_some() && !nested_declarator_name(item.decl)
+            } else {
+                find_function_declarator(item.decl).is_none()
+            }
         }) {
             let registered = if primitive {
                 // CDT's extra decl-specifier registration uses the first word
@@ -2706,7 +2824,108 @@ impl Ctx<'_> {
         let depth = depth + usize::from(grouped);
         let mut group_order = 1;
         let order = if grouped { &mut group_order } else { order };
-        // Pass 2: initialiser assignments / alloc lowerings, in order.
+        // Pass 2: emit all array dimension/alloc lowerings before initializers.
+        for it in &items {
+            let dimensions = array_dimensions(it.decl);
+            let sizes: Vec<_> = dimensions.iter().flatten().copied().collect();
+            // Sized local arrays allocate before their explicit initializer.
+            // File-scope arrays only emit dimensions when no initializer exists,
+            // including an empty arrayInitializer for an unsized declaration.
+            if (file_scope && it.init.is_none() && !dimensions.is_empty())
+                || (!file_scope && dimensions.first().is_some_and(Option::is_some))
+            {
+                let ao = *order;
+                *order += 1;
+                // File-scope array declarations retain their dimensions in
+                // an arrayInitializer. Only block-scope arrays synthesize
+                // assignment -> alloc(type, dimensions); treating globals
+                // as allocations also inflates the project-wide alloc stub.
+                if file_scope {
+                    self.note_call("<operator>.arrayInitializer", sizes.len());
+                    self.line(
+                        depth,
+                        "CALL",
+                        P {
+                            name: Some("<operator>.arrayInitializer".into()),
+                            code: Some(esc(text(it.outer, b))),
+                            tfn: Some("ANY".into()),
+                            mfn: Some("<operator>.arrayInitializer".into()),
+                            order: Some(ao),
+                            dispatch: Some("STATIC_DISPATCH".into()),
+                            ..Default::default()
+                        },
+                    );
+                    for (i, size) in sizes.into_iter().enumerate() {
+                        let k = (i + 1) as i64;
+                        self.emit_expr(size, b, depth + 1, k, Some(k));
+                    }
+                    continue;
+                }
+                self.note_call("<operator>.assignment", 2);
+                self.note_call("<operator>.alloc", sizes.len() + 1);
+                self.line(
+                    depth,
+                    "CALL",
+                    P {
+                        name: Some("<operator>.assignment".into()),
+                        code: Some(esc(text(it.outer, b))),
+                        tfn: Some("void".into()),
+                        mfn: Some("<operator>.assignment".into()),
+                        order: Some(ao),
+                        arg: if grouped { Some(ao) } else { assign_arg },
+                        dispatch: Some("STATIC_DISPATCH".into()),
+                        ..Default::default()
+                    },
+                );
+                self.line(
+                    depth + 1,
+                    "IDENTIFIER",
+                    P {
+                        name: Some(it.name.clone()),
+                        code: Some(if nested_declarator_name(it.decl) {
+                            String::new()
+                        } else {
+                            it.name.clone()
+                        }),
+                        tfn: Some(it.full_ty.clone()),
+                        order: Some(1),
+                        arg: Some(1),
+                        ..Default::default()
+                    },
+                );
+                self.line(
+                    depth + 1,
+                    "CALL",
+                    P {
+                        name: Some("<operator>.alloc".into()),
+                        code: Some(esc(text(it.outer, b))),
+                        tfn: Some(it.full_ty.clone()),
+                        mfn: Some("<operator>.alloc".into()),
+                        order: Some(2),
+                        arg: Some(2),
+                        dispatch: Some("STATIC_DISPATCH".into()),
+                        ..Default::default()
+                    },
+                );
+                self.line(
+                    depth + 2,
+                    "IDENTIFIER",
+                    P {
+                        name: Some(it.full_ty.clone()),
+                        code: Some(it.full_ty.clone()),
+                        tfn: Some(it.full_ty.clone()),
+                        order: Some(1),
+                        arg: Some(1),
+                        ..Default::default()
+                    },
+                );
+                for (i, sz) in sizes.into_iter().enumerate() {
+                    let k = (i + 2) as i64;
+                    self.emit_expr(sz, b, depth + 2, k, Some(k));
+                }
+            }
+        }
+        // Pass 3: explicit initializers follow every declarator's allocation.
         for it in items {
             if let Some(v) = it.init {
                 let ao = *order;
@@ -2732,7 +2951,7 @@ impl Ctx<'_> {
                     "IDENTIFIER",
                     P {
                         name: Some(it.name.clone()),
-                        code: Some(if find_function_declarator(it.decl).is_some() {
+                        code: Some(if nested_declarator_name(it.decl) {
                             String::new()
                         } else {
                             it.name.clone()
@@ -2744,95 +2963,6 @@ impl Ctx<'_> {
                     },
                 );
                 self.emit_expr(v, b, depth + 1, 2, Some(2));
-                continue;
-            }
-            let sizes = array_sizes(it.decl);
-            if !sizes.is_empty() {
-                let ao = *order;
-                *order += 1;
-                // File-scope array declarations retain their dimensions in
-                // an arrayInitializer. Only block-scope arrays synthesize
-                // assignment -> alloc(type, dimensions); treating globals
-                // as allocations also inflates the project-wide alloc stub.
-                if file_scope {
-                    self.note_call("<operator>.arrayInitializer", sizes.len());
-                    self.line(
-                        depth,
-                        "CALL",
-                        P {
-                            name: Some("<operator>.arrayInitializer".into()),
-                            code: Some(esc(text(it.decl, b))),
-                            tfn: Some("ANY".into()),
-                            mfn: Some("<operator>.arrayInitializer".into()),
-                            order: Some(ao),
-                            dispatch: Some("STATIC_DISPATCH".into()),
-                            ..Default::default()
-                        },
-                    );
-                    for (i, size) in sizes.into_iter().enumerate() {
-                        let k = (i + 1) as i64;
-                        self.emit_expr(size, b, depth + 1, k, Some(k));
-                    }
-                    continue;
-                }
-                self.note_call("<operator>.assignment", 2);
-                self.note_call("<operator>.alloc", sizes.len() + 1);
-                self.line(
-                    depth,
-                    "CALL",
-                    P {
-                        name: Some("<operator>.assignment".into()),
-                        code: Some(esc(text(it.decl, b))),
-                        tfn: Some("void".into()),
-                        mfn: Some("<operator>.assignment".into()),
-                        order: Some(ao),
-                        arg: if grouped { Some(ao) } else { assign_arg },
-                        dispatch: Some("STATIC_DISPATCH".into()),
-                        ..Default::default()
-                    },
-                );
-                self.line(
-                    depth + 1,
-                    "IDENTIFIER",
-                    P {
-                        name: Some(it.name.clone()),
-                        code: Some(it.name),
-                        tfn: Some(it.full_ty.clone()),
-                        order: Some(1),
-                        arg: Some(1),
-                        ..Default::default()
-                    },
-                );
-                self.line(
-                    depth + 1,
-                    "CALL",
-                    P {
-                        name: Some("<operator>.alloc".into()),
-                        code: Some(esc(text(it.decl, b))),
-                        tfn: Some(it.full_ty.clone()),
-                        mfn: Some("<operator>.alloc".into()),
-                        order: Some(2),
-                        arg: Some(2),
-                        dispatch: Some("STATIC_DISPATCH".into()),
-                        ..Default::default()
-                    },
-                );
-                self.line(
-                    depth + 2,
-                    "IDENTIFIER",
-                    P {
-                        name: Some(it.full_ty.clone()),
-                        code: Some(it.full_ty.clone()),
-                        tfn: Some(it.full_ty),
-                        order: Some(1),
-                        arg: Some(1),
-                        ..Default::default()
-                    },
-                );
-                for (i, sz) in sizes.into_iter().enumerate() {
-                    let k = (i + 2) as i64;
-                    self.emit_expr(sz, b, depth + 2, k, Some(k));
-                }
             }
         }
         (self.line_no > initializer).then_some(initializer)
@@ -3285,7 +3415,80 @@ impl Ctx<'_> {
                     },
                 );
             }
-            "cast_expression" => {
+            "initializer_list" | "subscript_range_designator" => {
+                let elements: Vec<_> = named_children(n)
+                    .into_iter()
+                    .filter(|child| child.kind() != "comment")
+                    .collect();
+                self.note_call("<operator>.arrayInitializer", elements.len());
+                self.line(
+                    depth,
+                    "CALL",
+                    P {
+                        name: Some("<operator>.arrayInitializer".into()),
+                        code: Some(esc(text(n, b))),
+                        tfn: Some("ANY".into()),
+                        mfn: Some("<operator>.arrayInitializer".into()),
+                        order: Some(order),
+                        arg,
+                        dispatch: Some("STATIC_DISPATCH".into()),
+                        ..Default::default()
+                    },
+                );
+                for (index, element) in elements.into_iter().enumerate() {
+                    let position = (index + 1) as i64;
+                    self.emit_expr(element, b, depth + 1, position, Some(position));
+                }
+            }
+            "initializer_pair" => {
+                // CDT groups array designators in a synthetic block. Nested
+                // indices each assign the value independently in source order.
+                self.line(
+                    depth,
+                    "BLOCK",
+                    P {
+                        tfn: Some("ANY".into()),
+                        order: Some(order),
+                        arg,
+                        ..Default::default()
+                    },
+                );
+                let mut cursor = n.walk();
+                let designators: Vec<_> = n
+                    .children_by_field_name("designator", &mut cursor)
+                    .collect();
+                if let Some(value) = n.child_by_field_name("value") {
+                    for (index, designator) in designators.into_iter().enumerate() {
+                        let target = match designator.kind() {
+                            "subscript_designator" => designator.named_child(0),
+                            "subscript_range_designator" => Some(designator),
+                            _ => None,
+                        };
+                        let Some(target) = target else {
+                            continue;
+                        };
+                        let position = (index + 1) as i64;
+                        self.note_call("<operator>.assignment", 2);
+                        self.line(
+                            depth + 1,
+                            "CALL",
+                            P {
+                                name: Some("<operator>.assignment".into()),
+                                code: Some(esc(text(n, b))),
+                                tfn: Some("void".into()),
+                                mfn: Some("<operator>.assignment".into()),
+                                order: Some(position),
+                                arg: Some(position),
+                                dispatch: Some("STATIC_DISPATCH".into()),
+                                ..Default::default()
+                            },
+                        );
+                        self.emit_expr(target, b, depth + 2, 1, Some(1));
+                        self.emit_expr(value, b, depth + 2, 2, Some(2));
+                    }
+                }
+            }
+            "cast_expression" | "compound_literal_expression" => {
                 // `(T)e` → <operator>.cast. CDT quirk: the type is the BASE
                 // type only — `(char *)x` types as `char` — while the
                 // TYPE_REF CODE keeps the raw descriptor text (`char *`).
@@ -3323,6 +3526,54 @@ impl Ctx<'_> {
                 );
                 if let Some(v) = n.child_by_field_name("value") {
                     self.emit_expr(v, b, depth + 1, 2, Some(2));
+                }
+            }
+            "offsetof_expression" => {
+                // With no external system-header expansion, CDT retains
+                // offsetof as a call; tree-sitter gives it a distinct node.
+                self.note_call("offsetof", 2);
+                self.line(
+                    depth,
+                    "CALL",
+                    P {
+                        name: Some("offsetof".into()),
+                        code: Some(esc(text(n, b))),
+                        tfn: Some("ANY".into()),
+                        mfn: Some("offsetof".into()),
+                        order: Some(order),
+                        arg,
+                        dispatch: Some("STATIC_DISPATCH".into()),
+                        ..Default::default()
+                    },
+                );
+                if let Some(ty) = n.child_by_field_name("type") {
+                    self.line(
+                        depth + 1,
+                        "IDENTIFIER",
+                        P {
+                            name: Some(text(ty, b).into()),
+                            code: Some(text(ty, b).into()),
+                            tfn: Some("ANY".into()),
+                            order: Some(1),
+                            arg: Some(1),
+                            ..Default::default()
+                        },
+                    );
+                }
+                if let Some(member) = n.child_by_field_name("member") {
+                    let name = text(member, b);
+                    self.line(
+                        depth + 1,
+                        "IDENTIFIER",
+                        P {
+                            name: Some(name.into()),
+                            code: Some(format!("<unknown> {name}")),
+                            tfn: Some("ANY".into()),
+                            order: Some(2),
+                            arg: Some(2),
+                            ..Default::default()
+                        },
+                    );
                 }
             }
             "sizeof_expression" => {
@@ -3460,6 +3711,166 @@ fn prototype_header_entries<'tree>(
         .collect()
 }
 
+/// Execute available quoted headers in the importing translation unit's macro
+/// environment. Include guards and undef/redefinitions are evaluated at each
+/// inclusion; declarations retain immutable snapshots of the preceding state.
+fn body_macro_context<'tree>(
+    root: Node<'tree>,
+    bytes: &[u8],
+    file: &str,
+    units: &[SourceUnit],
+) -> (Vec<Node<'tree>>, MacroState, HashMap<usize, MacroState>) {
+    #[allow(clippy::too_many_arguments)]
+    fn collect<'tree>(
+        node: Node<'tree>,
+        bytes: &[u8],
+        file: &str,
+        units: &[SourceUnit],
+        visiting: &mut HashSet<String>,
+        once: &mut HashSet<String>,
+        macros: &mut MacroState,
+        items: &mut Vec<Node<'tree>>,
+        states: &mut HashMap<usize, MacroState>,
+        capture: bool,
+    ) {
+        match node.kind() {
+            "preproc_if" | "preproc_ifdef" | "preproc_elif" | "preproc_elifdef"
+            | "preproc_else" => {
+                let take = if matches!(node.kind(), "preproc_if" | "preproc_elif") {
+                    let definitions = macros
+                        .iter()
+                        .map(|(name, definition)| {
+                            (
+                                name.clone(),
+                                if definition.params.is_some() {
+                                    name.clone()
+                                } else {
+                                    definition.body.clone()
+                                },
+                            )
+                        })
+                        .collect();
+                    preproc_condition(node, bytes, &definitions)
+                } else if let Some(name) = node.child_by_field_name("name") {
+                    let negated = node.child(0).is_some_and(|directive| {
+                        matches!(directive.kind(), "#ifndef" | "#elifndef")
+                    });
+                    macros.contains_key(text(name, bytes)) != negated
+                } else {
+                    true
+                };
+                let alternative = node.child_by_field_name("alternative");
+                if take {
+                    for child in named_children(node) {
+                        if Some(child) != node.child_by_field_name("condition")
+                            && Some(child) != node.child_by_field_name("name")
+                            && Some(child) != alternative
+                        {
+                            collect(
+                                child, bytes, file, units, visiting, once, macros, items, states,
+                                capture,
+                            );
+                        }
+                    }
+                } else if let Some(alternative) = alternative {
+                    collect(
+                        alternative,
+                        bytes,
+                        file,
+                        units,
+                        visiting,
+                        once,
+                        macros,
+                        items,
+                        states,
+                        capture,
+                    );
+                }
+            }
+            _ => {
+                if capture {
+                    if matches!(
+                        node.kind(),
+                        "function_definition"
+                            | "declaration"
+                            | "struct_specifier"
+                            | "union_specifier"
+                            | "enum_specifier"
+                    ) {
+                        states.insert(node.id(), macros.clone());
+                    }
+                    items.push(node);
+                }
+                if let Some(include) = included_source_name(node, bytes, file) {
+                    if !once.contains(&include) && visiting.insert(include.clone()) {
+                        if let Some(unit) = units.iter().find(|unit| {
+                            normalize_source_path(std::path::Path::new(&unit.file)) == include
+                        }) {
+                            let mut header_items = Vec::new();
+                            let mut header_states = HashMap::new();
+                            for child in named_children(unit.tree.root_node()) {
+                                collect(
+                                    child,
+                                    unit.src.as_bytes(),
+                                    &unit.file,
+                                    units,
+                                    visiting,
+                                    once,
+                                    macros,
+                                    &mut header_items,
+                                    &mut header_states,
+                                    false,
+                                );
+                            }
+                        }
+                        visiting.remove(&include);
+                    }
+                } else if node.kind() == "preproc_call"
+                    && node
+                        .child_by_field_name("directive")
+                        .is_some_and(|d| text(d, bytes).trim() == "#pragma")
+                    && node
+                        .child_by_field_name("argument")
+                        .is_some_and(|a| text(a, bytes).trim() == "once")
+                {
+                    once.insert(normalize_source_path(std::path::Path::new(file)));
+                } else if let Some((name, definition)) = source_macro_definition(node, bytes, file)
+                {
+                    Arc::make_mut(macros).insert(name, definition);
+                } else if node.kind() == "preproc_call"
+                    && node
+                        .child_by_field_name("directive")
+                        .is_some_and(|directive| text(directive, bytes).trim() == "#undef")
+                {
+                    if let Some(name) = node.child_by_field_name("argument") {
+                        Arc::make_mut(macros).remove(text(name, bytes).trim());
+                    }
+                }
+            }
+        }
+    }
+    let mut macros = Arc::new(HashMap::new());
+    let mut items = Vec::new();
+    let mut states = HashMap::new();
+    let mut once = HashSet::new();
+    let mut visiting = HashSet::from([normalize_source_path(std::path::Path::new(file))]);
+    for child in named_children(root) {
+        collect(
+            child,
+            bytes,
+            file,
+            units,
+            &mut visiting,
+            &mut once,
+            &mut macros,
+            &mut items,
+            &mut states,
+            true,
+        );
+    }
+    (items, macros, states)
+}
+
 /// Object macros from available source headers are needed to distinguish a
 /// declaration specifier macro from an unknown token. This table is used only
 /// for declaration spelling; expression/body preprocessing remains separate.
@@ -3570,10 +3981,53 @@ fn update_source_macros(
     }
 }
 
+/// Read the logical directive rather than recovered tree-sitter fields:
+/// comments within continued definitions can make a formal parameter appear
+/// as the definition's `name`, and function macros can be recovered as objects.
+fn source_macro_definition(node: Node, bytes: &[u8], file: &str) -> Option<(String, MacroDef)> {
+    if !matches!(node.kind(), "preproc_def" | "preproc_function_def") {
+        return None;
+    }
+    let line = preproc_logical_line(node, bytes);
+    let payload = preproc_payload(&line);
+    let end = payload
+        .bytes()
+        .position(|c| !(c.is_ascii_alphanumeric() || c == b'_'))
+        .unwrap_or(payload.len());
+    if end == 0 {
+        return None;
+    }
+    let name = payload[..end].to_string();
+    let tail = &payload[end..];
+    let (params, body) = if let Some(tail) = tail.strip_prefix('(') {
+        let close = tail.find(')')?;
+        let formals = &tail[..close];
+        let params = if formals.trim().is_empty() {
+            Vec::new()
+        } else {
+            formals.split(',').map(|p| p.trim().to_string()).collect()
+        };
+        (Some(params), tail[close + 1..].trim().to_string())
+    } else {
+        (None, tail.trim().to_string())
+    };
+    Some((
+        name,
+        MacroDef {
+            params,
+            body,
+            directive: preproc_raw_directive(node, bytes).to_string(),
+            file: file.to_string(),
+        },
+    ))
+}
+
 fn source_macro_effect(node: Node, b: &[u8]) -> Option<(String, Option<String>)> {
-    if node.kind() == "preproc_def" {
-        let name = node.child_by_field_name("name")?;
-        Some((text(name, b).to_string(), Some(preproc_macro_body(node, b))))
+    if let Some((name, definition)) = source_macro_definition(node, b, "") {
+        definition
+            .params
+            .is_none()
+            .then_some((name, Some(definition.body)))
     } else if node.kind() == "preproc_call"
         && node
             .child_by_field_name("directive")
@@ -3672,7 +4126,7 @@ fn declared_object_type(declaration: Node, decl: Node, b: &[u8]) -> String {
             }
         }
     }
-    format!("{base}{}", decl_suffix(decl, b))
+    format!("{base}{}", object_decl_suffix(decl, b, false))
 }
 
 fn prototype_declarations<'a>(root: Node<'a>, b: &[u8]) -> Vec<Node<'a>> {
@@ -3874,15 +4328,60 @@ fn decl_suffix(n: Node, b: &[u8]) -> String {
     parts.concat()
 }
 
-/// Size expressions of a (possibly multi-dim) array declarator, source order.
-fn array_sizes<'t>(n: Node<'t>) -> Vec<Node<'t>> {
+/// Object declarators use CDT's binding spelling; parameter/member renderers
+/// retain their distinct suffix ordering. A nested declarator contributes its
+/// pointer shape but not inner array dimensions (`*(*p[3])[2]` -> `*(*)[2]`).
+fn object_decl_suffix(n: Node, b: &[u8], nested_name: bool) -> String {
+    let nested = || {
+        n.child_by_field_name("declarator")
+            .map(|d| object_decl_suffix(d, b, nested_name))
+            .unwrap_or_default()
+    };
+    match n.kind() {
+        "pointer_declarator" | "abstract_pointer_declarator" => format!("*{}", nested()),
+        "array_declarator" | "abstract_array_declarator" if !nested_name => {
+            let size = n
+                .child_by_field_name("size")
+                .map(|sz| text(sz, b))
+                .unwrap_or_default();
+            format!("{}[{size}]", nested())
+        }
+        "array_declarator" | "abstract_array_declarator" => nested(),
+        "parenthesized_declarator" | "abstract_parenthesized_declarator" => {
+            let inner = n
+                .named_child(0)
+                .map(|d| object_decl_suffix(d, b, true))
+                .unwrap_or_default();
+            if inner.is_empty() {
+                inner
+            } else {
+                format!("({inner})")
+            }
+        }
+        _ => String::new(),
+    }
+}
+
+/// CDT's nested declarator name has empty CODE on synthesized assignment LHSs.
+fn nested_declarator_name(mut n: Node) -> bool {
+    loop {
+        if n.kind() == "parenthesized_declarator" {
+            return true;
+        }
+        let Some(next) = n.child_by_field_name("declarator") else {
+            return false;
+        };
+        n = next;
+    }
+}
+
+/// Array dimensions in source order; an absent expression retains unsized [].
+fn array_dimensions<'t>(n: Node<'t>) -> Vec<Option<Node<'t>>> {
     let mut out = Vec::new();
     let mut cur = n;
     loop {
         if cur.kind() == "array_declarator" {
-            if let Some(sz) = cur.child_by_field_name("size") {
-                out.push(sz);
-            }
+            out.push(cur.child_by_field_name("size"));
         } else if cur.kind() != "pointer_declarator" {
             break;
         }
@@ -4164,16 +4663,53 @@ fn needs_clinit(n: Node, _b: &[u8]) -> bool {
     })
 }
 
+/// CDT's MacroArgumentExtractor joins lexical tokens before MacroHandler
+/// removes ASCII spaces from its lookup key. Newlines, tabs and comments
+/// between tokens therefore never participate in matching. Only this lookup
+/// key is normalized; copied nodes retain their original literal spelling.
+fn macro_argument_match_code(node: Node, bytes: &[u8]) -> String {
+    fn append(node: Node, bytes: &[u8], out: &mut String) {
+        if node.kind() == "comment" {
+            return;
+        }
+        if node.child_count() == 0 || matches!(node.kind(), "string_literal" | "char_literal") {
+            out.extend(text(node, bytes).chars().filter(|&c| c != ' '));
+        } else {
+            let mut cursor = node.walk();
+            for child in node.children(&mut cursor) {
+                append(child, bytes, out);
+            }
+        }
+    }
+    let mut out = String::new();
+    append(node, bytes, &mut out);
+    out
+}
+
 /// Whole-word substitution of macro parameters with argument source text.
 fn substitute(body: &str, params: &[String], args: &[String]) -> String {
     let mut out = String::new();
     let bytes = body.as_bytes();
     let mut i = 0;
     while i < bytes.len() {
-        let c = bytes[i] as char;
-        if c.is_alphabetic() || c == '_' {
+        if matches!(bytes[i], b'\'' | b'"') {
+            let quote = bytes[i];
             let start = i;
-            while i < bytes.len() && ((bytes[i] as char).is_alphanumeric() || bytes[i] == b'_') {
+            i += 1;
+            while i < bytes.len() {
+                if bytes[i] == b'\\' {
+                    i = (i + 2).min(bytes.len());
+                } else if bytes[i] == quote {
+                    i += 1;
+                    break;
+                } else {
+                    i += 1;
+                }
+            }
+            out.push_str(&body[start..i]);
+        } else if bytes[i].is_ascii_alphabetic() || bytes[i] == b'_' {
+            let start = i;
+            while i < bytes.len() && (bytes[i].is_ascii_alphanumeric() || bytes[i] == b'_') {
                 i += 1;
             }
             let word = &body[start..i];
@@ -4182,11 +4718,140 @@ fn substitute(body: &str, params: &[String], args: &[String]) -> String {
                 _ => out.push_str(word),
             }
         } else {
+            let c = body[i..].chars().next().unwrap();
             out.push(c);
-            i += 1;
+            i += c.len_utf8();
         }
     }
     out
+}
+
+/// Render CDT's expanded expression spelling. A shared work budget and
+/// disabled-macro set stop replacement cycles before the AST emitter runs.
+fn expand_body_expression(
+    source: &str,
+    macros: &HashMap<String, MacroDef>,
+    disabled: &mut HashSet<String>,
+    budget: &mut usize,
+) -> String {
+    fn render(
+        node: Node,
+        bytes: &[u8],
+        macros: &HashMap<String, MacroDef>,
+        disabled: &mut HashSet<String>,
+        budget: &mut usize,
+    ) -> String {
+        let raw = text(node, bytes);
+        if *budget == 0 {
+            return raw.to_string();
+        }
+        *budget -= 1;
+        let invoked = if matches!(node.kind(), "identifier" | "type_identifier") {
+            macros
+                .get(raw)
+                .filter(|m| m.params.is_none())
+                .map(|m| (raw, m, Vec::new()))
+        } else if node.kind() == "call_expression" {
+            node.child_by_field_name("function").and_then(|function| {
+                let name = text(function, bytes);
+                macros.get(name).filter(|m| m.params.is_some()).map(|m| {
+                    let args = node
+                        .child_by_field_name("arguments")
+                        .map(named_children)
+                        .unwrap_or_default()
+                        .into_iter()
+                        .map(|a| text(a, bytes).to_string())
+                        .collect();
+                    (name, m, args)
+                })
+            })
+        } else {
+            None
+        };
+        if let Some((name, definition, args)) = invoked {
+            if disabled.len() < 256 && disabled.insert(name.to_string()) {
+                let replaced = substitute(
+                    &definition.body,
+                    definition.params.as_deref().unwrap_or_default(),
+                    &args,
+                );
+                let result = expand_body_expression(&replaced, macros, disabled, budget);
+                disabled.remove(name);
+                return result;
+            }
+        }
+        let mut child = |field: &str| {
+            node.child_by_field_name(field)
+                .map(|n| render(n, bytes, macros, disabled, budget))
+                .unwrap_or_default()
+        };
+        match node.kind() {
+            "binary_expression" | "assignment_expression" => {
+                let left = child("left");
+                let op = node
+                    .child_by_field_name("operator")
+                    .map(|n| text(n, bytes))
+                    .unwrap_or("");
+                let right = child("right");
+                format!("{left} {op} {right}")
+            }
+            "conditional_expression" => {
+                let a = child("condition");
+                let b = child("consequence");
+                let c = child("alternative");
+                format!("{a} ? {b} : {c}")
+            }
+            "call_expression" => {
+                let function = child("function");
+                let args = node
+                    .child_by_field_name("arguments")
+                    .map(named_children)
+                    .unwrap_or_default()
+                    .into_iter()
+                    .map(|n| render(n, bytes, macros, disabled, budget))
+                    .collect::<Vec<_>>()
+                    .join(", ");
+                let call = format!("{function}({args})");
+                // An object macro can supply the function macro name. Rescan
+                // that newly formed invocation with the same disabled set.
+                if disabled.len() < 256
+                    && !disabled.contains(&function)
+                    && macros.get(&function).is_some_and(|m| m.params.is_some())
+                {
+                    expand_body_expression(&call, macros, disabled, budget)
+                } else {
+                    call
+                }
+            }
+            "offsetof_expression" => {
+                let ty = child("type");
+                let member = child("member");
+                format!("offsetof({ty}, {member})")
+            }
+            _ => {
+                let mut result = raw.to_string();
+                for n in named_children(node).into_iter().rev() {
+                    let replacement = render(n, bytes, macros, disabled, budget);
+                    result.replace_range(
+                        n.start_byte() - node.start_byte()..n.end_byte() - node.start_byte(),
+                        &replacement,
+                    );
+                }
+                result
+            }
+        }
+    }
+    let wrapped = format!("void __m() {{ {source}; }}");
+    let mut parser = Parser::new();
+    parser
+        .set_language(&tree_sitter_c::LANGUAGE.into())
+        .unwrap();
+    let tree = parser.parse(&wrapped, None).unwrap();
+    if let Some(expr) = expansion_expr_node(tree.root_node()) {
+        render(expr, wrapped.as_bytes(), macros, disabled, budget)
+    } else {
+        source.to_string()
+    }
 }
 
 /// Collapse adjacent string tokens only in generated macro expansion text.
@@ -4254,7 +4919,7 @@ fn expansion_expr_node(root: Node) -> Option<Node> {
 fn expansion_type(
     expansion: &str,
     symbols: &HashMap<String, String>,
-    functions: &HashMap<String, String>,
+    globals: &HashMap<String, String>,
 ) -> String {
     let src = format!("void __m() {{ {expansion}; }}");
     let mut parser = Parser::new();
@@ -4264,16 +4929,12 @@ fn expansion_type(
     let Some(tree) = parser.parse(&src, None) else {
         return "ANY".into();
     };
-    let Some(mut e) = expansion_expr_node(tree.root_node()) else {
+    let Some(e) = expansion_expr_node(tree.root_node()) else {
         return "ANY".into();
     };
     let b = src.as_bytes();
-    while e.kind() == "parenthesized_expression" {
-        match named_children(e).into_iter().next() {
-            Some(inner) => e = inner,
-            None => break,
-        }
-    }
+    // CDT types the wrapper node itself. Parenthesized expressions use the
+    // generic node-type path (ANY), even when their final child is a literal.
     match e.kind() {
         "number_literal" => {
             let t = text(e, b);
@@ -4289,14 +4950,11 @@ fn expansion_type(
         // newly supported concatenation child does not type that wrapper.
         "concatenated_string" if expansion_expr_node(tree.root_node()) == Some(e) => "char*".into(),
         "concatenated_string" => "ANY".into(),
-        "identifier" => symbols.get(text(e, b)).cloned().unwrap_or("ANY".into()),
-        "call_expression" => {
-            let name = e
-                .child_by_field_name("function")
-                .map(|c| text(c, b).to_string())
-                .unwrap_or_default();
-            functions.get(&name).cloned().unwrap_or("ANY".into())
-        }
+        "identifier" => symbols
+            .get(text(e, b))
+            .or_else(|| globals.get(text(e, b)))
+            .cloned()
+            .unwrap_or("ANY".into()),
         _ => "ANY".into(),
     }
 }
@@ -4385,15 +5043,11 @@ fn active_translation_unit_items<'tree>(root: Node<'tree>, b: &[u8]) -> Vec<Node
                 }
             }
             "preproc_def" | "preproc_function_def" => {
-                if let Some(name) = node.child_by_field_name("name") {
-                    let value = preproc_macro_body(node, b);
-                    let name = text(name, b).to_string();
-                    // Function-like macros are defined, but a bare name does
-                    // not expand. Calls in conditions remain unsupported.
-                    let value = if node.kind() == "preproc_function_def" {
+                if let Some((name, definition)) = source_macro_definition(node, b, "") {
+                    let value = if definition.params.is_some() {
                         name.clone()
                     } else {
-                        value
+                        definition.body
                     };
                     definitions.insert(name, value);
                 }
@@ -4424,6 +5078,64 @@ fn active_translation_unit_items<'tree>(root: Node<'tree>, b: &[u8]) -> Vec<Node
 /// C preprocessing removes comments and splices escaped newlines before
 /// interpreting a directive. Read from the original bytes because the parser
 /// may expose only a prefix of a condition or replacement containing comments.
+fn preproc_raw_directive<'bytes>(node: Node, bytes: &'bytes [u8]) -> &'bytes str {
+    let source = std::str::from_utf8(&bytes[node.start_byte()..]).unwrap_or("");
+    let bytes = source.as_bytes();
+    let mut i = 0;
+    let mut comment = false;
+    let mut line_comment = false;
+    let mut quote = None;
+    while i < bytes.len() {
+        if bytes[i..].starts_with(b"\\\n") {
+            i += 2;
+            continue;
+        }
+        if bytes[i..].starts_with(b"\\\r\n") {
+            i += 3;
+            continue;
+        }
+        if line_comment {
+            if matches!(bytes[i], b'\n' | b'\r') {
+                break;
+            }
+            i += 1;
+            continue;
+        }
+        if comment {
+            if bytes[i..].starts_with(b"*/") {
+                comment = false;
+                i += 2;
+            } else {
+                i += 1;
+            }
+            continue;
+        }
+        if let Some(delimiter) = quote {
+            if bytes[i] == b'\\' {
+                i = (i + 2).min(bytes.len());
+                continue;
+            }
+            if bytes[i] == delimiter {
+                quote = None;
+            }
+        } else if bytes[i..].starts_with(b"//") {
+            line_comment = true;
+            i += 2;
+            continue;
+        } else if bytes[i..].starts_with(b"/*") {
+            comment = true;
+            i += 2;
+            continue;
+        } else if matches!(bytes[i], b'\'' | b'"') {
+            quote = Some(bytes[i]);
+        } else if matches!(bytes[i], b'\n' | b'\r') {
+            break;
+        }
+        i += 1;
+    }
+    source[..i].trim_end()
+}
+
 fn preproc_logical_line(node: Node, b: &[u8]) -> String {
     let source = std::str::from_utf8(&b[node.start_byte()..]).unwrap_or("");
     let bytes = source.as_bytes();
@@ -4484,21 +5196,6 @@ fn preproc_payload(line: &str) -> &str {
         .trim_start();
     line.trim_start_matches(|c: char| c.is_ascii_alphabetic())
         .trim_start()
-}
-
-fn preproc_macro_body(node: Node, b: &[u8]) -> String {
-    let line = preproc_logical_line(node, b);
-    let name = node
-        .child_by_field_name("name")
-        .map(|name| text(name, b))
-        .unwrap_or("");
-    let rest = preproc_payload(&line).strip_prefix(name).unwrap_or("");
-    let body = if node.kind() == "preproc_function_def" {
-        rest.split_once(')').map(|(_, body)| body).unwrap_or("")
-    } else {
-        rest
-    };
-    body.trim().to_string()
 }
 
 /// Expand object macro replacement tokens before parsing the condition. In
@@ -4809,6 +5506,7 @@ struct DNode {
     name: String,
     code1: String,
     fullcode: String,
+    has_code: bool,
     full: String,
     has_arg: bool,
     arg_index: i64,
@@ -4893,6 +5591,7 @@ fn parse_dump_block(text: &str) -> Vec<DNode> {
             name: grab(" NAME="),
             code1: grab(" CODE="),
             fullcode: extract_code(rest),
+            has_code: rest.contains(" CODE="),
             full: grab(" FULL_NAME="),
             has_arg: rest.contains(" ARGUMENT_INDEX="),
             arg_index,
@@ -4952,6 +5651,27 @@ impl CfgBuilder<'_> {
         (entry, pending)
     }
 
+    // A control construct must compose child edge lists in the pinned
+    // CfgCreator order. Detaching a child preserves that order independently
+    // of when the mutable AST builder visits it.
+    fn detached_build(
+        &mut self,
+        id: Option<usize>,
+    ) -> (Option<String>, Vec<String>, Vec<(String, String)>) {
+        let start = self.edges.len();
+        let (entry, fringe) = id.map(|id| self.build(id)).unwrap_or_default();
+        (entry, fringe, self.edges.split_off(start))
+    }
+
+    fn detached_seq(
+        &mut self,
+        ids: &[usize],
+    ) -> (Option<String>, Vec<String>, Vec<(String, String)>) {
+        let start = self.edges.len();
+        let (entry, fringe) = self.seq(ids);
+        (entry, fringe, self.edges.split_off(start))
+    }
+
     fn build(&mut self, id: usize) -> (Option<String>, Vec<String>) {
         let n = &self.arena[id];
         let me = self.addr(id);
@@ -4961,6 +5681,15 @@ impl CfgBuilder<'_> {
             | "UNKNOWN" | "JUMP_TARGET" => (Some(me.clone()), vec![me]),
             "CALL" => match self.arena[id].name.as_str() {
                 "<operator>.conditional" => {
+                    assert!(
+                        kids.len() == 3,
+                        "malformed conditional in {}: {:?}; children {:?}",
+                        self.block,
+                        n.fullcode,
+                        kids.iter()
+                            .map(|&k| &self.arena[k].fullcode)
+                            .collect::<Vec<_>>()
+                    );
                     let (e1, o1) = self.build(kids[0]);
                     let (e2, o2) = self.build(kids[1]);
                     let (e3, o3) = self.build(kids[2]);
@@ -4975,13 +5704,13 @@ impl CfgBuilder<'_> {
                     (e1, vec![me])
                 }
                 "<operator>.logicalAnd" | "<operator>.logicalOr" => {
-                    // Short-circuit: the lhs root branches to the rhs entry
-                    // and directly past it to the call node.
-                    let (e1, o1) = self.build(kids[0]);
-                    let (e2, o2) = self.build(kids[1]);
+                    let (e1, o1, left_edges) = self.detached_build(Some(kids[0]));
+                    let (e2, o2, right_edges) = self.detached_build(Some(kids[1]));
                     if let Some(e2) = &e2 {
                         self.connect(&o1, e2);
                     }
+                    self.edges.extend(left_edges);
+                    self.edges.extend(right_edges);
                     self.connect(&o1, &me);
                     self.connect(&o2, &me);
                     (e1, vec![me])
@@ -5028,9 +5757,9 @@ impl CfgBuilder<'_> {
             }
             "RETURN" => {
                 let (entry, outs) = self.seq(&kids);
-                self.connect(&outs, &me);
                 let mret = self.mret.clone();
                 self.edges.push((me.clone(), mret));
+                self.connect(&outs, &me);
                 (entry.or(Some(me)), vec![])
             }
             "CONTROL_STRUCTURE" => self.build_control(id, me, &kids),
@@ -5053,59 +5782,58 @@ impl CfgBuilder<'_> {
         let block_child = |b: &Self| kids.iter().copied().find(|&c| b.arena[c].label == "BLOCK");
         match kind.as_str() {
             "if" => {
-                let (ce, co) = self.build(kids[0]);
+                let (ce, co, condition_edges) = self.detached_build(kids.first().copied());
                 let then = block_child(self);
                 let els = kids.iter().copied().find(|&c| {
                     self.arena[c].label == "CONTROL_STRUCTURE" && self.arena[c].code1 == "else"
                 });
-                let mut outs = Vec::new();
-                if let Some(t) = then {
-                    let (te, to) = self.build(t);
-                    if let Some(te) = &te {
-                        self.connect(&co, te);
-                    }
-                    outs.extend(to);
-                }
-                if let Some(e) = els {
-                    let eb = self.arena[e]
+                let else_body = els.and_then(|e| {
+                    self.arena[e]
                         .children
                         .iter()
                         .copied()
-                        .find(|&c| self.arena[c].label == "BLOCK");
-                    if let Some(eb) = eb {
-                        let (ee, eo) = self.build(eb);
-                        if let Some(ee) = &ee {
-                            self.connect(&co, ee);
-                        }
-                        outs.extend(eo);
-                    }
-                } else {
-                    outs.extend(co);
+                        .find(|&c| self.arena[c].label == "BLOCK")
+                });
+                let (te, to, true_edges) = self.detached_build(then);
+                let (ee, eo, false_edges) = self.detached_build(else_body);
+                if let Some(target) = &te {
+                    self.connect(&co, target);
                 }
+                if let Some(target) = &ee {
+                    self.connect(&co, target);
+                }
+                self.edges.extend(condition_edges);
+                self.edges.extend(true_edges);
+                self.edges.extend(false_edges);
+                let outs = if te.is_none() && ee.is_none() {
+                    co
+                } else {
+                    let mut fringe = if te.is_some() { to } else { co.clone() };
+                    fringe.extend(if ee.is_some() { eo } else { co });
+                    fringe
+                };
                 (ce, outs)
             }
             "while" => {
                 self.breaks.push(Vec::new());
                 self.continues.push(Vec::new());
-                let (ce, co) = self.build(kids[0]);
+                let (ce, co, condition_edges) = self.detached_build(kids.first().copied());
                 let body = kids
                     .iter()
                     .copied()
                     .find(|&child| self.arena[child].order == 2);
-                if let Some(b) = body {
-                    let (be, bo) = self.build(b);
-                    if let Some(be) = &be {
-                        self.connect(&co, be);
-                    }
-                    if let Some(ce) = &ce {
-                        self.connect(&bo, ce);
-                    }
-                }
+                let (be, bo, body_edges) = self.detached_build(body);
                 let brs = self.breaks.pop().unwrap();
                 let conts = self.continues.pop().unwrap();
-                if let Some(ce) = &ce {
-                    self.connect(&conts, ce);
+                if let Some(target) = &be {
+                    self.connect(&co, target);
                 }
+                if let Some(target) = &ce {
+                    self.connect(&bo, target);
+                    self.connect(&conts, target);
+                }
+                self.edges.extend(condition_edges);
+                self.edges.extend(body_edges);
                 let mut outs = co;
                 outs.extend(brs);
                 (ce, outs)
@@ -5114,20 +5842,19 @@ impl CfgBuilder<'_> {
                 self.breaks.push(Vec::new());
                 self.continues.push(Vec::new());
                 let body = (kids.len() > 1).then(|| kids[0]);
-                let cond = kids.last().copied();
-                let (be, bo) = body.map(|b| self.build(b)).unwrap_or((None, vec![]));
-                let (ce, co) = cond.map(|c| self.build(c)).unwrap_or((None, vec![]));
-                if let Some(ce) = &ce {
-                    self.connect(&bo, ce);
+                let (be, bo, body_edges) = self.detached_build(body);
+                let (ce, co, condition_edges) = self.detached_build(kids.last().copied());
+                let brs = self.breaks.pop().unwrap();
+                let conts = self.continues.pop().unwrap();
+                if let Some(target) = &ce {
+                    self.connect(&conts, target);
+                    self.connect(&bo, target);
                 }
                 if let Some(target) = be.as_ref().or(ce.as_ref()) {
                     self.connect(&co, target);
                 }
-                let brs = self.breaks.pop().unwrap();
-                let conts = self.continues.pop().unwrap();
-                if let Some(ce) = &ce {
-                    self.connect(&conts, ce);
-                }
+                self.edges.extend(body_edges);
+                self.edges.extend(condition_edges);
                 let mut outs = co;
                 outs.extend(brs);
                 (be.or(ce), outs)
@@ -5160,26 +5887,31 @@ impl CfgBuilder<'_> {
                     .iter()
                     .copied()
                     .find(|&child| self.arena[child].order == condition_order + 2);
-                let (ie, io) = self.seq(&init_children);
-                let (ce, co) = cond.map(|c| self.build(c)).unwrap_or((None, vec![]));
-                let (ue, uo) = update.map(|u| self.build(u)).unwrap_or((None, vec![]));
-                let (be, bo) = body.map(|b| self.build(b)).unwrap_or((None, vec![]));
-                let loop_entry = ce.as_ref().or(be.as_ref()).or(ue.as_ref()).cloned();
-                let after_body = ue.as_ref().or(loop_entry.as_ref()).cloned();
-                if let Some(entry) = &loop_entry {
-                    self.connect(&io, entry);
-                    self.connect(&uo, entry);
-                }
-                if let Some(target) = be.as_ref().or(after_body.as_ref()) {
-                    self.connect(&co, target);
-                }
-                if let Some(target) = &after_body {
-                    self.connect(&bo, target);
-                }
+                let (ie, io, init_edges) = self.detached_seq(&init_children);
+                let (ce, co, condition_edges) = self.detached_build(cond);
+                let (ue, uo, update_edges) = self.detached_build(update);
+                let (be, bo, body_edges) = self.detached_build(body);
+                let inner_entry = be.as_ref().or(ue.as_ref());
+                let loop_entry = ce.as_ref().or(inner_entry).cloned();
+                let inner_fringe = if ue.is_some() { &uo } else { &bo };
                 let brs = self.breaks.pop().unwrap();
                 let conts = self.continues.pop().unwrap();
-                if let Some(target) = &after_body {
+                if let Some(target) = &loop_entry {
+                    self.connect(&io, target);
+                    self.connect(inner_fringe, target);
+                }
+                if let Some(target) = inner_entry.or(ce.as_ref()) {
+                    self.connect(&co, target);
+                }
+                if let Some(target) = ue.as_ref().or(loop_entry.as_ref()) {
                     self.connect(&conts, target);
+                }
+                self.edges.extend(init_edges);
+                self.edges.extend(condition_edges);
+                self.edges.extend(body_edges);
+                self.edges.extend(update_edges);
+                if let Some(target) = &ue {
+                    self.connect(&bo, target);
                 }
                 let mut outs = co;
                 outs.extend(brs);
@@ -5187,30 +5919,23 @@ impl CfgBuilder<'_> {
             }
             "switch" => {
                 self.breaks.push(Vec::new());
-                let (ce, co) = self.build(kids[0]);
-                let body = block_child(self);
-                let mut outs = Vec::new();
+                let (ce, co, condition_edges) = self.detached_build(kids.first().copied());
+                let bkids = block_child(self)
+                    .map(|b| self.arena[b].children.clone())
+                    .unwrap_or_default();
+                let (_, bo, body_edges) = self.detached_seq(&bkids);
                 let mut has_default = false;
-                if let Some(b) = body {
-                    let bkids = self.arena[b].children.clone();
-                    for &c in &bkids {
-                        if self.arena[c].label == "JUMP_TARGET" {
-                            let jt = self.addr(c);
-                            self.connect(&co, &jt);
-                            if self.arena[c].name == "default" {
-                                has_default = true;
-                            }
-                        }
+                for &c in &bkids {
+                    if self.arena[c].label == "JUMP_TARGET" {
+                        self.connect(&co, &self.addr(c));
+                        has_default |= self.arena[c].name == "default";
                     }
-                    // Natural chaining inside the body = fallthrough; the
-                    // dispatch edges above are the only entries.
-                    let (_, bo) = self.seq(&bkids);
-                    outs.extend(bo);
                 }
-                if !has_default {
-                    outs.extend(co.clone());
-                }
+                self.edges.extend(condition_edges);
+                self.edges.extend(body_edges);
+                let mut outs = if has_default { Vec::new() } else { co };
                 outs.extend(self.breaks.pop().unwrap());
+                outs.extend(bo);
                 (ce, outs)
             }
             "goto" => {
@@ -5448,13 +6173,6 @@ fn reaching_def_flows(block: &str, text: &str) -> Vec<(String, String, String)> 
     for &(source, target) in &cfg {
         successors[source].push(target);
     }
-    let mut reachable = HashSet::new();
-    let mut pending = vec![0];
-    while let Some(node) = pending.pop() {
-        if reachable.insert(node) {
-            pending.extend(successors[node].iter().copied());
-        }
-    }
     let method_addr = format!("M:{}", arena[0].full);
     let addr = |i: usize| -> String {
         if i == 0 {
@@ -5529,19 +6247,15 @@ fn reaching_def_flows(block: &str, text: &str) -> Vec<(String, String, String)> 
         .copied()
         .filter(|&k| arena[k].label == "METHOD_PARAMETER_IN")
         .collect();
-    let mut entry_gen: Vec<usize> = Vec::new();
     for &p in &params {
         def_var.insert(p, definition_key(p));
-        entry_gen.push(p);
+        gen.insert(p, vec![p]);
     }
-    // calls
-    // Reachable calls are processed by the call-site routines. ReachingDef's
-    // flow graph excludes disconnected CFG tails. GEN excludes field-access calls
-    // (Joern's defsForCalls.filterNot(isFieldAccess)): such a call defines no
-    // value of its own — it only becomes a def when it is itself an argument
-    // of a non-field-access parent (handled by the parent's gen below).
+    // GEN/KILL include method-contained calls even when their CFG nodes are
+    // unreachable. Their initial OUT is GEN, so a raw predecessor can supply
+    // definitions without ever receiving IN or call-site DDG processing.
     let calls: Vec<usize> = (0..n)
-        .filter(|&i| own.contains(&i) && reachable.contains(&i) && arena[i].label == "CALL")
+        .filter(|&i| own.contains(&i) && arena[i].label == "CALL")
         .collect();
     let gen_calls: Vec<usize> = calls
         .iter()
@@ -5639,72 +6353,148 @@ fn reaching_def_flows(block: &str, text: &str) -> Vec<(String, String, String)> 
         kill.insert(c, k);
     }
 
-    // --- dataflow fixpoint over the CFG ---
-    // Nodes that are part of this method's CFG (the reaching-def flow graph's
-    // node set). Used to tell an EXPRESSION block (comma operator — in the CFG)
-    // from a statement / INLINED-macro / stub body block (not in the CFG).
+    // --- ReachingDefFlowGraph and DataFlowSolver (Joern v4.0.555) ---
     let cfg_nodes: HashSet<usize> = cfg.iter().flat_map(|&(s, d)| [s, d]).collect();
-    let mut preds: Vec<Vec<usize>> = vec![Vec::new(); n];
-    for &(s, d) in &cfg {
-        if reachable.contains(&s) {
-            preds[d].push(s);
-        }
+    let exit = arena[0]
+        .children
+        .iter()
+        .copied()
+        .find(|&i| arena[i].label == "METHOD_RETURN");
+    let output_params: Vec<usize> = arena[0]
+        .children
+        .iter()
+        .copied()
+        .filter(|&i| arena[i].label == "METHOD_PARAMETER_OUT")
+        .collect();
+    let first_body = successors[0].first().copied();
+    let mut preds = vec![Vec::new(); n];
+    for &(source, target) in &cfg {
+        preds[target].push(source);
     }
-    // ReachingDefFlowGraph quirk (decompiled initPred): the FIRST body node's
-    // predecessor is the param-chain entry (method), REPLACING its CFG preds.
-    // When the loop condition is the first body node (no statements precede the
-    // loop, e.g. bsearch), this drops the loop back-edges into it — so loop-body
-    // defs don't flow back to the condition. The method node (0) points to the
-    // first body node.
-    for &(s, d) in &cfg {
-        if s == 0 {
-            preds[d] = vec![0];
-        }
-    }
-    let mut out: Vec<HashSet<usize>> = vec![HashSet::new(); n];
-    out[0] = entry_gen.iter().copied().collect();
-    let empty: Vec<usize> = Vec::new();
-    let mut changed = true;
-    while changed {
-        changed = false;
-        for i in 0..n {
-            let mut in_set: HashSet<usize> = HashSet::new();
-            for &p in &preds[i] {
-                in_set.extend(&out[p]);
-            }
-            let g = gen.get(&i).unwrap_or(&empty);
-            let k = kill.get(&i).unwrap_or(&empty);
-            let mut new_out: HashSet<usize> =
-                in_set.iter().copied().filter(|d| !k.contains(d)).collect();
-            new_out.extend(g.iter().copied());
-            if i == 0 {
-                new_out.extend(entry_gen.iter().copied());
-            }
-            if new_out != out[i] {
-                out[i] = new_out;
-                changed = true;
-            }
-        }
-    }
-    let in_of = |i: usize| -> HashSet<usize> {
-        let mut s = HashSet::new();
-        for &p in &preds[i] {
-            s.extend(&out[p]);
-        }
-        s
-    };
+    // ReachingDefFlowGraph selects the first incoming CFG edge. This is the
+    // CfgCreator composition order, not AST order or a reachability filter.
+    let last_actual = exit.and_then(|e| preds[e].first().copied());
 
-    // Joern's reaching-def runs over ReachingDefFlowGraph, not the raw CFG: the
-    // exit and the METHOD_PARAMETER_OUTs are fed by a param-out chain whose
-    // source is the single `lastActualCfgNode` (the earliest cfg-predecessor of
-    // METHOD_RETURN) — NOT the union of all returns. So a post-loop `return`
-    // never contributes its (bypass) param defs to the exit. For a
-    // single-return method this is identical to the union.
-    let exit_in: HashSet<usize> = (0..n)
-        .find(|&i| own.contains(&i) && arena[i].label == "METHOD_RETURN")
-        .and_then(|e| preds[e].iter().copied().filter(|&p| p < n).min())
-        .map(|la| out[la].clone())
-        .unwrap_or_default();
+    // Method.reversePostOrder traverses raw cfgNext, which excludes the
+    // METHOD_RETURN. Parameters and the exit are added explicitly afterward.
+    // Use an iterative DFS with suspended successor positions, as Joern's
+    // NodeOrdering does, rather than an AST-order fixed-point sweep.
+    let mut postorder = Vec::new();
+    let mut visited = vec![false; n];
+    let mut stack = vec![(0usize, 0usize)];
+    visited[0] = true;
+    while let Some((node, next_index)) = stack.last_mut() {
+        if *next_index < successors[*node].len() {
+            let next = successors[*node][*next_index];
+            *next_index += 1;
+            if Some(next) != exit && !visited[next] {
+                visited[next] = true;
+                stack.push((next, 0));
+            }
+        } else {
+            postorder.push(*node);
+            stack.pop();
+        }
+    }
+    let mut worklist = vec![0];
+    worklist.extend(params.iter().copied());
+    worklist.extend(postorder.into_iter().rev().filter(|&i| i != 0));
+    worklist.extend(output_params.iter().copied());
+    worklist.extend(exit);
+
+    // initPred and initSucc are intentionally asymmetric. A node whose only
+    // CFG successor is exit schedules the first output parameter instead;
+    // a loop condition with both body and exit successors still schedules
+    // exit directly. Output-parameter IN can therefore retain an earlier
+    // round even when the loop condition's OUT later changes.
+    let mut flow_successors = successors.clone();
+    for &i in &worklist {
+        if i == 0 {
+            flow_successors[i] = params
+                .first()
+                .copied()
+                .map_or_else(|| successors[i].clone(), |first| vec![first]);
+        } else if let Some(position) = params.iter().position(|&p| p == i) {
+            preds[i] = vec![position.checked_sub(1).map_or(0, |p| params[p])];
+            flow_successors[i] = params
+                .get(position + 1)
+                .copied()
+                .map_or_else(|| successors[0].clone(), |next| vec![next]);
+        } else if let Some(position) = output_params.iter().position(|&p| p == i) {
+            preds[i] = position
+                .checked_sub(1)
+                .map(|p| output_params[p])
+                .or(last_actual)
+                .into_iter()
+                .collect();
+            flow_successors[i] = output_params
+                .get(position + 1)
+                .copied()
+                .or(exit)
+                .into_iter()
+                .collect();
+        } else {
+            if Some(i) == first_body {
+                // This case precedes exit handling in initPred, including an
+                // empty method whose first CFG node is METHOD_RETURN.
+                preds[i] = vec![params.last().copied().unwrap_or(0)];
+            } else if Some(i) == exit {
+                preds[i] = output_params
+                    .last()
+                    .copied()
+                    .or(last_actual)
+                    .into_iter()
+                    .collect();
+            }
+            if arena[i].label == "RETURN"
+                || (successors[i].len() == 1 && successors[i].first().copied() == exit)
+            {
+                flow_successors[i] = output_params
+                    .first()
+                    .copied()
+                    .or(exit)
+                    .into_iter()
+                    .collect();
+            }
+        }
+    }
+
+    let mut out = vec![HashSet::<usize>::new(); n];
+    for (&node, generated) in &gen {
+        out[node].extend(generated.iter().copied());
+    }
+    let mut incoming: Vec<Option<HashSet<usize>>> = vec![None; n];
+    while !worklist.is_empty() {
+        let mut next_worklist = Vec::new();
+        let mut queued = vec![false; n];
+        for i in worklist {
+            let mut in_set = HashSet::new();
+            for &previous in &preds[i] {
+                in_set.extend(out[previous].iter().copied());
+            }
+            let mut next_out = in_set.clone();
+            if let Some(killed) = kill.get(&i) {
+                next_out.retain(|d| !killed.contains(d));
+            }
+            if let Some(generated) = gen.get(&i) {
+                next_out.extend(generated.iter().copied());
+            }
+            incoming[i] = Some(in_set);
+            if next_out != out[i] {
+                out[i] = next_out;
+                for &next in &flow_successors[i] {
+                    if !queued[next] {
+                        queued[next] = true;
+                        next_worklist.push(next);
+                    }
+                }
+            }
+        }
+        worklist = next_worklist;
+    }
+    // DDG routines read the saved IN solution, not unions recomputed from
+    // final predecessor OUT. Unscheduled nodes have no entry in this map.
+    let in_of = |i: usize| incoming[i].clone().unwrap_or_default();
 
     // isUsing(use, inElem) — faithful port of UsageAnalyzer.isUsing =
     // sameVariable || isContainer || isPart || isAlias. Joern compares
@@ -5716,20 +6506,15 @@ fn reaching_def_flows(block: &str, text: &str) -> Vec<(String, String, String)> 
     // Gate every candidate edge addEdge(from=s, to=d) through
     // isValidEdge(child=d, parent=s), exactly as DdgGenerator.addEdge does.
     let push = |var: String, s: usize, d: usize, flows: &mut Vec<(String, String, String)>| {
-        let in_flow_graph = |node| {
-            reachable.contains(&node)
-                || matches!(
-                    arena[node].label.as_str(),
-                    "METHOD_PARAMETER_IN" | "METHOD_PARAMETER_OUT" | "METHOD_RETURN"
-                )
-        };
-        if in_flow_graph(s) && in_flow_graph(d) && rd_valid_edge(&arena, d, s) {
+        if own.contains(&s)
+            && own.contains(&d)
+            && arena[s].label != "UNKNOWN"
+            && arena[d].label != "UNKNOWN"
+            && rd_valid_edge(&arena, d, s)
+        {
             flows.push((var, addr(s), addr(d)));
         }
     };
-
-    // method-return (exit) index
-    let exit = (0..n).find(|&i| own.contains(&i) && arena[i].label == "METHOD_RETURN");
 
     // isDdgNode: everything EXCEPT Method, ControlStructure, FieldIdentifier,
     // JumpTarget, MethodReturn. A BLOCK is a ddg node only when it is itself a
@@ -5791,7 +6576,12 @@ fn reaching_def_flows(block: &str, text: &str) -> Vec<(String, String, String)> 
     // `is_ddg` and `used_incoming` as well.
     #[allow(clippy::needless_range_loop)]
     for i in 0..n {
-        if i == 0 || !own.contains(&i) || !is_ddg(i) || assign_lhs.contains(&i) {
+        if i == 0
+            || incoming[i].is_none()
+            || !own.contains(&i)
+            || !is_ddg(i)
+            || assign_lhs.contains(&i)
+        {
             continue;
         }
         if arena[i].label == "CALL" && !args_of(i).is_empty() {
@@ -5802,8 +6592,8 @@ fn reaching_def_flows(block: &str, text: &str) -> Vec<(String, String, String)> 
         }
     }
 
-    // 2. call sites
-    for &c in &calls {
+    // 2. call sites: only nodes with a computed IN solution.
+    for &c in calls.iter().filter(|&&c| incoming[c].is_some()) {
         let g_set: Vec<usize> = gen.get(&c).cloned().unwrap_or_default();
         let is_gen_arg_node = |x: usize| g_set.contains(&x) && x != c;
         // first loop: reaching defs into each arg use (the assignment LHS is a
@@ -5888,7 +6678,7 @@ fn reaching_def_flows(block: &str, text: &str) -> Vec<(String, String, String)> 
 
     // 3. returns
     for i in 0..n {
-        if arena[i].label != "RETURN" || !own.contains(&i) {
+        if arena[i].label != "RETURN" || !own.contains(&i) || incoming[i].is_none() {
             continue;
         }
         for (u, ins) in used_incoming(i) {
@@ -5938,7 +6728,7 @@ fn reaching_def_flows(block: &str, text: &str) -> Vec<(String, String, String)> 
         // paramOut's own "use" is itself, so the match is isUsing(paramOut, d):
         // e.g. `*l` (indirection of l) is used by the paramOut of l, and `q.x`
         // (a write through q) by the paramOut of q.
-        let mut ds: Vec<usize> = exit_in
+        let mut ds: Vec<usize> = in_of(i)
             .iter()
             .copied()
             .filter(|&d| is_using(i, d))
@@ -5951,7 +6741,7 @@ fn reaching_def_flows(block: &str, text: &str) -> Vec<(String, String, String)> 
 
     // 5. exit node: every def in in(exit) -> exit
     if let Some(e) = exit {
-        let mut v: Vec<usize> = exit_in.iter().copied().collect();
+        let mut v: Vec<usize> = in_of(e).into_iter().collect();
         v.sort();
         for d in v {
             push(node_var(&arena[d]), d, e, &mut flows);
@@ -6048,7 +6838,14 @@ fn rd_node_str(arena: &[DNode], i: usize) -> Option<String> {
             Some(arena[i].name.clone())
         }
         "METHOD" | "METHOD_RETURN" | "CONTROL_STRUCTURE" | "JUMP_TARGET" => None,
-        _ => Some(arena[i].fullcode.clone()),
+        // propertiesMap omits an unset CODE, but Joern's Expression.code
+        // getter returns PropertyDefaults.Code ("<empty>"). An explicitly
+        // empty CODE remains empty, as for function-pointer initializers.
+        _ => Some(if arena[i].has_code {
+            arena[i].fullcode.clone()
+        } else {
+            "<empty>".to_string()
+        }),
     }
 }
 // call.argument with a given ARGUMENT_INDEX (argumentOption(idx)).
@@ -6166,15 +6963,39 @@ fn rd_is_expr(arena: &[DNode], node: usize) -> bool {
             | "TYPE_REF"
     )
 }
+// DefaultSemantics.operatorFlows uses an explicit PassThroughMapping for
+// these operators. Unlike absent semantics, it forbids cross-argument flow.
+fn rd_passthrough_operator(name: &str) -> bool {
+    matches!(
+        name,
+        "<operator>.modulo"
+            | "<operator>.arrayInitializer"
+            | "<operator>.tupleLiteral"
+            | "<operator>.dictLiteral"
+            | "<operator>.setLiteral"
+            | "<operator>.listLiteral"
+    )
+}
 fn rd_sem(arena: &[DNode], c: usize) -> Option<Vec<(i64, i64)>> {
-    if arena[c].label == "CALL" {
-        operator_semantics(&arena[c].name)
-    } else {
-        None
+    if arena[c].label != "CALL" {
+        return None;
     }
+    if rd_passthrough_operator(&arena[c].name) {
+        // PTF supports unbounded arity and excludes the receiver at index 0.
+        return Some(
+            rd_args(arena, c)
+                .into_iter()
+                .map(|argument| arena[argument].arg_index)
+                .filter(|&index| index != 0)
+                .flat_map(|index| [(index, index), (index, -1)])
+                .collect(),
+        );
+    }
+    operator_semantics(&arena[c].name)
 }
 fn rd_is_call_retval(arena: &[DNode], node: usize) -> bool {
-    if arena[node].label != "CALL" {
+    if arena[node].label != "CALL" || rd_passthrough_operator(&arena[node].name) {
+        // PassThroughMapping explicitly permits return flow even at arity 0.
         return false;
     }
     match rd_sem(arena, node) {
@@ -6270,5 +7091,66 @@ mod preproc_tests {
             "A"
         );
         assert!(budget > 0);
+    }
+}
+
+#[cfg(test)]
+mod rd_semantics_tests {
+    use super::*;
+
+    #[test]
+    fn pass_through_validation_uses_actual_arguments_without_sibling_flow() {
+        for operator in [
+            "<operator>.modulo",
+            "<operator>.arrayInitializer",
+            "<operator>.tupleLiteral",
+            "<operator>.dictLiteral",
+            "<operator>.setLiteral",
+            "<operator>.listLiteral",
+        ] {
+            let arena = parse_dump_block(&format!(
+                "CALL NAME={operator} CODE=initializer ORDER=1\n\
+                 \x20\x20LITERAL CODE=receiver ARGUMENT_INDEX=0 ORDER=0\n\
+                 \x20\x20LITERAL CODE=first ARGUMENT_INDEX=1 ORDER=1\n\
+                 \x20\x20LITERAL CODE=third ARGUMENT_INDEX=3 ORDER=3\n\
+                 \x20\x20LITERAL CODE=many ARGUMENT_INDEX=40 ORDER=40\n"
+            ));
+            assert!(!rd_is_used(&arena, 1), "{operator}: receiver is not input");
+            assert!(
+                !rd_is_defined(&arena, 1),
+                "{operator}: receiver is not output"
+            );
+            for argument in 2..arena.len() {
+                assert!(rd_is_used(&arena, argument), "{operator}: {argument}");
+                assert!(rd_is_defined(&arena, argument), "{operator}: {argument}");
+                assert!(rd_valid_edge(&arena, argument, argument));
+                assert!(rd_valid_edge(&arena, 0, argument));
+                for sibling in 2..arena.len() {
+                    if sibling != argument {
+                        assert!(!rd_valid_edge(&arena, sibling, argument));
+                    }
+                }
+            }
+            let empty = parse_dump_block(&format!("CALL NAME={operator} CODE={{}} ORDER=1"));
+            assert!(!rd_is_call_retval(&empty, 0), "{operator}: empty call");
+        }
+    }
+
+    #[test]
+    fn absent_expression_code_does_not_alias_explicit_empty_names() {
+        let arena = parse_dump_block(
+            "METHOD NAME=f FULL_NAME=f\n\
+             \x20\x20METHOD_PARAMETER_IN NAME= CODE=void ORDER=1\n\
+             \x20\x20BLOCK ORDER=2\n\
+             \x20\x20IDENTIFIER NAME= CODE= ARGUMENT_INDEX=1 ORDER=3\n\
+             \x20\x20BLOCK CODE= ORDER=4\n",
+        );
+        assert_eq!(rd_node_str(&arena, 2).as_deref(), Some("<empty>"));
+        assert!(!rd_is_using(&arena, 2, 1));
+        assert_eq!(rd_node_str(&arena, 3).as_deref(), Some(""));
+        assert!(rd_is_using(&arena, 3, 1));
+        assert_eq!(rd_node_str(&arena, 4).as_deref(), Some(""));
+        assert!(rd_is_using(&arena, 4, 1));
+        assert_eq!(rd_node_str(&arena, 0), None);
     }
 }

@@ -1,0 +1,1762 @@
+METHOD NAME=<global> CODE=<global> FULL_NAME=<includes>:<global> ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.addition FULL_NAME=<operator>.addition ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.conditional FULL_NAME=<operator>.conditional ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_IN NAME=p3 CODE=p3 TYPE_FULL_NAME=ANY ORDER=3
+  METHOD_PARAMETER_OUT NAME=p3 CODE=p3 TYPE_FULL_NAME=ANY ORDER=3
+
+METHOD NAME=<operator>.equals FULL_NAME=<operator>.equals ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.logicalAnd FULL_NAME=<operator>.logicalAnd ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.logicalOr FULL_NAME=<operator>.logicalOr ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.notEquals FULL_NAME=<operator>.notEquals ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.postDecrement FULL_NAME=<operator>.postDecrement ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=both_empty CODE=void both_empty(int condition) { if (condition) {} else {} } FULL_NAME=both_empty SIGNATURE=void(int) ORDER=1
+  METHOD_PARAMETER_IN NAME=condition CODE=int condition TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=condition CODE=int condition TYPE_FULL_NAME=int ORDER=1
+  BLOCK CODE={ if (condition) {} else {} } TYPE_FULL_NAME=void ORDER=2
+    CONTROL_STRUCTURE CODE=if (condition) {} else {} ORDER=1
+      CALL NAME=<operator>.notEquals CODE=condition != 0 TYPE_FULL_NAME=int METHOD_FULL_NAME=<operator>.notEquals ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=condition CODE=condition TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+        LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+      BLOCK CODE={} TYPE_FULL_NAME=void ORDER=2
+      CONTROL_STRUCTURE CODE=else ORDER=3
+        BLOCK CODE={} TYPE_FULL_NAME=void ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+
+METHOD NAME=branch_macro CODE=int branch_macro(int condition, int value) { return condition ? VALUE(value) : input(); } FULL_NAME=branch_macro SIGNATURE=int(int,int) ORDER=1
+  METHOD_PARAMETER_IN NAME=condition CODE=int condition TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=condition CODE=int condition TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=2
+  METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=2
+  BLOCK CODE={ return condition ? VALUE(value) : input(); } TYPE_FULL_NAME=void ORDER=3
+    RETURN CODE=return condition ? VALUE(value) : input(); ORDER=1
+      CALL NAME=<operator>.conditional CODE=condition ? VALUE(value) : input() TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.conditional ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=condition CODE=condition TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+        CALL NAME=VALUE CODE=VALUE(value) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=ordering.c:VALUE:ANY(1) SIGNATURE=ANY(1) ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=INLINED
+          IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+          BLOCK TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+            CALL NAME=<operator>.addition CODE=(value) + 1 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+              IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+              LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+        CALL NAME=input CODE=input() TYPE_FULL_NAME=int METHOD_FULL_NAME=input ORDER=3 ARGUMENT_INDEX=3 DISPATCH_TYPE=STATIC_DISPATCH
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=4
+
+METHOD NAME=empty_false CODE=void empty_false(int condition) { if (condition) input(); else {} } FULL_NAME=empty_false SIGNATURE=void(int) ORDER=1
+  METHOD_PARAMETER_IN NAME=condition CODE=int condition TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=condition CODE=int condition TYPE_FULL_NAME=int ORDER=1
+  BLOCK CODE={ if (condition) input(); else {} } TYPE_FULL_NAME=void ORDER=2
+    CONTROL_STRUCTURE CODE=if (condition) input(); else {} ORDER=1
+      CALL NAME=<operator>.notEquals CODE=condition != 0 TYPE_FULL_NAME=int METHOD_FULL_NAME=<operator>.notEquals ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=condition CODE=condition TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+        LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+      BLOCK TYPE_FULL_NAME=ANY ORDER=2
+        CALL NAME=input CODE=input() TYPE_FULL_NAME=int METHOD_FULL_NAME=input ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+      CONTROL_STRUCTURE CODE=else ORDER=3
+        BLOCK CODE={} TYPE_FULL_NAME=void ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+
+METHOD NAME=empty_true CODE=void empty_true(int condition) { if (condition) {} else input(); } FULL_NAME=empty_true SIGNATURE=void(int) ORDER=1
+  METHOD_PARAMETER_IN NAME=condition CODE=int condition TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=condition CODE=int condition TYPE_FULL_NAME=int ORDER=1
+  BLOCK CODE={ if (condition) {} else input(); } TYPE_FULL_NAME=void ORDER=2
+    CONTROL_STRUCTURE CODE=if (condition) {} else input(); ORDER=1
+      CALL NAME=<operator>.notEquals CODE=condition != 0 TYPE_FULL_NAME=int METHOD_FULL_NAME=<operator>.notEquals ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=condition CODE=condition TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+        LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+      BLOCK CODE={} TYPE_FULL_NAME=void ORDER=2
+      CONTROL_STRUCTURE CODE=else ORDER=3
+        BLOCK TYPE_FULL_NAME=ANY ORDER=1
+          CALL NAME=input CODE=input() TYPE_FULL_NAME=int METHOD_FULL_NAME=input ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+
+METHOD NAME=input CODE=int input(void); FULL_NAME=input SIGNATURE=int(void) ORDER=1
+  METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+
+METHOD NAME=multiple_returns CODE=int multiple_returns(int value) { input(); while (value) { if (value == 2) return input(); if (value == 3) return 1; value--; } return input(); } FULL_NAME=multiple_returns SIGNATURE=int(int) ORDER=1
+  METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+  BLOCK CODE={ input(); while (value) { if (value == 2) return input(); if (value == 3) return 1; value--; } return input(); } TYPE_FULL_NAME=void ORDER=2
+    CALL NAME=input CODE=input() TYPE_FULL_NAME=int METHOD_FULL_NAME=input ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+    CONTROL_STRUCTURE CODE=while (value) ORDER=2
+      CALL NAME=<operator>.notEquals CODE=value != 0 TYPE_FULL_NAME=int METHOD_FULL_NAME=<operator>.notEquals ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+        LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+      BLOCK CODE={ if (value == 2) return input(); if (value == 3) return 1; value--; } TYPE_FULL_NAME=void ORDER=2
+        CONTROL_STRUCTURE CODE=if (value == 2) return input(); ORDER=1
+          CALL NAME=<operator>.equals CODE=value == 2 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.equals ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+            IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+            LITERAL CODE=2 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+          BLOCK TYPE_FULL_NAME=ANY ORDER=2
+            RETURN CODE=return input(); ORDER=1
+              CALL NAME=input CODE=input() TYPE_FULL_NAME=int METHOD_FULL_NAME=input ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+        CONTROL_STRUCTURE CODE=if (value == 3) return 1; ORDER=2
+          CALL NAME=<operator>.equals CODE=value == 3 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.equals ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+            IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+            LITERAL CODE=3 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+          BLOCK TYPE_FULL_NAME=ANY ORDER=2
+            RETURN CODE=return 1; ORDER=1
+              LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=1
+        CALL NAME=<operator>.postDecrement CODE=value-- TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.postDecrement ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+    RETURN CODE=return input(); ORDER=3
+      CALL NAME=input CODE=input() TYPE_FULL_NAME=int METHOD_FULL_NAME=input ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+
+METHOD NAME=nested_do CODE=void nested_do(int first, int second) { input(); do { do { second--; } while (second); first--; } while (first); } FULL_NAME=nested_do SIGNATURE=void(int,int) ORDER=1
+  METHOD_PARAMETER_IN NAME=first CODE=int first TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=first CODE=int first TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_IN NAME=second CODE=int second TYPE_FULL_NAME=int ORDER=2
+  METHOD_PARAMETER_OUT NAME=second CODE=int second TYPE_FULL_NAME=int ORDER=2
+  BLOCK CODE={ input(); do { do { second--; } while (second); first--; } while (first); } TYPE_FULL_NAME=void ORDER=3
+    CALL NAME=input CODE=input() TYPE_FULL_NAME=int METHOD_FULL_NAME=input ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+    CONTROL_STRUCTURE CODE=do { do { second--; } while (second); first--; } while (first); ORDER=2
+      BLOCK CODE={ do { second--; } while (second); first--; } TYPE_FULL_NAME=void ORDER=1
+        CONTROL_STRUCTURE CODE=do { second--; } while (second); ORDER=1
+          BLOCK CODE={ second--; } TYPE_FULL_NAME=void ORDER=1
+            CALL NAME=<operator>.postDecrement CODE=second-- TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.postDecrement ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+              IDENTIFIER NAME=second CODE=second TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+          CALL NAME=<operator>.notEquals CODE=second != 0 TYPE_FULL_NAME=int METHOD_FULL_NAME=<operator>.notEquals ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+            IDENTIFIER NAME=second CODE=second TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+            LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+        CALL NAME=<operator>.postDecrement CODE=first-- TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.postDecrement ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=first CODE=first TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+      CALL NAME=<operator>.notEquals CODE=first != 0 TYPE_FULL_NAME=int METHOD_FULL_NAME=<operator>.notEquals ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=first CODE=first TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+        LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=4
+
+METHOD NAME=nested_for CODE=void nested_for(int first, int second) { input(); for (; first; first--) { for (; second; second--) observe(first); } } FULL_NAME=nested_for SIGNATURE=void(int,int) ORDER=1
+  METHOD_PARAMETER_IN NAME=first CODE=int first TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=first CODE=int first TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_IN NAME=second CODE=int second TYPE_FULL_NAME=int ORDER=2
+  METHOD_PARAMETER_OUT NAME=second CODE=int second TYPE_FULL_NAME=int ORDER=2
+  BLOCK CODE={ input(); for (; first; first--) { for (; second; second--) observe(first); } } TYPE_FULL_NAME=void ORDER=3
+    CALL NAME=input CODE=input() TYPE_FULL_NAME=int METHOD_FULL_NAME=input ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+    CONTROL_STRUCTURE CODE=for (;first;first--) ORDER=2
+      BLOCK TYPE_FULL_NAME=ANY ORDER=1
+      CALL NAME=<operator>.notEquals CODE=first != 0 TYPE_FULL_NAME=int METHOD_FULL_NAME=<operator>.notEquals ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=first CODE=first TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+        LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+      CALL NAME=<operator>.postDecrement CODE=first-- TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.postDecrement ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=first CODE=first TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+      BLOCK CODE={ for (; second; second--) observe(first); } TYPE_FULL_NAME=void ORDER=4
+        CONTROL_STRUCTURE CODE=for (;second;second--) ORDER=1
+          BLOCK TYPE_FULL_NAME=ANY ORDER=1
+          CALL NAME=<operator>.notEquals CODE=second != 0 TYPE_FULL_NAME=int METHOD_FULL_NAME=<operator>.notEquals ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+            IDENTIFIER NAME=second CODE=second TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+            LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+          CALL NAME=<operator>.postDecrement CODE=second-- TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.postDecrement ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH
+            IDENTIFIER NAME=second CODE=second TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+          CALL NAME=observe CODE=observe(first) TYPE_FULL_NAME=void METHOD_FULL_NAME=observe ORDER=4 DISPATCH_TYPE=STATIC_DISPATCH
+            IDENTIFIER NAME=first CODE=first TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=4
+
+METHOD NAME=nested_while CODE=void nested_while(int first, int second) { input(); while (first) { first--; while (second) second--; } } FULL_NAME=nested_while SIGNATURE=void(int,int) ORDER=1
+  METHOD_PARAMETER_IN NAME=first CODE=int first TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=first CODE=int first TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_IN NAME=second CODE=int second TYPE_FULL_NAME=int ORDER=2
+  METHOD_PARAMETER_OUT NAME=second CODE=int second TYPE_FULL_NAME=int ORDER=2
+  BLOCK CODE={ input(); while (first) { first--; while (second) second--; } } TYPE_FULL_NAME=void ORDER=3
+    CALL NAME=input CODE=input() TYPE_FULL_NAME=int METHOD_FULL_NAME=input ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+    CONTROL_STRUCTURE CODE=while (first) ORDER=2
+      CALL NAME=<operator>.notEquals CODE=first != 0 TYPE_FULL_NAME=int METHOD_FULL_NAME=<operator>.notEquals ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=first CODE=first TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+        LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+      BLOCK CODE={ first--; while (second) second--; } TYPE_FULL_NAME=void ORDER=2
+        CALL NAME=<operator>.postDecrement CODE=first-- TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.postDecrement ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=first CODE=first TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+        CONTROL_STRUCTURE CODE=while (second) ORDER=2
+          CALL NAME=<operator>.notEquals CODE=second != 0 TYPE_FULL_NAME=int METHOD_FULL_NAME=<operator>.notEquals ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+            IDENTIFIER NAME=second CODE=second TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+            LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+          CALL NAME=<operator>.postDecrement CODE=second-- TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.postDecrement ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+            IDENTIFIER NAME=second CODE=second TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=4
+
+METHOD NAME=observe CODE=void observe(int value); FULL_NAME=observe SIGNATURE=void(int) ORDER=1
+  METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+
+METHOD NAME=<global> CODE=<global> FULL_NAME=ordering.c:<global> ORDER=1
+  METHOD NAME=empty_true CODE=void empty_true(int condition) { if (condition) {} else input(); } FULL_NAME=empty_true SIGNATURE=void(int) ORDER=1
+    METHOD_PARAMETER_IN NAME=condition CODE=int condition TYPE_FULL_NAME=int ORDER=1
+    METHOD_PARAMETER_OUT NAME=condition CODE=int condition TYPE_FULL_NAME=int ORDER=1
+    BLOCK CODE={ if (condition) {} else input(); } TYPE_FULL_NAME=void ORDER=2
+      CONTROL_STRUCTURE CODE=if (condition) {} else input(); ORDER=1
+        CALL NAME=<operator>.notEquals CODE=condition != 0 TYPE_FULL_NAME=int METHOD_FULL_NAME=<operator>.notEquals ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=condition CODE=condition TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+          LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+        BLOCK CODE={} TYPE_FULL_NAME=void ORDER=2
+        CONTROL_STRUCTURE CODE=else ORDER=3
+          BLOCK TYPE_FULL_NAME=ANY ORDER=1
+            CALL NAME=input CODE=input() TYPE_FULL_NAME=int METHOD_FULL_NAME=input ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+  METHOD NAME=empty_false CODE=void empty_false(int condition) { if (condition) input(); else {} } FULL_NAME=empty_false SIGNATURE=void(int) ORDER=1
+    METHOD_PARAMETER_IN NAME=condition CODE=int condition TYPE_FULL_NAME=int ORDER=1
+    METHOD_PARAMETER_OUT NAME=condition CODE=int condition TYPE_FULL_NAME=int ORDER=1
+    BLOCK CODE={ if (condition) input(); else {} } TYPE_FULL_NAME=void ORDER=2
+      CONTROL_STRUCTURE CODE=if (condition) input(); else {} ORDER=1
+        CALL NAME=<operator>.notEquals CODE=condition != 0 TYPE_FULL_NAME=int METHOD_FULL_NAME=<operator>.notEquals ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=condition CODE=condition TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+          LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+        BLOCK TYPE_FULL_NAME=ANY ORDER=2
+          CALL NAME=input CODE=input() TYPE_FULL_NAME=int METHOD_FULL_NAME=input ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+        CONTROL_STRUCTURE CODE=else ORDER=3
+          BLOCK CODE={} TYPE_FULL_NAME=void ORDER=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+  METHOD NAME=both_empty CODE=void both_empty(int condition) { if (condition) {} else {} } FULL_NAME=both_empty SIGNATURE=void(int) ORDER=1
+    METHOD_PARAMETER_IN NAME=condition CODE=int condition TYPE_FULL_NAME=int ORDER=1
+    METHOD_PARAMETER_OUT NAME=condition CODE=int condition TYPE_FULL_NAME=int ORDER=1
+    BLOCK CODE={ if (condition) {} else {} } TYPE_FULL_NAME=void ORDER=2
+      CONTROL_STRUCTURE CODE=if (condition) {} else {} ORDER=1
+        CALL NAME=<operator>.notEquals CODE=condition != 0 TYPE_FULL_NAME=int METHOD_FULL_NAME=<operator>.notEquals ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=condition CODE=condition TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+          LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+        BLOCK CODE={} TYPE_FULL_NAME=void ORDER=2
+        CONTROL_STRUCTURE CODE=else ORDER=3
+          BLOCK CODE={} TYPE_FULL_NAME=void ORDER=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+  METHOD NAME=switch_exit CODE=void switch_exit(int value) { switch (value) { case 1: break; default: input(); } } FULL_NAME=switch_exit SIGNATURE=void(int) ORDER=1
+    METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+    METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+    BLOCK CODE={ switch (value) { case 1: break; default: input(); } } TYPE_FULL_NAME=void ORDER=2
+      CONTROL_STRUCTURE CODE=switch (value) { case 1: break; default: input(); } ORDER=1
+        IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1
+        BLOCK CODE={ case 1: break; default: input(); } TYPE_FULL_NAME=void ORDER=2
+          JUMP_TARGET NAME=case CODE=case 1: ORDER=1
+          LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=2
+          CONTROL_STRUCTURE CODE=break; ORDER=3
+          JUMP_TARGET NAME=default CODE=default: ORDER=4
+          CALL NAME=input CODE=input() TYPE_FULL_NAME=int METHOD_FULL_NAME=input ORDER=5 DISPATCH_TYPE=STATIC_DISPATCH
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+  METHOD NAME=switch_no_default CODE=void switch_no_default(int value) { switch (value) { case 1: input(); break; case 2: observe(value); } } FULL_NAME=switch_no_default SIGNATURE=void(int) ORDER=1
+    METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+    METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+    BLOCK CODE={ switch (value) { case 1: input(); break; case 2: observe(value); } } TYPE_FULL_NAME=void ORDER=2
+      CONTROL_STRUCTURE CODE=switch (value) { case 1: input(); break; case 2: observe(value); } ORDER=1
+        IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1
+        BLOCK CODE={ case 1: input(); break; case 2: observe(value); } TYPE_FULL_NAME=void ORDER=2
+          JUMP_TARGET NAME=case CODE=case 1: ORDER=1
+          LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=2
+          CALL NAME=input CODE=input() TYPE_FULL_NAME=int METHOD_FULL_NAME=input ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH
+          CONTROL_STRUCTURE CODE=break; ORDER=4
+          JUMP_TARGET NAME=case CODE=case 2: ORDER=5
+          LITERAL CODE=2 TYPE_FULL_NAME=int ORDER=6
+          CALL NAME=observe CODE=observe(value) TYPE_FULL_NAME=void METHOD_FULL_NAME=observe ORDER=7 DISPATCH_TYPE=STATIC_DISPATCH
+            IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+  METHOD NAME=nested_for CODE=void nested_for(int first, int second) { input(); for (; first; first--) { for (; second; second--) observe(first); } } FULL_NAME=nested_for SIGNATURE=void(int,int) ORDER=1
+    METHOD_PARAMETER_IN NAME=first CODE=int first TYPE_FULL_NAME=int ORDER=1
+    METHOD_PARAMETER_OUT NAME=first CODE=int first TYPE_FULL_NAME=int ORDER=1
+    METHOD_PARAMETER_IN NAME=second CODE=int second TYPE_FULL_NAME=int ORDER=2
+    METHOD_PARAMETER_OUT NAME=second CODE=int second TYPE_FULL_NAME=int ORDER=2
+    BLOCK CODE={ input(); for (; first; first--) { for (; second; second--) observe(first); } } TYPE_FULL_NAME=void ORDER=3
+      CALL NAME=input CODE=input() TYPE_FULL_NAME=int METHOD_FULL_NAME=input ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+      CONTROL_STRUCTURE CODE=for (;first;first--) ORDER=2
+        BLOCK TYPE_FULL_NAME=ANY ORDER=1
+        CALL NAME=<operator>.notEquals CODE=first != 0 TYPE_FULL_NAME=int METHOD_FULL_NAME=<operator>.notEquals ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=first CODE=first TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+          LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+        CALL NAME=<operator>.postDecrement CODE=first-- TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.postDecrement ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=first CODE=first TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+        BLOCK CODE={ for (; second; second--) observe(first); } TYPE_FULL_NAME=void ORDER=4
+          CONTROL_STRUCTURE CODE=for (;second;second--) ORDER=1
+            BLOCK TYPE_FULL_NAME=ANY ORDER=1
+            CALL NAME=<operator>.notEquals CODE=second != 0 TYPE_FULL_NAME=int METHOD_FULL_NAME=<operator>.notEquals ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+              IDENTIFIER NAME=second CODE=second TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+              LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+            CALL NAME=<operator>.postDecrement CODE=second-- TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.postDecrement ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH
+              IDENTIFIER NAME=second CODE=second TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+            CALL NAME=observe CODE=observe(first) TYPE_FULL_NAME=void METHOD_FULL_NAME=observe ORDER=4 DISPATCH_TYPE=STATIC_DISPATCH
+              IDENTIFIER NAME=first CODE=first TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=4
+  METHOD NAME=nested_while CODE=void nested_while(int first, int second) { input(); while (first) { first--; while (second) second--; } } FULL_NAME=nested_while SIGNATURE=void(int,int) ORDER=1
+    METHOD_PARAMETER_IN NAME=first CODE=int first TYPE_FULL_NAME=int ORDER=1
+    METHOD_PARAMETER_OUT NAME=first CODE=int first TYPE_FULL_NAME=int ORDER=1
+    METHOD_PARAMETER_IN NAME=second CODE=int second TYPE_FULL_NAME=int ORDER=2
+    METHOD_PARAMETER_OUT NAME=second CODE=int second TYPE_FULL_NAME=int ORDER=2
+    BLOCK CODE={ input(); while (first) { first--; while (second) second--; } } TYPE_FULL_NAME=void ORDER=3
+      CALL NAME=input CODE=input() TYPE_FULL_NAME=int METHOD_FULL_NAME=input ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+      CONTROL_STRUCTURE CODE=while (first) ORDER=2
+        CALL NAME=<operator>.notEquals CODE=first != 0 TYPE_FULL_NAME=int METHOD_FULL_NAME=<operator>.notEquals ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=first CODE=first TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+          LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+        BLOCK CODE={ first--; while (second) second--; } TYPE_FULL_NAME=void ORDER=2
+          CALL NAME=<operator>.postDecrement CODE=first-- TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.postDecrement ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+            IDENTIFIER NAME=first CODE=first TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+          CONTROL_STRUCTURE CODE=while (second) ORDER=2
+            CALL NAME=<operator>.notEquals CODE=second != 0 TYPE_FULL_NAME=int METHOD_FULL_NAME=<operator>.notEquals ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+              IDENTIFIER NAME=second CODE=second TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+              LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+            CALL NAME=<operator>.postDecrement CODE=second-- TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.postDecrement ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+              IDENTIFIER NAME=second CODE=second TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=4
+  METHOD NAME=nested_do CODE=void nested_do(int first, int second) { input(); do { do { second--; } while (second); first--; } while (first); } FULL_NAME=nested_do SIGNATURE=void(int,int) ORDER=1
+    METHOD_PARAMETER_IN NAME=first CODE=int first TYPE_FULL_NAME=int ORDER=1
+    METHOD_PARAMETER_OUT NAME=first CODE=int first TYPE_FULL_NAME=int ORDER=1
+    METHOD_PARAMETER_IN NAME=second CODE=int second TYPE_FULL_NAME=int ORDER=2
+    METHOD_PARAMETER_OUT NAME=second CODE=int second TYPE_FULL_NAME=int ORDER=2
+    BLOCK CODE={ input(); do { do { second--; } while (second); first--; } while (first); } TYPE_FULL_NAME=void ORDER=3
+      CALL NAME=input CODE=input() TYPE_FULL_NAME=int METHOD_FULL_NAME=input ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+      CONTROL_STRUCTURE CODE=do { do { second--; } while (second); first--; } while (first); ORDER=2
+        BLOCK CODE={ do { second--; } while (second); first--; } TYPE_FULL_NAME=void ORDER=1
+          CONTROL_STRUCTURE CODE=do { second--; } while (second); ORDER=1
+            BLOCK CODE={ second--; } TYPE_FULL_NAME=void ORDER=1
+              CALL NAME=<operator>.postDecrement CODE=second-- TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.postDecrement ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+                IDENTIFIER NAME=second CODE=second TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+            CALL NAME=<operator>.notEquals CODE=second != 0 TYPE_FULL_NAME=int METHOD_FULL_NAME=<operator>.notEquals ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+              IDENTIFIER NAME=second CODE=second TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+              LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+          CALL NAME=<operator>.postDecrement CODE=first-- TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.postDecrement ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+            IDENTIFIER NAME=first CODE=first TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+        CALL NAME=<operator>.notEquals CODE=first != 0 TYPE_FULL_NAME=int METHOD_FULL_NAME=<operator>.notEquals ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=first CODE=first TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+          LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=4
+  METHOD NAME=return_inside_block CODE=int return_inside_block(int value) { { observe(value); return value; } } FULL_NAME=return_inside_block SIGNATURE=int(int) ORDER=1
+    METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+    METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+    BLOCK CODE={ { observe(value); return value; } } TYPE_FULL_NAME=void ORDER=2
+      BLOCK CODE={ observe(value); return value; } TYPE_FULL_NAME=void ORDER=1
+        CALL NAME=observe CODE=observe(value) TYPE_FULL_NAME=void METHOD_FULL_NAME=observe ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+        RETURN CODE=return value; ORDER=2
+          IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+  METHOD NAME=branch_macro CODE=int branch_macro(int condition, int value) { return condition ? VALUE(value) : input(); } FULL_NAME=branch_macro SIGNATURE=int(int,int) ORDER=1
+    METHOD_PARAMETER_IN NAME=condition CODE=int condition TYPE_FULL_NAME=int ORDER=1
+    METHOD_PARAMETER_OUT NAME=condition CODE=int condition TYPE_FULL_NAME=int ORDER=1
+    METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=2
+    METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=2
+    BLOCK CODE={ return condition ? VALUE(value) : input(); } TYPE_FULL_NAME=void ORDER=3
+      RETURN CODE=return condition ? VALUE(value) : input(); ORDER=1
+        CALL NAME=<operator>.conditional CODE=condition ? VALUE(value) : input() TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.conditional ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=condition CODE=condition TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+          CALL NAME=VALUE CODE=VALUE(value) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=ordering.c:VALUE:ANY(1) SIGNATURE=ANY(1) ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=INLINED
+            IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+            BLOCK TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+              CALL NAME=<operator>.addition CODE=(value) + 1 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+                IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+                LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+          CALL NAME=input CODE=input() TYPE_FULL_NAME=int METHOD_FULL_NAME=input ORDER=3 ARGUMENT_INDEX=3 DISPATCH_TYPE=STATIC_DISPATCH
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=4
+  METHOD NAME=short_circuit CODE=int short_circuit(int condition, int value) { return (condition && input()) || VALUE(value); } FULL_NAME=short_circuit SIGNATURE=int(int,int) ORDER=1
+    METHOD_PARAMETER_IN NAME=condition CODE=int condition TYPE_FULL_NAME=int ORDER=1
+    METHOD_PARAMETER_OUT NAME=condition CODE=int condition TYPE_FULL_NAME=int ORDER=1
+    METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=2
+    METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=2
+    BLOCK CODE={ return (condition && input()) || VALUE(value); } TYPE_FULL_NAME=void ORDER=3
+      RETURN CODE=return (condition && input()) || VALUE(value); ORDER=1
+        CALL NAME=<operator>.logicalOr CODE=(condition && input()) || VALUE(value) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.logicalOr ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+          CALL NAME=<operator>.logicalAnd CODE=condition && input() TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.logicalAnd ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+            IDENTIFIER NAME=condition CODE=condition TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+            CALL NAME=input CODE=input() TYPE_FULL_NAME=int METHOD_FULL_NAME=input ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+          CALL NAME=VALUE CODE=VALUE(value) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=ordering.c:VALUE:ANY(1) SIGNATURE=ANY(1) ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=INLINED
+            IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+            BLOCK TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+              CALL NAME=<operator>.addition CODE=(value) + 1 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+                IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+                LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=4
+  METHOD NAME=multiple_returns CODE=int multiple_returns(int value) { input(); while (value) { if (value == 2) return input(); if (value == 3) return 1; value--; } return input(); } FULL_NAME=multiple_returns SIGNATURE=int(int) ORDER=1
+    METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+    METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+    BLOCK CODE={ input(); while (value) { if (value == 2) return input(); if (value == 3) return 1; value--; } return input(); } TYPE_FULL_NAME=void ORDER=2
+      CALL NAME=input CODE=input() TYPE_FULL_NAME=int METHOD_FULL_NAME=input ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+      CONTROL_STRUCTURE CODE=while (value) ORDER=2
+        CALL NAME=<operator>.notEquals CODE=value != 0 TYPE_FULL_NAME=int METHOD_FULL_NAME=<operator>.notEquals ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+          LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+        BLOCK CODE={ if (value == 2) return input(); if (value == 3) return 1; value--; } TYPE_FULL_NAME=void ORDER=2
+          CONTROL_STRUCTURE CODE=if (value == 2) return input(); ORDER=1
+            CALL NAME=<operator>.equals CODE=value == 2 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.equals ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+              IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+              LITERAL CODE=2 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+            BLOCK TYPE_FULL_NAME=ANY ORDER=2
+              RETURN CODE=return input(); ORDER=1
+                CALL NAME=input CODE=input() TYPE_FULL_NAME=int METHOD_FULL_NAME=input ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+          CONTROL_STRUCTURE CODE=if (value == 3) return 1; ORDER=2
+            CALL NAME=<operator>.equals CODE=value == 3 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.equals ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+              IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+              LITERAL CODE=3 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+            BLOCK TYPE_FULL_NAME=ANY ORDER=2
+              RETURN CODE=return 1; ORDER=1
+                LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=1
+          CALL NAME=<operator>.postDecrement CODE=value-- TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.postDecrement ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH
+            IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+      RETURN CODE=return input(); ORDER=3
+        CALL NAME=input CODE=input() TYPE_FULL_NAME=int METHOD_FULL_NAME=input ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+    METHOD_REF CODE=empty_true TYPE_FULL_NAME=empty_true METHOD_FULL_NAME=empty_true ORDER=1
+    METHOD_REF CODE=empty_false TYPE_FULL_NAME=empty_false METHOD_FULL_NAME=empty_false ORDER=2
+    METHOD_REF CODE=both_empty TYPE_FULL_NAME=both_empty METHOD_FULL_NAME=both_empty ORDER=3
+    METHOD_REF CODE=switch_exit TYPE_FULL_NAME=switch_exit METHOD_FULL_NAME=switch_exit ORDER=4
+    METHOD_REF CODE=switch_no_default TYPE_FULL_NAME=switch_no_default METHOD_FULL_NAME=switch_no_default ORDER=5
+    METHOD_REF CODE=nested_for TYPE_FULL_NAME=nested_for METHOD_FULL_NAME=nested_for ORDER=6
+    METHOD_REF CODE=nested_while TYPE_FULL_NAME=nested_while METHOD_FULL_NAME=nested_while ORDER=7
+    METHOD_REF CODE=nested_do TYPE_FULL_NAME=nested_do METHOD_FULL_NAME=nested_do ORDER=8
+    METHOD_REF CODE=return_inside_block TYPE_FULL_NAME=return_inside_block METHOD_FULL_NAME=return_inside_block ORDER=9
+    METHOD_REF CODE=branch_macro TYPE_FULL_NAME=branch_macro METHOD_FULL_NAME=branch_macro ORDER=10
+    METHOD_REF CODE=short_circuit TYPE_FULL_NAME=short_circuit METHOD_FULL_NAME=short_circuit ORDER=11
+    METHOD_REF CODE=multiple_returns TYPE_FULL_NAME=multiple_returns METHOD_FULL_NAME=multiple_returns ORDER=12
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=VALUE CODE=#define VALUE(value) ((value) + 1) FULL_NAME=ordering.c:VALUE:ANY(1) SIGNATURE=ANY(1) ORDER=1
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=3
+
+METHOD NAME=return_inside_block CODE=int return_inside_block(int value) { { observe(value); return value; } } FULL_NAME=return_inside_block SIGNATURE=int(int) ORDER=1
+  METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+  BLOCK CODE={ { observe(value); return value; } } TYPE_FULL_NAME=void ORDER=2
+    BLOCK CODE={ observe(value); return value; } TYPE_FULL_NAME=void ORDER=1
+      CALL NAME=observe CODE=observe(value) TYPE_FULL_NAME=void METHOD_FULL_NAME=observe ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+      RETURN CODE=return value; ORDER=2
+        IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+
+METHOD NAME=short_circuit CODE=int short_circuit(int condition, int value) { return (condition && input()) || VALUE(value); } FULL_NAME=short_circuit SIGNATURE=int(int,int) ORDER=1
+  METHOD_PARAMETER_IN NAME=condition CODE=int condition TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=condition CODE=int condition TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=2
+  METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=2
+  BLOCK CODE={ return (condition && input()) || VALUE(value); } TYPE_FULL_NAME=void ORDER=3
+    RETURN CODE=return (condition && input()) || VALUE(value); ORDER=1
+      CALL NAME=<operator>.logicalOr CODE=(condition && input()) || VALUE(value) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.logicalOr ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+        CALL NAME=<operator>.logicalAnd CODE=condition && input() TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.logicalAnd ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=condition CODE=condition TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+          CALL NAME=input CODE=input() TYPE_FULL_NAME=int METHOD_FULL_NAME=input ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+        CALL NAME=VALUE CODE=VALUE(value) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=ordering.c:VALUE:ANY(1) SIGNATURE=ANY(1) ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=INLINED
+          IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+          BLOCK TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+            CALL NAME=<operator>.addition CODE=(value) + 1 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+              IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+              LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=4
+
+METHOD NAME=switch_exit CODE=void switch_exit(int value) { switch (value) { case 1: break; default: input(); } } FULL_NAME=switch_exit SIGNATURE=void(int) ORDER=1
+  METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+  BLOCK CODE={ switch (value) { case 1: break; default: input(); } } TYPE_FULL_NAME=void ORDER=2
+    CONTROL_STRUCTURE CODE=switch (value) { case 1: break; default: input(); } ORDER=1
+      IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1
+      BLOCK CODE={ case 1: break; default: input(); } TYPE_FULL_NAME=void ORDER=2
+        JUMP_TARGET NAME=case CODE=case 1: ORDER=1
+        LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=2
+        CONTROL_STRUCTURE CODE=break; ORDER=3
+        JUMP_TARGET NAME=default CODE=default: ORDER=4
+        CALL NAME=input CODE=input() TYPE_FULL_NAME=int METHOD_FULL_NAME=input ORDER=5 DISPATCH_TYPE=STATIC_DISPATCH
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+
+METHOD NAME=switch_no_default CODE=void switch_no_default(int value) { switch (value) { case 1: input(); break; case 2: observe(value); } } FULL_NAME=switch_no_default SIGNATURE=void(int) ORDER=1
+  METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+  BLOCK CODE={ switch (value) { case 1: input(); break; case 2: observe(value); } } TYPE_FULL_NAME=void ORDER=2
+    CONTROL_STRUCTURE CODE=switch (value) { case 1: input(); break; case 2: observe(value); } ORDER=1
+      IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1
+      BLOCK CODE={ case 1: input(); break; case 2: observe(value); } TYPE_FULL_NAME=void ORDER=2
+        JUMP_TARGET NAME=case CODE=case 1: ORDER=1
+        LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=2
+        CALL NAME=input CODE=input() TYPE_FULL_NAME=int METHOD_FULL_NAME=input ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH
+        CONTROL_STRUCTURE CODE=break; ORDER=4
+        JUMP_TARGET NAME=case CODE=case 2: ORDER=5
+        LITERAL CODE=2 TYPE_FULL_NAME=int ORDER=6
+        CALL NAME=observe CODE=observe(value) TYPE_FULL_NAME=void METHOD_FULL_NAME=observe ORDER=7 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+
+NODES|META_DATA LANGUAGE=NEWC
+NODES|FILE NAME=<includes> ORDER=1
+NODES|FILE NAME=<unknown> ORDER=0
+NODES|FILE NAME=ordering.c ORDER=0
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<global> FILENAME=<unknown> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<includes>:<global> FILENAME=<includes> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=ordering.c:<global> FILENAME=ordering.c ORDER=1
+NODES|NAMESPACE NAME=<global>
+NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=both_empty FULL_NAME=both_empty CODE=both_empty AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=ordering.c:<global> FILENAME=ordering.c ORDER=1
+NODES|TYPE_DECL NAME=branch_macro FULL_NAME=branch_macro CODE=branch_macro AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=ordering.c:<global> FILENAME=ordering.c ORDER=1
+NODES|TYPE_DECL NAME=empty_false FULL_NAME=empty_false CODE=empty_false AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=ordering.c:<global> FILENAME=ordering.c ORDER=1
+NODES|TYPE_DECL NAME=empty_true FULL_NAME=empty_true CODE=empty_true AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=ordering.c:<global> FILENAME=ordering.c ORDER=1
+NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=multiple_returns FULL_NAME=multiple_returns CODE=multiple_returns AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=ordering.c:<global> FILENAME=ordering.c ORDER=1
+NODES|TYPE_DECL NAME=nested_do FULL_NAME=nested_do CODE=nested_do AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=ordering.c:<global> FILENAME=ordering.c ORDER=1
+NODES|TYPE_DECL NAME=nested_for FULL_NAME=nested_for CODE=nested_for AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=ordering.c:<global> FILENAME=ordering.c ORDER=1
+NODES|TYPE_DECL NAME=nested_while FULL_NAME=nested_while CODE=nested_while AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=ordering.c:<global> FILENAME=ordering.c ORDER=1
+NODES|TYPE_DECL NAME=<global> FULL_NAME=ordering.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=ordering.c:<global> FILENAME=ordering.c ORDER=1
+NODES|TYPE_DECL NAME=return_inside_block FULL_NAME=return_inside_block CODE=return_inside_block AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=ordering.c:<global> FILENAME=ordering.c ORDER=1
+NODES|TYPE_DECL NAME=short_circuit FULL_NAME=short_circuit CODE=short_circuit AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=ordering.c:<global> FILENAME=ordering.c ORDER=1
+NODES|TYPE_DECL NAME=switch_exit FULL_NAME=switch_exit CODE=switch_exit AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=ordering.c:<global> FILENAME=ordering.c ORDER=1
+NODES|TYPE_DECL NAME=switch_no_default FULL_NAME=switch_no_default CODE=switch_no_default AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=ordering.c:<global> FILENAME=ordering.c ORDER=1
+NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+NODES|TYPE NAME=both_empty FULL_NAME=both_empty TYPE_DECL_FULL_NAME=both_empty
+NODES|TYPE NAME=branch_macro FULL_NAME=branch_macro TYPE_DECL_FULL_NAME=branch_macro
+NODES|TYPE NAME=empty_false FULL_NAME=empty_false TYPE_DECL_FULL_NAME=empty_false
+NODES|TYPE NAME=empty_true FULL_NAME=empty_true TYPE_DECL_FULL_NAME=empty_true
+NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+NODES|TYPE NAME=multiple_returns FULL_NAME=multiple_returns TYPE_DECL_FULL_NAME=multiple_returns
+NODES|TYPE NAME=nested_do FULL_NAME=nested_do TYPE_DECL_FULL_NAME=nested_do
+NODES|TYPE NAME=nested_for FULL_NAME=nested_for TYPE_DECL_FULL_NAME=nested_for
+NODES|TYPE NAME=nested_while FULL_NAME=nested_while TYPE_DECL_FULL_NAME=nested_while
+NODES|TYPE NAME=return_inside_block FULL_NAME=return_inside_block TYPE_DECL_FULL_NAME=return_inside_block
+NODES|TYPE NAME=short_circuit FULL_NAME=short_circuit TYPE_DECL_FULL_NAME=short_circuit
+NODES|TYPE NAME=switch_exit FULL_NAME=switch_exit TYPE_DECL_FULL_NAME=switch_exit
+NODES|TYPE NAME=switch_no_default FULL_NAME=switch_no_default TYPE_DECL_FULL_NAME=switch_no_default
+NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+EDGES|ARGUMENT both_empty#5 -> both_empty#6
+EDGES|ARGUMENT both_empty#5 -> both_empty#7
+EDGES|ARGUMENT branch_macro#12 -> branch_macro#13
+EDGES|ARGUMENT branch_macro#12 -> branch_macro#14
+EDGES|ARGUMENT branch_macro#6 -> branch_macro#7
+EDGES|ARGUMENT branch_macro#7 -> branch_macro#15
+EDGES|ARGUMENT branch_macro#7 -> branch_macro#8
+EDGES|ARGUMENT branch_macro#7 -> branch_macro#9
+EDGES|ARGUMENT branch_macro#9 -> branch_macro#10
+EDGES|ARGUMENT empty_false#5 -> empty_false#6
+EDGES|ARGUMENT empty_false#5 -> empty_false#7
+EDGES|ARGUMENT empty_true#5 -> empty_true#6
+EDGES|ARGUMENT empty_true#5 -> empty_true#7
+EDGES|ARGUMENT multiple_returns#11 -> multiple_returns#12
+EDGES|ARGUMENT multiple_returns#11 -> multiple_returns#13
+EDGES|ARGUMENT multiple_returns#15 -> multiple_returns#16
+EDGES|ARGUMENT multiple_returns#18 -> multiple_returns#19
+EDGES|ARGUMENT multiple_returns#18 -> multiple_returns#20
+EDGES|ARGUMENT multiple_returns#22 -> multiple_returns#23
+EDGES|ARGUMENT multiple_returns#24 -> multiple_returns#25
+EDGES|ARGUMENT multiple_returns#26 -> multiple_returns#27
+EDGES|ARGUMENT multiple_returns#6 -> multiple_returns#7
+EDGES|ARGUMENT multiple_returns#6 -> multiple_returns#8
+EDGES|ARGUMENT nested_do#11 -> nested_do#12
+EDGES|ARGUMENT nested_do#13 -> nested_do#14
+EDGES|ARGUMENT nested_do#13 -> nested_do#15
+EDGES|ARGUMENT nested_do#16 -> nested_do#17
+EDGES|ARGUMENT nested_do#18 -> nested_do#19
+EDGES|ARGUMENT nested_do#18 -> nested_do#20
+EDGES|ARGUMENT nested_for#12 -> nested_for#13
+EDGES|ARGUMENT nested_for#17 -> nested_for#18
+EDGES|ARGUMENT nested_for#17 -> nested_for#19
+EDGES|ARGUMENT nested_for#20 -> nested_for#21
+EDGES|ARGUMENT nested_for#22 -> nested_for#23
+EDGES|ARGUMENT nested_for#9 -> nested_for#10
+EDGES|ARGUMENT nested_for#9 -> nested_for#11
+EDGES|ARGUMENT nested_while#12 -> nested_while#13
+EDGES|ARGUMENT nested_while#15 -> nested_while#16
+EDGES|ARGUMENT nested_while#15 -> nested_while#17
+EDGES|ARGUMENT nested_while#18 -> nested_while#19
+EDGES|ARGUMENT nested_while#8 -> nested_while#10
+EDGES|ARGUMENT nested_while#8 -> nested_while#9
+EDGES|ARGUMENT return_inside_block#5 -> return_inside_block#6
+EDGES|ARGUMENT return_inside_block#7 -> return_inside_block#8
+EDGES|ARGUMENT short_circuit#11 -> short_circuit#12
+EDGES|ARGUMENT short_circuit#14 -> short_circuit#15
+EDGES|ARGUMENT short_circuit#14 -> short_circuit#16
+EDGES|ARGUMENT short_circuit#6 -> short_circuit#7
+EDGES|ARGUMENT short_circuit#7 -> short_circuit#11
+EDGES|ARGUMENT short_circuit#7 -> short_circuit#8
+EDGES|ARGUMENT short_circuit#8 -> short_circuit#10
+EDGES|ARGUMENT short_circuit#8 -> short_circuit#9
+EDGES|ARGUMENT switch_no_default#13 -> switch_no_default#14
+EDGES|CALL both_empty#5 -> <operator>.notEquals#0
+EDGES|CALL branch_macro#12 -> <operator>.addition#0
+EDGES|CALL branch_macro#15 -> input#0
+EDGES|CALL branch_macro#7 -> <operator>.conditional#0
+EDGES|CALL branch_macro#9 -> ordering.c:VALUE:ANY(1)#0
+EDGES|CALL empty_false#5 -> <operator>.notEquals#0
+EDGES|CALL empty_false#9 -> input#0
+EDGES|CALL empty_true#11 -> input#0
+EDGES|CALL empty_true#5 -> <operator>.notEquals#0
+EDGES|CALL multiple_returns#11 -> <operator>.equals#0
+EDGES|CALL multiple_returns#16 -> input#0
+EDGES|CALL multiple_returns#18 -> <operator>.equals#0
+EDGES|CALL multiple_returns#24 -> <operator>.postDecrement#0
+EDGES|CALL multiple_returns#27 -> input#0
+EDGES|CALL multiple_returns#4 -> input#0
+EDGES|CALL multiple_returns#6 -> <operator>.notEquals#0
+EDGES|CALL nested_do#11 -> <operator>.postDecrement#0
+EDGES|CALL nested_do#13 -> <operator>.notEquals#0
+EDGES|CALL nested_do#16 -> <operator>.postDecrement#0
+EDGES|CALL nested_do#18 -> <operator>.notEquals#0
+EDGES|CALL nested_do#6 -> input#0
+EDGES|CALL nested_for#12 -> <operator>.postDecrement#0
+EDGES|CALL nested_for#17 -> <operator>.notEquals#0
+EDGES|CALL nested_for#20 -> <operator>.postDecrement#0
+EDGES|CALL nested_for#22 -> observe#0
+EDGES|CALL nested_for#6 -> input#0
+EDGES|CALL nested_for#9 -> <operator>.notEquals#0
+EDGES|CALL nested_while#12 -> <operator>.postDecrement#0
+EDGES|CALL nested_while#15 -> <operator>.notEquals#0
+EDGES|CALL nested_while#18 -> <operator>.postDecrement#0
+EDGES|CALL nested_while#6 -> input#0
+EDGES|CALL nested_while#8 -> <operator>.notEquals#0
+EDGES|CALL return_inside_block#5 -> observe#0
+EDGES|CALL short_circuit#10 -> input#0
+EDGES|CALL short_circuit#11 -> ordering.c:VALUE:ANY(1)#0
+EDGES|CALL short_circuit#14 -> <operator>.addition#0
+EDGES|CALL short_circuit#7 -> <operator>.logicalOr#0
+EDGES|CALL short_circuit#8 -> <operator>.logicalAnd#0
+EDGES|CALL switch_exit#11 -> input#0
+EDGES|CALL switch_no_default#13 -> observe#0
+EDGES|CALL switch_no_default#9 -> input#0
+EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+EDGES|CFG <operator>.addition#0 -> <operator>.addition#5
+EDGES|CFG <operator>.conditional#0 -> <operator>.conditional#5
+EDGES|CFG <operator>.equals#0 -> <operator>.equals#5
+EDGES|CFG <operator>.logicalAnd#0 -> <operator>.logicalAnd#5
+EDGES|CFG <operator>.logicalOr#0 -> <operator>.logicalOr#5
+EDGES|CFG <operator>.notEquals#0 -> <operator>.notEquals#5
+EDGES|CFG <operator>.postDecrement#0 -> <operator>.postDecrement#4
+EDGES|CFG both_empty#0 -> both_empty#6
+EDGES|CFG both_empty#5 -> both_empty#11
+EDGES|CFG both_empty#6 -> both_empty#7
+EDGES|CFG both_empty#7 -> both_empty#5
+EDGES|CFG branch_macro#0 -> branch_macro#8
+EDGES|CFG branch_macro#10 -> branch_macro#9
+EDGES|CFG branch_macro#12 -> branch_macro#7
+EDGES|CFG branch_macro#13 -> branch_macro#14
+EDGES|CFG branch_macro#14 -> branch_macro#12
+EDGES|CFG branch_macro#15 -> branch_macro#7
+EDGES|CFG branch_macro#6 -> branch_macro#16
+EDGES|CFG branch_macro#7 -> branch_macro#6
+EDGES|CFG branch_macro#8 -> branch_macro#10
+EDGES|CFG branch_macro#8 -> branch_macro#15
+EDGES|CFG branch_macro#9 -> branch_macro#13
+EDGES|CFG branch_macro#9 -> branch_macro#7
+EDGES|CFG empty_false#0 -> empty_false#6
+EDGES|CFG empty_false#5 -> empty_false#12
+EDGES|CFG empty_false#5 -> empty_false#9
+EDGES|CFG empty_false#6 -> empty_false#7
+EDGES|CFG empty_false#7 -> empty_false#5
+EDGES|CFG empty_false#9 -> empty_false#12
+EDGES|CFG empty_true#0 -> empty_true#6
+EDGES|CFG empty_true#11 -> empty_true#12
+EDGES|CFG empty_true#5 -> empty_true#11
+EDGES|CFG empty_true#5 -> empty_true#12
+EDGES|CFG empty_true#6 -> empty_true#7
+EDGES|CFG empty_true#7 -> empty_true#5
+EDGES|CFG input#0 -> input#4
+EDGES|CFG multiple_returns#0 -> multiple_returns#4
+EDGES|CFG multiple_returns#11 -> multiple_returns#16
+EDGES|CFG multiple_returns#11 -> multiple_returns#19
+EDGES|CFG multiple_returns#12 -> multiple_returns#13
+EDGES|CFG multiple_returns#13 -> multiple_returns#11
+EDGES|CFG multiple_returns#15 -> multiple_returns#28
+EDGES|CFG multiple_returns#16 -> multiple_returns#15
+EDGES|CFG multiple_returns#18 -> multiple_returns#23
+EDGES|CFG multiple_returns#18 -> multiple_returns#25
+EDGES|CFG multiple_returns#19 -> multiple_returns#20
+EDGES|CFG multiple_returns#20 -> multiple_returns#18
+EDGES|CFG multiple_returns#22 -> multiple_returns#28
+EDGES|CFG multiple_returns#23 -> multiple_returns#22
+EDGES|CFG multiple_returns#24 -> multiple_returns#7
+EDGES|CFG multiple_returns#25 -> multiple_returns#24
+EDGES|CFG multiple_returns#26 -> multiple_returns#28
+EDGES|CFG multiple_returns#27 -> multiple_returns#26
+EDGES|CFG multiple_returns#4 -> multiple_returns#7
+EDGES|CFG multiple_returns#6 -> multiple_returns#12
+EDGES|CFG multiple_returns#6 -> multiple_returns#27
+EDGES|CFG multiple_returns#7 -> multiple_returns#8
+EDGES|CFG multiple_returns#8 -> multiple_returns#6
+EDGES|CFG nested_do#0 -> nested_do#6
+EDGES|CFG nested_do#11 -> nested_do#14
+EDGES|CFG nested_do#12 -> nested_do#11
+EDGES|CFG nested_do#13 -> nested_do#12
+EDGES|CFG nested_do#13 -> nested_do#17
+EDGES|CFG nested_do#14 -> nested_do#15
+EDGES|CFG nested_do#15 -> nested_do#13
+EDGES|CFG nested_do#16 -> nested_do#19
+EDGES|CFG nested_do#17 -> nested_do#16
+EDGES|CFG nested_do#18 -> nested_do#12
+EDGES|CFG nested_do#18 -> nested_do#21
+EDGES|CFG nested_do#19 -> nested_do#20
+EDGES|CFG nested_do#20 -> nested_do#18
+EDGES|CFG nested_do#6 -> nested_do#12
+EDGES|CFG nested_for#0 -> nested_for#6
+EDGES|CFG nested_for#10 -> nested_for#11
+EDGES|CFG nested_for#11 -> nested_for#9
+EDGES|CFG nested_for#12 -> nested_for#10
+EDGES|CFG nested_for#13 -> nested_for#12
+EDGES|CFG nested_for#17 -> nested_for#13
+EDGES|CFG nested_for#17 -> nested_for#23
+EDGES|CFG nested_for#18 -> nested_for#19
+EDGES|CFG nested_for#19 -> nested_for#17
+EDGES|CFG nested_for#20 -> nested_for#18
+EDGES|CFG nested_for#21 -> nested_for#20
+EDGES|CFG nested_for#22 -> nested_for#21
+EDGES|CFG nested_for#23 -> nested_for#22
+EDGES|CFG nested_for#6 -> nested_for#10
+EDGES|CFG nested_for#9 -> nested_for#18
+EDGES|CFG nested_for#9 -> nested_for#24
+EDGES|CFG nested_while#0 -> nested_while#6
+EDGES|CFG nested_while#10 -> nested_while#8
+EDGES|CFG nested_while#12 -> nested_while#16
+EDGES|CFG nested_while#13 -> nested_while#12
+EDGES|CFG nested_while#15 -> nested_while#19
+EDGES|CFG nested_while#15 -> nested_while#9
+EDGES|CFG nested_while#16 -> nested_while#17
+EDGES|CFG nested_while#17 -> nested_while#15
+EDGES|CFG nested_while#18 -> nested_while#16
+EDGES|CFG nested_while#19 -> nested_while#18
+EDGES|CFG nested_while#6 -> nested_while#9
+EDGES|CFG nested_while#8 -> nested_while#13
+EDGES|CFG nested_while#8 -> nested_while#20
+EDGES|CFG nested_while#9 -> nested_while#10
+EDGES|CFG observe#0 -> observe#4
+EDGES|CFG ordering.c:<global>#0 -> ordering.c:<global>#211
+EDGES|CFG ordering.c:<global>#136 -> return_inside_block#6
+EDGES|CFG ordering.c:<global>#163 -> short_circuit#9
+EDGES|CFG ordering.c:<global>#211 -> ordering.c:<global>#212
+EDGES|CFG ordering.c:<global>#212 -> ordering.c:<global>#213
+EDGES|CFG ordering.c:<global>#213 -> ordering.c:<global>#214
+EDGES|CFG ordering.c:<global>#214 -> ordering.c:<global>#215
+EDGES|CFG ordering.c:<global>#215 -> ordering.c:<global>#216
+EDGES|CFG ordering.c:<global>#216 -> ordering.c:<global>#217
+EDGES|CFG ordering.c:<global>#217 -> ordering.c:<global>#218
+EDGES|CFG ordering.c:<global>#218 -> ordering.c:<global>#219
+EDGES|CFG ordering.c:<global>#219 -> ordering.c:<global>#220
+EDGES|CFG ordering.c:<global>#220 -> ordering.c:<global>#221
+EDGES|CFG ordering.c:<global>#221 -> ordering.c:<global>#222
+EDGES|CFG ordering.c:<global>#222 -> ordering.c:<global>#223
+EDGES|CFG ordering.c:<global>#39 -> switch_exit#5
+EDGES|CFG ordering.c:<global>#52 -> switch_no_default#5
+EDGES|CFG ordering.c:VALUE:ANY(1)#0 -> ordering.c:VALUE:ANY(1)#4
+EDGES|CFG return_inside_block#4 -> return_inside_block#9
+EDGES|CFG return_inside_block#5 -> return_inside_block#8
+EDGES|CFG return_inside_block#6 -> return_inside_block#5
+EDGES|CFG return_inside_block#7 -> return_inside_block#9
+EDGES|CFG return_inside_block#8 -> return_inside_block#7
+EDGES|CFG short_circuit#10 -> short_circuit#8
+EDGES|CFG short_circuit#11 -> short_circuit#15
+EDGES|CFG short_circuit#11 -> short_circuit#7
+EDGES|CFG short_circuit#12 -> short_circuit#11
+EDGES|CFG short_circuit#14 -> short_circuit#7
+EDGES|CFG short_circuit#15 -> short_circuit#16
+EDGES|CFG short_circuit#16 -> short_circuit#14
+EDGES|CFG short_circuit#6 -> short_circuit#17
+EDGES|CFG short_circuit#7 -> short_circuit#6
+EDGES|CFG short_circuit#8 -> short_circuit#12
+EDGES|CFG short_circuit#8 -> short_circuit#7
+EDGES|CFG short_circuit#9 -> short_circuit#10
+EDGES|CFG short_circuit#9 -> short_circuit#8
+EDGES|CFG switch_exit#10 -> switch_exit#11
+EDGES|CFG switch_exit#11 -> switch_exit#12
+EDGES|CFG switch_exit#5 -> switch_exit#10
+EDGES|CFG switch_exit#5 -> switch_exit#7
+EDGES|CFG switch_exit#7 -> switch_exit#8
+EDGES|CFG switch_exit#8 -> switch_exit#9
+EDGES|CFG switch_exit#9 -> switch_exit#12
+EDGES|CFG switch_no_default#10 -> switch_no_default#15
+EDGES|CFG switch_no_default#11 -> switch_no_default#12
+EDGES|CFG switch_no_default#12 -> switch_no_default#14
+EDGES|CFG switch_no_default#13 -> switch_no_default#15
+EDGES|CFG switch_no_default#14 -> switch_no_default#13
+EDGES|CFG switch_no_default#5 -> switch_no_default#11
+EDGES|CFG switch_no_default#5 -> switch_no_default#15
+EDGES|CFG switch_no_default#5 -> switch_no_default#7
+EDGES|CFG switch_no_default#7 -> switch_no_default#8
+EDGES|CFG switch_no_default#8 -> switch_no_default#9
+EDGES|CFG switch_no_default#9 -> switch_no_default#10
+EDGES|CONDITION both_empty#4 -> both_empty#5
+EDGES|CONDITION empty_false#4 -> empty_false#5
+EDGES|CONDITION empty_true#4 -> empty_true#5
+EDGES|CONDITION multiple_returns#10 -> multiple_returns#11
+EDGES|CONDITION multiple_returns#17 -> multiple_returns#18
+EDGES|CONDITION multiple_returns#5 -> multiple_returns#6
+EDGES|CONDITION nested_do#7 -> nested_do#18
+EDGES|CONDITION nested_do#9 -> nested_do#13
+EDGES|CONDITION nested_for#15 -> nested_for#17
+EDGES|CONDITION nested_for#7 -> nested_for#9
+EDGES|CONDITION nested_while#14 -> nested_while#15
+EDGES|CONDITION nested_while#7 -> nested_while#8
+EDGES|CONDITION switch_exit#4 -> switch_exit#5
+EDGES|CONDITION switch_no_default#4 -> switch_no_default#5
+EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+EDGES|CONTAINS <operator>.addition#0 -> <operator>.addition#2
+EDGES|CONTAINS <operator>.conditional#0 -> <operator>.conditional#2
+EDGES|CONTAINS <operator>.equals#0 -> <operator>.equals#2
+EDGES|CONTAINS <operator>.logicalAnd#0 -> <operator>.logicalAnd#2
+EDGES|CONTAINS <operator>.logicalOr#0 -> <operator>.logicalOr#2
+EDGES|CONTAINS <operator>.notEquals#0 -> <operator>.notEquals#2
+EDGES|CONTAINS <operator>.postDecrement#0 -> <operator>.postDecrement#2
+EDGES|CONTAINS D:ordering.c:<global> -> D:both_empty
+EDGES|CONTAINS D:ordering.c:<global> -> D:branch_macro
+EDGES|CONTAINS D:ordering.c:<global> -> D:empty_false
+EDGES|CONTAINS D:ordering.c:<global> -> D:empty_true
+EDGES|CONTAINS D:ordering.c:<global> -> D:multiple_returns
+EDGES|CONTAINS D:ordering.c:<global> -> D:nested_do
+EDGES|CONTAINS D:ordering.c:<global> -> D:nested_for
+EDGES|CONTAINS D:ordering.c:<global> -> D:nested_while
+EDGES|CONTAINS D:ordering.c:<global> -> D:return_inside_block
+EDGES|CONTAINS D:ordering.c:<global> -> D:short_circuit
+EDGES|CONTAINS D:ordering.c:<global> -> D:switch_exit
+EDGES|CONTAINS D:ordering.c:<global> -> D:switch_no_default
+EDGES|CONTAINS D:ordering.c:<global> -> input#0
+EDGES|CONTAINS D:ordering.c:<global> -> observe#0
+EDGES|CONTAINS D:ordering.c:<global> -> ordering.c:<global>#0
+EDGES|CONTAINS D:ordering.c:<global> -> ordering.c:VALUE:ANY(1)#0
+EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+EDGES|CONTAINS F:<includes> -> D:ANY
+EDGES|CONTAINS F:<includes> -> D:int
+EDGES|CONTAINS F:<includes> -> D:void
+EDGES|CONTAINS F:ordering.c -> D:ordering.c:<global>
+EDGES|CONTAINS both_empty#0 -> both_empty#10
+EDGES|CONTAINS both_empty#0 -> both_empty#3
+EDGES|CONTAINS both_empty#0 -> both_empty#4
+EDGES|CONTAINS both_empty#0 -> both_empty#5
+EDGES|CONTAINS both_empty#0 -> both_empty#6
+EDGES|CONTAINS both_empty#0 -> both_empty#7
+EDGES|CONTAINS both_empty#0 -> both_empty#8
+EDGES|CONTAINS both_empty#0 -> both_empty#9
+EDGES|CONTAINS branch_macro#0 -> branch_macro#10
+EDGES|CONTAINS branch_macro#0 -> branch_macro#11
+EDGES|CONTAINS branch_macro#0 -> branch_macro#12
+EDGES|CONTAINS branch_macro#0 -> branch_macro#13
+EDGES|CONTAINS branch_macro#0 -> branch_macro#14
+EDGES|CONTAINS branch_macro#0 -> branch_macro#15
+EDGES|CONTAINS branch_macro#0 -> branch_macro#5
+EDGES|CONTAINS branch_macro#0 -> branch_macro#6
+EDGES|CONTAINS branch_macro#0 -> branch_macro#7
+EDGES|CONTAINS branch_macro#0 -> branch_macro#8
+EDGES|CONTAINS branch_macro#0 -> branch_macro#9
+EDGES|CONTAINS empty_false#0 -> empty_false#10
+EDGES|CONTAINS empty_false#0 -> empty_false#11
+EDGES|CONTAINS empty_false#0 -> empty_false#3
+EDGES|CONTAINS empty_false#0 -> empty_false#4
+EDGES|CONTAINS empty_false#0 -> empty_false#5
+EDGES|CONTAINS empty_false#0 -> empty_false#6
+EDGES|CONTAINS empty_false#0 -> empty_false#7
+EDGES|CONTAINS empty_false#0 -> empty_false#8
+EDGES|CONTAINS empty_false#0 -> empty_false#9
+EDGES|CONTAINS empty_true#0 -> empty_true#10
+EDGES|CONTAINS empty_true#0 -> empty_true#11
+EDGES|CONTAINS empty_true#0 -> empty_true#3
+EDGES|CONTAINS empty_true#0 -> empty_true#4
+EDGES|CONTAINS empty_true#0 -> empty_true#5
+EDGES|CONTAINS empty_true#0 -> empty_true#6
+EDGES|CONTAINS empty_true#0 -> empty_true#7
+EDGES|CONTAINS empty_true#0 -> empty_true#8
+EDGES|CONTAINS empty_true#0 -> empty_true#9
+EDGES|CONTAINS input#0 -> input#3
+EDGES|CONTAINS multiple_returns#0 -> multiple_returns#10
+EDGES|CONTAINS multiple_returns#0 -> multiple_returns#11
+EDGES|CONTAINS multiple_returns#0 -> multiple_returns#12
+EDGES|CONTAINS multiple_returns#0 -> multiple_returns#13
+EDGES|CONTAINS multiple_returns#0 -> multiple_returns#14
+EDGES|CONTAINS multiple_returns#0 -> multiple_returns#15
+EDGES|CONTAINS multiple_returns#0 -> multiple_returns#16
+EDGES|CONTAINS multiple_returns#0 -> multiple_returns#17
+EDGES|CONTAINS multiple_returns#0 -> multiple_returns#18
+EDGES|CONTAINS multiple_returns#0 -> multiple_returns#19
+EDGES|CONTAINS multiple_returns#0 -> multiple_returns#20
+EDGES|CONTAINS multiple_returns#0 -> multiple_returns#21
+EDGES|CONTAINS multiple_returns#0 -> multiple_returns#22
+EDGES|CONTAINS multiple_returns#0 -> multiple_returns#23
+EDGES|CONTAINS multiple_returns#0 -> multiple_returns#24
+EDGES|CONTAINS multiple_returns#0 -> multiple_returns#25
+EDGES|CONTAINS multiple_returns#0 -> multiple_returns#26
+EDGES|CONTAINS multiple_returns#0 -> multiple_returns#27
+EDGES|CONTAINS multiple_returns#0 -> multiple_returns#3
+EDGES|CONTAINS multiple_returns#0 -> multiple_returns#4
+EDGES|CONTAINS multiple_returns#0 -> multiple_returns#5
+EDGES|CONTAINS multiple_returns#0 -> multiple_returns#6
+EDGES|CONTAINS multiple_returns#0 -> multiple_returns#7
+EDGES|CONTAINS multiple_returns#0 -> multiple_returns#8
+EDGES|CONTAINS multiple_returns#0 -> multiple_returns#9
+EDGES|CONTAINS nested_do#0 -> nested_do#10
+EDGES|CONTAINS nested_do#0 -> nested_do#11
+EDGES|CONTAINS nested_do#0 -> nested_do#12
+EDGES|CONTAINS nested_do#0 -> nested_do#13
+EDGES|CONTAINS nested_do#0 -> nested_do#14
+EDGES|CONTAINS nested_do#0 -> nested_do#15
+EDGES|CONTAINS nested_do#0 -> nested_do#16
+EDGES|CONTAINS nested_do#0 -> nested_do#17
+EDGES|CONTAINS nested_do#0 -> nested_do#18
+EDGES|CONTAINS nested_do#0 -> nested_do#19
+EDGES|CONTAINS nested_do#0 -> nested_do#20
+EDGES|CONTAINS nested_do#0 -> nested_do#5
+EDGES|CONTAINS nested_do#0 -> nested_do#6
+EDGES|CONTAINS nested_do#0 -> nested_do#7
+EDGES|CONTAINS nested_do#0 -> nested_do#8
+EDGES|CONTAINS nested_do#0 -> nested_do#9
+EDGES|CONTAINS nested_for#0 -> nested_for#10
+EDGES|CONTAINS nested_for#0 -> nested_for#11
+EDGES|CONTAINS nested_for#0 -> nested_for#12
+EDGES|CONTAINS nested_for#0 -> nested_for#13
+EDGES|CONTAINS nested_for#0 -> nested_for#14
+EDGES|CONTAINS nested_for#0 -> nested_for#15
+EDGES|CONTAINS nested_for#0 -> nested_for#16
+EDGES|CONTAINS nested_for#0 -> nested_for#17
+EDGES|CONTAINS nested_for#0 -> nested_for#18
+EDGES|CONTAINS nested_for#0 -> nested_for#19
+EDGES|CONTAINS nested_for#0 -> nested_for#20
+EDGES|CONTAINS nested_for#0 -> nested_for#21
+EDGES|CONTAINS nested_for#0 -> nested_for#22
+EDGES|CONTAINS nested_for#0 -> nested_for#23
+EDGES|CONTAINS nested_for#0 -> nested_for#5
+EDGES|CONTAINS nested_for#0 -> nested_for#6
+EDGES|CONTAINS nested_for#0 -> nested_for#7
+EDGES|CONTAINS nested_for#0 -> nested_for#8
+EDGES|CONTAINS nested_for#0 -> nested_for#9
+EDGES|CONTAINS nested_while#0 -> nested_while#10
+EDGES|CONTAINS nested_while#0 -> nested_while#11
+EDGES|CONTAINS nested_while#0 -> nested_while#12
+EDGES|CONTAINS nested_while#0 -> nested_while#13
+EDGES|CONTAINS nested_while#0 -> nested_while#14
+EDGES|CONTAINS nested_while#0 -> nested_while#15
+EDGES|CONTAINS nested_while#0 -> nested_while#16
+EDGES|CONTAINS nested_while#0 -> nested_while#17
+EDGES|CONTAINS nested_while#0 -> nested_while#18
+EDGES|CONTAINS nested_while#0 -> nested_while#19
+EDGES|CONTAINS nested_while#0 -> nested_while#5
+EDGES|CONTAINS nested_while#0 -> nested_while#6
+EDGES|CONTAINS nested_while#0 -> nested_while#7
+EDGES|CONTAINS nested_while#0 -> nested_while#8
+EDGES|CONTAINS nested_while#0 -> nested_while#9
+EDGES|CONTAINS observe#0 -> observe#3
+EDGES|CONTAINS ordering.c:<global>#0 -> both_empty#0
+EDGES|CONTAINS ordering.c:<global>#0 -> branch_macro#0
+EDGES|CONTAINS ordering.c:<global>#0 -> empty_false#0
+EDGES|CONTAINS ordering.c:<global>#0 -> empty_true#0
+EDGES|CONTAINS ordering.c:<global>#0 -> multiple_returns#0
+EDGES|CONTAINS ordering.c:<global>#0 -> nested_do#0
+EDGES|CONTAINS ordering.c:<global>#0 -> nested_for#0
+EDGES|CONTAINS ordering.c:<global>#0 -> nested_while#0
+EDGES|CONTAINS ordering.c:<global>#0 -> ordering.c:<global>#136
+EDGES|CONTAINS ordering.c:<global>#0 -> ordering.c:<global>#163
+EDGES|CONTAINS ordering.c:<global>#0 -> ordering.c:<global>#210
+EDGES|CONTAINS ordering.c:<global>#0 -> ordering.c:<global>#211
+EDGES|CONTAINS ordering.c:<global>#0 -> ordering.c:<global>#212
+EDGES|CONTAINS ordering.c:<global>#0 -> ordering.c:<global>#213
+EDGES|CONTAINS ordering.c:<global>#0 -> ordering.c:<global>#214
+EDGES|CONTAINS ordering.c:<global>#0 -> ordering.c:<global>#215
+EDGES|CONTAINS ordering.c:<global>#0 -> ordering.c:<global>#216
+EDGES|CONTAINS ordering.c:<global>#0 -> ordering.c:<global>#217
+EDGES|CONTAINS ordering.c:<global>#0 -> ordering.c:<global>#218
+EDGES|CONTAINS ordering.c:<global>#0 -> ordering.c:<global>#219
+EDGES|CONTAINS ordering.c:<global>#0 -> ordering.c:<global>#220
+EDGES|CONTAINS ordering.c:<global>#0 -> ordering.c:<global>#221
+EDGES|CONTAINS ordering.c:<global>#0 -> ordering.c:<global>#222
+EDGES|CONTAINS ordering.c:<global>#0 -> ordering.c:<global>#39
+EDGES|CONTAINS ordering.c:<global>#0 -> ordering.c:<global>#52
+EDGES|CONTAINS ordering.c:<global>#136 -> return_inside_block#3
+EDGES|CONTAINS ordering.c:<global>#136 -> return_inside_block#4
+EDGES|CONTAINS ordering.c:<global>#136 -> return_inside_block#5
+EDGES|CONTAINS ordering.c:<global>#136 -> return_inside_block#6
+EDGES|CONTAINS ordering.c:<global>#136 -> return_inside_block#7
+EDGES|CONTAINS ordering.c:<global>#136 -> return_inside_block#8
+EDGES|CONTAINS ordering.c:<global>#163 -> short_circuit#10
+EDGES|CONTAINS ordering.c:<global>#163 -> short_circuit#11
+EDGES|CONTAINS ordering.c:<global>#163 -> short_circuit#12
+EDGES|CONTAINS ordering.c:<global>#163 -> short_circuit#13
+EDGES|CONTAINS ordering.c:<global>#163 -> short_circuit#14
+EDGES|CONTAINS ordering.c:<global>#163 -> short_circuit#15
+EDGES|CONTAINS ordering.c:<global>#163 -> short_circuit#16
+EDGES|CONTAINS ordering.c:<global>#163 -> short_circuit#5
+EDGES|CONTAINS ordering.c:<global>#163 -> short_circuit#6
+EDGES|CONTAINS ordering.c:<global>#163 -> short_circuit#7
+EDGES|CONTAINS ordering.c:<global>#163 -> short_circuit#8
+EDGES|CONTAINS ordering.c:<global>#163 -> short_circuit#9
+EDGES|CONTAINS ordering.c:<global>#39 -> switch_exit#10
+EDGES|CONTAINS ordering.c:<global>#39 -> switch_exit#11
+EDGES|CONTAINS ordering.c:<global>#39 -> switch_exit#3
+EDGES|CONTAINS ordering.c:<global>#39 -> switch_exit#4
+EDGES|CONTAINS ordering.c:<global>#39 -> switch_exit#5
+EDGES|CONTAINS ordering.c:<global>#39 -> switch_exit#6
+EDGES|CONTAINS ordering.c:<global>#39 -> switch_exit#7
+EDGES|CONTAINS ordering.c:<global>#39 -> switch_exit#8
+EDGES|CONTAINS ordering.c:<global>#39 -> switch_exit#9
+EDGES|CONTAINS ordering.c:<global>#52 -> switch_no_default#10
+EDGES|CONTAINS ordering.c:<global>#52 -> switch_no_default#11
+EDGES|CONTAINS ordering.c:<global>#52 -> switch_no_default#12
+EDGES|CONTAINS ordering.c:<global>#52 -> switch_no_default#13
+EDGES|CONTAINS ordering.c:<global>#52 -> switch_no_default#14
+EDGES|CONTAINS ordering.c:<global>#52 -> switch_no_default#3
+EDGES|CONTAINS ordering.c:<global>#52 -> switch_no_default#4
+EDGES|CONTAINS ordering.c:<global>#52 -> switch_no_default#5
+EDGES|CONTAINS ordering.c:<global>#52 -> switch_no_default#6
+EDGES|CONTAINS ordering.c:<global>#52 -> switch_no_default#7
+EDGES|CONTAINS ordering.c:<global>#52 -> switch_no_default#8
+EDGES|CONTAINS ordering.c:<global>#52 -> switch_no_default#9
+EDGES|CONTAINS ordering.c:VALUE:ANY(1)#0 -> ordering.c:VALUE:ANY(1)#3
+EDGES|DO_BODY nested_do#7 -> nested_do#8
+EDGES|DO_BODY nested_do#9 -> nested_do#10
+EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#6 -> T:ANY
+EDGES|EVAL_TYPE <operator>.conditional#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.conditional#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.conditional#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.conditional#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.conditional#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.conditional#6 -> T:ANY
+EDGES|EVAL_TYPE <operator>.conditional#7 -> T:ANY
+EDGES|EVAL_TYPE <operator>.conditional#8 -> T:ANY
+EDGES|EVAL_TYPE <operator>.equals#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.equals#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.equals#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.equals#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.equals#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.equals#6 -> T:ANY
+EDGES|EVAL_TYPE <operator>.logicalAnd#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.logicalAnd#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.logicalAnd#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.logicalAnd#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.logicalAnd#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.logicalAnd#6 -> T:ANY
+EDGES|EVAL_TYPE <operator>.logicalOr#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.logicalOr#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.logicalOr#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.logicalOr#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.logicalOr#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.logicalOr#6 -> T:ANY
+EDGES|EVAL_TYPE <operator>.notEquals#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.notEquals#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.notEquals#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.notEquals#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.notEquals#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.notEquals#6 -> T:ANY
+EDGES|EVAL_TYPE <operator>.postDecrement#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.postDecrement#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.postDecrement#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.postDecrement#4 -> T:ANY
+EDGES|EVAL_TYPE both_empty#1 -> T:int
+EDGES|EVAL_TYPE both_empty#10 -> T:void
+EDGES|EVAL_TYPE both_empty#11 -> T:void
+EDGES|EVAL_TYPE both_empty#2 -> T:int
+EDGES|EVAL_TYPE both_empty#3 -> T:void
+EDGES|EVAL_TYPE both_empty#5 -> T:int
+EDGES|EVAL_TYPE both_empty#6 -> T:int
+EDGES|EVAL_TYPE both_empty#7 -> T:int
+EDGES|EVAL_TYPE both_empty#8 -> T:void
+EDGES|EVAL_TYPE branch_macro#1 -> T:int
+EDGES|EVAL_TYPE branch_macro#10 -> T:int
+EDGES|EVAL_TYPE branch_macro#11 -> T:ANY
+EDGES|EVAL_TYPE branch_macro#12 -> T:ANY
+EDGES|EVAL_TYPE branch_macro#13 -> T:int
+EDGES|EVAL_TYPE branch_macro#14 -> T:int
+EDGES|EVAL_TYPE branch_macro#15 -> T:int
+EDGES|EVAL_TYPE branch_macro#16 -> T:int
+EDGES|EVAL_TYPE branch_macro#2 -> T:int
+EDGES|EVAL_TYPE branch_macro#3 -> T:int
+EDGES|EVAL_TYPE branch_macro#4 -> T:int
+EDGES|EVAL_TYPE branch_macro#5 -> T:void
+EDGES|EVAL_TYPE branch_macro#7 -> T:ANY
+EDGES|EVAL_TYPE branch_macro#8 -> T:int
+EDGES|EVAL_TYPE branch_macro#9 -> T:ANY
+EDGES|EVAL_TYPE empty_false#1 -> T:int
+EDGES|EVAL_TYPE empty_false#11 -> T:void
+EDGES|EVAL_TYPE empty_false#12 -> T:void
+EDGES|EVAL_TYPE empty_false#2 -> T:int
+EDGES|EVAL_TYPE empty_false#3 -> T:void
+EDGES|EVAL_TYPE empty_false#5 -> T:int
+EDGES|EVAL_TYPE empty_false#6 -> T:int
+EDGES|EVAL_TYPE empty_false#7 -> T:int
+EDGES|EVAL_TYPE empty_false#8 -> T:ANY
+EDGES|EVAL_TYPE empty_false#9 -> T:int
+EDGES|EVAL_TYPE empty_true#1 -> T:int
+EDGES|EVAL_TYPE empty_true#10 -> T:ANY
+EDGES|EVAL_TYPE empty_true#11 -> T:int
+EDGES|EVAL_TYPE empty_true#12 -> T:void
+EDGES|EVAL_TYPE empty_true#2 -> T:int
+EDGES|EVAL_TYPE empty_true#3 -> T:void
+EDGES|EVAL_TYPE empty_true#5 -> T:int
+EDGES|EVAL_TYPE empty_true#6 -> T:int
+EDGES|EVAL_TYPE empty_true#7 -> T:int
+EDGES|EVAL_TYPE empty_true#8 -> T:void
+EDGES|EVAL_TYPE input#1 -> T:void
+EDGES|EVAL_TYPE input#2 -> T:void
+EDGES|EVAL_TYPE input#3 -> T:ANY
+EDGES|EVAL_TYPE input#4 -> T:int
+EDGES|EVAL_TYPE multiple_returns#1 -> T:int
+EDGES|EVAL_TYPE multiple_returns#11 -> T:ANY
+EDGES|EVAL_TYPE multiple_returns#12 -> T:int
+EDGES|EVAL_TYPE multiple_returns#13 -> T:int
+EDGES|EVAL_TYPE multiple_returns#14 -> T:ANY
+EDGES|EVAL_TYPE multiple_returns#16 -> T:int
+EDGES|EVAL_TYPE multiple_returns#18 -> T:ANY
+EDGES|EVAL_TYPE multiple_returns#19 -> T:int
+EDGES|EVAL_TYPE multiple_returns#2 -> T:int
+EDGES|EVAL_TYPE multiple_returns#20 -> T:int
+EDGES|EVAL_TYPE multiple_returns#21 -> T:ANY
+EDGES|EVAL_TYPE multiple_returns#23 -> T:int
+EDGES|EVAL_TYPE multiple_returns#24 -> T:ANY
+EDGES|EVAL_TYPE multiple_returns#25 -> T:int
+EDGES|EVAL_TYPE multiple_returns#27 -> T:int
+EDGES|EVAL_TYPE multiple_returns#28 -> T:int
+EDGES|EVAL_TYPE multiple_returns#3 -> T:void
+EDGES|EVAL_TYPE multiple_returns#4 -> T:int
+EDGES|EVAL_TYPE multiple_returns#6 -> T:int
+EDGES|EVAL_TYPE multiple_returns#7 -> T:int
+EDGES|EVAL_TYPE multiple_returns#8 -> T:int
+EDGES|EVAL_TYPE multiple_returns#9 -> T:void
+EDGES|EVAL_TYPE nested_do#1 -> T:int
+EDGES|EVAL_TYPE nested_do#10 -> T:void
+EDGES|EVAL_TYPE nested_do#11 -> T:ANY
+EDGES|EVAL_TYPE nested_do#12 -> T:int
+EDGES|EVAL_TYPE nested_do#13 -> T:int
+EDGES|EVAL_TYPE nested_do#14 -> T:int
+EDGES|EVAL_TYPE nested_do#15 -> T:int
+EDGES|EVAL_TYPE nested_do#16 -> T:ANY
+EDGES|EVAL_TYPE nested_do#17 -> T:int
+EDGES|EVAL_TYPE nested_do#18 -> T:int
+EDGES|EVAL_TYPE nested_do#19 -> T:int
+EDGES|EVAL_TYPE nested_do#2 -> T:int
+EDGES|EVAL_TYPE nested_do#20 -> T:int
+EDGES|EVAL_TYPE nested_do#21 -> T:void
+EDGES|EVAL_TYPE nested_do#3 -> T:int
+EDGES|EVAL_TYPE nested_do#4 -> T:int
+EDGES|EVAL_TYPE nested_do#5 -> T:void
+EDGES|EVAL_TYPE nested_do#6 -> T:int
+EDGES|EVAL_TYPE nested_do#8 -> T:void
+EDGES|EVAL_TYPE nested_for#1 -> T:int
+EDGES|EVAL_TYPE nested_for#10 -> T:int
+EDGES|EVAL_TYPE nested_for#11 -> T:int
+EDGES|EVAL_TYPE nested_for#12 -> T:ANY
+EDGES|EVAL_TYPE nested_for#13 -> T:int
+EDGES|EVAL_TYPE nested_for#14 -> T:void
+EDGES|EVAL_TYPE nested_for#16 -> T:ANY
+EDGES|EVAL_TYPE nested_for#17 -> T:int
+EDGES|EVAL_TYPE nested_for#18 -> T:int
+EDGES|EVAL_TYPE nested_for#19 -> T:int
+EDGES|EVAL_TYPE nested_for#2 -> T:int
+EDGES|EVAL_TYPE nested_for#20 -> T:ANY
+EDGES|EVAL_TYPE nested_for#21 -> T:int
+EDGES|EVAL_TYPE nested_for#22 -> T:void
+EDGES|EVAL_TYPE nested_for#23 -> T:int
+EDGES|EVAL_TYPE nested_for#24 -> T:void
+EDGES|EVAL_TYPE nested_for#3 -> T:int
+EDGES|EVAL_TYPE nested_for#4 -> T:int
+EDGES|EVAL_TYPE nested_for#5 -> T:void
+EDGES|EVAL_TYPE nested_for#6 -> T:int
+EDGES|EVAL_TYPE nested_for#8 -> T:ANY
+EDGES|EVAL_TYPE nested_for#9 -> T:int
+EDGES|EVAL_TYPE nested_while#1 -> T:int
+EDGES|EVAL_TYPE nested_while#10 -> T:int
+EDGES|EVAL_TYPE nested_while#11 -> T:void
+EDGES|EVAL_TYPE nested_while#12 -> T:ANY
+EDGES|EVAL_TYPE nested_while#13 -> T:int
+EDGES|EVAL_TYPE nested_while#15 -> T:int
+EDGES|EVAL_TYPE nested_while#16 -> T:int
+EDGES|EVAL_TYPE nested_while#17 -> T:int
+EDGES|EVAL_TYPE nested_while#18 -> T:ANY
+EDGES|EVAL_TYPE nested_while#19 -> T:int
+EDGES|EVAL_TYPE nested_while#2 -> T:int
+EDGES|EVAL_TYPE nested_while#20 -> T:void
+EDGES|EVAL_TYPE nested_while#3 -> T:int
+EDGES|EVAL_TYPE nested_while#4 -> T:int
+EDGES|EVAL_TYPE nested_while#5 -> T:void
+EDGES|EVAL_TYPE nested_while#6 -> T:int
+EDGES|EVAL_TYPE nested_while#8 -> T:int
+EDGES|EVAL_TYPE nested_while#9 -> T:int
+EDGES|EVAL_TYPE observe#1 -> T:int
+EDGES|EVAL_TYPE observe#2 -> T:int
+EDGES|EVAL_TYPE observe#3 -> T:ANY
+EDGES|EVAL_TYPE observe#4 -> T:void
+EDGES|EVAL_TYPE ordering.c:<global>#210 -> T:ANY
+EDGES|EVAL_TYPE ordering.c:<global>#211 -> T:empty_true
+EDGES|EVAL_TYPE ordering.c:<global>#212 -> T:empty_false
+EDGES|EVAL_TYPE ordering.c:<global>#213 -> T:both_empty
+EDGES|EVAL_TYPE ordering.c:<global>#214 -> T:switch_exit
+EDGES|EVAL_TYPE ordering.c:<global>#215 -> T:switch_no_default
+EDGES|EVAL_TYPE ordering.c:<global>#216 -> T:nested_for
+EDGES|EVAL_TYPE ordering.c:<global>#217 -> T:nested_while
+EDGES|EVAL_TYPE ordering.c:<global>#218 -> T:nested_do
+EDGES|EVAL_TYPE ordering.c:<global>#219 -> T:return_inside_block
+EDGES|EVAL_TYPE ordering.c:<global>#220 -> T:branch_macro
+EDGES|EVAL_TYPE ordering.c:<global>#221 -> T:short_circuit
+EDGES|EVAL_TYPE ordering.c:<global>#222 -> T:multiple_returns
+EDGES|EVAL_TYPE ordering.c:<global>#223 -> T:ANY
+EDGES|EVAL_TYPE ordering.c:VALUE:ANY(1)#1 -> T:ANY
+EDGES|EVAL_TYPE ordering.c:VALUE:ANY(1)#2 -> T:ANY
+EDGES|EVAL_TYPE ordering.c:VALUE:ANY(1)#3 -> T:ANY
+EDGES|EVAL_TYPE ordering.c:VALUE:ANY(1)#4 -> T:ANY
+EDGES|EVAL_TYPE return_inside_block#1 -> T:int
+EDGES|EVAL_TYPE return_inside_block#2 -> T:int
+EDGES|EVAL_TYPE return_inside_block#3 -> T:void
+EDGES|EVAL_TYPE return_inside_block#4 -> T:void
+EDGES|EVAL_TYPE return_inside_block#5 -> T:void
+EDGES|EVAL_TYPE return_inside_block#6 -> T:int
+EDGES|EVAL_TYPE return_inside_block#8 -> T:int
+EDGES|EVAL_TYPE return_inside_block#9 -> T:int
+EDGES|EVAL_TYPE short_circuit#1 -> T:int
+EDGES|EVAL_TYPE short_circuit#10 -> T:int
+EDGES|EVAL_TYPE short_circuit#11 -> T:ANY
+EDGES|EVAL_TYPE short_circuit#12 -> T:int
+EDGES|EVAL_TYPE short_circuit#13 -> T:ANY
+EDGES|EVAL_TYPE short_circuit#14 -> T:ANY
+EDGES|EVAL_TYPE short_circuit#15 -> T:int
+EDGES|EVAL_TYPE short_circuit#16 -> T:int
+EDGES|EVAL_TYPE short_circuit#17 -> T:int
+EDGES|EVAL_TYPE short_circuit#2 -> T:int
+EDGES|EVAL_TYPE short_circuit#3 -> T:int
+EDGES|EVAL_TYPE short_circuit#4 -> T:int
+EDGES|EVAL_TYPE short_circuit#5 -> T:void
+EDGES|EVAL_TYPE short_circuit#7 -> T:ANY
+EDGES|EVAL_TYPE short_circuit#8 -> T:ANY
+EDGES|EVAL_TYPE short_circuit#9 -> T:int
+EDGES|EVAL_TYPE switch_exit#1 -> T:int
+EDGES|EVAL_TYPE switch_exit#11 -> T:int
+EDGES|EVAL_TYPE switch_exit#12 -> T:void
+EDGES|EVAL_TYPE switch_exit#2 -> T:int
+EDGES|EVAL_TYPE switch_exit#3 -> T:void
+EDGES|EVAL_TYPE switch_exit#5 -> T:int
+EDGES|EVAL_TYPE switch_exit#6 -> T:void
+EDGES|EVAL_TYPE switch_exit#8 -> T:int
+EDGES|EVAL_TYPE switch_no_default#1 -> T:int
+EDGES|EVAL_TYPE switch_no_default#12 -> T:int
+EDGES|EVAL_TYPE switch_no_default#13 -> T:void
+EDGES|EVAL_TYPE switch_no_default#14 -> T:int
+EDGES|EVAL_TYPE switch_no_default#15 -> T:void
+EDGES|EVAL_TYPE switch_no_default#2 -> T:int
+EDGES|EVAL_TYPE switch_no_default#3 -> T:void
+EDGES|EVAL_TYPE switch_no_default#5 -> T:int
+EDGES|EVAL_TYPE switch_no_default#6 -> T:void
+EDGES|EVAL_TYPE switch_no_default#8 -> T:int
+EDGES|EVAL_TYPE switch_no_default#9 -> T:int
+EDGES|FALSE_BODY both_empty#4 -> both_empty#9
+EDGES|FALSE_BODY empty_false#4 -> empty_false#10
+EDGES|FALSE_BODY empty_true#4 -> empty_true#9
+EDGES|FOR_BODY nested_for#15 -> nested_for#22
+EDGES|FOR_BODY nested_for#7 -> nested_for#14
+EDGES|FOR_INIT nested_for#15 -> nested_for#16
+EDGES|FOR_INIT nested_for#7 -> nested_for#8
+EDGES|FOR_UPDATE nested_for#15 -> nested_for#20
+EDGES|FOR_UPDATE nested_for#7 -> nested_for#12
+EDGES|PARAMETER_LINK <operator>.addition#1 -> <operator>.addition#3
+EDGES|PARAMETER_LINK <operator>.addition#4 -> <operator>.addition#6
+EDGES|PARAMETER_LINK <operator>.conditional#1 -> <operator>.conditional#3
+EDGES|PARAMETER_LINK <operator>.conditional#4 -> <operator>.conditional#6
+EDGES|PARAMETER_LINK <operator>.conditional#7 -> <operator>.conditional#8
+EDGES|PARAMETER_LINK <operator>.equals#1 -> <operator>.equals#3
+EDGES|PARAMETER_LINK <operator>.equals#4 -> <operator>.equals#6
+EDGES|PARAMETER_LINK <operator>.logicalAnd#1 -> <operator>.logicalAnd#3
+EDGES|PARAMETER_LINK <operator>.logicalAnd#4 -> <operator>.logicalAnd#6
+EDGES|PARAMETER_LINK <operator>.logicalOr#1 -> <operator>.logicalOr#3
+EDGES|PARAMETER_LINK <operator>.logicalOr#4 -> <operator>.logicalOr#6
+EDGES|PARAMETER_LINK <operator>.notEquals#1 -> <operator>.notEquals#3
+EDGES|PARAMETER_LINK <operator>.notEquals#4 -> <operator>.notEquals#6
+EDGES|PARAMETER_LINK <operator>.postDecrement#1 -> <operator>.postDecrement#3
+EDGES|PARAMETER_LINK both_empty#1 -> both_empty#2
+EDGES|PARAMETER_LINK branch_macro#1 -> branch_macro#2
+EDGES|PARAMETER_LINK branch_macro#3 -> branch_macro#4
+EDGES|PARAMETER_LINK empty_false#1 -> empty_false#2
+EDGES|PARAMETER_LINK empty_true#1 -> empty_true#2
+EDGES|PARAMETER_LINK input#1 -> input#2
+EDGES|PARAMETER_LINK multiple_returns#1 -> multiple_returns#2
+EDGES|PARAMETER_LINK nested_do#1 -> nested_do#2
+EDGES|PARAMETER_LINK nested_do#3 -> nested_do#4
+EDGES|PARAMETER_LINK nested_for#1 -> nested_for#2
+EDGES|PARAMETER_LINK nested_for#3 -> nested_for#4
+EDGES|PARAMETER_LINK nested_while#1 -> nested_while#2
+EDGES|PARAMETER_LINK nested_while#3 -> nested_while#4
+EDGES|PARAMETER_LINK observe#1 -> observe#2
+EDGES|PARAMETER_LINK ordering.c:VALUE:ANY(1)#1 -> ordering.c:VALUE:ANY(1)#2
+EDGES|PARAMETER_LINK return_inside_block#1 -> return_inside_block#2
+EDGES|PARAMETER_LINK short_circuit#1 -> short_circuit#2
+EDGES|PARAMETER_LINK short_circuit#3 -> short_circuit#4
+EDGES|PARAMETER_LINK switch_exit#1 -> switch_exit#2
+EDGES|PARAMETER_LINK switch_no_default#1 -> switch_no_default#2
+EDGES|REF NB:<global> -> NS:<global>
+EDGES|REF NB:<includes>:<global> -> NS:<global>
+EDGES|REF NB:ordering.c:<global> -> NS:<global>
+EDGES|REF T:ANY -> D:ANY
+EDGES|REF T:both_empty -> D:both_empty
+EDGES|REF T:branch_macro -> D:branch_macro
+EDGES|REF T:empty_false -> D:empty_false
+EDGES|REF T:empty_true -> D:empty_true
+EDGES|REF T:int -> D:int
+EDGES|REF T:multiple_returns -> D:multiple_returns
+EDGES|REF T:nested_do -> D:nested_do
+EDGES|REF T:nested_for -> D:nested_for
+EDGES|REF T:nested_while -> D:nested_while
+EDGES|REF T:return_inside_block -> D:return_inside_block
+EDGES|REF T:short_circuit -> D:short_circuit
+EDGES|REF T:switch_exit -> D:switch_exit
+EDGES|REF T:switch_no_default -> D:switch_no_default
+EDGES|REF T:void -> D:void
+EDGES|REF both_empty#6 -> both_empty#1
+EDGES|REF branch_macro#13 -> branch_macro#3
+EDGES|REF branch_macro#8 -> branch_macro#1
+EDGES|REF empty_false#6 -> empty_false#1
+EDGES|REF empty_true#6 -> empty_true#1
+EDGES|REF multiple_returns#12 -> multiple_returns#1
+EDGES|REF multiple_returns#19 -> multiple_returns#1
+EDGES|REF multiple_returns#25 -> multiple_returns#1
+EDGES|REF multiple_returns#7 -> multiple_returns#1
+EDGES|REF nested_do#12 -> nested_do#3
+EDGES|REF nested_do#14 -> nested_do#3
+EDGES|REF nested_do#17 -> nested_do#1
+EDGES|REF nested_do#19 -> nested_do#1
+EDGES|REF nested_for#10 -> nested_for#1
+EDGES|REF nested_for#13 -> nested_for#1
+EDGES|REF nested_for#18 -> nested_for#3
+EDGES|REF nested_for#21 -> nested_for#3
+EDGES|REF nested_for#23 -> nested_for#1
+EDGES|REF nested_while#13 -> nested_while#1
+EDGES|REF nested_while#16 -> nested_while#3
+EDGES|REF nested_while#19 -> nested_while#3
+EDGES|REF nested_while#9 -> nested_while#1
+EDGES|REF ordering.c:<global>#211 -> empty_true#0
+EDGES|REF ordering.c:<global>#212 -> empty_false#0
+EDGES|REF ordering.c:<global>#213 -> both_empty#0
+EDGES|REF ordering.c:<global>#214 -> ordering.c:<global>#39
+EDGES|REF ordering.c:<global>#215 -> ordering.c:<global>#52
+EDGES|REF ordering.c:<global>#216 -> nested_for#0
+EDGES|REF ordering.c:<global>#217 -> nested_while#0
+EDGES|REF ordering.c:<global>#218 -> nested_do#0
+EDGES|REF ordering.c:<global>#219 -> ordering.c:<global>#136
+EDGES|REF ordering.c:<global>#220 -> branch_macro#0
+EDGES|REF ordering.c:<global>#221 -> ordering.c:<global>#163
+EDGES|REF ordering.c:<global>#222 -> multiple_returns#0
+EDGES|REF return_inside_block#6 -> return_inside_block#1
+EDGES|REF return_inside_block#8 -> return_inside_block#1
+EDGES|REF short_circuit#15 -> short_circuit#3
+EDGES|REF short_circuit#9 -> short_circuit#1
+EDGES|REF switch_exit#5 -> switch_exit#1
+EDGES|REF switch_no_default#14 -> switch_no_default#1
+EDGES|REF switch_no_default#5 -> switch_no_default#1
+EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+EDGES|SOURCE_FILE D:ANY -> F:<includes>
+EDGES|SOURCE_FILE D:both_empty -> F:ordering.c
+EDGES|SOURCE_FILE D:branch_macro -> F:ordering.c
+EDGES|SOURCE_FILE D:empty_false -> F:ordering.c
+EDGES|SOURCE_FILE D:empty_true -> F:ordering.c
+EDGES|SOURCE_FILE D:int -> F:<includes>
+EDGES|SOURCE_FILE D:multiple_returns -> F:ordering.c
+EDGES|SOURCE_FILE D:nested_do -> F:ordering.c
+EDGES|SOURCE_FILE D:nested_for -> F:ordering.c
+EDGES|SOURCE_FILE D:nested_while -> F:ordering.c
+EDGES|SOURCE_FILE D:ordering.c:<global> -> F:ordering.c
+EDGES|SOURCE_FILE D:return_inside_block -> F:ordering.c
+EDGES|SOURCE_FILE D:short_circuit -> F:ordering.c
+EDGES|SOURCE_FILE D:switch_exit -> F:ordering.c
+EDGES|SOURCE_FILE D:switch_no_default -> F:ordering.c
+EDGES|SOURCE_FILE D:void -> F:<includes>
+EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
+EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>
+EDGES|SOURCE_FILE NB:ordering.c:<global> -> F:ordering.c
+EDGES|SOURCE_FILE both_empty#0 -> F:ordering.c
+EDGES|SOURCE_FILE branch_macro#0 -> F:ordering.c
+EDGES|SOURCE_FILE empty_false#0 -> F:ordering.c
+EDGES|SOURCE_FILE empty_true#0 -> F:ordering.c
+EDGES|SOURCE_FILE input#0 -> F:ordering.c
+EDGES|SOURCE_FILE multiple_returns#0 -> F:ordering.c
+EDGES|SOURCE_FILE nested_do#0 -> F:ordering.c
+EDGES|SOURCE_FILE nested_for#0 -> F:ordering.c
+EDGES|SOURCE_FILE nested_while#0 -> F:ordering.c
+EDGES|SOURCE_FILE observe#0 -> F:ordering.c
+EDGES|SOURCE_FILE ordering.c:<global>#0 -> F:ordering.c
+EDGES|SOURCE_FILE ordering.c:<global>#136 -> F:ordering.c
+EDGES|SOURCE_FILE ordering.c:<global>#163 -> F:ordering.c
+EDGES|SOURCE_FILE ordering.c:<global>#39 -> F:ordering.c
+EDGES|SOURCE_FILE ordering.c:<global>#52 -> F:ordering.c
+EDGES|SOURCE_FILE ordering.c:VALUE:ANY(1)#0 -> F:ordering.c
+EDGES|TRUE_BODY both_empty#4 -> both_empty#8
+EDGES|TRUE_BODY empty_false#4 -> empty_false#8
+EDGES|TRUE_BODY empty_true#4 -> empty_true#8
+EDGES|TRUE_BODY multiple_returns#10 -> multiple_returns#14
+EDGES|TRUE_BODY multiple_returns#17 -> multiple_returns#21
+EDGES|TRUE_BODY multiple_returns#5 -> multiple_returns#9
+EDGES|TRUE_BODY nested_while#14 -> nested_while#18
+EDGES|TRUE_BODY nested_while#7 -> nested_while#11
+EDGES|TRUE_BODY switch_exit#4 -> switch_exit#6
+EDGES|TRUE_BODY switch_no_default#4 -> switch_no_default#6
+FLOWS|REACHING_DEF[(condition && input()) || VALUE(value)] short_circuit#7 -> short_circuit#17
+FLOWS|REACHING_DEF[(condition && input()) || VALUE(value)] short_circuit#7 -> short_circuit#6
+FLOWS|REACHING_DEF[(value) + 1] branch_macro#12 -> branch_macro#16
+FLOWS|REACHING_DEF[(value) + 1] short_circuit#14 -> short_circuit#17
+FLOWS|REACHING_DEF[0] both_empty#7 -> both_empty#5
+FLOWS|REACHING_DEF[0] both_empty#7 -> both_empty#6
+FLOWS|REACHING_DEF[0] empty_false#7 -> empty_false#5
+FLOWS|REACHING_DEF[0] empty_false#7 -> empty_false#6
+FLOWS|REACHING_DEF[0] empty_true#7 -> empty_true#5
+FLOWS|REACHING_DEF[0] empty_true#7 -> empty_true#6
+FLOWS|REACHING_DEF[0] multiple_returns#8 -> multiple_returns#6
+FLOWS|REACHING_DEF[0] multiple_returns#8 -> multiple_returns#7
+FLOWS|REACHING_DEF[0] nested_do#15 -> nested_do#13
+FLOWS|REACHING_DEF[0] nested_do#15 -> nested_do#14
+FLOWS|REACHING_DEF[0] nested_do#20 -> nested_do#18
+FLOWS|REACHING_DEF[0] nested_do#20 -> nested_do#19
+FLOWS|REACHING_DEF[0] nested_for#11 -> nested_for#10
+FLOWS|REACHING_DEF[0] nested_for#11 -> nested_for#9
+FLOWS|REACHING_DEF[0] nested_for#19 -> nested_for#17
+FLOWS|REACHING_DEF[0] nested_for#19 -> nested_for#18
+FLOWS|REACHING_DEF[0] nested_while#10 -> nested_while#8
+FLOWS|REACHING_DEF[0] nested_while#10 -> nested_while#9
+FLOWS|REACHING_DEF[0] nested_while#17 -> nested_while#15
+FLOWS|REACHING_DEF[0] nested_while#17 -> nested_while#16
+FLOWS|REACHING_DEF[1] branch_macro#14 -> branch_macro#12
+FLOWS|REACHING_DEF[1] multiple_returns#23 -> multiple_returns#22
+FLOWS|REACHING_DEF[1] short_circuit#16 -> short_circuit#14
+FLOWS|REACHING_DEF[2] multiple_returns#13 -> multiple_returns#11
+FLOWS|REACHING_DEF[2] multiple_returns#13 -> multiple_returns#12
+FLOWS|REACHING_DEF[3] multiple_returns#20 -> multiple_returns#18
+FLOWS|REACHING_DEF[3] multiple_returns#20 -> multiple_returns#19
+FLOWS|REACHING_DEF[<RET>] branch_macro#6 -> branch_macro#16
+FLOWS|REACHING_DEF[<RET>] multiple_returns#15 -> multiple_returns#28
+FLOWS|REACHING_DEF[<RET>] multiple_returns#22 -> multiple_returns#28
+FLOWS|REACHING_DEF[<RET>] multiple_returns#26 -> multiple_returns#28
+FLOWS|REACHING_DEF[<RET>] return_inside_block#7 -> return_inside_block#9
+FLOWS|REACHING_DEF[<RET>] short_circuit#6 -> short_circuit#17
+FLOWS|REACHING_DEF[VALUE(value)] branch_macro#9 -> branch_macro#16
+FLOWS|REACHING_DEF[VALUE(value)] branch_macro#9 -> branch_macro#7
+FLOWS|REACHING_DEF[VALUE(value)] short_circuit#11 -> short_circuit#17
+FLOWS|REACHING_DEF[VALUE(value)] short_circuit#11 -> short_circuit#7
+FLOWS|REACHING_DEF[VALUE(value)] short_circuit#11 -> short_circuit#8
+FLOWS|REACHING_DEF[] <operator>.addition#0 -> <operator>.addition#1
+FLOWS|REACHING_DEF[] <operator>.addition#0 -> <operator>.addition#4
+FLOWS|REACHING_DEF[] <operator>.conditional#0 -> <operator>.conditional#1
+FLOWS|REACHING_DEF[] <operator>.conditional#0 -> <operator>.conditional#4
+FLOWS|REACHING_DEF[] <operator>.conditional#0 -> <operator>.conditional#7
+FLOWS|REACHING_DEF[] <operator>.equals#0 -> <operator>.equals#1
+FLOWS|REACHING_DEF[] <operator>.equals#0 -> <operator>.equals#4
+FLOWS|REACHING_DEF[] <operator>.logicalAnd#0 -> <operator>.logicalAnd#1
+FLOWS|REACHING_DEF[] <operator>.logicalAnd#0 -> <operator>.logicalAnd#4
+FLOWS|REACHING_DEF[] <operator>.logicalOr#0 -> <operator>.logicalOr#1
+FLOWS|REACHING_DEF[] <operator>.logicalOr#0 -> <operator>.logicalOr#4
+FLOWS|REACHING_DEF[] <operator>.notEquals#0 -> <operator>.notEquals#1
+FLOWS|REACHING_DEF[] <operator>.notEquals#0 -> <operator>.notEquals#4
+FLOWS|REACHING_DEF[] <operator>.postDecrement#0 -> <operator>.postDecrement#1
+FLOWS|REACHING_DEF[] both_empty#0 -> both_empty#1
+FLOWS|REACHING_DEF[] both_empty#0 -> both_empty#6
+FLOWS|REACHING_DEF[] both_empty#0 -> both_empty#7
+FLOWS|REACHING_DEF[] branch_macro#0 -> branch_macro#1
+FLOWS|REACHING_DEF[] branch_macro#0 -> branch_macro#10
+FLOWS|REACHING_DEF[] branch_macro#0 -> branch_macro#13
+FLOWS|REACHING_DEF[] branch_macro#0 -> branch_macro#14
+FLOWS|REACHING_DEF[] branch_macro#0 -> branch_macro#15
+FLOWS|REACHING_DEF[] branch_macro#0 -> branch_macro#3
+FLOWS|REACHING_DEF[] empty_false#0 -> empty_false#1
+FLOWS|REACHING_DEF[] empty_false#0 -> empty_false#6
+FLOWS|REACHING_DEF[] empty_false#0 -> empty_false#7
+FLOWS|REACHING_DEF[] empty_false#0 -> empty_false#9
+FLOWS|REACHING_DEF[] empty_true#0 -> empty_true#1
+FLOWS|REACHING_DEF[] empty_true#0 -> empty_true#11
+FLOWS|REACHING_DEF[] empty_true#0 -> empty_true#6
+FLOWS|REACHING_DEF[] empty_true#0 -> empty_true#7
+FLOWS|REACHING_DEF[] input#0 -> input#1
+FLOWS|REACHING_DEF[] input#1 -> input#2
+FLOWS|REACHING_DEF[] input#1 -> input#4
+FLOWS|REACHING_DEF[] multiple_returns#0 -> multiple_returns#1
+FLOWS|REACHING_DEF[] multiple_returns#0 -> multiple_returns#12
+FLOWS|REACHING_DEF[] multiple_returns#0 -> multiple_returns#13
+FLOWS|REACHING_DEF[] multiple_returns#0 -> multiple_returns#16
+FLOWS|REACHING_DEF[] multiple_returns#0 -> multiple_returns#19
+FLOWS|REACHING_DEF[] multiple_returns#0 -> multiple_returns#20
+FLOWS|REACHING_DEF[] multiple_returns#0 -> multiple_returns#22
+FLOWS|REACHING_DEF[] multiple_returns#0 -> multiple_returns#23
+FLOWS|REACHING_DEF[] multiple_returns#0 -> multiple_returns#25
+FLOWS|REACHING_DEF[] multiple_returns#0 -> multiple_returns#27
+FLOWS|REACHING_DEF[] multiple_returns#0 -> multiple_returns#4
+FLOWS|REACHING_DEF[] multiple_returns#0 -> multiple_returns#7
+FLOWS|REACHING_DEF[] multiple_returns#0 -> multiple_returns#8
+FLOWS|REACHING_DEF[] nested_do#0 -> nested_do#1
+FLOWS|REACHING_DEF[] nested_do#0 -> nested_do#12
+FLOWS|REACHING_DEF[] nested_do#0 -> nested_do#14
+FLOWS|REACHING_DEF[] nested_do#0 -> nested_do#15
+FLOWS|REACHING_DEF[] nested_do#0 -> nested_do#17
+FLOWS|REACHING_DEF[] nested_do#0 -> nested_do#19
+FLOWS|REACHING_DEF[] nested_do#0 -> nested_do#20
+FLOWS|REACHING_DEF[] nested_do#0 -> nested_do#3
+FLOWS|REACHING_DEF[] nested_do#0 -> nested_do#6
+FLOWS|REACHING_DEF[] nested_for#0 -> nested_for#1
+FLOWS|REACHING_DEF[] nested_for#0 -> nested_for#10
+FLOWS|REACHING_DEF[] nested_for#0 -> nested_for#11
+FLOWS|REACHING_DEF[] nested_for#0 -> nested_for#13
+FLOWS|REACHING_DEF[] nested_for#0 -> nested_for#18
+FLOWS|REACHING_DEF[] nested_for#0 -> nested_for#19
+FLOWS|REACHING_DEF[] nested_for#0 -> nested_for#21
+FLOWS|REACHING_DEF[] nested_for#0 -> nested_for#23
+FLOWS|REACHING_DEF[] nested_for#0 -> nested_for#3
+FLOWS|REACHING_DEF[] nested_for#0 -> nested_for#6
+FLOWS|REACHING_DEF[] nested_while#0 -> nested_while#1
+FLOWS|REACHING_DEF[] nested_while#0 -> nested_while#10
+FLOWS|REACHING_DEF[] nested_while#0 -> nested_while#13
+FLOWS|REACHING_DEF[] nested_while#0 -> nested_while#16
+FLOWS|REACHING_DEF[] nested_while#0 -> nested_while#17
+FLOWS|REACHING_DEF[] nested_while#0 -> nested_while#19
+FLOWS|REACHING_DEF[] nested_while#0 -> nested_while#3
+FLOWS|REACHING_DEF[] nested_while#0 -> nested_while#6
+FLOWS|REACHING_DEF[] nested_while#0 -> nested_while#9
+FLOWS|REACHING_DEF[] observe#0 -> observe#1
+FLOWS|REACHING_DEF[] ordering.c:<global>#0 -> ordering.c:<global>#211
+FLOWS|REACHING_DEF[] ordering.c:<global>#0 -> ordering.c:<global>#212
+FLOWS|REACHING_DEF[] ordering.c:<global>#0 -> ordering.c:<global>#213
+FLOWS|REACHING_DEF[] ordering.c:<global>#0 -> ordering.c:<global>#214
+FLOWS|REACHING_DEF[] ordering.c:<global>#0 -> ordering.c:<global>#215
+FLOWS|REACHING_DEF[] ordering.c:<global>#0 -> ordering.c:<global>#216
+FLOWS|REACHING_DEF[] ordering.c:<global>#0 -> ordering.c:<global>#217
+FLOWS|REACHING_DEF[] ordering.c:<global>#0 -> ordering.c:<global>#218
+FLOWS|REACHING_DEF[] ordering.c:<global>#0 -> ordering.c:<global>#219
+FLOWS|REACHING_DEF[] ordering.c:<global>#0 -> ordering.c:<global>#220
+FLOWS|REACHING_DEF[] ordering.c:<global>#0 -> ordering.c:<global>#221
+FLOWS|REACHING_DEF[] ordering.c:<global>#0 -> ordering.c:<global>#222
+FLOWS|REACHING_DEF[] ordering.c:<global>#136 -> return_inside_block#1
+FLOWS|REACHING_DEF[] ordering.c:<global>#136 -> return_inside_block#6
+FLOWS|REACHING_DEF[] ordering.c:<global>#136 -> return_inside_block#8
+FLOWS|REACHING_DEF[] ordering.c:<global>#163 -> short_circuit#1
+FLOWS|REACHING_DEF[] ordering.c:<global>#163 -> short_circuit#10
+FLOWS|REACHING_DEF[] ordering.c:<global>#163 -> short_circuit#12
+FLOWS|REACHING_DEF[] ordering.c:<global>#163 -> short_circuit#15
+FLOWS|REACHING_DEF[] ordering.c:<global>#163 -> short_circuit#16
+FLOWS|REACHING_DEF[] ordering.c:<global>#163 -> short_circuit#3
+FLOWS|REACHING_DEF[] ordering.c:<global>#163 -> short_circuit#9
+FLOWS|REACHING_DEF[] ordering.c:<global>#39 -> switch_exit#1
+FLOWS|REACHING_DEF[] ordering.c:<global>#39 -> switch_exit#11
+FLOWS|REACHING_DEF[] ordering.c:<global>#39 -> switch_exit#5
+FLOWS|REACHING_DEF[] ordering.c:<global>#39 -> switch_exit#8
+FLOWS|REACHING_DEF[] ordering.c:<global>#52 -> switch_no_default#1
+FLOWS|REACHING_DEF[] ordering.c:<global>#52 -> switch_no_default#12
+FLOWS|REACHING_DEF[] ordering.c:<global>#52 -> switch_no_default#14
+FLOWS|REACHING_DEF[] ordering.c:<global>#52 -> switch_no_default#5
+FLOWS|REACHING_DEF[] ordering.c:<global>#52 -> switch_no_default#8
+FLOWS|REACHING_DEF[] ordering.c:<global>#52 -> switch_no_default#9
+FLOWS|REACHING_DEF[] ordering.c:VALUE:ANY(1)#0 -> ordering.c:VALUE:ANY(1)#1
+FLOWS|REACHING_DEF[condition != 0] both_empty#5 -> both_empty#11
+FLOWS|REACHING_DEF[condition != 0] empty_false#5 -> empty_false#12
+FLOWS|REACHING_DEF[condition != 0] empty_true#5 -> empty_true#12
+FLOWS|REACHING_DEF[condition && input()] short_circuit#8 -> short_circuit#11
+FLOWS|REACHING_DEF[condition && input()] short_circuit#8 -> short_circuit#17
+FLOWS|REACHING_DEF[condition && input()] short_circuit#8 -> short_circuit#7
+FLOWS|REACHING_DEF[condition ? VALUE(value) : input()] branch_macro#7 -> branch_macro#16
+FLOWS|REACHING_DEF[condition ? VALUE(value) : input()] branch_macro#7 -> branch_macro#6
+FLOWS|REACHING_DEF[condition] both_empty#1 -> both_empty#2
+FLOWS|REACHING_DEF[condition] both_empty#1 -> both_empty#6
+FLOWS|REACHING_DEF[condition] both_empty#6 -> both_empty#11
+FLOWS|REACHING_DEF[condition] both_empty#6 -> both_empty#2
+FLOWS|REACHING_DEF[condition] both_empty#6 -> both_empty#5
+FLOWS|REACHING_DEF[condition] branch_macro#1 -> branch_macro#2
+FLOWS|REACHING_DEF[condition] branch_macro#8 -> branch_macro#16
+FLOWS|REACHING_DEF[condition] branch_macro#8 -> branch_macro#2
+FLOWS|REACHING_DEF[condition] branch_macro#8 -> branch_macro#7
+FLOWS|REACHING_DEF[condition] empty_false#1 -> empty_false#2
+FLOWS|REACHING_DEF[condition] empty_false#1 -> empty_false#6
+FLOWS|REACHING_DEF[condition] empty_false#6 -> empty_false#12
+FLOWS|REACHING_DEF[condition] empty_false#6 -> empty_false#2
+FLOWS|REACHING_DEF[condition] empty_false#6 -> empty_false#5
+FLOWS|REACHING_DEF[condition] empty_true#1 -> empty_true#2
+FLOWS|REACHING_DEF[condition] empty_true#1 -> empty_true#6
+FLOWS|REACHING_DEF[condition] empty_true#6 -> empty_true#12
+FLOWS|REACHING_DEF[condition] empty_true#6 -> empty_true#2
+FLOWS|REACHING_DEF[condition] empty_true#6 -> empty_true#5
+FLOWS|REACHING_DEF[condition] short_circuit#1 -> short_circuit#2
+FLOWS|REACHING_DEF[condition] short_circuit#1 -> short_circuit#9
+FLOWS|REACHING_DEF[condition] short_circuit#9 -> short_circuit#10
+FLOWS|REACHING_DEF[condition] short_circuit#9 -> short_circuit#17
+FLOWS|REACHING_DEF[condition] short_circuit#9 -> short_circuit#2
+FLOWS|REACHING_DEF[condition] short_circuit#9 -> short_circuit#8
+FLOWS|REACHING_DEF[first != 0] nested_do#18 -> nested_do#21
+FLOWS|REACHING_DEF[first != 0] nested_for#9 -> nested_for#24
+FLOWS|REACHING_DEF[first != 0] nested_while#8 -> nested_while#20
+FLOWS|REACHING_DEF[first--] nested_do#16 -> nested_do#21
+FLOWS|REACHING_DEF[first--] nested_for#12 -> nested_for#24
+FLOWS|REACHING_DEF[first] nested_do#1 -> nested_do#17
+FLOWS|REACHING_DEF[first] nested_do#1 -> nested_do#2
+FLOWS|REACHING_DEF[first] nested_do#17 -> nested_do#16
+FLOWS|REACHING_DEF[first] nested_do#17 -> nested_do#19
+FLOWS|REACHING_DEF[first] nested_do#19 -> nested_do#17
+FLOWS|REACHING_DEF[first] nested_do#19 -> nested_do#18
+FLOWS|REACHING_DEF[first] nested_do#19 -> nested_do#2
+FLOWS|REACHING_DEF[first] nested_do#19 -> nested_do#21
+FLOWS|REACHING_DEF[first] nested_for#1 -> nested_for#10
+FLOWS|REACHING_DEF[first] nested_for#1 -> nested_for#2
+FLOWS|REACHING_DEF[first] nested_for#10 -> nested_for#13
+FLOWS|REACHING_DEF[first] nested_for#10 -> nested_for#2
+FLOWS|REACHING_DEF[first] nested_for#10 -> nested_for#23
+FLOWS|REACHING_DEF[first] nested_for#10 -> nested_for#24
+FLOWS|REACHING_DEF[first] nested_for#10 -> nested_for#9
+FLOWS|REACHING_DEF[first] nested_for#13 -> nested_for#10
+FLOWS|REACHING_DEF[first] nested_for#13 -> nested_for#12
+FLOWS|REACHING_DEF[first] nested_for#23 -> nested_for#13
+FLOWS|REACHING_DEF[first] nested_for#23 -> nested_for#22
+FLOWS|REACHING_DEF[first] nested_while#1 -> nested_while#2
+FLOWS|REACHING_DEF[first] nested_while#1 -> nested_while#9
+FLOWS|REACHING_DEF[first] nested_while#13 -> nested_while#12
+FLOWS|REACHING_DEF[first] nested_while#13 -> nested_while#9
+FLOWS|REACHING_DEF[first] nested_while#9 -> nested_while#13
+FLOWS|REACHING_DEF[first] nested_while#9 -> nested_while#2
+FLOWS|REACHING_DEF[first] nested_while#9 -> nested_while#20
+FLOWS|REACHING_DEF[first] nested_while#9 -> nested_while#8
+FLOWS|REACHING_DEF[input()] branch_macro#15 -> branch_macro#16
+FLOWS|REACHING_DEF[input()] branch_macro#15 -> branch_macro#7
+FLOWS|REACHING_DEF[input()] empty_false#9 -> empty_false#12
+FLOWS|REACHING_DEF[input()] multiple_returns#16 -> multiple_returns#15
+FLOWS|REACHING_DEF[input()] multiple_returns#16 -> multiple_returns#28
+FLOWS|REACHING_DEF[input()] multiple_returns#27 -> multiple_returns#26
+FLOWS|REACHING_DEF[input()] nested_do#6 -> nested_do#21
+FLOWS|REACHING_DEF[input()] nested_for#6 -> nested_for#24
+FLOWS|REACHING_DEF[input()] nested_while#6 -> nested_while#20
+FLOWS|REACHING_DEF[input()] short_circuit#10 -> short_circuit#17
+FLOWS|REACHING_DEF[input()] short_circuit#10 -> short_circuit#8
+FLOWS|REACHING_DEF[input()] short_circuit#10 -> short_circuit#9
+FLOWS|REACHING_DEF[observe(value)] return_inside_block#5 -> return_inside_block#9
+FLOWS|REACHING_DEF[p1] <operator>.addition#1 -> <operator>.addition#3
+FLOWS|REACHING_DEF[p1] <operator>.addition#1 -> <operator>.addition#5
+FLOWS|REACHING_DEF[p1] <operator>.conditional#1 -> <operator>.conditional#3
+FLOWS|REACHING_DEF[p1] <operator>.conditional#1 -> <operator>.conditional#5
+FLOWS|REACHING_DEF[p1] <operator>.equals#1 -> <operator>.equals#3
+FLOWS|REACHING_DEF[p1] <operator>.equals#1 -> <operator>.equals#5
+FLOWS|REACHING_DEF[p1] <operator>.logicalAnd#1 -> <operator>.logicalAnd#3
+FLOWS|REACHING_DEF[p1] <operator>.logicalAnd#1 -> <operator>.logicalAnd#5
+FLOWS|REACHING_DEF[p1] <operator>.logicalOr#1 -> <operator>.logicalOr#3
+FLOWS|REACHING_DEF[p1] <operator>.logicalOr#1 -> <operator>.logicalOr#5
+FLOWS|REACHING_DEF[p1] <operator>.notEquals#1 -> <operator>.notEquals#3
+FLOWS|REACHING_DEF[p1] <operator>.notEquals#1 -> <operator>.notEquals#5
+FLOWS|REACHING_DEF[p1] <operator>.postDecrement#1 -> <operator>.postDecrement#3
+FLOWS|REACHING_DEF[p1] <operator>.postDecrement#1 -> <operator>.postDecrement#4
+FLOWS|REACHING_DEF[p1] ordering.c:VALUE:ANY(1)#1 -> ordering.c:VALUE:ANY(1)#2
+FLOWS|REACHING_DEF[p1] ordering.c:VALUE:ANY(1)#1 -> ordering.c:VALUE:ANY(1)#4
+FLOWS|REACHING_DEF[p2] <operator>.addition#4 -> <operator>.addition#5
+FLOWS|REACHING_DEF[p2] <operator>.addition#4 -> <operator>.addition#6
+FLOWS|REACHING_DEF[p2] <operator>.conditional#4 -> <operator>.conditional#5
+FLOWS|REACHING_DEF[p2] <operator>.conditional#4 -> <operator>.conditional#6
+FLOWS|REACHING_DEF[p2] <operator>.equals#4 -> <operator>.equals#5
+FLOWS|REACHING_DEF[p2] <operator>.equals#4 -> <operator>.equals#6
+FLOWS|REACHING_DEF[p2] <operator>.logicalAnd#4 -> <operator>.logicalAnd#5
+FLOWS|REACHING_DEF[p2] <operator>.logicalAnd#4 -> <operator>.logicalAnd#6
+FLOWS|REACHING_DEF[p2] <operator>.logicalOr#4 -> <operator>.logicalOr#5
+FLOWS|REACHING_DEF[p2] <operator>.logicalOr#4 -> <operator>.logicalOr#6
+FLOWS|REACHING_DEF[p2] <operator>.notEquals#4 -> <operator>.notEquals#5
+FLOWS|REACHING_DEF[p2] <operator>.notEquals#4 -> <operator>.notEquals#6
+FLOWS|REACHING_DEF[p3] <operator>.conditional#7 -> <operator>.conditional#5
+FLOWS|REACHING_DEF[p3] <operator>.conditional#7 -> <operator>.conditional#8
+FLOWS|REACHING_DEF[second != 0] nested_do#13 -> nested_do#21
+FLOWS|REACHING_DEF[second != 0] nested_while#15 -> nested_while#20
+FLOWS|REACHING_DEF[second--] nested_do#11 -> nested_do#21
+FLOWS|REACHING_DEF[second] nested_do#12 -> nested_do#11
+FLOWS|REACHING_DEF[second] nested_do#12 -> nested_do#14
+FLOWS|REACHING_DEF[second] nested_do#14 -> nested_do#12
+FLOWS|REACHING_DEF[second] nested_do#14 -> nested_do#13
+FLOWS|REACHING_DEF[second] nested_do#14 -> nested_do#21
+FLOWS|REACHING_DEF[second] nested_do#14 -> nested_do#4
+FLOWS|REACHING_DEF[second] nested_do#3 -> nested_do#12
+FLOWS|REACHING_DEF[second] nested_do#3 -> nested_do#4
+FLOWS|REACHING_DEF[second] nested_for#18 -> nested_for#17
+FLOWS|REACHING_DEF[second] nested_for#18 -> nested_for#21
+FLOWS|REACHING_DEF[second] nested_for#21 -> nested_for#18
+FLOWS|REACHING_DEF[second] nested_for#21 -> nested_for#20
+FLOWS|REACHING_DEF[second] nested_for#3 -> nested_for#18
+FLOWS|REACHING_DEF[second] nested_for#3 -> nested_for#24
+FLOWS|REACHING_DEF[second] nested_for#3 -> nested_for#4
+FLOWS|REACHING_DEF[second] nested_while#16 -> nested_while#15
+FLOWS|REACHING_DEF[second] nested_while#16 -> nested_while#19
+FLOWS|REACHING_DEF[second] nested_while#16 -> nested_while#20
+FLOWS|REACHING_DEF[second] nested_while#16 -> nested_while#4
+FLOWS|REACHING_DEF[second] nested_while#19 -> nested_while#16
+FLOWS|REACHING_DEF[second] nested_while#19 -> nested_while#18
+FLOWS|REACHING_DEF[second] nested_while#3 -> nested_while#16
+FLOWS|REACHING_DEF[second] nested_while#3 -> nested_while#20
+FLOWS|REACHING_DEF[second] nested_while#3 -> nested_while#4
+FLOWS|REACHING_DEF[value != 0] multiple_returns#6 -> multiple_returns#28
+FLOWS|REACHING_DEF[value == 2] multiple_returns#11 -> multiple_returns#28
+FLOWS|REACHING_DEF[value == 3] multiple_returns#18 -> multiple_returns#28
+FLOWS|REACHING_DEF[value--] multiple_returns#24 -> multiple_returns#28
+FLOWS|REACHING_DEF[value] branch_macro#10 -> branch_macro#13
+FLOWS|REACHING_DEF[value] branch_macro#10 -> branch_macro#16
+FLOWS|REACHING_DEF[value] branch_macro#10 -> branch_macro#4
+FLOWS|REACHING_DEF[value] branch_macro#10 -> branch_macro#9
+FLOWS|REACHING_DEF[value] branch_macro#13 -> branch_macro#12
+FLOWS|REACHING_DEF[value] branch_macro#13 -> branch_macro#16
+FLOWS|REACHING_DEF[value] branch_macro#13 -> branch_macro#4
+FLOWS|REACHING_DEF[value] branch_macro#3 -> branch_macro#10
+FLOWS|REACHING_DEF[value] branch_macro#3 -> branch_macro#16
+FLOWS|REACHING_DEF[value] branch_macro#3 -> branch_macro#4
+FLOWS|REACHING_DEF[value] multiple_returns#1 -> multiple_returns#2
+FLOWS|REACHING_DEF[value] multiple_returns#1 -> multiple_returns#7
+FLOWS|REACHING_DEF[value] multiple_returns#12 -> multiple_returns#11
+FLOWS|REACHING_DEF[value] multiple_returns#12 -> multiple_returns#19
+FLOWS|REACHING_DEF[value] multiple_returns#12 -> multiple_returns#2
+FLOWS|REACHING_DEF[value] multiple_returns#12 -> multiple_returns#28
+FLOWS|REACHING_DEF[value] multiple_returns#19 -> multiple_returns#18
+FLOWS|REACHING_DEF[value] multiple_returns#19 -> multiple_returns#25
+FLOWS|REACHING_DEF[value] multiple_returns#25 -> multiple_returns#24
+FLOWS|REACHING_DEF[value] multiple_returns#25 -> multiple_returns#7
+FLOWS|REACHING_DEF[value] multiple_returns#7 -> multiple_returns#12
+FLOWS|REACHING_DEF[value] multiple_returns#7 -> multiple_returns#6
+FLOWS|REACHING_DEF[value] observe#1 -> observe#2
+FLOWS|REACHING_DEF[value] observe#1 -> observe#4
+FLOWS|REACHING_DEF[value] return_inside_block#1 -> return_inside_block#2
+FLOWS|REACHING_DEF[value] return_inside_block#1 -> return_inside_block#6
+FLOWS|REACHING_DEF[value] return_inside_block#6 -> return_inside_block#2
+FLOWS|REACHING_DEF[value] return_inside_block#6 -> return_inside_block#5
+FLOWS|REACHING_DEF[value] return_inside_block#6 -> return_inside_block#8
+FLOWS|REACHING_DEF[value] return_inside_block#6 -> return_inside_block#9
+FLOWS|REACHING_DEF[value] return_inside_block#8 -> return_inside_block#7
+FLOWS|REACHING_DEF[value] short_circuit#12 -> short_circuit#11
+FLOWS|REACHING_DEF[value] short_circuit#12 -> short_circuit#15
+FLOWS|REACHING_DEF[value] short_circuit#12 -> short_circuit#17
+FLOWS|REACHING_DEF[value] short_circuit#12 -> short_circuit#4
+FLOWS|REACHING_DEF[value] short_circuit#15 -> short_circuit#14
+FLOWS|REACHING_DEF[value] short_circuit#15 -> short_circuit#17
+FLOWS|REACHING_DEF[value] short_circuit#15 -> short_circuit#4
+FLOWS|REACHING_DEF[value] short_circuit#3 -> short_circuit#12
+FLOWS|REACHING_DEF[value] short_circuit#3 -> short_circuit#17
+FLOWS|REACHING_DEF[value] short_circuit#3 -> short_circuit#4
+FLOWS|REACHING_DEF[value] switch_exit#1 -> switch_exit#12
+FLOWS|REACHING_DEF[value] switch_exit#1 -> switch_exit#2
+FLOWS|REACHING_DEF[value] switch_no_default#1 -> switch_no_default#14
+FLOWS|REACHING_DEF[value] switch_no_default#1 -> switch_no_default#15
+FLOWS|REACHING_DEF[value] switch_no_default#1 -> switch_no_default#2
+FLOWS|REACHING_DEF[value] switch_no_default#14 -> switch_no_default#13

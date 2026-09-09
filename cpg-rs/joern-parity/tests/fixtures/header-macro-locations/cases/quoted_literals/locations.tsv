@@ -1,0 +1,73 @@
+<includes>:<global>	0	METHOD	<global>	<global>	1	<absent>	1	<absent>
+<includes>:<global>	1	BLOCK	<absent>	<absent>	1	<absent>	<absent>	<absent>
+<includes>:<global>	2	METHOD_RETURN	<absent>	RET	2	<absent>	1	<absent>
+character	0	METHOD	character	int character(void) { return ID(' '); }	1	<absent>	4	1
+character	1	METHOD_PARAMETER_IN		void	1	<absent>	4	15
+character	2	METHOD_PARAMETER_OUT		void	1	<absent>	4	15
+character	3	BLOCK	<absent>	{ return ID(' '); }	2	<absent>	4	21
+character	4	RETURN	<absent>	return ID(' ');	1	<absent>	4	23
+character	5	CALL	ID	ID(' ')	1	<absent>	4	30
+character	6	BLOCK	<absent>	<absent>	1	1	4	30
+character	7	LITERAL	<absent>	' '	1	<absent>	4	30
+character	8	METHOD_RETURN	<absent>	RET	3	<absent>	4	1
+defs.h:<global>	0	METHOD	<global>	<global>	1	<absent>	1	1
+defs.h:<global>	1	BLOCK	<absent>	<absent>	1	<absent>	1	1
+defs.h:<global>	2	METHOD_RETURN	<absent>	RET	2	<absent>	1	1
+defs.h:ID:ANY(1)	0	METHOD	ID	#define ID(x) (x)	1	<absent>	1	1
+defs.h:ID:ANY(1)	1	METHOD_PARAMETER_IN	p1	p1	1	<absent>	1	1
+defs.h:ID:ANY(1)	2	METHOD_PARAMETER_OUT	p1	p1	1	<absent>	1	1
+defs.h:ID:ANY(1)	3	BLOCK	<absent>	<absent>	2	<absent>	<absent>	<absent>
+defs.h:ID:ANY(1)	4	METHOD_RETURN	<absent>	RET	3	<absent>	1	1
+escaped	0	METHOD	escaped	char *escaped(void) { return ID("a\tb"); }	1	<absent>	3	1
+escaped	1	METHOD_PARAMETER_IN		void	1	<absent>	3	15
+escaped	2	METHOD_PARAMETER_OUT		void	1	<absent>	3	15
+escaped	3	BLOCK	<absent>	{ return ID("a\tb"); }	2	<absent>	3	21
+escaped	4	RETURN	<absent>	return ID("a\tb");	1	<absent>	3	23
+escaped	5	CALL	ID	ID("a\tb")	1	<absent>	3	30
+escaped	6	LITERAL	<absent>	"a\tb"	1	1	3	30
+escaped	7	BLOCK	<absent>	<absent>	2	2	3	30
+escaped	8	LITERAL	<absent>	"a\tb"	1	<absent>	3	30
+escaped	9	METHOD_RETURN	<absent>	RET	3	<absent>	3	1
+locations.c:<global>	0	METHOD	<global>	<global>	1	<absent>	1	1
+locations.c:<global>	1	METHOD	probe	char *probe(void) { return ID("a b"); }	1	<absent>	2	1
+locations.c:<global>	2	METHOD_PARAMETER_IN		void	1	<absent>	2	13
+locations.c:<global>	3	METHOD_PARAMETER_OUT		void	1	<absent>	2	13
+locations.c:<global>	4	BLOCK	<absent>	{ return ID("a b"); }	2	<absent>	2	19
+locations.c:<global>	5	RETURN	<absent>	return ID("a b");	1	<absent>	2	21
+locations.c:<global>	6	CALL	ID	ID("a b")	1	<absent>	2	28
+locations.c:<global>	7	BLOCK	<absent>	<absent>	1	1	2	28
+locations.c:<global>	8	LITERAL	<absent>	"a b"	1	<absent>	2	28
+locations.c:<global>	9	METHOD_RETURN	<absent>	RET	3	<absent>	2	1
+locations.c:<global>	10	METHOD	escaped	char *escaped(void) { return ID("a\tb"); }	1	<absent>	3	1
+locations.c:<global>	11	METHOD_PARAMETER_IN		void	1	<absent>	3	15
+locations.c:<global>	12	METHOD_PARAMETER_OUT		void	1	<absent>	3	15
+locations.c:<global>	13	BLOCK	<absent>	{ return ID("a\tb"); }	2	<absent>	3	21
+locations.c:<global>	14	RETURN	<absent>	return ID("a\tb");	1	<absent>	3	23
+locations.c:<global>	15	CALL	ID	ID("a\tb")	1	<absent>	3	30
+locations.c:<global>	16	LITERAL	<absent>	"a\tb"	1	1	3	30
+locations.c:<global>	17	BLOCK	<absent>	<absent>	2	2	3	30
+locations.c:<global>	18	LITERAL	<absent>	"a\tb"	1	<absent>	3	30
+locations.c:<global>	19	METHOD_RETURN	<absent>	RET	3	<absent>	3	1
+locations.c:<global>	20	METHOD	character	int character(void) { return ID(' '); }	1	<absent>	4	1
+locations.c:<global>	21	METHOD_PARAMETER_IN		void	1	<absent>	4	15
+locations.c:<global>	22	METHOD_PARAMETER_OUT		void	1	<absent>	4	15
+locations.c:<global>	23	BLOCK	<absent>	{ return ID(' '); }	2	<absent>	4	21
+locations.c:<global>	24	RETURN	<absent>	return ID(' ');	1	<absent>	4	23
+locations.c:<global>	25	CALL	ID	ID(' ')	1	<absent>	4	30
+locations.c:<global>	26	BLOCK	<absent>	<absent>	1	1	4	30
+locations.c:<global>	27	LITERAL	<absent>	' '	1	<absent>	4	30
+locations.c:<global>	28	METHOD_RETURN	<absent>	RET	3	<absent>	4	1
+locations.c:<global>	29	BLOCK	<absent>	<absent>	1	<absent>	1	1
+locations.c:<global>	30	METHOD_REF	<absent>	probe	1	<absent>	2	1
+locations.c:<global>	31	METHOD_REF	<absent>	escaped	2	<absent>	3	1
+locations.c:<global>	32	METHOD_REF	<absent>	character	3	<absent>	4	1
+locations.c:<global>	33	METHOD_RETURN	<absent>	RET	2	<absent>	1	1
+probe	0	METHOD	probe	char *probe(void) { return ID("a b"); }	1	<absent>	2	1
+probe	1	METHOD_PARAMETER_IN		void	1	<absent>	2	13
+probe	2	METHOD_PARAMETER_OUT		void	1	<absent>	2	13
+probe	3	BLOCK	<absent>	{ return ID("a b"); }	2	<absent>	2	19
+probe	4	RETURN	<absent>	return ID("a b");	1	<absent>	2	21
+probe	5	CALL	ID	ID("a b")	1	<absent>	2	28
+probe	6	BLOCK	<absent>	<absent>	1	1	2	28
+probe	7	LITERAL	<absent>	"a b"	1	<absent>	2	28
+probe	8	METHOD_RETURN	<absent>	RET	3	<absent>	2	1

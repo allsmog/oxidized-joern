@@ -1,0 +1,32 @@
+{
+  "baseline": {
+    "command": [
+      "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/.local/header-macro-probes/fixture-validation/baseline-joern-parity",
+      "main.c"
+    ],
+    "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/cpg-rs/joern-parity/tests/fixtures/header-macros/diagnostics/offsetof_macro_ternary/input",
+    "exitCode": -6,
+    "seconds": 0.014205250001396053,
+    "exact": false,
+    "binarySha256": "e33e19a2988c12db59548189be0880ce54ba88349b5d12e154546f4b0443ce26",
+    "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderrSha256": "05b94e702f780753d58083b5d0e46dcf4018a94dfdf3f3eb940fed72bc9e1614",
+    "diffSha256": "680f946924abaa789668b53e939e375b572c3de16b1c9ef4b7d34aa21a828c84",
+    "diffLines": 275
+  },
+  "candidate": {
+    "command": [
+      "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/.local/header-macro-probes/fixture-validation/candidate-joern-parity",
+      "main.c"
+    ],
+    "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-fourth-arrays/cpg-rs/joern-parity/tests/fixtures/header-macros/diagnostics/offsetof_macro_ternary/input",
+    "exitCode": 0,
+    "seconds": 0.004494000007980503,
+    "exact": false,
+    "binarySha256": "36e71c56cf91763099cb8f68899d979b05cfd038d1dd542952fabdfacba11aef",
+    "stdoutSha256": "e6d0b8de91babfe9a54fbdaa71284c666b32d4cdd4175866e9ecb0a325f3592d",
+    "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "diffSha256": "bfb94b1a24a4380be7ef681cf7b819c54e1af87674f52bd138a9bd86c0d3309f",
+    "diffLines": 300
+  }
+}

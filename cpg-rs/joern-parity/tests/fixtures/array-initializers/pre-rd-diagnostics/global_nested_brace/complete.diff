@@ -1,0 +1,13 @@
+--- live
++++ array-only
+@@ -167,8 +167,10 @@
+ FLOWS|REACHING_DEF[value] arrays.c:<global>#4 -> arrays.c:<global>#3
+ FLOWS|REACHING_DEF[{1, 2}] arrays.c:<global>#6 -> arrays.c:<global>#12
+ FLOWS|REACHING_DEF[{1, 2}] arrays.c:<global>#6 -> arrays.c:<global>#5
++FLOWS|REACHING_DEF[{1, 2}] arrays.c:<global>#6 -> arrays.c:<global>#9
+ FLOWS|REACHING_DEF[{3, 4}] arrays.c:<global>#9 -> arrays.c:<global>#12
+ FLOWS|REACHING_DEF[{3, 4}] arrays.c:<global>#9 -> arrays.c:<global>#5
++FLOWS|REACHING_DEF[{3, 4}] arrays.c:<global>#9 -> arrays.c:<global>#6
+ FLOWS|REACHING_DEF[{{1, 2}, {3, 4}}] arrays.c:<global>#5 -> arrays.c:<global>#12
+ FLOWS|REACHING_DEF[{{1, 2}, {3, 4}}] arrays.c:<global>#5 -> arrays.c:<global>#3
+ FLOWS|REACHING_DEF[{{1, 2}, {3, 4}}] arrays.c:<global>#5 -> arrays.c:<global>#4

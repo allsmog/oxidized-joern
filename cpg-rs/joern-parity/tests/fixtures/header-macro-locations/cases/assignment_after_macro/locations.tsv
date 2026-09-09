@@ -1,0 +1,70 @@
+<includes>:<global>	0	METHOD	<global>	<global>	1	<absent>	1	<absent>
+<includes>:<global>	1	BLOCK	<absent>	<absent>	1	<absent>	<absent>	<absent>
+<includes>:<global>	2	METHOD_RETURN	<absent>	RET	2	<absent>	1	<absent>
+<operator>.addition	0	METHOD	<operator>.addition	<absent>	0	<absent>	<absent>	<absent>
+<operator>.addition	1	METHOD_PARAMETER_IN	p1	p1	1	<absent>	<absent>	<absent>
+<operator>.addition	2	BLOCK	<absent>	<absent>	1	1	<absent>	<absent>
+<operator>.addition	3	METHOD_PARAMETER_OUT	p1	p1	1	<absent>	<absent>	<absent>
+<operator>.addition	4	METHOD_PARAMETER_IN	p2	p2	2	<absent>	<absent>	<absent>
+<operator>.addition	5	METHOD_RETURN	<absent>	RET	2	<absent>	<absent>	<absent>
+<operator>.addition	6	METHOD_PARAMETER_OUT	p2	p2	2	<absent>	<absent>	<absent>
+<operator>.assignment	0	METHOD	<operator>.assignment	<absent>	0	<absent>	<absent>	<absent>
+<operator>.assignment	1	METHOD_PARAMETER_IN	p1	p1	1	<absent>	<absent>	<absent>
+<operator>.assignment	2	BLOCK	<absent>	<absent>	1	1	<absent>	<absent>
+<operator>.assignment	3	METHOD_PARAMETER_OUT	p1	p1	1	<absent>	<absent>	<absent>
+<operator>.assignment	4	METHOD_PARAMETER_IN	p2	p2	2	<absent>	<absent>	<absent>
+<operator>.assignment	5	METHOD_RETURN	<absent>	RET	2	<absent>	<absent>	<absent>
+<operator>.assignment	6	METHOD_PARAMETER_OUT	p2	p2	2	<absent>	<absent>	<absent>
+defs.h:<global>	0	METHOD	<global>	<global>	1	<absent>	1	1
+defs.h:<global>	1	BLOCK	<absent>	<absent>	1	<absent>	1	1
+defs.h:<global>	2	METHOD_RETURN	<absent>	RET	2	<absent>	1	1
+defs.h:STEP:ANY(1)	0	METHOD	STEP	#define STEP(x) ((x) + 17)	1	<absent>	1	1
+defs.h:STEP:ANY(1)	1	METHOD_PARAMETER_IN	p1	p1	1	<absent>	1	1
+defs.h:STEP:ANY(1)	2	METHOD_PARAMETER_OUT	p1	p1	1	<absent>	1	1
+defs.h:STEP:ANY(1)	3	BLOCK	<absent>	<absent>	2	<absent>	<absent>	<absent>
+defs.h:STEP:ANY(1)	4	METHOD_RETURN	<absent>	RET	3	<absent>	1	1
+locations.c:<global>	0	METHOD	<global>	<global>	1	<absent>	1	1
+locations.c:<global>	1	METHOD	probe	void probe(int value) {\n  STEP(value);\n  value = 17;\n  sink(value);\n  sink(17);\n}	1	<absent>	3	1
+locations.c:<global>	2	METHOD_PARAMETER_IN	value	int value	1	<absent>	3	12
+locations.c:<global>	3	METHOD_PARAMETER_OUT	value	int value	1	<absent>	3	12
+locations.c:<global>	4	BLOCK	<absent>	{\n  STEP(value);\n  value = 17;\n  sink(value);\n  sink(17);\n}	2	<absent>	3	23
+locations.c:<global>	5	CALL	STEP	STEP(value)	1	<absent>	4	3
+locations.c:<global>	6	IDENTIFIER	value	value	1	1	4	3
+locations.c:<global>	7	BLOCK	<absent>	<absent>	2	2	4	3
+locations.c:<global>	8	CALL	<operator>.addition	(value) + 17	1	<absent>	4	3
+locations.c:<global>	9	IDENTIFIER	value	value	1	1	4	3
+locations.c:<global>	10	LITERAL	<absent>	17	2	2	4	3
+locations.c:<global>	11	CALL	<operator>.assignment	value = 17	2	<absent>	5	3
+locations.c:<global>	12	IDENTIFIER	value	value	1	1	5	3
+locations.c:<global>	13	LITERAL	<absent>	17	2	2	5	11
+locations.c:<global>	14	CALL	sink	sink(value)	3	<absent>	6	3
+locations.c:<global>	15	IDENTIFIER	value	value	1	1	6	8
+locations.c:<global>	16	CALL	sink	sink(17)	4	<absent>	7	3
+locations.c:<global>	17	LITERAL	<absent>	17	1	1	7	8
+locations.c:<global>	18	METHOD_RETURN	<absent>	RET	3	<absent>	3	1
+locations.c:<global>	19	BLOCK	<absent>	<absent>	1	<absent>	1	1
+locations.c:<global>	20	METHOD_REF	<absent>	probe	1	<absent>	3	1
+locations.c:<global>	21	METHOD_RETURN	<absent>	RET	2	<absent>	1	1
+probe	0	METHOD	probe	void probe(int value) {\n  STEP(value);\n  value = 17;\n  sink(value);\n  sink(17);\n}	1	<absent>	3	1
+probe	1	METHOD_PARAMETER_IN	value	int value	1	<absent>	3	12
+probe	2	METHOD_PARAMETER_OUT	value	int value	1	<absent>	3	12
+probe	3	BLOCK	<absent>	{\n  STEP(value);\n  value = 17;\n  sink(value);\n  sink(17);\n}	2	<absent>	3	23
+probe	4	CALL	STEP	STEP(value)	1	<absent>	4	3
+probe	5	IDENTIFIER	value	value	1	1	4	3
+probe	6	BLOCK	<absent>	<absent>	2	2	4	3
+probe	7	CALL	<operator>.addition	(value) + 17	1	<absent>	4	3
+probe	8	IDENTIFIER	value	value	1	1	4	3
+probe	9	LITERAL	<absent>	17	2	2	4	3
+probe	10	CALL	<operator>.assignment	value = 17	2	<absent>	5	3
+probe	11	IDENTIFIER	value	value	1	1	5	3
+probe	12	LITERAL	<absent>	17	2	2	5	11
+probe	13	CALL	sink	sink(value)	3	<absent>	6	3
+probe	14	IDENTIFIER	value	value	1	1	6	8
+probe	15	CALL	sink	sink(17)	4	<absent>	7	3
+probe	16	LITERAL	<absent>	17	1	1	7	8
+probe	17	METHOD_RETURN	<absent>	RET	3	<absent>	3	1
+sink	0	METHOD	sink	void sink(int value);	1	<absent>	2	6
+sink	1	METHOD_PARAMETER_IN	value	int value	1	<absent>	2	11
+sink	2	METHOD_PARAMETER_OUT	value	int value	1	<absent>	2	11
+sink	3	BLOCK	<absent>	<absent>	2	<absent>	<absent>	<absent>
+sink	4	METHOD_RETURN	<absent>	RET	3	<absent>	2	6

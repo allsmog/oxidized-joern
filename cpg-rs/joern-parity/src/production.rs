@@ -7,7 +7,6 @@
 //! difference visible without normalising semantic gaps away.
 
 use std::collections::{BTreeMap, BTreeSet};
-use std::path::Path;
 
 #[derive(Clone, Copy)]
 pub enum Mode {
@@ -16,19 +15,8 @@ pub enum Mode {
 }
 
 pub fn dump_paths(paths: &[String]) -> String {
-    let sources: Vec<(String, String)> = paths
-        .iter()
-        .map(|path| {
-            let source = std::fs::read_to_string(path)
-                .unwrap_or_else(|e| panic!("read production parity input {path}: {e}"));
-            let name = Path::new(path)
-                .file_name()
-                .unwrap_or_else(|| panic!("input has no filename: {path}"))
-                .to_string_lossy()
-                .into_owned();
-            (name, source)
-        })
-        .collect();
+    let sources =
+        cpg_lang_c::exact::read_sources_from_paths(paths).expect("read production parity inputs");
     dump_sources(&sources)
 }
 
@@ -52,19 +40,8 @@ fn canonical_project(sources: &[(String, String)]) -> String {
 /// Exercise the production incremental API on a real source set and compare
 /// its complete canonical graph to a clean rebuild of the edited snapshot.
 pub fn update_equivalence(paths: &[String]) -> Result<usize, String> {
-    let mut sources: Vec<(String, String)> = paths
-        .iter()
-        .map(|path| {
-            let source = std::fs::read_to_string(path)
-                .map_err(|error| format!("read update-equivalence input {path}: {error}"))?;
-            let name = Path::new(path)
-                .file_name()
-                .ok_or_else(|| format!("input has no filename: {path}"))?
-                .to_string_lossy()
-                .into_owned();
-            Ok((name, source))
-        })
-        .collect::<Result<_, String>>()?;
+    let mut sources = cpg_lang_c::exact::read_sources_from_paths(paths)
+        .map_err(|error| format!("read update-equivalence input: {error}"))?;
     sources.sort_by(|a, b| a.0.cmp(&b.0));
     let refs: Vec<(&str, &str)> = sources
         .iter()
