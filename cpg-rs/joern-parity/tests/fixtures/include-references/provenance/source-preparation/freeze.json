@@ -1,0 +1,82 @@
+{
+  "status": "FROZEN_PREPARATION_NOT_EXECUTION_RELEASE",
+  "root": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/include-reference-preparation-v1",
+  "files": {
+    "README.md": {
+      "sha256": "51062df1037dcdc1f0e7d742b1ba100f77482dfda0f0080a172470505856cf89",
+      "bytes": 5044
+    },
+    "input/duplicate_supplied_macro_local/a.c": {
+      "sha256": "1451c2a021da1bec7b92bea600133bc4c30a4666c184ce9a64006669035e207e",
+      "bytes": 112
+    },
+    "input/duplicate_supplied_macro_local/api.h": {
+      "sha256": "1204017a881a23dd38815832b040f76d3b37ee3355e4f2c1ead9d3e3a4b17db1",
+      "bytes": 21
+    },
+    "input/duplicate_supplied_macro_local/b.c": {
+      "sha256": "df59ac123d32a8c86f1161077f35046e09b2862fdc48b0ce7d66cb6181713d64",
+      "bytes": 116
+    },
+    "input/inactive_body_include/inactive.h": {
+      "sha256": "e6be797d4b0e670eb494b4dd9050eb1042f56b832f8218b2a8905b2ab1ac5d7d",
+      "bytes": 32
+    },
+    "input/inactive_body_include/main.c": {
+      "sha256": "6f9fc5b3121682bbce24044f2bedfc75774968c616951955ea4f0c0bb9ba76a6",
+      "bytes": 302
+    },
+    "input/repeated_direct_include/main.c": {
+      "sha256": "3a71231efb0ec5721cab22fa6230610cfaf13582dc37dc24dcc7011bab0a5776",
+      "bytes": 83
+    },
+    "input/repeated_direct_include/repeat.h": {
+      "sha256": "9de56527b206dea4b2c43ea0f85460c08fefe041a230b547590a44b4d3373cc4",
+      "bytes": 66
+    },
+    "input/tiny_fixedtables_include/fixed.h": {
+      "sha256": "3039380a12e6dba1fb44314f13292d1b5ec6744aa80eff5599566a29ea94ea86",
+      "bytes": 98
+    },
+    "input/tiny_fixedtables_include/main.c": {
+      "sha256": "7203039d3be732abfb9abaad7177eaa77efa51d6e9fa58d58733346eb6cb4dda",
+      "bytes": 254
+    },
+    "input/tiny_fixedtables_inline/main.c": {
+      "sha256": "8af2a0a9531deec50f16e8c125de4000c0636b443b11628e232bb9e9413d2a6f",
+      "bytes": 333
+    },
+    "input/unresolved_include_pair/main.c": {
+      "sha256": "e428ca556a8c267b57c83f04a79a5a1fbc257bb8566ef433ffa1b9f9c4c65fb0",
+      "bytes": 85
+    },
+    "offline-checks.json": {
+      "sha256": "6ac5d4524608768731286ded30373186eec0ab70503ae1631d60ae9d50673b4c",
+      "bytes": 3236
+    },
+    "preparation.json": {
+      "sha256": "855ac7547d1d591b0db9d8639900d1a811504e2aceabf9f3148d2474fb6ad97c",
+      "bytes": 20210
+    },
+    "prepare.py": {
+      "sha256": "f3ea378ef33b481bc984d9e4fdae62758b51a1197b1a22f5eb2d486210b25689",
+      "bytes": 7754
+    },
+    "upstream/AstCreator.scala": {
+      "sha256": "b90c7804a6ab74326f67da35124da0873c32be1340e6006f8a3d47720bc0141c",
+      "bytes": 5617
+    },
+    "upstream/AstCreatorHelper.scala": {
+      "sha256": "1c3514cb3e006b8c8bf1bb6b5cee072969416a8c94353d185a5ebacbe00e92f2",
+      "bytes": 10106
+    },
+    "upstream/tag-resolution.txt": {
+      "sha256": "4eac817e8c5787d33c3170707c5796799bf09db19cfe7e1894c99f51280f0f47",
+      "bytes": 123
+    }
+  },
+  "projectCount": 6,
+  "sourceFileCount": 11,
+  "newExpectedGraphs": 0,
+  "producerRuns": 0
+}

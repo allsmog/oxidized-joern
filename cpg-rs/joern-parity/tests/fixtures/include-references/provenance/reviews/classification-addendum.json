@@ -1,0 +1,732 @@
+{
+  "status": "PASS_FULL_ANCHOR_AND_INCLUDE_FACT_CLASSIFICATION",
+  "checks": 87,
+  "checkNames": [
+    "duplicate_supplied_macro_local actual IDs identical",
+    "duplicate_supplied_macro_local all edge rows and multiplicities identical",
+    "duplicate_supplied_macro_local exactly one changed node",
+    "duplicate_supplied_macro_local only META_DATA ROOT changed",
+    "tiny_fixedtables_include actual IDs identical",
+    "tiny_fixedtables_include all edge rows and multiplicities identical",
+    "tiny_fixedtables_include exactly one changed node",
+    "tiny_fixedtables_include only META_DATA ROOT changed",
+    "tiny_fixedtables_inline actual IDs identical",
+    "tiny_fixedtables_inline all edge rows and multiplicities identical",
+    "tiny_fixedtables_inline exactly one changed node",
+    "tiny_fixedtables_inline only META_DATA ROOT changed",
+    "duplicate_supplied_macro_local baseline no include nodes",
+    "duplicate_supplied_macro_local unique parent/dependency",
+    "duplicate_supplied_macro_local exact Import property set",
+    "duplicate_supplied_macro_local actual numeric class and column",
+    "duplicate_supplied_macro_local exact Dependency property set",
+    "duplicate_supplied_macro_local exact caller namespace and null payloads",
+    "duplicate_supplied_macro_local same raw include name throughout",
+    "duplicate_supplied_macro_local unique parent/dependency",
+    "duplicate_supplied_macro_local exact Import property set",
+    "duplicate_supplied_macro_local actual numeric class and column",
+    "duplicate_supplied_macro_local exact Dependency property set",
+    "duplicate_supplied_macro_local exact caller namespace and null payloads",
+    "duplicate_supplied_macro_local same raw include name throughout",
+    "duplicate_supplied_macro_local complete physical occurrences",
+    "duplicate_supplied_macro_local exactly two incident edges per pair",
+    "inactive_body_include baseline no include nodes",
+    "inactive_body_include unique parent/dependency",
+    "inactive_body_include exact Import property set",
+    "inactive_body_include actual numeric class and column",
+    "inactive_body_include exact Dependency property set",
+    "inactive_body_include exact caller namespace and null payloads",
+    "inactive_body_include same raw include name throughout",
+    "inactive_body_include unique parent/dependency",
+    "inactive_body_include exact Import property set",
+    "inactive_body_include actual numeric class and column",
+    "inactive_body_include exact Dependency property set",
+    "inactive_body_include exact caller namespace and null payloads",
+    "inactive_body_include same raw include name throughout",
+    "inactive_body_include complete physical occurrences",
+    "inactive_body_include exactly two incident edges per pair",
+    "repeated_direct_include baseline no include nodes",
+    "repeated_direct_include unique parent/dependency",
+    "repeated_direct_include exact Import property set",
+    "repeated_direct_include actual numeric class and column",
+    "repeated_direct_include exact Dependency property set",
+    "repeated_direct_include exact caller namespace and null payloads",
+    "repeated_direct_include same raw include name throughout",
+    "repeated_direct_include unique parent/dependency",
+    "repeated_direct_include exact Import property set",
+    "repeated_direct_include actual numeric class and column",
+    "repeated_direct_include exact Dependency property set",
+    "repeated_direct_include exact caller namespace and null payloads",
+    "repeated_direct_include same raw include name throughout",
+    "repeated_direct_include complete physical occurrences",
+    "repeated_direct_include exactly two incident edges per pair",
+    "tiny_fixedtables_include baseline no include nodes",
+    "tiny_fixedtables_include unique parent/dependency",
+    "tiny_fixedtables_include exact Import property set",
+    "tiny_fixedtables_include actual numeric class and column",
+    "tiny_fixedtables_include exact Dependency property set",
+    "tiny_fixedtables_include exact caller namespace and null payloads",
+    "tiny_fixedtables_include same raw include name throughout",
+    "tiny_fixedtables_include complete physical occurrences",
+    "tiny_fixedtables_include exactly two incident edges per pair",
+    "tiny_fixedtables_inline baseline no include nodes",
+    "tiny_fixedtables_inline complete physical occurrences",
+    "tiny_fixedtables_inline exactly two incident edges per pair",
+    "unresolved_include_pair baseline no include nodes",
+    "unresolved_include_pair unique parent/dependency",
+    "unresolved_include_pair exact Import property set",
+    "unresolved_include_pair actual numeric class and column",
+    "unresolved_include_pair exact Dependency property set",
+    "unresolved_include_pair exact caller namespace and null payloads",
+    "unresolved_include_pair same raw include name throughout",
+    "unresolved_include_pair unique parent/dependency",
+    "unresolved_include_pair exact Import property set",
+    "unresolved_include_pair actual numeric class and column",
+    "unresolved_include_pair exact Dependency property set",
+    "unresolved_include_pair exact caller namespace and null payloads",
+    "unresolved_include_pair same raw include name throughout",
+    "unresolved_include_pair complete physical occurrences",
+    "unresolved_include_pair exactly two incident edges per pair",
+    "one observed external macro binding",
+    "macro binding complete two relations",
+    "accepted macro binding absent"
+  ],
+  "historicalAnchors": {
+    "duplicate_supplied_macro_local": {
+      "allActualIdsIdentical": true,
+      "allEdgesAndMultiplicitiesIdentical": true,
+      "onlyChangedNode": {
+        "before": {
+          "id": "103079215104",
+          "label": "META_DATA",
+          "properties": {
+            "LANGUAGE": {
+              "kind": "string",
+              "value": "NEWC"
+            },
+            "OVERLAYS": {
+              "kind": "sequence",
+              "class": "flatgraph.misc.ISeq",
+              "values": [
+                {
+                  "kind": "string",
+                  "value": "base"
+                },
+                {
+                  "kind": "string",
+                  "value": "controlflow"
+                },
+                {
+                  "kind": "string",
+                  "value": "typerel"
+                },
+                {
+                  "kind": "string",
+                  "value": "callgraph"
+                },
+                {
+                  "kind": "string",
+                  "value": "dataflowOss"
+                }
+              ]
+            },
+            "ROOT": {
+              "kind": "string",
+              "value": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/fixedtables-identity-runner-v3/runs/first-complete-eight-identity-reference-batch/snapshot/input/duplicate_supplied_macro_local"
+            },
+            "VERSION": {
+              "kind": "string",
+              "value": "4.0.555"
+            }
+          }
+        },
+        "after": {
+          "id": "103079215104",
+          "label": "META_DATA",
+          "properties": {
+            "LANGUAGE": {
+              "kind": "string",
+              "value": "NEWC"
+            },
+            "OVERLAYS": {
+              "kind": "sequence",
+              "class": "flatgraph.misc.ISeq",
+              "values": [
+                {
+                  "kind": "string",
+                  "value": "base"
+                },
+                {
+                  "kind": "string",
+                  "value": "controlflow"
+                },
+                {
+                  "kind": "string",
+                  "value": "typerel"
+                },
+                {
+                  "kind": "string",
+                  "value": "callgraph"
+                },
+                {
+                  "kind": "string",
+                  "value": "dataflowOss"
+                }
+              ]
+            },
+            "ROOT": {
+              "kind": "string",
+              "value": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/include-reference-runner-v1/runs/first-complete-six-include-reference-batch/snapshot/input/duplicate_supplied_macro_local"
+            },
+            "VERSION": {
+              "kind": "string",
+              "value": "4.0.555"
+            }
+          }
+        }
+      },
+      "fullInputs": [
+        {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/thirteenth-include-observer-v1/runs/first-complete-six-include-saved-cpg-observation/anchor-comparisons/duplicate_supplied_macro_local/historical-full.jsonl",
+          "sha256": "1f67ba287f994102e81216f7f3e97eb4ae2322706804804c2866c9685c31cc3f",
+          "bytes": 72631
+        },
+        {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/thirteenth-include-observer-v1/runs/first-complete-six-include-saved-cpg-observation/anchor-comparisons/duplicate_supplied_macro_local/fresh-full.jsonl",
+          "sha256": "302758b80346e3c2e38c7f667b28ec16a8bac2ed0604735bb8167936347cad79",
+          "bytes": 72625
+        }
+      ],
+      "normalizationUsed": false
+    },
+    "tiny_fixedtables_include": {
+      "allActualIdsIdentical": true,
+      "allEdgesAndMultiplicitiesIdentical": true,
+      "onlyChangedNode": {
+        "before": {
+          "id": "103079215104",
+          "label": "META_DATA",
+          "properties": {
+            "LANGUAGE": {
+              "kind": "string",
+              "value": "NEWC"
+            },
+            "OVERLAYS": {
+              "kind": "sequence",
+              "class": "flatgraph.misc.ISeq",
+              "values": [
+                {
+                  "kind": "string",
+                  "value": "base"
+                },
+                {
+                  "kind": "string",
+                  "value": "controlflow"
+                },
+                {
+                  "kind": "string",
+                  "value": "typerel"
+                },
+                {
+                  "kind": "string",
+                  "value": "callgraph"
+                },
+                {
+                  "kind": "string",
+                  "value": "dataflowOss"
+                }
+              ]
+            },
+            "ROOT": {
+              "kind": "string",
+              "value": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-runner-v3/runs/first-complete-primitive-member-reference-batch/snapshot/input/tiny_fixedtables_include"
+            },
+            "VERSION": {
+              "kind": "string",
+              "value": "4.0.555"
+            }
+          }
+        },
+        "after": {
+          "id": "103079215104",
+          "label": "META_DATA",
+          "properties": {
+            "LANGUAGE": {
+              "kind": "string",
+              "value": "NEWC"
+            },
+            "OVERLAYS": {
+              "kind": "sequence",
+              "class": "flatgraph.misc.ISeq",
+              "values": [
+                {
+                  "kind": "string",
+                  "value": "base"
+                },
+                {
+                  "kind": "string",
+                  "value": "controlflow"
+                },
+                {
+                  "kind": "string",
+                  "value": "typerel"
+                },
+                {
+                  "kind": "string",
+                  "value": "callgraph"
+                },
+                {
+                  "kind": "string",
+                  "value": "dataflowOss"
+                }
+              ]
+            },
+            "ROOT": {
+              "kind": "string",
+              "value": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/include-reference-runner-v1/runs/first-complete-six-include-reference-batch/snapshot/input/tiny_fixedtables_include"
+            },
+            "VERSION": {
+              "kind": "string",
+              "value": "4.0.555"
+            }
+          }
+        }
+      },
+      "fullInputs": [
+        {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/thirteenth-include-observer-v1/runs/first-complete-six-include-saved-cpg-observation/anchor-comparisons/tiny_fixedtables_include/historical-full.jsonl",
+          "sha256": "f61a07a81f97b38480fc42a913b05dac13f9d75e3826ccf7217072a7a3d9fc5f",
+          "bytes": 146846
+        },
+        {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/thirteenth-include-observer-v1/runs/first-complete-six-include-saved-cpg-observation/anchor-comparisons/tiny_fixedtables_include/fresh-full.jsonl",
+          "sha256": "8ad5a0ea8046bc8dc7ef7c18d32809834427526b69f1b2dce7d504fd4e5daeb8",
+          "bytes": 146842
+        }
+      ],
+      "normalizationUsed": false
+    },
+    "tiny_fixedtables_inline": {
+      "allActualIdsIdentical": true,
+      "allEdgesAndMultiplicitiesIdentical": true,
+      "onlyChangedNode": {
+        "before": {
+          "id": "103079215104",
+          "label": "META_DATA",
+          "properties": {
+            "LANGUAGE": {
+              "kind": "string",
+              "value": "NEWC"
+            },
+            "OVERLAYS": {
+              "kind": "sequence",
+              "class": "flatgraph.misc.ISeq",
+              "values": [
+                {
+                  "kind": "string",
+                  "value": "base"
+                },
+                {
+                  "kind": "string",
+                  "value": "controlflow"
+                },
+                {
+                  "kind": "string",
+                  "value": "typerel"
+                },
+                {
+                  "kind": "string",
+                  "value": "callgraph"
+                },
+                {
+                  "kind": "string",
+                  "value": "dataflowOss"
+                }
+              ]
+            },
+            "ROOT": {
+              "kind": "string",
+              "value": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-runner-v3/runs/first-complete-primitive-member-reference-batch/snapshot/input/tiny_fixedtables_inline"
+            },
+            "VERSION": {
+              "kind": "string",
+              "value": "4.0.555"
+            }
+          }
+        },
+        "after": {
+          "id": "103079215104",
+          "label": "META_DATA",
+          "properties": {
+            "LANGUAGE": {
+              "kind": "string",
+              "value": "NEWC"
+            },
+            "OVERLAYS": {
+              "kind": "sequence",
+              "class": "flatgraph.misc.ISeq",
+              "values": [
+                {
+                  "kind": "string",
+                  "value": "base"
+                },
+                {
+                  "kind": "string",
+                  "value": "controlflow"
+                },
+                {
+                  "kind": "string",
+                  "value": "typerel"
+                },
+                {
+                  "kind": "string",
+                  "value": "callgraph"
+                },
+                {
+                  "kind": "string",
+                  "value": "dataflowOss"
+                }
+              ]
+            },
+            "ROOT": {
+              "kind": "string",
+              "value": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/include-reference-runner-v1/runs/first-complete-six-include-reference-batch/snapshot/input/tiny_fixedtables_inline"
+            },
+            "VERSION": {
+              "kind": "string",
+              "value": "4.0.555"
+            }
+          }
+        }
+      },
+      "fullInputs": [
+        {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/thirteenth-include-observer-v1/runs/first-complete-six-include-saved-cpg-observation/anchor-comparisons/tiny_fixedtables_inline/historical-full.jsonl",
+          "sha256": "2eb6a67d75ece96e0b5399e7ccb587ede448d9b83f16c757431c2fda5747fdf6",
+          "bytes": 114109
+        },
+        {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/thirteenth-include-observer-v1/runs/first-complete-six-include-saved-cpg-observation/anchor-comparisons/tiny_fixedtables_inline/fresh-full.jsonl",
+          "sha256": "58fcdf3d0f6f3f3af91c298fae91bb98b4808f30c50b47025df0864446db4d2f",
+          "bytes": 114105
+        }
+      ],
+      "normalizationUsed": false
+    }
+  },
+  "observedPhysicalOccurrences": {
+    "duplicate_supplied_macro_local": [
+      [
+        "a.c",
+        1,
+        1
+      ],
+      [
+        "b.c",
+        1,
+        1
+      ]
+    ],
+    "inactive_body_include": [
+      [
+        "main.c",
+        3,
+        1
+      ],
+      [
+        "main.c",
+        16,
+        2
+      ]
+    ],
+    "repeated_direct_include": [
+      [
+        "main.c",
+        1,
+        1
+      ],
+      [
+        "main.c",
+        2,
+        2
+      ]
+    ],
+    "tiny_fixedtables_include": [
+      [
+        "main.c",
+        8,
+        1
+      ]
+    ],
+    "tiny_fixedtables_inline": [],
+    "unresolved_include_pair": [
+      [
+        "main.c",
+        1,
+        1
+      ],
+      [
+        "main.c",
+        2,
+        2
+      ]
+    ]
+  },
+  "separatePreexistingMacroBindingGap": {
+    "scope": "Separate accepted-baseline diagnostic; no repair or new source authorized by this observation.",
+    "completeJoernNode": {
+      "id": "21474836481",
+      "label": "BINDING",
+      "properties": {
+        "METHOD_FULL_NAME": {
+          "kind": "string",
+          "value": "repeat.h:INCLUDED_VALUE:int(0)"
+        },
+        "NAME": {
+          "kind": "string",
+          "value": "INCLUDED_VALUE"
+        },
+        "SIGNATURE": {
+          "kind": "string",
+          "value": "int(0)"
+        }
+      }
+    },
+    "allIncidentEdgesAndEndpoints": [
+      {
+        "edge": {
+          "source": "21474836481",
+          "destination": "107374182404",
+          "label": "REF",
+          "property": {
+            "kind": "null"
+          }
+        },
+        "sourceNode": {
+          "id": "21474836481",
+          "label": "BINDING",
+          "properties": {
+            "METHOD_FULL_NAME": {
+              "kind": "string",
+              "value": "repeat.h:INCLUDED_VALUE:int(0)"
+            },
+            "NAME": {
+              "kind": "string",
+              "value": "INCLUDED_VALUE"
+            },
+            "SIGNATURE": {
+              "kind": "string",
+              "value": "int(0)"
+            }
+          }
+        },
+        "destinationNode": {
+          "id": "107374182404",
+          "label": "METHOD",
+          "properties": {
+            "AST_PARENT_FULL_NAME": {
+              "kind": "string",
+              "value": "main.c:<global>"
+            },
+            "AST_PARENT_TYPE": {
+              "kind": "string",
+              "value": "TYPE_DECL"
+            },
+            "CODE": {
+              "kind": "string",
+              "value": "#define INCLUDED_VALUE 7"
+            },
+            "COLUMN_NUMBER": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "15"
+            },
+            "COLUMN_NUMBER_END": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "18"
+            },
+            "FILENAME": {
+              "kind": "string",
+              "value": "main.c"
+            },
+            "FULL_NAME": {
+              "kind": "string",
+              "value": "repeat.h:INCLUDED_VALUE:int(0)"
+            },
+            "IS_EXTERNAL": {
+              "kind": "boolean",
+              "value": true
+            },
+            "LINE_NUMBER": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "3"
+            },
+            "LINE_NUMBER_END": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "3"
+            },
+            "NAME": {
+              "kind": "string",
+              "value": "INCLUDED_VALUE"
+            },
+            "ORDER": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "1"
+            },
+            "SIGNATURE": {
+              "kind": "string",
+              "value": "int(0)"
+            }
+          }
+        }
+      },
+      {
+        "edge": {
+          "source": "167503724545",
+          "destination": "21474836481",
+          "label": "BINDS",
+          "property": {
+            "kind": "null"
+          }
+        },
+        "sourceNode": {
+          "id": "167503724545",
+          "label": "TYPE_DECL",
+          "properties": {
+            "AST_PARENT_FULL_NAME": {
+              "kind": "string",
+              "value": "main.c:<global>"
+            },
+            "AST_PARENT_TYPE": {
+              "kind": "string",
+              "value": "NAMESPACE_BLOCK"
+            },
+            "CODE": {
+              "kind": "string",
+              "value": "<global>"
+            },
+            "COLUMN_NUMBER": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "1"
+            },
+            "FILENAME": {
+              "kind": "string",
+              "value": "main.c"
+            },
+            "FULL_NAME": {
+              "kind": "string",
+              "value": "main.c:<global>"
+            },
+            "LINE_NUMBER": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "1"
+            },
+            "NAME": {
+              "kind": "string",
+              "value": "<global>"
+            },
+            "ORDER": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "3"
+            }
+          }
+        },
+        "destinationNode": {
+          "id": "21474836481",
+          "label": "BINDING",
+          "properties": {
+            "METHOD_FULL_NAME": {
+              "kind": "string",
+              "value": "repeat.h:INCLUDED_VALUE:int(0)"
+            },
+            "NAME": {
+              "kind": "string",
+              "value": "INCLUDED_VALUE"
+            },
+            "SIGNATURE": {
+              "kind": "string",
+              "value": "int(0)"
+            }
+          }
+        }
+      }
+    ],
+    "acceptedRustBindingNodes": [
+      {
+        "id": "42",
+        "label": "BINDING",
+        "properties": {
+          "METHOD_FULL_NAME": {
+            "kind": "string",
+            "value": "entry"
+          },
+          "NAME": {
+            "kind": "string",
+            "value": "entry"
+          },
+          "SIGNATURE": {
+            "kind": "string",
+            "value": "int(void)"
+          }
+        },
+        "record": "NODE",
+        "storage": {
+          "argumentIndex": {
+            "class": "rust.i32",
+            "kind": "number",
+            "value": "-1"
+          },
+          "filePartitionId": "2",
+          "kind": "24",
+          "order": {
+            "class": "rust.i32",
+            "kind": "number",
+            "value": "0"
+          }
+        }
+      }
+    ],
+    "inputs": [
+      {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/thirteenth-batch/accepted-capture-v1/repeated_direct_include/supplement.stdout",
+        "sha256": "01275003029af753c86c801a41918336fab15761b68f94fa1c944e9c98a130db",
+        "bytes": 28493
+      },
+      {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/thirteenth-include-observer-v1/runs/first-complete-six-include-saved-cpg-observation/admitted-supplement/repeated_direct_include/supplement.jsonl",
+        "sha256": "8815f4ce639175e0b6bd4e957e137fb20ca94929e061960407f6ddc155826735",
+        "bytes": 32391
+      }
+    ]
+  },
+  "upstreamBindings": [
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/include-reference-preparation-v1/upstream/AstCreatorHelper.scala",
+      "sha256": "1c3514cb3e006b8c8bf1bb6b5cee072969416a8c94353d185a5ebacbe00e92f2",
+      "bytes": 10106
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/include-reference-preparation-v1/upstream/AstCreator.scala",
+      "sha256": "b90c7804a6ab74326f67da35124da0873c32be1340e6006f8a3d47720bc0141c",
+      "bytes": 5617
+    }
+  ],
+  "completeEvidence": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/thirteenth-include-observation-review-v1/result/facts.json",
+    "sha256": "59e3de52e4d303389be3213bd5f7821c0ffde985f1141c1eeb740ca7c4015292",
+    "bytes": 104610
+  },
+  "completeObservationReview": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/thirteenth-include-observation-review-v1/result/review.json",
+    "sha256": "0a437e3db1d104c6832be5f977da47f254575c2430c67d391b5537de69cee5f7",
+    "bytes": 133345
+  },
+  "noProducer": true,
+  "noPropertyOrPathNormalization": true
+}

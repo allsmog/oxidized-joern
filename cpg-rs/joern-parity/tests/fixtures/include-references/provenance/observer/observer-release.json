@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "status": "PARENT_APPROVED_INCLUDE_REFERENCE_OBSERVER_RELEASE",
+  "observationHoldReleased": true,
+  "preparedManifestSha256": "966d385f172f5b7754135a72238f8a615c502fef328c5745164b572aedc69ef4",
+  "sourceCommit": "afe23fc4bedbbf6b669f2bd6dfed0f0af141ecfc",
+  "documentationCommit": "afe23fc4bedbbf6b669f2bd6dfed0f0af141ecfc",
+  "frozenBuild": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/twelfth-batch/lint-corrected/final-real-differential/bin/source-bindings.json",
+    "sha256": "33f4740b78f60a142a615b1a07b2a2ea448ed7955e9464395e72fe6a8af91dda",
+    "bytes": 2121168
+  },
+  "canonicalRun": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/include-reference-runner-v1/runs/first-complete-six-include-reference-batch/run.json",
+    "sha256": "d91a5e412fb4d7ba848ff10a357f9d5c77b1407403913ca4bff9c2fe9af7e495"
+  },
+  "canonicalRelease": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/thirteenth-batch/canonical-producer-release-v1.json",
+    "sha256": "cd062f8f8dce75bdc5897819c8afc0b686664ba1eff50a471901eb3e7a9b06bd"
+  },
+  "historicalObservation": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/twelfth-identity-observer-v2/runs/first-complete-eleven-identity-saved-cpg-observation/run.json",
+    "sha256": "5faa77644bbcb55c734afb6a68ed2e5260784fa564ab518315dad38cd0a88ed3",
+    "bytes": 1311857
+  },
+  "note": "Root releases six copied fresh saved stores only. Stable driver review passed; its only pending owner final offline freeze is now verified by root. Preserve full canonical reproduction, complete typed snapshots and all historical anchor differences. No C emission policy is inferred by this receipt.",
+  "reviews": [
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/thirteenth-batch/observer-root-review-v1.json",
+      "sha256": "fb4ad3ac5ad0847bde0991dc465938c17209e1b265ce59af6a73f12962177370"
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-include-references/.local/thirteenth-observer-review-v1/review-draft.json",
+      "sha256": "227138c64335e0d3736f0575afe05cb8501124538568bd6988986a80c4646da3"
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/thirteenth-include-observer-v1/offline-checks/review.json",
+      "sha256": "8b673cfb285e7808a6110e4190e642c2de93da9bed9860e97b3955e2c19e6678"
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/thirteenth-include-observer-v1-freeze.json",
+      "sha256": "6326fe5ffa8d52435bd775fe19f9e176a8983e6961a01c6238fc1bfe58cb2d38"
+    }
+  ]
+}

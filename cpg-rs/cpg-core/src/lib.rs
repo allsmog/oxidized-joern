@@ -16,7 +16,7 @@ pub mod traversal;
 
 pub use builder::CpgBuilder;
 pub use freeze::{Freeze, FrozenCpg};
-pub use graph::{Cpg, FileId, HalfEdge, NodeId};
+pub use graph::{Cpg, FileId, HalfEdge, NodeId, OrderProperty};
 pub use intern::Sym;
 pub use schema::{EdgeKind, Layer, NodeKind};
 pub use segments::{SegmentDescriptor, SegmentDigest, SegmentKey, SegmentManifest};

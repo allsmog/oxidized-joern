@@ -1,0 +1,85 @@
+{
+  "absenceBridge": "Every observed Import/Dependency property is retained. Omitted properties remain omitted; ORDER requires explicit Absent or Present, never Unknown.",
+  "edgePayloadBoundary": "All observed incident payloads are null; Rust payload storage is unsupported. The gate compares every incident edge kind, endpoint and occurrence, not payload storage.",
+  "globalOrderBoundary": "The existing owner global TYPE_DECL dense ORDER value is compared separately. No claim is made that its Joern ORDER presence is stored.",
+  "integerBridge": "Exact integer values: observed Java Integer is checked in i32 domain; nonnegative LINE_NUMBER is represented by Rust u32. Java class names remain only in the untouched raw reference.",
+  "ownerGlobalTypeDeclOrders": [
+    {
+      "denseOrder": 2,
+      "file": "a.c",
+      "fullName": "a.c:<global>"
+    },
+    {
+      "denseOrder": 2,
+      "file": "b.c",
+      "fullName": "b.c:<global>"
+    }
+  ],
+  "pairs": [
+    {
+      "dependency": {
+        "DEPENDENCY_GROUP_ID": "api.h",
+        "NAME": "api.h",
+        "VERSION": "include"
+      },
+      "import": {
+        "CODE": "#include \"api.h\"",
+        "COLUMN_NUMBER": 1,
+        "IMPORTED_AS": "api.h",
+        "IMPORTED_ENTITY": "api.h",
+        "LINE_NUMBER": 1,
+        "ORDER": 1
+      },
+      "incidentEdges": [
+        [
+          "import",
+          "IMPORTS",
+          "dependency"
+        ],
+        [
+          "owner",
+          "AST",
+          "import"
+        ]
+      ],
+      "owner": {
+        "FILENAME": "a.c",
+        "FULL_NAME": "a.c:<global>",
+        "NAME": "<global>"
+      }
+    },
+    {
+      "dependency": {
+        "DEPENDENCY_GROUP_ID": "api.h",
+        "NAME": "api.h",
+        "VERSION": "include"
+      },
+      "import": {
+        "CODE": "#include \"api.h\"",
+        "COLUMN_NUMBER": 1,
+        "IMPORTED_AS": "api.h",
+        "IMPORTED_ENTITY": "api.h",
+        "LINE_NUMBER": 1,
+        "ORDER": 1
+      },
+      "incidentEdges": [
+        [
+          "import",
+          "IMPORTS",
+          "dependency"
+        ],
+        [
+          "owner",
+          "AST",
+          "import"
+        ]
+      ],
+      "owner": {
+        "FILENAME": "b.c",
+        "FULL_NAME": "b.c:<global>",
+        "NAME": "<global>"
+      }
+    }
+  ],
+  "schemaVersion": 1
+}

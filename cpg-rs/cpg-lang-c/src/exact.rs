@@ -76,6 +76,18 @@ pub(crate) struct ExactMetadata {
     pub bindings: Vec<FunctionBinding>,
     pub modifiers: Vec<ModifierMetadata>,
     pub reference_origins: Vec<MethodReferenceOrigin>,
+    pub include_references: Vec<IncludeReference>,
+}
+
+/// A physical include directive, independent of resolving or executing its
+/// header. CDT retains inactive and repeated directives in this inventory.
+pub(crate) struct IncludeReference {
+    pub file: String,
+    pub code: String,
+    pub name: String,
+    pub line: u32,
+    pub column: i32,
+    pub order: i32,
 }
 
 pub(crate) struct FunctionBinding {
@@ -369,20 +381,47 @@ pub(crate) fn canonical_dump_sources_with_metadata(
     let mut expansion_control_kinds = HashMap::new();
     let mut used_macros: std::collections::BTreeMap<String, (String, String, usize, String)> =
         std::collections::BTreeMap::new();
-    // #include directives become IMPORT nodes that consume earlier sibling
-    // slots: the file-global TYPE_DECL's ORDER is 1 + #includes.
+    // This physical inventory is separate from preprocessing execution: even
+    // inactive, guarded repeats and unresolved includes consume IMPORT slots.
+    // The canonical view records their effect on the global TYPE_DECL order;
+    // typed metadata carries the actual nodes omitted by that projection.
     let include_counts: HashMap<String, usize> = units
         .iter()
         .map(|u| {
             let mut pending = vec![u.tree.root_node()];
-            let mut n = 0;
+            let mut includes = Vec::new();
             while let Some(node) = pending.pop() {
                 if node.kind() == "preproc_include" {
-                    n += 1;
+                    includes.push(node);
                 }
                 pending.extend(translation_unit_children(node, u.src.as_bytes()));
             }
-            (u.file.clone(), n)
+            includes.sort_by_key(Node::start_byte);
+            for (index, node) in includes.iter().copied().enumerate() {
+                let Some(path) = node.child_by_field_name("path") else {
+                    continue;
+                };
+                let spelling = text(path, u.src.as_bytes());
+                let name = spelling
+                    .strip_prefix('"')
+                    .and_then(|s| s.strip_suffix('"'))
+                    .or_else(|| spelling.strip_prefix('<').and_then(|s| s.strip_suffix('>')));
+                // Macro-computed include names need their own CDT observation
+                // and expansion transport; do not invent their resolved name.
+                let Some(name) = name else { continue };
+                let position = node.start_position();
+                let line_start = node.start_byte() - position.column;
+                let column = u.src[line_start..node.start_byte()].encode_utf16().count() + 1;
+                metadata.include_references.push(IncludeReference {
+                    file: u.file.clone(),
+                    code: preproc_raw_directive(node, u.src.as_bytes()).to_owned(),
+                    name: name.to_owned(),
+                    line: u32::try_from(position.row + 1).expect("include line fits CPG storage"),
+                    column: i32::try_from(column).expect("include column fits CPG storage"),
+                    order: i32::try_from(index + 1).expect("include order fits CPG storage"),
+                });
+            }
+            (u.file.clone(), includes.len())
         })
         .collect();
 

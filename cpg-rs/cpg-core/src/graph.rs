@@ -32,7 +32,7 @@ use tempfile::NamedTempFile;
 
 const MAGIC_V1: &[u8; 4] = b"CPG1";
 const MAGIC_V2: &[u8; 4] = b"CPG2";
-const FORMAT_VERSION: u16 = 2;
+const FORMAT_VERSION: u16 = 3;
 const CHECKSUM_ALGORITHM_CRC32: u8 = 1;
 const CHECKSUM_VERSION: u8 = 1;
 const FLAG_AUTHORITATIVE_AST: u32 = 1 << 0;
@@ -62,7 +62,11 @@ const MAX_FILES: u64 = 1_000_000;
 const MAX_STRING_BYTES: usize = 16 * 1024 * 1024;
 const MAX_PATH_BYTES: usize = 64 * 1024;
 const LEGACY_MIN_NODE_PAYLOAD_BYTES: usize = 42;
-const MIN_NODE_PAYLOAD_BYTES: usize = LEGACY_MIN_NODE_PAYLOAD_BYTES + 4;
+const V2_MIN_NODE_PAYLOAD_BYTES: usize = LEGACY_MIN_NODE_PAYLOAD_BYTES + 4;
+// Four optional symbols, a column-presence tag, and an order-presence tag.
+// A present column adds four bytes, without reserving an i32 sentinel.
+const V3_MIN_NODE_EXTENSION_BYTES: usize = 4 * 4 + 1 + 1;
+const MIN_NODE_PAYLOAD_BYTES: usize = V2_MIN_NODE_PAYLOAD_BYTES + V3_MIN_NODE_EXTENSION_BYTES;
 
 /// Stable handle to a node. Index into the columnar arrays.
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug, PartialOrd, Ord)]
@@ -71,6 +75,15 @@ pub struct NodeId(pub u32);
 /// Identifies the source file a node belongs to (the incrementality unit).
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
 pub struct FileId(pub u32);
+
+/// Semantic ORDER presence, kept separate from the dense traversal order.
+/// Older graphs and storage-only writes do not establish property presence.
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+pub enum OrderProperty {
+    Unknown,
+    Absent,
+    Present(i32),
+}
 
 /// One end of an edge as seen from a node's adjacency list.
 #[derive(Clone, Copy, Debug)]
@@ -93,8 +106,15 @@ pub struct Cpg {
     type_full_name: Vec<Option<Sym>>,
     signature: Vec<Option<Sym>>,
     modifier_type: Vec<Option<Sym>>,
+    imported_entity: Vec<Option<Sym>>,
+    imported_as: Vec<Option<Sym>>,
+    dependency_group_id: Vec<Option<Sym>>,
+    version: Vec<Option<Sym>>,
+    column_number: Vec<Option<i32>>,
     line: Vec<Option<u32>>,
     order: Vec<i32>,
+    // None = unknown, Some(false) = absent, Some(true) = present in `order`.
+    order_presence: Vec<Option<bool>>,
     argument_index: Vec<i32>,
     live: Vec<bool>,
 
@@ -152,8 +172,14 @@ impl Cpg {
             self.type_full_name[i] = None;
             self.signature[i] = None;
             self.modifier_type[i] = None;
+            self.imported_entity[i] = None;
+            self.imported_as[i] = None;
+            self.dependency_group_id[i] = None;
+            self.version[i] = None;
+            self.column_number[i] = None;
             self.line[i] = None;
             self.order[i] = 0;
+            self.order_presence[i] = None;
             self.argument_index[i] = -1;
             self.live[i] = true;
             self.out_edges[i].clear();
@@ -169,8 +195,14 @@ impl Cpg {
             self.type_full_name.push(None);
             self.signature.push(None);
             self.modifier_type.push(None);
+            self.imported_entity.push(None);
+            self.imported_as.push(None);
+            self.dependency_group_id.push(None);
+            self.version.push(None);
+            self.column_number.push(None);
             self.line.push(None);
             self.order.push(0);
+            self.order_presence.push(None);
             self.argument_index.push(-1);
             self.live.push(true);
             self.out_edges.push(Vec::new());
@@ -257,11 +289,55 @@ impl Cpg {
     pub fn clear_modifier_type(&mut self, n: NodeId) {
         self.modifier_type[n.0 as usize] = None;
     }
+    /// Store IMPORTED_ENTITY independently of NAME and other import properties.
+    pub fn set_imported_entity(&mut self, n: NodeId, s: Sym) {
+        self.imported_entity[n.0 as usize] = Some(s);
+    }
+    pub fn clear_imported_entity(&mut self, n: NodeId) {
+        self.imported_entity[n.0 as usize] = None;
+    }
+    /// Store IMPORTED_AS; a present empty string differs from absence.
+    pub fn set_imported_as(&mut self, n: NodeId, s: Sym) {
+        self.imported_as[n.0 as usize] = Some(s);
+    }
+    pub fn clear_imported_as(&mut self, n: NodeId) {
+        self.imported_as[n.0 as usize] = None;
+    }
+    pub fn set_dependency_group_id(&mut self, n: NodeId, s: Sym) {
+        self.dependency_group_id[n.0 as usize] = Some(s);
+    }
+    pub fn clear_dependency_group_id(&mut self, n: NodeId) {
+        self.dependency_group_id[n.0 as usize] = None;
+    }
+    /// Store VERSION as its own property, not a signature or full name.
+    pub fn set_version(&mut self, n: NodeId, s: Sym) {
+        self.version[n.0 as usize] = Some(s);
+    }
+    pub fn clear_version(&mut self, n: NodeId) {
+        self.version[n.0 as usize] = None;
+    }
+    pub fn set_column_number(&mut self, n: NodeId, column: i32) {
+        self.column_number[n.0 as usize] = Some(column);
+    }
+    pub fn clear_column_number(&mut self, n: NodeId) {
+        self.column_number[n.0 as usize] = None;
+    }
     pub fn set_line(&mut self, n: NodeId, line: u32) {
         self.line[n.0 as usize] = Some(line);
     }
     pub fn set_order(&mut self, n: NodeId, order: i32) {
         self.order[n.0 as usize] = order;
+        // This legacy API writes traversal storage, not semantic presence.
+        self.order_presence[n.0 as usize] = None;
+    }
+    /// Set the semantic ORDER property and the dense traversal value together.
+    pub fn set_order_property(&mut self, n: NodeId, order: i32) {
+        self.order[n.0 as usize] = order;
+        self.order_presence[n.0 as usize] = Some(true);
+    }
+    /// Record absent ORDER without inventing a property from dense storage.
+    pub fn clear_order_property(&mut self, n: NodeId) {
+        self.order_presence[n.0 as usize] = Some(false);
     }
     pub fn set_argument_index(&mut self, n: NodeId, idx: i32) {
         self.argument_index[n.0 as usize] = idx;
@@ -301,11 +377,33 @@ impl Cpg {
     pub fn modifier_type_of(&self, n: NodeId) -> Option<&str> {
         self.modifier_type[n.0 as usize].map(|s| self.strings.resolve(s))
     }
+    pub fn imported_entity_of(&self, n: NodeId) -> Option<&str> {
+        self.imported_entity[n.0 as usize].map(|s| self.strings.resolve(s))
+    }
+    pub fn imported_as_of(&self, n: NodeId) -> Option<&str> {
+        self.imported_as[n.0 as usize].map(|s| self.strings.resolve(s))
+    }
+    pub fn dependency_group_id_of(&self, n: NodeId) -> Option<&str> {
+        self.dependency_group_id[n.0 as usize].map(|s| self.strings.resolve(s))
+    }
+    pub fn version_of(&self, n: NodeId) -> Option<&str> {
+        self.version[n.0 as usize].map(|s| self.strings.resolve(s))
+    }
+    pub fn column_number_of(&self, n: NodeId) -> Option<i32> {
+        self.column_number[n.0 as usize]
+    }
     pub fn line_of(&self, n: NodeId) -> Option<u32> {
         self.line[n.0 as usize]
     }
     pub fn order_of(&self, n: NodeId) -> i32 {
         self.order[n.0 as usize]
+    }
+    pub fn order_property_of(&self, n: NodeId) -> OrderProperty {
+        match self.order_presence[n.0 as usize] {
+            None => OrderProperty::Unknown,
+            Some(false) => OrderProperty::Absent,
+            Some(true) => OrderProperty::Present(self.order[n.0 as usize]),
+        }
     }
     pub fn argument_index_of(&self, n: NodeId) -> i32 {
         self.argument_index[n.0 as usize]
@@ -459,6 +557,35 @@ impl Cpg {
             w.u32(id.0);
             w.bytes(path.as_bytes());
         }
+
+        // Version 3 appends properties after the complete version 2 payload.
+        // Older graphs retain their original columns, edges and file-table bytes.
+        for col in [
+            &self.imported_entity,
+            &self.imported_as,
+            &self.dependency_group_id,
+            &self.version,
+        ] {
+            for value in col {
+                w.opt_u32(value.map(|s| s.0));
+            }
+        }
+        for column in &self.column_number {
+            match column {
+                None => w.u8(0),
+                Some(value) => {
+                    w.u8(1);
+                    w.i32(*value);
+                }
+            }
+        }
+        for presence in &self.order_presence {
+            w.u8(match presence {
+                None => 0,
+                Some(false) => 1,
+                Some(true) => 2,
+            });
+        }
         w.buf
     }
 
@@ -546,6 +673,10 @@ impl Cpg {
                 self.type_full_name[i],
                 self.signature[i],
                 self.modifier_type[i],
+                self.imported_entity[i],
+                self.imported_as[i],
+                self.dependency_group_id[i],
+                self.version[i],
             ]
             .into_iter()
             .flatten()
@@ -586,9 +717,10 @@ impl Cpg {
         Ok(())
     }
 
-    /// Reconstruct a graph from CPG2 output. Version 1 and legacy CPG1 payloads
-    /// remain readable, with MODIFIER_TYPE absent, through the same validating
-    /// decoder. New writes use version 2, which adds its own string column.
+    /// Reconstruct a graph from CPG2 versions 1 through 3 or legacy CPG1.
+    /// Version 1 and CPG1 have no MODIFIER_TYPE; version 2 preserves that column.
+    /// New writes use version 3. Its added properties are absent on older graphs,
+    /// except ORDER presence, which remains explicitly unknown.
     pub fn from_bytes(data: &[u8]) -> Result<Cpg, DecodeError> {
         if u64::try_from(data.len()).unwrap_or(u64::MAX) > MAX_CPG_BYTES {
             return Err(DecodeError(format!(
@@ -610,7 +742,7 @@ impl Cpg {
         let version = envelope.u16()?;
         if !(1..=FORMAT_VERSION).contains(&version) {
             return Err(DecodeError(format!(
-                "unsupported CPG2 format version {version}; expected 1 or {FORMAT_VERSION}"
+                "unsupported CPG2 format version {version}; expected 1 through {FORMAT_VERSION}"
             )));
         }
         let algorithm = envelope.u8()?;
@@ -673,6 +805,8 @@ impl Cpg {
 
         let minimum_node_bytes = if version == 1 {
             LEGACY_MIN_NODE_PAYLOAD_BYTES
+        } else if version == 2 {
+            V2_MIN_NODE_PAYLOAD_BYTES
         } else {
             MIN_NODE_PAYLOAD_BYTES
         };
@@ -683,6 +817,11 @@ impl Cpg {
             if version == 1 && raw >= NodeKind::Binding.to_u8() {
                 return Err(DecodeError(format!(
                     "invalid version 1 node kind {raw} at node {i}"
+                )));
+            }
+            if version == 2 && raw >= NodeKind::Import.to_u8() {
+                return Err(DecodeError(format!(
+                    "invalid version 2 node kind {raw} at node {i}"
                 )));
             }
             kind.push(
@@ -743,6 +882,11 @@ impl Cpg {
                         "invalid version 1 edge kind {raw_kind} at node {src}"
                     )));
                 }
+                if version == 2 && raw_kind >= EdgeKind::Imports.to_u8() {
+                    return Err(DecodeError(format!(
+                        "invalid version 2 edge kind {raw_kind} at node {src}"
+                    )));
+                }
                 let edge_kind = EdgeKind::from_u8(raw_kind).ok_or_else(|| {
                     DecodeError(format!("invalid edge kind {raw_kind} at node {src}"))
                 })?;
@@ -795,6 +939,67 @@ impl Cpg {
             }
             nodes_of_file.insert(id, Vec::new());
         }
+        let (
+            imported_entity,
+            imported_as,
+            dependency_group_id,
+            version_property,
+            column_number,
+            order_presence,
+        ) = if version >= 3 {
+            require_remaining(
+                &r,
+                n,
+                V3_MIN_NODE_EXTENSION_BYTES,
+                "version 3 node properties",
+            )?;
+            let imported_entity = read_sym_column(&mut r, n, str_count, "imported_entity")?;
+            let imported_as = read_sym_column(&mut r, n, str_count, "imported_as")?;
+            let dependency_group_id = read_sym_column(&mut r, n, str_count, "dependency_group_id")?;
+            let version_property = read_sym_column(&mut r, n, str_count, "version")?;
+            let mut column_number = Vec::with_capacity(n);
+            for i in 0..n {
+                column_number.push(match r.u8()? {
+                    0 => None,
+                    1 => Some(r.i32()?),
+                    tag => {
+                        return Err(DecodeError(format!(
+                            "invalid column presence {tag} at node {i}"
+                        )))
+                    }
+                });
+            }
+            let mut order_presence = Vec::with_capacity(n);
+            for i in 0..n {
+                order_presence.push(match r.u8()? {
+                    0 => None,
+                    1 => Some(false),
+                    2 => Some(true),
+                    tag => {
+                        return Err(DecodeError(format!(
+                            "invalid order presence {tag} at node {i}"
+                        )))
+                    }
+                });
+            }
+            (
+                imported_entity,
+                imported_as,
+                dependency_group_id,
+                version_property,
+                column_number,
+                order_presence,
+            )
+        } else {
+            (
+                vec![None; n],
+                vec![None; n],
+                vec![None; n],
+                vec![None; n],
+                vec![None; n],
+                vec![None; n],
+            )
+        };
         if r.remaining() != 0 {
             return Err(DecodeError(format!(
                 "{} trailing payload bytes at offset {}",
@@ -843,8 +1048,14 @@ impl Cpg {
             type_full_name,
             signature,
             modifier_type,
+            imported_entity,
+            imported_as,
+            dependency_group_id,
+            version: version_property,
+            column_number,
             line,
             order,
+            order_presence,
             argument_index,
             live,
             out_edges,
@@ -952,10 +1163,30 @@ impl Cpg {
                 let s = map_sym(self, s);
                 self.set_modifier_type(nn, s);
             }
+            if let Some(s) = donor.imported_entity[i] {
+                let s = map_sym(self, s);
+                self.set_imported_entity(nn, s);
+            }
+            if let Some(s) = donor.imported_as[i] {
+                let s = map_sym(self, s);
+                self.set_imported_as(nn, s);
+            }
+            if let Some(s) = donor.dependency_group_id[i] {
+                let s = map_sym(self, s);
+                self.set_dependency_group_id(nn, s);
+            }
+            if let Some(s) = donor.version[i] {
+                let s = map_sym(self, s);
+                self.set_version(nn, s);
+            }
+            if let Some(column) = donor.column_number[i] {
+                self.set_column_number(nn, column);
+            }
             if let Some(l) = donor.line[i] {
                 self.set_line(nn, l);
             }
             self.set_order(nn, donor.order[i]);
+            self.order_presence[nn.0 as usize] = donor.order_presence[i];
             self.set_argument_index(nn, donor.argument_index[i]);
             node_map[i] = nn;
         }
@@ -1322,7 +1553,7 @@ mod persistence_tests {
         let text = cpg.intern("unrelated source code");
         cpg.set_code(explicit, text);
         let bytes = cpg.to_bytes();
-        assert_eq!(&bytes[4..6], &2_u16.to_le_bytes());
+        assert_eq!(&bytes[4..6], &FORMAT_VERSION.to_le_bytes());
         let directory = TestDir::new("modifier-column");
         let path = directory.0.join("graph.cpg");
         cpg.save(path.to_str().unwrap()).unwrap();
@@ -1453,6 +1684,18 @@ mod persistence_tests {
             invalid[offset] = 255;
             assert_decode_error_without_panic(label, &cpg2_version(&invalid, 2));
         }
+        for (offset, tag) in [
+            (PAYLOAD_NODE_KIND, NodeKind::Import.to_u8()),
+            (PAYLOAD_NODE_KIND, NodeKind::Dependency.to_u8()),
+            (PAYLOAD_EDGE_KIND + 4, EdgeKind::Imports.to_u8()),
+        ] {
+            let mut invalid = payload.clone();
+            invalid[offset] = tag;
+            assert_decode_error_without_panic(
+                "version 3 tag in version 2",
+                &cpg2_version(&invalid, 2),
+            );
+        }
         for end in 0..payload.len() {
             assert_decode_error_without_panic(
                 "version 2 payload truncation",
@@ -1462,6 +1705,9 @@ mod persistence_tests {
         for (offset, tag) in [
             (PAYLOAD_NODE_KIND, NodeKind::Binding.to_u8()),
             (PAYLOAD_EDGE_KIND, EdgeKind::Binds.to_u8()),
+            (PAYLOAD_NODE_KIND, NodeKind::Import.to_u8()),
+            (PAYLOAD_NODE_KIND, NodeKind::Dependency.to_u8()),
+            (PAYLOAD_EDGE_KIND, EdgeKind::Imports.to_u8()),
         ] {
             let mut invalid = valid_payload();
             invalid[offset] = tag;
@@ -1472,6 +1718,223 @@ mod persistence_tests {
         let method = invalid.methods()[0];
         invalid.set_modifier_type(method, Sym(u32::MAX - 1));
         assert!(invalid.try_to_bytes().is_err());
+    }
+
+    #[test]
+    fn include_properties_preserve_absence_empty_strings_and_signed_domains() {
+        let mut graph = Cpg::new();
+        let file = graph.file_id("include.c");
+        let absent = graph.add_node(NodeKind::Dependency, file);
+        let empty = graph.add_node(NodeKind::Import, file);
+        let cleared = graph.add_node(NodeKind::Dependency, file);
+        let setters = [
+            Cpg::set_imported_entity,
+            Cpg::set_imported_as,
+            Cpg::set_dependency_group_id,
+            Cpg::set_version,
+        ];
+        let empty_symbol = graph.intern("");
+        for setter in setters {
+            setter(&mut graph, empty, empty_symbol);
+            setter(&mut graph, cleared, empty_symbol);
+        }
+        graph.clear_imported_entity(cleared);
+        graph.clear_imported_as(cleared);
+        graph.clear_dependency_group_id(cleared);
+        graph.clear_version(cleared);
+        graph.set_column_number(cleared, 0);
+        graph.clear_column_number(cleared);
+        graph.clear_order_property(absent);
+        let mut boundaries = Vec::new();
+        for value in [i32::MIN, -1, 0, 1, i32::MAX] {
+            let node = graph.add_node(NodeKind::Import, file);
+            graph.set_column_number(node, value);
+            graph.set_order_property(node, value);
+            boundaries.push((node, value));
+        }
+        graph.set_order_property(cleared, i32::MIN);
+        assert_eq!(
+            graph.order_property_of(cleared),
+            OrderProperty::Present(i32::MIN)
+        );
+        graph.clear_order_property(cleared);
+        assert_eq!(graph.order_of(cleared), i32::MIN);
+        assert_eq!(graph.order_property_of(cleared), OrderProperty::Absent);
+        graph.set_order(cleared, i32::MAX);
+        assert_eq!(graph.order_property_of(cleared), OrderProperty::Unknown);
+        let directory = tempfile::tempdir().unwrap();
+        let path = directory.path().join("signed-columns.cpg");
+        graph.save(path.to_str().unwrap()).unwrap();
+        let reopened = Cpg::load(path.to_str().unwrap()).unwrap();
+        assert_eq!(graph.to_bytes(), reopened.to_bytes());
+        for cpg in [&graph, &reopened] {
+            for getter in [
+                Cpg::imported_entity_of,
+                Cpg::imported_as_of,
+                Cpg::dependency_group_id_of,
+                Cpg::version_of,
+            ] {
+                assert_eq!(getter(cpg, absent), None);
+                assert_eq!(getter(cpg, cleared), None);
+                assert_eq!(getter(cpg, empty), Some(""));
+            }
+            assert_eq!(cpg.column_number_of(absent), None);
+            assert_eq!(cpg.column_number_of(cleared), None);
+            assert_eq!(cpg.order_property_of(absent), OrderProperty::Absent);
+            assert_eq!(cpg.order_property_of(empty), OrderProperty::Unknown);
+            assert_eq!(cpg.order_property_of(cleared), OrderProperty::Unknown);
+            assert_eq!(cpg.order_of(cleared), i32::MAX);
+            for &(node, value) in &boundaries {
+                assert_eq!(cpg.column_number_of(node), Some(value));
+                assert_eq!(cpg.order_of(node), value);
+                assert_eq!(cpg.order_property_of(node), OrderProperty::Present(value));
+            }
+        }
+    }
+
+    #[test]
+    fn include_occurrences_survive_interner_merge_csr_and_recycled_slots() {
+        use crate::Freeze;
+        let mut donor = Cpg::new();
+        let file = donor.file_id("caller.c");
+        let import = donor.add_node(NodeKind::Import, file);
+        let dependencies = [
+            donor.add_node(NodeKind::Dependency, file),
+            donor.add_node(NodeKind::Dependency, file),
+        ];
+        let text = "header\n\r\0雪\u{2028}.h";
+        let symbol = donor.intern(text);
+        donor.set_imported_entity(import, symbol);
+        donor.set_imported_as(import, symbol);
+        donor.set_column_number(import, i32::MAX);
+        donor.set_order_property(import, 0);
+        for dependency in dependencies {
+            donor.set_name(dependency, symbol);
+            donor.set_dependency_group_id(dependency, symbol);
+            donor.set_version(dependency, symbol);
+            donor.clear_order_property(dependency);
+            donor.add_edge(import, dependency, EdgeKind::Imports);
+            donor.add_edge(import, dependency, EdgeKind::Imports);
+        }
+        let mut cpg = Cpg::new();
+        cpg.intern("different first symbol");
+        let retained_file = cpg.file_id("retained.c");
+        let retained = cpg.add_node(NodeKind::Method, retained_file);
+        cpg.absorb(donor);
+        let mut cpg = Cpg::from_bytes(&cpg.to_bytes()).unwrap();
+        let import = cpg
+            .nodes()
+            .find(|&n| cpg.kind_of(n) == NodeKind::Import)
+            .unwrap();
+        assert_ne!(import, retained);
+        assert_eq!(cpg.imported_entity_of(import), Some(text));
+        assert_eq!(cpg.imported_as_of(import), Some(text));
+        assert_eq!(cpg.column_number_of(import), Some(i32::MAX));
+        assert_eq!(cpg.order_property_of(import), OrderProperty::Present(0));
+        let endpoints: Vec<_> = cpg.out_kind(import, EdgeKind::Imports).collect();
+        assert_eq!(endpoints.len(), 4);
+        assert_eq!(endpoints[0], endpoints[1]);
+        assert_eq!(endpoints[2], endpoints[3]);
+        assert_ne!(endpoints[0], endpoints[2]);
+        assert_eq!(cpg.freeze().out(import, EdgeKind::Imports), endpoints);
+        for &dependency in &endpoints {
+            assert_eq!(
+                cpg.in_kind(dependency, EdgeKind::Imports)
+                    .collect::<Vec<_>>(),
+                [import, import]
+            );
+            assert_eq!(cpg.dependency_group_id_of(dependency), Some(text));
+            assert_eq!(cpg.version_of(dependency), Some(text));
+            assert_eq!(cpg.order_property_of(dependency), OrderProperty::Absent);
+            assert_eq!(cpg.column_number_of(dependency), None);
+        }
+        let file = cpg.file_of(import);
+        cpg.add_edge(retained, import, EdgeKind::Imports);
+        cpg.remove_file(file);
+        assert!(cpg.out(retained).is_empty());
+        for _ in 0..3 {
+            let reused = cpg.add_node(NodeKind::Import, file);
+            assert_eq!(cpg.imported_entity_of(reused), None);
+            assert_eq!(cpg.imported_as_of(reused), None);
+            assert_eq!(cpg.dependency_group_id_of(reused), None);
+            assert_eq!(cpg.version_of(reused), None);
+            assert_eq!(cpg.column_number_of(reused), None);
+            assert_eq!(cpg.order_property_of(reused), OrderProperty::Unknown);
+            assert_eq!(cpg.order_of(reused), 0);
+            assert!(cpg.in_(reused).is_empty() && cpg.out(reused).is_empty());
+        }
+        assert_eq!(Cpg::from_bytes(&cpg.to_bytes()).unwrap().live_count(), 4);
+    }
+
+    #[test]
+    fn version_three_extension_checks_symbols_presence_and_truncation() {
+        const MODIFIER_OFFSET: usize = PAYLOAD_NAME_SYM + 5 * 4;
+        let mut payload = valid_payload();
+        payload.splice(MODIFIER_OFFSET..MODIFIER_OFFSET, u32::MAX.to_le_bytes());
+        payload[PAYLOAD_NODE_KIND] = NodeKind::Import.to_u8();
+        payload[PAYLOAD_EDGE_KIND + 4] = EdgeKind::Imports.to_u8();
+        let extension = payload.len();
+        for _ in 0..4 {
+            payload.extend(0_u32.to_le_bytes());
+        }
+        payload.push(1);
+        payload.extend(i32::MIN.to_le_bytes());
+        payload.push(2);
+        let graph = Cpg::from_bytes(&cpg2_version(&payload, 3)).unwrap();
+        assert_eq!(graph.kind_of(NodeId(0)), NodeKind::Import);
+        assert_eq!(graph.column_number_of(NodeId(0)), Some(i32::MIN));
+        assert_eq!(
+            graph.order_property_of(NodeId(0)),
+            OrderProperty::Present(0)
+        );
+        for getter in [
+            Cpg::imported_entity_of,
+            Cpg::imported_as_of,
+            Cpg::dependency_group_id_of,
+            Cpg::version_of,
+        ] {
+            assert_eq!(getter(&graph, NodeId(0)), Some("x"));
+        }
+        for column in 0..4 {
+            let mut invalid = payload.clone();
+            invalid[extension + column * 4..extension + (column + 1) * 4]
+                .copy_from_slice(&1_u32.to_le_bytes());
+            assert_decode_error_without_panic("invalid new symbol", &cpg2_version(&invalid, 3));
+        }
+        for (offset, tag) in [(extension + 16, 2), (payload.len() - 1, 3)] {
+            let mut invalid = payload.clone();
+            invalid[offset] = tag;
+            assert_decode_error_without_panic(
+                "invalid new presence tag",
+                &cpg2_version(&invalid, 3),
+            );
+        }
+        for end in 0..payload.len() {
+            assert_decode_error_without_panic(
+                "version 3 payload truncation",
+                &cpg2_version(&payload[..end], 3),
+            );
+        }
+        let mut trailing = payload.clone();
+        trailing.push(0);
+        assert_decode_error_without_panic(
+            "version 3 trailing payload",
+            &cpg2_version(&trailing, 3),
+        );
+        for setter in [
+            Cpg::set_imported_entity,
+            Cpg::set_imported_as,
+            Cpg::set_dependency_group_id,
+            Cpg::set_version,
+        ] {
+            let mut graph = sample_cpg("bad symbol");
+            let node = graph.methods()[0];
+            setter(&mut graph, node, Sym(u32::MAX - 1));
+            assert_eq!(
+                graph.try_to_bytes().unwrap_err().kind(),
+                io::ErrorKind::InvalidInput
+            );
+        }
     }
 
     #[test]

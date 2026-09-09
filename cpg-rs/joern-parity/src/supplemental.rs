@@ -3,7 +3,7 @@
 //! This supplements the legacy canonical projection. It does not reconstruct
 //! unstored Joern properties, default-property presence, or edge payloads.
 
-use cpg_core::{Cpg, EdgeKind, Layer, NodeKind};
+use cpg_core::{Cpg, EdgeKind, Layer, NodeKind, OrderProperty};
 use serde_json::{json, Map, Value};
 use std::fmt::Write;
 
@@ -48,6 +48,8 @@ fn node_label(kind: NodeKind) -> &'static str {
         NodeKind::Type => "TYPE",
         NodeKind::MetaData => "META_DATA",
         NodeKind::Binding => "BINDING",
+        NodeKind::Import => "IMPORT",
+        NodeKind::Dependency => "DEPENDENCY",
     }
 }
 
@@ -73,6 +75,7 @@ fn edge_label(kind: EdgeKind) -> &'static str {
         EdgeKind::SourceFile => "SOURCE_FILE",
         EdgeKind::ParameterLink => "PARAMETER_LINK",
         EdgeKind::Binds => "BINDS",
+        EdgeKind::Imports => "IMPORTS",
     }
 }
 
@@ -101,12 +104,13 @@ pub fn snapshot(cpg: &Cpg) -> String {
         output,
         "{}",
         json!({
-            "record": "BEGIN", "schemaVersion": 1, "producer": "cpg-core",
+            "record": "BEGIN", "schemaVersion": 2, "producer": "cpg-core",
             "nodeCount": nodes.len().to_string(), "edgeCount": edge_count.to_string(),
             "propertyCoverage": "represented columns only",
             "numericClasses": "Rust storage types; no Java runtime-class inference",
-            "unknownPropertyPresence": ["ORDER", "ARGUMENT_INDEX"],
-            "unsupportedCoordinateStorage": ["COLUMN_NUMBER", "LINE_NUMBER_END", "COLUMN_NUMBER_END", "OFFSET", "OFFSET_END"],
+            "unknownPropertyPresence": ["ARGUMENT_INDEX"],
+            "orderPropertyPresence": "per-node storage.orderPropertyPresence: unknown, absent, or present",
+            "unsupportedCoordinateStorage": ["LINE_NUMBER_END", "COLUMN_NUMBER_END", "OFFSET", "OFFSET_END"],
             "edgePropertyStorage": "unsupported",
             "filePartitionIsNotFilenameProperty": true,
             "authoritativeLayers": layers,
@@ -158,9 +162,32 @@ pub fn snapshot(cpg: &Cpg) -> String {
             cpg.signature_of(node),
         );
         optional_string(&mut properties, "MODIFIER_TYPE", cpg.modifier_type_of(node));
+        optional_string(
+            &mut properties,
+            "IMPORTED_ENTITY",
+            cpg.imported_entity_of(node),
+        );
+        optional_string(&mut properties, "IMPORTED_AS", cpg.imported_as_of(node));
+        optional_string(
+            &mut properties,
+            "DEPENDENCY_GROUP_ID",
+            cpg.dependency_group_id_of(node),
+        );
+        optional_string(&mut properties, "VERSION", cpg.version_of(node));
         if let Some(line) = cpg.line_of(node) {
             properties.insert("LINE_NUMBER".into(), number("rust.u32", line));
         }
+        if let Some(column) = cpg.column_number_of(node) {
+            properties.insert("COLUMN_NUMBER".into(), number("rust.i32", column));
+        }
+        let order_presence = match cpg.order_property_of(node) {
+            OrderProperty::Unknown => "unknown",
+            OrderProperty::Absent => "absent",
+            OrderProperty::Present(value) => {
+                properties.insert("ORDER".into(), number("rust.i32", value));
+                "present"
+            }
+        };
         writeln!(
             output,
             "{}",
@@ -171,6 +198,7 @@ pub fn snapshot(cpg: &Cpg) -> String {
                     "kind": kind.to_u8().to_string(),
                     "filePartitionId": cpg.file_of(node).0.to_string(),
                     "order": number("rust.i32", cpg.order_of(node)),
+                    "orderPropertyPresence": order_presence,
                     "argumentIndex": number("rust.i32", cpg.argument_index_of(node))
                 }
             })
@@ -316,6 +344,83 @@ mod tests {
             .all(|r| r.get("property").is_none() && r["propertyStorage"] == "unsupported"));
         assert_eq!(rows[0]["nodeCount"], "8");
         assert_eq!(rows.last().unwrap()["edgeCount"], "5");
+    }
+
+    #[test]
+    fn supplemental_retains_include_strings_signed_coordinates_and_order_presence() {
+        let mut cpg = Cpg::new();
+        let file = cpg.file_id("caller.c");
+        let import = cpg.add_node(NodeKind::Import, file);
+        let dependency = cpg.add_node(NodeKind::Dependency, file);
+        let legacy = cpg.add_node(NodeKind::Unknown, file);
+        let cleared = cpg.add_node(NodeKind::Import, file);
+        let text = "api\n\r\0雪\u{2028}.h";
+        let symbol = cpg.intern(text);
+        cpg.set_imported_entity(import, symbol);
+        let symbol = cpg.intern("");
+        cpg.set_imported_as(import, symbol);
+        let symbol = cpg.intern("group");
+        cpg.set_dependency_group_id(dependency, symbol);
+        let symbol = cpg.intern("include");
+        cpg.set_version(dependency, symbol);
+        cpg.set_column_number(import, i32::MIN);
+        cpg.set_order_property(import, i32::MAX);
+        cpg.set_order(dependency, 19);
+        cpg.clear_order_property(dependency);
+        cpg.set_order(legacy, -7);
+        cpg.set_column_number(cleared, i32::MAX);
+        cpg.clear_column_number(cleared);
+        cpg.set_order_property(cleared, 0);
+        cpg.clear_order_property(cleared);
+        cpg.add_edge(import, dependency, EdgeKind::Imports);
+        cpg.add_edge(import, dependency, EdgeKind::Imports);
+        let original = snapshot(&cpg);
+        let reopened = Cpg::from_bytes(&cpg.to_bytes()).unwrap();
+        assert_eq!(snapshot(&reopened), original);
+        let rows = rows(&original);
+        let node = |id: cpg_core::NodeId| {
+            let id = id.0.to_string();
+            rows.iter()
+                .find(|row| row["record"] == "NODE" && row["id"].as_str() == Some(id.as_str()))
+                .unwrap()
+        };
+        assert_eq!(rows[0]["schemaVersion"], 2);
+        assert_eq!(node(import)["label"], "IMPORT");
+        assert_eq!(node(import)["properties"]["IMPORTED_ENTITY"], string(text));
+        assert_eq!(node(import)["properties"]["IMPORTED_AS"], string(""));
+        assert_eq!(
+            node(import)["properties"]["COLUMN_NUMBER"],
+            number("rust.i32", i32::MIN)
+        );
+        assert_eq!(
+            node(import)["properties"]["ORDER"],
+            number("rust.i32", i32::MAX)
+        );
+        assert_eq!(node(import)["storage"]["orderPropertyPresence"], "present");
+        assert!(node(import)["properties"].get("NAME").is_none());
+        assert!(node(import)["properties"].get("FILENAME").is_none());
+        assert_eq!(node(dependency)["label"], "DEPENDENCY");
+        assert_eq!(
+            node(dependency)["properties"]["DEPENDENCY_GROUP_ID"],
+            string("group")
+        );
+        assert_eq!(node(dependency)["properties"]["VERSION"], string("include"));
+        assert_eq!(node(dependency)["storage"]["order"], number("rust.i32", 19));
+        assert_eq!(
+            node(dependency)["storage"]["orderPropertyPresence"],
+            "absent"
+        );
+        assert_eq!(node(legacy)["storage"]["orderPropertyPresence"], "unknown");
+        for id in [dependency, legacy, cleared] {
+            assert!(node(id)["properties"].get("ORDER").is_none());
+            assert!(node(id)["properties"].get("COLUMN_NUMBER").is_none());
+        }
+        assert_eq!(
+            rows.iter()
+                .filter(|row| row["record"] == "EDGE" && row["label"] == "IMPORTS")
+                .count(),
+            2
+        );
     }
 
     #[test]
