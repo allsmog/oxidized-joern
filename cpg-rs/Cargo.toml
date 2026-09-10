@@ -26,7 +26,7 @@ cpg-lang-python = { path = "cpg-lang-python" }
 cpg-lang-ts = { path = "cpg-lang-ts" }
 cpg-analysis = { path = "cpg-analysis" }
 cpg-incremental = { path = "cpg-incremental" }
-tree-sitter = "0.26.9"
+tree-sitter = "0.27.0"
 tree-sitter-c = "0.24.2"
 tree-sitter-python = "0.25"
 rayon = "1.12.0"
@@ -35,7 +35,7 @@ tempfile = "3.27.0"
 blake3 = "1.8.2"
 fs2 = "0.4.3"
 regex = "1.12.2"
-zstd = "0.13.3"
+zstd = "0.14.0"
 
 [profile.release]
 lto = "thin"
