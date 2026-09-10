@@ -1,0 +1,56 @@
+executing /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-declaration-macros/.local/header-return-regression/binding-boundaries/oracle.sc with params=Map(inputPath -> /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-declaration-macros/.local/header-return-regression/binding-boundaries/input)
+Using generator for language: NEWC: CCpgGenerator
+Creating project `callback_alias` for code at `/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-declaration-macros/.local/header-return-regression/binding-boundaries/input/callback_alias`
+moving cpg.bin.zip to cpg.bin because it is already a database file
+Creating working copy of CPG to be safe
+Loading base CPG from: /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-declaration-macros/.local/header-return-regression/binding-boundaries/oracle-workspace/workspace/callback_alias/cpg.bin.tmp
+Code successfully imported. You can now query it using `cpg`.
+For an overview of all imported code, type `workspace`.
+Adding default overlays to base CPG
+The graph has been modified. You may want to use the `save` command to persist changes to disk.  All changes will also be saved collectively on exit
+The graph has been modified. You may want to use the `save` command to persist changes to disk.  All changes will also be saved collectively on exit
+Using generator for language: NEWC: CCpgGenerator
+Creating project `caller_alias` for code at `/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-declaration-macros/.local/header-return-regression/binding-boundaries/input/caller_alias`
+moving cpg.bin.zip to cpg.bin because it is already a database file
+Creating working copy of CPG to be safe
+Loading base CPG from: /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-declaration-macros/.local/header-return-regression/binding-boundaries/oracle-workspace/workspace/caller_alias/cpg.bin.tmp
+Code successfully imported. You can now query it using `cpg`.
+For an overview of all imported code, type `workspace`.
+Adding default overlays to base CPG
+The graph has been modified. You may want to use the `save` command to persist changes to disk.  All changes will also be saved collectively on exit
+The graph has been modified. You may want to use the `save` command to persist changes to disk.  All changes will also be saved collectively on exit
+Using generator for language: NEWC: CCpgGenerator
+Creating project `cycle_alias` for code at `/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-declaration-macros/.local/header-return-regression/binding-boundaries/input/cycle_alias`
+moving cpg.bin.zip to cpg.bin because it is already a database file
+Creating working copy of CPG to be safe
+Loading base CPG from: /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-declaration-macros/.local/header-return-regression/binding-boundaries/oracle-workspace/workspace/cycle_alias/cpg.bin.tmp
+Code successfully imported. You can now query it using `cpg`.
+For an overview of all imported code, type `workspace`.
+Adding default overlays to base CPG
+The graph has been modified. You may want to use the `save` command to persist changes to disk.  All changes will also be saved collectively on exit
+The graph has been modified. You may want to use the `save` command to persist changes to disk.  All changes will also be saved collectively on exit
+Using generator for language: NEWC: CCpgGenerator
+Creating project `late_alias` for code at `/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-declaration-macros/.local/header-return-regression/binding-boundaries/input/late_alias`
+moving cpg.bin.zip to cpg.bin because it is already a database file
+Creating working copy of CPG to be safe
+Loading base CPG from: /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-declaration-macros/.local/header-return-regression/binding-boundaries/oracle-workspace/workspace/late_alias/cpg.bin.tmp
+Code successfully imported. You can now query it using `cpg`.
+For an overview of all imported code, type `workspace`.
+Adding default overlays to base CPG
+The graph has been modified. You may want to use the `save` command to persist changes to disk.  All changes will also be saved collectively on exit
+The graph has been modified. You may want to use the `save` command to persist changes to disk.  All changes will also be saved collectively on exit
+Using generator for language: NEWC: CCpgGenerator
+Creating project `pointer_alias` for code at `/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-declaration-macros/.local/header-return-regression/binding-boundaries/input/pointer_alias`
+moving cpg.bin.zip to cpg.bin because it is already a database file
+Creating working copy of CPG to be safe
+Loading base CPG from: /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-declaration-macros/.local/header-return-regression/binding-boundaries/oracle-workspace/workspace/pointer_alias/cpg.bin.tmp
+Code successfully imported. You can now query it using `cpg`.
+For an overview of all imported code, type `workspace`.
+Adding default overlays to base CPG
+The graph has been modified. You may want to use the `save` command to persist changes to disk.  All changes will also be saved collectively on exit
+The graph has been modified. You may want to use the `save` command to persist changes to disk.  All changes will also be saved collectively on exit
+closing/saving project `callback_alias`
+closing/saving project `caller_alias`
+closing/saving project `cycle_alias`
+closing/saving project `late_alias`
+closing/saving project `pointer_alias`

@@ -1,0 +1,119 @@
+--- fresh-live
++++ before
+@@ -8,7 +8,7 @@
+     METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+     BLOCK CODE={ return VALUE; } TYPE_FULL_NAME=void ORDER=2
+       RETURN CODE=return VALUE; ORDER=1
+-        CALL NAME=VALUE CODE=VALUE TYPE_FULL_NAME=unsigned longint METHOD_FULL_NAME=main.c:VALUE:unsigned longint(0) SIGNATURE=unsigned longint(0) ORDER=1 DISPATCH_TYPE=INLINED
++        CALL NAME=VALUE CODE=VALUE TYPE_FULL_NAME=int METHOD_FULL_NAME=main.c:VALUE:int(0) SIGNATURE=int(0) ORDER=1 DISPATCH_TYPE=INLINED
+           BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+             LITERAL CODE=1UL TYPE_FULL_NAME=unsigned longint ORDER=1
+     METHOD_RETURN CODE=RET TYPE_FULL_NAME=longdouble ORDER=3
+@@ -16,16 +16,16 @@
+     METHOD_REF CODE=value TYPE_FULL_NAME=value METHOD_FULL_NAME=value ORDER=1
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+ 
+-METHOD NAME=VALUE CODE=#define VALUE 1UL FULL_NAME=main.c:VALUE:unsigned longint(0) SIGNATURE=unsigned longint(0) ORDER=1
++METHOD NAME=VALUE CODE=#define VALUE 1UL FULL_NAME=main.c:VALUE:int(0) SIGNATURE=int(0) ORDER=1
+   BLOCK TYPE_FULL_NAME=ANY ORDER=1
+-  METHOD_RETURN CODE=RET TYPE_FULL_NAME=unsigned longint ORDER=2
++  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=2
+ 
+ METHOD NAME=value CODE=long double value(void) { return VALUE; } FULL_NAME=value SIGNATURE=longdouble(void) ORDER=1
+   METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+   METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+   BLOCK CODE={ return VALUE; } TYPE_FULL_NAME=void ORDER=2
+     RETURN CODE=return VALUE; ORDER=1
+-      CALL NAME=VALUE CODE=VALUE TYPE_FULL_NAME=unsigned longint METHOD_FULL_NAME=main.c:VALUE:unsigned longint(0) SIGNATURE=unsigned longint(0) ORDER=1 DISPATCH_TYPE=INLINED
++      CALL NAME=VALUE CODE=VALUE TYPE_FULL_NAME=int METHOD_FULL_NAME=main.c:VALUE:int(0) SIGNATURE=int(0) ORDER=1 DISPATCH_TYPE=INLINED
+         BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+           LITERAL CODE=1UL TYPE_FULL_NAME=unsigned longint ORDER=1
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=longdouble ORDER=3
+@@ -39,23 +39,25 @@
+ NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+ NODES|NAMESPACE NAME=<global>
+ NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
++NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE_DECL NAME=longdouble FULL_NAME=longdouble CODE=longdouble IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE_DECL NAME=<global> FULL_NAME=main.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+ NODES|TYPE_DECL NAME=unsigned longint FULL_NAME=unsigned longint CODE=unsigned longint IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE_DECL NAME=value FULL_NAME=value CODE=value AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+ NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
++NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+ NODES|TYPE NAME=longdouble FULL_NAME=longdouble TYPE_DECL_FULL_NAME=longdouble
+ NODES|TYPE NAME=unsigned longint FULL_NAME=unsigned longint TYPE_DECL_FULL_NAME=unsigned longint
+ NODES|TYPE NAME=value FULL_NAME=value TYPE_DECL_FULL_NAME=value
+ NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+ EDGES|ARGUMENT value#4 -> value#5
+-EDGES|CALL value#5 -> main.c:VALUE:unsigned longint(0)#0
++EDGES|CALL value#5 -> main.c:VALUE:int(0)#0
+ EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+ EDGES|CFG main.c:<global>#0 -> main.c:<global>#11
+ EDGES|CFG main.c:<global>#1 -> value#5
+ EDGES|CFG main.c:<global>#11 -> main.c:<global>#12
+-EDGES|CFG main.c:VALUE:unsigned longint(0)#0 -> main.c:VALUE:unsigned longint(0)#2
++EDGES|CFG main.c:VALUE:int(0)#0 -> main.c:VALUE:int(0)#2
+ EDGES|CFG value#4 -> value#8
+ EDGES|CFG value#5 -> value#4
+ EDGES|CFG value#5 -> value#7
+@@ -63,9 +65,10 @@
+ EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+ EDGES|CONTAINS D:main.c:<global> -> D:value
+ EDGES|CONTAINS D:main.c:<global> -> main.c:<global>#0
+-EDGES|CONTAINS D:main.c:<global> -> main.c:VALUE:unsigned longint(0)#0
++EDGES|CONTAINS D:main.c:<global> -> main.c:VALUE:int(0)#0
+ EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+ EDGES|CONTAINS F:<includes> -> D:ANY
++EDGES|CONTAINS F:<includes> -> D:int
+ EDGES|CONTAINS F:<includes> -> D:longdouble
+ EDGES|CONTAINS F:<includes> -> D:unsigned longint
+ EDGES|CONTAINS F:<includes> -> D:void
+@@ -78,18 +81,18 @@
+ EDGES|CONTAINS main.c:<global>#1 -> value#5
+ EDGES|CONTAINS main.c:<global>#1 -> value#6
+ EDGES|CONTAINS main.c:<global>#1 -> value#7
+-EDGES|CONTAINS main.c:VALUE:unsigned longint(0)#0 -> main.c:VALUE:unsigned longint(0)#1
++EDGES|CONTAINS main.c:VALUE:int(0)#0 -> main.c:VALUE:int(0)#1
+ EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+ EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+ EDGES|EVAL_TYPE main.c:<global>#10 -> T:ANY
+ EDGES|EVAL_TYPE main.c:<global>#11 -> T:value
+ EDGES|EVAL_TYPE main.c:<global>#12 -> T:ANY
+-EDGES|EVAL_TYPE main.c:VALUE:unsigned longint(0)#1 -> T:ANY
+-EDGES|EVAL_TYPE main.c:VALUE:unsigned longint(0)#2 -> T:unsigned longint
++EDGES|EVAL_TYPE main.c:VALUE:int(0)#1 -> T:ANY
++EDGES|EVAL_TYPE main.c:VALUE:int(0)#2 -> T:int
+ EDGES|EVAL_TYPE value#1 -> T:void
+ EDGES|EVAL_TYPE value#2 -> T:void
+ EDGES|EVAL_TYPE value#3 -> T:void
+-EDGES|EVAL_TYPE value#5 -> T:unsigned longint
++EDGES|EVAL_TYPE value#5 -> T:int
+ EDGES|EVAL_TYPE value#6 -> T:ANY
+ EDGES|EVAL_TYPE value#7 -> T:unsigned longint
+ EDGES|EVAL_TYPE value#8 -> T:longdouble
+@@ -98,6 +101,7 @@
+ EDGES|REF NB:<includes>:<global> -> NS:<global>
+ EDGES|REF NB:main.c:<global> -> NS:<global>
+ EDGES|REF T:ANY -> D:ANY
++EDGES|REF T:int -> D:int
+ EDGES|REF T:longdouble -> D:longdouble
+ EDGES|REF T:unsigned longint -> D:unsigned longint
+ EDGES|REF T:value -> D:value
+@@ -105,6 +109,7 @@
+ EDGES|REF main.c:<global>#11 -> main.c:<global>#1
+ EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+ EDGES|SOURCE_FILE D:ANY -> F:<includes>
++EDGES|SOURCE_FILE D:int -> F:<includes>
+ EDGES|SOURCE_FILE D:longdouble -> F:<includes>
+ EDGES|SOURCE_FILE D:main.c:<global> -> F:main.c
+ EDGES|SOURCE_FILE D:unsigned longint -> F:<includes>
+@@ -115,7 +120,7 @@
+ EDGES|SOURCE_FILE NB:main.c:<global> -> F:main.c
+ EDGES|SOURCE_FILE main.c:<global>#0 -> F:main.c
+ EDGES|SOURCE_FILE main.c:<global>#1 -> F:main.c
+-EDGES|SOURCE_FILE main.c:VALUE:unsigned longint(0)#0 -> F:main.c
++EDGES|SOURCE_FILE main.c:VALUE:int(0)#0 -> F:main.c
+ FLOWS|REACHING_DEF[<RET>] value#4 -> value#8
+ FLOWS|REACHING_DEF[VALUE] value#5 -> value#4
+ FLOWS|REACHING_DEF[VALUE] value#5 -> value#8

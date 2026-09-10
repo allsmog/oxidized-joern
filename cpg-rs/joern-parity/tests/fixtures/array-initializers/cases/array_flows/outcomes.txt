@@ -1,0 +1,5 @@
+RESULT|brace_entry|true
+RESULT|clean_entry|false
+RESULT|compound_entry|false
+RESULT|overwrite_entry|false
+RESULT|scalar_entry|true

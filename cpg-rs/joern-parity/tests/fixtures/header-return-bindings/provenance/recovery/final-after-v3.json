@@ -1,0 +1,48 @@
+{
+  "binary": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-declaration-macros/.local/header-return-regression/frozen-final-v3/joern-parity",
+    "sha256": "453402b825089bd8ea3a43f3ab087004afde5296dc29c0206ab11ad7a815ddfb"
+  },
+  "liveReceipt": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-declaration-macros/.local/header-return-regression/recovery/live-run.json",
+    "sha256": "232a86540795608a35f92eef3e9d7cb2428f882775c1b19ffc4d97e622f30e63"
+  },
+  "results": [
+    {
+      "case": "recovery_error_then_valid",
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-declaration-macros/.local/header-return-regression/frozen-final-v3/joern-parity",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-declaration-macros/.local/header-return-regression/recovery/input/recovery_error_then_valid/api.h",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-declaration-macros/.local/header-return-regression/recovery/input/recovery_error_then_valid/main.c"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 0.004310125004849397,
+      "exact": false,
+      "completeDiffLines": 184,
+      "inputHashes": {
+        "api.h": "432ef6ae9f0d273a8922270166728e07c1f78aa494cc70be6a1bf79162bd393e",
+        "main.c": "1bd5ba0b963dd6b1fb51064ae441f4f9171db08da6a47b4225871fb145a5ec3a"
+      },
+      "expectedSha256": "430215ef3d9266cd72db3dc5423fc528702a01a3c49c42a392f69f109e8af066",
+      "actualSha256": "9e430e70de59397c93ccd688fb9b480f3e77543adcf3190a7c119198282a3edc"
+    },
+    {
+      "case": "recovery_valid_then_error",
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-declaration-macros/.local/header-return-regression/frozen-final-v3/joern-parity",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-declaration-macros/.local/header-return-regression/recovery/input/recovery_valid_then_error/api.h",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-declaration-macros/.local/header-return-regression/recovery/input/recovery_valid_then_error/main.c"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 0.004311333002988249,
+      "exact": false,
+      "completeDiffLines": 86,
+      "inputHashes": {
+        "api.h": "a26c4ee591b04ad5f0b295de508adb93f91b7b3eab3cb7a725de0d84b5fd9597",
+        "main.c": "1bd5ba0b963dd6b1fb51064ae441f4f9171db08da6a47b4225871fb145a5ec3a"
+      },
+      "expectedSha256": "0387985d0112832d926621370c12a56d646418e3c09ab0ecd8a1179ace7d732b",
+      "actualSha256": "b04875062d4b372da4d99407c184e49a0dd2dea0e39048aeaed165524c7df056"
+    }
+  ]
+}

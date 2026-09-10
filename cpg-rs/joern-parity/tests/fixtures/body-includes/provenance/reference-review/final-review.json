@@ -1,0 +1,35 @@
+{
+  "status": "READ_ONLY_DIAGNOSIS_COMPLETE",
+  "sourceCommit": "00c37613b3074025d3d65aa632cbd79af95d0c46",
+  "projects": 12,
+  "exactProjects": 2,
+  "canonicalLinesIncludingSeparators": 4676,
+  "nonemptySelectedRecords": 4588,
+  "verification": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/tenth-body-include-reference-review/verification.json",
+    "sha256": "52aefaede3c3b1ee1c04f9aa539c7f8702f1c0b595d608f6611e48600edb15d1",
+    "bytes": 218149
+  },
+  "diagnosis": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/tenth-body-include-reference-review/diagnosis.md",
+    "sha256": "839bab2112c0bbb52a257a6ca94706f76405b615892371033eb9dd33df38ea7f",
+    "bytes": 7854
+  },
+  "sourceFacts": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/tenth-body-include-reference-review/source-facts.json",
+    "sha256": "ad91f5fcb3e1ed699824cd2d1aa0f14cfe127e4ad436636f8fb0c91caece2eeb",
+    "bytes": 223777
+  },
+  "verifier": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/tenth-body-include-reference-review/verify.py",
+    "sha256": "e2960bfd36957da7ddc189cbaa6bd23a7a9ca9f0f9e869515e92404d63c4327c",
+    "bytes": 11777
+  },
+  "rawReferencesAndFullDifferencesRetained": true,
+  "runtimeReviewRepeated": false,
+  "sourceEdits": false,
+  "producerRuns": false,
+  "implementationAccepted": false,
+  "labelCorrection": "unresolved_header_controls quoted decoy resolves in live; no inferred fallback search rule.",
+  "ownershipCorrection": "Local TYPE_DECL physical source is scope.h independently of its caller method."
+}

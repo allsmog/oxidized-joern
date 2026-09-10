@@ -1,0 +1,12 @@
+{
+  "matchingLost": [],
+  "matchingGained": [
+    "NODES|TYPE_DECL NAME=<global> FULL_NAME=main.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=3"
+  ],
+  "allAdded": [
+    "NODES|TYPE_DECL NAME=<global> FULL_NAME=main.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=3"
+  ],
+  "allRemoved": [
+    "NODES|TYPE_DECL NAME=<global> FULL_NAME=main.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1"
+  ]
+}

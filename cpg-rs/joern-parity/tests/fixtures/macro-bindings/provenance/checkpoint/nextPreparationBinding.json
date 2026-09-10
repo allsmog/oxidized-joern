@@ -1,0 +1,28 @@
+{
+  "status": "ACCEPTED_PARENT_BOUND_NEXT_SOURCE_PREPARATION_ONLY",
+  "acceptedCommit": "a806866acc83ce9b40b69259fe9e430a3e818dd0",
+  "acceptedTree": "5b68b8deef7b4050734f04aba3f5b53934c74083",
+  "acceptedBranch": "codex/astra-parity-sprint",
+  "frozenBuild": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/thirteenth-batch/final-release-v2/bin/source-bindings.json",
+    "sha256": "d339e070ad6dc154a344b8d1c07953fb6fd85e21c3cb79381286fc08847691e5",
+    "bytes": 2153885
+  },
+  "buildParentRevisionIsPrecommit": "afe23fc4bedbbf6b669f2bd6dfed0f0af141ecfc",
+  "commitTreeEqualsReviewedTestedIndex": true,
+  "sourceFiles": 151,
+  "fixtureFiles": 11821,
+  "inputPreparation": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-include-references/.local/macro-binding-input-preparation-v1/manifest.json",
+    "sha256": "3211e426c8f6c9ad06cf555ee1639f5096df641d2a094a333249c124dc13ef57",
+    "bytes": 1960
+  },
+  "rootInputReview": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/thirteenth-batch/next-macro-input-root-review-v1.json",
+    "sha256": "2a959317e02bd13ab0e7096f2fa3d25fb02d4e1a89b045d8559aebf3adf6361f",
+    "bytes": 1089
+  },
+  "preparedParentNullsAreHistorical": true,
+  "producerReleased": false,
+  "requiredNextStep": "Create an isolated worker at this accepted commit; adapt and review the exact four-case canonical and saved-graph observer runners before reference execution. New expected outputs remain unobserved."
+}

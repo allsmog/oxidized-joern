@@ -1,0 +1,1182 @@
+--- joern
++++ before_fix
+@@ -11,8 +11,6 @@
+   METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+ 
+ METHOD NAME=<operator>.arrayInitializer FULL_NAME=<operator>.arrayInitializer ORDER=0
+-  METHOD_PARAMETER_IN NAME=p0 CODE=p0 TYPE_FULL_NAME=ANY ORDER=0
+-  METHOD_PARAMETER_OUT NAME=p0 CODE=p0 TYPE_FULL_NAME=ANY ORDER=0
+   METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+   BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+   METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+@@ -25,12 +23,6 @@
+   METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+   METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+-
+-METHOD NAME=<operator>.pointerCall FULL_NAME=<operator>.pointerCall ORDER=0
+-  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+-  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+-  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+-  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+ 
+ METHOD NAME=lua_absindex CODE=extern int extern int  ()(lua_State *, int); FULL_NAME=<unresolvedNamespace>.lua_absindex SIGNATURE=int(lua_State*,int) ORDER=1
+   METHOD_PARAMETER_IN NAME=L CODE=lua_State *L TYPE_FULL_NAME=lua_State* ORDER=1
+@@ -158,7 +150,7 @@
+   BLOCK TYPE_FULL_NAME=ANY ORDER=2
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+ 
+-METHOD NAME=lua_gc CODE=extern int extern int  ()(lua_State *, int, ...); FULL_NAME=<unresolvedNamespace>.lua_gc SIGNATURE=int(lua_State*,int,...) ORDER=1
++METHOD NAME=lua_gc CODE=extern int extern int  ()(lua_State *, int, <param>3...); FULL_NAME=<unresolvedNamespace>.lua_gc SIGNATURE=int(lua_State*,int,...) ORDER=1
+   METHOD_PARAMETER_IN NAME=L CODE=lua_State *L TYPE_FULL_NAME=lua_State* ORDER=1
+   METHOD_PARAMETER_OUT NAME=L CODE=lua_State *L TYPE_FULL_NAME=lua_State* ORDER=1
+   METHOD_PARAMETER_IN NAME=what CODE=int what TYPE_FULL_NAME=int ORDER=2
+@@ -168,7 +160,7 @@
+   BLOCK TYPE_FULL_NAME=ANY ORDER=4
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=5
+ 
+-METHOD NAME=lua_getallocf CODE=extern lua_Alloc extern lua_Alloc  ()(lua_State *, void * *); FULL_NAME=<unresolvedNamespace>.lua_getallocf SIGNATURE=lua_Alloc(lua_State*,void**) ORDER=1
++METHOD NAME=lua_getallocf CODE=extern lua_Alloc extern lua_Alloc  ()(lua_State *, void **); FULL_NAME=<unresolvedNamespace>.lua_getallocf SIGNATURE=lua_Alloc(lua_State*,void**) ORDER=1
+   METHOD_PARAMETER_IN NAME=L CODE=lua_State *L TYPE_FULL_NAME=lua_State* ORDER=1
+   METHOD_PARAMETER_OUT NAME=L CODE=lua_State *L TYPE_FULL_NAME=lua_State* ORDER=1
+   METHOD_PARAMETER_IN NAME=ud CODE=void **ud TYPE_FULL_NAME=void** ORDER=2
+@@ -242,7 +234,7 @@
+   BLOCK TYPE_FULL_NAME=ANY ORDER=4
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=5
+ 
+-METHOD NAME=lua_getlocal CODE=extern const char extern const char * ()(lua_State *, const lua_Debug *, int); FULL_NAME=<unresolvedNamespace>.lua_getlocal SIGNATURE=char*(lua_State*,lua_Debug*,int) ORDER=1
++METHOD NAME=lua_getlocal CODE=LUA_API const char *(lua_getlocal) (lua_State *L, const lua_Debug *ar, int n); FULL_NAME=<unresolvedNamespace>.lua_getlocal SIGNATURE=char*(lua_State*,lua_Debug*,int) ORDER=1
+   METHOD_PARAMETER_IN NAME=L CODE=lua_State *L TYPE_FULL_NAME=lua_State* ORDER=1
+   METHOD_PARAMETER_OUT NAME=L CODE=lua_State *L TYPE_FULL_NAME=lua_State* ORDER=1
+   METHOD_PARAMETER_IN NAME=ar CODE=const lua_Debug *ar TYPE_FULL_NAME=lua_Debug* ORDER=2
+@@ -284,7 +276,7 @@
+   BLOCK TYPE_FULL_NAME=ANY ORDER=2
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+ 
+-METHOD NAME=lua_getupvalue CODE=extern const char extern const char * ()(lua_State *, int, int); FULL_NAME=<unresolvedNamespace>.lua_getupvalue SIGNATURE=char*(lua_State*,int,int) ORDER=1
++METHOD NAME=lua_getupvalue CODE=LUA_API const char *(lua_getupvalue) (lua_State *L, int funcindex, int n); FULL_NAME=<unresolvedNamespace>.lua_getupvalue SIGNATURE=char*(lua_State*,int,int) ORDER=1
+   METHOD_PARAMETER_IN NAME=L CODE=lua_State *L TYPE_FULL_NAME=lua_State* ORDER=1
+   METHOD_PARAMETER_OUT NAME=L CODE=lua_State *L TYPE_FULL_NAME=lua_State* ORDER=1
+   METHOD_PARAMETER_IN NAME=funcindex CODE=int funcindex TYPE_FULL_NAME=int ORDER=2
+@@ -362,7 +354,7 @@
+   BLOCK TYPE_FULL_NAME=ANY ORDER=6
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=7
+ 
+-METHOD NAME=lua_newstate CODE=extern lua_State extern lua_State * ()(lua_Alloc, void *); FULL_NAME=<unresolvedNamespace>.lua_newstate SIGNATURE=lua_State*(lua_Alloc,void*) ORDER=1
++METHOD NAME=lua_newstate CODE=LUA_API lua_State *(lua_newstate) (lua_Alloc f, void *ud); FULL_NAME=<unresolvedNamespace>.lua_newstate SIGNATURE=lua_State*(lua_Alloc,void*) ORDER=1
+   METHOD_PARAMETER_IN NAME=f CODE=lua_Alloc f TYPE_FULL_NAME=lua_Alloc ORDER=1
+   METHOD_PARAMETER_OUT NAME=f CODE=lua_Alloc f TYPE_FULL_NAME=lua_Alloc ORDER=1
+   METHOD_PARAMETER_IN NAME=ud CODE=void *ud TYPE_FULL_NAME=void* ORDER=2
+@@ -370,13 +362,13 @@
+   BLOCK TYPE_FULL_NAME=ANY ORDER=3
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=lua_State* ORDER=4
+ 
+-METHOD NAME=lua_newthread CODE=extern lua_State extern lua_State * ()(lua_State *); FULL_NAME=<unresolvedNamespace>.lua_newthread SIGNATURE=lua_State*(lua_State*) ORDER=1
++METHOD NAME=lua_newthread CODE=LUA_API lua_State *(lua_newthread) (lua_State *L); FULL_NAME=<unresolvedNamespace>.lua_newthread SIGNATURE=lua_State*(lua_State*) ORDER=1
+   METHOD_PARAMETER_IN NAME=L CODE=lua_State *L TYPE_FULL_NAME=lua_State* ORDER=1
+   METHOD_PARAMETER_OUT NAME=L CODE=lua_State *L TYPE_FULL_NAME=lua_State* ORDER=1
+   BLOCK TYPE_FULL_NAME=ANY ORDER=2
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=lua_State* ORDER=3
+ 
+-METHOD NAME=lua_newuserdatauv CODE=extern void extern void * ()(lua_State *, size_t, int); FULL_NAME=<unresolvedNamespace>.lua_newuserdatauv SIGNATURE=void*(lua_State*,size_t,int) ORDER=1
++METHOD NAME=lua_newuserdatauv CODE=LUA_API void *(lua_newuserdatauv) (lua_State *L, size_t sz, int nuvalue); FULL_NAME=<unresolvedNamespace>.lua_newuserdatauv SIGNATURE=void*(lua_State*,size_t,int) ORDER=1
+   METHOD_PARAMETER_IN NAME=L CODE=lua_State *L TYPE_FULL_NAME=lua_State* ORDER=1
+   METHOD_PARAMETER_OUT NAME=L CODE=lua_State *L TYPE_FULL_NAME=lua_State* ORDER=1
+   METHOD_PARAMETER_IN NAME=sz CODE=size_t sz TYPE_FULL_NAME=size_t ORDER=2
+@@ -428,7 +420,7 @@
+   BLOCK TYPE_FULL_NAME=ANY ORDER=4
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=5
+ 
+-METHOD NAME=lua_pushfstring CODE=extern const char extern const char * ()(lua_State *, const char *, ...); FULL_NAME=<unresolvedNamespace>.lua_pushfstring SIGNATURE=char*(lua_State*,char*,...) ORDER=1
++METHOD NAME=lua_pushfstring CODE=LUA_API const char *(lua_pushfstring) (lua_State *L, const char *fmt, ...); FULL_NAME=<unresolvedNamespace>.lua_pushfstring SIGNATURE=char*(lua_State*,char*,...) ORDER=1
+   METHOD_PARAMETER_IN NAME=L CODE=lua_State *L TYPE_FULL_NAME=lua_State* ORDER=1
+   METHOD_PARAMETER_OUT NAME=L CODE=lua_State *L TYPE_FULL_NAME=lua_State* ORDER=1
+   METHOD_PARAMETER_IN NAME=fmt CODE=const char *fmt TYPE_FULL_NAME=char* ORDER=2
+@@ -454,7 +446,7 @@
+   BLOCK TYPE_FULL_NAME=ANY ORDER=3
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=4
+ 
+-METHOD NAME=lua_pushlstring CODE=extern const char extern const char * ()(lua_State *, const char *, size_t); FULL_NAME=<unresolvedNamespace>.lua_pushlstring SIGNATURE=char*(lua_State*,char*,size_t) ORDER=1
++METHOD NAME=lua_pushlstring CODE=LUA_API const char *(lua_pushlstring) (lua_State *L, const char *s, size_t len); FULL_NAME=<unresolvedNamespace>.lua_pushlstring SIGNATURE=char*(lua_State*,char*,size_t) ORDER=1
+   METHOD_PARAMETER_IN NAME=L CODE=lua_State *L TYPE_FULL_NAME=lua_State* ORDER=1
+   METHOD_PARAMETER_OUT NAME=L CODE=lua_State *L TYPE_FULL_NAME=lua_State* ORDER=1
+   METHOD_PARAMETER_IN NAME=s CODE=const char *s TYPE_FULL_NAME=char* ORDER=2
+@@ -478,7 +470,7 @@
+   BLOCK TYPE_FULL_NAME=ANY ORDER=3
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=4
+ 
+-METHOD NAME=lua_pushstring CODE=extern const char extern const char * ()(lua_State *, const char *); FULL_NAME=<unresolvedNamespace>.lua_pushstring SIGNATURE=char*(lua_State*,char*) ORDER=1
++METHOD NAME=lua_pushstring CODE=LUA_API const char *(lua_pushstring) (lua_State *L, const char *s); FULL_NAME=<unresolvedNamespace>.lua_pushstring SIGNATURE=char*(lua_State*,char*) ORDER=1
+   METHOD_PARAMETER_IN NAME=L CODE=lua_State *L TYPE_FULL_NAME=lua_State* ORDER=1
+   METHOD_PARAMETER_OUT NAME=L CODE=lua_State *L TYPE_FULL_NAME=lua_State* ORDER=1
+   METHOD_PARAMETER_IN NAME=s CODE=const char *s TYPE_FULL_NAME=char* ORDER=2
+@@ -500,7 +492,7 @@
+   BLOCK TYPE_FULL_NAME=ANY ORDER=3
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=4
+ 
+-METHOD NAME=lua_pushvfstring CODE=extern const char extern const char * ()(lua_State *, const char *, va_list); FULL_NAME=<unresolvedNamespace>.lua_pushvfstring SIGNATURE=char*(lua_State*,char*,va_list) ORDER=1
++METHOD NAME=lua_pushvfstring CODE=LUA_API const char *(lua_pushvfstring) (lua_State *L, const char *fmt,\n                                                      va_list argp); FULL_NAME=<unresolvedNamespace>.lua_pushvfstring SIGNATURE=char*(lua_State*,char*,va_list) ORDER=1
+   METHOD_PARAMETER_IN NAME=L CODE=lua_State *L TYPE_FULL_NAME=lua_State* ORDER=1
+   METHOD_PARAMETER_OUT NAME=L CODE=lua_State *L TYPE_FULL_NAME=lua_State* ORDER=1
+   METHOD_PARAMETER_IN NAME=fmt CODE=const char *fmt TYPE_FULL_NAME=char* ORDER=2
+@@ -680,7 +672,7 @@
+   BLOCK TYPE_FULL_NAME=ANY ORDER=4
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=5
+ 
+-METHOD NAME=lua_setlocal CODE=extern const char extern const char * ()(lua_State *, const lua_Debug *, int); FULL_NAME=<unresolvedNamespace>.lua_setlocal SIGNATURE=char*(lua_State*,lua_Debug*,int) ORDER=1
++METHOD NAME=lua_setlocal CODE=LUA_API const char *(lua_setlocal) (lua_State *L, const lua_Debug *ar, int n); FULL_NAME=<unresolvedNamespace>.lua_setlocal SIGNATURE=char*(lua_State*,lua_Debug*,int) ORDER=1
+   METHOD_PARAMETER_IN NAME=L CODE=lua_State *L TYPE_FULL_NAME=lua_State* ORDER=1
+   METHOD_PARAMETER_OUT NAME=L CODE=lua_State *L TYPE_FULL_NAME=lua_State* ORDER=1
+   METHOD_PARAMETER_IN NAME=ar CODE=const lua_Debug *ar TYPE_FULL_NAME=lua_Debug* ORDER=2
+@@ -714,7 +706,7 @@
+   BLOCK TYPE_FULL_NAME=ANY ORDER=3
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=4
+ 
+-METHOD NAME=lua_setupvalue CODE=extern const char extern const char * ()(lua_State *, int, int); FULL_NAME=<unresolvedNamespace>.lua_setupvalue SIGNATURE=char*(lua_State*,int,int) ORDER=1
++METHOD NAME=lua_setupvalue CODE=LUA_API const char *(lua_setupvalue) (lua_State *L, int funcindex, int n); FULL_NAME=<unresolvedNamespace>.lua_setupvalue SIGNATURE=char*(lua_State*,int,int) ORDER=1
+   METHOD_PARAMETER_IN NAME=L CODE=lua_State *L TYPE_FULL_NAME=lua_State* ORDER=1
+   METHOD_PARAMETER_OUT NAME=L CODE=lua_State *L TYPE_FULL_NAME=lua_State* ORDER=1
+   METHOD_PARAMETER_IN NAME=funcindex CODE=int funcindex TYPE_FULL_NAME=int ORDER=2
+@@ -782,7 +774,7 @@
+   BLOCK TYPE_FULL_NAME=ANY ORDER=4
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=lua_Integer ORDER=5
+ 
+-METHOD NAME=lua_tolstring CODE=extern const char extern const char * ()(lua_State *, int, size_t *); FULL_NAME=<unresolvedNamespace>.lua_tolstring SIGNATURE=char*(lua_State*,int,size_t*) ORDER=1
++METHOD NAME=lua_tolstring CODE=LUA_API const char     *(lua_tolstring) (lua_State *L, int idx, size_t *len); FULL_NAME=<unresolvedNamespace>.lua_tolstring SIGNATURE=char*(lua_State*,int,size_t*) ORDER=1
+   METHOD_PARAMETER_IN NAME=L CODE=lua_State *L TYPE_FULL_NAME=lua_State* ORDER=1
+   METHOD_PARAMETER_OUT NAME=L CODE=lua_State *L TYPE_FULL_NAME=lua_State* ORDER=1
+   METHOD_PARAMETER_IN NAME=idx CODE=int idx TYPE_FULL_NAME=int ORDER=2
+@@ -802,7 +794,7 @@
+   BLOCK TYPE_FULL_NAME=ANY ORDER=4
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=lua_Number ORDER=5
+ 
+-METHOD NAME=lua_topointer CODE=extern const void extern const void * ()(lua_State *, int); FULL_NAME=<unresolvedNamespace>.lua_topointer SIGNATURE=void*(lua_State*,int) ORDER=1
++METHOD NAME=lua_topointer CODE=LUA_API const void     *(lua_topointer) (lua_State *L, int idx); FULL_NAME=<unresolvedNamespace>.lua_topointer SIGNATURE=void*(lua_State*,int) ORDER=1
+   METHOD_PARAMETER_IN NAME=L CODE=lua_State *L TYPE_FULL_NAME=lua_State* ORDER=1
+   METHOD_PARAMETER_OUT NAME=L CODE=lua_State *L TYPE_FULL_NAME=lua_State* ORDER=1
+   METHOD_PARAMETER_IN NAME=idx CODE=int idx TYPE_FULL_NAME=int ORDER=2
+@@ -810,7 +802,7 @@
+   BLOCK TYPE_FULL_NAME=ANY ORDER=3
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=void* ORDER=4
+ 
+-METHOD NAME=lua_tothread CODE=extern lua_State extern lua_State * ()(lua_State *, int); FULL_NAME=<unresolvedNamespace>.lua_tothread SIGNATURE=lua_State*(lua_State*,int) ORDER=1
++METHOD NAME=lua_tothread CODE=LUA_API lua_State      *(lua_tothread) (lua_State *L, int idx); FULL_NAME=<unresolvedNamespace>.lua_tothread SIGNATURE=lua_State*(lua_State*,int) ORDER=1
+   METHOD_PARAMETER_IN NAME=L CODE=lua_State *L TYPE_FULL_NAME=lua_State* ORDER=1
+   METHOD_PARAMETER_OUT NAME=L CODE=lua_State *L TYPE_FULL_NAME=lua_State* ORDER=1
+   METHOD_PARAMETER_IN NAME=idx CODE=int idx TYPE_FULL_NAME=int ORDER=2
+@@ -818,7 +810,7 @@
+   BLOCK TYPE_FULL_NAME=ANY ORDER=3
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=lua_State* ORDER=4
+ 
+-METHOD NAME=lua_touserdata CODE=extern void extern void * ()(lua_State *, int); FULL_NAME=<unresolvedNamespace>.lua_touserdata SIGNATURE=void*(lua_State*,int) ORDER=1
++METHOD NAME=lua_touserdata CODE=LUA_API void	       *(lua_touserdata) (lua_State *L, int idx); FULL_NAME=<unresolvedNamespace>.lua_touserdata SIGNATURE=void*(lua_State*,int) ORDER=1
+   METHOD_PARAMETER_IN NAME=L CODE=lua_State *L TYPE_FULL_NAME=lua_State* ORDER=1
+   METHOD_PARAMETER_OUT NAME=L CODE=lua_State *L TYPE_FULL_NAME=lua_State* ORDER=1
+   METHOD_PARAMETER_IN NAME=idx CODE=int idx TYPE_FULL_NAME=int ORDER=2
+@@ -834,7 +826,7 @@
+   BLOCK TYPE_FULL_NAME=ANY ORDER=3
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=4
+ 
+-METHOD NAME=lua_typename CODE=extern const char extern const char * ()(lua_State *, int); FULL_NAME=<unresolvedNamespace>.lua_typename SIGNATURE=char*(lua_State*,int) ORDER=1
++METHOD NAME=lua_typename CODE=LUA_API const char     *(lua_typename) (lua_State *L, int tp); FULL_NAME=<unresolvedNamespace>.lua_typename SIGNATURE=char*(lua_State*,int) ORDER=1
+   METHOD_PARAMETER_IN NAME=L CODE=lua_State *L TYPE_FULL_NAME=lua_State* ORDER=1
+   METHOD_PARAMETER_OUT NAME=L CODE=lua_State *L TYPE_FULL_NAME=lua_State* ORDER=1
+   METHOD_PARAMETER_IN NAME=tp CODE=int tp TYPE_FULL_NAME=int ORDER=2
+@@ -842,7 +834,7 @@
+   BLOCK TYPE_FULL_NAME=ANY ORDER=3
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=char* ORDER=4
+ 
+-METHOD NAME=lua_upvalueid CODE=extern void extern void * ()(lua_State *, int, int); FULL_NAME=<unresolvedNamespace>.lua_upvalueid SIGNATURE=void*(lua_State*,int,int) ORDER=1
++METHOD NAME=lua_upvalueid CODE=LUA_API void *(lua_upvalueid) (lua_State *L, int fidx, int n); FULL_NAME=<unresolvedNamespace>.lua_upvalueid SIGNATURE=void*(lua_State*,int,int) ORDER=1
+   METHOD_PARAMETER_IN NAME=L CODE=lua_State *L TYPE_FULL_NAME=lua_State* ORDER=1
+   METHOD_PARAMETER_OUT NAME=L CODE=lua_State *L TYPE_FULL_NAME=lua_State* ORDER=1
+   METHOD_PARAMETER_IN NAME=fidx CODE=int fidx TYPE_FULL_NAME=int ORDER=2
+@@ -910,7 +902,6 @@
+   METHOD_PARAMETER_IN NAME=j CODE=lua_Integer j TYPE_FULL_NAME=lua_Integer ORDER=2
+   METHOD_PARAMETER_OUT NAME=j CODE=lua_Integer j TYPE_FULL_NAME=lua_Integer ORDER=2
+   BLOCK CODE={return ADD(i,j);} TYPE_FULL_NAME=void ORDER=3
+-    LOCAL NAME=lua_Unsigned CODE=<unknown> lua_Unsigned TYPE_FULL_NAME=ANY ORDER=0
+     RETURN CODE=return ADD(i,j); ORDER=1
+       CALL NAME=ADD CODE=ADD(i,j) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=main.c:ADD:ANY(2) SIGNATURE=ANY(2) ORDER=1 DISPATCH_TYPE=INLINED
+         IDENTIFIER NAME=i CODE=i TYPE_FULL_NAME=lua_Integer ORDER=1 ARGUMENT_INDEX=1
+@@ -919,42 +910,41 @@
+           CALL NAME=<operator>.cast CODE=(lua_Integer)(((lua_Unsigned)(i)) + ((lua_Unsigned)(j))) TYPE_FULL_NAME=lua_Integer METHOD_FULL_NAME=<operator>.cast ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+             TYPE_REF CODE=lua_Integer TYPE_FULL_NAME=lua_Integer ORDER=1 ARGUMENT_INDEX=1
+             CALL NAME=<operator>.addition CODE=((lua_Unsigned)(i)) + ((lua_Unsigned)(j)) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+-              CALL NAME=<operator>.pointerCall CODE=(lua_Unsigned)(i) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.pointerCall ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=DYNAMIC_DISPATCH
+-                IDENTIFIER NAME=lua_Unsigned CODE=<unknown> lua_Unsigned TYPE_FULL_NAME=ANY ORDER=1
+-                IDENTIFIER NAME=i CODE=i TYPE_FULL_NAME=lua_Integer ORDER=2 ARGUMENT_INDEX=1
+-              CALL NAME=<operator>.pointerCall CODE=(lua_Unsigned)(j) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.pointerCall ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=DYNAMIC_DISPATCH
+-                IDENTIFIER NAME=lua_Unsigned CODE=<unknown> lua_Unsigned TYPE_FULL_NAME=ANY ORDER=1
+-                IDENTIFIER NAME=j CODE=j TYPE_FULL_NAME=lua_Integer ORDER=2 ARGUMENT_INDEX=1
++              CALL NAME=<operator>.cast CODE=(lua_Unsigned)(i) TYPE_FULL_NAME=lua_Unsigned METHOD_FULL_NAME=<operator>.cast ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
++                TYPE_REF CODE=lua_Unsigned TYPE_FULL_NAME=lua_Unsigned ORDER=1 ARGUMENT_INDEX=1
++                IDENTIFIER NAME=i CODE=i TYPE_FULL_NAME=lua_Integer ORDER=2 ARGUMENT_INDEX=2
++              CALL NAME=<operator>.cast CODE=(lua_Unsigned)(j) TYPE_FULL_NAME=lua_Unsigned METHOD_FULL_NAME=<operator>.cast ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
++                TYPE_REF CODE=lua_Unsigned TYPE_FULL_NAME=lua_Unsigned ORDER=1 ARGUMENT_INDEX=1
++                IDENTIFIER NAME=j CODE=j TYPE_FULL_NAME=lua_Integer ORDER=2 ARGUMENT_INDEX=2
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=4
+ 
+ METHOD NAME=direct CODE=int direct(lua_Integer i){return l_castS2U(i);} FULL_NAME=direct SIGNATURE=int(lua_Integer) ORDER=1
+   METHOD_PARAMETER_IN NAME=i CODE=lua_Integer i TYPE_FULL_NAME=lua_Integer ORDER=1
+   METHOD_PARAMETER_OUT NAME=i CODE=lua_Integer i TYPE_FULL_NAME=lua_Integer ORDER=1
+   BLOCK CODE={return l_castS2U(i);} TYPE_FULL_NAME=void ORDER=2
+-    LOCAL NAME=lua_Unsigned CODE=<unknown> lua_Unsigned TYPE_FULL_NAME=ANY ORDER=0
+     RETURN CODE=return l_castS2U(i); ORDER=1
+       CALL NAME=l_castS2U CODE=l_castS2U(i) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=llimits.h:l_castS2U:ANY(1) SIGNATURE=ANY(1) ORDER=1 DISPATCH_TYPE=INLINED
+         IDENTIFIER NAME=i CODE=i TYPE_FULL_NAME=lua_Integer ORDER=1 ARGUMENT_INDEX=1
+         BLOCK TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+-          CALL NAME=<operator>.pointerCall CODE=(lua_Unsigned)(i) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.pointerCall ORDER=1 DISPATCH_TYPE=DYNAMIC_DISPATCH
+-            IDENTIFIER NAME=lua_Unsigned CODE=<unknown> lua_Unsigned TYPE_FULL_NAME=ANY ORDER=1
+-            IDENTIFIER NAME=i CODE=i TYPE_FULL_NAME=lua_Integer ORDER=2 ARGUMENT_INDEX=1
++          CALL NAME=<operator>.cast CODE=(lua_Unsigned)(i) TYPE_FULL_NAME=lua_Unsigned METHOD_FULL_NAME=<operator>.cast ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
++            TYPE_REF CODE=lua_Unsigned TYPE_FULL_NAME=lua_Unsigned ORDER=1 ARGUMENT_INDEX=1
++            IDENTIFIER NAME=i CODE=i TYPE_FULL_NAME=lua_Integer ORDER=2 ARGUMENT_INDEX=2
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+ 
+ METHOD NAME=<global> CODE=<global> FULL_NAME=llimits.h:<global> ORDER=1
+   BLOCK TYPE_FULL_NAME=ANY ORDER=1
+     TYPE_DECL NAME=lu_mem CODE=typedef LUAI_UMEM lu_mem; FULL_NAME=lu_mem ORDER=1
+     TYPE_DECL NAME=l_mem CODE=typedef LUAI_MEM l_mem; FULL_NAME=l_mem ORDER=2
+-    TYPE_DECL NAME=lu_mem CODE=typedef size_t lu_mem; FULL_NAME=lu_mem<duplicate>0 ORDER=3
+-    TYPE_DECL NAME=l_mem CODE=typedef ptrdiff_t l_mem; FULL_NAME=l_mem<duplicate>0 ORDER=4
+-    TYPE_DECL NAME=lu_mem CODE=typedef unsigned long lu_mem; FULL_NAME=lu_mem<duplicate>1 ORDER=5
+-    TYPE_DECL NAME=l_mem CODE=typedef long l_mem; FULL_NAME=l_mem<duplicate>1 ORDER=6
++    TYPE_DECL NAME=lu_mem CODE=typedef size_t lu_mem; FULL_NAME=lu_mem ORDER=3
++    TYPE_DECL NAME=l_mem CODE=typedef ptrdiff_t l_mem; FULL_NAME=l_mem ORDER=4
++    TYPE_DECL NAME=lu_mem CODE=typedef unsigned long lu_mem; FULL_NAME=lu_mem ORDER=5
++    TYPE_DECL NAME=l_mem CODE=typedef long l_mem; FULL_NAME=l_mem ORDER=6
+     TYPE_DECL NAME=lu_byte CODE=typedef unsigned char lu_byte; FULL_NAME=lu_byte ORDER=7
+     TYPE_DECL NAME=ls_byte CODE=typedef signed char ls_byte; FULL_NAME=ls_byte ORDER=8
+     TYPE_DECL NAME=l_uacNumber CODE=typedef LUAI_UACNUMBER l_uacNumber; FULL_NAME=l_uacNumber ORDER=9
+     TYPE_DECL NAME=l_uacInt CODE=typedef LUAI_UACINT l_uacInt; FULL_NAME=l_uacInt ORDER=10
+     TYPE_DECL NAME=l_uint32 CODE=typedef unsigned int l_uint32; FULL_NAME=l_uint32 ORDER=11
+-    TYPE_DECL NAME=l_uint32 CODE=typedef unsigned long l_uint32; FULL_NAME=l_uint32<duplicate>0 ORDER=12
++    TYPE_DECL NAME=l_uint32 CODE=typedef unsigned long l_uint32; FULL_NAME=l_uint32 ORDER=12
+     TYPE_DECL NAME=Instruction CODE=typedef l_uint32 Instruction; FULL_NAME=Instruction ORDER=13
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+ 
+@@ -969,7 +959,7 @@
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+ 
+ METHOD NAME=<global> CODE=<global> FULL_NAME=lua.h:<global> ORDER=1
+-  TYPE_DECL NAME=lua_Debug CODE=struct lua_Debug {\n  int event;\n  const char *name;	/* (n) */\n  const char *namewhat;	/* (n) 'global', 'local', 'field', 'method' */\n  const char *what;	/* (S) 'Lua', 'C', 'main', 'tail' */\n  const char *source;	/* (S) */\n  size_t srclen;	/* (S) */\n  int currentline;	/* (l) */\n  int linedefined;	/* (S) */\n  int lastlinedefined;	/* (S) */\n  unsigned char nups;	/* (u) number of upvalues */\n  unsigned char nparams;/* (u) number of parameters */\n  char isvararg;        /* (u) */\n  char istailcall;	/* (t) */\n  unsigned short ftransfer;   /* (r) index of first value transferred */\n  unsigned short ntransfer;   /* (r) number of transferred values */\n  char short_src[LUA_IDSIZE]; /* (S) */\n  /* private part */\n  struct CallInfo *i_ci;  /* active function */\n} FULL_NAME=lua_Debug<duplicate>1 ORDER=1
++  TYPE_DECL NAME=lua_Debug CODE=struct lua_Debug {\n  int event;\n  const char *name;	/* (n) */\n  const char *namewhat;	/* (n) 'global', 'local', 'field', 'method' */\n  const char *what;	/* (S) 'Lua', 'C', 'main', 'tail' */\n  const char *source;	/* (S) */\n  size_t srclen;	/* (S) */\n  int currentline;	/* (l) */\n  int linedefined;	/* (S) */\n  int lastlinedefined;	/* (S) */\n  unsigned char nups;	/* (u) number of upvalues */\n  unsigned char nparams;/* (u) number of parameters */\n  char isvararg;        /* (u) */\n  char istailcall;	/* (t) */\n  unsigned short ftransfer;   /* (r) index of first value transferred */\n  unsigned short ntransfer;   /* (r) number of transferred values */\n  char short_src[LUA_IDSIZE]; /* (S) */\n  /* private part */\n  struct CallInfo *i_ci;  /* active function */\n} FULL_NAME=lua_Debug ORDER=1
+     MEMBER NAME=event CODE=event TYPE_FULL_NAME=int ORDER=1
+     MEMBER NAME=name CODE=*name TYPE_FULL_NAME=char* ORDER=2
+     MEMBER NAME=namewhat CODE=*namewhat TYPE_FULL_NAME=char* ORDER=3
+@@ -983,8 +973,8 @@
+     MEMBER NAME=nparams CODE=nparams TYPE_FULL_NAME=unsigned char ORDER=11
+     MEMBER NAME=isvararg CODE=isvararg TYPE_FULL_NAME=char ORDER=12
+     MEMBER NAME=istailcall CODE=istailcall TYPE_FULL_NAME=char ORDER=13
+-    MEMBER NAME=ftransfer CODE=ftransfer TYPE_FULL_NAME=shortunsigned ORDER=14
+-    MEMBER NAME=ntransfer CODE=ntransfer TYPE_FULL_NAME=shortunsigned ORDER=15
++    MEMBER NAME=ftransfer CODE=ftransfer TYPE_FULL_NAME=unsigned short ORDER=14
++    MEMBER NAME=ntransfer CODE=ntransfer TYPE_FULL_NAME=unsigned short ORDER=15
+     MEMBER NAME=short_src CODE=short_src[LUA_IDSIZE] TYPE_FULL_NAME=char[60] ORDER=16
+     MEMBER NAME=i_ci CODE=*i_ci TYPE_FULL_NAME=CallInfo* ORDER=17
+     METHOD NAME=<clinit> CODE=<clinit> FULL_NAME=lua_Debug.<clinit>:lua_Debug() ORDER=18
+@@ -997,17 +987,15 @@
+       MODIFIER ORDER=3
+       METHOD_RETURN CODE=RET TYPE_FULL_NAME=lua_Debug ORDER=4
+   BLOCK TYPE_FULL_NAME=ANY ORDER=1
+-    TYPE_DECL NAME=lua_State CODE=typedef struct lua_State FULL_NAME=lua_State ORDER=1
+-    TYPE_DECL NAME=lua_State CODE=typedef struct lua_State lua_State; FULL_NAME=lua_State<duplicate>0 ORDER=2
+-    TYPE_DECL NAME=lua_Number CODE=typedef LUA_NUMBER lua_Number; FULL_NAME=lua_Number ORDER=3
+-    TYPE_DECL NAME=lua_Integer CODE=typedef LUA_INTEGER lua_Integer; FULL_NAME=lua_Integer ORDER=4
+-    UNKNOWN CODE=typedef LUA_UNSIGNED lua_Unsigned; ORDER=5
+-    TYPE_DECL NAME=lua_KContext CODE=typedef LUA_KCONTEXT lua_KContext; FULL_NAME=lua_KContext ORDER=6
+-    TYPE_DECL NAME=lua_Debug CODE=typedef struct lua_Debug FULL_NAME=lua_Debug ORDER=7
+-    TYPE_DECL NAME=lua_Debug CODE=typedef struct lua_Debug lua_Debug; FULL_NAME=lua_Debug<duplicate>0 ORDER=8
+-    LOCAL NAME=lua_ident CODE=extern const char lua_ident[] TYPE_FULL_NAME=char[] ORDER=9
+-    CALL NAME=<operator>.arrayInitializer CODE=lua_ident[] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.arrayInitializer ORDER=10 DISPATCH_TYPE=STATIC_DISPATCH
+-    TYPE_REF CODE=struct lua_Debug {\n  int event;\n  const char *name;	/* (n) */\n  const char *namewhat;	/* (n) 'global', 'local', 'field', 'method' */\n  const char *what;	/* (S) 'Lua', 'C', 'main', 'tail' */\n  const char *source;	/* (S) */\n  size_t srclen;	/* (S) */\n  int currentline;	/* (l) */\n  int linedefined;	/* (S) */\n  int lastlinedefined;	/* (S) */\n  unsigned char nups;	/* (u) number of upvalues */\n  unsigned char nparams;/* (u) number of parameters */\n  char isvararg;        /* (u) */\n  char istailcall;	/* (t) */\n  unsigned short ftransfer;   /* (r) index of first value transferred */\n  unsigned short ntransfer;   /* (r) number of transferred values */\n  char short_src[LUA_IDSIZE]; /* (S) */\n  /* private part */\n  struct CallInfo *i_ci;  /* active function */\n} TYPE_FULL_NAME=lua_Debug ORDER=11
++    TYPE_DECL NAME=lua_State CODE=typedef struct lua_State lua_State; FULL_NAME=lua_State ORDER=1
++    TYPE_DECL NAME=lua_Number CODE=typedef LUA_NUMBER lua_Number; FULL_NAME=lua_Number ORDER=2
++    TYPE_DECL NAME=lua_Integer CODE=typedef LUA_INTEGER lua_Integer; FULL_NAME=lua_Integer ORDER=3
++    TYPE_DECL NAME=lua_Unsigned CODE=typedef LUA_UNSIGNED lua_Unsigned; FULL_NAME=lua_Unsigned ORDER=4
++    TYPE_DECL NAME=lua_KContext CODE=typedef LUA_KCONTEXT lua_KContext; FULL_NAME=lua_KContext ORDER=5
++    TYPE_DECL NAME=lua_Debug CODE=typedef struct lua_Debug lua_Debug; FULL_NAME=lua_Debug ORDER=6
++    LOCAL NAME=lua_ident CODE=extern const char lua_ident[] TYPE_FULL_NAME=char[] ORDER=7
++    CALL NAME=<operator>.arrayInitializer CODE=lua_ident[] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.arrayInitializer ORDER=8 DISPATCH_TYPE=STATIC_DISPATCH
++    TYPE_REF CODE=struct lua_Debug {\n  int event;\n  const char *name;	/* (n) */\n  const char *namewhat;	/* (n) 'global', 'local', 'field', 'method' */\n  const char *what;	/* (S) 'Lua', 'C', 'main', 'tail' */\n  const char *source;	/* (S) */\n  size_t srclen;	/* (S) */\n  int currentline;	/* (l) */\n  int linedefined;	/* (S) */\n  int lastlinedefined;	/* (S) */\n  unsigned char nups;	/* (u) number of upvalues */\n  unsigned char nparams;/* (u) number of parameters */\n  char isvararg;        /* (u) */\n  char istailcall;	/* (t) */\n  unsigned short ftransfer;   /* (r) index of first value transferred */\n  unsigned short ntransfer;   /* (r) number of transferred values */\n  char short_src[LUA_IDSIZE]; /* (S) */\n  /* private part */\n  struct CallInfo *i_ci;  /* active function */\n} TYPE_FULL_NAME=lua_Debug ORDER=9
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+ 
+ METHOD NAME=<clinit> CODE=<clinit> FULL_NAME=lua_Debug.<clinit>:lua_Debug() ORDER=18
+@@ -1033,14 +1021,13 @@
+     METHOD_PARAMETER_IN NAME=i CODE=lua_Integer i TYPE_FULL_NAME=lua_Integer ORDER=1
+     METHOD_PARAMETER_OUT NAME=i CODE=lua_Integer i TYPE_FULL_NAME=lua_Integer ORDER=1
+     BLOCK CODE={return l_castS2U(i);} TYPE_FULL_NAME=void ORDER=2
+-      LOCAL NAME=lua_Unsigned CODE=<unknown> lua_Unsigned TYPE_FULL_NAME=ANY ORDER=0
+       RETURN CODE=return l_castS2U(i); ORDER=1
+         CALL NAME=l_castS2U CODE=l_castS2U(i) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=llimits.h:l_castS2U:ANY(1) SIGNATURE=ANY(1) ORDER=1 DISPATCH_TYPE=INLINED
+           IDENTIFIER NAME=i CODE=i TYPE_FULL_NAME=lua_Integer ORDER=1 ARGUMENT_INDEX=1
+           BLOCK TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+-            CALL NAME=<operator>.pointerCall CODE=(lua_Unsigned)(i) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.pointerCall ORDER=1 DISPATCH_TYPE=DYNAMIC_DISPATCH
+-              IDENTIFIER NAME=lua_Unsigned CODE=<unknown> lua_Unsigned TYPE_FULL_NAME=ANY ORDER=1
+-              IDENTIFIER NAME=i CODE=i TYPE_FULL_NAME=lua_Integer ORDER=2 ARGUMENT_INDEX=1
++            CALL NAME=<operator>.cast CODE=(lua_Unsigned)(i) TYPE_FULL_NAME=lua_Unsigned METHOD_FULL_NAME=<operator>.cast ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
++              TYPE_REF CODE=lua_Unsigned TYPE_FULL_NAME=lua_Unsigned ORDER=1 ARGUMENT_INDEX=1
++              IDENTIFIER NAME=i CODE=i TYPE_FULL_NAME=lua_Integer ORDER=2 ARGUMENT_INDEX=2
+     METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+   METHOD NAME=add CODE=int add(lua_Integer i,lua_Integer j){return ADD(i,j);} FULL_NAME=add SIGNATURE=int(lua_Integer,lua_Integer) ORDER=1
+     METHOD_PARAMETER_IN NAME=i CODE=lua_Integer i TYPE_FULL_NAME=lua_Integer ORDER=1
+@@ -1048,7 +1035,6 @@
+     METHOD_PARAMETER_IN NAME=j CODE=lua_Integer j TYPE_FULL_NAME=lua_Integer ORDER=2
+     METHOD_PARAMETER_OUT NAME=j CODE=lua_Integer j TYPE_FULL_NAME=lua_Integer ORDER=2
+     BLOCK CODE={return ADD(i,j);} TYPE_FULL_NAME=void ORDER=3
+-      LOCAL NAME=lua_Unsigned CODE=<unknown> lua_Unsigned TYPE_FULL_NAME=ANY ORDER=0
+       RETURN CODE=return ADD(i,j); ORDER=1
+         CALL NAME=ADD CODE=ADD(i,j) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=main.c:ADD:ANY(2) SIGNATURE=ANY(2) ORDER=1 DISPATCH_TYPE=INLINED
+           IDENTIFIER NAME=i CODE=i TYPE_FULL_NAME=lua_Integer ORDER=1 ARGUMENT_INDEX=1
+@@ -1057,12 +1043,12 @@
+             CALL NAME=<operator>.cast CODE=(lua_Integer)(((lua_Unsigned)(i)) + ((lua_Unsigned)(j))) TYPE_FULL_NAME=lua_Integer METHOD_FULL_NAME=<operator>.cast ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+               TYPE_REF CODE=lua_Integer TYPE_FULL_NAME=lua_Integer ORDER=1 ARGUMENT_INDEX=1
+               CALL NAME=<operator>.addition CODE=((lua_Unsigned)(i)) + ((lua_Unsigned)(j)) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+-                CALL NAME=<operator>.pointerCall CODE=(lua_Unsigned)(i) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.pointerCall ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=DYNAMIC_DISPATCH
+-                  IDENTIFIER NAME=lua_Unsigned CODE=<unknown> lua_Unsigned TYPE_FULL_NAME=ANY ORDER=1
+-                  IDENTIFIER NAME=i CODE=i TYPE_FULL_NAME=lua_Integer ORDER=2 ARGUMENT_INDEX=1
+-                CALL NAME=<operator>.pointerCall CODE=(lua_Unsigned)(j) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.pointerCall ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=DYNAMIC_DISPATCH
+-                  IDENTIFIER NAME=lua_Unsigned CODE=<unknown> lua_Unsigned TYPE_FULL_NAME=ANY ORDER=1
+-                  IDENTIFIER NAME=j CODE=j TYPE_FULL_NAME=lua_Integer ORDER=2 ARGUMENT_INDEX=1
++                CALL NAME=<operator>.cast CODE=(lua_Unsigned)(i) TYPE_FULL_NAME=lua_Unsigned METHOD_FULL_NAME=<operator>.cast ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
++                  TYPE_REF CODE=lua_Unsigned TYPE_FULL_NAME=lua_Unsigned ORDER=1 ARGUMENT_INDEX=1
++                  IDENTIFIER NAME=i CODE=i TYPE_FULL_NAME=lua_Integer ORDER=2 ARGUMENT_INDEX=2
++                CALL NAME=<operator>.cast CODE=(lua_Unsigned)(j) TYPE_FULL_NAME=lua_Unsigned METHOD_FULL_NAME=<operator>.cast ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
++                  TYPE_REF CODE=lua_Unsigned TYPE_FULL_NAME=lua_Unsigned ORDER=1 ARGUMENT_INDEX=1
++                  IDENTIFIER NAME=j CODE=j TYPE_FULL_NAME=lua_Integer ORDER=2 ARGUMENT_INDEX=2
+     METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=4
+   BLOCK TYPE_FULL_NAME=ANY ORDER=1
+     METHOD_REF CODE=direct TYPE_FULL_NAME=direct METHOD_FULL_NAME=direct ORDER=1
+@@ -1096,60 +1082,64 @@
+ NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE_DECL NAME=CallInfo* FULL_NAME=CallInfo* CODE=CallInfo* IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE_DECL NAME=Instruction FULL_NAME=Instruction CODE=typedef l_uint32 Instruction; AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=llimits.h ORDER=13
++NODES|TYPE_DECL NAME=LUAI_MEM FULL_NAME=LUAI_MEM CODE=LUAI_MEM IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
++NODES|TYPE_DECL NAME=LUAI_UACINT FULL_NAME=LUAI_UACINT CODE=LUAI_UACINT IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
++NODES|TYPE_DECL NAME=LUAI_UACNUMBER FULL_NAME=LUAI_UACNUMBER CODE=LUAI_UACNUMBER IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
++NODES|TYPE_DECL NAME=LUAI_UMEM FULL_NAME=LUAI_UMEM CODE=LUAI_UMEM IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
++NODES|TYPE_DECL NAME=LUA_INTEGER FULL_NAME=LUA_INTEGER CODE=LUA_INTEGER IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
++NODES|TYPE_DECL NAME=LUA_KCONTEXT FULL_NAME=LUA_KCONTEXT CODE=LUA_KCONTEXT IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
++NODES|TYPE_DECL NAME=LUA_NUMBER FULL_NAME=LUA_NUMBER CODE=LUA_NUMBER IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
++NODES|TYPE_DECL NAME=LUA_UNSIGNED FULL_NAME=LUA_UNSIGNED CODE=LUA_UNSIGNED IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE_DECL NAME=add FULL_NAME=add CODE=add AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+ NODES|TYPE_DECL NAME=char FULL_NAME=char CODE=char IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE_DECL NAME=char* FULL_NAME=char* CODE=char* IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE_DECL NAME=char[60] FULL_NAME=char[60] CODE=char[60] IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE_DECL NAME=char[] FULL_NAME=char[] CODE=char[] IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE_DECL NAME=direct FULL_NAME=direct CODE=direct AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+-NODES|TYPE_DECL NAME=double FULL_NAME=double CODE=double IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+-NODES|TYPE_DECL NAME=i_ci FULL_NAME=i_ci CODE=i_ci IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE_DECL NAME=int* FULL_NAME=int* CODE=int* IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE_DECL NAME=l_mem FULL_NAME=l_mem CODE=typedef LUAI_MEM l_mem; AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=llimits.h ORDER=2
+-NODES|TYPE_DECL NAME=l_mem FULL_NAME=l_mem<duplicate>0 CODE=typedef ptrdiff_t l_mem; AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=llimits.h ORDER=4
+-NODES|TYPE_DECL NAME=l_mem FULL_NAME=l_mem<duplicate>1 CODE=typedef long l_mem; AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=llimits.h ORDER=6
++NODES|TYPE_DECL NAME=l_mem FULL_NAME=l_mem CODE=typedef ptrdiff_t l_mem; AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=llimits.h ORDER=4
++NODES|TYPE_DECL NAME=l_mem FULL_NAME=l_mem CODE=typedef long l_mem; AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=llimits.h ORDER=6
+ NODES|TYPE_DECL NAME=l_uacInt FULL_NAME=l_uacInt CODE=typedef LUAI_UACINT l_uacInt; AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=llimits.h ORDER=10
+ NODES|TYPE_DECL NAME=l_uacNumber FULL_NAME=l_uacNumber CODE=typedef LUAI_UACNUMBER l_uacNumber; AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=llimits.h ORDER=9
+ NODES|TYPE_DECL NAME=l_uint32 FULL_NAME=l_uint32 CODE=typedef unsigned int l_uint32; AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=llimits.h ORDER=11
+-NODES|TYPE_DECL NAME=l_uint32 FULL_NAME=l_uint32<duplicate>0 CODE=typedef unsigned long l_uint32; AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=llimits.h ORDER=12
++NODES|TYPE_DECL NAME=l_uint32 FULL_NAME=l_uint32 CODE=typedef unsigned long l_uint32; AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=llimits.h ORDER=12
+ NODES|TYPE_DECL NAME=<global> FULL_NAME=llimits.h:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=llimits.h:<global> FILENAME=llimits.h ORDER=6
+ NODES|TYPE_DECL NAME=longint FULL_NAME=longint CODE=longint IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE_DECL NAME=<global> FULL_NAME=lprefix.h:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=lprefix.h:<global> FILENAME=lprefix.h ORDER=1
+ NODES|TYPE_DECL NAME=ls_byte FULL_NAME=ls_byte CODE=typedef signed char ls_byte; AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=llimits.h ORDER=8
+ NODES|TYPE_DECL NAME=lu_byte FULL_NAME=lu_byte CODE=typedef unsigned char lu_byte; AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=llimits.h ORDER=7
+ NODES|TYPE_DECL NAME=lu_mem FULL_NAME=lu_mem CODE=typedef LUAI_UMEM lu_mem; AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=llimits.h ORDER=1
+-NODES|TYPE_DECL NAME=lu_mem FULL_NAME=lu_mem<duplicate>0 CODE=typedef size_t lu_mem; AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=llimits.h ORDER=3
+-NODES|TYPE_DECL NAME=lu_mem FULL_NAME=lu_mem<duplicate>1 CODE=typedef unsigned long lu_mem; AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=llimits.h ORDER=5
+-NODES|TYPE_DECL NAME=<global> FULL_NAME=lua.h:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=lua.h:<global> FILENAME=lua.h ORDER=4
++NODES|TYPE_DECL NAME=lu_mem FULL_NAME=lu_mem CODE=typedef size_t lu_mem; AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=llimits.h ORDER=3
++NODES|TYPE_DECL NAME=lu_mem FULL_NAME=lu_mem CODE=typedef unsigned long lu_mem; AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=llimits.h ORDER=5
++NODES|TYPE_DECL NAME=<global> FULL_NAME=lua.h:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=lua.h:<global> FILENAME=lua.h ORDER=5
+ NODES|TYPE_DECL NAME=lua_Alloc FULL_NAME=lua_Alloc CODE=lua_Alloc IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE_DECL NAME=lua_CFunction FULL_NAME=lua_CFunction CODE=lua_CFunction IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+-NODES|TYPE_DECL NAME=lua_Debug FULL_NAME=lua_Debug CODE=typedef struct lua_Debug AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=lua.h ORDER=7
++NODES|TYPE_DECL NAME=lua_Debug FULL_NAME=lua_Debug CODE=struct lua_Debug {\n  int event;\n  const char *name;	/* (n) */\n  const char *namewhat;	/* (n) 'global', 'local', 'field', 'method' */\n  const char *what;	/* (S) 'Lua', 'C', 'main', 'tail' */\n  const char *source;	/* (S) */\n  size_t srclen;	/* (S) */\n  int currentline;	/* (l) */\n  int linedefined;	/* (S) */\n  int lastlinedefined;	/* (S) */\n  unsigned char nups;	/* (u) number of upvalues */\n  unsigned char nparams;/* (u) number of parameters */\n  char isvararg;        /* (u) */\n  char istailcall;	/* (t) */\n  unsigned short ftransfer;   /* (r) index of first value transferred */\n  unsigned short ntransfer;   /* (r) number of transferred values */\n  char short_src[LUA_IDSIZE]; /* (S) */\n  /* private part */\n  struct CallInfo *i_ci;  /* active function */\n} AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=lua.h ORDER=1
++NODES|TYPE_DECL NAME=lua_Debug FULL_NAME=lua_Debug CODE=typedef struct lua_Debug lua_Debug; AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=lua.h ORDER=6
+ NODES|TYPE_DECL NAME=lua_Debug* FULL_NAME=lua_Debug* CODE=lua_Debug* IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+-NODES|TYPE_DECL NAME=CallInfo FULL_NAME=lua_Debug.CallInfo CODE=CallInfo IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+-NODES|TYPE_DECL NAME=lua_Debug FULL_NAME=lua_Debug<duplicate>0 CODE=typedef struct lua_Debug lua_Debug; AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=lua.h ORDER=8
+-NODES|TYPE_DECL NAME=lua_Debug FULL_NAME=lua_Debug<duplicate>1 CODE=struct lua_Debug {\n  int event;\n  const char *name;	/* (n) */\n  const char *namewhat;	/* (n) 'global', 'local', 'field', 'method' */\n  const char *what;	/* (S) 'Lua', 'C', 'main', 'tail' */\n  const char *source;	/* (S) */\n  size_t srclen;	/* (S) */\n  int currentline;	/* (l) */\n  int linedefined;	/* (S) */\n  int lastlinedefined;	/* (S) */\n  unsigned char nups;	/* (u) number of upvalues */\n  unsigned char nparams;/* (u) number of parameters */\n  char isvararg;        /* (u) */\n  char istailcall;	/* (t) */\n  unsigned short ftransfer;   /* (r) index of first value transferred */\n  unsigned short ntransfer;   /* (r) number of transferred values */\n  char short_src[LUA_IDSIZE]; /* (S) */\n  /* private part */\n  struct CallInfo *i_ci;  /* active function */\n} AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=lua.h ORDER=1
+ NODES|TYPE_DECL NAME=lua_Hook FULL_NAME=lua_Hook CODE=lua_Hook IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+-NODES|TYPE_DECL NAME=lua_Integer FULL_NAME=lua_Integer CODE=typedef LUA_INTEGER lua_Integer; AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=lua.h ORDER=4
+-NODES|TYPE_DECL NAME=lua_KContext FULL_NAME=lua_KContext CODE=typedef LUA_KCONTEXT lua_KContext; AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=lua.h ORDER=6
++NODES|TYPE_DECL NAME=lua_Integer FULL_NAME=lua_Integer CODE=typedef LUA_INTEGER lua_Integer; AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=lua.h ORDER=3
++NODES|TYPE_DECL NAME=lua_KContext FULL_NAME=lua_KContext CODE=typedef LUA_KCONTEXT lua_KContext; AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=lua.h ORDER=5
+ NODES|TYPE_DECL NAME=lua_KFunction FULL_NAME=lua_KFunction CODE=lua_KFunction IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+-NODES|TYPE_DECL NAME=lua_Number FULL_NAME=lua_Number CODE=typedef LUA_NUMBER lua_Number; AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=lua.h ORDER=3
++NODES|TYPE_DECL NAME=lua_Number FULL_NAME=lua_Number CODE=typedef LUA_NUMBER lua_Number; AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=lua.h ORDER=2
+ NODES|TYPE_DECL NAME=lua_Reader FULL_NAME=lua_Reader CODE=lua_Reader IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+-NODES|TYPE_DECL NAME=lua_State FULL_NAME=lua_State CODE=typedef struct lua_State AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=lua.h ORDER=1
++NODES|TYPE_DECL NAME=lua_State FULL_NAME=lua_State CODE=typedef struct lua_State lua_State; AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=lua.h ORDER=1
+ NODES|TYPE_DECL NAME=lua_State* FULL_NAME=lua_State* CODE=lua_State* IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+-NODES|TYPE_DECL NAME=lua_State FULL_NAME=lua_State<duplicate>0 CODE=typedef struct lua_State lua_State; AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=lua.h ORDER=2
+-NODES|TYPE_DECL NAME=lua_Unsigned FULL_NAME=lua_Unsigned CODE=lua_Unsigned IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
++NODES|TYPE_DECL NAME=lua_Unsigned FULL_NAME=lua_Unsigned CODE=typedef LUA_UNSIGNED lua_Unsigned; AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=lua.h ORDER=4
+ NODES|TYPE_DECL NAME=lua_WarnFunction FULL_NAME=lua_WarnFunction CODE=lua_WarnFunction IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE_DECL NAME=lua_Writer FULL_NAME=lua_Writer CODE=lua_Writer IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE_DECL NAME=<global> FULL_NAME=luaconf.h:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=luaconf.h:<global> FILENAME=luaconf.h ORDER=5
+ NODES|TYPE_DECL NAME=<global> FULL_NAME=main.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=3
+-NODES|TYPE_DECL NAME=shortunsigned FULL_NAME=shortunsigned CODE=shortunsigned IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
++NODES|TYPE_DECL NAME=ptrdiff_t FULL_NAME=ptrdiff_t CODE=ptrdiff_t IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE_DECL NAME=signedchar FULL_NAME=signedchar CODE=signedchar IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE_DECL NAME=size_t FULL_NAME=size_t CODE=size_t IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE_DECL NAME=size_t* FULL_NAME=size_t* CODE=size_t* IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE_DECL NAME=unsigned char FULL_NAME=unsigned char CODE=unsigned char IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE_DECL NAME=unsigned int FULL_NAME=unsigned int CODE=unsigned int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE_DECL NAME=unsigned longint FULL_NAME=unsigned longint CODE=unsigned longint IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
++NODES|TYPE_DECL NAME=unsigned short FULL_NAME=unsigned short CODE=unsigned short IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE_DECL NAME=va_list FULL_NAME=va_list CODE=va_list IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE_DECL NAME=void* FULL_NAME=void* CODE=void* IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+@@ -1157,14 +1147,20 @@
+ NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+ NODES|TYPE NAME=CallInfo* FULL_NAME=CallInfo* TYPE_DECL_FULL_NAME=CallInfo*
+ NODES|TYPE NAME=Instruction FULL_NAME=Instruction TYPE_DECL_FULL_NAME=Instruction
++NODES|TYPE NAME=LUAI_MEM FULL_NAME=LUAI_MEM TYPE_DECL_FULL_NAME=LUAI_MEM
++NODES|TYPE NAME=LUAI_UACINT FULL_NAME=LUAI_UACINT TYPE_DECL_FULL_NAME=LUAI_UACINT
++NODES|TYPE NAME=LUAI_UACNUMBER FULL_NAME=LUAI_UACNUMBER TYPE_DECL_FULL_NAME=LUAI_UACNUMBER
++NODES|TYPE NAME=LUAI_UMEM FULL_NAME=LUAI_UMEM TYPE_DECL_FULL_NAME=LUAI_UMEM
++NODES|TYPE NAME=LUA_INTEGER FULL_NAME=LUA_INTEGER TYPE_DECL_FULL_NAME=LUA_INTEGER
++NODES|TYPE NAME=LUA_KCONTEXT FULL_NAME=LUA_KCONTEXT TYPE_DECL_FULL_NAME=LUA_KCONTEXT
++NODES|TYPE NAME=LUA_NUMBER FULL_NAME=LUA_NUMBER TYPE_DECL_FULL_NAME=LUA_NUMBER
++NODES|TYPE NAME=LUA_UNSIGNED FULL_NAME=LUA_UNSIGNED TYPE_DECL_FULL_NAME=LUA_UNSIGNED
+ NODES|TYPE NAME=add FULL_NAME=add TYPE_DECL_FULL_NAME=add
+ NODES|TYPE NAME=char FULL_NAME=char TYPE_DECL_FULL_NAME=char
+ NODES|TYPE NAME=char* FULL_NAME=char* TYPE_DECL_FULL_NAME=char*
+ NODES|TYPE NAME=char[60] FULL_NAME=char[60] TYPE_DECL_FULL_NAME=char[60]
+ NODES|TYPE NAME=char[] FULL_NAME=char[] TYPE_DECL_FULL_NAME=char[]
+ NODES|TYPE NAME=direct FULL_NAME=direct TYPE_DECL_FULL_NAME=direct
+-NODES|TYPE NAME=double FULL_NAME=double TYPE_DECL_FULL_NAME=double
+-NODES|TYPE NAME=i_ci FULL_NAME=i_ci TYPE_DECL_FULL_NAME=i_ci
+ NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+ NODES|TYPE NAME=int* FULL_NAME=int* TYPE_DECL_FULL_NAME=int*
+ NODES|TYPE NAME=l_mem FULL_NAME=l_mem TYPE_DECL_FULL_NAME=l_mem
+@@ -1179,7 +1175,6 @@
+ NODES|TYPE NAME=lua_CFunction FULL_NAME=lua_CFunction TYPE_DECL_FULL_NAME=lua_CFunction
+ NODES|TYPE NAME=lua_Debug FULL_NAME=lua_Debug TYPE_DECL_FULL_NAME=lua_Debug
+ NODES|TYPE NAME=lua_Debug* FULL_NAME=lua_Debug* TYPE_DECL_FULL_NAME=lua_Debug*
+-NODES|TYPE NAME=CallInfo FULL_NAME=lua_Debug.CallInfo TYPE_DECL_FULL_NAME=lua_Debug.CallInfo
+ NODES|TYPE NAME=lua_Hook FULL_NAME=lua_Hook TYPE_DECL_FULL_NAME=lua_Hook
+ NODES|TYPE NAME=lua_Integer FULL_NAME=lua_Integer TYPE_DECL_FULL_NAME=lua_Integer
+ NODES|TYPE NAME=lua_KContext FULL_NAME=lua_KContext TYPE_DECL_FULL_NAME=lua_KContext
+@@ -1191,42 +1186,48 @@
+ NODES|TYPE NAME=lua_Unsigned FULL_NAME=lua_Unsigned TYPE_DECL_FULL_NAME=lua_Unsigned
+ NODES|TYPE NAME=lua_WarnFunction FULL_NAME=lua_WarnFunction TYPE_DECL_FULL_NAME=lua_WarnFunction
+ NODES|TYPE NAME=lua_Writer FULL_NAME=lua_Writer TYPE_DECL_FULL_NAME=lua_Writer
+-NODES|TYPE NAME=shortunsigned FULL_NAME=shortunsigned TYPE_DECL_FULL_NAME=shortunsigned
++NODES|TYPE NAME=ptrdiff_t FULL_NAME=ptrdiff_t TYPE_DECL_FULL_NAME=ptrdiff_t
+ NODES|TYPE NAME=signedchar FULL_NAME=signedchar TYPE_DECL_FULL_NAME=signedchar
+ NODES|TYPE NAME=size_t FULL_NAME=size_t TYPE_DECL_FULL_NAME=size_t
+ NODES|TYPE NAME=size_t* FULL_NAME=size_t* TYPE_DECL_FULL_NAME=size_t*
+ NODES|TYPE NAME=unsigned char FULL_NAME=unsigned char TYPE_DECL_FULL_NAME=unsigned char
+ NODES|TYPE NAME=unsigned int FULL_NAME=unsigned int TYPE_DECL_FULL_NAME=unsigned int
+ NODES|TYPE NAME=unsigned longint FULL_NAME=unsigned longint TYPE_DECL_FULL_NAME=unsigned longint
++NODES|TYPE NAME=unsigned short FULL_NAME=unsigned short TYPE_DECL_FULL_NAME=unsigned short
+ NODES|TYPE NAME=va_list FULL_NAME=va_list TYPE_DECL_FULL_NAME=va_list
+ NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+ NODES|TYPE NAME=void* FULL_NAME=void* TYPE_DECL_FULL_NAME=void*
+ NODES|TYPE NAME=void** FULL_NAME=void** TYPE_DECL_FULL_NAME=void**
+-EDGES|ARGUMENT add#12 -> add#13
+-EDGES|ARGUMENT add#12 -> add#14
++EDGES|ARGUMENT add#11 -> add#12
++EDGES|ARGUMENT add#11 -> add#13
++EDGES|ARGUMENT add#13 -> add#14
++EDGES|ARGUMENT add#13 -> add#17
+ EDGES|ARGUMENT add#14 -> add#15
+-EDGES|ARGUMENT add#14 -> add#18
+-EDGES|ARGUMENT add#15 -> add#17
+-EDGES|ARGUMENT add#18 -> add#20
++EDGES|ARGUMENT add#14 -> add#16
++EDGES|ARGUMENT add#17 -> add#18
++EDGES|ARGUMENT add#17 -> add#19
++EDGES|ARGUMENT add#6 -> add#7
+ EDGES|ARGUMENT add#7 -> add#8
+-EDGES|ARGUMENT add#8 -> add#10
+-EDGES|ARGUMENT add#8 -> add#9
++EDGES|ARGUMENT add#7 -> add#9
++EDGES|ARGUMENT direct#4 -> direct#5
+ EDGES|ARGUMENT direct#5 -> direct#6
+-EDGES|ARGUMENT direct#6 -> direct#7
+-EDGES|ARGUMENT direct#9 -> direct#11
++EDGES|ARGUMENT direct#8 -> direct#10
++EDGES|ARGUMENT direct#8 -> direct#9
+ EDGES|ARGUMENT lua_Debug.<clinit>:lua_Debug()#2 -> lua_Debug.<clinit>:lua_Debug()#3
+-EDGES|CALL add#12 -> <operator>.cast#0
+-EDGES|CALL add#14 -> <operator>.addition#0
+-EDGES|CALL add#8 -> main.c:ADD:ANY(2)#0
+-EDGES|CALL direct#6 -> llimits.h:l_castS2U:ANY(1)#0
+-EDGES|CALL lua.h:<global>#38 -> <operator>.arrayInitializer#0
++EDGES|CALL add#11 -> <operator>.cast#0
++EDGES|CALL add#13 -> <operator>.addition#0
++EDGES|CALL add#14 -> <operator>.cast#0
++EDGES|CALL add#17 -> <operator>.cast#0
++EDGES|CALL add#7 -> main.c:ADD:ANY(2)#0
++EDGES|CALL direct#5 -> llimits.h:l_castS2U:ANY(1)#0
++EDGES|CALL direct#8 -> <operator>.cast#0
++EDGES|CALL lua.h:<global>#36 -> <operator>.arrayInitializer#0
+ EDGES|CALL lua_Debug.<clinit>:lua_Debug()#2 -> <operator>.arrayInitializer#0
+ EDGES|CALL lua_Debug.<clinit>:lua_Debug()#3 -> luaconf.h:LUA_IDSIZE:int(0)#0
+ EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+ EDGES|CFG <operator>.addition#0 -> <operator>.addition#5
+-EDGES|CFG <operator>.arrayInitializer#0 -> <operator>.arrayInitializer#6
++EDGES|CFG <operator>.arrayInitializer#0 -> <operator>.arrayInitializer#4
+ EDGES|CFG <operator>.cast#0 -> <operator>.cast#5
+-EDGES|CFG <operator>.pointerCall#0 -> <operator>.pointerCall#4
+ EDGES|CFG <unresolvedNamespace>.lua_absindex#0 -> <unresolvedNamespace>.lua_absindex#6
+ EDGES|CFG <unresolvedNamespace>.lua_arith#0 -> <unresolvedNamespace>.lua_arith#6
+ EDGES|CFG <unresolvedNamespace>.lua_atpanic#0 -> <unresolvedNamespace>.lua_atpanic#6
+@@ -1325,52 +1326,50 @@
+ EDGES|CFG <unresolvedNamespace>.lua_warning#0 -> <unresolvedNamespace>.lua_warning#8
+ EDGES|CFG <unresolvedNamespace>.lua_xmove#0 -> <unresolvedNamespace>.lua_xmove#8
+ EDGES|CFG <unresolvedNamespace>.lua_yieldk#0 -> <unresolvedNamespace>.lua_yieldk#10
+-EDGES|CFG add#0 -> add#9
+-EDGES|CFG add#10 -> add#8
+-EDGES|CFG add#12 -> add#7
+-EDGES|CFG add#13 -> add#16
+-EDGES|CFG add#14 -> add#12
+-EDGES|CFG add#15 -> add#19
+-EDGES|CFG add#16 -> add#17
+-EDGES|CFG add#17 -> add#15
+-EDGES|CFG add#18 -> add#14
+-EDGES|CFG add#19 -> add#20
+-EDGES|CFG add#20 -> add#18
+-EDGES|CFG add#7 -> add#21
+-EDGES|CFG add#8 -> add#13
+-EDGES|CFG add#8 -> add#7
+-EDGES|CFG add#9 -> add#10
+-EDGES|CFG direct#0 -> direct#7
+-EDGES|CFG direct#10 -> direct#11
+-EDGES|CFG direct#11 -> direct#9
+-EDGES|CFG direct#5 -> direct#12
+-EDGES|CFG direct#6 -> direct#10
++EDGES|CFG add#0 -> add#8
++EDGES|CFG add#11 -> add#6
++EDGES|CFG add#12 -> add#15
++EDGES|CFG add#13 -> add#11
++EDGES|CFG add#14 -> add#18
++EDGES|CFG add#15 -> add#16
++EDGES|CFG add#16 -> add#14
++EDGES|CFG add#17 -> add#13
++EDGES|CFG add#18 -> add#19
++EDGES|CFG add#19 -> add#17
++EDGES|CFG add#6 -> add#20
++EDGES|CFG add#7 -> add#12
++EDGES|CFG add#7 -> add#6
++EDGES|CFG add#8 -> add#9
++EDGES|CFG add#9 -> add#7
++EDGES|CFG direct#0 -> direct#6
++EDGES|CFG direct#10 -> direct#8
++EDGES|CFG direct#4 -> direct#11
++EDGES|CFG direct#5 -> direct#4
++EDGES|CFG direct#5 -> direct#9
+ EDGES|CFG direct#6 -> direct#5
+-EDGES|CFG direct#7 -> direct#6
+-EDGES|CFG direct#9 -> direct#5
++EDGES|CFG direct#8 -> direct#4
++EDGES|CFG direct#9 -> direct#10
+ EDGES|CFG llimits.h:<global>#0 -> llimits.h:<global>#15
+ EDGES|CFG llimits.h:l_castS2U:ANY(1)#0 -> llimits.h:l_castS2U:ANY(1)#4
+ EDGES|CFG lprefix.h:<global>#0 -> lprefix.h:<global>#2
+-EDGES|CFG lua.h:<global>#0 -> lua.h:<global>#33
++EDGES|CFG lua.h:<global>#0 -> lua.h:<global>#36
+ EDGES|CFG lua.h:<global>#19 -> lua_Debug.<clinit>:lua_Debug()#3
+-EDGES|CFG lua.h:<global>#33 -> lua.h:<global>#38
+-EDGES|CFG lua.h:<global>#38 -> lua.h:<global>#39
+-EDGES|CFG lua.h:<global>#39 -> lua.h:<global>#40
++EDGES|CFG lua.h:<global>#36 -> lua.h:<global>#37
++EDGES|CFG lua.h:<global>#37 -> lua.h:<global>#38
+ EDGES|CFG lua_Debug.<clinit>:lua_Debug()#2 -> lua_Debug.<clinit>:lua_Debug()#8
+ EDGES|CFG lua_Debug.<clinit>:lua_Debug()#3 -> lua_Debug.<clinit>:lua_Debug()#2
+ EDGES|CFG lua_Debug.<clinit>:lua_Debug()#3 -> lua_Debug.<clinit>:lua_Debug()#5
+ EDGES|CFG lua_Debug.<clinit>:lua_Debug()#5 -> lua_Debug.<clinit>:lua_Debug()#2
+ EDGES|CFG luaconf.h:<global>#0 -> luaconf.h:<global>#2
+ EDGES|CFG luaconf.h:LUA_IDSIZE:int(0)#0 -> luaconf.h:LUA_IDSIZE:int(0)#2
+-EDGES|CFG main.c:<global>#0 -> main.c:<global>#37
+-EDGES|CFG main.c:<global>#37 -> main.c:<global>#38
+-EDGES|CFG main.c:<global>#38 -> main.c:<global>#39
++EDGES|CFG main.c:<global>#0 -> main.c:<global>#35
++EDGES|CFG main.c:<global>#35 -> main.c:<global>#36
++EDGES|CFG main.c:<global>#36 -> main.c:<global>#37
+ EDGES|CFG main.c:ADD:ANY(2)#0 -> main.c:ADD:ANY(2)#6
+ EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+ EDGES|CONTAINS <operator>.addition#0 -> <operator>.addition#2
+-EDGES|CONTAINS <operator>.arrayInitializer#0 -> <operator>.arrayInitializer#4
++EDGES|CONTAINS <operator>.arrayInitializer#0 -> <operator>.arrayInitializer#2
+ EDGES|CONTAINS <operator>.cast#0 -> <operator>.cast#2
+-EDGES|CONTAINS <operator>.pointerCall#0 -> <operator>.pointerCall#2
+ EDGES|CONTAINS <unresolvedNamespace>.lua_absindex#0 -> <unresolvedNamespace>.lua_absindex#5
+ EDGES|CONTAINS <unresolvedNamespace>.lua_arith#0 -> <unresolvedNamespace>.lua_arith#5
+ EDGES|CONTAINS <unresolvedNamespace>.lua_atpanic#0 -> <unresolvedNamespace>.lua_atpanic#5
+@@ -1580,33 +1579,38 @@
+ EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+ EDGES|CONTAINS F:<includes> -> D:ANY
+ EDGES|CONTAINS F:<includes> -> D:CallInfo*
++EDGES|CONTAINS F:<includes> -> D:LUAI_MEM
++EDGES|CONTAINS F:<includes> -> D:LUAI_UACINT
++EDGES|CONTAINS F:<includes> -> D:LUAI_UACNUMBER
++EDGES|CONTAINS F:<includes> -> D:LUAI_UMEM
++EDGES|CONTAINS F:<includes> -> D:LUA_INTEGER
++EDGES|CONTAINS F:<includes> -> D:LUA_KCONTEXT
++EDGES|CONTAINS F:<includes> -> D:LUA_NUMBER
++EDGES|CONTAINS F:<includes> -> D:LUA_UNSIGNED
+ EDGES|CONTAINS F:<includes> -> D:char
+ EDGES|CONTAINS F:<includes> -> D:char*
+ EDGES|CONTAINS F:<includes> -> D:char[60]
+ EDGES|CONTAINS F:<includes> -> D:char[]
+-EDGES|CONTAINS F:<includes> -> D:double
+-EDGES|CONTAINS F:<includes> -> D:i_ci
+ EDGES|CONTAINS F:<includes> -> D:int
+ EDGES|CONTAINS F:<includes> -> D:int*
+ EDGES|CONTAINS F:<includes> -> D:longint
+ EDGES|CONTAINS F:<includes> -> D:lua_Alloc
+ EDGES|CONTAINS F:<includes> -> D:lua_CFunction
+ EDGES|CONTAINS F:<includes> -> D:lua_Debug*
+-EDGES|CONTAINS F:<includes> -> D:lua_Debug.CallInfo
+ EDGES|CONTAINS F:<includes> -> D:lua_Hook
+ EDGES|CONTAINS F:<includes> -> D:lua_KFunction
+ EDGES|CONTAINS F:<includes> -> D:lua_Reader
+ EDGES|CONTAINS F:<includes> -> D:lua_State*
+-EDGES|CONTAINS F:<includes> -> D:lua_Unsigned
+ EDGES|CONTAINS F:<includes> -> D:lua_WarnFunction
+ EDGES|CONTAINS F:<includes> -> D:lua_Writer
+-EDGES|CONTAINS F:<includes> -> D:shortunsigned
++EDGES|CONTAINS F:<includes> -> D:ptrdiff_t
+ EDGES|CONTAINS F:<includes> -> D:signedchar
+ EDGES|CONTAINS F:<includes> -> D:size_t
+ EDGES|CONTAINS F:<includes> -> D:size_t*
+ EDGES|CONTAINS F:<includes> -> D:unsigned char
+ EDGES|CONTAINS F:<includes> -> D:unsigned int
+ EDGES|CONTAINS F:<includes> -> D:unsigned longint
++EDGES|CONTAINS F:<includes> -> D:unsigned short
+ EDGES|CONTAINS F:<includes> -> D:va_list
+ EDGES|CONTAINS F:<includes> -> D:void
+ EDGES|CONTAINS F:<includes> -> D:void*
+@@ -1626,14 +1630,14 @@
+ EDGES|CONTAINS add#0 -> add#17
+ EDGES|CONTAINS add#0 -> add#18
+ EDGES|CONTAINS add#0 -> add#19
+-EDGES|CONTAINS add#0 -> add#20
+ EDGES|CONTAINS add#0 -> add#5
++EDGES|CONTAINS add#0 -> add#6
+ EDGES|CONTAINS add#0 -> add#7
+ EDGES|CONTAINS add#0 -> add#8
+ EDGES|CONTAINS add#0 -> add#9
+ EDGES|CONTAINS direct#0 -> direct#10
+-EDGES|CONTAINS direct#0 -> direct#11
+ EDGES|CONTAINS direct#0 -> direct#3
++EDGES|CONTAINS direct#0 -> direct#4
+ EDGES|CONTAINS direct#0 -> direct#5
+ EDGES|CONTAINS direct#0 -> direct#6
+ EDGES|CONTAINS direct#0 -> direct#7
+@@ -1643,14 +1647,9 @@
+ EDGES|CONTAINS llimits.h:<global>#0 -> llimits.h:<global>#10
+ EDGES|CONTAINS llimits.h:<global>#0 -> llimits.h:<global>#11
+ EDGES|CONTAINS llimits.h:<global>#0 -> llimits.h:<global>#12
+-EDGES|CONTAINS llimits.h:<global>#0 -> llimits.h:<global>#13
+ EDGES|CONTAINS llimits.h:<global>#0 -> llimits.h:<global>#14
+ EDGES|CONTAINS llimits.h:<global>#0 -> llimits.h:<global>#2
+ EDGES|CONTAINS llimits.h:<global>#0 -> llimits.h:<global>#3
+-EDGES|CONTAINS llimits.h:<global>#0 -> llimits.h:<global>#4
+-EDGES|CONTAINS llimits.h:<global>#0 -> llimits.h:<global>#5
+-EDGES|CONTAINS llimits.h:<global>#0 -> llimits.h:<global>#6
+-EDGES|CONTAINS llimits.h:<global>#0 -> llimits.h:<global>#7
+ EDGES|CONTAINS llimits.h:<global>#0 -> llimits.h:<global>#8
+ EDGES|CONTAINS llimits.h:<global>#0 -> llimits.h:<global>#9
+ EDGES|CONTAINS llimits.h:l_castS2U:ANY(1)#0 -> llimits.h:l_castS2U:ANY(1)#3
+@@ -1662,11 +1661,8 @@
+ EDGES|CONTAINS lua.h:<global>#0 -> lua.h:<global>#31
+ EDGES|CONTAINS lua.h:<global>#0 -> lua.h:<global>#32
+ EDGES|CONTAINS lua.h:<global>#0 -> lua.h:<global>#33
+-EDGES|CONTAINS lua.h:<global>#0 -> lua.h:<global>#34
+-EDGES|CONTAINS lua.h:<global>#0 -> lua.h:<global>#35
+ EDGES|CONTAINS lua.h:<global>#0 -> lua.h:<global>#36
+-EDGES|CONTAINS lua.h:<global>#0 -> lua.h:<global>#38
+-EDGES|CONTAINS lua.h:<global>#0 -> lua.h:<global>#39
++EDGES|CONTAINS lua.h:<global>#0 -> lua.h:<global>#37
+ EDGES|CONTAINS lua.h:<global>#1 -> lua.h:<global>#19
+ EDGES|CONTAINS lua.h:<global>#19 -> lua_Debug.<clinit>:lua_Debug()#1
+ EDGES|CONTAINS lua.h:<global>#19 -> lua_Debug.<clinit>:lua_Debug()#2
+@@ -1677,9 +1673,9 @@
+ EDGES|CONTAINS luaconf.h:LUA_IDSIZE:int(0)#0 -> luaconf.h:LUA_IDSIZE:int(0)#1
+ EDGES|CONTAINS main.c:<global>#0 -> add#0
+ EDGES|CONTAINS main.c:<global>#0 -> direct#0
++EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#34
++EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#35
+ EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#36
+-EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#37
+-EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#38
+ EDGES|CONTAINS main.c:ADD:ANY(2)#0 -> main.c:ADD:ANY(2)#5
+ EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+ EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+@@ -1693,18 +1689,12 @@
+ EDGES|EVAL_TYPE <operator>.arrayInitializer#2 -> T:ANY
+ EDGES|EVAL_TYPE <operator>.arrayInitializer#3 -> T:ANY
+ EDGES|EVAL_TYPE <operator>.arrayInitializer#4 -> T:ANY
+-EDGES|EVAL_TYPE <operator>.arrayInitializer#5 -> T:ANY
+-EDGES|EVAL_TYPE <operator>.arrayInitializer#6 -> T:ANY
+ EDGES|EVAL_TYPE <operator>.cast#1 -> T:ANY
+ EDGES|EVAL_TYPE <operator>.cast#2 -> T:ANY
+ EDGES|EVAL_TYPE <operator>.cast#3 -> T:ANY
+ EDGES|EVAL_TYPE <operator>.cast#4 -> T:ANY
+ EDGES|EVAL_TYPE <operator>.cast#5 -> T:ANY
+ EDGES|EVAL_TYPE <operator>.cast#6 -> T:ANY
+-EDGES|EVAL_TYPE <operator>.pointerCall#1 -> T:ANY
+-EDGES|EVAL_TYPE <operator>.pointerCall#2 -> T:ANY
+-EDGES|EVAL_TYPE <operator>.pointerCall#3 -> T:ANY
+-EDGES|EVAL_TYPE <operator>.pointerCall#4 -> T:ANY
+ EDGES|EVAL_TYPE <unresolvedNamespace>.lua_absindex#1 -> T:lua_State*
+ EDGES|EVAL_TYPE <unresolvedNamespace>.lua_absindex#2 -> T:lua_State*
+ EDGES|EVAL_TYPE <unresolvedNamespace>.lua_absindex#3 -> T:int
+@@ -2382,36 +2372,34 @@
+ EDGES|EVAL_TYPE <unresolvedNamespace>.lua_yieldk#8 -> T:lua_KFunction
+ EDGES|EVAL_TYPE <unresolvedNamespace>.lua_yieldk#9 -> T:ANY
+ EDGES|EVAL_TYPE add#1 -> T:lua_Integer
+-EDGES|EVAL_TYPE add#10 -> T:lua_Integer
+-EDGES|EVAL_TYPE add#11 -> T:ANY
++EDGES|EVAL_TYPE add#10 -> T:ANY
++EDGES|EVAL_TYPE add#11 -> T:lua_Integer
+ EDGES|EVAL_TYPE add#12 -> T:lua_Integer
+-EDGES|EVAL_TYPE add#13 -> T:lua_Integer
+-EDGES|EVAL_TYPE add#14 -> T:ANY
+-EDGES|EVAL_TYPE add#15 -> T:ANY
+-EDGES|EVAL_TYPE add#16 -> T:ANY
+-EDGES|EVAL_TYPE add#17 -> T:lua_Integer
+-EDGES|EVAL_TYPE add#18 -> T:ANY
+-EDGES|EVAL_TYPE add#19 -> T:ANY
++EDGES|EVAL_TYPE add#13 -> T:ANY
++EDGES|EVAL_TYPE add#14 -> T:lua_Unsigned
++EDGES|EVAL_TYPE add#15 -> T:lua_Unsigned
++EDGES|EVAL_TYPE add#16 -> T:lua_Integer
++EDGES|EVAL_TYPE add#17 -> T:lua_Unsigned
++EDGES|EVAL_TYPE add#18 -> T:lua_Unsigned
++EDGES|EVAL_TYPE add#19 -> T:lua_Integer
+ EDGES|EVAL_TYPE add#2 -> T:lua_Integer
+-EDGES|EVAL_TYPE add#20 -> T:lua_Integer
+-EDGES|EVAL_TYPE add#21 -> T:int
++EDGES|EVAL_TYPE add#20 -> T:int
+ EDGES|EVAL_TYPE add#3 -> T:lua_Integer
+ EDGES|EVAL_TYPE add#4 -> T:lua_Integer
+ EDGES|EVAL_TYPE add#5 -> T:void
+-EDGES|EVAL_TYPE add#6 -> T:ANY
+-EDGES|EVAL_TYPE add#8 -> T:ANY
++EDGES|EVAL_TYPE add#7 -> T:ANY
++EDGES|EVAL_TYPE add#8 -> T:lua_Integer
+ EDGES|EVAL_TYPE add#9 -> T:lua_Integer
+ EDGES|EVAL_TYPE direct#1 -> T:lua_Integer
+-EDGES|EVAL_TYPE direct#10 -> T:ANY
+-EDGES|EVAL_TYPE direct#11 -> T:lua_Integer
+-EDGES|EVAL_TYPE direct#12 -> T:int
++EDGES|EVAL_TYPE direct#10 -> T:lua_Integer
++EDGES|EVAL_TYPE direct#11 -> T:int
+ EDGES|EVAL_TYPE direct#2 -> T:lua_Integer
+ EDGES|EVAL_TYPE direct#3 -> T:void
+-EDGES|EVAL_TYPE direct#4 -> T:ANY
+-EDGES|EVAL_TYPE direct#6 -> T:ANY
+-EDGES|EVAL_TYPE direct#7 -> T:lua_Integer
+-EDGES|EVAL_TYPE direct#8 -> T:ANY
+-EDGES|EVAL_TYPE direct#9 -> T:ANY
++EDGES|EVAL_TYPE direct#5 -> T:ANY
++EDGES|EVAL_TYPE direct#6 -> T:lua_Integer
++EDGES|EVAL_TYPE direct#7 -> T:ANY
++EDGES|EVAL_TYPE direct#8 -> T:lua_Unsigned
++EDGES|EVAL_TYPE direct#9 -> T:lua_Unsigned
+ EDGES|EVAL_TYPE llimits.h:<global>#1 -> T:ANY
+ EDGES|EVAL_TYPE llimits.h:<global>#15 -> T:ANY
+ EDGES|EVAL_TYPE llimits.h:l_castS2U:ANY(1)#1 -> T:ANY
+@@ -2425,18 +2413,18 @@
+ EDGES|EVAL_TYPE lua.h:<global>#12 -> T:unsigned char
+ EDGES|EVAL_TYPE lua.h:<global>#13 -> T:char
+ EDGES|EVAL_TYPE lua.h:<global>#14 -> T:char
+-EDGES|EVAL_TYPE lua.h:<global>#15 -> T:shortunsigned
+-EDGES|EVAL_TYPE lua.h:<global>#16 -> T:shortunsigned
++EDGES|EVAL_TYPE lua.h:<global>#15 -> T:unsigned short
++EDGES|EVAL_TYPE lua.h:<global>#16 -> T:unsigned short
+ EDGES|EVAL_TYPE lua.h:<global>#17 -> T:char[60]
+ EDGES|EVAL_TYPE lua.h:<global>#18 -> T:CallInfo*
+ EDGES|EVAL_TYPE lua.h:<global>#2 -> T:int
+ EDGES|EVAL_TYPE lua.h:<global>#28 -> T:ANY
+ EDGES|EVAL_TYPE lua.h:<global>#3 -> T:char*
+-EDGES|EVAL_TYPE lua.h:<global>#37 -> T:char[]
++EDGES|EVAL_TYPE lua.h:<global>#35 -> T:char[]
++EDGES|EVAL_TYPE lua.h:<global>#36 -> T:ANY
++EDGES|EVAL_TYPE lua.h:<global>#37 -> T:lua_Debug
+ EDGES|EVAL_TYPE lua.h:<global>#38 -> T:ANY
+-EDGES|EVAL_TYPE lua.h:<global>#39 -> T:lua_Debug
+ EDGES|EVAL_TYPE lua.h:<global>#4 -> T:char*
+-EDGES|EVAL_TYPE lua.h:<global>#40 -> T:ANY
+ EDGES|EVAL_TYPE lua.h:<global>#5 -> T:char*
+ EDGES|EVAL_TYPE lua.h:<global>#6 -> T:char*
+ EDGES|EVAL_TYPE lua.h:<global>#7 -> T:size_t
+@@ -2451,10 +2439,10 @@
+ EDGES|EVAL_TYPE luaconf.h:<global>#2 -> T:ANY
+ EDGES|EVAL_TYPE luaconf.h:LUA_IDSIZE:int(0)#1 -> T:ANY
+ EDGES|EVAL_TYPE luaconf.h:LUA_IDSIZE:int(0)#2 -> T:int
+-EDGES|EVAL_TYPE main.c:<global>#36 -> T:ANY
+-EDGES|EVAL_TYPE main.c:<global>#37 -> T:direct
+-EDGES|EVAL_TYPE main.c:<global>#38 -> T:add
+-EDGES|EVAL_TYPE main.c:<global>#39 -> T:ANY
++EDGES|EVAL_TYPE main.c:<global>#34 -> T:ANY
++EDGES|EVAL_TYPE main.c:<global>#35 -> T:direct
++EDGES|EVAL_TYPE main.c:<global>#36 -> T:add
++EDGES|EVAL_TYPE main.c:<global>#37 -> T:ANY
+ EDGES|EVAL_TYPE main.c:ADD:ANY(2)#1 -> T:ANY
+ EDGES|EVAL_TYPE main.c:ADD:ANY(2)#2 -> T:ANY
+ EDGES|EVAL_TYPE main.c:ADD:ANY(2)#3 -> T:ANY
+@@ -2463,11 +2451,9 @@
+ EDGES|EVAL_TYPE main.c:ADD:ANY(2)#6 -> T:ANY
+ EDGES|PARAMETER_LINK <operator>.addition#1 -> <operator>.addition#3
+ EDGES|PARAMETER_LINK <operator>.addition#4 -> <operator>.addition#6
+-EDGES|PARAMETER_LINK <operator>.arrayInitializer#1 -> <operator>.arrayInitializer#2
+-EDGES|PARAMETER_LINK <operator>.arrayInitializer#3 -> <operator>.arrayInitializer#5
++EDGES|PARAMETER_LINK <operator>.arrayInitializer#1 -> <operator>.arrayInitializer#3
+ EDGES|PARAMETER_LINK <operator>.cast#1 -> <operator>.cast#3
+ EDGES|PARAMETER_LINK <operator>.cast#4 -> <operator>.cast#6
+-EDGES|PARAMETER_LINK <operator>.pointerCall#1 -> <operator>.pointerCall#3
+ EDGES|PARAMETER_LINK <unresolvedNamespace>.lua_absindex#1 -> <unresolvedNamespace>.lua_absindex#2
+ EDGES|PARAMETER_LINK <unresolvedNamespace>.lua_absindex#3 -> <unresolvedNamespace>.lua_absindex#4
+ EDGES|PARAMETER_LINK <unresolvedNamespace>.lua_arith#1 -> <unresolvedNamespace>.lua_arith#2
+@@ -2724,14 +2710,20 @@
+ EDGES|REF T:ANY -> D:ANY
+ EDGES|REF T:CallInfo* -> D:CallInfo*
+ EDGES|REF T:Instruction -> llimits.h:<global>#14
++EDGES|REF T:LUAI_MEM -> D:LUAI_MEM
++EDGES|REF T:LUAI_UACINT -> D:LUAI_UACINT
++EDGES|REF T:LUAI_UACNUMBER -> D:LUAI_UACNUMBER
++EDGES|REF T:LUAI_UMEM -> D:LUAI_UMEM
++EDGES|REF T:LUA_INTEGER -> D:LUA_INTEGER
++EDGES|REF T:LUA_KCONTEXT -> D:LUA_KCONTEXT
++EDGES|REF T:LUA_NUMBER -> D:LUA_NUMBER
++EDGES|REF T:LUA_UNSIGNED -> D:LUA_UNSIGNED
+ EDGES|REF T:add -> D:add
+ EDGES|REF T:char -> D:char
+ EDGES|REF T:char* -> D:char*
+ EDGES|REF T:char[60] -> D:char[60]
+ EDGES|REF T:char[] -> D:char[]
+ EDGES|REF T:direct -> D:direct
+-EDGES|REF T:double -> D:double
+-EDGES|REF T:i_ci -> D:i_ci
+ EDGES|REF T:int -> D:int
+ EDGES|REF T:int* -> D:int*
+ EDGES|REF T:l_mem -> llimits.h:<global>#3
+@@ -2744,39 +2736,36 @@
+ EDGES|REF T:lu_mem -> llimits.h:<global>#2
+ EDGES|REF T:lua_Alloc -> D:lua_Alloc
+ EDGES|REF T:lua_CFunction -> D:lua_CFunction
+-EDGES|REF T:lua_Debug -> lua.h:<global>#35
++EDGES|REF T:lua_Debug -> lua.h:<global>#1
+ EDGES|REF T:lua_Debug* -> D:lua_Debug*
+-EDGES|REF T:lua_Debug.CallInfo -> D:lua_Debug.CallInfo
+ EDGES|REF T:lua_Hook -> D:lua_Hook
+-EDGES|REF T:lua_Integer -> lua.h:<global>#32
+-EDGES|REF T:lua_KContext -> lua.h:<global>#34
++EDGES|REF T:lua_Integer -> lua.h:<global>#31
++EDGES|REF T:lua_KContext -> lua.h:<global>#33
+ EDGES|REF T:lua_KFunction -> D:lua_KFunction
+-EDGES|REF T:lua_Number -> lua.h:<global>#31
++EDGES|REF T:lua_Number -> lua.h:<global>#30
+ EDGES|REF T:lua_Reader -> D:lua_Reader
+ EDGES|REF T:lua_State -> lua.h:<global>#29
+ EDGES|REF T:lua_State* -> D:lua_State*
+-EDGES|REF T:lua_Unsigned -> D:lua_Unsigned
++EDGES|REF T:lua_Unsigned -> lua.h:<global>#32
+ EDGES|REF T:lua_WarnFunction -> D:lua_WarnFunction
+ EDGES|REF T:lua_Writer -> D:lua_Writer
+-EDGES|REF T:shortunsigned -> D:shortunsigned
++EDGES|REF T:ptrdiff_t -> D:ptrdiff_t
+ EDGES|REF T:signedchar -> D:signedchar
+ EDGES|REF T:size_t -> D:size_t
+ EDGES|REF T:size_t* -> D:size_t*
+ EDGES|REF T:unsigned char -> D:unsigned char
+ EDGES|REF T:unsigned int -> D:unsigned int
+ EDGES|REF T:unsigned longint -> D:unsigned longint
++EDGES|REF T:unsigned short -> D:unsigned short
+ EDGES|REF T:va_list -> D:va_list
+ EDGES|REF T:void -> D:void
+ EDGES|REF T:void* -> D:void*
+ EDGES|REF T:void** -> D:void**
+-EDGES|REF add#16 -> add#6
+-EDGES|REF add#17 -> add#1
+-EDGES|REF add#19 -> add#6
+-EDGES|REF add#20 -> add#3
+-EDGES|REF direct#10 -> direct#4
+-EDGES|REF direct#11 -> direct#1
+-EDGES|REF main.c:<global>#37 -> direct#0
+-EDGES|REF main.c:<global>#38 -> add#0
++EDGES|REF add#16 -> add#1
++EDGES|REF add#19 -> add#3
++EDGES|REF direct#10 -> direct#1
++EDGES|REF main.c:<global>#35 -> direct#0
++EDGES|REF main.c:<global>#36 -> add#0
+ EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+ EDGES|SOURCE_FILE <unresolvedNamespace>.lua_absindex#0 -> F:lua.h
+ EDGES|SOURCE_FILE <unresolvedNamespace>.lua_arith#0 -> F:lua.h
+@@ -2878,14 +2867,20 @@
+ EDGES|SOURCE_FILE <unresolvedNamespace>.lua_yieldk#0 -> F:lua.h
+ EDGES|SOURCE_FILE D:ANY -> F:<includes>
+ EDGES|SOURCE_FILE D:CallInfo* -> F:<includes>
++EDGES|SOURCE_FILE D:LUAI_MEM -> F:<includes>
++EDGES|SOURCE_FILE D:LUAI_UACINT -> F:<includes>
++EDGES|SOURCE_FILE D:LUAI_UACNUMBER -> F:<includes>
++EDGES|SOURCE_FILE D:LUAI_UMEM -> F:<includes>
++EDGES|SOURCE_FILE D:LUA_INTEGER -> F:<includes>
++EDGES|SOURCE_FILE D:LUA_KCONTEXT -> F:<includes>
++EDGES|SOURCE_FILE D:LUA_NUMBER -> F:<includes>
++EDGES|SOURCE_FILE D:LUA_UNSIGNED -> F:<includes>
+ EDGES|SOURCE_FILE D:add -> F:main.c
+ EDGES|SOURCE_FILE D:char -> F:<includes>
+ EDGES|SOURCE_FILE D:char* -> F:<includes>
+ EDGES|SOURCE_FILE D:char[60] -> F:<includes>
+ EDGES|SOURCE_FILE D:char[] -> F:<includes>
+ EDGES|SOURCE_FILE D:direct -> F:main.c
+-EDGES|SOURCE_FILE D:double -> F:<includes>
+-EDGES|SOURCE_FILE D:i_ci -> F:<includes>
+ EDGES|SOURCE_FILE D:int -> F:<includes>
+ EDGES|SOURCE_FILE D:int* -> F:<includes>
+ EDGES|SOURCE_FILE D:llimits.h:<global> -> F:llimits.h
+@@ -2895,23 +2890,22 @@
+ EDGES|SOURCE_FILE D:lua_Alloc -> F:<includes>
+ EDGES|SOURCE_FILE D:lua_CFunction -> F:<includes>
+ EDGES|SOURCE_FILE D:lua_Debug* -> F:<includes>
+-EDGES|SOURCE_FILE D:lua_Debug.CallInfo -> F:<includes>
+ EDGES|SOURCE_FILE D:lua_Hook -> F:<includes>
+ EDGES|SOURCE_FILE D:lua_KFunction -> F:<includes>
+ EDGES|SOURCE_FILE D:lua_Reader -> F:<includes>
+ EDGES|SOURCE_FILE D:lua_State* -> F:<includes>
+-EDGES|SOURCE_FILE D:lua_Unsigned -> F:<includes>
+ EDGES|SOURCE_FILE D:lua_WarnFunction -> F:<includes>
+ EDGES|SOURCE_FILE D:lua_Writer -> F:<includes>
+ EDGES|SOURCE_FILE D:luaconf.h:<global> -> F:luaconf.h
+ EDGES|SOURCE_FILE D:main.c:<global> -> F:main.c
+-EDGES|SOURCE_FILE D:shortunsigned -> F:<includes>
++EDGES|SOURCE_FILE D:ptrdiff_t -> F:<includes>
+ EDGES|SOURCE_FILE D:signedchar -> F:<includes>
+ EDGES|SOURCE_FILE D:size_t -> F:<includes>
+ EDGES|SOURCE_FILE D:size_t* -> F:<includes>
+ EDGES|SOURCE_FILE D:unsigned char -> F:<includes>
+ EDGES|SOURCE_FILE D:unsigned int -> F:<includes>
+ EDGES|SOURCE_FILE D:unsigned longint -> F:<includes>
++EDGES|SOURCE_FILE D:unsigned short -> F:<includes>
+ EDGES|SOURCE_FILE D:va_list -> F:<includes>
+ EDGES|SOURCE_FILE D:void -> F:<includes>
+ EDGES|SOURCE_FILE D:void* -> F:<includes>
+@@ -2929,14 +2923,9 @@
+ EDGES|SOURCE_FILE llimits.h:<global>#10 -> F:llimits.h
+ EDGES|SOURCE_FILE llimits.h:<global>#11 -> F:llimits.h
+ EDGES|SOURCE_FILE llimits.h:<global>#12 -> F:llimits.h
+-EDGES|SOURCE_FILE llimits.h:<global>#13 -> F:llimits.h
+ EDGES|SOURCE_FILE llimits.h:<global>#14 -> F:llimits.h
+ EDGES|SOURCE_FILE llimits.h:<global>#2 -> F:llimits.h
+ EDGES|SOURCE_FILE llimits.h:<global>#3 -> F:llimits.h
+-EDGES|SOURCE_FILE llimits.h:<global>#4 -> F:llimits.h
+-EDGES|SOURCE_FILE llimits.h:<global>#5 -> F:llimits.h
+-EDGES|SOURCE_FILE llimits.h:<global>#6 -> F:llimits.h
+-EDGES|SOURCE_FILE llimits.h:<global>#7 -> F:llimits.h
+ EDGES|SOURCE_FILE llimits.h:<global>#8 -> F:llimits.h
+ EDGES|SOURCE_FILE llimits.h:<global>#9 -> F:llimits.h
+ EDGES|SOURCE_FILE llimits.h:l_castS2U:ANY(1)#0 -> F:main.c
+@@ -2948,29 +2937,27 @@
+ EDGES|SOURCE_FILE lua.h:<global>#30 -> F:lua.h
+ EDGES|SOURCE_FILE lua.h:<global>#31 -> F:lua.h
+ EDGES|SOURCE_FILE lua.h:<global>#32 -> F:lua.h
+-EDGES|SOURCE_FILE lua.h:<global>#34 -> F:lua.h
+-EDGES|SOURCE_FILE lua.h:<global>#35 -> F:lua.h
+-EDGES|SOURCE_FILE lua.h:<global>#36 -> F:lua.h
++EDGES|SOURCE_FILE lua.h:<global>#33 -> F:lua.h
+ EDGES|SOURCE_FILE luaconf.h:<global>#0 -> F:luaconf.h
+ EDGES|SOURCE_FILE luaconf.h:LUA_IDSIZE:int(0)#0 -> F:lua.h
+ EDGES|SOURCE_FILE main.c:<global>#0 -> F:main.c
+ EDGES|SOURCE_FILE main.c:ADD:ANY(2)#0 -> F:main.c
+-FLOWS|REACHING_DEF[((lua_Unsigned)(i)) + ((lua_Unsigned)(j))] add#14 -> add#12
+-FLOWS|REACHING_DEF[((lua_Unsigned)(i)) + ((lua_Unsigned)(j))] add#14 -> add#21
+-FLOWS|REACHING_DEF[(lua_Integer)(((lua_Unsigned)(i)) + ((lua_Unsigned)(j)))] add#12 -> add#21
+-FLOWS|REACHING_DEF[(lua_Unsigned)(i)] add#15 -> add#14
+-FLOWS|REACHING_DEF[(lua_Unsigned)(i)] add#15 -> add#21
+-FLOWS|REACHING_DEF[(lua_Unsigned)(i)] direct#9 -> direct#12
+-FLOWS|REACHING_DEF[(lua_Unsigned)(j)] add#18 -> add#14
+-FLOWS|REACHING_DEF[(lua_Unsigned)(j)] add#18 -> add#21
+-FLOWS|REACHING_DEF[<RET>] add#7 -> add#21
+-FLOWS|REACHING_DEF[<RET>] direct#5 -> direct#12
++FLOWS|REACHING_DEF[((lua_Unsigned)(i)) + ((lua_Unsigned)(j))] add#13 -> add#11
++FLOWS|REACHING_DEF[((lua_Unsigned)(i)) + ((lua_Unsigned)(j))] add#13 -> add#20
++FLOWS|REACHING_DEF[(lua_Integer)(((lua_Unsigned)(i)) + ((lua_Unsigned)(j)))] add#11 -> add#20
++FLOWS|REACHING_DEF[(lua_Unsigned)(i)] add#14 -> add#13
++FLOWS|REACHING_DEF[(lua_Unsigned)(i)] add#14 -> add#20
++FLOWS|REACHING_DEF[(lua_Unsigned)(i)] direct#8 -> direct#11
++FLOWS|REACHING_DEF[(lua_Unsigned)(j)] add#17 -> add#13
++FLOWS|REACHING_DEF[(lua_Unsigned)(j)] add#17 -> add#20
++FLOWS|REACHING_DEF[<RET>] add#6 -> add#20
++FLOWS|REACHING_DEF[<RET>] direct#4 -> direct#11
+ FLOWS|REACHING_DEF[<param>3] <unresolvedNamespace>.lua_gc#5 -> <unresolvedNamespace>.lua_gc#6
+ FLOWS|REACHING_DEF[<param>3] <unresolvedNamespace>.lua_gc#5 -> <unresolvedNamespace>.lua_gc#8
+ FLOWS|REACHING_DEF[<param>3] <unresolvedNamespace>.lua_pushfstring#5 -> <unresolvedNamespace>.lua_pushfstring#6
+ FLOWS|REACHING_DEF[<param>3] <unresolvedNamespace>.lua_pushfstring#5 -> <unresolvedNamespace>.lua_pushfstring#8
+-FLOWS|REACHING_DEF[ADD(i,j)] add#8 -> add#21
+-FLOWS|REACHING_DEF[ADD(i,j)] add#8 -> add#7
++FLOWS|REACHING_DEF[ADD(i,j)] add#7 -> add#20
++FLOWS|REACHING_DEF[ADD(i,j)] add#7 -> add#6
+ FLOWS|REACHING_DEF[LUA_IDSIZE] lua_Debug.<clinit>:lua_Debug()#3 -> lua_Debug.<clinit>:lua_Debug()#2
+ FLOWS|REACHING_DEF[LUA_IDSIZE] lua_Debug.<clinit>:lua_Debug()#3 -> lua_Debug.<clinit>:lua_Debug()#8
+ FLOWS|REACHING_DEF[L] <unresolvedNamespace>.lua_absindex#1 -> <unresolvedNamespace>.lua_absindex#2
+@@ -3168,10 +3155,8 @@
+ FLOWS|REACHING_DEF[] <operator>.addition#0 -> <operator>.addition#1
+ FLOWS|REACHING_DEF[] <operator>.addition#0 -> <operator>.addition#4
+ FLOWS|REACHING_DEF[] <operator>.arrayInitializer#0 -> <operator>.arrayInitializer#1
+-FLOWS|REACHING_DEF[] <operator>.arrayInitializer#0 -> <operator>.arrayInitializer#3
+ FLOWS|REACHING_DEF[] <operator>.cast#0 -> <operator>.cast#1
+ FLOWS|REACHING_DEF[] <operator>.cast#0 -> <operator>.cast#4
+-FLOWS|REACHING_DEF[] <operator>.pointerCall#0 -> <operator>.pointerCall#1
+ FLOWS|REACHING_DEF[] <unresolvedNamespace>.lua_absindex#0 -> <unresolvedNamespace>.lua_absindex#1
+ FLOWS|REACHING_DEF[] <unresolvedNamespace>.lua_absindex#0 -> <unresolvedNamespace>.lua_absindex#3
+ FLOWS|REACHING_DEF[] <unresolvedNamespace>.lua_arith#0 -> <unresolvedNamespace>.lua_arith#1
+@@ -3413,25 +3398,25 @@
+ FLOWS|REACHING_DEF[] <unresolvedNamespace>.lua_yieldk#0 -> <unresolvedNamespace>.lua_yieldk#5
+ FLOWS|REACHING_DEF[] <unresolvedNamespace>.lua_yieldk#0 -> <unresolvedNamespace>.lua_yieldk#7
+ FLOWS|REACHING_DEF[] add#0 -> add#1
+-FLOWS|REACHING_DEF[] add#0 -> add#10
+-FLOWS|REACHING_DEF[] add#0 -> add#13
++FLOWS|REACHING_DEF[] add#0 -> add#12
++FLOWS|REACHING_DEF[] add#0 -> add#15
+ FLOWS|REACHING_DEF[] add#0 -> add#16
+-FLOWS|REACHING_DEF[] add#0 -> add#17
++FLOWS|REACHING_DEF[] add#0 -> add#18
+ FLOWS|REACHING_DEF[] add#0 -> add#19
+-FLOWS|REACHING_DEF[] add#0 -> add#20
+ FLOWS|REACHING_DEF[] add#0 -> add#3
++FLOWS|REACHING_DEF[] add#0 -> add#8
+ FLOWS|REACHING_DEF[] add#0 -> add#9
+ FLOWS|REACHING_DEF[] direct#0 -> direct#1
+ FLOWS|REACHING_DEF[] direct#0 -> direct#10
+-FLOWS|REACHING_DEF[] direct#0 -> direct#11
+-FLOWS|REACHING_DEF[] direct#0 -> direct#7
++FLOWS|REACHING_DEF[] direct#0 -> direct#6
++FLOWS|REACHING_DEF[] direct#0 -> direct#9
+ FLOWS|REACHING_DEF[] llimits.h:l_castS2U:ANY(1)#0 -> llimits.h:l_castS2U:ANY(1)#1
+-FLOWS|REACHING_DEF[] lua.h:<global>#0 -> lua.h:<global>#38
+-FLOWS|REACHING_DEF[] lua.h:<global>#0 -> lua.h:<global>#39
++FLOWS|REACHING_DEF[] lua.h:<global>#0 -> lua.h:<global>#36
++FLOWS|REACHING_DEF[] lua.h:<global>#0 -> lua.h:<global>#37
+ FLOWS|REACHING_DEF[] lua.h:<global>#19 -> lua_Debug.<clinit>:lua_Debug()#3
+ FLOWS|REACHING_DEF[] lua.h:<global>#19 -> lua_Debug.<clinit>:lua_Debug()#5
+-FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#37
+-FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#38
++FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#35
++FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#36
+ FLOWS|REACHING_DEF[] main.c:ADD:ANY(2)#0 -> main.c:ADD:ANY(2)#1
+ FLOWS|REACHING_DEF[] main.c:ADD:ANY(2)#0 -> main.c:ADD:ANY(2)#3
+ FLOWS|REACHING_DEF[ar] <unresolvedNamespace>.lua_getinfo#5 -> <unresolvedNamespace>.lua_getinfo#6
+@@ -3495,24 +3480,24 @@
+ FLOWS|REACHING_DEF[funcindex] <unresolvedNamespace>.lua_setupvalue#3 -> <unresolvedNamespace>.lua_setupvalue#4
+ FLOWS|REACHING_DEF[funcindex] <unresolvedNamespace>.lua_setupvalue#3 -> <unresolvedNamespace>.lua_setupvalue#8
+ FLOWS|REACHING_DEF[i] add#1 -> add#2
+-FLOWS|REACHING_DEF[i] add#1 -> add#9
+-FLOWS|REACHING_DEF[i] add#17 -> add#15
+-FLOWS|REACHING_DEF[i] add#17 -> add#2
+-FLOWS|REACHING_DEF[i] add#17 -> add#21
+-FLOWS|REACHING_DEF[i] add#9 -> add#10
+-FLOWS|REACHING_DEF[i] add#9 -> add#17
+-FLOWS|REACHING_DEF[i] add#9 -> add#2
+-FLOWS|REACHING_DEF[i] add#9 -> add#21
+-FLOWS|REACHING_DEF[i] add#9 -> add#8
++FLOWS|REACHING_DEF[i] add#1 -> add#8
++FLOWS|REACHING_DEF[i] add#16 -> add#14
++FLOWS|REACHING_DEF[i] add#16 -> add#2
++FLOWS|REACHING_DEF[i] add#16 -> add#20
++FLOWS|REACHING_DEF[i] add#8 -> add#16
++FLOWS|REACHING_DEF[i] add#8 -> add#2
++FLOWS|REACHING_DEF[i] add#8 -> add#20
++FLOWS|REACHING_DEF[i] add#8 -> add#7
++FLOWS|REACHING_DEF[i] add#8 -> add#9
+ FLOWS|REACHING_DEF[i] direct#1 -> direct#2
+-FLOWS|REACHING_DEF[i] direct#1 -> direct#7
+-FLOWS|REACHING_DEF[i] direct#11 -> direct#12
+-FLOWS|REACHING_DEF[i] direct#11 -> direct#2
+-FLOWS|REACHING_DEF[i] direct#11 -> direct#9
+-FLOWS|REACHING_DEF[i] direct#7 -> direct#11
+-FLOWS|REACHING_DEF[i] direct#7 -> direct#12
+-FLOWS|REACHING_DEF[i] direct#7 -> direct#2
+-FLOWS|REACHING_DEF[i] direct#7 -> direct#6
++FLOWS|REACHING_DEF[i] direct#1 -> direct#6
++FLOWS|REACHING_DEF[i] direct#10 -> direct#11
++FLOWS|REACHING_DEF[i] direct#10 -> direct#2
++FLOWS|REACHING_DEF[i] direct#10 -> direct#8
++FLOWS|REACHING_DEF[i] direct#6 -> direct#10
++FLOWS|REACHING_DEF[i] direct#6 -> direct#11
++FLOWS|REACHING_DEF[i] direct#6 -> direct#2
++FLOWS|REACHING_DEF[i] direct#6 -> direct#5
+ FLOWS|REACHING_DEF[idx1] <unresolvedNamespace>.lua_compare#3 -> <unresolvedNamespace>.lua_compare#10
+ FLOWS|REACHING_DEF[idx1] <unresolvedNamespace>.lua_compare#3 -> <unresolvedNamespace>.lua_compare#4
+ FLOWS|REACHING_DEF[idx1] <unresolvedNamespace>.lua_rawequal#3 -> <unresolvedNamespace>.lua_rawequal#4
+@@ -3599,16 +3584,16 @@
+ FLOWS|REACHING_DEF[isnum] <unresolvedNamespace>.lua_tointegerx#5 -> <unresolvedNamespace>.lua_tointegerx#8
+ FLOWS|REACHING_DEF[isnum] <unresolvedNamespace>.lua_tonumberx#5 -> <unresolvedNamespace>.lua_tonumberx#6
+ FLOWS|REACHING_DEF[isnum] <unresolvedNamespace>.lua_tonumberx#5 -> <unresolvedNamespace>.lua_tonumberx#8
+-FLOWS|REACHING_DEF[j] add#10 -> add#20
+-FLOWS|REACHING_DEF[j] add#10 -> add#21
+-FLOWS|REACHING_DEF[j] add#10 -> add#4
+-FLOWS|REACHING_DEF[j] add#10 -> add#8
+-FLOWS|REACHING_DEF[j] add#10 -> add#9
+-FLOWS|REACHING_DEF[j] add#20 -> add#18
+-FLOWS|REACHING_DEF[j] add#20 -> add#21
+-FLOWS|REACHING_DEF[j] add#20 -> add#4
+-FLOWS|REACHING_DEF[j] add#3 -> add#10
++FLOWS|REACHING_DEF[j] add#19 -> add#17
++FLOWS|REACHING_DEF[j] add#19 -> add#20
++FLOWS|REACHING_DEF[j] add#19 -> add#4
+ FLOWS|REACHING_DEF[j] add#3 -> add#4
++FLOWS|REACHING_DEF[j] add#3 -> add#9
++FLOWS|REACHING_DEF[j] add#9 -> add#19
++FLOWS|REACHING_DEF[j] add#9 -> add#20
++FLOWS|REACHING_DEF[j] add#9 -> add#4
++FLOWS|REACHING_DEF[j] add#9 -> add#7
++FLOWS|REACHING_DEF[j] add#9 -> add#8
+ FLOWS|REACHING_DEF[k] <unresolvedNamespace>.lua_callk#9 -> <unresolvedNamespace>.lua_callk#10
+ FLOWS|REACHING_DEF[k] <unresolvedNamespace>.lua_callk#9 -> <unresolvedNamespace>.lua_callk#12
+ FLOWS|REACHING_DEF[k] <unresolvedNamespace>.lua_getfield#5 -> <unresolvedNamespace>.lua_getfield#6
+@@ -3619,8 +3604,8 @@
+ FLOWS|REACHING_DEF[k] <unresolvedNamespace>.lua_setfield#5 -> <unresolvedNamespace>.lua_setfield#8
+ FLOWS|REACHING_DEF[k] <unresolvedNamespace>.lua_yieldk#7 -> <unresolvedNamespace>.lua_yieldk#10
+ FLOWS|REACHING_DEF[k] <unresolvedNamespace>.lua_yieldk#7 -> <unresolvedNamespace>.lua_yieldk#8
+-FLOWS|REACHING_DEF[l_castS2U(i)] direct#6 -> direct#12
+-FLOWS|REACHING_DEF[l_castS2U(i)] direct#6 -> direct#5
++FLOWS|REACHING_DEF[l_castS2U(i)] direct#5 -> direct#11
++FLOWS|REACHING_DEF[l_castS2U(i)] direct#5 -> direct#4
+ FLOWS|REACHING_DEF[len] <unresolvedNamespace>.lua_pushlstring#5 -> <unresolvedNamespace>.lua_pushlstring#6
+ FLOWS|REACHING_DEF[len] <unresolvedNamespace>.lua_pushlstring#5 -> <unresolvedNamespace>.lua_pushlstring#8
+ FLOWS|REACHING_DEF[len] <unresolvedNamespace>.lua_tolstring#5 -> <unresolvedNamespace>.lua_tolstring#6
+@@ -3629,8 +3614,11 @@
+ FLOWS|REACHING_DEF[level] <unresolvedNamespace>.lua_getstack#3 -> <unresolvedNamespace>.lua_getstack#8
+ FLOWS|REACHING_DEF[limit] <unresolvedNamespace>.lua_setcstacklimit#3 -> <unresolvedNamespace>.lua_setcstacklimit#4
+ FLOWS|REACHING_DEF[limit] <unresolvedNamespace>.lua_setcstacklimit#3 -> <unresolvedNamespace>.lua_setcstacklimit#6
+-FLOWS|REACHING_DEF[lua_Integer] add#13 -> add#12
+-FLOWS|REACHING_DEF[lua_ident[]] lua.h:<global>#38 -> lua.h:<global>#40
++FLOWS|REACHING_DEF[lua_Integer] add#12 -> add#11
++FLOWS|REACHING_DEF[lua_Unsigned] add#15 -> add#14
++FLOWS|REACHING_DEF[lua_Unsigned] add#18 -> add#17
++FLOWS|REACHING_DEF[lua_Unsigned] direct#9 -> direct#8
++FLOWS|REACHING_DEF[lua_ident[]] lua.h:<global>#36 -> lua.h:<global>#38
+ FLOWS|REACHING_DEF[mask] <unresolvedNamespace>.lua_sethook#5 -> <unresolvedNamespace>.lua_sethook#10
+ FLOWS|REACHING_DEF[mask] <unresolvedNamespace>.lua_sethook#5 -> <unresolvedNamespace>.lua_sethook#6
+ FLOWS|REACHING_DEF[mode] <unresolvedNamespace>.lua_load#9 -> <unresolvedNamespace>.lua_load#10
+@@ -3709,16 +3697,12 @@
+ FLOWS|REACHING_DEF[op] <unresolvedNamespace>.lua_arith#3 -> <unresolvedNamespace>.lua_arith#6
+ FLOWS|REACHING_DEF[op] <unresolvedNamespace>.lua_compare#7 -> <unresolvedNamespace>.lua_compare#10
+ FLOWS|REACHING_DEF[op] <unresolvedNamespace>.lua_compare#7 -> <unresolvedNamespace>.lua_compare#8
+-FLOWS|REACHING_DEF[p0] <operator>.arrayInitializer#1 -> <operator>.arrayInitializer#2
+-FLOWS|REACHING_DEF[p0] <operator>.arrayInitializer#1 -> <operator>.arrayInitializer#6
+ FLOWS|REACHING_DEF[p1] <operator>.addition#1 -> <operator>.addition#3
+ FLOWS|REACHING_DEF[p1] <operator>.addition#1 -> <operator>.addition#5
+-FLOWS|REACHING_DEF[p1] <operator>.arrayInitializer#3 -> <operator>.arrayInitializer#5
+-FLOWS|REACHING_DEF[p1] <operator>.arrayInitializer#3 -> <operator>.arrayInitializer#6
++FLOWS|REACHING_DEF[p1] <operator>.arrayInitializer#1 -> <operator>.arrayInitializer#3
++FLOWS|REACHING_DEF[p1] <operator>.arrayInitializer#1 -> <operator>.arrayInitializer#4
+ FLOWS|REACHING_DEF[p1] <operator>.cast#1 -> <operator>.cast#3
+ FLOWS|REACHING_DEF[p1] <operator>.cast#1 -> <operator>.cast#5
+-FLOWS|REACHING_DEF[p1] <operator>.pointerCall#1 -> <operator>.pointerCall#3
+-FLOWS|REACHING_DEF[p1] <operator>.pointerCall#1 -> <operator>.pointerCall#4
+ FLOWS|REACHING_DEF[p1] llimits.h:l_castS2U:ANY(1)#1 -> llimits.h:l_castS2U:ANY(1)#2
+ FLOWS|REACHING_DEF[p1] llimits.h:l_castS2U:ANY(1)#1 -> llimits.h:l_castS2U:ANY(1)#4
+ FLOWS|REACHING_DEF[p1] main.c:ADD:ANY(2)#1 -> main.c:ADD:ANY(2)#2

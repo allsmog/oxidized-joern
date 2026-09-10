@@ -1,0 +1,75 @@
+{
+  "completedAtUtc": "2026-09-09T04:32:15.322791+00:00",
+  "workspaceTests": 490,
+  "workspaceResultGroups": 82,
+  "checkerTests": 17,
+  "auditedCrates": 73,
+  "committedBlocks": 308,
+  "freshLiveBlocks": 308,
+  "allFailedIgnoredFiltered": 0,
+  "formatting": "passed",
+  "strictClippy": "passed",
+  "nativeRelease": "passed",
+  "nativeArchive": "passed",
+  "officialRealProjectAcceptance": "passed",
+  "nativePlatform": "macos-arm64",
+  "containerOtherPlatformsRun": false,
+  "releaseBuildReceipt": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/thirteenth-batch/final-release-v2/final/build-result-v2.json",
+    "sha256": "fee53906460e46c874bbc2ad448b948ad4e48e0aca165a5cec055cd801668c4c"
+  },
+  "frozenBuildSha256": "d339e070ad6dc154a344b8d1c07953fb6fd85e21c3cb79381286fc08847691e5",
+  "allFrozenInputFilesUnchanged": 151,
+  "allFrozenFixtureFilesUnchanged": 11821,
+  "manifestSha256": "9c072671a0395676be7e7ca8b94712dcfe4aaa5ec984153a162247ae4c96425d",
+  "logs": {
+    "fmt.log": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/thirteenth-batch/final-v2/fmt.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "workspace-tests.log": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/thirteenth-batch/final-v2/workspace-tests.log",
+      "sha256": "451729865c3ef5e98a5219e5b25b2b94d06c89ebe34c7d3646053970d6d1359e"
+    },
+    "clippy.log": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/thirteenth-batch/final-v2/clippy.log",
+      "sha256": "3b75b494a105558eadf9f952f965880a794cd1da8c24a3539fa762293bf056d2"
+    },
+    "release-recheck.log": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/thirteenth-batch/final-v2/release-recheck.log",
+      "sha256": "765f1396d07f30f3a451cd3f9d9cad4e83c92c8e0aecf955ffc09061a6cf1e02"
+    },
+    "committed-parity.log": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/thirteenth-batch/final-v2/committed-parity.log",
+      "sha256": "c105179d62065e9cbf9f398ff94754c29ec03add1206db7dff281cb4c07b6be6"
+    },
+    "live-parity.log": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/thirteenth-batch/final-v2/live-parity.log",
+      "sha256": "715e0c188ca0e7a744ace60c9fa451649f34143022f2a1a163bd46303772dd68"
+    },
+    "checker-tests.log": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/thirteenth-batch/final-v2/checker-tests.log",
+      "sha256": "12638a0750fc6d2e1e6f0158b5720ab17caf2c1c80078892b13b9228cc14e6fa"
+    },
+    "dependency-audit.log": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/thirteenth-batch/final-v2/dependency-audit.log",
+      "sha256": "2a91a692bdd0f166d94bb45220a29b5f469072246f9ef0b5205b36dd0375393b"
+    },
+    "native-release.log": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/thirteenth-batch/final-v2/native-release.log",
+      "sha256": "45cda7a5b72da78bc7f734c52fd6ff53ddda5899ce137fd3ed237702651a1bce"
+    },
+    "native-archive.log": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/thirteenth-batch/final-v2/native-archive.log",
+      "sha256": "ef3c5c34f322e704ac643421dabf07471ef2ed8a5f44d4d424d73443e80b8226"
+    },
+    "official-real-project-acceptance.log": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/thirteenth-batch/final-v2/official-real-project-acceptance.log",
+      "sha256": "5bcc14beb1cb4f8e804359a6ca08ca7630b6ad23329da32ddccd9615494cdaa7"
+    },
+    "release-build.log": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/thirteenth-batch/final-release-v2/final/release-build.log",
+      "sha256": "765f1396d07f30f3a451cd3f9d9cad4e83c92c8e0aecf955ffc09061a6cf1e02"
+    }
+  }
+}

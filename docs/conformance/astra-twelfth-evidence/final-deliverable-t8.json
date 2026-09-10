@@ -1,0 +1,207 @@
+{
+  "status": "PASS_FINAL_DELIVERABLE_T8",
+  "reviewedAtUtc": "2026-09-09T03:16:26.835640+00:00",
+  "reviewMode": "Read-only source/document/evidence inspection; zero builds, graph producers, source edits or documentation rewrites by reviewer. Only new ignored review artifacts written.",
+  "skill": {
+    "path": "/Users/shayaunnejad/liminal-ops-workflow/plugins/liminal-flows/skills/verify-deliverable/SKILL.md",
+    "sha256": "6ba35c4dbdbcf0406ceac7ef1ef2182d189ad9a48d5741d58d8f07c7e0316aef",
+    "bytes": 2013
+  },
+  "registerSkill": {
+    "path": "/Users/shayaunnejad/liminal-ops-workflow/plugins/liminal-core/skills/register-lint/SKILL.md",
+    "sha256": "63104bb758501f3c8e0d1f2375e698357b7a64c71e19341dd6c3a7ad7f7bafa3",
+    "bytes": 2923
+  },
+  "targets": [
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/docs/conformance/astra-twelfth-batch-2026-09-09.md",
+      "sha256": "d86db8ffa1a85a2f2f87cb3692b6bfe596f6b2fc11b7362d582d2ed284af5f09",
+      "bytes": 8170
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/docs/conformance/astra-twelfth-batch-acceptance.json",
+      "sha256": "7ddd8ddd9ff9bfa37439a99260d4f8a04e3f23706eee7e64a9bd9ea74273c749",
+      "bytes": 39545
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/docs/conformance/astra-twelfth-batch-metrics.json",
+      "sha256": "7114f9e78897cd97093954d0955e494af1cef5cd53ba4347de1ddd52c90f41d0",
+      "bytes": 196015
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/docs/conformance/astra-twelfth-supplemental-gaps.md",
+      "sha256": "c19bd52ac0e79dd3dadb0245459f54e9b2618a5f21a005eea3e2f8a83828977d",
+      "bytes": 4563
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/PROGRESS.md",
+      "sha256": "9ee0254a916011271191c2d355e1e13279f0d5e2dff1e192839f79241344a370",
+      "bytes": 53750
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/COMPATIBILITY.md",
+      "sha256": "bab4003d90ebd916bcd83db428344354ddc7ccb1e502384ef541da4420055caa",
+      "bytes": 13927
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/joern-parity/QUIRKS.md",
+      "sha256": "634d3ace467d3366d376bf13e56e2e5f203a63d58249df2c72dde34b75c24c94",
+      "bytes": 24045
+    }
+  ],
+  "finalBuild": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/twelfth-batch/lint-corrected/final-real-differential/bin/source-bindings.json",
+    "sha256": "33f4740b78f60a142a615b1a07b2a2ea448ed7955e9464395e72fe6a8af91dda",
+    "bytes": 2121168
+  },
+  "mechanicalAudit": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-function-identities/.local/twelfth-docs-t8-v1/checks.json",
+    "sha256": "e2ed761ae6a81d8c6c62576fb1d30a7a7aaf87ed3e1a4754071d1cd24309b1b4",
+    "bytes": 2298429
+  },
+  "auditScript": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-function-identities/.local/twelfth-docs-t8-v1/check.py",
+    "sha256": "a9b1ffa27d25842455f2c63d1bbd4a96776b7475078b69f3e19b597a1912fb65",
+    "bytes": 8880
+  },
+  "mechanicalCheckCount": 12955,
+  "markdownLinksChecked": 29,
+  "scores": [
+    {
+      "criterion": "Grounding",
+      "score": 2,
+      "reason": "Five most consequential claims are quoted verbatim below and tied to current actual outputs or independently bound review receipts. Present and historical artifact boundaries are explicit."
+    },
+    {
+      "criterion": "Contract",
+      "score": 2,
+      "reason": "Inferred contract: an internal engineering checkpoint account of implemented behavior, exact bounded validations, storage compatibility, measured resources, retained failures, incomplete parity and next work. The report, acceptance, metrics, gap note, PROGRESS and compatibility/quirk additions satisfy this contract; no user template was supplied."
+    },
+    {
+      "criterion": "Register",
+      "score": 2,
+      "reason": "Technical terms identify actual graph schema, file formats, counters and evidence records. This is internal engineering documentation rather than Liminal product copy; unrelated product-loop/PPA vocabulary rules do not apply. No vague marketing claim, product jargon leak, or dishonest completion label remains."
+    },
+    {
+      "criterion": "Veracity",
+      "score": 2,
+      "reason": "The premature committed-artifact wording was corrected by the owner. Current text says included/proposed/prepared, while acceptance explicitly records the pending local commit. Full Joern and supplemental parity remain incomplete; reused output is justified through identical executable hashes instead of a fictitious new run."
+    },
+    {
+      "criterion": "Gates",
+      "score": 2,
+      "reason": "Current source149/fixture11642 maps and both executables equal final33f. Actual logs give482 tests/80 groups,308 committed and308 fresh live blocks,17 checker tests and73 audited crates. Official actual run exits0 against the eight-field applied manifest. Original dirty state is untouched and the action remains a local checkpoint with no push/merge."
+    },
+    {
+      "criterion": "Usefulness",
+      "score": 2,
+      "reason": "A maintainer can locate the source tests, detailed acceptance/metrics and copied review receipts, distinguish the eleven-case canonical success from full-property gaps, and identify the next three observed include pairs plus separate future policy controls. Local-only large evidence is disclosed; no clone-portability claim is made."
+    }
+  ],
+  "total": 12,
+  "maximum": 12,
+  "weakestClaims": [
+    {
+      "claimVerbatim": "Every complete Rust snapshot is byte-identical before saving and after reopening, and all 81 selected metadata occurrences match the live reference.",
+      "location": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/docs/conformance/astra-twelfth-batch-2026-09-09.md:9",
+      "receipts": [
+        {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/docs/conformance/astra-twelfth-evidence/capture-review.json",
+          "sha256": "f49071787f448bb48aea7f15eaf79458a14cea0ed920e9fb9a9468ca9f9179d0",
+          "bytes": 1272085
+        },
+        {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/docs/conformance/astra-twelfth-evidence/metadata-review.json",
+          "sha256": "a36c702c7be47c347a182cd040c4e000b9f142c0bea3d6b4fcfe86a04b993378",
+          "bytes": 8951
+        }
+      ],
+      "verification": "All eleven actual complete in-memory/reopened stdout pairs independently compared byte-for-byte in this audit; 55 zero-status commands and the independent 81-occurrence metadata bridge remain bound. This does not imply complete Joern property or graph parity.",
+      "requiredFix": null
+    },
+    {
+      "claimVerbatim": "Complete matching multisets gain **27,686 zlib /2,425 Lua records**, with **no formerly matching records lost**.",
+      "location": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/docs/conformance/astra-twelfth-batch-2026-09-09.md:15",
+      "receipts": [
+        {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/docs/conformance/astra-twelfth-evidence/whole-review.json",
+          "sha256": "ee7c21a44721b933e824ae295e1bb532bea1424938121dc675bc6aec698f975c",
+          "bytes": 55311
+        }
+      ],
+      "verification": "The complete whole review retains raw multiplicities and source occurrence bridges, with matching losses zero in each project. Its final33f binding and both byte-identical binary continuities are current. These are matching-record counts, not unique defect counts.",
+      "requiredFix": null
+    },
+    {
+      "claimVerbatim": "All **61 tracked facts, 19 selected trees/stubs and three actual zlib snprintf calls** remain.",
+      "location": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/docs/conformance/astra-twelfth-batch-2026-09-09.md:22",
+      "receipts": [
+        {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/docs/conformance/astra-twelfth-evidence/whole-review.json",
+          "sha256": "ee7c21a44721b933e824ae295e1bb532bea1424938121dc675bc6aec698f975c",
+          "bytes": 55311
+        }
+      ],
+      "verification": "The bound prior-fact verifier retains twelve zlib plus forty-nine Lua facts, five plus fourteen complete selected trees, and three actual zlib snprintf calls. This is the enumerated prior fact set, not an unmeasured primary/body subclass count.",
+      "requiredFix": null
+    },
+    {
+      "claimVerbatim": "Both repetitions pass the unchanged **20-second and 512/1,024 MiB** build ceilings and produce identical graph, edge, export and zero-finding SARIF bytes.",
+      "location": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/docs/conformance/astra-twelfth-batch-2026-09-09.md:32",
+      "receipts": [
+        {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/docs/conformance/astra-twelfth-evidence/resource-review.json",
+          "sha256": "af33a26934776ec8b517f752b0577de59ec1bb2076f117422c48f7c178e4b650",
+          "bytes": 11067
+        },
+        {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/docs/conformance/astra-twelfth-evidence/resource-measurements.json",
+          "sha256": "62f950ae7dcdcc58709ca9cbfc31d5c230f30a4a032caee925a042bc8ba7441a",
+          "bytes": 4004
+        },
+        {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/docs/conformance/astra-twelfth-evidence/manifest-applied.json",
+          "sha256": "0e855e43f621071dccbc831b602b3693c8f23155c85ee703610396c78fd02967",
+          "bytes": 2534
+        }
+      ],
+      "verification": "Both repetitions meet the stated per-build ceilings; their graph/edge/export/SARIF hashes agree. Exactly eight expected fields differ from accepted c3a8c67. Update RSS and official helper cumulative RSS are correctly distinguished; unrelated host activity is explicitly uncontrolled.",
+      "requiredFix": null
+    },
+    {
+      "claimVerbatim": "The original checkout and its **13 preexisting dirty files** remain unchanged.",
+      "location": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/docs/conformance/astra-twelfth-batch-2026-09-09.md:34",
+      "receipts": [
+        {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/docs/conformance/astra-twelfth-evidence/original-checkout.json",
+          "sha256": "df97a9f0774a0ace4f02c794101ee4b280dbda1e4f69e03dd231404170a8c7ba",
+          "bytes": 2341
+        }
+      ],
+      "verification": "The original checkout HEAD, complete porcelain status and all thirteen actual dirty-file SHA256 values independently match the retained snapshot at this review. Local integration remains on codex/astra-parity-sprint before commit; no push or merge is claimed.",
+      "requiredFix": null
+    }
+  ],
+  "resolvedFindings": [
+    {
+      "finding": "New staged fixtures/assets and references were described as already committed before local commit.",
+      "ownerChanges": [
+        "Main report: are explicitly included in this checkpoint.",
+        "Acceptance: proposed checkpoint includes artifacts; Source and PROGRESS are prepared for the same commit.",
+        "Gap report: reference snapshots are included under the fixture family."
+      ],
+      "resolution": "Confirmed in the exact target hashes bound above. Existing descriptions of prior committed oracle/measurement receipts were preserved."
+    }
+  ],
+  "requiredFixes": [],
+  "scopeLimits": [
+    "This T8 audits the final engineering deliverable against existing actual evidence; it does not run additional acceptance or oracle producers.",
+    "Domain-specific graph/schema words are not treated as prohibited marketing vocabulary.",
+    "No full port, complete stored Joern graph parity, primary/body subclass count or local-large-artifact portability is inferred."
+  ],
+  "strongestReceipt": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/docs/conformance/astra-twelfth-evidence/whole-review.json",
+    "sha256": "ee7c21a44721b933e824ae295e1bb532bea1424938121dc675bc6aec698f975c",
+    "bytes": 55311
+  }
+}

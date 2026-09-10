@@ -1,0 +1,12 @@
+{
+  "joern_version": "v4.0.555",
+  "jdk_version": "21.0.12",
+  "baseline_commit": "6e50d916b",
+  "fixture_sha256": "f27504a435d082c5ef31398fe4f8792a55da83acb68f9175d34b9474eb701026",
+  "methods": 67,
+  "baseline_exact_method_asts": 27,
+  "candidate_exact_method_asts": 67,
+  "baseline_full_graph_diff_lines": 1034,
+  "candidate_full_graph_diff_lines": 0,
+  "oracle_output_sha256": "fb8aa2229979ea1512631fc8945159a9f65f9bd26ddd973f6df8d23fd8731b1c"
+}

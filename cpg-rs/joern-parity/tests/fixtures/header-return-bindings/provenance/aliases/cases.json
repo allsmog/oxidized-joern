@@ -1,0 +1,42 @@
+{
+  "unknown_alias": {
+    "api.h": "typedef Missing I;\nI f(int x);\n",
+    "main.c": "#include \"api.h\"\nlong g(int x){return f(x);}\n"
+  },
+  "unknown_return": {
+    "api.h": "Missing f(int x);\n",
+    "main.c": "#include \"api.h\"\nlong g(int x){return f(x);}\n"
+  },
+  "primitive_alias": {
+    "api.h": "typedef long I;\nI f(int x);\n",
+    "main.c": "#include \"api.h\"\nlong g(int x){return f(x);}\n"
+  },
+  "alias_chain": {
+    "api.h": "typedef long I;\ntypedef I J;\nJ f(int x);\n",
+    "main.c": "#include \"api.h\"\nlong g(int x){return f(x);}\n"
+  },
+  "struct_alias": {
+    "api.h": "typedef struct Tag I;\nI *f(int x);\n",
+    "main.c": "#include \"api.h\"\nlong g(int x){return f(x);}\n"
+  },
+  "struct_same": {
+    "api.h": "typedef struct I I;\nI *f(int x);\n",
+    "main.c": "#include \"api.h\"\nlong g(int x){return f(x);}\n"
+  },
+  "unknown_pointer_alias": {
+    "api.h": "typedef Missing I;\nI *f(int x);\n",
+    "main.c": "#include \"api.h\"\nlong g(int x){return f(x);}\n"
+  },
+  "macro_alias": {
+    "api.h": "#define TYPE long\ntypedef TYPE I;\nI f(int x);\n",
+    "main.c": "#include \"api.h\"\nlong g(int x){return f(x);}\n"
+  },
+  "unknown_macro_alias": {
+    "api.h": "#define TYPE MISSING\ntypedef TYPE I;\nI f(int x);\n",
+    "main.c": "#include \"api.h\"\nlong g(int x){return f(x);}\n"
+  },
+  "forward_tag": {
+    "api.h": "struct Tag *f(int x);\n",
+    "main.c": "#include \"api.h\"\nlong g(int x){return f(x);}\n"
+  }
+}

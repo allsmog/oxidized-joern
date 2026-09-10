@@ -1,0 +1,201 @@
+--- joern
++++ before
+@@ -15,9 +15,7 @@
+     LOCAL NAME=a CODE=int a TYPE_FULL_NAME=int ORDER=1
+     CALL NAME=<operator>.assignment CODE=a = N TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+       IDENTIFIER NAME=a CODE=a TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+-      CALL NAME=N CODE=N TYPE_FULL_NAME=int METHOD_FULL_NAME=main.c:N:int(0) SIGNATURE=int(0) ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=INLINED
+-        BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+-          LITERAL CODE=3 TYPE_FULL_NAME=int ORDER=1
++      IDENTIFIER NAME=N CODE=<unknown> N TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+     LOCAL NAME=b CODE=int b TYPE_FULL_NAME=int ORDER=3
+     CALL NAME=<operator>.assignment CODE=b = N TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=4 DISPATCH_TYPE=STATIC_DISPATCH
+       IDENTIFIER NAME=b CODE=b TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+@@ -27,12 +25,10 @@
+     LOCAL NAME=c CODE=int c TYPE_FULL_NAME=int ORDER=5
+     CALL NAME=<operator>.assignment CODE=c = N TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=6 DISPATCH_TYPE=STATIC_DISPATCH
+       IDENTIFIER NAME=c CODE=c TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+-      CALL NAME=N CODE=N TYPE_FULL_NAME=int METHOD_FULL_NAME=main.c:N:int(0) SIGNATURE=int(0) ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=INLINED
+-        BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+-          LITERAL CODE=4 TYPE_FULL_NAME=int ORDER=1
++      IDENTIFIER NAME=N CODE=<unknown> N TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+ 
+-METHOD NAME=N CODE=#define N 3 FULL_NAME=main.c:N:int(0) SIGNATURE=int(0) ORDER=1
++METHOD NAME=N CODE=#define N 4 FULL_NAME=main.c:N:int(0) SIGNATURE=int(0) ORDER=1
+   BLOCK TYPE_FULL_NAME=ANY ORDER=1
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=2
+ 
+@@ -51,36 +47,30 @@
+ NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+ NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+ NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+-EDGES|ARGUMENT main.c:<global>#15 -> main.c:<global>#16
+-EDGES|ARGUMENT main.c:<global>#15 -> main.c:<global>#17
++EDGES|ARGUMENT main.c:<global>#13 -> main.c:<global>#14
++EDGES|ARGUMENT main.c:<global>#13 -> main.c:<global>#15
+ EDGES|ARGUMENT main.c:<global>#3 -> main.c:<global>#4
+ EDGES|ARGUMENT main.c:<global>#3 -> main.c:<global>#5
+-EDGES|ARGUMENT main.c:<global>#9 -> main.c:<global>#10
+-EDGES|ARGUMENT main.c:<global>#9 -> main.c:<global>#11
+-EDGES|CALL main.c:<global>#11 -> main.c:N:int(0)#0
+-EDGES|CALL main.c:<global>#15 -> <operator>.assignment#0
+-EDGES|CALL main.c:<global>#17 -> main.c:N:int(0)#0
++EDGES|ARGUMENT main.c:<global>#7 -> main.c:<global>#8
++EDGES|ARGUMENT main.c:<global>#7 -> main.c:<global>#9
++EDGES|CALL main.c:<global>#13 -> <operator>.assignment#0
+ EDGES|CALL main.c:<global>#3 -> <operator>.assignment#0
+-EDGES|CALL main.c:<global>#5 -> main.c:N:int(0)#0
+-EDGES|CALL main.c:<global>#9 -> <operator>.assignment#0
++EDGES|CALL main.c:<global>#7 -> <operator>.assignment#0
++EDGES|CALL main.c:<global>#9 -> main.c:N:int(0)#0
+ EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+ EDGES|CFG <operator>.assignment#0 -> <operator>.assignment#5
+ EDGES|CFG main.c:<global>#0 -> main.c:<global>#4
+-EDGES|CFG main.c:<global>#10 -> main.c:<global>#11
+-EDGES|CFG main.c:<global>#11 -> main.c:<global>#13
+-EDGES|CFG main.c:<global>#11 -> main.c:<global>#9
+-EDGES|CFG main.c:<global>#13 -> main.c:<global>#9
+-EDGES|CFG main.c:<global>#15 -> main.c:<global>#20
+-EDGES|CFG main.c:<global>#16 -> main.c:<global>#17
+-EDGES|CFG main.c:<global>#17 -> main.c:<global>#15
+-EDGES|CFG main.c:<global>#17 -> main.c:<global>#19
+-EDGES|CFG main.c:<global>#19 -> main.c:<global>#15
+-EDGES|CFG main.c:<global>#3 -> main.c:<global>#10
++EDGES|CFG main.c:<global>#11 -> main.c:<global>#7
++EDGES|CFG main.c:<global>#13 -> main.c:<global>#16
++EDGES|CFG main.c:<global>#14 -> main.c:<global>#15
++EDGES|CFG main.c:<global>#15 -> main.c:<global>#13
++EDGES|CFG main.c:<global>#3 -> main.c:<global>#8
+ EDGES|CFG main.c:<global>#4 -> main.c:<global>#5
+ EDGES|CFG main.c:<global>#5 -> main.c:<global>#3
+-EDGES|CFG main.c:<global>#5 -> main.c:<global>#7
+-EDGES|CFG main.c:<global>#7 -> main.c:<global>#3
+-EDGES|CFG main.c:<global>#9 -> main.c:<global>#16
++EDGES|CFG main.c:<global>#7 -> main.c:<global>#14
++EDGES|CFG main.c:<global>#8 -> main.c:<global>#9
++EDGES|CFG main.c:<global>#9 -> main.c:<global>#11
++EDGES|CFG main.c:<global>#9 -> main.c:<global>#7
+ EDGES|CFG main.c:N:int(0)#0 -> main.c:N:int(0)#2
+ EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+ EDGES|CONTAINS <operator>.assignment#0 -> <operator>.assignment#2
+@@ -94,18 +84,14 @@
+ EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#1
+ EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#10
+ EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#11
+-EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#12
+ EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#13
++EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#14
+ EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#15
+-EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#16
+-EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#17
+-EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#18
+-EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#19
+ EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#3
+ EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#4
+ EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#5
+-EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#6
+ EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#7
++EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#8
+ EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#9
+ EDGES|CONTAINS main.c:N:int(0)#0 -> main.c:N:int(0)#1
+ EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+@@ -117,25 +103,21 @@
+ EDGES|EVAL_TYPE <operator>.assignment#5 -> T:ANY
+ EDGES|EVAL_TYPE <operator>.assignment#6 -> T:ANY
+ EDGES|EVAL_TYPE main.c:<global>#1 -> T:ANY
+-EDGES|EVAL_TYPE main.c:<global>#10 -> T:int
++EDGES|EVAL_TYPE main.c:<global>#10 -> T:ANY
+ EDGES|EVAL_TYPE main.c:<global>#11 -> T:int
+-EDGES|EVAL_TYPE main.c:<global>#12 -> T:ANY
+-EDGES|EVAL_TYPE main.c:<global>#13 -> T:int
++EDGES|EVAL_TYPE main.c:<global>#12 -> T:int
++EDGES|EVAL_TYPE main.c:<global>#13 -> T:void
+ EDGES|EVAL_TYPE main.c:<global>#14 -> T:int
+-EDGES|EVAL_TYPE main.c:<global>#15 -> T:void
+-EDGES|EVAL_TYPE main.c:<global>#16 -> T:int
+-EDGES|EVAL_TYPE main.c:<global>#17 -> T:int
+-EDGES|EVAL_TYPE main.c:<global>#18 -> T:ANY
+-EDGES|EVAL_TYPE main.c:<global>#19 -> T:int
++EDGES|EVAL_TYPE main.c:<global>#15 -> T:ANY
++EDGES|EVAL_TYPE main.c:<global>#16 -> T:ANY
+ EDGES|EVAL_TYPE main.c:<global>#2 -> T:int
+-EDGES|EVAL_TYPE main.c:<global>#20 -> T:ANY
+ EDGES|EVAL_TYPE main.c:<global>#3 -> T:void
+ EDGES|EVAL_TYPE main.c:<global>#4 -> T:int
+-EDGES|EVAL_TYPE main.c:<global>#5 -> T:int
+-EDGES|EVAL_TYPE main.c:<global>#6 -> T:ANY
+-EDGES|EVAL_TYPE main.c:<global>#7 -> T:int
++EDGES|EVAL_TYPE main.c:<global>#5 -> T:ANY
++EDGES|EVAL_TYPE main.c:<global>#6 -> T:int
++EDGES|EVAL_TYPE main.c:<global>#7 -> T:void
+ EDGES|EVAL_TYPE main.c:<global>#8 -> T:int
+-EDGES|EVAL_TYPE main.c:<global>#9 -> T:void
++EDGES|EVAL_TYPE main.c:<global>#9 -> T:int
+ EDGES|EVAL_TYPE main.c:N:int(0)#1 -> T:ANY
+ EDGES|EVAL_TYPE main.c:N:int(0)#2 -> T:int
+ EDGES|PARAMETER_LINK <operator>.assignment#1 -> <operator>.assignment#3
+@@ -146,9 +128,9 @@
+ EDGES|REF T:ANY -> D:ANY
+ EDGES|REF T:int -> D:int
+ EDGES|REF T:void -> D:void
+-EDGES|REF main.c:<global>#10 -> main.c:<global>#8
+-EDGES|REF main.c:<global>#16 -> main.c:<global>#14
++EDGES|REF main.c:<global>#14 -> main.c:<global>#12
+ EDGES|REF main.c:<global>#4 -> main.c:<global>#2
++EDGES|REF main.c:<global>#8 -> main.c:<global>#6
+ EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+ EDGES|SOURCE_FILE D:ANY -> F:<includes>
+ EDGES|SOURCE_FILE D:int -> F:<includes>
+@@ -159,30 +141,32 @@
+ EDGES|SOURCE_FILE NB:main.c:<global> -> F:main.c
+ EDGES|SOURCE_FILE main.c:<global>#0 -> F:main.c
+ EDGES|SOURCE_FILE main.c:N:int(0)#0 -> F:main.c
+-FLOWS|REACHING_DEF[N] main.c:<global>#11 -> main.c:<global>#10
+-FLOWS|REACHING_DEF[N] main.c:<global>#11 -> main.c:<global>#9
+-FLOWS|REACHING_DEF[N] main.c:<global>#17 -> main.c:<global>#15
+-FLOWS|REACHING_DEF[N] main.c:<global>#17 -> main.c:<global>#16
+-FLOWS|REACHING_DEF[N] main.c:<global>#17 -> main.c:<global>#20
+-FLOWS|REACHING_DEF[N] main.c:<global>#5 -> main.c:<global>#3
+-FLOWS|REACHING_DEF[N] main.c:<global>#5 -> main.c:<global>#4
++FLOWS|REACHING_DEF[<unknown> N] main.c:<global>#15 -> main.c:<global>#13
++FLOWS|REACHING_DEF[<unknown> N] main.c:<global>#15 -> main.c:<global>#14
++FLOWS|REACHING_DEF[<unknown> N] main.c:<global>#15 -> main.c:<global>#16
++FLOWS|REACHING_DEF[<unknown> N] main.c:<global>#5 -> main.c:<global>#15
++FLOWS|REACHING_DEF[<unknown> N] main.c:<global>#5 -> main.c:<global>#3
++FLOWS|REACHING_DEF[<unknown> N] main.c:<global>#5 -> main.c:<global>#4
++FLOWS|REACHING_DEF[<unknown> N] main.c:<global>#5 -> main.c:<global>#9
++FLOWS|REACHING_DEF[N] main.c:<global>#9 -> main.c:<global>#15
++FLOWS|REACHING_DEF[N] main.c:<global>#9 -> main.c:<global>#16
++FLOWS|REACHING_DEF[N] main.c:<global>#9 -> main.c:<global>#7
++FLOWS|REACHING_DEF[N] main.c:<global>#9 -> main.c:<global>#8
+ FLOWS|REACHING_DEF[] <operator>.assignment#0 -> <operator>.assignment#1
+ FLOWS|REACHING_DEF[] <operator>.assignment#0 -> <operator>.assignment#4
+ FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#11
+-FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#13
+-FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#17
+-FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#19
++FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#15
+ FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#5
+-FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#7
+-FLOWS|REACHING_DEF[a = N] main.c:<global>#3 -> main.c:<global>#20
+-FLOWS|REACHING_DEF[a] main.c:<global>#4 -> main.c:<global>#20
++FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#9
++FLOWS|REACHING_DEF[a = N] main.c:<global>#3 -> main.c:<global>#16
++FLOWS|REACHING_DEF[a] main.c:<global>#4 -> main.c:<global>#16
+ FLOWS|REACHING_DEF[a] main.c:<global>#4 -> main.c:<global>#3
+-FLOWS|REACHING_DEF[b = N] main.c:<global>#9 -> main.c:<global>#20
+-FLOWS|REACHING_DEF[b] main.c:<global>#10 -> main.c:<global>#20
+-FLOWS|REACHING_DEF[b] main.c:<global>#10 -> main.c:<global>#9
+-FLOWS|REACHING_DEF[c = N] main.c:<global>#15 -> main.c:<global>#20
+-FLOWS|REACHING_DEF[c] main.c:<global>#16 -> main.c:<global>#15
+-FLOWS|REACHING_DEF[c] main.c:<global>#16 -> main.c:<global>#20
++FLOWS|REACHING_DEF[b = N] main.c:<global>#7 -> main.c:<global>#16
++FLOWS|REACHING_DEF[b] main.c:<global>#8 -> main.c:<global>#16
++FLOWS|REACHING_DEF[b] main.c:<global>#8 -> main.c:<global>#7
++FLOWS|REACHING_DEF[c = N] main.c:<global>#13 -> main.c:<global>#16
++FLOWS|REACHING_DEF[c] main.c:<global>#14 -> main.c:<global>#13
++FLOWS|REACHING_DEF[c] main.c:<global>#14 -> main.c:<global>#16
+ FLOWS|REACHING_DEF[p1] <operator>.assignment#1 -> <operator>.assignment#3
+ FLOWS|REACHING_DEF[p1] <operator>.assignment#1 -> <operator>.assignment#5
+ FLOWS|REACHING_DEF[p2] <operator>.assignment#4 -> <operator>.assignment#5

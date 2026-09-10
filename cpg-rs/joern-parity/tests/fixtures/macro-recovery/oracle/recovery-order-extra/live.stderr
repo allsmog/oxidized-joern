@@ -1,0 +1,45 @@
+executing /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-field-macros/.local/recovery-order-extra/oracle.sc with params=Map(inputPath -> /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-field-macros/.local/recovery-order-extra/input)
+Using generator for language: NEWC: CCpgGenerator
+Creating project `global_arg_later` for code at `/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-field-macros/.local/recovery-order-extra/input/global_arg_later`
+moving cpg.bin.zip to cpg.bin because it is already a database file
+Creating working copy of CPG to be safe
+Loading base CPG from: /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-field-macros/.local/recovery-order-extra/oracle-workspace/workspace/global_arg_later/cpg.bin.tmp
+Code successfully imported. You can now query it using `cpg`.
+For an overview of all imported code, type `workspace`.
+Adding default overlays to base CPG
+The graph has been modified. You may want to use the `save` command to persist changes to disk.  All changes will also be saved collectively on exit
+The graph has been modified. You may want to use the `save` command to persist changes to disk.  All changes will also be saved collectively on exit
+Using generator for language: NEWC: CCpgGenerator
+Creating project `global_arg_only` for code at `/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-field-macros/.local/recovery-order-extra/input/global_arg_only`
+moving cpg.bin.zip to cpg.bin because it is already a database file
+Creating working copy of CPG to be safe
+Loading base CPG from: /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-field-macros/.local/recovery-order-extra/oracle-workspace/workspace/global_arg_only/cpg.bin.tmp
+Code successfully imported. You can now query it using `cpg`.
+For an overview of all imported code, type `workspace`.
+Adding default overlays to base CPG
+The graph has been modified. You may want to use the `save` command to persist changes to disk.  All changes will also be saved collectively on exit
+The graph has been modified. You may want to use the `save` command to persist changes to disk.  All changes will also be saved collectively on exit
+Using generator for language: NEWC: CCpgGenerator
+Creating project `global_reverse` for code at `/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-field-macros/.local/recovery-order-extra/input/global_reverse`
+moving cpg.bin.zip to cpg.bin because it is already a database file
+Creating working copy of CPG to be safe
+Loading base CPG from: /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-field-macros/.local/recovery-order-extra/oracle-workspace/workspace/global_reverse/cpg.bin.tmp
+Code successfully imported. You can now query it using `cpg`.
+For an overview of all imported code, type `workspace`.
+Adding default overlays to base CPG
+The graph has been modified. You may want to use the `save` command to persist changes to disk.  All changes will also be saved collectively on exit
+The graph has been modified. You may want to use the `save` command to persist changes to disk.  All changes will also be saved collectively on exit
+Using generator for language: NEWC: CCpgGenerator
+Creating project `recovery_repeat_helper` for code at `/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-field-macros/.local/recovery-order-extra/input/recovery_repeat_helper`
+moving cpg.bin.zip to cpg.bin because it is already a database file
+Creating working copy of CPG to be safe
+Loading base CPG from: /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-field-macros/.local/recovery-order-extra/oracle-workspace/workspace/recovery_repeat_helper/cpg.bin.tmp
+Code successfully imported. You can now query it using `cpg`.
+For an overview of all imported code, type `workspace`.
+Adding default overlays to base CPG
+The graph has been modified. You may want to use the `save` command to persist changes to disk.  All changes will also be saved collectively on exit
+The graph has been modified. You may want to use the `save` command to persist changes to disk.  All changes will also be saved collectively on exit
+closing/saving project `global_arg_later`
+closing/saving project `global_arg_only`
+closing/saving project `global_reverse`
+closing/saving project `recovery_repeat_helper`

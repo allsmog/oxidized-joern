@@ -1,0 +1,3784 @@
+{
+  "status": "PASS_BOUNDED_FROZEN_SOURCE_AND_COMPLETED_REPLAYS",
+  "checkCount": 883,
+  "checks": [
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/frozen-v1/bindings.json",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/replay.json",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/validation-v1-final-test/checks.json",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/frozen-v1/source.patch",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/frozen-v1/build.log",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/scripts/build-v1.py",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/scripts/replay19-v1.py",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/copy-admitted.json",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/run.json",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-runner-v3/runs/first-complete-primitive-member-reference-batch/run.json",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/primitive-member-preparation-v2/prepared.json",
+      "pass": true
+    },
+    {
+      "check": "build accepted baseline/success/stability",
+      "pass": true
+    },
+    {
+      "check": "build before inventory equals successful binding",
+      "pass": true
+    },
+    {
+      "check": "139 frozen inputs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/frozen-v1/cpg",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/frozen-v1/joern-parity",
+      "pass": true
+    },
+    {
+      "check": "one measured member-base replacement reconstructs complete frozen source",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/frozen-v1/source/cpg-rs/cpg-lang-c/src/exact.rs",
+      "pass": true
+    },
+    {
+      "check": "no source helper or other production byte changed",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/Cargo.lock",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/Cargo.toml",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/conformance/Cargo.toml",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/conformance/src/lib.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/cpg-analysis/Cargo.toml",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/cpg-analysis/src/authz.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/cpg-analysis/src/callgraph.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/cpg-analysis/src/cfg.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/cpg-analysis/src/entries.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/cpg-analysis/src/lib.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/cpg-analysis/src/middleware.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/cpg-analysis/src/pass.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/cpg-analysis/src/provenance.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/cpg-analysis/src/query.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/cpg-analysis/src/reaching_def.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/cpg-analysis/src/relations.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/cpg-analysis/src/return_flow.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/cpg-analysis/src/scan.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/cpg-analysis/src/structural.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/cpg-analysis/src/summaries.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/cpg-analysis/src/symbols.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/cpg-analysis/src/taint.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/cpg-analysis/src/value_flow.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/cpg-analysis/tests/canonical_c_array_initializers.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/cpg-analysis/tests/canonical_c_braceless_if.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/cpg-analysis/tests/canonical_c_braceless_loops.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/cpg-analysis/tests/canonical_c_flow.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/cpg-analysis/tests/canonical_c_preprocessor.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/cpg-analysis/tests/canonical_c_standalone_blocks.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/cpg-analysis/tests/direct_c_flow.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/cpg-analysis/tests/taint_sanitizers.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/cpg-cli/Cargo.toml",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/cpg-cli/src/apis.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/cpg-cli/src/coverage.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/cpg-cli/src/export.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/cpg-cli/src/lib.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/cpg-cli/src/main.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/cpg-cli/src/mcp.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/cpg-cli/src/merge.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/cpg-cli/src/play.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/cpg-cli/src/rules.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/cpg-cli/src/sarif.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/cpg-cli/src/scan.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/cpg-cli/src/slice.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/cpg-cli/src/thrift.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/cpg-cli/src/vectors.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/cpg-cli/src/workspace.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/cpg-cli/tests/c_format_positions.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/cpg-cli/tests/cli_metadata.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/cpg-cli/tests/mcp_stdio.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/cpg-cli/tests/scan_sarif.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/cpg-cli/tests/source_idents.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/cpg-cli/tests/thrift_stitch.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/cpg-cli/tests/tools_parity.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/cpg-core/Cargo.toml",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/cpg-core/src/builder.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/cpg-core/src/freeze.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/cpg-core/src/graph.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/cpg-core/src/intern.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/cpg-core/src/lib.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/cpg-core/src/persist.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/cpg-core/src/schema.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/cpg-core/src/segments.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/cpg-core/src/traversal.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/cpg-frontend/Cargo.toml",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/cpg-frontend/src/lib.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/cpg-incremental/Cargo.toml",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/cpg-incremental/examples/scale.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/cpg-incremental/src/lib.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/cpg-lang-c/Cargo.toml",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/cpg-lang-c/src/import.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/cpg-lang-c/src/lib.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/cpg-lang-c/tests/control_truth.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/cpg-lang-c/tests/declaration_shapes.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/cpg-lang-c/tests/method_address_definitions.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/cpg-lang-python/Cargo.toml",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/cpg-lang-python/src/lib.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/cpg-lang-ts/Cargo.toml",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/cpg-lang-ts/src/engine.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/cpg-lang-ts/src/lib.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/cpg-lang-ts/src/spec.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/cpg-lang-ts/tests/robustness.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/joern-parity/Cargo.toml",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/joern-parity/src/main.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/joern-parity/src/production.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/joern-parity/tests/array_declarations.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/joern-parity/tests/array_dimension_macros.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/joern-parity/tests/array_initializers.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/joern-parity/tests/body_includes.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/joern-parity/tests/body_macro_state.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/joern-parity/tests/body_preprocessor.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/joern-parity/tests/combined_c_types.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/joern-parity/tests/concatenated_strings.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/joern-parity/tests/declaration_macros.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/joern-parity/tests/declaration_registration.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/joern-parity/tests/direct_field_macros.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/joern-parity/tests/direct_macro_arguments.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/joern-parity/tests/external_functions.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/joern-parity/tests/field_cast_interactions.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/joern-parity/tests/field_macros.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/joern-parity/tests/fixtures/array-dimension-macros/provenance/candidate-v4/exact.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/joern-parity/tests/fixtures/array-dimension-macros/provenance/performance-v3/exact.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/joern-parity/tests/fixtures/body-includes/held/v1/source/cpg-rs/cpg-lang-c/src/exact.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/joern-parity/tests/fixtures/body-includes/held/v1/source/cpg-rs/cpg-lang-c/src/import.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/joern-parity/tests/fixtures/body-includes/held/v1/source/cpg-rs/cpg-lang-c/src/lib.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/joern-parity/tests/fixtures/body-includes/held/v1/source/cpg-rs/joern-parity/src/main.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/joern-parity/tests/fixtures/body-macro-state/provenance/before-exact.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/joern-parity/tests/fixtures/body-macro-state/provenance/candidate-v1/exact.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/joern-parity/tests/fixtures/body-macro-state/provenance/candidate-v2/exact.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/joern-parity/tests/fixtures/body-macro-state/provenance/candidate-v3/exact.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/joern-parity/tests/fixtures/body-macro-state/provenance/candidate-v4/exact.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/joern-parity/tests/fixtures/body-macro-state/provenance/candidate-v5/exact.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/joern-parity/tests/fixtures/body-macro-state/provenance/candidate-v6/exact.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/joern-parity/tests/fixtures/body-macro-state/provenance/candidate-v7/exact.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/joern-parity/tests/fixtures/body-macro-state/provenance/candidate-v8/exact.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/joern-parity/tests/header_macro_locations.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/joern-parity/tests/header_macros.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/joern-parity/tests/header_return_bindings.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/joern-parity/tests/inactive_declaration_context.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/joern-parity/tests/macro_cast_context.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/joern-parity/tests/macro_definitions.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/joern-parity/tests/macro_recovery.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/joern-parity/tests/nested_macro_casts.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/joern-parity/tests/numeric_literals.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/joern-parity/tests/numeric_macro_roots.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/joern-parity/tests/predefined_c_macros.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/frozen-v1/source/cpg-rs/joern-parity/tests/primitive_members.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/joern-parity/tests/primitive_roles.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/joern-parity/tests/rd_scheduling.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/joern-parity/tests/sixth_context_interactions.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/joern-parity/tests/sixth_integration_promotions.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/joern-parity/tests/sizeof_expansion.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/joern-parity/tests/spaced_method_names.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/joern-parity/tests/standalone_blocks.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/joern-parity/tests/statement_macros.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/joern-parity/tests/static_modifiers.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/joern-parity/tests/typedef_aggregates.rs",
+      "pass": true
+    },
+    {
+      "check": "accepted Git source cpg-rs/joern-parity/tests/typedef_existence.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/frozen-v1/source/cpg-rs/cpg-lang-c/src/lib.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/frozen-v1/source/cpg-rs/cpg-lang-c/src/import.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/frozen-v1/source/cpg-rs/cpg-lang-c/src/exact.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/frozen-v1/source/cpg-rs/joern-parity/tests/primitive_members.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/frozen-v1/source/cpg-rs/cpg-cli/src/workspace.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/joern-parity/tests/fixtures/primitive-members/cases/base_qualified_pointer/expected.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/joern-parity/tests/fixtures/primitive-members/cases/base_qualified_pointer/main.c",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/joern-parity/tests/fixtures/primitive-members/cases/const_unsigned_short/expected.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/joern-parity/tests/fixtures/primitive-members/cases/const_unsigned_short/main.c",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/joern-parity/tests/fixtures/primitive-members/cases/mixed_declarator_shapes/expected.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/joern-parity/tests/fixtures/primitive-members/cases/mixed_declarator_shapes/main.c",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/joern-parity/tests/fixtures/primitive-members/cases/nonprimitive_scalar_control/expected.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/joern-parity/tests/fixtures/primitive-members/cases/nonprimitive_scalar_control/main.c",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/joern-parity/tests/fixtures/primitive-members/cases/ordinary_numeric_control/expected.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/joern-parity/tests/fixtures/primitive-members/cases/ordinary_numeric_control/main.c",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/joern-parity/tests/fixtures/primitive-members/cases/pointer_qualified_pointer/expected.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/joern-parity/tests/fixtures/primitive-members/cases/pointer_qualified_pointer/main.c",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/joern-parity/tests/fixtures/primitive-members/cases/short_int_unsigned/expected.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/joern-parity/tests/fixtures/primitive-members/cases/short_int_unsigned/main.c",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/joern-parity/tests/fixtures/primitive-members/cases/short_unsigned/expected.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/joern-parity/tests/fixtures/primitive-members/cases/short_unsigned/main.c",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/joern-parity/tests/fixtures/primitive-members/cases/signed_char/expected.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/joern-parity/tests/fixtures/primitive-members/cases/signed_char/main.c",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/joern-parity/tests/fixtures/primitive-members/cases/signed_short/expected.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/joern-parity/tests/fixtures/primitive-members/cases/signed_short/main.c",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/joern-parity/tests/fixtures/primitive-members/cases/tiny_fixedtables_include/expected.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/joern-parity/tests/fixtures/primitive-members/cases/tiny_fixedtables_include/fixed.h",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/joern-parity/tests/fixtures/primitive-members/cases/tiny_fixedtables_include/main.c",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/joern-parity/tests/fixtures/primitive-members/cases/tiny_fixedtables_inline/expected.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/joern-parity/tests/fixtures/primitive-members/cases/tiny_fixedtables_inline/main.c",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/joern-parity/tests/fixtures/primitive-members/cases/unsigned_char/expected.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/joern-parity/tests/fixtures/primitive-members/cases/unsigned_char/main.c",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/joern-parity/tests/fixtures/primitive-members/cases/unsigned_long_long_int/expected.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/joern-parity/tests/fixtures/primitive-members/cases/unsigned_long_long_int/main.c",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/joern-parity/tests/fixtures/primitive-members/cases/unsigned_short/expected.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/joern-parity/tests/fixtures/primitive-members/cases/unsigned_short/main.c",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/joern-parity/tests/fixtures/primitive-members/cases/unsigned_short_array/expected.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/joern-parity/tests/fixtures/primitive-members/cases/unsigned_short_array/main.c",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/joern-parity/tests/fixtures/primitive-members/cases/unsigned_short_int/expected.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/joern-parity/tests/fixtures/primitive-members/cases/unsigned_short_int/main.c",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/joern-parity/tests/fixtures/primitive-members/cases/unsigned_short_pointer/expected.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/joern-parity/tests/fixtures/primitive-members/cases/unsigned_short_pointer/main.c",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/joern-parity/tests/fixtures/primitive-members/cases/volatile_unsigned_short/expected.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/joern-parity/tests/fixtures/primitive-members/cases/volatile_unsigned_short/main.c",
+      "pass": true
+    },
+    {
+      "check": "only final test classification changes after source freeze",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/Cargo.lock",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/Cargo.toml",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/conformance/Cargo.toml",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/conformance/src/lib.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/cpg-analysis/Cargo.toml",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/cpg-analysis/src/authz.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/cpg-analysis/src/callgraph.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/cpg-analysis/src/cfg.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/cpg-analysis/src/entries.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/cpg-analysis/src/lib.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/cpg-analysis/src/middleware.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/cpg-analysis/src/pass.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/cpg-analysis/src/provenance.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/cpg-analysis/src/query.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/cpg-analysis/src/reaching_def.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/cpg-analysis/src/relations.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/cpg-analysis/src/return_flow.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/cpg-analysis/src/scan.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/cpg-analysis/src/structural.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/cpg-analysis/src/summaries.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/cpg-analysis/src/symbols.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/cpg-analysis/src/taint.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/cpg-analysis/src/value_flow.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/cpg-analysis/tests/canonical_c_array_initializers.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/cpg-analysis/tests/canonical_c_braceless_if.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/cpg-analysis/tests/canonical_c_braceless_loops.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/cpg-analysis/tests/canonical_c_flow.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/cpg-analysis/tests/canonical_c_preprocessor.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/cpg-analysis/tests/canonical_c_standalone_blocks.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/cpg-analysis/tests/direct_c_flow.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/cpg-analysis/tests/taint_sanitizers.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/cpg-cli/Cargo.toml",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/cpg-cli/src/apis.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/cpg-cli/src/coverage.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/cpg-cli/src/export.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/cpg-cli/src/lib.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/cpg-cli/src/main.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/cpg-cli/src/mcp.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/cpg-cli/src/merge.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/cpg-cli/src/play.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/cpg-cli/src/rules.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/cpg-cli/src/sarif.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/cpg-cli/src/scan.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/cpg-cli/src/slice.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/cpg-cli/src/thrift.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/cpg-cli/src/vectors.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/cpg-cli/src/workspace.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/cpg-cli/tests/c_format_positions.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/cpg-cli/tests/cli_metadata.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/cpg-cli/tests/mcp_stdio.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/cpg-cli/tests/scan_sarif.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/cpg-cli/tests/source_idents.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/cpg-cli/tests/thrift_stitch.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/cpg-cli/tests/tools_parity.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/cpg-core/Cargo.toml",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/cpg-core/src/builder.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/cpg-core/src/freeze.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/cpg-core/src/graph.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/cpg-core/src/intern.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/cpg-core/src/lib.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/cpg-core/src/persist.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/cpg-core/src/schema.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/cpg-core/src/segments.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/cpg-core/src/traversal.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/cpg-frontend/Cargo.toml",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/cpg-frontend/src/lib.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/cpg-incremental/Cargo.toml",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/cpg-incremental/examples/scale.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/cpg-incremental/src/lib.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/cpg-lang-c/Cargo.toml",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/cpg-lang-c/src/exact.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/cpg-lang-c/src/import.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/cpg-lang-c/src/lib.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/cpg-lang-c/tests/control_truth.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/cpg-lang-c/tests/declaration_shapes.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/cpg-lang-c/tests/method_address_definitions.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/cpg-lang-python/Cargo.toml",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/cpg-lang-python/src/lib.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/cpg-lang-ts/Cargo.toml",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/cpg-lang-ts/src/engine.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/cpg-lang-ts/src/lib.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/cpg-lang-ts/src/spec.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/cpg-lang-ts/tests/robustness.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/joern-parity/Cargo.toml",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/joern-parity/src/main.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/joern-parity/src/production.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/joern-parity/tests/array_declarations.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/joern-parity/tests/array_dimension_macros.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/joern-parity/tests/array_initializers.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/joern-parity/tests/body_includes.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/joern-parity/tests/body_macro_state.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/joern-parity/tests/body_preprocessor.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/joern-parity/tests/combined_c_types.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/joern-parity/tests/concatenated_strings.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/joern-parity/tests/declaration_macros.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/joern-parity/tests/declaration_registration.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/joern-parity/tests/direct_field_macros.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/joern-parity/tests/direct_macro_arguments.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/joern-parity/tests/external_functions.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/joern-parity/tests/field_cast_interactions.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/joern-parity/tests/field_macros.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/joern-parity/tests/fixtures/array-dimension-macros/provenance/candidate-v4/exact.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/joern-parity/tests/fixtures/array-dimension-macros/provenance/performance-v3/exact.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/joern-parity/tests/fixtures/body-includes/held/v1/source/cpg-rs/cpg-lang-c/src/exact.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/joern-parity/tests/fixtures/body-includes/held/v1/source/cpg-rs/cpg-lang-c/src/import.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/joern-parity/tests/fixtures/body-includes/held/v1/source/cpg-rs/cpg-lang-c/src/lib.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/joern-parity/tests/fixtures/body-includes/held/v1/source/cpg-rs/joern-parity/src/main.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/joern-parity/tests/fixtures/body-macro-state/provenance/before-exact.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/joern-parity/tests/fixtures/body-macro-state/provenance/candidate-v1/exact.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/joern-parity/tests/fixtures/body-macro-state/provenance/candidate-v2/exact.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/joern-parity/tests/fixtures/body-macro-state/provenance/candidate-v3/exact.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/joern-parity/tests/fixtures/body-macro-state/provenance/candidate-v4/exact.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/joern-parity/tests/fixtures/body-macro-state/provenance/candidate-v5/exact.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/joern-parity/tests/fixtures/body-macro-state/provenance/candidate-v6/exact.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/joern-parity/tests/fixtures/body-macro-state/provenance/candidate-v7/exact.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/joern-parity/tests/fixtures/body-macro-state/provenance/candidate-v8/exact.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/joern-parity/tests/header_macro_locations.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/joern-parity/tests/header_macros.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/joern-parity/tests/header_return_bindings.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/joern-parity/tests/inactive_declaration_context.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/joern-parity/tests/macro_cast_context.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/joern-parity/tests/macro_definitions.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/joern-parity/tests/macro_recovery.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/joern-parity/tests/nested_macro_casts.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/joern-parity/tests/numeric_literals.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/joern-parity/tests/numeric_macro_roots.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/joern-parity/tests/predefined_c_macros.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/joern-parity/tests/primitive_members.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/joern-parity/tests/primitive_roles.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/joern-parity/tests/rd_scheduling.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/joern-parity/tests/sixth_context_interactions.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/joern-parity/tests/sixth_integration_promotions.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/joern-parity/tests/sizeof_expansion.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/joern-parity/tests/spaced_method_names.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/joern-parity/tests/standalone_blocks.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/joern-parity/tests/statement_macros.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/joern-parity/tests/static_modifiers.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/joern-parity/tests/typedef_aggregates.rs",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/joern-parity/tests/typedef_existence.rs",
+      "pass": true
+    },
+    {
+      "check": "final test removes only measured nonexact case",
+      "pass": true
+    },
+    {
+      "check": "final test has 18 full graph gates",
+      "pass": true
+    },
+    {
+      "check": "test compares complete canonical production graph",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/validation-v1-final-test/fmt.log",
+      "pass": true
+    },
+    {
+      "check": "gate success fmt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/validation-v1-final-test/focused.log",
+      "pass": true
+    },
+    {
+      "check": "gate success focused",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/validation-v1-final-test/main308.log",
+      "pass": true
+    },
+    {
+      "check": "gate success main308",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/validation-v1-final-test/clippy.log",
+      "pass": true
+    },
+    {
+      "check": "gate success clippy",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/target/debug/deps/primitive_members-6d3a78bb224ce90b",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/target/debug/deps/primitive_roles-1902e547d3bd0681",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/target/debug/deps/typedef_aggregates-b6cfd0f5576af698",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/target/debug/deps/array_initializers-0eb8fcc1cfd96a10",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/target/debug/deps/body_includes-4f840c528273dbfc",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/target/debug/deps/array_dimension_macros-b3d713312526e1ed",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/target/debug/deps/body_macro_state-b977641cb6f04920",
+      "pass": true
+    },
+    {
+      "check": "21 focused tests no failed/ignored",
+      "pass": true
+    },
+    {
+      "check": "main committed 308 pass",
+      "pass": true
+    },
+    {
+      "check": "complete unique 19 inventory",
+      "pass": true
+    },
+    {
+      "check": "base_qualified_pointer saved row",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/base_qualified_pointer/actual.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/base_qualified_pointer/before-candidate.diff",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/base_qualified_pointer/before.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/base_qualified_pointer/expected-before.diff",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/base_qualified_pointer/expected-candidate.diff",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/base_qualified_pointer/expected.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/base_qualified_pointer/input/main.c",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/base_qualified_pointer/stderr.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/base_qualified_pointer/stdout.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/base_qualified_pointer/input/main.c",
+      "pass": true
+    },
+    {
+      "check": "base_qualified_pointer admitted source main.c",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-runner-v3/runs/first-complete-primitive-member-reference-batch/expected/base_qualified_pointer/expected.txt",
+      "pass": true
+    },
+    {
+      "check": "base_qualified_pointer full admitted reference",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/base_qualified_pointer/actual.txt",
+      "pass": true
+    },
+    {
+      "check": "base_qualified_pointer accepted old full output",
+      "pass": true
+    },
+    {
+      "check": "base_qualified_pointer candidate stdout LF only",
+      "pass": true
+    },
+    {
+      "check": "base_qualified_pointer command and successful status",
+      "pass": true
+    },
+    {
+      "check": "base_qualified_pointer exact status correct",
+      "pass": true
+    },
+    {
+      "check": "base_qualified_pointer includingSeparators counters",
+      "pass": true
+    },
+    {
+      "check": "base_qualified_pointer nonempty counters",
+      "pass": true
+    },
+    {
+      "check": "base_qualified_pointer complete diff expected-before.diff",
+      "pass": true
+    },
+    {
+      "check": "base_qualified_pointer complete diff expected-candidate.diff",
+      "pass": true
+    },
+    {
+      "check": "base_qualified_pointer complete diff before-candidate.diff",
+      "pass": true
+    },
+    {
+      "check": "base_qualified_pointer flow bytes unchanged",
+      "pass": true
+    },
+    {
+      "check": "base_qualified_pointer AST topology and non-type properties unchanged",
+      "pass": true
+    },
+    {
+      "check": "base_qualified_pointer no old matching loss",
+      "pass": true
+    },
+    {
+      "check": "const_unsigned_short saved row",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/const_unsigned_short/actual.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/const_unsigned_short/before-candidate.diff",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/const_unsigned_short/before.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/const_unsigned_short/expected-before.diff",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/const_unsigned_short/expected-candidate.diff",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/const_unsigned_short/expected.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/const_unsigned_short/input/main.c",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/const_unsigned_short/stderr.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/const_unsigned_short/stdout.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/const_unsigned_short/input/main.c",
+      "pass": true
+    },
+    {
+      "check": "const_unsigned_short admitted source main.c",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-runner-v3/runs/first-complete-primitive-member-reference-batch/expected/const_unsigned_short/expected.txt",
+      "pass": true
+    },
+    {
+      "check": "const_unsigned_short full admitted reference",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/const_unsigned_short/actual.txt",
+      "pass": true
+    },
+    {
+      "check": "const_unsigned_short accepted old full output",
+      "pass": true
+    },
+    {
+      "check": "const_unsigned_short candidate stdout LF only",
+      "pass": true
+    },
+    {
+      "check": "const_unsigned_short command and successful status",
+      "pass": true
+    },
+    {
+      "check": "const_unsigned_short exact status correct",
+      "pass": true
+    },
+    {
+      "check": "const_unsigned_short includingSeparators counters",
+      "pass": true
+    },
+    {
+      "check": "const_unsigned_short nonempty counters",
+      "pass": true
+    },
+    {
+      "check": "const_unsigned_short complete diff expected-before.diff",
+      "pass": true
+    },
+    {
+      "check": "const_unsigned_short complete diff expected-candidate.diff",
+      "pass": true
+    },
+    {
+      "check": "const_unsigned_short complete diff before-candidate.diff",
+      "pass": true
+    },
+    {
+      "check": "const_unsigned_short flow bytes unchanged",
+      "pass": true
+    },
+    {
+      "check": "const_unsigned_short AST topology and non-type properties unchanged",
+      "pass": true
+    },
+    {
+      "check": "const_unsigned_short no old matching loss",
+      "pass": true
+    },
+    {
+      "check": "mixed_declarator_shapes saved row",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/mixed_declarator_shapes/actual.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/mixed_declarator_shapes/before-candidate.diff",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/mixed_declarator_shapes/before.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/mixed_declarator_shapes/expected-before.diff",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/mixed_declarator_shapes/expected-candidate.diff",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/mixed_declarator_shapes/expected.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/mixed_declarator_shapes/input/main.c",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/mixed_declarator_shapes/stderr.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/mixed_declarator_shapes/stdout.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/mixed_declarator_shapes/input/main.c",
+      "pass": true
+    },
+    {
+      "check": "mixed_declarator_shapes admitted source main.c",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-runner-v3/runs/first-complete-primitive-member-reference-batch/expected/mixed_declarator_shapes/expected.txt",
+      "pass": true
+    },
+    {
+      "check": "mixed_declarator_shapes full admitted reference",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/mixed_declarator_shapes/actual.txt",
+      "pass": true
+    },
+    {
+      "check": "mixed_declarator_shapes accepted old full output",
+      "pass": true
+    },
+    {
+      "check": "mixed_declarator_shapes candidate stdout LF only",
+      "pass": true
+    },
+    {
+      "check": "mixed_declarator_shapes command and successful status",
+      "pass": true
+    },
+    {
+      "check": "mixed_declarator_shapes exact status correct",
+      "pass": true
+    },
+    {
+      "check": "mixed_declarator_shapes includingSeparators counters",
+      "pass": true
+    },
+    {
+      "check": "mixed_declarator_shapes nonempty counters",
+      "pass": true
+    },
+    {
+      "check": "mixed_declarator_shapes complete diff expected-before.diff",
+      "pass": true
+    },
+    {
+      "check": "mixed_declarator_shapes complete diff expected-candidate.diff",
+      "pass": true
+    },
+    {
+      "check": "mixed_declarator_shapes complete diff before-candidate.diff",
+      "pass": true
+    },
+    {
+      "check": "mixed_declarator_shapes flow bytes unchanged",
+      "pass": true
+    },
+    {
+      "check": "mixed_declarator_shapes AST topology and non-type properties unchanged",
+      "pass": true
+    },
+    {
+      "check": "mixed_declarator_shapes no old matching loss",
+      "pass": true
+    },
+    {
+      "check": "nonprimitive_scalar_control saved row",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/nonprimitive_scalar_control/actual.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/nonprimitive_scalar_control/before-candidate.diff",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/nonprimitive_scalar_control/before.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/nonprimitive_scalar_control/expected-before.diff",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/nonprimitive_scalar_control/expected-candidate.diff",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/nonprimitive_scalar_control/expected.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/nonprimitive_scalar_control/input/main.c",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/nonprimitive_scalar_control/stderr.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/nonprimitive_scalar_control/stdout.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/nonprimitive_scalar_control/input/main.c",
+      "pass": true
+    },
+    {
+      "check": "nonprimitive_scalar_control admitted source main.c",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-runner-v3/runs/first-complete-primitive-member-reference-batch/expected/nonprimitive_scalar_control/expected.txt",
+      "pass": true
+    },
+    {
+      "check": "nonprimitive_scalar_control full admitted reference",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/nonprimitive_scalar_control/actual.txt",
+      "pass": true
+    },
+    {
+      "check": "nonprimitive_scalar_control accepted old full output",
+      "pass": true
+    },
+    {
+      "check": "nonprimitive_scalar_control candidate stdout LF only",
+      "pass": true
+    },
+    {
+      "check": "nonprimitive_scalar_control command and successful status",
+      "pass": true
+    },
+    {
+      "check": "nonprimitive_scalar_control exact status correct",
+      "pass": true
+    },
+    {
+      "check": "nonprimitive_scalar_control includingSeparators counters",
+      "pass": true
+    },
+    {
+      "check": "nonprimitive_scalar_control nonempty counters",
+      "pass": true
+    },
+    {
+      "check": "nonprimitive_scalar_control complete diff expected-before.diff",
+      "pass": true
+    },
+    {
+      "check": "nonprimitive_scalar_control complete diff expected-candidate.diff",
+      "pass": true
+    },
+    {
+      "check": "nonprimitive_scalar_control complete diff before-candidate.diff",
+      "pass": true
+    },
+    {
+      "check": "nonprimitive_scalar_control flow bytes unchanged",
+      "pass": true
+    },
+    {
+      "check": "nonprimitive_scalar_control AST topology and non-type properties unchanged",
+      "pass": true
+    },
+    {
+      "check": "nonprimitive_scalar_control no old matching loss",
+      "pass": true
+    },
+    {
+      "check": "ordinary_numeric_control saved row",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/ordinary_numeric_control/actual.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/ordinary_numeric_control/before-candidate.diff",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/ordinary_numeric_control/before.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/ordinary_numeric_control/expected-before.diff",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/ordinary_numeric_control/expected-candidate.diff",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/ordinary_numeric_control/expected.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/ordinary_numeric_control/input/main.c",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/ordinary_numeric_control/stderr.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/ordinary_numeric_control/stdout.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/ordinary_numeric_control/input/main.c",
+      "pass": true
+    },
+    {
+      "check": "ordinary_numeric_control admitted source main.c",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-runner-v3/runs/first-complete-primitive-member-reference-batch/expected/ordinary_numeric_control/expected.txt",
+      "pass": true
+    },
+    {
+      "check": "ordinary_numeric_control full admitted reference",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/ordinary_numeric_control/actual.txt",
+      "pass": true
+    },
+    {
+      "check": "ordinary_numeric_control accepted old full output",
+      "pass": true
+    },
+    {
+      "check": "ordinary_numeric_control candidate stdout LF only",
+      "pass": true
+    },
+    {
+      "check": "ordinary_numeric_control command and successful status",
+      "pass": true
+    },
+    {
+      "check": "ordinary_numeric_control exact status correct",
+      "pass": true
+    },
+    {
+      "check": "ordinary_numeric_control includingSeparators counters",
+      "pass": true
+    },
+    {
+      "check": "ordinary_numeric_control nonempty counters",
+      "pass": true
+    },
+    {
+      "check": "ordinary_numeric_control complete diff expected-before.diff",
+      "pass": true
+    },
+    {
+      "check": "ordinary_numeric_control complete diff expected-candidate.diff",
+      "pass": true
+    },
+    {
+      "check": "ordinary_numeric_control complete diff before-candidate.diff",
+      "pass": true
+    },
+    {
+      "check": "ordinary_numeric_control flow bytes unchanged",
+      "pass": true
+    },
+    {
+      "check": "ordinary_numeric_control AST topology and non-type properties unchanged",
+      "pass": true
+    },
+    {
+      "check": "ordinary_numeric_control no old matching loss",
+      "pass": true
+    },
+    {
+      "check": "pointer_qualified_pointer saved row",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/pointer_qualified_pointer/actual.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/pointer_qualified_pointer/before-candidate.diff",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/pointer_qualified_pointer/before.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/pointer_qualified_pointer/expected-before.diff",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/pointer_qualified_pointer/expected-candidate.diff",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/pointer_qualified_pointer/expected.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/pointer_qualified_pointer/input/main.c",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/pointer_qualified_pointer/stderr.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/pointer_qualified_pointer/stdout.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/pointer_qualified_pointer/input/main.c",
+      "pass": true
+    },
+    {
+      "check": "pointer_qualified_pointer admitted source main.c",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-runner-v3/runs/first-complete-primitive-member-reference-batch/expected/pointer_qualified_pointer/expected.txt",
+      "pass": true
+    },
+    {
+      "check": "pointer_qualified_pointer full admitted reference",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/pointer_qualified_pointer/actual.txt",
+      "pass": true
+    },
+    {
+      "check": "pointer_qualified_pointer accepted old full output",
+      "pass": true
+    },
+    {
+      "check": "pointer_qualified_pointer candidate stdout LF only",
+      "pass": true
+    },
+    {
+      "check": "pointer_qualified_pointer command and successful status",
+      "pass": true
+    },
+    {
+      "check": "pointer_qualified_pointer exact status correct",
+      "pass": true
+    },
+    {
+      "check": "pointer_qualified_pointer includingSeparators counters",
+      "pass": true
+    },
+    {
+      "check": "pointer_qualified_pointer nonempty counters",
+      "pass": true
+    },
+    {
+      "check": "pointer_qualified_pointer complete diff expected-before.diff",
+      "pass": true
+    },
+    {
+      "check": "pointer_qualified_pointer complete diff expected-candidate.diff",
+      "pass": true
+    },
+    {
+      "check": "pointer_qualified_pointer complete diff before-candidate.diff",
+      "pass": true
+    },
+    {
+      "check": "pointer_qualified_pointer flow bytes unchanged",
+      "pass": true
+    },
+    {
+      "check": "pointer_qualified_pointer AST topology and non-type properties unchanged",
+      "pass": true
+    },
+    {
+      "check": "pointer_qualified_pointer no old matching loss",
+      "pass": true
+    },
+    {
+      "check": "short_int_unsigned saved row",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/short_int_unsigned/actual.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/short_int_unsigned/before-candidate.diff",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/short_int_unsigned/before.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/short_int_unsigned/expected-before.diff",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/short_int_unsigned/expected-candidate.diff",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/short_int_unsigned/expected.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/short_int_unsigned/input/main.c",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/short_int_unsigned/stderr.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/short_int_unsigned/stdout.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/short_int_unsigned/input/main.c",
+      "pass": true
+    },
+    {
+      "check": "short_int_unsigned admitted source main.c",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-runner-v3/runs/first-complete-primitive-member-reference-batch/expected/short_int_unsigned/expected.txt",
+      "pass": true
+    },
+    {
+      "check": "short_int_unsigned full admitted reference",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/short_int_unsigned/actual.txt",
+      "pass": true
+    },
+    {
+      "check": "short_int_unsigned accepted old full output",
+      "pass": true
+    },
+    {
+      "check": "short_int_unsigned candidate stdout LF only",
+      "pass": true
+    },
+    {
+      "check": "short_int_unsigned command and successful status",
+      "pass": true
+    },
+    {
+      "check": "short_int_unsigned exact status correct",
+      "pass": true
+    },
+    {
+      "check": "short_int_unsigned includingSeparators counters",
+      "pass": true
+    },
+    {
+      "check": "short_int_unsigned nonempty counters",
+      "pass": true
+    },
+    {
+      "check": "short_int_unsigned complete diff expected-before.diff",
+      "pass": true
+    },
+    {
+      "check": "short_int_unsigned complete diff expected-candidate.diff",
+      "pass": true
+    },
+    {
+      "check": "short_int_unsigned complete diff before-candidate.diff",
+      "pass": true
+    },
+    {
+      "check": "short_int_unsigned flow bytes unchanged",
+      "pass": true
+    },
+    {
+      "check": "short_int_unsigned AST topology and non-type properties unchanged",
+      "pass": true
+    },
+    {
+      "check": "short_int_unsigned no old matching loss",
+      "pass": true
+    },
+    {
+      "check": "short_unsigned saved row",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/short_unsigned/actual.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/short_unsigned/before-candidate.diff",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/short_unsigned/before.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/short_unsigned/expected-before.diff",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/short_unsigned/expected-candidate.diff",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/short_unsigned/expected.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/short_unsigned/input/main.c",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/short_unsigned/stderr.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/short_unsigned/stdout.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/short_unsigned/input/main.c",
+      "pass": true
+    },
+    {
+      "check": "short_unsigned admitted source main.c",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-runner-v3/runs/first-complete-primitive-member-reference-batch/expected/short_unsigned/expected.txt",
+      "pass": true
+    },
+    {
+      "check": "short_unsigned full admitted reference",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/short_unsigned/actual.txt",
+      "pass": true
+    },
+    {
+      "check": "short_unsigned accepted old full output",
+      "pass": true
+    },
+    {
+      "check": "short_unsigned candidate stdout LF only",
+      "pass": true
+    },
+    {
+      "check": "short_unsigned command and successful status",
+      "pass": true
+    },
+    {
+      "check": "short_unsigned exact status correct",
+      "pass": true
+    },
+    {
+      "check": "short_unsigned includingSeparators counters",
+      "pass": true
+    },
+    {
+      "check": "short_unsigned nonempty counters",
+      "pass": true
+    },
+    {
+      "check": "short_unsigned complete diff expected-before.diff",
+      "pass": true
+    },
+    {
+      "check": "short_unsigned complete diff expected-candidate.diff",
+      "pass": true
+    },
+    {
+      "check": "short_unsigned complete diff before-candidate.diff",
+      "pass": true
+    },
+    {
+      "check": "short_unsigned flow bytes unchanged",
+      "pass": true
+    },
+    {
+      "check": "short_unsigned AST topology and non-type properties unchanged",
+      "pass": true
+    },
+    {
+      "check": "short_unsigned no old matching loss",
+      "pass": true
+    },
+    {
+      "check": "signed_char saved row",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/signed_char/actual.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/signed_char/before-candidate.diff",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/signed_char/before.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/signed_char/expected-before.diff",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/signed_char/expected-candidate.diff",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/signed_char/expected.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/signed_char/input/main.c",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/signed_char/stderr.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/signed_char/stdout.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/signed_char/input/main.c",
+      "pass": true
+    },
+    {
+      "check": "signed_char admitted source main.c",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-runner-v3/runs/first-complete-primitive-member-reference-batch/expected/signed_char/expected.txt",
+      "pass": true
+    },
+    {
+      "check": "signed_char full admitted reference",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/signed_char/actual.txt",
+      "pass": true
+    },
+    {
+      "check": "signed_char accepted old full output",
+      "pass": true
+    },
+    {
+      "check": "signed_char candidate stdout LF only",
+      "pass": true
+    },
+    {
+      "check": "signed_char command and successful status",
+      "pass": true
+    },
+    {
+      "check": "signed_char exact status correct",
+      "pass": true
+    },
+    {
+      "check": "signed_char includingSeparators counters",
+      "pass": true
+    },
+    {
+      "check": "signed_char nonempty counters",
+      "pass": true
+    },
+    {
+      "check": "signed_char complete diff expected-before.diff",
+      "pass": true
+    },
+    {
+      "check": "signed_char complete diff expected-candidate.diff",
+      "pass": true
+    },
+    {
+      "check": "signed_char complete diff before-candidate.diff",
+      "pass": true
+    },
+    {
+      "check": "signed_char flow bytes unchanged",
+      "pass": true
+    },
+    {
+      "check": "signed_char AST topology and non-type properties unchanged",
+      "pass": true
+    },
+    {
+      "check": "signed_char no old matching loss",
+      "pass": true
+    },
+    {
+      "check": "signed_short saved row",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/signed_short/actual.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/signed_short/before-candidate.diff",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/signed_short/before.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/signed_short/expected-before.diff",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/signed_short/expected-candidate.diff",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/signed_short/expected.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/signed_short/input/main.c",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/signed_short/stderr.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/signed_short/stdout.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/signed_short/input/main.c",
+      "pass": true
+    },
+    {
+      "check": "signed_short admitted source main.c",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-runner-v3/runs/first-complete-primitive-member-reference-batch/expected/signed_short/expected.txt",
+      "pass": true
+    },
+    {
+      "check": "signed_short full admitted reference",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/signed_short/actual.txt",
+      "pass": true
+    },
+    {
+      "check": "signed_short accepted old full output",
+      "pass": true
+    },
+    {
+      "check": "signed_short candidate stdout LF only",
+      "pass": true
+    },
+    {
+      "check": "signed_short command and successful status",
+      "pass": true
+    },
+    {
+      "check": "signed_short exact status correct",
+      "pass": true
+    },
+    {
+      "check": "signed_short includingSeparators counters",
+      "pass": true
+    },
+    {
+      "check": "signed_short nonempty counters",
+      "pass": true
+    },
+    {
+      "check": "signed_short complete diff expected-before.diff",
+      "pass": true
+    },
+    {
+      "check": "signed_short complete diff expected-candidate.diff",
+      "pass": true
+    },
+    {
+      "check": "signed_short complete diff before-candidate.diff",
+      "pass": true
+    },
+    {
+      "check": "signed_short flow bytes unchanged",
+      "pass": true
+    },
+    {
+      "check": "signed_short AST topology and non-type properties unchanged",
+      "pass": true
+    },
+    {
+      "check": "signed_short no old matching loss",
+      "pass": true
+    },
+    {
+      "check": "tiny_fixedtables_include saved row",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/tiny_fixedtables_include/actual.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/tiny_fixedtables_include/before-candidate.diff",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/tiny_fixedtables_include/before.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/tiny_fixedtables_include/expected-before.diff",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/tiny_fixedtables_include/expected-candidate.diff",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/tiny_fixedtables_include/expected.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/tiny_fixedtables_include/input/fixed.h",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/tiny_fixedtables_include/input/main.c",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/tiny_fixedtables_include/stderr.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/tiny_fixedtables_include/stdout.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/tiny_fixedtables_include/input/fixed.h",
+      "pass": true
+    },
+    {
+      "check": "tiny_fixedtables_include admitted source fixed.h",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/tiny_fixedtables_include/input/main.c",
+      "pass": true
+    },
+    {
+      "check": "tiny_fixedtables_include admitted source main.c",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-runner-v3/runs/first-complete-primitive-member-reference-batch/expected/tiny_fixedtables_include/expected.txt",
+      "pass": true
+    },
+    {
+      "check": "tiny_fixedtables_include full admitted reference",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/tiny_fixedtables_include/actual.txt",
+      "pass": true
+    },
+    {
+      "check": "tiny_fixedtables_include accepted old full output",
+      "pass": true
+    },
+    {
+      "check": "tiny_fixedtables_include candidate stdout LF only",
+      "pass": true
+    },
+    {
+      "check": "tiny_fixedtables_include command and successful status",
+      "pass": true
+    },
+    {
+      "check": "tiny_fixedtables_include exact status correct",
+      "pass": true
+    },
+    {
+      "check": "tiny_fixedtables_include includingSeparators counters",
+      "pass": true
+    },
+    {
+      "check": "tiny_fixedtables_include nonempty counters",
+      "pass": true
+    },
+    {
+      "check": "tiny_fixedtables_include complete diff expected-before.diff",
+      "pass": true
+    },
+    {
+      "check": "tiny_fixedtables_include complete diff expected-candidate.diff",
+      "pass": true
+    },
+    {
+      "check": "tiny_fixedtables_include complete diff before-candidate.diff",
+      "pass": true
+    },
+    {
+      "check": "tiny_fixedtables_include flow bytes unchanged",
+      "pass": true
+    },
+    {
+      "check": "tiny_fixedtables_include AST topology and non-type properties unchanged",
+      "pass": true
+    },
+    {
+      "check": "tiny_fixedtables_include no old matching loss",
+      "pass": true
+    },
+    {
+      "check": "tiny_fixedtables_inline saved row",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/tiny_fixedtables_inline/actual.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/tiny_fixedtables_inline/before-candidate.diff",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/tiny_fixedtables_inline/before.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/tiny_fixedtables_inline/expected-before.diff",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/tiny_fixedtables_inline/expected-candidate.diff",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/tiny_fixedtables_inline/expected.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/tiny_fixedtables_inline/input/main.c",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/tiny_fixedtables_inline/stderr.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/tiny_fixedtables_inline/stdout.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/tiny_fixedtables_inline/input/main.c",
+      "pass": true
+    },
+    {
+      "check": "tiny_fixedtables_inline admitted source main.c",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-runner-v3/runs/first-complete-primitive-member-reference-batch/expected/tiny_fixedtables_inline/expected.txt",
+      "pass": true
+    },
+    {
+      "check": "tiny_fixedtables_inline full admitted reference",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/tiny_fixedtables_inline/actual.txt",
+      "pass": true
+    },
+    {
+      "check": "tiny_fixedtables_inline accepted old full output",
+      "pass": true
+    },
+    {
+      "check": "tiny_fixedtables_inline candidate stdout LF only",
+      "pass": true
+    },
+    {
+      "check": "tiny_fixedtables_inline command and successful status",
+      "pass": true
+    },
+    {
+      "check": "tiny_fixedtables_inline exact status correct",
+      "pass": true
+    },
+    {
+      "check": "tiny_fixedtables_inline includingSeparators counters",
+      "pass": true
+    },
+    {
+      "check": "tiny_fixedtables_inline nonempty counters",
+      "pass": true
+    },
+    {
+      "check": "tiny_fixedtables_inline complete diff expected-before.diff",
+      "pass": true
+    },
+    {
+      "check": "tiny_fixedtables_inline complete diff expected-candidate.diff",
+      "pass": true
+    },
+    {
+      "check": "tiny_fixedtables_inline complete diff before-candidate.diff",
+      "pass": true
+    },
+    {
+      "check": "tiny_fixedtables_inline flow bytes unchanged",
+      "pass": true
+    },
+    {
+      "check": "tiny_fixedtables_inline AST topology and non-type properties unchanged",
+      "pass": true
+    },
+    {
+      "check": "tiny_fixedtables_inline no old matching loss",
+      "pass": true
+    },
+    {
+      "check": "unsigned_char saved row",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/unsigned_char/actual.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/unsigned_char/before-candidate.diff",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/unsigned_char/before.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/unsigned_char/expected-before.diff",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/unsigned_char/expected-candidate.diff",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/unsigned_char/expected.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/unsigned_char/input/main.c",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/unsigned_char/stderr.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/unsigned_char/stdout.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/unsigned_char/input/main.c",
+      "pass": true
+    },
+    {
+      "check": "unsigned_char admitted source main.c",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-runner-v3/runs/first-complete-primitive-member-reference-batch/expected/unsigned_char/expected.txt",
+      "pass": true
+    },
+    {
+      "check": "unsigned_char full admitted reference",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/unsigned_char/actual.txt",
+      "pass": true
+    },
+    {
+      "check": "unsigned_char accepted old full output",
+      "pass": true
+    },
+    {
+      "check": "unsigned_char candidate stdout LF only",
+      "pass": true
+    },
+    {
+      "check": "unsigned_char command and successful status",
+      "pass": true
+    },
+    {
+      "check": "unsigned_char exact status correct",
+      "pass": true
+    },
+    {
+      "check": "unsigned_char includingSeparators counters",
+      "pass": true
+    },
+    {
+      "check": "unsigned_char nonempty counters",
+      "pass": true
+    },
+    {
+      "check": "unsigned_char complete diff expected-before.diff",
+      "pass": true
+    },
+    {
+      "check": "unsigned_char complete diff expected-candidate.diff",
+      "pass": true
+    },
+    {
+      "check": "unsigned_char complete diff before-candidate.diff",
+      "pass": true
+    },
+    {
+      "check": "unsigned_char flow bytes unchanged",
+      "pass": true
+    },
+    {
+      "check": "unsigned_char AST topology and non-type properties unchanged",
+      "pass": true
+    },
+    {
+      "check": "unsigned_char no old matching loss",
+      "pass": true
+    },
+    {
+      "check": "unsigned_long_long_int saved row",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/unsigned_long_long_int/actual.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/unsigned_long_long_int/before-candidate.diff",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/unsigned_long_long_int/before.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/unsigned_long_long_int/expected-before.diff",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/unsigned_long_long_int/expected-candidate.diff",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/unsigned_long_long_int/expected.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/unsigned_long_long_int/input/main.c",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/unsigned_long_long_int/stderr.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/unsigned_long_long_int/stdout.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/unsigned_long_long_int/input/main.c",
+      "pass": true
+    },
+    {
+      "check": "unsigned_long_long_int admitted source main.c",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-runner-v3/runs/first-complete-primitive-member-reference-batch/expected/unsigned_long_long_int/expected.txt",
+      "pass": true
+    },
+    {
+      "check": "unsigned_long_long_int full admitted reference",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/unsigned_long_long_int/actual.txt",
+      "pass": true
+    },
+    {
+      "check": "unsigned_long_long_int accepted old full output",
+      "pass": true
+    },
+    {
+      "check": "unsigned_long_long_int candidate stdout LF only",
+      "pass": true
+    },
+    {
+      "check": "unsigned_long_long_int command and successful status",
+      "pass": true
+    },
+    {
+      "check": "unsigned_long_long_int exact status correct",
+      "pass": true
+    },
+    {
+      "check": "unsigned_long_long_int includingSeparators counters",
+      "pass": true
+    },
+    {
+      "check": "unsigned_long_long_int nonempty counters",
+      "pass": true
+    },
+    {
+      "check": "unsigned_long_long_int complete diff expected-before.diff",
+      "pass": true
+    },
+    {
+      "check": "unsigned_long_long_int complete diff expected-candidate.diff",
+      "pass": true
+    },
+    {
+      "check": "unsigned_long_long_int complete diff before-candidate.diff",
+      "pass": true
+    },
+    {
+      "check": "unsigned_long_long_int flow bytes unchanged",
+      "pass": true
+    },
+    {
+      "check": "unsigned_long_long_int AST topology and non-type properties unchanged",
+      "pass": true
+    },
+    {
+      "check": "unsigned_long_long_int no old matching loss",
+      "pass": true
+    },
+    {
+      "check": "unsigned_short saved row",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/unsigned_short/actual.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/unsigned_short/before-candidate.diff",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/unsigned_short/before.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/unsigned_short/expected-before.diff",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/unsigned_short/expected-candidate.diff",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/unsigned_short/expected.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/unsigned_short/input/main.c",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/unsigned_short/stderr.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/unsigned_short/stdout.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/unsigned_short/input/main.c",
+      "pass": true
+    },
+    {
+      "check": "unsigned_short admitted source main.c",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-runner-v3/runs/first-complete-primitive-member-reference-batch/expected/unsigned_short/expected.txt",
+      "pass": true
+    },
+    {
+      "check": "unsigned_short full admitted reference",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/unsigned_short/actual.txt",
+      "pass": true
+    },
+    {
+      "check": "unsigned_short accepted old full output",
+      "pass": true
+    },
+    {
+      "check": "unsigned_short candidate stdout LF only",
+      "pass": true
+    },
+    {
+      "check": "unsigned_short command and successful status",
+      "pass": true
+    },
+    {
+      "check": "unsigned_short exact status correct",
+      "pass": true
+    },
+    {
+      "check": "unsigned_short includingSeparators counters",
+      "pass": true
+    },
+    {
+      "check": "unsigned_short nonempty counters",
+      "pass": true
+    },
+    {
+      "check": "unsigned_short complete diff expected-before.diff",
+      "pass": true
+    },
+    {
+      "check": "unsigned_short complete diff expected-candidate.diff",
+      "pass": true
+    },
+    {
+      "check": "unsigned_short complete diff before-candidate.diff",
+      "pass": true
+    },
+    {
+      "check": "unsigned_short flow bytes unchanged",
+      "pass": true
+    },
+    {
+      "check": "unsigned_short AST topology and non-type properties unchanged",
+      "pass": true
+    },
+    {
+      "check": "unsigned_short no old matching loss",
+      "pass": true
+    },
+    {
+      "check": "unsigned_short_array saved row",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/unsigned_short_array/actual.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/unsigned_short_array/before-candidate.diff",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/unsigned_short_array/before.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/unsigned_short_array/expected-before.diff",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/unsigned_short_array/expected-candidate.diff",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/unsigned_short_array/expected.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/unsigned_short_array/input/main.c",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/unsigned_short_array/stderr.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/unsigned_short_array/stdout.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/unsigned_short_array/input/main.c",
+      "pass": true
+    },
+    {
+      "check": "unsigned_short_array admitted source main.c",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-runner-v3/runs/first-complete-primitive-member-reference-batch/expected/unsigned_short_array/expected.txt",
+      "pass": true
+    },
+    {
+      "check": "unsigned_short_array full admitted reference",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/unsigned_short_array/actual.txt",
+      "pass": true
+    },
+    {
+      "check": "unsigned_short_array accepted old full output",
+      "pass": true
+    },
+    {
+      "check": "unsigned_short_array candidate stdout LF only",
+      "pass": true
+    },
+    {
+      "check": "unsigned_short_array command and successful status",
+      "pass": true
+    },
+    {
+      "check": "unsigned_short_array exact status correct",
+      "pass": true
+    },
+    {
+      "check": "unsigned_short_array includingSeparators counters",
+      "pass": true
+    },
+    {
+      "check": "unsigned_short_array nonempty counters",
+      "pass": true
+    },
+    {
+      "check": "unsigned_short_array complete diff expected-before.diff",
+      "pass": true
+    },
+    {
+      "check": "unsigned_short_array complete diff expected-candidate.diff",
+      "pass": true
+    },
+    {
+      "check": "unsigned_short_array complete diff before-candidate.diff",
+      "pass": true
+    },
+    {
+      "check": "unsigned_short_array flow bytes unchanged",
+      "pass": true
+    },
+    {
+      "check": "unsigned_short_array AST topology and non-type properties unchanged",
+      "pass": true
+    },
+    {
+      "check": "unsigned_short_array no old matching loss",
+      "pass": true
+    },
+    {
+      "check": "unsigned_short_int saved row",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/unsigned_short_int/actual.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/unsigned_short_int/before-candidate.diff",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/unsigned_short_int/before.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/unsigned_short_int/expected-before.diff",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/unsigned_short_int/expected-candidate.diff",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/unsigned_short_int/expected.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/unsigned_short_int/input/main.c",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/unsigned_short_int/stderr.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/unsigned_short_int/stdout.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/unsigned_short_int/input/main.c",
+      "pass": true
+    },
+    {
+      "check": "unsigned_short_int admitted source main.c",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-runner-v3/runs/first-complete-primitive-member-reference-batch/expected/unsigned_short_int/expected.txt",
+      "pass": true
+    },
+    {
+      "check": "unsigned_short_int full admitted reference",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/unsigned_short_int/actual.txt",
+      "pass": true
+    },
+    {
+      "check": "unsigned_short_int accepted old full output",
+      "pass": true
+    },
+    {
+      "check": "unsigned_short_int candidate stdout LF only",
+      "pass": true
+    },
+    {
+      "check": "unsigned_short_int command and successful status",
+      "pass": true
+    },
+    {
+      "check": "unsigned_short_int exact status correct",
+      "pass": true
+    },
+    {
+      "check": "unsigned_short_int includingSeparators counters",
+      "pass": true
+    },
+    {
+      "check": "unsigned_short_int nonempty counters",
+      "pass": true
+    },
+    {
+      "check": "unsigned_short_int complete diff expected-before.diff",
+      "pass": true
+    },
+    {
+      "check": "unsigned_short_int complete diff expected-candidate.diff",
+      "pass": true
+    },
+    {
+      "check": "unsigned_short_int complete diff before-candidate.diff",
+      "pass": true
+    },
+    {
+      "check": "unsigned_short_int flow bytes unchanged",
+      "pass": true
+    },
+    {
+      "check": "unsigned_short_int AST topology and non-type properties unchanged",
+      "pass": true
+    },
+    {
+      "check": "unsigned_short_int no old matching loss",
+      "pass": true
+    },
+    {
+      "check": "unsigned_short_pointer saved row",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/unsigned_short_pointer/actual.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/unsigned_short_pointer/before-candidate.diff",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/unsigned_short_pointer/before.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/unsigned_short_pointer/expected-before.diff",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/unsigned_short_pointer/expected-candidate.diff",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/unsigned_short_pointer/expected.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/unsigned_short_pointer/input/main.c",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/unsigned_short_pointer/stderr.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/unsigned_short_pointer/stdout.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/unsigned_short_pointer/input/main.c",
+      "pass": true
+    },
+    {
+      "check": "unsigned_short_pointer admitted source main.c",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-runner-v3/runs/first-complete-primitive-member-reference-batch/expected/unsigned_short_pointer/expected.txt",
+      "pass": true
+    },
+    {
+      "check": "unsigned_short_pointer full admitted reference",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/unsigned_short_pointer/actual.txt",
+      "pass": true
+    },
+    {
+      "check": "unsigned_short_pointer accepted old full output",
+      "pass": true
+    },
+    {
+      "check": "unsigned_short_pointer candidate stdout LF only",
+      "pass": true
+    },
+    {
+      "check": "unsigned_short_pointer command and successful status",
+      "pass": true
+    },
+    {
+      "check": "unsigned_short_pointer exact status correct",
+      "pass": true
+    },
+    {
+      "check": "unsigned_short_pointer includingSeparators counters",
+      "pass": true
+    },
+    {
+      "check": "unsigned_short_pointer nonempty counters",
+      "pass": true
+    },
+    {
+      "check": "unsigned_short_pointer complete diff expected-before.diff",
+      "pass": true
+    },
+    {
+      "check": "unsigned_short_pointer complete diff expected-candidate.diff",
+      "pass": true
+    },
+    {
+      "check": "unsigned_short_pointer complete diff before-candidate.diff",
+      "pass": true
+    },
+    {
+      "check": "unsigned_short_pointer flow bytes unchanged",
+      "pass": true
+    },
+    {
+      "check": "unsigned_short_pointer AST topology and non-type properties unchanged",
+      "pass": true
+    },
+    {
+      "check": "unsigned_short_pointer no old matching loss",
+      "pass": true
+    },
+    {
+      "check": "volatile_unsigned_short saved row",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/volatile_unsigned_short/actual.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/volatile_unsigned_short/before-candidate.diff",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/volatile_unsigned_short/before.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/volatile_unsigned_short/expected-before.diff",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/volatile_unsigned_short/expected-candidate.diff",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/volatile_unsigned_short/expected.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/volatile_unsigned_short/input/main.c",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/volatile_unsigned_short/stderr.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/volatile_unsigned_short/stdout.txt",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/volatile_unsigned_short/input/main.c",
+      "pass": true
+    },
+    {
+      "check": "volatile_unsigned_short admitted source main.c",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-runner-v3/runs/first-complete-primitive-member-reference-batch/expected/volatile_unsigned_short/expected.txt",
+      "pass": true
+    },
+    {
+      "check": "volatile_unsigned_short full admitted reference",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/volatile_unsigned_short/actual.txt",
+      "pass": true
+    },
+    {
+      "check": "volatile_unsigned_short accepted old full output",
+      "pass": true
+    },
+    {
+      "check": "volatile_unsigned_short candidate stdout LF only",
+      "pass": true
+    },
+    {
+      "check": "volatile_unsigned_short command and successful status",
+      "pass": true
+    },
+    {
+      "check": "volatile_unsigned_short exact status correct",
+      "pass": true
+    },
+    {
+      "check": "volatile_unsigned_short includingSeparators counters",
+      "pass": true
+    },
+    {
+      "check": "volatile_unsigned_short nonempty counters",
+      "pass": true
+    },
+    {
+      "check": "volatile_unsigned_short complete diff expected-before.diff",
+      "pass": true
+    },
+    {
+      "check": "volatile_unsigned_short complete diff expected-candidate.diff",
+      "pass": true
+    },
+    {
+      "check": "volatile_unsigned_short complete diff before-candidate.diff",
+      "pass": true
+    },
+    {
+      "check": "volatile_unsigned_short flow bytes unchanged",
+      "pass": true
+    },
+    {
+      "check": "volatile_unsigned_short AST topology and non-type properties unchanged",
+      "pass": true
+    },
+    {
+      "check": "volatile_unsigned_short no old matching loss",
+      "pass": true
+    },
+    {
+      "check": "independent 19-case totals",
+      "pass": true
+    },
+    {
+      "check": "exact gates equal successful full-exact cases",
+      "pass": true
+    },
+    {
+      "check": "nonprimitive retained complete diagnostic",
+      "pass": true
+    },
+    {
+      "check": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay-prior-v1/replay.json",
+      "pass": true
+    },
+    {
+      "check": "prior receipt pair binding",
+      "pass": true
+    }
+  ],
+  "bindings": {
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/frozen-v1/bindings.json": "9a036a96c94a34c9bffc85ba101b5db0ea0af40f581f6621cc8c40851cfb98b9",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/frozen-v1/source.patch": "9aec011314e7b26c59c96edd4a6e5219b48e60a3f6706c3c14a102b3b120abca",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/frozen-v1/source/cpg-rs/cpg-lang-c/src/exact.rs": "a76495894a72f4e1a023dea997e4308d60122bbf3ceb812538e1dd31a4161893",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/replay.json": "ca8114b68f4e4f31ffbc20e834bc1892db7200f689097956e6ee5a9c13c0e942",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/validation-v1-final-test/checks.json": "1b583646d0dee5c0040033c7ec32b9d7afa23471d2282803134ef15bcd6f5d72",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay-prior-v1/replay.json": "1ec133c54770652fc9384877ed88a0785f8f6e245c851fa8395fb2e14602fa31"
+  },
+  "sourceScope": "One MEMBER base-type call now uses existing TypeRole::Declaration. The renderer and nonprimitive normalize_type fallback are unchanged; CODE, suffixes, order, enum branch and clinit logic are byte-identical. No importer, solver, checker or reference changes.",
+  "totals": {
+    "cases": 19,
+    "beforeExact": 2,
+    "candidateExact": 18,
+    "gained": 126,
+    "lost": 0,
+    "expectedLfLines": 3493,
+    "expectedNonempty": 3423
+  },
+  "cases": [
+    {
+      "case": "base_qualified_pointer",
+      "beforeExact": false,
+      "candidateExact": true,
+      "beforeCandidateIdentical": false,
+      "expectedSha256": "53b149c0c3b91fc21969901c294099353666c6e0842f621bf49d596a9017cb5c",
+      "beforeSha256": "fbaa5726235b4fef3793f017331847ece1bd623819660858f4a7405b5e55d00b",
+      "candidateSha256": "53b149c0c3b91fc21969901c294099353666c6e0842f621bf49d596a9017cb5c",
+      "gained": 7,
+      "lost": 0
+    },
+    {
+      "case": "const_unsigned_short",
+      "beforeExact": false,
+      "candidateExact": true,
+      "beforeCandidateIdentical": false,
+      "expectedSha256": "7ffc36c68f07466a0ab2f31de41b75a9f73e7e130ddf547cbc96d1b4fa774284",
+      "beforeSha256": "41381915fe3da9041f17b5b93d2cb9b2ebe5df5372f2f8807d2c557a38034fbf",
+      "candidateSha256": "7ffc36c68f07466a0ab2f31de41b75a9f73e7e130ddf547cbc96d1b4fa774284",
+      "gained": 7,
+      "lost": 0
+    },
+    {
+      "case": "mixed_declarator_shapes",
+      "beforeExact": false,
+      "candidateExact": true,
+      "beforeCandidateIdentical": false,
+      "expectedSha256": "1d3402f00cd066767d6a87552aa217b8292a66629c72309165bafaa1a8d4ff0d",
+      "beforeSha256": "11aaaca3111248fd6db26a5a93cef887572c7667f643269e8d8004011d24ba44",
+      "candidateSha256": "1d3402f00cd066767d6a87552aa217b8292a66629c72309165bafaa1a8d4ff0d",
+      "gained": 21,
+      "lost": 0
+    },
+    {
+      "case": "nonprimitive_scalar_control",
+      "beforeExact": false,
+      "candidateExact": false,
+      "beforeCandidateIdentical": true,
+      "expectedSha256": "d01b88fb2012eb6671de933e8be87c445c1cc7d951aeee509276ddd6373dd34c",
+      "beforeSha256": "2193e03adf6e49107881f79b1006f5787adfa5d2084cd57bf9dc59120045a3bd",
+      "candidateSha256": "2193e03adf6e49107881f79b1006f5787adfa5d2084cd57bf9dc59120045a3bd",
+      "gained": 0,
+      "lost": 0
+    },
+    {
+      "case": "ordinary_numeric_control",
+      "beforeExact": true,
+      "candidateExact": true,
+      "beforeCandidateIdentical": true,
+      "expectedSha256": "4528adacb40f21e1aa33eb4195cfb87470e8f5a3a288a1678486d1800c63aef1",
+      "beforeSha256": "4528adacb40f21e1aa33eb4195cfb87470e8f5a3a288a1678486d1800c63aef1",
+      "candidateSha256": "4528adacb40f21e1aa33eb4195cfb87470e8f5a3a288a1678486d1800c63aef1",
+      "gained": 0,
+      "lost": 0
+    },
+    {
+      "case": "pointer_qualified_pointer",
+      "beforeExact": false,
+      "candidateExact": true,
+      "beforeCandidateIdentical": false,
+      "expectedSha256": "1efb5791f73bc51f3d36709eb8f61cd5e9850b3b01fe4687ff8a64f26e01b625",
+      "beforeSha256": "103bb7bd2403c9dfb79594295cd790c013c2d71366d813f9e4c606fbfe500fb6",
+      "candidateSha256": "1efb5791f73bc51f3d36709eb8f61cd5e9850b3b01fe4687ff8a64f26e01b625",
+      "gained": 7,
+      "lost": 0
+    },
+    {
+      "case": "short_int_unsigned",
+      "beforeExact": false,
+      "candidateExact": true,
+      "beforeCandidateIdentical": false,
+      "expectedSha256": "92cfd06fee6b3bcb4a94e9eb9f76234322feb6f521fafbbcd7ab928d2d4b92e0",
+      "beforeSha256": "5614d64321db129964d63ba14ccae2c83a982e8c40dc1f526fc1384a3cd7cfa4",
+      "candidateSha256": "92cfd06fee6b3bcb4a94e9eb9f76234322feb6f521fafbbcd7ab928d2d4b92e0",
+      "gained": 7,
+      "lost": 0
+    },
+    {
+      "case": "short_unsigned",
+      "beforeExact": false,
+      "candidateExact": true,
+      "beforeCandidateIdentical": false,
+      "expectedSha256": "33b6a8ed56ff9b624cfa8bf0410d5bd9372fcdbf1cb41fde895ef129446ba90f",
+      "beforeSha256": "cde860a27c45998c02c762c349ddc9ff5a45706790dfeb486fdc892eb24aaa79",
+      "candidateSha256": "33b6a8ed56ff9b624cfa8bf0410d5bd9372fcdbf1cb41fde895ef129446ba90f",
+      "gained": 7,
+      "lost": 0
+    },
+    {
+      "case": "signed_char",
+      "beforeExact": false,
+      "candidateExact": true,
+      "beforeCandidateIdentical": false,
+      "expectedSha256": "01213a09ac6d7a925b92e76fa1e9424a8c6e1d1f60201de3f0701c987ac794aa",
+      "beforeSha256": "450ee58b73fd4e3bb70e91538302fd1c334b3e04a5b9262ddfb36e617c8cb5e8",
+      "candidateSha256": "01213a09ac6d7a925b92e76fa1e9424a8c6e1d1f60201de3f0701c987ac794aa",
+      "gained": 7,
+      "lost": 0
+    },
+    {
+      "case": "signed_short",
+      "beforeExact": false,
+      "candidateExact": true,
+      "beforeCandidateIdentical": false,
+      "expectedSha256": "d1a36fa051100458c9a44e8cafb4499d361950fe1e5f8ff5fd4f0b2e9aa22d39",
+      "beforeSha256": "6c8bd98f1ee2c25500259d0c66bc8e6d716075b2c4dc5de8eedb3a3100911cc0",
+      "candidateSha256": "d1a36fa051100458c9a44e8cafb4499d361950fe1e5f8ff5fd4f0b2e9aa22d39",
+      "gained": 7,
+      "lost": 0
+    },
+    {
+      "case": "tiny_fixedtables_include",
+      "beforeExact": false,
+      "candidateExact": true,
+      "beforeCandidateIdentical": false,
+      "expectedSha256": "fc4a1360d6f10152edb364c346a47ae73d2df2460fe5ef12da2d2e79cbb7dd3f",
+      "beforeSha256": "3b15e5adbaa6fba426e00c4b695cafb905e530dc4627573646e3388279393796",
+      "candidateSha256": "fc4a1360d6f10152edb364c346a47ae73d2df2460fe5ef12da2d2e79cbb7dd3f",
+      "gained": 7,
+      "lost": 0
+    },
+    {
+      "case": "tiny_fixedtables_inline",
+      "beforeExact": false,
+      "candidateExact": true,
+      "beforeCandidateIdentical": false,
+      "expectedSha256": "6d613c7085ab54541cc1d9fa83494748e33fe70bfc5c541ee39f12aa8046cadd",
+      "beforeSha256": "7fc32775a3481703dbe3d002b091e4c68c04bea03c0b2d808c6711e06307fb55",
+      "candidateSha256": "6d613c7085ab54541cc1d9fa83494748e33fe70bfc5c541ee39f12aa8046cadd",
+      "gained": 7,
+      "lost": 0
+    },
+    {
+      "case": "unsigned_char",
+      "beforeExact": true,
+      "candidateExact": true,
+      "beforeCandidateIdentical": true,
+      "expectedSha256": "4a794f1b11f8d0b222bdc91d3e45abe0c55ecbdbaf64db736a95f91828aec8d4",
+      "beforeSha256": "4a794f1b11f8d0b222bdc91d3e45abe0c55ecbdbaf64db736a95f91828aec8d4",
+      "candidateSha256": "4a794f1b11f8d0b222bdc91d3e45abe0c55ecbdbaf64db736a95f91828aec8d4",
+      "gained": 0,
+      "lost": 0
+    },
+    {
+      "case": "unsigned_long_long_int",
+      "beforeExact": false,
+      "candidateExact": true,
+      "beforeCandidateIdentical": false,
+      "expectedSha256": "8cdd2dbee080157990c124b09867988f64b4c790a00ab92b5be48b270c61a720",
+      "beforeSha256": "f85a47d40520d00231233b3234bf711a871491b288e9118737e3d0250f78478c",
+      "candidateSha256": "8cdd2dbee080157990c124b09867988f64b4c790a00ab92b5be48b270c61a720",
+      "gained": 7,
+      "lost": 0
+    },
+    {
+      "case": "unsigned_short",
+      "beforeExact": false,
+      "candidateExact": true,
+      "beforeCandidateIdentical": false,
+      "expectedSha256": "67200ecf8fbbbf5beacd4025936a0f959c30ede649497118d7510d2bea4f7b88",
+      "beforeSha256": "99a38cf210662b412e3cae339c3ecab70a46b00473554191fff08e4ba622019a",
+      "candidateSha256": "67200ecf8fbbbf5beacd4025936a0f959c30ede649497118d7510d2bea4f7b88",
+      "gained": 7,
+      "lost": 0
+    },
+    {
+      "case": "unsigned_short_array",
+      "beforeExact": false,
+      "candidateExact": true,
+      "beforeCandidateIdentical": false,
+      "expectedSha256": "500f0b8fd015d905346cdc8b0d9dea88b91ecb24bf068504ff9ddb59b1916ef0",
+      "beforeSha256": "05bbf56f6e7e62880c9d2ed791e5d9ee6e12021997dde484d6eff81f87622b36",
+      "candidateSha256": "500f0b8fd015d905346cdc8b0d9dea88b91ecb24bf068504ff9ddb59b1916ef0",
+      "gained": 7,
+      "lost": 0
+    },
+    {
+      "case": "unsigned_short_int",
+      "beforeExact": false,
+      "candidateExact": true,
+      "beforeCandidateIdentical": false,
+      "expectedSha256": "2f53a7bf0e015f6d42627dde4d6c54bafcd2e55b0b81a3f2b80b70f9a46cf3d1",
+      "beforeSha256": "837530af832de745ef82ac69484e1aa20fc4a712dd159cd2bbfc65bcdb6d0de6",
+      "candidateSha256": "2f53a7bf0e015f6d42627dde4d6c54bafcd2e55b0b81a3f2b80b70f9a46cf3d1",
+      "gained": 7,
+      "lost": 0
+    },
+    {
+      "case": "unsigned_short_pointer",
+      "beforeExact": false,
+      "candidateExact": true,
+      "beforeCandidateIdentical": false,
+      "expectedSha256": "75c4b6060b1e8d56e967c641dd7050a696c00ab95b37b284633ca58ad5fdb0f9",
+      "beforeSha256": "056956ce53a8af9468f0d835629ead78fb3f211db183fa59c04958ac528fa800",
+      "candidateSha256": "75c4b6060b1e8d56e967c641dd7050a696c00ab95b37b284633ca58ad5fdb0f9",
+      "gained": 7,
+      "lost": 0
+    },
+    {
+      "case": "volatile_unsigned_short",
+      "beforeExact": false,
+      "candidateExact": true,
+      "beforeCandidateIdentical": false,
+      "expectedSha256": "3dc76afa755430aab0204df9f9ef02f714b67b2468229d70a316746460e2e8d9",
+      "beforeSha256": "599fde6e4b6ea50c1480760d5a46d18363005bafb1c4ec089d4c57d392648ac7",
+      "candidateSha256": "3dc76afa755430aab0204df9f9ef02f714b67b2468229d70a316746460e2e8d9",
+      "gained": 7,
+      "lost": 0
+    }
+  ],
+  "priorReplay": {
+    "status": "Raw review assigned independently to analysis_scope; only receipt identity bound here",
+    "instancesReported": 229
+  },
+  "testClassification": {
+    "initialFrozenTestIncorrectlyIncluded": "nonprimitive_scalar_control",
+    "initialFrozenTestPreserved": true,
+    "finalTestSha256": "920fe8b29a06e76a263eb8cf49dbe8470c81c5dc32b1879188bf0c58e352babe",
+    "fullGraphGates": 18,
+    "finalTestOnlyRemovesMeasuredDiagnosticFromExactGateAndAddsExplanation": true
+  },
+  "limits": [
+    "Existing outputs independently recomputed; no reviewer Rust/Joern producer or Cargo execution.",
+    "The 19 complete canonical references contain 3493 LF lines and 3423 nonempty records. The replay includingSeparators counters additionally count the terminal split empty item; no gain/loss effect.",
+    "Nonprimitive scalar control retains missing external nested/tag/member scaffold, byte-identical to accepted tenth.",
+    "Portable package not sealed/reviewed yet. Root integration, full-project and resource acceptance remain separate."
+  ]
+}

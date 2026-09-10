@@ -1,0 +1,343 @@
+--- Joern
++++ old7
+@@ -24,30 +24,21 @@
+   METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=2
+   METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=2
+   BLOCK CODE={\n int result;\n#if !defined(USE_OLD)\n if (base == 2)\n  result = x;\n else\n#endif\n if (base == 10)\n  result = 10;\n else\n  result = 0;\n return result;\n} TYPE_FULL_NAME=void ORDER=3
++    LOCAL NAME=USE_OLD CODE=<unknown> USE_OLD TYPE_FULL_NAME=ANY ORDER=0
+     LOCAL NAME=result CODE=int result TYPE_FULL_NAME=int ORDER=1
+-    CONTROL_STRUCTURE CODE=if (base == 2)\n  result = x;\n else\n#endif\n if (base == 10)\n  result = 10;\n else\n  result = 0; ORDER=2
+-      CALL NAME=<operator>.equals CODE=base == 2 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.equals ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
++    CONTROL_STRUCTURE CODE=if (base == 10)\n  result = 10;\n else\n  result = 0; ORDER=2
++      CALL NAME=<operator>.equals CODE=base == 10 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.equals ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+         IDENTIFIER NAME=base CODE=base TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+-        LITERAL CODE=2 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
++        LITERAL CODE=10 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+       BLOCK TYPE_FULL_NAME=ANY ORDER=2
+-        CALL NAME=<operator>.assignment CODE=result = x TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
++        CALL NAME=<operator>.assignment CODE=result = 10 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+           IDENTIFIER NAME=result CODE=result TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+-          IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
++          LITERAL CODE=10 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+       CONTROL_STRUCTURE CODE=else ORDER=3
+         BLOCK TYPE_FULL_NAME=ANY ORDER=1
+-          CONTROL_STRUCTURE CODE=if (base == 10)\n  result = 10;\n else\n  result = 0; ORDER=1
+-            CALL NAME=<operator>.equals CODE=base == 10 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.equals ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+-              IDENTIFIER NAME=base CODE=base TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+-              LITERAL CODE=10 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+-            BLOCK TYPE_FULL_NAME=ANY ORDER=2
+-              CALL NAME=<operator>.assignment CODE=result = 10 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+-                IDENTIFIER NAME=result CODE=result TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+-                LITERAL CODE=10 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+-            CONTROL_STRUCTURE CODE=else ORDER=3
+-              BLOCK TYPE_FULL_NAME=ANY ORDER=1
+-                CALL NAME=<operator>.assignment CODE=result = 0 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+-                  IDENTIFIER NAME=result CODE=result TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+-                  LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
++          CALL NAME=<operator>.assignment CODE=result = 0 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
++            IDENTIFIER NAME=result CODE=result TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
++            LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+     RETURN CODE=return result; ORDER=3
+       IDENTIFIER NAME=result CODE=result TYPE_FULL_NAME=int ORDER=1
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=4
+@@ -59,30 +50,21 @@
+     METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=2
+     METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=2
+     BLOCK CODE={\n int result;\n#if !defined(USE_OLD)\n if (base == 2)\n  result = x;\n else\n#endif\n if (base == 10)\n  result = 10;\n else\n  result = 0;\n return result;\n} TYPE_FULL_NAME=void ORDER=3
++      LOCAL NAME=USE_OLD CODE=<unknown> USE_OLD TYPE_FULL_NAME=ANY ORDER=0
+       LOCAL NAME=result CODE=int result TYPE_FULL_NAME=int ORDER=1
+-      CONTROL_STRUCTURE CODE=if (base == 2)\n  result = x;\n else\n#endif\n if (base == 10)\n  result = 10;\n else\n  result = 0; ORDER=2
+-        CALL NAME=<operator>.equals CODE=base == 2 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.equals ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
++      CONTROL_STRUCTURE CODE=if (base == 10)\n  result = 10;\n else\n  result = 0; ORDER=2
++        CALL NAME=<operator>.equals CODE=base == 10 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.equals ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+           IDENTIFIER NAME=base CODE=base TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+-          LITERAL CODE=2 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
++          LITERAL CODE=10 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+         BLOCK TYPE_FULL_NAME=ANY ORDER=2
+-          CALL NAME=<operator>.assignment CODE=result = x TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
++          CALL NAME=<operator>.assignment CODE=result = 10 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+             IDENTIFIER NAME=result CODE=result TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+-            IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
++            LITERAL CODE=10 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+         CONTROL_STRUCTURE CODE=else ORDER=3
+           BLOCK TYPE_FULL_NAME=ANY ORDER=1
+-            CONTROL_STRUCTURE CODE=if (base == 10)\n  result = 10;\n else\n  result = 0; ORDER=1
+-              CALL NAME=<operator>.equals CODE=base == 10 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.equals ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+-                IDENTIFIER NAME=base CODE=base TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+-                LITERAL CODE=10 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+-              BLOCK TYPE_FULL_NAME=ANY ORDER=2
+-                CALL NAME=<operator>.assignment CODE=result = 10 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+-                  IDENTIFIER NAME=result CODE=result TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+-                  LITERAL CODE=10 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+-              CONTROL_STRUCTURE CODE=else ORDER=3
+-                BLOCK TYPE_FULL_NAME=ANY ORDER=1
+-                  CALL NAME=<operator>.assignment CODE=result = 0 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+-                    IDENTIFIER NAME=result CODE=result TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+-                    LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
++            CALL NAME=<operator>.assignment CODE=result = 0 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
++              IDENTIFIER NAME=result CODE=result TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
++              LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+       RETURN CODE=return result; ORDER=3
+         IDENTIFIER NAME=result CODE=result TYPE_FULL_NAME=int ORDER=1
+     METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=4
+@@ -107,49 +89,35 @@
+ NODES|TYPE NAME=choose FULL_NAME=choose TYPE_DECL_FULL_NAME=choose
+ NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+ NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+-EDGES|ARGUMENT choose#12 -> choose#13
+-EDGES|ARGUMENT choose#12 -> choose#14
++EDGES|ARGUMENT choose#13 -> choose#14
++EDGES|ARGUMENT choose#13 -> choose#15
+ EDGES|ARGUMENT choose#18 -> choose#19
+ EDGES|ARGUMENT choose#18 -> choose#20
+-EDGES|ARGUMENT choose#22 -> choose#23
+-EDGES|ARGUMENT choose#22 -> choose#24
+-EDGES|ARGUMENT choose#27 -> choose#28
+-EDGES|ARGUMENT choose#27 -> choose#29
+-EDGES|ARGUMENT choose#30 -> choose#31
+-EDGES|ARGUMENT choose#8 -> choose#10
+-EDGES|ARGUMENT choose#8 -> choose#9
+-EDGES|CALL choose#12 -> <operator>.assignment#0
+-EDGES|CALL choose#18 -> <operator>.equals#0
+-EDGES|CALL choose#22 -> <operator>.assignment#0
+-EDGES|CALL choose#27 -> <operator>.assignment#0
+-EDGES|CALL choose#8 -> <operator>.equals#0
++EDGES|ARGUMENT choose#21 -> choose#22
++EDGES|ARGUMENT choose#9 -> choose#10
++EDGES|ARGUMENT choose#9 -> choose#11
++EDGES|CALL choose#13 -> <operator>.assignment#0
++EDGES|CALL choose#18 -> <operator>.assignment#0
++EDGES|CALL choose#9 -> <operator>.equals#0
+ EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+ EDGES|CFG <operator>.assignment#0 -> <operator>.assignment#5
+ EDGES|CFG <operator>.equals#0 -> <operator>.equals#5
+-EDGES|CFG choose#0 -> choose#9
+-EDGES|CFG choose#10 -> choose#8
+-EDGES|CFG choose#12 -> choose#31
+-EDGES|CFG choose#13 -> choose#14
+-EDGES|CFG choose#14 -> choose#12
+-EDGES|CFG choose#18 -> choose#23
+-EDGES|CFG choose#18 -> choose#28
++EDGES|CFG choose#0 -> choose#10
++EDGES|CFG choose#10 -> choose#11
++EDGES|CFG choose#11 -> choose#9
++EDGES|CFG choose#13 -> choose#22
++EDGES|CFG choose#14 -> choose#15
++EDGES|CFG choose#15 -> choose#13
++EDGES|CFG choose#18 -> choose#22
+ EDGES|CFG choose#19 -> choose#20
+ EDGES|CFG choose#20 -> choose#18
+-EDGES|CFG choose#22 -> choose#31
+-EDGES|CFG choose#23 -> choose#24
+-EDGES|CFG choose#24 -> choose#22
+-EDGES|CFG choose#27 -> choose#31
+-EDGES|CFG choose#28 -> choose#29
+-EDGES|CFG choose#29 -> choose#27
+-EDGES|CFG choose#30 -> choose#32
+-EDGES|CFG choose#31 -> choose#30
+-EDGES|CFG choose#8 -> choose#13
+-EDGES|CFG choose#8 -> choose#19
+-EDGES|CFG choose#9 -> choose#10
+-EDGES|CFG main.c:<global>#0 -> main.c:<global>#35
+-EDGES|CFG main.c:<global>#35 -> main.c:<global>#36
+-EDGES|CONDITION choose#17 -> choose#18
+-EDGES|CONDITION choose#7 -> choose#8
++EDGES|CFG choose#21 -> choose#23
++EDGES|CFG choose#22 -> choose#21
++EDGES|CFG choose#9 -> choose#14
++EDGES|CFG choose#9 -> choose#19
++EDGES|CFG main.c:<global>#0 -> main.c:<global>#26
++EDGES|CFG main.c:<global>#26 -> main.c:<global>#27
++EDGES|CONDITION choose#8 -> choose#9
+ EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+ EDGES|CONTAINS <operator>.assignment#0 -> <operator>.assignment#2
+ EDGES|CONTAINS <operator>.equals#0 -> <operator>.equals#2
+@@ -173,22 +141,12 @@
+ EDGES|CONTAINS choose#0 -> choose#20
+ EDGES|CONTAINS choose#0 -> choose#21
+ EDGES|CONTAINS choose#0 -> choose#22
+-EDGES|CONTAINS choose#0 -> choose#23
+-EDGES|CONTAINS choose#0 -> choose#24
+-EDGES|CONTAINS choose#0 -> choose#25
+-EDGES|CONTAINS choose#0 -> choose#26
+-EDGES|CONTAINS choose#0 -> choose#27
+-EDGES|CONTAINS choose#0 -> choose#28
+-EDGES|CONTAINS choose#0 -> choose#29
+-EDGES|CONTAINS choose#0 -> choose#30
+-EDGES|CONTAINS choose#0 -> choose#31
+ EDGES|CONTAINS choose#0 -> choose#5
+-EDGES|CONTAINS choose#0 -> choose#7
+ EDGES|CONTAINS choose#0 -> choose#8
+ EDGES|CONTAINS choose#0 -> choose#9
+ EDGES|CONTAINS main.c:<global>#0 -> choose#0
+-EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#34
+-EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#35
++EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#25
++EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#26
+ EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+ EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+ EDGES|EVAL_TYPE <operator>.assignment#1 -> T:ANY
+@@ -205,36 +163,28 @@
+ EDGES|EVAL_TYPE <operator>.equals#6 -> T:ANY
+ EDGES|EVAL_TYPE choose#1 -> T:int
+ EDGES|EVAL_TYPE choose#10 -> T:int
+-EDGES|EVAL_TYPE choose#11 -> T:ANY
++EDGES|EVAL_TYPE choose#11 -> T:int
+ EDGES|EVAL_TYPE choose#12 -> T:ANY
+-EDGES|EVAL_TYPE choose#13 -> T:int
++EDGES|EVAL_TYPE choose#13 -> T:ANY
+ EDGES|EVAL_TYPE choose#14 -> T:int
+-EDGES|EVAL_TYPE choose#16 -> T:ANY
++EDGES|EVAL_TYPE choose#15 -> T:int
++EDGES|EVAL_TYPE choose#17 -> T:ANY
+ EDGES|EVAL_TYPE choose#18 -> T:ANY
+ EDGES|EVAL_TYPE choose#19 -> T:int
+ EDGES|EVAL_TYPE choose#2 -> T:int
+ EDGES|EVAL_TYPE choose#20 -> T:int
+-EDGES|EVAL_TYPE choose#21 -> T:ANY
+-EDGES|EVAL_TYPE choose#22 -> T:ANY
++EDGES|EVAL_TYPE choose#22 -> T:int
+ EDGES|EVAL_TYPE choose#23 -> T:int
+-EDGES|EVAL_TYPE choose#24 -> T:int
+-EDGES|EVAL_TYPE choose#26 -> T:ANY
+-EDGES|EVAL_TYPE choose#27 -> T:ANY
+-EDGES|EVAL_TYPE choose#28 -> T:int
+-EDGES|EVAL_TYPE choose#29 -> T:int
+ EDGES|EVAL_TYPE choose#3 -> T:int
+-EDGES|EVAL_TYPE choose#31 -> T:int
+-EDGES|EVAL_TYPE choose#32 -> T:int
+ EDGES|EVAL_TYPE choose#4 -> T:int
+ EDGES|EVAL_TYPE choose#5 -> T:void
+-EDGES|EVAL_TYPE choose#6 -> T:int
+-EDGES|EVAL_TYPE choose#8 -> T:ANY
+-EDGES|EVAL_TYPE choose#9 -> T:int
+-EDGES|EVAL_TYPE main.c:<global>#34 -> T:ANY
+-EDGES|EVAL_TYPE main.c:<global>#35 -> T:choose
+-EDGES|EVAL_TYPE main.c:<global>#36 -> T:ANY
+-EDGES|FALSE_BODY choose#17 -> choose#25
+-EDGES|FALSE_BODY choose#7 -> choose#15
++EDGES|EVAL_TYPE choose#6 -> T:ANY
++EDGES|EVAL_TYPE choose#7 -> T:int
++EDGES|EVAL_TYPE choose#9 -> T:ANY
++EDGES|EVAL_TYPE main.c:<global>#25 -> T:ANY
++EDGES|EVAL_TYPE main.c:<global>#26 -> T:choose
++EDGES|EVAL_TYPE main.c:<global>#27 -> T:ANY
++EDGES|FALSE_BODY choose#8 -> choose#16
+ EDGES|PARAMETER_LINK <operator>.assignment#1 -> <operator>.assignment#3
+ EDGES|PARAMETER_LINK <operator>.assignment#4 -> <operator>.assignment#6
+ EDGES|PARAMETER_LINK <operator>.equals#1 -> <operator>.equals#3
+@@ -248,14 +198,11 @@
+ EDGES|REF T:choose -> D:choose
+ EDGES|REF T:int -> D:int
+ EDGES|REF T:void -> D:void
+-EDGES|REF choose#13 -> choose#6
+-EDGES|REF choose#14 -> choose#3
+-EDGES|REF choose#19 -> choose#1
+-EDGES|REF choose#23 -> choose#6
+-EDGES|REF choose#28 -> choose#6
+-EDGES|REF choose#31 -> choose#6
+-EDGES|REF choose#9 -> choose#1
+-EDGES|REF main.c:<global>#35 -> choose#0
++EDGES|REF choose#10 -> choose#1
++EDGES|REF choose#14 -> choose#7
++EDGES|REF choose#19 -> choose#7
++EDGES|REF choose#22 -> choose#7
++EDGES|REF main.c:<global>#26 -> choose#0
+ EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+ EDGES|SOURCE_FILE D:ANY -> F:<includes>
+ EDGES|SOURCE_FILE D:choose -> F:main.c
+@@ -267,43 +214,32 @@
+ EDGES|SOURCE_FILE NB:main.c:<global> -> F:main.c
+ EDGES|SOURCE_FILE choose#0 -> F:main.c
+ EDGES|SOURCE_FILE main.c:<global>#0 -> F:main.c
+-EDGES|TRUE_BODY choose#17 -> choose#21
+-EDGES|TRUE_BODY choose#7 -> choose#11
+-FLOWS|REACHING_DEF[0] choose#29 -> choose#27
+-FLOWS|REACHING_DEF[0] choose#29 -> choose#28
+-FLOWS|REACHING_DEF[10] choose#20 -> choose#18
+-FLOWS|REACHING_DEF[10] choose#20 -> choose#19
+-FLOWS|REACHING_DEF[10] choose#24 -> choose#22
+-FLOWS|REACHING_DEF[10] choose#24 -> choose#23
+-FLOWS|REACHING_DEF[2] choose#10 -> choose#8
+-FLOWS|REACHING_DEF[2] choose#10 -> choose#9
+-FLOWS|REACHING_DEF[<RET>] choose#30 -> choose#32
++EDGES|TRUE_BODY choose#8 -> choose#12
++FLOWS|REACHING_DEF[0] choose#20 -> choose#18
++FLOWS|REACHING_DEF[0] choose#20 -> choose#19
++FLOWS|REACHING_DEF[10] choose#11 -> choose#10
++FLOWS|REACHING_DEF[10] choose#11 -> choose#9
++FLOWS|REACHING_DEF[10] choose#15 -> choose#13
++FLOWS|REACHING_DEF[10] choose#15 -> choose#14
++FLOWS|REACHING_DEF[<RET>] choose#21 -> choose#23
+ FLOWS|REACHING_DEF[] <operator>.assignment#0 -> <operator>.assignment#1
+ FLOWS|REACHING_DEF[] <operator>.assignment#0 -> <operator>.assignment#4
+ FLOWS|REACHING_DEF[] <operator>.equals#0 -> <operator>.equals#1
+ FLOWS|REACHING_DEF[] <operator>.equals#0 -> <operator>.equals#4
+ FLOWS|REACHING_DEF[] choose#0 -> choose#1
+ FLOWS|REACHING_DEF[] choose#0 -> choose#10
+-FLOWS|REACHING_DEF[] choose#0 -> choose#14
+-FLOWS|REACHING_DEF[] choose#0 -> choose#19
++FLOWS|REACHING_DEF[] choose#0 -> choose#11
++FLOWS|REACHING_DEF[] choose#0 -> choose#15
+ FLOWS|REACHING_DEF[] choose#0 -> choose#20
+-FLOWS|REACHING_DEF[] choose#0 -> choose#24
+-FLOWS|REACHING_DEF[] choose#0 -> choose#29
++FLOWS|REACHING_DEF[] choose#0 -> choose#22
+ FLOWS|REACHING_DEF[] choose#0 -> choose#3
+-FLOWS|REACHING_DEF[] choose#0 -> choose#31
+-FLOWS|REACHING_DEF[] choose#0 -> choose#9
+-FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#35
+-FLOWS|REACHING_DEF[base == 10] choose#18 -> choose#32
+-FLOWS|REACHING_DEF[base == 2] choose#8 -> choose#32
++FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#26
++FLOWS|REACHING_DEF[base == 10] choose#9 -> choose#23
++FLOWS|REACHING_DEF[base] choose#1 -> choose#10
+ FLOWS|REACHING_DEF[base] choose#1 -> choose#2
+-FLOWS|REACHING_DEF[base] choose#1 -> choose#9
+-FLOWS|REACHING_DEF[base] choose#19 -> choose#18
+-FLOWS|REACHING_DEF[base] choose#19 -> choose#2
+-FLOWS|REACHING_DEF[base] choose#19 -> choose#32
+-FLOWS|REACHING_DEF[base] choose#9 -> choose#19
+-FLOWS|REACHING_DEF[base] choose#9 -> choose#2
+-FLOWS|REACHING_DEF[base] choose#9 -> choose#32
+-FLOWS|REACHING_DEF[base] choose#9 -> choose#8
++FLOWS|REACHING_DEF[base] choose#10 -> choose#2
++FLOWS|REACHING_DEF[base] choose#10 -> choose#23
++FLOWS|REACHING_DEF[base] choose#10 -> choose#9
+ FLOWS|REACHING_DEF[p1] <operator>.assignment#1 -> <operator>.assignment#3
+ FLOWS|REACHING_DEF[p1] <operator>.assignment#1 -> <operator>.assignment#5
+ FLOWS|REACHING_DEF[p1] <operator>.equals#1 -> <operator>.equals#3
+@@ -312,23 +248,14 @@
+ FLOWS|REACHING_DEF[p2] <operator>.assignment#4 -> <operator>.assignment#6
+ FLOWS|REACHING_DEF[p2] <operator>.equals#4 -> <operator>.equals#5
+ FLOWS|REACHING_DEF[p2] <operator>.equals#4 -> <operator>.equals#6
+-FLOWS|REACHING_DEF[result = 0] choose#27 -> choose#32
+-FLOWS|REACHING_DEF[result = 10] choose#22 -> choose#32
+-FLOWS|REACHING_DEF[result = x] choose#12 -> choose#32
+-FLOWS|REACHING_DEF[result] choose#13 -> choose#12
+-FLOWS|REACHING_DEF[result] choose#13 -> choose#31
+-FLOWS|REACHING_DEF[result] choose#13 -> choose#32
+-FLOWS|REACHING_DEF[result] choose#23 -> choose#22
+-FLOWS|REACHING_DEF[result] choose#23 -> choose#31
+-FLOWS|REACHING_DEF[result] choose#23 -> choose#32
+-FLOWS|REACHING_DEF[result] choose#28 -> choose#27
+-FLOWS|REACHING_DEF[result] choose#28 -> choose#31
+-FLOWS|REACHING_DEF[result] choose#28 -> choose#32
+-FLOWS|REACHING_DEF[result] choose#31 -> choose#30
+-FLOWS|REACHING_DEF[x] choose#14 -> choose#12
+-FLOWS|REACHING_DEF[x] choose#14 -> choose#13
+-FLOWS|REACHING_DEF[x] choose#14 -> choose#32
+-FLOWS|REACHING_DEF[x] choose#14 -> choose#4
+-FLOWS|REACHING_DEF[x] choose#3 -> choose#14
+-FLOWS|REACHING_DEF[x] choose#3 -> choose#32
++FLOWS|REACHING_DEF[result = 0] choose#18 -> choose#23
++FLOWS|REACHING_DEF[result = 10] choose#13 -> choose#23
++FLOWS|REACHING_DEF[result] choose#14 -> choose#13
++FLOWS|REACHING_DEF[result] choose#14 -> choose#22
++FLOWS|REACHING_DEF[result] choose#14 -> choose#23
++FLOWS|REACHING_DEF[result] choose#19 -> choose#18
++FLOWS|REACHING_DEF[result] choose#19 -> choose#22
++FLOWS|REACHING_DEF[result] choose#19 -> choose#23
++FLOWS|REACHING_DEF[result] choose#22 -> choose#21
++FLOWS|REACHING_DEF[x] choose#3 -> choose#23
+ FLOWS|REACHING_DEF[x] choose#3 -> choose#4

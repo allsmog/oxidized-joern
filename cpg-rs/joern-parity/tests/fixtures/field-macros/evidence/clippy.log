@@ -1,0 +1,55 @@
+   Compiling libc v0.2.189
+    Checking cfg-if v1.0.4
+    Checking bitflags v2.13.1
+    Checking memchr v2.8.1
+    Checking tree-sitter-language v0.1.7
+    Checking fastrand v2.5.0
+    Checking once_cell v1.21.4
+   Compiling zmij v1.0.21
+   Compiling itoa v1.0.18
+    Checking crc32fast v1.5.0
+    Checking regex-syntax v0.8.11
+    Checking streaming-iterator v0.1.9
+    Checking crossbeam-utils v0.8.21
+    Checking tree-sitter-c v0.24.2
+    Checking serde_core v1.0.229
+    Checking aho-corasick v1.1.4
+    Checking either v1.16.0
+    Checking tree-sitter-python v0.25.0
+    Checking tree-sitter-ruby v0.23.1
+   Compiling serde_json v1.0.151
+    Checking tree-sitter-java v0.23.5
+    Checking tree-sitter-typescript v0.23.2
+    Checking tree-sitter-javascript v0.25.0
+    Checking tree-sitter-scala v0.26.2
+    Checking tree-sitter-rust v0.24.2
+    Checking crossbeam-epoch v0.9.20
+    Checking tree-sitter-go v0.25.0
+    Checking tree-sitter-cpp v0.23.4
+   Compiling blake3 v1.8.6
+    Checking arrayvec v0.7.8
+    Checking arrayref v0.3.9
+    Checking constant_time_eq v0.4.2
+    Checking crossbeam-deque v0.8.6
+    Checking rayon-core v1.13.0
+    Checking rayon v1.12.0
+    Checking errno v0.3.14
+    Checking getrandom v0.4.3
+    Checking fs2 v0.4.3
+   Compiling tree-sitter v0.26.12
+    Checking rustix v1.1.4
+    Checking regex-automata v0.4.14
+    Checking serde v1.0.229
+    Checking tempfile v3.27.0
+    Checking cpg-core v0.1.1 (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-field-macros/cpg-rs/cpg-core)
+    Checking cpg-frontend v0.1.1 (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-field-macros/cpg-rs/cpg-frontend)
+    Checking cpg-analysis v0.1.1 (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-field-macros/cpg-rs/cpg-analysis)
+    Checking regex v1.12.4
+    Checking cpg-lang-c v0.1.1 (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-field-macros/cpg-rs/cpg-lang-c)
+    Checking cpg-lang-ts v0.1.1 (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-field-macros/cpg-rs/cpg-lang-ts)
+    Checking cpg-lang-python v0.1.1 (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-field-macros/cpg-rs/cpg-lang-python)
+    Checking cpg-incremental v0.1.1 (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-field-macros/cpg-rs/cpg-incremental)
+    Checking conformance v0.1.1 (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-field-macros/cpg-rs/conformance)
+    Checking cpg-cli v0.1.1 (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-field-macros/cpg-rs/cpg-cli)
+    Checking joern-parity v0.1.1 (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-field-macros/cpg-rs/joern-parity)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 4.09s

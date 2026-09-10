@@ -1,0 +1,10 @@
+   Compiling joern-parity v0.1.1 (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/joern-parity)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.92s
+     Running tests/sizeof_expansion.rs (target/debug/deps/sizeof_expansion-1cf10ae848639849)
+
+running 2 tests
+test malformed_sizeof_parentheses_retain_all_recovered_source_children ... ok
+test expanded_sizeof_matches_complete_live_graphs ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.09s
+

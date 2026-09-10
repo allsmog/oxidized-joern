@@ -1,0 +1,54 @@
+--- joern
++++ candidate
+@@ -9,12 +9,12 @@
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+ 
+ METHOD NAME=<global> CODE=<global> FULL_NAME=strings.c:<global> ORDER=1
+-  METHOD NAME=test CODE=void test(void) {\n consume("first"\n         "second");\n consume("following");\n} FULL_NAME=test SIGNATURE=void(void) ORDER=1
++  METHOD NAME=test CODE=void test(void) {\n consume("first"\n         "second");\n consume("following");\n} FULL_NAME=test SIGNATURE=void(void) ORDER=1
+     METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+     METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+-    BLOCK CODE={\n consume("first"\n         "second");\n consume("following");\n} TYPE_FULL_NAME=void ORDER=2
+-      CALL NAME=consume CODE=consume("first"\n         "second") TYPE_FULL_NAME=void METHOD_FULL_NAME=consume ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+-        LITERAL CODE="first"\n         "second" TYPE_FULL_NAME=char* ORDER=1 ARGUMENT_INDEX=1
++    BLOCK CODE={\n consume("first"\n         "second");\n consume("following");\n} TYPE_FULL_NAME=void ORDER=2
++      CALL NAME=consume CODE=consume("first"\n         "second") TYPE_FULL_NAME=void METHOD_FULL_NAME=consume ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
++        LITERAL CODE="first"\n         "second" TYPE_FULL_NAME=char* ORDER=1 ARGUMENT_INDEX=1
+       CALL NAME=consume CODE=consume("following") TYPE_FULL_NAME=void METHOD_FULL_NAME=consume ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+         LITERAL CODE="following" TYPE_FULL_NAME=char* ORDER=1 ARGUMENT_INDEX=1
+     METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+@@ -22,12 +22,12 @@
+     METHOD_REF CODE=test TYPE_FULL_NAME=test METHOD_FULL_NAME=test ORDER=1
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+ 
+-METHOD NAME=test CODE=void test(void) {\n consume("first"\n         "second");\n consume("following");\n} FULL_NAME=test SIGNATURE=void(void) ORDER=1
++METHOD NAME=test CODE=void test(void) {\n consume("first"\n         "second");\n consume("following");\n} FULL_NAME=test SIGNATURE=void(void) ORDER=1
+   METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+   METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+-  BLOCK CODE={\n consume("first"\n         "second");\n consume("following");\n} TYPE_FULL_NAME=void ORDER=2
+-    CALL NAME=consume CODE=consume("first"\n         "second") TYPE_FULL_NAME=void METHOD_FULL_NAME=consume ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+-      LITERAL CODE="first"\n         "second" TYPE_FULL_NAME=char* ORDER=1 ARGUMENT_INDEX=1
++  BLOCK CODE={\n consume("first"\n         "second");\n consume("following");\n} TYPE_FULL_NAME=void ORDER=2
++    CALL NAME=consume CODE=consume("first"\n         "second") TYPE_FULL_NAME=void METHOD_FULL_NAME=consume ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
++      LITERAL CODE="first"\n         "second" TYPE_FULL_NAME=char* ORDER=1 ARGUMENT_INDEX=1
+     CALL NAME=consume CODE=consume("following") TYPE_FULL_NAME=void METHOD_FULL_NAME=consume ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+       LITERAL CODE="following" TYPE_FULL_NAME=char* ORDER=1 ARGUMENT_INDEX=1
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+@@ -119,7 +119,7 @@
+ EDGES|SOURCE_FILE consume#0 -> F:strings.c
+ EDGES|SOURCE_FILE strings.c:<global>#0 -> F:strings.c
+ EDGES|SOURCE_FILE strings.c:<global>#1 -> F:strings.c
+-FLOWS|REACHING_DEF["first"\n         "second"] test#5 -> test#4
++FLOWS|REACHING_DEF["first"\n         "second"] test#5 -> test#4
+ FLOWS|REACHING_DEF["following"] test#7 -> test#6
+ FLOWS|REACHING_DEF[] consume#0 -> consume#1
+ FLOWS|REACHING_DEF[] strings.c:<global>#0 -> strings.c:<global>#11
+@@ -128,7 +128,7 @@
+ FLOWS|REACHING_DEF[] strings.c:<global>#1 -> test#7
+ FLOWS|REACHING_DEF[] test#1 -> test#2
+ FLOWS|REACHING_DEF[] test#1 -> test#8
+-FLOWS|REACHING_DEF[consume("first"\n         "second")] test#4 -> test#8
++FLOWS|REACHING_DEF[consume("first"\n         "second")] test#4 -> test#8
+ FLOWS|REACHING_DEF[consume("following")] test#6 -> test#8
+ FLOWS|REACHING_DEF[value] consume#1 -> consume#2
+ FLOWS|REACHING_DEF[value] consume#1 -> consume#4

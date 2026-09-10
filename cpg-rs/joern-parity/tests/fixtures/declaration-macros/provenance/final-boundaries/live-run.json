@@ -1,0 +1,58 @@
+{
+  "command": [
+    "/Users/shayaunnejad/vibe-code/joern-oxidized/.local/astra-sprint/oracle/runtime/joern-cli/joern",
+    "--script",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-declaration-macros/.local/declaration-macros/final-boundaries/oracle.sc",
+    "--param",
+    "inputPath=/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-declaration-macros/.local/declaration-macros/final-boundaries/input"
+  ],
+  "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-declaration-macros/.local/declaration-macros/final-boundaries/oracle-workspace",
+  "exitCode": 0,
+  "wallSeconds": 6.574389834000613,
+  "inputHashes": {
+    "commented_prototype": {
+      "main.c": "148a3cac073b8ebaa2e6484b514fafb8d83e0000fef617b288151ba5c2ecf885"
+    },
+    "ordinary_comment": {
+      "main.c": "afe6359daa3ae9dcb55af01ab119dbbcfb476846212989419107dcaa204f5255"
+    },
+    "function_macro_missing": {
+      "main.c": "833d97b243298c00ced18a01c27247f915fa10b39a31eb5934d39f2ac3259b17"
+    },
+    "function_macro_extra": {
+      "main.c": "d3fb6d7c7dc4c292c36264cb0195641eefff8cdf23c0f79bc68da96ff0801893"
+    }
+  },
+  "scriptSha256": "56431f14868678e64f9eb41026b44f1d3d7738404d28d2db62711b520c98c742",
+  "sharedOracleSha256": "bd2e18fab06ecd7897d796f5b31dac6669dc45ecf70c54fb1d5cc0fe29f3c1ab",
+  "joernVersion": "4.0.555",
+  "officialArchiveSha256": "12989883d6b5aeacc97b2dc0ecc4e2951bf50e48cb244f8c8f333d11a8be0c7e",
+  "projects": [
+    {
+      "case": "commented_prototype",
+      "canonicalLinesIncludingSeparators": 160,
+      "nonemptySelectedRecords": 156,
+      "expectedSha256": "d176600260b8c83f9fb60a4ef1563408f39a770633c7385757eecc273c2013ea"
+    },
+    {
+      "case": "function_macro_extra",
+      "canonicalLinesIncludingSeparators": 45,
+      "nonemptySelectedRecords": 43,
+      "expectedSha256": "4696fe6381bc252c59ba579d2b3d553419d204ce1359025da440369a16a24405"
+    },
+    {
+      "case": "function_macro_missing",
+      "canonicalLinesIncludingSeparators": 101,
+      "nonemptySelectedRecords": 98,
+      "expectedSha256": "7b6edeebbec3743fc291713ae53164494547b65780c86f5b2d1ea52b335c7808"
+    },
+    {
+      "case": "ordinary_comment",
+      "canonicalLinesIncludingSeparators": 160,
+      "nonemptySelectedRecords": 156,
+      "expectedSha256": "c536fdae23d2e887d2b80db7c23a605214a636b0c1953e9e6715a301671f88ff"
+    }
+  ],
+  "rawStdoutSha256": "1aebef75df62e7f76f4fe366100ff2d26c75514bab8a9c8d5c28b221d5d6ca19",
+  "rawStderrSha256": "b6259e15f490baa204c9ce5fc72503892c36943a1e04fa7569be44f4defe3409"
+}

@@ -1,0 +1,55 @@
+{
+  "local_definition": {
+    "main.c": "int choose(int x) {\n#define BODY_FLAG 1\n#if BODY_FLAG\n    return x;\n#else\n    return 0;\n#endif\n}\n"
+  },
+  "local_undef": {
+    "main.c": "#define FLAG 1\nint choose(int x) {\n#undef FLAG\n#ifdef FLAG\n return x;\n#else\n return 0;\n#endif\n}\n"
+  },
+  "local_redefinition": {
+    "main.c": "#define VALUE 1\nint choose(int x) {\n int before=VALUE;\n#undef VALUE\n#define VALUE 2\n return before + VALUE + x;\n}\n"
+  },
+  "nested_block_persistence": {
+    "main.c": "int choose(int x) {\n {\n#define FLAG 1\n }\n#if FLAG\n return x;\n#else\n return 0;\n#endif\n}\n"
+  },
+  "selected_arm_definition": {
+    "main.c": "int choose(int x) {\n#define FLAG 1\n#if FLAG\n#define CHOICE 1\n#else\n#define CHOICE 0\n#endif\n#if CHOICE\n return x;\n#else\n return 0;\n#endif\n}\n"
+  },
+  "inactive_effects": {
+    "main.c": "#define FLAG 1\nint choose(int x) {\n#if 0\n#undef FLAG\n#define HIDDEN 1\n#endif\n#if defined(FLAG) && !defined(HIDDEN)\n return x;\n#else\n return 0;\n#endif\n}\n"
+  },
+  "elif_definition": {
+    "main.c": "int choose(int x) {\n#if 0\n#define CHOICE 0\n#elif 1\n#define CHOICE 1\n#else\n#undef CHOICE\n#endif\n#if CHOICE\n return x;\n#else\n return 0;\n#endif\n}\n"
+  },
+  "cross_function_state": {
+    "main.c": "void setup(void) {\n#define AFTER 1\n}\nint choose(int x) {\n#if AFTER\n return x;\n#else\n return 0;\n#endif\n}\n"
+  },
+  "no_backwards_leak": {
+    "main.c": "int before(int x) {\n#if LATE\n return x;\n#else\n return 0;\n#endif\n}\nvoid setup(void) {\n#define LATE 1\n}\nint after(int x) {\n#if LATE\n return x;\n#else\n return 0;\n#endif\n}\n"
+  },
+  "runtime_if_directive": {
+    "main.c": "int choose(int x) {\n if (0) {\n#define FLAG 1\n }\n#if FLAG\n return x;\n#else\n return 0;\n#endif\n}\n"
+  },
+  "conditional_local_typedef": {
+    "main.c": "int choose(int x) {\n#define ENABLE 1\n#if ENABLE\n typedef int T;\n#endif\n return (T)(x);\n}\n"
+  },
+  "inactive_typedef_shadow": {
+    "main.c": "typedef int T;\nint choose(int x) {\n#define DISABLED 0\n#if DISABLED\n int T=0;\n#endif\n return (T)(x);\n}\n"
+  },
+  "header_then_local_undef": {
+    "switch.h": "#define FLAG 1\n",
+    "main.c": "#include \"switch.h\"\nint choose(int x) {\n#undef FLAG\n#ifdef FLAG\n return x;\n#else\n return 0;\n#endif\n}\n"
+  },
+  "local_function_macro": {
+    "main.c": "int choose(int x) {\n#define ID(v) (v)\n return ID(x);\n}\n"
+  },
+  "local_type_macro": {
+    "main.c": "int choose(int x) {\n#define BASE int\n typedef BASE T;\n return (T)(x);\n}\n"
+  },
+  "inactive_function_effects": {
+    "main.c": "#if 0\nvoid skipped(void) {\n#define FLAG 1\n}\n#endif\nint choose(int x) {\n#ifdef FLAG\n return x;\n#else\n return 0;\n#endif\n}\n"
+  },
+  "body_state_then_include": {
+    "api.h": "#if SELECT\n#define AFTER 1\n#else\n#define AFTER 0\n#endif\n",
+    "main.c": "void setup(void) {\n#define SELECT 1\n}\n#include \"api.h\"\nint choose(int x) {\n#if AFTER\n return x;\n#else\n return 0;\n#endif\n}\n"
+  }
+}

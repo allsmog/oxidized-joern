@@ -1,0 +1,33 @@
+--- Joern
++++ before
+@@ -14,8 +14,8 @@
+   METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+   METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+   BLOCK CODE={return beta+alpha;} TYPE_FULL_NAME=void ORDER=2
++    LOCAL NAME=beta CODE=<unknown> beta TYPE_FULL_NAME=ANY ORDER=0
+     LOCAL NAME=alpha CODE=<unknown> alpha TYPE_FULL_NAME=ANY ORDER=0
+-    LOCAL NAME=beta CODE=<unknown> beta TYPE_FULL_NAME=ANY ORDER=0
+     RETURN CODE=return beta+alpha; ORDER=1
+       CALL NAME=<operator>.addition CODE=beta+alpha TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+         IDENTIFIER NAME=beta CODE=<unknown> beta TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+@@ -27,8 +27,8 @@
+     METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+     METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+     BLOCK CODE={return beta+alpha;} TYPE_FULL_NAME=void ORDER=2
++      LOCAL NAME=beta CODE=<unknown> beta TYPE_FULL_NAME=ANY ORDER=0
+       LOCAL NAME=alpha CODE=<unknown> alpha TYPE_FULL_NAME=ANY ORDER=0
+-      LOCAL NAME=beta CODE=<unknown> beta TYPE_FULL_NAME=ANY ORDER=0
+       RETURN CODE=return beta+alpha; ORDER=1
+         CALL NAME=<operator>.addition CODE=beta+alpha TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+           IDENTIFIER NAME=beta CODE=<unknown> beta TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+@@ -115,8 +115,8 @@
+ EDGES|REF T:f -> D:f
+ EDGES|REF T:int -> D:int
+ EDGES|REF T:void -> D:void
+-EDGES|REF f#8 -> f#5
+-EDGES|REF f#9 -> f#4
++EDGES|REF f#8 -> f#4
++EDGES|REF f#9 -> f#5
+ EDGES|REF main.c:<global>#13 -> f#0
+ EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+ EDGES|SOURCE_FILE D:ANY -> F:<includes>

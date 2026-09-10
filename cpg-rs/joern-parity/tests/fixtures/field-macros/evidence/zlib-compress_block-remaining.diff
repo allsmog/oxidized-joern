@@ -1,0 +1,373 @@
+--- joern
+
++++ candidate
+
+@@ -1,2 +1,2 @@
+
+-METHOD NAME=compress_block CODE=local void compress_block(deflate_state *s, const ct_data *ltree,\n                          const ct_data *dtree) {\n    unsigned dist;      /* distance of matched string */\n    int lc;             /* match length or unmatched char (if dist == 0) */\n    unsigned sx = 0;    /* running index in symbol buffers */\n    unsigned code;      /* the code to send */\n    int extra;          /* number of extra bits to send */\n\n    if (s->sym_next != 0) do {\n#ifdef LIT_MEM\n        dist = s->d_buf[sx];\n        lc = s->l_buf[sx++];\n#else\n        dist = s->sym_buf[sx++] & 0xff;\n        dist += (unsigned)(s->sym_buf[sx++] & 0xff) << 8;\n        lc = s->sym_buf[sx++];\n#endif\n        if (dist == 0) {\n            send_code(s, lc, ltree); /* send a literal byte */\n            Tracecv(isgraph(lc), (stderr," '%c' ", lc));\n        } else {\n            /* Here, lc is the match length - MIN_MATCH */\n            code = _length_code[lc];\n            send_code(s, code + LITERALS + 1, ltree);   /* send length code... FULL_NAME=compress_block SIGNATURE=void(deflate_state*,ct_data*,ct_data*) ORDER=1
++METHOD NAME=compress_block CODE=local void compress_block(deflate_state *s, const ct_data *ltree,\n                          const ct_data *dtree) {\n    unsigned dist;      /* distance of matched string */\n    int lc;             /* match length or unmatched char (if dist == 0) */\n    unsigned sx = 0;    /* running index in symbol buffers */\n    unsigned code;      /* the code to send */\n    int extra;          /* number of extra bits to send */\n\n    if (s->sym_next != 0) do {\n#ifdef LIT_MEM\n        dist = s->d_buf[sx];\n        lc = s->l_buf[sx++];\n#else\n        dist = s->sym_buf[sx++] & 0xff;\n        dist += (unsigned)(s->sym_buf[sx++] & 0xff) << 8;\n        lc = s->sym_buf[sx++];\n#endif\n        if (dist == 0) {\n            send_code(s, lc, ltree); /* send a literal byte */\n            Tracecv(isgraph(lc), (stderr," '%c' ", lc));\n        } else {\n            /* Here, lc is the match length - MIN_MATCH */\n            code = _length_code[lc];\n            send_code(s, code + LITERALS + 1, ltree);   /* send length code */\n            extra = extra_lbits[code];\n            if (extra != 0) {\n                lc -= base_length[code];\n                send_bits(s, lc, extra);       /* send the extra length bits */\n            }\n            dist--; /* dist is now the match distance - 1 */\n            code = d_code(dist);\n            Assert (code < D_CODES, "bad d_code");\n\n            send_code(s, code, dtree);       /* send the distance code */\n            extra = extra_dbits[code];\n            if (extra != 0) {\n                dist -= (unsigned)base_dist[code];\n                send_bits(s, dist, extra);   /* send the extra distance bits */\n            }\n        } /* literal or match pair ? */\n\n        /* Check for no overlay of pending_buf on needed symbols */\n#ifdef LIT_MEM\n        Assert(s->pending < 2 * (s->lit_bufsize + sx), "pendingBuf overflow");\n#else\n        Assert(s->pending < s->lit_bufsize + sx, "pendingBuf overflow");\n#endif\n\n    } while (sx < s->sym_next);\n\n    send_code(s, END_BLOCK, ltree);\n} FULL_NAME=compress_block SIGNATURE=local(deflate_state*,ct_data*,ct_data*) ORDER=1
+   METHOD_PARAMETER_IN NAME=s CODE=deflate_state *s TYPE_FULL_NAME=deflate_state* ORDER=1
+@@ -7,9 +7,12 @@
+
+   METHOD_PARAMETER_OUT NAME=dtree CODE=const ct_data *dtree TYPE_FULL_NAME=ct_data* ORDER=3
+-  BLOCK CODE={\n    unsigned dist;      /* distance of matched string */\n    int lc;             /* match length or unmatched char (if dist == 0) */\n    unsigned sx = 0;    /* running index in symbol buffers */\n    unsigned code;      /* the code to send */\n    int extra;          /* number of extra bits to send */\n\n    if (s->sym_next != 0) do {\n#ifdef LIT_MEM\n        dist = s->d_buf[sx];\n        lc = s->l_buf[sx++];\n#else\n        dist = s->sym_buf[sx++] & 0xff;\n        dist += (unsigned)(s->sym_buf[sx++] & 0xff) << 8;\n        lc = s->sym_buf[sx++];\n#endif\n        if (dist == 0) {\n            send_code(s, lc, ltree); /* send a literal byte */\n            Tracecv(isgraph(lc), (stderr," '%c' ", lc));\n        } else {\n            /* Here, lc is the match length - MIN_MATCH */\n            code = _length_code[lc];\n            send_code(s, code + LITERALS + 1, ltree);   /* send length code */\n            extra = extra_lbits[code];\n            if (extra != 0) {\n                lc -= base_length[code];\n... TYPE_FULL_NAME=void ORDER=4
+-    LOCAL NAME=base_dist CODE=<global> base_dist TYPE_FULL_NAME=int[30] ORDER=0
+-    LOCAL NAME=extra_dbits CODE=<global> extra_dbits TYPE_FULL_NAME=int[30] ORDER=0
+-    LOCAL NAME=_dist_code CODE=<global> _dist_code TYPE_FULL_NAME=uch[512] ORDER=0
+-    LOCAL NAME=base_length CODE=<global> base_length TYPE_FULL_NAME=int[29] ORDER=0
+-    LOCAL NAME=extra_lbits CODE=<global> extra_lbits TYPE_FULL_NAME=int[29] ORDER=0
++  BLOCK CODE={\n    unsigned dist;      /* distance of matched string */\n    int lc;             /* match length or unmatched char (if dist == 0) */\n    unsigned sx = 0;    /* running index in symbol buffers */\n    unsigned code;      /* the code to send */\n    int extra;          /* number of extra bits to send */\n\n    if (s->sym_next != 0) do {\n#ifdef LIT_MEM\n        dist = s->d_buf[sx];\n        lc = s->l_buf[sx++];\n#else\n        dist = s->sym_buf[sx++] & 0xff;\n        dist += (unsigned)(s->sym_buf[sx++] & 0xff) << 8;\n        lc = s->sym_buf[sx++];\n#endif\n        if (dist == 0) {\n            send_code(s, lc, ltree); /* send a literal byte */\n            Tracecv(isgraph(lc), (stderr," '%c' ", lc));\n        } else {\n            /* Here, lc is the match length - MIN_MATCH */\n            code = _length_code[lc];\n            send_code(s, code + LITERALS + 1, ltree);   /* send length code */\n            extra = extra_lbits[code];\n            if (extra != 0) {\n                lc -= base_length[code];\n                send_bits(s, lc, extra);       /* send the extra length bits */\n            }\n            dist--; /* dist is now the match distance - 1 */\n            code = d_code(dist);\n            Assert (code < D_CODES, "bad d_code");\n\n            send_code(s, code, dtree);       /* send the distance code */\n            extra = extra_dbits[code];\n            if (extra != 0) {\n                dist -= (unsigned)base_dist[code];\n                send_bits(s, dist, extra);   /* send the extra distance bits */\n            }\n        } /* literal or match pair ? */\n\n        /* Check for no overlay of pending_buf on needed symbols */\n#ifdef LIT_MEM\n        Assert(s->pending < 2 * (s->lit_bufsize + sx), "pendingBuf overflow");\n#else\n        Assert(s->pending < s->lit_bufsize + sx, "pendingBuf overflow");\n#endif\n\n    } while (sx < s->sym_next);\n\n    send_code(s, END_BLOCK, ltree);\n} TYPE_FULL_NAME=void ORDER=4
++    LOCAL NAME=Bytef CODE=<unknown> Bytef TYPE_FULL_NAME=ANY ORDER=0
++    LOCAL NAME=uch CODE=<unknown> uch TYPE_FULL_NAME=ANY ORDER=0
++    LOCAL NAME=ush CODE=<unknown> ush TYPE_FULL_NAME=ANY ORDER=0
+     LOCAL NAME=_length_code CODE=<global> _length_code TYPE_FULL_NAME=uch[MAX_MATCH-MIN_MATCH+1] ORDER=0
++    LOCAL NAME=extra_lbits CODE=<global> extra_lbits TYPE_FULL_NAME=local[LENGTH_CODES] ORDER=0
++    LOCAL NAME=base_length CODE=<global> base_length TYPE_FULL_NAME=local[LENGTH_CODES] ORDER=0
++    LOCAL NAME=_dist_code CODE=<global> _dist_code TYPE_FULL_NAME=uch[DIST_CODE_LEN] ORDER=0
++    LOCAL NAME=extra_dbits CODE=<global> extra_dbits TYPE_FULL_NAME=local[D_CODES] ORDER=0
++    LOCAL NAME=base_dist CODE=<global> base_dist TYPE_FULL_NAME=local[D_CODES] ORDER=0
+     LOCAL NAME=dist CODE=unsigned dist TYPE_FULL_NAME=unsigned ORDER=1
+@@ -22,3 +25,3 @@
+
+     LOCAL NAME=extra CODE=int extra TYPE_FULL_NAME=int ORDER=6
+-    CONTROL_STRUCTURE CODE=if (s->sym_next != 0) do {\n#ifdef LIT_MEM\n        dist = s->d_buf[sx];\n        lc = s->l_buf[sx++];\n#else\n        dist = s->sym_buf[sx++] & 0xff;\n        dist += (unsigned)(s->sym_buf[sx++] & 0xff) << 8;\n        lc = s->sym_buf[sx++];\n#endif\n        if (dist == 0) {\n            send_code(s, lc, ltree); /* send a literal byte */\n            Tracecv(isgraph(lc), (stderr," '%c' ", lc));\n        } else {\n            /* Here, lc is the match length - MIN_MATCH */\n            code = _length_code[lc];\n            send_code(s, code + LITERALS + 1, ltree);   /* send length code */\n            extra = extra_lbits[code];\n            if (extra != 0) {\n                lc -= base_length[code];\n                send_bits(s, lc, extra);       /* send the extra length bits */\n            }\n            dist--; /* dist is now the match distance - 1 */\n            code = d_code(dist);\n            Assert (code < D_CODES, "bad d_code");\n\n            send_code(s, code, dtree);       /* send the distance co... ORDER=7
++    CONTROL_STRUCTURE CODE=if (s->sym_next != 0) do {\n#ifdef LIT_MEM\n        dist = s->d_buf[sx];\n        lc = s->l_buf[sx++];\n#else\n        dist = s->sym_buf[sx++] & 0xff;\n        dist += (unsigned)(s->sym_buf[sx++] & 0xff) << 8;\n        lc = s->sym_buf[sx++];\n#endif\n        if (dist == 0) {\n            send_code(s, lc, ltree); /* send a literal byte */\n            Tracecv(isgraph(lc), (stderr," '%c' ", lc));\n        } else {\n            /* Here, lc is the match length - MIN_MATCH */\n            code = _length_code[lc];\n            send_code(s, code + LITERALS + 1, ltree);   /* send length code */\n            extra = extra_lbits[code];\n            if (extra != 0) {\n                lc -= base_length[code];\n                send_bits(s, lc, extra);       /* send the extra length bits */\n            }\n            dist--; /* dist is now the match distance - 1 */\n            code = d_code(dist);\n            Assert (code < D_CODES, "bad d_code");\n\n            send_code(s, code, dtree);       /* send the distance code */\n            extra = extra_dbits[code];\n            if (extra != 0) {\n                dist -= (unsigned)base_dist[code];\n                send_bits(s, dist, extra);   /* send the extra distance bits */\n            }\n        } /* literal or match pair ? */\n\n        /* Check for no overlay of pending_buf on needed symbols */\n#ifdef LIT_MEM\n        Assert(s->pending < 2 * (s->lit_bufsize + sx), "pendingBuf overflow");\n#else\n        Assert(s->pending < s->lit_bufsize + sx, "pendingBuf overflow");\n#endif\n\n    } while (sx < s->sym_next); ORDER=7
+       CALL NAME=<operator>.notEquals CODE=s->sym_next != 0 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.notEquals ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+@@ -29,4 +32,4 @@
+
+       BLOCK TYPE_FULL_NAME=ANY ORDER=2
+-        CONTROL_STRUCTURE CODE=do {\n#ifdef LIT_MEM\n        dist = s->d_buf[sx];\n        lc = s->l_buf[sx++];\n#else\n        dist = s->sym_buf[sx++] & 0xff;\n        dist += (unsigned)(s->sym_buf[sx++] & 0xff) << 8;\n        lc = s->sym_buf[sx++];\n#endif\n        if (dist == 0) {\n            send_code(s, lc, ltree); /* send a literal byte */\n            Tracecv(isgraph(lc), (stderr," '%c' ", lc));\n        } else {\n            /* Here, lc is the match length - MIN_MATCH */\n            code = _length_code[lc];\n            send_code(s, code + LITERALS + 1, ltree);   /* send length code */\n            extra = extra_lbits[code];\n            if (extra != 0) {\n                lc -= base_length[code];\n                send_bits(s, lc, extra);       /* send the extra length bits */\n            }\n            dist--; /* dist is now the match distance - 1 */\n            code = d_code(dist);\n            Assert (code < D_CODES, "bad d_code");\n\n            send_code(s, code, dtree);       /* send the distance code */\n            extr... ORDER=1
+-          BLOCK CODE={\n#ifdef LIT_MEM\n        dist = s->d_buf[sx];\n        lc = s->l_buf[sx++];\n#else\n        dist = s->sym_buf[sx++] & 0xff;\n        dist += (unsigned)(s->sym_buf[sx++] & 0xff) << 8;\n        lc = s->sym_buf[sx++];\n#endif\n        if (dist == 0) {\n            send_code(s, lc, ltree); /* send a literal byte */\n            Tracecv(isgraph(lc), (stderr," '%c' ", lc));\n        } else {\n            /* Here, lc is the match length - MIN_MATCH */\n            code = _length_code[lc];\n            send_code(s, code + LITERALS + 1, ltree);   /* send length code */\n            extra = extra_lbits[code];\n            if (extra != 0) {\n                lc -= base_length[code];\n                send_bits(s, lc, extra);       /* send the extra length bits */\n            }\n            dist--; /* dist is now the match distance - 1 */\n            code = d_code(dist);\n            Assert (code < D_CODES, "bad d_code");\n\n            send_code(s, code, dtree);       /* send the distance code */\n            extra =... TYPE_FULL_NAME=void ORDER=1
++        CONTROL_STRUCTURE CODE=do {\n#ifdef LIT_MEM\n        dist = s->d_buf[sx];\n        lc = s->l_buf[sx++];\n#else\n        dist = s->sym_buf[sx++] & 0xff;\n        dist += (unsigned)(s->sym_buf[sx++] & 0xff) << 8;\n        lc = s->sym_buf[sx++];\n#endif\n        if (dist == 0) {\n            send_code(s, lc, ltree); /* send a literal byte */\n            Tracecv(isgraph(lc), (stderr," '%c' ", lc));\n        } else {\n            /* Here, lc is the match length - MIN_MATCH */\n            code = _length_code[lc];\n            send_code(s, code + LITERALS + 1, ltree);   /* send length code */\n            extra = extra_lbits[code];\n            if (extra != 0) {\n                lc -= base_length[code];\n                send_bits(s, lc, extra);       /* send the extra length bits */\n            }\n            dist--; /* dist is now the match distance - 1 */\n            code = d_code(dist);\n            Assert (code < D_CODES, "bad d_code");\n\n            send_code(s, code, dtree);       /* send the distance code */\n            extra = extra_dbits[code];\n            if (extra != 0) {\n                dist -= (unsigned)base_dist[code];\n                send_bits(s, dist, extra);   /* send the extra distance bits */\n            }\n        } /* literal or match pair ? */\n\n        /* Check for no overlay of pending_buf on needed symbols */\n#ifdef LIT_MEM\n        Assert(s->pending < 2 * (s->lit_bufsize + sx), "pendingBuf overflow");\n#else\n        Assert(s->pending < s->lit_bufsize + sx, "pendingBuf overflow");\n#endif\n\n    } while (sx < s->sym_next); ORDER=1
++          BLOCK CODE={\n#ifdef LIT_MEM\n        dist = s->d_buf[sx];\n        lc = s->l_buf[sx++];\n#else\n        dist = s->sym_buf[sx++] & 0xff;\n        dist += (unsigned)(s->sym_buf[sx++] & 0xff) << 8;\n        lc = s->sym_buf[sx++];\n#endif\n        if (dist == 0) {\n            send_code(s, lc, ltree); /* send a literal byte */\n            Tracecv(isgraph(lc), (stderr," '%c' ", lc));\n        } else {\n            /* Here, lc is the match length - MIN_MATCH */\n            code = _length_code[lc];\n            send_code(s, code + LITERALS + 1, ltree);   /* send length code */\n            extra = extra_lbits[code];\n            if (extra != 0) {\n                lc -= base_length[code];\n                send_bits(s, lc, extra);       /* send the extra length bits */\n            }\n            dist--; /* dist is now the match distance - 1 */\n            code = d_code(dist);\n            Assert (code < D_CODES, "bad d_code");\n\n            send_code(s, code, dtree);       /* send the distance code */\n            extra = extra_dbits[code];\n            if (extra != 0) {\n                dist -= (unsigned)base_dist[code];\n                send_bits(s, dist, extra);   /* send the extra distance bits */\n            }\n        } /* literal or match pair ? */\n\n        /* Check for no overlay of pending_buf on needed symbols */\n#ifdef LIT_MEM\n        Assert(s->pending < 2 * (s->lit_bufsize + sx), "pendingBuf overflow");\n#else\n        Assert(s->pending < s->lit_bufsize + sx, "pendingBuf overflow");\n#endif\n\n    } TYPE_FULL_NAME=void ORDER=1
+             CALL NAME=<operator>.assignment CODE=dist = s->sym_buf[sx++] & 0xff TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+@@ -128,7 +131,7 @@
+
+                                     FIELD_IDENTIFIER CODE=pending ORDER=2 ARGUMENT_INDEX=2
+-                              CALL NAME=<operator>.cast CODE=(Bytef)((uch)((s->bi_buf) & 0xff)) TYPE_FULL_NAME=Bytef METHOD_FULL_NAME=<operator>.cast ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+-                                TYPE_REF CODE=Bytef TYPE_FULL_NAME=Bytef ORDER=1 ARGUMENT_INDEX=1
+-                                CALL NAME=<operator>.cast CODE=(uch)((s->bi_buf) & 0xff) TYPE_FULL_NAME=uch METHOD_FULL_NAME=<operator>.cast ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+-                                  TYPE_REF CODE=uch TYPE_FULL_NAME=uch ORDER=1 ARGUMENT_INDEX=1
+-                                  CALL NAME=<operator>.and CODE=(s->bi_buf) & 0xff TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.and ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
++                              CALL NAME=<operator>.pointerCall CODE=(Bytef)((uch)((s->bi_buf) & 0xff)) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.pointerCall ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=DYNAMIC_DISPATCH
++                                IDENTIFIER NAME=Bytef CODE=<unknown> Bytef TYPE_FULL_NAME=ANY ORDER=1
++                                CALL NAME=<operator>.pointerCall CODE=(uch)((s->bi_buf) & 0xff) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.pointerCall ORDER=2 ARGUMENT_INDEX=1 DISPATCH_TYPE=DYNAMIC_DISPATCH
++                                  IDENTIFIER NAME=uch CODE=<unknown> uch TYPE_FULL_NAME=ANY ORDER=1
++                                  CALL NAME=<operator>.and CODE=(s->bi_buf) & 0xff TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.and ORDER=2 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                                     CALL NAME=<operator>.indirectFieldAccess CODE=s->bi_buf TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+@@ -147,10 +150,10 @@
+
+                                     FIELD_IDENTIFIER CODE=pending ORDER=2 ARGUMENT_INDEX=2
+-                              CALL NAME=<operator>.cast CODE=(Bytef)((uch)((ush)(s->bi_buf) >> 8)) TYPE_FULL_NAME=Bytef METHOD_FULL_NAME=<operator>.cast ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+-                                TYPE_REF CODE=Bytef TYPE_FULL_NAME=Bytef ORDER=1 ARGUMENT_INDEX=1
+-                                CALL NAME=<operator>.cast CODE=(uch)((ush)(s->bi_buf) >> 8) TYPE_FULL_NAME=uch METHOD_FULL_NAME=<operator>.cast ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+-                                  TYPE_REF CODE=uch TYPE_FULL_NAME=uch ORDER=1 ARGUMENT_INDEX=1
+-                                  CALL NAME=<operator>.arithmeticShiftRight CODE=(ush)(s->bi_buf) >> 8 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.arithmeticShiftRight ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+-                                    CALL NAME=<operator>.cast CODE=(ush)(s->bi_buf) TYPE_FULL_NAME=ush METHOD_FULL_NAME=<operator>.cast ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+-                                      TYPE_REF CODE=ush TYPE_FULL_NAME=ush ORDER=1 ARGUMENT_INDEX=1
+-                                      CALL NAME=<operator>.indirectFieldAccess CODE=s->bi_buf TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
++                              CALL NAME=<operator>.pointerCall CODE=(Bytef)((uch)((ush)(s->bi_buf) >> 8)) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.pointerCall ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=DYNAMIC_DISPATCH
++                                IDENTIFIER NAME=Bytef CODE=<unknown> Bytef TYPE_FULL_NAME=ANY ORDER=1
++                                CALL NAME=<operator>.pointerCall CODE=(uch)((ush)(s->bi_buf) >> 8) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.pointerCall ORDER=2 ARGUMENT_INDEX=1 DISPATCH_TYPE=DYNAMIC_DISPATCH
++                                  IDENTIFIER NAME=uch CODE=<unknown> uch TYPE_FULL_NAME=ANY ORDER=1
++                                  CALL NAME=<operator>.arithmeticShiftRight CODE=(ush)(s->bi_buf) >> 8 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.arithmeticShiftRight ORDER=2 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
++                                    CALL NAME=<operator>.pointerCall CODE=(ush)(s->bi_buf) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.pointerCall ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=DYNAMIC_DISPATCH
++                                      IDENTIFIER NAME=ush CODE=<unknown> ush TYPE_FULL_NAME=ANY ORDER=1
++                                      CALL NAME=<operator>.indirectFieldAccess CODE=s->bi_buf TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=2 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                                         IDENTIFIER NAME=s CODE=s TYPE_FULL_NAME=deflate_state* ORDER=1 ARGUMENT_INDEX=1
+@@ -185,5 +188,5 @@
+
+                             CALL NAME=<operator>.shiftLeft CODE=(ush)(ltree[lc].fc.code) << s->bi_valid TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.shiftLeft ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+-                              CALL NAME=<operator>.cast CODE=(ush)(ltree[lc].fc.code) TYPE_FULL_NAME=ush METHOD_FULL_NAME=<operator>.cast ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+-                                TYPE_REF CODE=ush TYPE_FULL_NAME=ush ORDER=1 ARGUMENT_INDEX=1
+-                                CALL NAME=<operator>.fieldAccess CODE=ltree[lc].fc.code TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.fieldAccess ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
++                              CALL NAME=<operator>.pointerCall CODE=(ush)(ltree[lc].fc.code) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.pointerCall ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=DYNAMIC_DISPATCH
++                                IDENTIFIER NAME=ush CODE=<unknown> ush TYPE_FULL_NAME=ANY ORDER=1
++                                CALL NAME=<operator>.fieldAccess CODE=ltree[lc].fc.code TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.fieldAccess ORDER=2 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                                   CALL NAME=<operator>.fieldAccess CODE=ltree[lc].fc TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.fieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+@@ -202,2 +205,4 @@
+
+                             IDENTIFIER NAME=len CODE=len TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
++                CALL NAME=Tracecv CODE=Tracecv(isgraph(lc), (stderr," '%c' ", lc)) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=zutil.h:Tracecv:ANY(2) SIGNATURE=ANY(2) ORDER=2 DISPATCH_TYPE=INLINED
++                  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+               CONTROL_STRUCTURE CODE=else ORDER=3
+@@ -276,7 +281,7 @@
+
+                                       FIELD_IDENTIFIER CODE=pending ORDER=2 ARGUMENT_INDEX=2
+-                                CALL NAME=<operator>.cast CODE=(Bytef)((uch)((s->bi_buf) & 0xff)) TYPE_FULL_NAME=Bytef METHOD_FULL_NAME=<operator>.cast ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+-                                  TYPE_REF CODE=Bytef TYPE_FULL_NAME=Bytef ORDER=1 ARGUMENT_INDEX=1
+-                                  CALL NAME=<operator>.cast CODE=(uch)((s->bi_buf) & 0xff) TYPE_FULL_NAME=uch METHOD_FULL_NAME=<operator>.cast ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+-                                    TYPE_REF CODE=uch TYPE_FULL_NAME=uch ORDER=1 ARGUMENT_INDEX=1
+-                                    CALL NAME=<operator>.and CODE=(s->bi_buf) & 0xff TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.and ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
++                                CALL NAME=<operator>.pointerCall CODE=(Bytef)((uch)((s->bi_buf) & 0xff)) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.pointerCall ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=DYNAMIC_DISPATCH
++                                  IDENTIFIER NAME=Bytef CODE=<unknown> Bytef TYPE_FULL_NAME=ANY ORDER=1
++                                  CALL NAME=<operator>.pointerCall CODE=(uch)((s->bi_buf) & 0xff) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.pointerCall ORDER=2 ARGUMENT_INDEX=1 DISPATCH_TYPE=DYNAMIC_DISPATCH
++                                    IDENTIFIER NAME=uch CODE=<unknown> uch TYPE_FULL_NAME=ANY ORDER=1
++                                    CALL NAME=<operator>.and CODE=(s->bi_buf) & 0xff TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.and ORDER=2 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                                       CALL NAME=<operator>.indirectFieldAccess CODE=s->bi_buf TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+@@ -295,10 +300,10 @@
+
+                                       FIELD_IDENTIFIER CODE=pending ORDER=2 ARGUMENT_INDEX=2
+-                                CALL NAME=<operator>.cast CODE=(Bytef)((uch)((ush)(s->bi_buf) >> 8)) TYPE_FULL_NAME=Bytef METHOD_FULL_NAME=<operator>.cast ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+-                                  TYPE_REF CODE=Bytef TYPE_FULL_NAME=Bytef ORDER=1 ARGUMENT_INDEX=1
+-                                  CALL NAME=<operator>.cast CODE=(uch)((ush)(s->bi_buf) >> 8) TYPE_FULL_NAME=uch METHOD_FULL_NAME=<operator>.cast ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+-                                    TYPE_REF CODE=uch TYPE_FULL_NAME=uch ORDER=1 ARGUMENT_INDEX=1
+-                                    CALL NAME=<operator>.arithmeticShiftRight CODE=(ush)(s->bi_buf) >> 8 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.arithmeticShiftRight ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+-                                      CALL NAME=<operator>.cast CODE=(ush)(s->bi_buf) TYPE_FULL_NAME=ush METHOD_FULL_NAME=<operator>.cast ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+-                                        TYPE_REF CODE=ush TYPE_FULL_NAME=ush ORDER=1 ARGUMENT_INDEX=1
+-                                        CALL NAME=<operator>.indirectFieldAccess CODE=s->bi_buf TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
++                                CALL NAME=<operator>.pointerCall CODE=(Bytef)((uch)((ush)(s->bi_buf) >> 8)) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.pointerCall ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=DYNAMIC_DISPATCH
++                                  IDENTIFIER NAME=Bytef CODE=<unknown> Bytef TYPE_FULL_NAME=ANY ORDER=1
++                                  CALL NAME=<operator>.pointerCall CODE=(uch)((ush)(s->bi_buf) >> 8) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.pointerCall ORDER=2 ARGUMENT_INDEX=1 DISPATCH_TYPE=DYNAMIC_DISPATCH
++                                    IDENTIFIER NAME=uch CODE=<unknown> uch TYPE_FULL_NAME=ANY ORDER=1
++                                    CALL NAME=<operator>.arithmeticShiftRight CODE=(ush)(s->bi_buf) >> 8 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.arithmeticShiftRight ORDER=2 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
++                                      CALL NAME=<operator>.pointerCall CODE=(ush)(s->bi_buf) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.pointerCall ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=DYNAMIC_DISPATCH
++                                        IDENTIFIER NAME=ush CODE=<unknown> ush TYPE_FULL_NAME=ANY ORDER=1
++                                        CALL NAME=<operator>.indirectFieldAccess CODE=s->bi_buf TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=2 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                                           IDENTIFIER NAME=s CODE=s TYPE_FULL_NAME=deflate_state* ORDER=1 ARGUMENT_INDEX=1
+@@ -333,5 +338,5 @@
+
+                               CALL NAME=<operator>.shiftLeft CODE=(ush)(ltree[code + 256 + 1].fc.code) << s->bi_valid TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.shiftLeft ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+-                                CALL NAME=<operator>.cast CODE=(ush)(ltree[code + 256 + 1].fc.code) TYPE_FULL_NAME=ush METHOD_FULL_NAME=<operator>.cast ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+-                                  TYPE_REF CODE=ush TYPE_FULL_NAME=ush ORDER=1 ARGUMENT_INDEX=1
+-                                  CALL NAME=<operator>.fieldAccess CODE=ltree[code + 256 + 1].fc.code TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.fieldAccess ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
++                                CALL NAME=<operator>.pointerCall CODE=(ush)(ltree[code + 256 + 1].fc.code) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.pointerCall ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=DYNAMIC_DISPATCH
++                                  IDENTIFIER NAME=ush CODE=<unknown> ush TYPE_FULL_NAME=ANY ORDER=1
++                                  CALL NAME=<operator>.fieldAccess CODE=ltree[code + 256 + 1].fc.code TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.fieldAccess ORDER=2 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                                     CALL NAME=<operator>.fieldAccess CODE=ltree[code + 256 + 1].fc TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.fieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+@@ -357,3 +362,3 @@
+
+                     CALL NAME=<operator>.indirectIndexAccess CODE=extra_lbits[code] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectIndexAccess ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+-                      IDENTIFIER NAME=extra_lbits CODE=<global> extra_lbits TYPE_FULL_NAME=int[29] ORDER=1 ARGUMENT_INDEX=1
++                      IDENTIFIER NAME=extra_lbits CODE=<global> extra_lbits TYPE_FULL_NAME=local[LENGTH_CODES] ORDER=1 ARGUMENT_INDEX=1
+                       IDENTIFIER NAME=code CODE=code TYPE_FULL_NAME=unsigned ORDER=2 ARGUMENT_INDEX=2
+@@ -367,3 +372,3 @@
+
+                         CALL NAME=<operator>.indirectIndexAccess CODE=base_length[code] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectIndexAccess ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+-                          IDENTIFIER NAME=base_length CODE=<global> base_length TYPE_FULL_NAME=int[29] ORDER=1 ARGUMENT_INDEX=1
++                          IDENTIFIER NAME=base_length CODE=<global> base_length TYPE_FULL_NAME=local[LENGTH_CODES] ORDER=1 ARGUMENT_INDEX=1
+                           IDENTIFIER NAME=code CODE=code TYPE_FULL_NAME=unsigned ORDER=2 ARGUMENT_INDEX=2
+@@ -417,7 +422,7 @@
+
+                                           FIELD_IDENTIFIER CODE=pending ORDER=2 ARGUMENT_INDEX=2
+-                                    CALL NAME=<operator>.cast CODE=(Bytef)((uch)((s->bi_buf) & 0xff)) TYPE_FULL_NAME=Bytef METHOD_FULL_NAME=<operator>.cast ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+-                                      TYPE_REF CODE=Bytef TYPE_FULL_NAME=Bytef ORDER=1 ARGUMENT_INDEX=1
+-                                      CALL NAME=<operator>.cast CODE=(uch)((s->bi_buf) & 0xff) TYPE_FULL_NAME=uch METHOD_FULL_NAME=<operator>.cast ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+-                                        TYPE_REF CODE=uch TYPE_FULL_NAME=uch ORDER=1 ARGUMENT_INDEX=1
+-                                        CALL NAME=<operator>.and CODE=(s->bi_buf) & 0xff TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.and ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
++                                    CALL NAME=<operator>.pointerCall CODE=(Bytef)((uch)((s->bi_buf) & 0xff)) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.pointerCall ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=DYNAMIC_DISPATCH
++                                      IDENTIFIER NAME=Bytef CODE=<unknown> Bytef TYPE_FULL_NAME=ANY ORDER=1
++                                      CALL NAME=<operator>.pointerCall CODE=(uch)((s->bi_buf) & 0xff) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.pointerCall ORDER=2 ARGUMENT_INDEX=1 DISPATCH_TYPE=DYNAMIC_DISPATCH
++                                        IDENTIFIER NAME=uch CODE=<unknown> uch TYPE_FULL_NAME=ANY ORDER=1
++                                        CALL NAME=<operator>.and CODE=(s->bi_buf) & 0xff TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.and ORDER=2 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                                           CALL NAME=<operator>.indirectFieldAccess CODE=s->bi_buf TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+@@ -436,10 +441,10 @@
+
+                                           FIELD_IDENTIFIER CODE=pending ORDER=2 ARGUMENT_INDEX=2
+-                                    CALL NAME=<operator>.cast CODE=(Bytef)((uch)((ush)(s->bi_buf) >> 8)) TYPE_FULL_NAME=Bytef METHOD_FULL_NAME=<operator>.cast ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+-                                      TYPE_REF CODE=Bytef TYPE_FULL_NAME=Bytef ORDER=1 ARGUMENT_INDEX=1
+-                                      CALL NAME=<operator>.cast CODE=(uch)((ush)(s->bi_buf) >> 8) TYPE_FULL_NAME=uch METHOD_FULL_NAME=<operator>.cast ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+-                                        TYPE_REF CODE=uch TYPE_FULL_NAME=uch ORDER=1 ARGUMENT_INDEX=1
+-                                        CALL NAME=<operator>.arithmeticShiftRight CODE=(ush)(s->bi_buf) >> 8 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.arithmeticShiftRight ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+-                                          CALL NAME=<operator>.cast CODE=(ush)(s->bi_buf) TYPE_FULL_NAME=ush METHOD_FULL_NAME=<operator>.cast ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+-                                            TYPE_REF CODE=ush TYPE_FULL_NAME=ush ORDER=1 ARGUMENT_INDEX=1
+-                                            CALL NAME=<operator>.indirectFieldAccess CODE=s->bi_buf TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
++                                    CALL NAME=<operator>.pointerCall CODE=(Bytef)((uch)((ush)(s->bi_buf) >> 8)) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.pointerCall ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=DYNAMIC_DISPATCH
++                                      IDENTIFIER NAME=Bytef CODE=<unknown> Bytef TYPE_FULL_NAME=ANY ORDER=1
++                                      CALL NAME=<operator>.pointerCall CODE=(uch)((ush)(s->bi_buf) >> 8) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.pointerCall ORDER=2 ARGUMENT_INDEX=1 DISPATCH_TYPE=DYNAMIC_DISPATCH
++                                        IDENTIFIER NAME=uch CODE=<unknown> uch TYPE_FULL_NAME=ANY ORDER=1
++                                        CALL NAME=<operator>.arithmeticShiftRight CODE=(ush)(s->bi_buf) >> 8 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.arithmeticShiftRight ORDER=2 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
++                                          CALL NAME=<operator>.pointerCall CODE=(ush)(s->bi_buf) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.pointerCall ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=DYNAMIC_DISPATCH
++                                            IDENTIFIER NAME=ush CODE=<unknown> ush TYPE_FULL_NAME=ANY ORDER=1
++                                            CALL NAME=<operator>.indirectFieldAccess CODE=s->bi_buf TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=2 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                                               IDENTIFIER NAME=s CODE=s TYPE_FULL_NAME=deflate_state* ORDER=1 ARGUMENT_INDEX=1
+@@ -474,5 +479,5 @@
+
+                                   CALL NAME=<operator>.shiftLeft CODE=(ush)(lc) << s->bi_valid TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.shiftLeft ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+-                                    CALL NAME=<operator>.cast CODE=(ush)(lc) TYPE_FULL_NAME=ush METHOD_FULL_NAME=<operator>.cast ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+-                                      TYPE_REF CODE=ush TYPE_FULL_NAME=ush ORDER=1 ARGUMENT_INDEX=1
+-                                      IDENTIFIER NAME=lc CODE=lc TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
++                                    CALL NAME=<operator>.pointerCall CODE=(ush)(lc) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.pointerCall ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=DYNAMIC_DISPATCH
++                                      IDENTIFIER NAME=ush CODE=<unknown> ush TYPE_FULL_NAME=ANY ORDER=1
++                                      IDENTIFIER NAME=lc CODE=lc TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=1
+                                     CALL NAME=<operator>.indirectFieldAccess CODE=s->bi_valid TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+@@ -497,6 +502,6 @@
+
+                           CALL NAME=<operator>.indirectIndexAccess CODE=_dist_code[dist] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectIndexAccess ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+-                            IDENTIFIER NAME=_dist_code CODE=<global> _dist_code TYPE_FULL_NAME=uch[512] ORDER=1 ARGUMENT_INDEX=1
++                            IDENTIFIER NAME=_dist_code CODE=<global> _dist_code TYPE_FULL_NAME=uch[DIST_CODE_LEN] ORDER=1 ARGUMENT_INDEX=1
+                             IDENTIFIER NAME=dist CODE=dist TYPE_FULL_NAME=unsigned ORDER=2 ARGUMENT_INDEX=2
+                           CALL NAME=<operator>.indirectIndexAccess CODE=_dist_code[256 + ((dist) >> 7)] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectIndexAccess ORDER=3 ARGUMENT_INDEX=3 DISPATCH_TYPE=STATIC_DISPATCH
+-                            IDENTIFIER NAME=_dist_code CODE=<global> _dist_code TYPE_FULL_NAME=uch[512] ORDER=1 ARGUMENT_INDEX=1
++                            IDENTIFIER NAME=_dist_code CODE=<global> _dist_code TYPE_FULL_NAME=uch[DIST_CODE_LEN] ORDER=1 ARGUMENT_INDEX=1
+                             CALL NAME=<operator>.addition CODE=256 + ((dist) >> 7) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+@@ -506,3 +511,5 @@
+
+                                 LITERAL CODE=7 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+-                  CALL NAME=send_code CODE=send_code(s, code, dtree) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=trees.c:send_code:ANY(3) SIGNATURE=ANY(3) ORDER=7 DISPATCH_TYPE=INLINED
++                  CALL NAME=Assert CODE=Assert (code < D_CODES, "bad d_code") TYPE_FULL_NAME=ANY METHOD_FULL_NAME=zutil.h:Assert:ANY(2) SIGNATURE=ANY(2) ORDER=7 DISPATCH_TYPE=INLINED
++                    BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
++                  CALL NAME=send_code CODE=send_code(s, code, dtree) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=trees.c:send_code:ANY(3) SIGNATURE=ANY(3) ORDER=8 DISPATCH_TYPE=INLINED
+                     IDENTIFIER NAME=s CODE=s TYPE_FULL_NAME=deflate_state* ORDER=1 ARGUMENT_INDEX=1
+@@ -566,7 +573,7 @@
+
+                                       FIELD_IDENTIFIER CODE=pending ORDER=2 ARGUMENT_INDEX=2
+-                                CALL NAME=<operator>.cast CODE=(Bytef)((uch)((s->bi_buf) & 0xff)) TYPE_FULL_NAME=Bytef METHOD_FULL_NAME=<operator>.cast ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+-                                  TYPE_REF CODE=Bytef TYPE_FULL_NAME=Bytef ORDER=1 ARGUMENT_INDEX=1
+-                                  CALL NAME=<operator>.cast CODE=(uch)((s->bi_buf) & 0xff) TYPE_FULL_NAME=uch METHOD_FULL_NAME=<operator>.cast ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+-                                    TYPE_REF CODE=uch TYPE_FULL_NAME=uch ORDER=1 ARGUMENT_INDEX=1
+-                                    CALL NAME=<operator>.and CODE=(s->bi_buf) & 0xff TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.and ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
++                                CALL NAME=<operator>.pointerCall CODE=(Bytef)((uch)((s->bi_buf) & 0xff)) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.pointerCall ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=DYNAMIC_DISPATCH
++                                  IDENTIFIER NAME=Bytef CODE=<unknown> Bytef TYPE_FULL_NAME=ANY ORDER=1
++                                  CALL NAME=<operator>.pointerCall CODE=(uch)((s->bi_buf) & 0xff) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.pointerCall ORDER=2 ARGUMENT_INDEX=1 DISPATCH_TYPE=DYNAMIC_DISPATCH
++                                    IDENTIFIER NAME=uch CODE=<unknown> uch TYPE_FULL_NAME=ANY ORDER=1
++                                    CALL NAME=<operator>.and CODE=(s->bi_buf) & 0xff TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.and ORDER=2 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                                       CALL NAME=<operator>.indirectFieldAccess CODE=s->bi_buf TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+@@ -585,10 +592,10 @@
+
+                                       FIELD_IDENTIFIER CODE=pending ORDER=2 ARGUMENT_INDEX=2
+-                                CALL NAME=<operator>.cast CODE=(Bytef)((uch)((ush)(s->bi_buf) >> 8)) TYPE_FULL_NAME=Bytef METHOD_FULL_NAME=<operator>.cast ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+-                                  TYPE_REF CODE=Bytef TYPE_FULL_NAME=Bytef ORDER=1 ARGUMENT_INDEX=1
+-                                  CALL NAME=<operator>.cast CODE=(uch)((ush)(s->bi_buf) >> 8) TYPE_FULL_NAME=uch METHOD_FULL_NAME=<operator>.cast ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+-                                    TYPE_REF CODE=uch TYPE_FULL_NAME=uch ORDER=1 ARGUMENT_INDEX=1
+-                                    CALL NAME=<operator>.arithmeticShiftRight CODE=(ush)(s->bi_buf) >> 8 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.arithmeticShiftRight ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+-                                      CALL NAME=<operator>.cast CODE=(ush)(s->bi_buf) TYPE_FULL_NAME=ush METHOD_FULL_NAME=<operator>.cast ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+-                                        TYPE_REF CODE=ush TYPE_FULL_NAME=ush ORDER=1 ARGUMENT_INDEX=1
+-                                        CALL NAME=<operator>.indirectFieldAccess CODE=s->bi_buf TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
++                                CALL NAME=<operator>.pointerCall CODE=(Bytef)((uch)((ush)(s->bi_buf) >> 8)) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.pointerCall ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=DYNAMIC_DISPATCH
++                                  IDENTIFIER NAME=Bytef CODE=<unknown> Bytef TYPE_FULL_NAME=ANY ORDER=1
++                                  CALL NAME=<operator>.pointerCall CODE=(uch)((ush)(s->bi_buf) >> 8) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.pointerCall ORDER=2 ARGUMENT_INDEX=1 DISPATCH_TYPE=DYNAMIC_DISPATCH
++                                    IDENTIFIER NAME=uch CODE=<unknown> uch TYPE_FULL_NAME=ANY ORDER=1
++                                    CALL NAME=<operator>.arithmeticShiftRight CODE=(ush)(s->bi_buf) >> 8 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.arithmeticShiftRight ORDER=2 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
++                                      CALL NAME=<operator>.pointerCall CODE=(ush)(s->bi_buf) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.pointerCall ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=DYNAMIC_DISPATCH
++                                        IDENTIFIER NAME=ush CODE=<unknown> ush TYPE_FULL_NAME=ANY ORDER=1
++                                        CALL NAME=<operator>.indirectFieldAccess CODE=s->bi_buf TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=2 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                                           IDENTIFIER NAME=s CODE=s TYPE_FULL_NAME=deflate_state* ORDER=1 ARGUMENT_INDEX=1
+@@ -623,5 +630,5 @@
+
+                               CALL NAME=<operator>.shiftLeft CODE=(ush)(dtree[code].fc.code) << s->bi_valid TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.shiftLeft ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+-                                CALL NAME=<operator>.cast CODE=(ush)(dtree[code].fc.code) TYPE_FULL_NAME=ush METHOD_FULL_NAME=<operator>.cast ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+-                                  TYPE_REF CODE=ush TYPE_FULL_NAME=ush ORDER=1 ARGUMENT_INDEX=1
+-                                  CALL NAME=<operator>.fieldAccess CODE=dtree[code].fc.code TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.fieldAccess ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
++                                CALL NAME=<operator>.pointerCall CODE=(ush)(dtree[code].fc.code) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.pointerCall ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=DYNAMIC_DISPATCH
++                                  IDENTIFIER NAME=ush CODE=<unknown> ush TYPE_FULL_NAME=ANY ORDER=1
++                                  CALL NAME=<operator>.fieldAccess CODE=dtree[code].fc.code TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.fieldAccess ORDER=2 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                                     CALL NAME=<operator>.fieldAccess CODE=dtree[code].fc TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.fieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+@@ -640,8 +647,8 @@
+
+                               IDENTIFIER NAME=len CODE=len TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+-                  CALL NAME=<operator>.assignment CODE=extra = extra_dbits[code] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=8 DISPATCH_TYPE=STATIC_DISPATCH
++                  CALL NAME=<operator>.assignment CODE=extra = extra_dbits[code] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=9 DISPATCH_TYPE=STATIC_DISPATCH
+                     IDENTIFIER NAME=extra CODE=extra TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+                     CALL NAME=<operator>.indirectIndexAccess CODE=extra_dbits[code] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectIndexAccess ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+-                      IDENTIFIER NAME=extra_dbits CODE=<global> extra_dbits TYPE_FULL_NAME=int[30] ORDER=1 ARGUMENT_INDEX=1
++                      IDENTIFIER NAME=extra_dbits CODE=<global> extra_dbits TYPE_FULL_NAME=local[D_CODES] ORDER=1 ARGUMENT_INDEX=1
+                       IDENTIFIER NAME=code CODE=code TYPE_FULL_NAME=unsigned ORDER=2 ARGUMENT_INDEX=2
+-                  CONTROL_STRUCTURE CODE=if (extra != 0) {\n                dist -= (unsigned)base_dist[code];\n                send_bits(s, dist, extra);   /* send the extra distance bits */\n            } ORDER=9
++                  CONTROL_STRUCTURE CODE=if (extra != 0) {\n                dist -= (unsigned)base_dist[code];\n                send_bits(s, dist, extra);   /* send the extra distance bits */\n            } ORDER=10
+                     CALL NAME=<operator>.notEquals CODE=extra != 0 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.notEquals ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+@@ -655,3 +662,3 @@
+
+                           CALL NAME=<operator>.indirectIndexAccess CODE=base_dist[code] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectIndexAccess ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+-                            IDENTIFIER NAME=base_dist CODE=<global> base_dist TYPE_FULL_NAME=int[30] ORDER=1 ARGUMENT_INDEX=1
++                            IDENTIFIER NAME=base_dist CODE=<global> base_dist TYPE_FULL_NAME=local[D_CODES] ORDER=1 ARGUMENT_INDEX=1
+                             IDENTIFIER NAME=code CODE=code TYPE_FULL_NAME=unsigned ORDER=2 ARGUMENT_INDEX=2
+@@ -705,7 +712,7 @@
+
+                                           FIELD_IDENTIFIER CODE=pending ORDER=2 ARGUMENT_INDEX=2
+-                                    CALL NAME=<operator>.cast CODE=(Bytef)((uch)((s->bi_buf) & 0xff)) TYPE_FULL_NAME=Bytef METHOD_FULL_NAME=<operator>.cast ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+-                                      TYPE_REF CODE=Bytef TYPE_FULL_NAME=Bytef ORDER=1 ARGUMENT_INDEX=1
+-                                      CALL NAME=<operator>.cast CODE=(uch)((s->bi_buf) & 0xff) TYPE_FULL_NAME=uch METHOD_FULL_NAME=<operator>.cast ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+-                                        TYPE_REF CODE=uch TYPE_FULL_NAME=uch ORDER=1 ARGUMENT_INDEX=1
+-                                        CALL NAME=<operator>.and CODE=(s->bi_buf) & 0xff TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.and ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
++                                    CALL NAME=<operator>.pointerCall CODE=(Bytef)((uch)((s->bi_buf) & 0xff)) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.pointerCall ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=DYNAMIC_DISPATCH
++                                      IDENTIFIER NAME=Bytef CODE=<unknown> Bytef TYPE_FULL_NAME=ANY ORDER=1
++                                      CALL NAME=<operator>.pointerCall CODE=(uch)((s->bi_buf) & 0xff) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.pointerCall ORDER=2 ARGUMENT_INDEX=1 DISPATCH_TYPE=DYNAMIC_DISPATCH
++                                        IDENTIFIER NAME=uch CODE=<unknown> uch TYPE_FULL_NAME=ANY ORDER=1
++                                        CALL NAME=<operator>.and CODE=(s->bi_buf) & 0xff TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.and ORDER=2 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                                           CALL NAME=<operator>.indirectFieldAccess CODE=s->bi_buf TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+@@ -724,10 +731,10 @@
+
+                                           FIELD_IDENTIFIER CODE=pending ORDER=2 ARGUMENT_INDEX=2
+-                                    CALL NAME=<operator>.cast CODE=(Bytef)((uch)((ush)(s->bi_buf) >> 8)) TYPE_FULL_NAME=Bytef METHOD_FULL_NAME=<operator>.cast ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+-                                      TYPE_REF CODE=Bytef TYPE_FULL_NAME=Bytef ORDER=1 ARGUMENT_INDEX=1
+-                                      CALL NAME=<operator>.cast CODE=(uch)((ush)(s->bi_buf) >> 8) TYPE_FULL_NAME=uch METHOD_FULL_NAME=<operator>.cast ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+-                                        TYPE_REF CODE=uch TYPE_FULL_NAME=uch ORDER=1 ARGUMENT_INDEX=1
+-                                        CALL NAME=<operator>.arithmeticShiftRight CODE=(ush)(s->bi_buf) >> 8 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.arithmeticShiftRight ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+-                                          CALL NAME=<operator>.cast CODE=(ush)(s->bi_buf) TYPE_FULL_NAME=ush METHOD_FULL_NAME=<operator>.cast ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+-                                            TYPE_REF CODE=ush TYPE_FULL_NAME=ush ORDER=1 ARGUMENT_INDEX=1
+-                                            CALL NAME=<operator>.indirectFieldAccess CODE=s->bi_buf TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
++                                    CALL NAME=<operator>.pointerCall CODE=(Bytef)((uch)((ush)(s->bi_buf) >> 8)) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.pointerCall ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=DYNAMIC_DISPATCH
++                                      IDENTIFIER NAME=Bytef CODE=<unknown> Bytef TYPE_FULL_NAME=ANY ORDER=1
++                                      CALL NAME=<operator>.pointerCall CODE=(uch)((ush)(s->bi_buf) >> 8) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.pointerCall ORDER=2 ARGUMENT_INDEX=1 DISPATCH_TYPE=DYNAMIC_DISPATCH
++                                        IDENTIFIER NAME=uch CODE=<unknown> uch TYPE_FULL_NAME=ANY ORDER=1
++                                        CALL NAME=<operator>.arithmeticShiftRight CODE=(ush)(s->bi_buf) >> 8 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.arithmeticShiftRight ORDER=2 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
++                                          CALL NAME=<operator>.pointerCall CODE=(ush)(s->bi_buf) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.pointerCall ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=DYNAMIC_DISPATCH
++                                            IDENTIFIER NAME=ush CODE=<unknown> ush TYPE_FULL_NAME=ANY ORDER=1
++                                            CALL NAME=<operator>.indirectFieldAccess CODE=s->bi_buf TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=2 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                                               IDENTIFIER NAME=s CODE=s TYPE_FULL_NAME=deflate_state* ORDER=1 ARGUMENT_INDEX=1
+@@ -762,5 +769,5 @@
+
+                                   CALL NAME=<operator>.shiftLeft CODE=(ush)(dist) << s->bi_valid TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.shiftLeft ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+-                                    CALL NAME=<operator>.cast CODE=(ush)(dist) TYPE_FULL_NAME=ush METHOD_FULL_NAME=<operator>.cast ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+-                                      TYPE_REF CODE=ush TYPE_FULL_NAME=ush ORDER=1 ARGUMENT_INDEX=1
+-                                      IDENTIFIER NAME=dist CODE=dist TYPE_FULL_NAME=unsigned ORDER=2 ARGUMENT_INDEX=2
++                                    CALL NAME=<operator>.pointerCall CODE=(ush)(dist) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.pointerCall ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=DYNAMIC_DISPATCH
++                                      IDENTIFIER NAME=ush CODE=<unknown> ush TYPE_FULL_NAME=ANY ORDER=1
++                                      IDENTIFIER NAME=dist CODE=dist TYPE_FULL_NAME=unsigned ORDER=2 ARGUMENT_INDEX=1
+                                     CALL NAME=<operator>.indirectFieldAccess CODE=s->bi_valid TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+@@ -773,2 +780,4 @@
+
+                                   IDENTIFIER NAME=len CODE=len TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
++            CALL NAME=Assert CODE=Assert(s->pending < s->lit_bufsize + sx, "pendingBuf overflow") TYPE_FULL_NAME=ANY METHOD_FULL_NAME=zutil.h:Assert:ANY(2) SIGNATURE=ANY(2) ORDER=5 DISPATCH_TYPE=INLINED
++              BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+           CALL NAME=<operator>.lessThan CODE=sx < s->sym_next TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.lessThan ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+@@ -837,7 +846,7 @@
+
+                         FIELD_IDENTIFIER CODE=pending ORDER=2 ARGUMENT_INDEX=2
+-                  CALL NAME=<operator>.cast CODE=(Bytef)((uch)((s->bi_buf) & 0xff)) TYPE_FULL_NAME=Bytef METHOD_FULL_NAME=<operator>.cast ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+-                    TYPE_REF CODE=Bytef TYPE_FULL_NAME=Bytef ORDER=1 ARGUMENT_INDEX=1
+-                    CALL NAME=<operator>.cast CODE=(uch)((s->bi_buf) & 0xff) TYPE_FULL_NAME=uch METHOD_FULL_NAME=<operator>.cast ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+-                      TYPE_REF CODE=uch TYPE_FULL_NAME=uch ORDER=1 ARGUMENT_INDEX=1
+-                      CALL NAME=<operator>.and CODE=(s->bi_buf) & 0xff TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.and ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
++                  CALL NAME=<operator>.pointerCall CODE=(Bytef)((uch)((s->bi_buf) & 0xff)) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.pointerCall ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=DYNAMIC_DISPATCH
++                    IDENTIFIER NAME=Bytef CODE=<unknown> Bytef TYPE_FULL_NAME=ANY ORDER=1
++                    CALL NAME=<operator>.pointerCall CODE=(uch)((s->bi_buf) & 0xff) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.pointerCall ORDER=2 ARGUMENT_INDEX=1 DISPATCH_TYPE=DYNAMIC_DISPATCH
++                      IDENTIFIER NAME=uch CODE=<unknown> uch TYPE_FULL_NAME=ANY ORDER=1
++                      CALL NAME=<operator>.and CODE=(s->bi_buf) & 0xff TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.and ORDER=2 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                         CALL NAME=<operator>.indirectFieldAccess CODE=s->bi_buf TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+@@ -856,10 +865,10 @@
+
+                         FIELD_IDENTIFIER CODE=pending ORDER=2 ARGUMENT_INDEX=2
+-                  CALL NAME=<operator>.cast CODE=(Bytef)((uch)((ush)(s->bi_buf) >> 8)) TYPE_FULL_NAME=Bytef METHOD_FULL_NAME=<operator>.cast ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+-                    TYPE_REF CODE=Bytef TYPE_FULL_NAME=Bytef ORDER=1 ARGUMENT_INDEX=1
+-                    CALL NAME=<operator>.cast CODE=(uch)((ush)(s->bi_buf) >> 8) TYPE_FULL_NAME=uch METHOD_FULL_NAME=<operator>.cast ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+-                      TYPE_REF CODE=uch TYPE_FULL_NAME=uch ORDER=1 ARGUMENT_INDEX=1
+-                      CALL NAME=<operator>.arithmeticShiftRight CODE=(ush)(s->bi_buf) >> 8 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.arithmeticShiftRight ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+-                        CALL NAME=<operator>.cast CODE=(ush)(s->bi_buf) TYPE_FULL_NAME=ush METHOD_FULL_NAME=<operator>.cast ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+-                          TYPE_REF CODE=ush TYPE_FULL_NAME=ush ORDER=1 ARGUMENT_INDEX=1
+-                          CALL NAME=<operator>.indirectFieldAccess CODE=s->bi_buf TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
++                  CALL NAME=<operator>.pointerCall CODE=(Bytef)((uch)((ush)(s->bi_buf) >> 8)) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.pointerCall ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=DYNAMIC_DISPATCH
++                    IDENTIFIER NAME=Bytef CODE=<unknown> Bytef TYPE_FULL_NAME=ANY ORDER=1
++                    CALL NAME=<operator>.pointerCall CODE=(uch)((ush)(s->bi_buf) >> 8) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.pointerCall ORDER=2 ARGUMENT_INDEX=1 DISPATCH_TYPE=DYNAMIC_DISPATCH
++                      IDENTIFIER NAME=uch CODE=<unknown> uch TYPE_FULL_NAME=ANY ORDER=1
++                      CALL NAME=<operator>.arithmeticShiftRight CODE=(ush)(s->bi_buf) >> 8 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.arithmeticShiftRight ORDER=2 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
++                        CALL NAME=<operator>.pointerCall CODE=(ush)(s->bi_buf) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.pointerCall ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=DYNAMIC_DISPATCH
++                          IDENTIFIER NAME=ush CODE=<unknown> ush TYPE_FULL_NAME=ANY ORDER=1
++                          CALL NAME=<operator>.indirectFieldAccess CODE=s->bi_buf TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=2 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                             IDENTIFIER NAME=s CODE=s TYPE_FULL_NAME=deflate_state* ORDER=1 ARGUMENT_INDEX=1
+@@ -894,5 +903,5 @@
+
+                 CALL NAME=<operator>.shiftLeft CODE=(ush)(ltree[256].fc.code) << s->bi_valid TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.shiftLeft ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+-                  CALL NAME=<operator>.cast CODE=(ush)(ltree[256].fc.code) TYPE_FULL_NAME=ush METHOD_FULL_NAME=<operator>.cast ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+-                    TYPE_REF CODE=ush TYPE_FULL_NAME=ush ORDER=1 ARGUMENT_INDEX=1
+-                    CALL NAME=<operator>.fieldAccess CODE=ltree[256].fc.code TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.fieldAccess ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
++                  CALL NAME=<operator>.pointerCall CODE=(ush)(ltree[256].fc.code) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.pointerCall ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=DYNAMIC_DISPATCH
++                    IDENTIFIER NAME=ush CODE=<unknown> ush TYPE_FULL_NAME=ANY ORDER=1
++                    CALL NAME=<operator>.fieldAccess CODE=ltree[256].fc.code TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.fieldAccess ORDER=2 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                       CALL NAME=<operator>.fieldAccess CODE=ltree[256].fc TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.fieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+@@ -911,2 +920,2 @@
+
+                 IDENTIFIER NAME=len CODE=len TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+-  METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=5
++  METHOD_RETURN CODE=RET TYPE_FULL_NAME=local ORDER=5

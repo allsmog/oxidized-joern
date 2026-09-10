@@ -1,0 +1,39 @@
+--- joern
++++ before
+@@ -2,21 +2,21 @@
+   BLOCK TYPE_FULL_NAME=ANY ORDER=1
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+ 
+-METHOD NAME=invoke CODE=const char *invoke(int x){return " FULL_NAME=invoke ";} FULL_NAME=invoke SIGNATURE=char*(int) ORDER=1
++METHOD NAME=invoke CODE=const char *invoke(int x){return " FULL_NAME=invoke SIGNATURE=char*(int) ORDER=1
+   METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+   METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+-  BLOCK CODE={return " FULL_NAME=invoke ";} TYPE_FULL_NAME=void ORDER=2
++  BLOCK CODE={return " TYPE_FULL_NAME=void FULL_NAME=invoke ";} ORDER=2
+     RETURN CODE=return " FULL_NAME=invoke "; ORDER=1
+-      LITERAL CODE=" FULL_NAME=invoke " TYPE_FULL_NAME=char* ORDER=1
++      LITERAL CODE=" TYPE_FULL_NAME=char* FULL_NAME=invoke " ORDER=1
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=char* ORDER=3
+ 
+ METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1
+-  METHOD NAME=invoke CODE=const char *invoke(int x){return " FULL_NAME=invoke ";} FULL_NAME=invoke SIGNATURE=char*(int) ORDER=1
++  METHOD NAME=invoke CODE=const char *invoke(int x){return " FULL_NAME=invoke SIGNATURE=char*(int) ORDER=1
+     METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+     METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+-    BLOCK CODE={return " FULL_NAME=invoke ";} TYPE_FULL_NAME=void ORDER=2
++    BLOCK CODE={return " TYPE_FULL_NAME=void FULL_NAME=invoke ";} ORDER=2
+       RETURN CODE=return " FULL_NAME=invoke "; ORDER=1
+-        LITERAL CODE=" FULL_NAME=invoke " TYPE_FULL_NAME=char* ORDER=1
++        LITERAL CODE=" TYPE_FULL_NAME=char* FULL_NAME=invoke " ORDER=1
+     METHOD_RETURN CODE=RET TYPE_FULL_NAME=char* ORDER=3
+   BLOCK TYPE_FULL_NAME=ANY ORDER=1
+     METHOD_REF CODE=invoke TYPE_FULL_NAME=invoke METHOD_FULL_NAME=invoke ORDER=1
+@@ -95,7 +95,7 @@
+ EDGES|SOURCE_FILE NB:main.c:<global> -> F:main.c
+ EDGES|SOURCE_FILE invoke#0 -> F:main.c
+ EDGES|SOURCE_FILE main.c:<global>#0 -> F:main.c
+-FLOWS|REACHING_DEF[" FULL_NAME=invoke "] invoke#5 -> invoke#4
++FLOWS|REACHING_DEF["] invoke#5 -> invoke#4
+ FLOWS|REACHING_DEF[<RET>] invoke#4 -> invoke#6
+ FLOWS|REACHING_DEF[] invoke#0 -> invoke#1
+ FLOWS|REACHING_DEF[] invoke#0 -> invoke#4

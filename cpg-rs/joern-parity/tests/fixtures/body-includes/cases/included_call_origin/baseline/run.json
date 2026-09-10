@@ -1,0 +1,64 @@
+{
+  "case": "included_call_origin",
+  "status": "COMPLETE_PRODUCTION_COMPARISON",
+  "command": [
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/ninth-batch/reviewed-final-real-differential/bin/joern-parity",
+    "--production",
+    "api.h",
+    "main.c"
+  ],
+  "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/tenth-source-location-review/input/included_call_origin",
+  "exitCode": 0,
+  "timedOut": false,
+  "seconds": 0.0065304170129820704,
+  "inputBefore": [
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/tenth-source-location-review/input/included_call_origin/api.h",
+      "sha256": "3064f0f3d560eb7f40dfe541d055b10025f6a6f82d2e8ee2f3dd57915d1205d2",
+      "bytes": 27
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/tenth-source-location-review/input/included_call_origin/main.c",
+      "sha256": "205780cf31cc2024bab2bdf052a8242d00d1faa3dab0a203f1b511133e18eba2",
+      "bytes": 98
+    }
+  ],
+  "inputAfter": [
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/tenth-source-location-review/input/included_call_origin/api.h",
+      "sha256": "3064f0f3d560eb7f40dfe541d055b10025f6a6f82d2e8ee2f3dd57915d1205d2",
+      "bytes": 27
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/tenth-source-location-review/input/included_call_origin/main.c",
+      "sha256": "205780cf31cc2024bab2bdf052a8242d00d1faa3dab0a203f1b511133e18eba2",
+      "bytes": 98
+    }
+  ],
+  "expected": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/tenth-source-location-review/input/included_call_origin/expected.txt",
+    "sha256": "ede00de3f22c2caff78996f3bdbed91ba716cbf206b9aa17da6dbac113d1f2a9",
+    "bytes": 13553
+  },
+  "actual": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/tenth-source-location-review/accepted-ninth-baseline/included_call_origin/actual.txt",
+    "sha256": "f69035b77ccc6b247d31ac8cbbd0df053cf23ae8d8d6ba7c453737c4844cc2a2",
+    "bytes": 11668
+  },
+  "stderr": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/tenth-source-location-review/accepted-ninth-baseline/included_call_origin/stderr.txt",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0
+  },
+  "completeDiff": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/tenth-source-location-review/accepted-ninth-baseline/included_call_origin/complete.diff",
+    "sha256": "ff30e7d905d6777328f2884228f90cee8510a402f829f4f66a2f36d94ff261c9",
+    "bytes": 10714
+  },
+  "byteExact": false,
+  "expectedNonemptyRecords": 237,
+  "actualNonemptyRecords": 204,
+  "matchingRecordMultiplicities": 171,
+  "missingRecordMultiplicities": 66,
+  "extraRecordMultiplicities": 33
+}

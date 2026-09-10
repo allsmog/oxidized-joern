@@ -1,0 +1,638 @@
+   Compiling cpg-lang-c v0.1.1 (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/cpg-rs/cpg-lang-c)
+   Compiling cpg-lang-ts v0.1.1 (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/cpg-rs/cpg-lang-ts)
+   Compiling joern-parity v0.1.1 (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/cpg-rs/joern-parity)
+   Compiling cpg-analysis v0.1.1 (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/cpg-rs/cpg-analysis)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 8.03s
+     Running unittests src/lib.rs (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/target/debug/deps/cpg_analysis-fa82cfa5dd565e62)
+
+running 167 tests
+test authz::tests::invocation_requires_name_adjacent_parens ... ok
+test callgraph::tests::test_path_conventions ... ok
+test authz::tests::authz_name_heuristic_matches_words_not_substrings ... ok
+test callgraph::tests::production_call_with_only_test_candidates_stays_unresolved ... ok
+test callgraph::tests::member_hint_resolves_and_is_persisted ... ok
+test callgraph::tests::interface_hint_fans_out_to_implementors ... ok
+test callgraph::tests::inherited_method_resolves_through_base ... ok
+test callgraph::tests::out_of_graph_interface_hint_stays_unresolved ... ok
+test callgraph::tests::hint_with_no_match_in_hierarchy_stays_unresolved ... ok
+test callgraph::tests::production_calls_skip_test_file_candidates ... ok
+test middleware::tests::binary_root_layouts ... ok
+test cfg::tests::cfg_while_loop_has_back_edge ... ok
+test cfg::tests::cfg_arguments_chain_before_call ... ok
+test cfg::tests::cfg_break_and_continue ... ok
+test cfg::tests::cfg_return_flows_to_method_return_only ... ok
+test cfg::tests::cfg_if_without_else_falls_through ... ok
+test cfg::tests::cfg_if_else_branches_from_condition ... ok
+test cfg::tests::cfg_do_while_executes_body_first ... ok
+test cfg::tests::cfg_for_loop_shape ... ok
+test cfg::tests::cfg_switch_dispatch_and_fallthrough ... ok
+test middleware::tests::census_default_marker_accepts_concatenated_spelling ... ok
+test middleware::tests::census_default_marker_preserves_caller_claims_compatibility ... ok
+test middleware::tests::census_chain_variable_append_framework_shape ... ok
+test middleware::tests::census_caller_context_gated_and_field_read_shapes ... ok
+test middleware::tests::census_marker_does_not_join_separate_expression_tokens ... ok
+test middleware::tests::census_gate_body_evidence_requires_dominance_over_continuation ... ok
+test middleware::tests::census_caller_context_markers_are_configurable_and_disableable ... ok
+test middleware::tests::census_inline_partial_and_none ... ok
+test reaching_def::tests::assignment_semantics_gate_sibling_edges ... ok
+test middleware::tests::census_framework_server_calls_are_configurable_and_disableable ... ok
+test middleware::tests::census_route_wrapper_beats_module_middleware ... ok
+test middleware::tests::census_server_scope_interceptor_gates_remaining_entries ... ok
+test middleware::tests::census_factory_closure_body_evidence_marks_enforcing ... ok
+test reaching_def::tests::def_flows_into_call_argument ... ok
+test reaching_def::tests::def_reaches_use ... ok
+test reaching_def::tests::branch_defs_both_reach_join_use ... ok
+test middleware::tests::census_switch_before_check_still_dominates ... ok
+test reaching_def::tests::def_survives_branch_join ... ok
+test reaching_def::tests::return_use_and_exit_edges ... ok
+test reaching_def::tests::reassignment_kills_earlier_def ... ok
+test reaching_def::tests::rerun_is_idempotent ... ok
+test structural::tests::lhs_bindings_parses_binding_shapes ... ok
+test structural::tests::clear_key_comparison_is_case_insensitive ... ok
+test structural::tests::literal_string_strips_quotes_only ... ok
+test structural::tests::pat_match_star_semantics ... ok
+test middleware::tests::census_mount_facade_gate_forwards_to_generated_registrations ... ok
+test middleware::tests::census_qualified_spelling_marks_enforcing ... ok
+test middleware::tests::census_route_group_gate_binds_registrations ... ok
+test structural::tests::append_without_delete_flags_undeleted_trust_header ... ok
+test summaries::tests::external_json_accepts_label_or_sanitizer_spelling ... ok
+test summaries::tests::computed_summaries_never_claim_receiver_modeling ... ok
+test summaries::tests::external_json_flow_with_via_is_sanitized ... ok
+test summaries::tests::recv_point_parsing_and_pass_through_truth_table ... ok
+test structural::tests::statement_position_call_is_a_total_discard ... ok
+test summaries::tests::non_sanitized_flow_still_raw ... ok
+test structural::tests::test_files_are_excluded ... ok
+test summaries::tests::sanitizer_call_marks_summary_flow_sanitized ... ok
+test middleware::tests::census_global_middleware_before_gate_binds_router_scope ... ok
+test taint::tests::alias_after_member_store_carries_object_taint ... ok
+test summaries::tests::sanitized_flow_propagates_transitively ... ok
+test summaries::tests::call_returns_record_source_wrappers_raw_and_sanitized ... ok
+test taint::tests::alias_out_param_write_taints_aliasee ... ok
+test structural::tests::scala_tuple_blank_binding_is_flagged_via_statement_text ... ok
+test taint::tests::assign_sink_fires_from_entry_param_walk ... ok
+test taint::tests::alias_member_store_taints_aliasee_inside_callee ... ok
+test structural::tests::discarded_return_flags_blank_bound_auth_call ... ok
+test taint::tests::alias_member_store_taints_aliasee ... ok
+test taint::tests::assign_sink_fires_on_member_store_not_local_rebind ... ok
+test summaries::tests::fixpoint_memoises_repeat_computations ... ok
+test taint::tests::assign_sink_fires_on_setter_form ... ok
+test taint::tests::alias_transitive_chain_taints_root ... ok
+test taint::tests::alias_rebind_dissolves_the_link ... ok
+test structural::tests::append_flags_struct_transport_header_key ... ok
+test taint::tests::assign_sink_fires_on_scala_named_argument ... ok
+test taint::tests::authz_dominating_check_annotates_finding ... ok
+test taint::tests::confiner_matches_whole_call_names_not_substrings ... ok
+test taint::tests::assign_sink_matches_go_if_init_tenant_overwrite ... ok
+test taint::tests::c_copy_family_propagates_inside_callee_summary ... ok
+test taint::tests::census_mines_framework_server_constructor_as_gate ... ok
+test taint::tests::branch_only_authz_check_is_partial ... ok
+test taint::tests::c_copy_family_propagates_through_strcpy ... ok
+test taint::tests::census_idl_entries_respect_handler_shape_gate ... ok
+test taint::tests::confiner_member_store_on_path_annotates_confined ... ok
+test taint::tests::external_summary_call_return_originates_taint ... ok
+test taint::tests::confiner_call_on_path_annotates_confined ... ok
+test taint::tests::declared_recv_flow_keeps_pass_through_sanitized_does_not ... ok
+test taint::tests::external_summary_hop_is_marked_summary_only ... ok
+test taint::tests::destructure_from_call_binds_every_name ... ok
+test taint::tests::entry_method_gate_dominates_interprocedural_sink ... ok
+test taint::tests::alias_field_store_lands_on_partner_field ... ok
+test taint::tests::field_read_call_does_not_hand_off_to_same_named_function ... ok
+test taint::tests::field_read_accessor_summary_carries_param_flow ... ok
+test taint::tests::downrank_guarded_orders_unguarded_first ... ok
+test taint::tests::format_verb_filter_traces_two_hop_local_chain ... ok
+test taint::tests::format_verb_filter_blocks_int_verbs_and_passes_string_verbs ... ok
+test taint::tests::go_struct_literal_propagates_taint ... ok
+test taint::tests::go_range_binding_carries_element_taint ... ok
+test taint::tests::go_return_flow_through_local_helper ... ok
+test taint::tests::intraproc_steps_carry_intraproc_provenance ... ok
+test taint::tests::grow_guard_ignores_unrelated_grow ... ok
+test taint::tests::clean_field_store_does_not_launder_object ... ok
+test taint::tests::format_verb_filter_traces_literal_through_local ... ok
+test taint::tests::len_sanitizer_kills_length_only_taint ... ok
+test taint::tests::mines_decorator_registration ... ok
+test taint::tests::entry_param_field_store_is_field_sensitive_too ... ok
+test taint::tests::miner_skips_ambiguous_names_and_test_files ... ok
+test taint::tests::mines_router_registration_and_flows ... ok
+test taint::tests::grow_guard_recognizes_grow_before_copy ... ok
+test taint::tests::guard_annotation_classifies_pre_and_post_checks ... ok
+test taint::tests::no_authz_check_leaves_annotation_empty ... ok
+test taint::tests::nested_lift_splices_two_levels ... ok
+test taint::tests::persist_variants_symmetric_across_casings ... ok
+test taint::tests::out_all_args_variant_taints_every_argument ... ok
+test taint::tests::mines_method_value_and_middleware_wrap ... ok
+test taint::tests::out_param_source_reaches_sink_through_callee ... ok
+test taint::tests::mines_inline_closure_registration_and_flows ... ok
+test taint::tests::out_param_source_taints_buffer_not_return ... ok
+test taint::tests::field_store_taints_only_its_path ... ok
+test taint::tests::nested_field_store_selects_and_contains ... ok
+test taint::tests::persisted_read_in_test_file_is_demoted ... ok
+test taint::tests::persistence_stitch_connects_setter_to_getter_across_methods ... ok
+test taint::tests::persistence_stitch_go_struct_literal_store_to_field_read ... ok
+test taint::tests::persistence_rescue_does_not_bypass_read_side_filter ... ok
+test taint::tests::position_qualified_sink_rejects_field_reads ... ok
+test taint::tests::persistence_sink_relevance_rescues_over_threshold_key ... ok
+test taint::tests::provenance_serializes ... ok
+test taint::tests::persistence_stitch_member_store_to_field_read ... ok
+test taint::tests::post_sink_authz_check_is_partial ... ok
+test taint::tests::python_call_nested_in_keyword_argument_exists ... ok
+test taint::tests::python_fstring_carries_source_ident_taint ... ok
+test taint::tests::persistence_harvest_through_return_and_splice ... ok
+test taint::tests::python_keyword_argument_carries_value_taint ... ok
+test taint::tests::persistence_stitch_initialism_cross_casing ... ok
+test taint::tests::python_dict_comprehension_binds_loop_vars ... ok
+test taint::tests::persistence_stitch_named_arg_store_to_getter ... ok
+test taint::tests::python_kwarg_maps_by_name_through_summary_splice ... ok
+test taint::tests::python_list_argument_carries_element_taint ... ok
+test taint::tests::python_tuple_for_binding_carries_element_taint ... ok
+test taint::tests::persistence_stitch_read_nested_in_member_chain_still_originates ... ok
+test taint::tests::python_parallel_assignment_binds_pairwise ... ok
+test taint::tests::query_call_does_not_transfer_object_state ... ok
+test taint::tests::recv_modeled_summary_suppresses_receiver_pass_through ... ok
+test taint::tests::recv_qualified_sink_parses_into_simple_name_plus_qualification ... ok
+test taint::tests::python_kwarg_maps_to_named_parameter ... ok
+test taint::tests::query_time_sanitizer_kills_wrapper_source_return ... ok
+test taint::tests::persistence_stitch_scala_job_config_shape ... ok
+test taint::tests::persistence_ubiquity_counts_methods_not_store_sites ... ok
+test taint::tests::registered_entry_bypasses_handler_shape_gate ... ok
+test taint::tests::sink_arg_position_restricts_findings ... ok
+test taint::tests::sanitizer_kills_finding_but_raw_path_still_reports ... ok
+test taint::tests::recv_qualified_sink_fires_only_through_declared_receiver ... ok
+test taint::tests::persistence_ubiquity_filter_drops_widely_stored_keys ... ok
+test taint::tests::spec_authz_names_extend_the_heuristic ... ok
+test taint::tests::serve_http_struct_handler_is_mined_as_entry ... ok
+test taint::tests::sanitized_callee_summary_does_not_propagate ... ok
+test taint::tests::shell_dash_c_payload_flags_despite_position_qualifier ... ok
+test taint::tests::shellform_assembly_in_slice_literal_flags ... ok
+test taint::tests::verb_registration_requires_route_literal ... ok
+test taint::tests::stores_after_the_first_sink_hit_are_still_harvested ... ok
+test taint::tests::spec_only_sanitizer_inside_callee_kills_via_chain_recheck ... ok
+test taint::tests::untyped_receiver_ignores_recv_model ... ok
+test taint::tests::wrapper_source_return_lifts_transitively ... ok
+test taint::tests::witness_includes_callee_internal_steps_with_provenance ... ok
+test taint::tests::witness_choice_among_tainted_args_is_deterministic ... ok
+test taint::tests::wrapper_returning_source_result_originates_taint_at_call_site ... ok
+test taint::tests::tsx_jsx_attribute_sink_fires_from_hook_source ... ok
+test taint::tests::tainted_argument_reaches_sink_inside_callee ... ok
+
+test result: ok. 167 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running tests/canonical_c_array_initializers.rs (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/target/debug/deps/canonical_c_array_initializers-7025d522e4bf351a)
+
+running 1 test
+test array_initializer_findings_match_live_joern_outcomes ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/canonical_c_braceless_if.rs (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/target/debug/deps/canonical_c_braceless_if-57ad9df58db9a8b9)
+
+running 1 test
+test canonical_c_braceless_if_preserves_findings_and_sanitizers ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/canonical_c_braceless_loops.rs (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/target/debug/deps/canonical_c_braceless_loops-203902f9c8b6a6d9)
+
+running 1 test
+test braceless_loops_preserve_findings_sanitizers_and_call_locations ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/canonical_c_flow.rs (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/target/debug/deps/canonical_c_flow-6d20b82085c76479)
+
+running 10 tests
+test canonical_c_summary_preserves_parameter_on_optional_overwrite ... ok
+test merging_c_preserves_generic_accessor_summaries ... ok
+test canonical_flow_survives_save_and_load_with_authoritative_identity ... ok
+test duplicate_translation_unit_helpers_keep_distinct_call_targets ... ok
+test canonical_c_return_dependencies_preserve_optional_source_results ... ok
+test canonical_c_findings_cross_calls_and_recursive_summaries ... ok
+test canonical_c_return_dependencies_keep_sanitizer_and_external_summary_policy ... ok
+test canonical_c_matches_live_joern_return_flow_outcomes ... ok
+test canonical_c_findings_cover_control_flow_kills_members_and_returns ... ok
+test canonical_c_return_dependencies_distinguish_may_flow_from_definite_kills ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.20s
+
+     Running tests/canonical_c_preprocessor.rs (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/target/debug/deps/canonical_c_preprocessor-7d73cd08051f389f)
+
+running 1 test
+test conditional_methods_keep_source_locations_and_active_scanner_findings ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/canonical_c_standalone_blocks.rs (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/target/debug/deps/canonical_c_standalone_blocks-9220fa0ecb8cc85c)
+
+running 2 tests
+test standalone_blocks_keep_definite_kills_and_sanitizer_cuts ... ok
+test standalone_block_findings_match_live_joern_outcomes ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running tests/direct_c_flow.rs (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/target/debug/deps/direct_c_flow-81ecd4c2598ae53e)
+
+running 9 tests
+test parameter_path_keeps_priority_over_unrelated_policy_source ... ok
+test recursive_entry_queries_keep_distinct_ancestor_contexts ... ok
+test direct_c_does_not_cross_method_or_translation_unit_names ... ok
+test merging_c_keeps_generic_finding_generation_unchanged ... ok
+test repeated_queries_do_not_reuse_sanitizer_cuts ... ok
+test direct_c_witness_uses_live_definition_and_splices_summary_hops ... ok
+test repeated_handoffs_keep_witnesses_and_definite_kills ... ok
+test direct_c_keeps_query_and_summary_sanitizer_cuts ... ok
+test direct_c_matches_live_joern_outcomes ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.09s
+
+     Running tests/taint_sanitizers.rs (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/target/debug/deps/taint_sanitizers-22a37dc4bd4add22)
+
+running 1 test
+test explicit_sanitizer_blocks_source_to_sink ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/target/debug/deps/cpg_lang_c-1bb197e58826ab6f)
+
+running 19 tests
+test exact::macro_token_tests::argument_slots_follow_preprocessing_tokens ... ok
+test exact::macro_token_tests::argument_splices_precede_comment_recognition ... ok
+test exact::rd_semantics_tests::absent_expression_code_does_not_alias_explicit_empty_names ... ok
+test exact::dump_property_tests::full_names_end_at_properties_or_end_of_line ... ok
+test exact::macro_token_tests::declaration_expansion_preserves_opaque_preprocessing_tokens ... ok
+test exact::preproc_tests::macro_expansion_bounds_empty_doubling_chains_and_cycles ... ok
+test exact::macro_token_tests::function_macro_names_inside_preprocessing_numbers_remain_opaque ... ok
+test exact::rd_semantics_tests::pass_through_validation_uses_actual_arguments_without_sibling_flow ... ok
+test exact::macro_token_tests::declaration_expansion_bounds_recursive_and_oversized_replacements ... ok
+test import::tests::source_lines_keep_global_declarations_outside_function_bodies ... ok
+test tests::parses_function_with_params_and_call ... ok
+test tests::tolerates_incomplete_code ... ok
+test import::tests::source_lines_anchor_conditional_and_identical_duplicate_definitions ... ok
+test import::tests::imports_every_exact_schema_kind_and_edge_without_loss ... ok
+test import::tests::source_lines_preserve_overlapping_parameters_declarations_and_children ... ok
+test import::tests::source_lines_unmatched_nodes_inherit_without_consuming_siblings ... ok
+test import::tests::source_lines_match_tokens_and_repeated_statements_monotonically ... ok
+test import::tests::source_lines_keep_lua_sweep2old_in_its_own_method ... ok
+test exact::definition_set_tests::membership_and_equality_match_sets_through_union_kill_and_regeneration ... ok
+
+test result: ok. 19 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s
+
+     Running tests/control_truth.rs (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/target/debug/deps/control_truth-1dcd483b48e0c665)
+
+running 5 tests
+test braceless_loop_bodies_keep_direct_statements_and_cfg_edges ... ok
+test explicit_and_non_identifier_conditions_keep_their_expression ... ok
+test unconditional_do_return_keeps_unreachable_tail_out_of_reaching_defs ... ok
+test multiple_for_declarators_share_one_initializer_slot ... ok
+test identifier_truth_tests_use_the_oracle_integer_and_pointer_zero ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.11s
+
+     Running tests/declaration_shapes.rs (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/target/debug/deps/declaration_shapes-5626effbfbcdfb35)
+
+running 6 tests
+test function_typedefs_do_not_erase_neighboring_ordinary_aliases ... ok
+test headers_apply_undef_and_redefinitions_in_order_without_basename_fallback ... ok
+test quoted_header_macros_resolve_relative_to_each_supplied_source ... ok
+test parenthesized_definition_keeps_its_body_and_separate_call_identity ... ok
+test mixed_prototypes_keep_individual_identities_and_shared_return_type ... ok
+test duplicate_parenthesized_definitions_keep_calls_to_the_shared_plain_stub ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/method_address_definitions.rs (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/target/debug/deps/method_address_definitions-a6e1897ed9c748f9)
+
+running 3 tests
+test explicit_function_address_does_not_kill_the_unnamed_parameter ... ok
+test distinct_empty_code_targets_and_unnamed_parameter_reach_exit ... ok
+test reassignment_kills_the_prior_empty_code_definition_by_name ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running unittests src/main.rs (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/target/debug/deps/joern_parity-5ecdce53b68ca6e1)
+
+running 13 tests
+test production::tests::migration_report_is_stable_and_sectioned ... ok
+test production::tests::production_counts_imports_in_all_conditional_branches ... ok
+test production::tests::production_keeps_same_name_conditional_methods_distinct ... ok
+test production::tests::production_preserves_macro_expansion_before_a_later_undef ... ok
+test production::tests::production_preserves_braceless_if_else_calls ... ok
+test production::tests::production_preserves_braceless_if_return ... ok
+test production::tests::production_dump_is_deterministic_and_uses_standard_layers ... ok
+test production::tests::production_respects_macro_replacement_precedence_and_condition_expressions ... ok
+test production::tests::production_removes_comments_before_interpreting_directives ... ok
+test production::tests::production_preserves_braceless_if_call ... ok
+test production::tests::production_retains_all_conditional_declarations_and_only_active_bodies ... ok
+test production::tests::production_update_matches_a_clean_rebuild ... ok
+test production::tests::production_selects_conditions_in_source_order_without_losing_inactive_methods ... ok
+
+test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests/array_declarations.rs (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/target/debug/deps/array_declarations-5bbcc8af9652e977)
+
+running 2 tests
+test global_dimensions_do_not_expand_local_allocation_parameters ... ok
+test array_declarations_match_complete_live_graph ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/array_initializers.rs (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/target/debug/deps/array_initializers-aaccc913d30595de)
+
+running 5 tests
+test ordinary_assignments_do_not_borrow_nested_declaration_locations ... ok
+test all_local_allocations_precede_explicit_initializers ... ok
+test array_initializers_preserve_source_lines_across_repeated_methods ... ok
+test allocation_views_do_not_consume_declaration_or_following_statement_locations ... ok
+test array_initializers_match_complete_isolated_live_graphs ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.24s
+
+     Running tests/body_preprocessor.rs (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/target/debug/deps/body_preprocessor-9871f30e9e9a18a1)
+
+running 2 tests
+test inactive_branches_and_directive_conditions_create_no_phantom_locals ... ok
+test active_body_branches_match_complete_live_graphs ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.09s
+
+     Running tests/combined_c_types.rs (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/target/debug/deps/combined_c_types-da048c15e7463a23)
+
+running 2 tests
+test static_parenthesized_definitions_keep_translation_unit_identities ... ok
+test static_modifiers_primitive_roles_and_numeric_literals_compose ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/concatenated_strings.rs (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/target/debug/deps/concatenated_strings-29c852979787ac8c)
+
+running 3 tests
+test source_literals_and_following_calls_keep_their_lines ... ok
+test concatenated_strings_match_complete_live_graph ... ok
+test lua_ternary_keeps_all_operands_and_cfg_branches ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s
+
+     Running tests/declaration_macros.rs (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/target/debug/deps/declaration_macros-55c28d9b973576aa)
+
+running 4 tests
+test empty_declaration_prefix_retains_method_and_call_locations ... ok
+test header_call_types_follow_each_importing_translation_unit ... ok
+test multiline_empty_prefix_and_conditional_duplicates_keep_separate_source_ranges ... ok
+test declaration_macros_match_complete_isolated_live_graphs ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s
+
+     Running tests/declaration_registration.rs (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/target/debug/deps/declaration_registration-71bbca8988c663c4)
+
+running 4 tests
+test tags_keep_their_independent_base_type_registration ... ok
+test uninitialized_objects_keep_their_full_types_and_source_locations ... ok
+test only_an_ordinary_objects_own_initializer_adds_the_prefix_type ... ok
+test registration_matches_each_complete_isolated_live_graph ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.11s
+
+     Running tests/direct_field_macros.rs (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/target/debug/deps/direct_field_macros-8a19ebb4df6926ac)
+
+running 2 tests
+test repeated_field_expansions_keep_their_own_access_and_following_call_lines ... ok
+test direct_field_macros_match_complete_isolated_live_graphs ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.09s
+
+     Running tests/direct_macro_arguments.rs (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/target/debug/deps/direct_macro_arguments-c8d3bd7fd56d9530)
+
+running 2 tests
+test typedef_intop_preserves_operands_and_original_macro_argument_slots ... ok
+test token_arguments_match_complete_isolated_live_graphs ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s
+
+     Running tests/external_functions.rs (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/target/debug/deps/external_functions-04d1ed8c36cebc04)
+
+running 10 tests
+test inactive_function_bodies_do_not_register_block_prototypes ... ok
+test block_prototype_shadows_a_pointer_parameter_only_within_that_block ... ok
+test leaving_a_block_restores_the_shadowed_parameter_ref_binding ... ok
+test unused_multiple_void_unnamed_and_variadic_prototypes_keep_typed_structure ... ok
+test direct_callees_have_no_phantom_locals_and_keep_declared_return_types ... ok
+test late_prototypes_preserve_duplicate_static_definition_identity ... ok
+test block_pointer_shadow_does_not_change_later_direct_function_call ... ok
+test for_initializer_scope_restores_function_dispatch_and_parameter_binding ... ok
+test synthetic_for_condition_does_not_shift_real_call_locations ... ok
+test initialized_and_uninitialized_local_and_global_function_pointers_dispatch_dynamically ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/field_cast_interactions.rs (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/target/debug/deps/field_cast_interactions-726d47efa415531c)
+
+running 1 test
+test field_cast_interactions_match_complete_isolated_live_graphs ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests/field_macros.rs (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/target/debug/deps/field_macros-3db6291554d97eff)
+
+running 1 test
+test field_macros_match_complete_isolated_live_graphs ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+
+     Running tests/header_macro_locations.rs (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/target/debug/deps/header_macro_locations-f2ecc78299aadb56)
+
+running 2 tests
+test macro_descendants_and_following_statements_match_live_lines ... ok
+test header_macro_location_fixtures_match_complete_live_graphs ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests/header_macros.rs (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/target/debug/deps/header_macros-8137475a0d6964c6)
+
+running 2 tests
+test supplied_header_macros_match_complete_isolated_live_graphs ... ok
+test parity_cli_preserves_relative_header_paths ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.27s
+
+     Running tests/header_return_bindings.rs (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/target/debug/deps/header_return_bindings-5eb4b98a693e02a1)
+
+running 4 tests
+test expanded_header_recovery_cannot_invent_a_callable_named_after_its_return_type ... ok
+test invalid_redeclarations_do_not_erase_valid_recovered_typedef_bindings ... ok
+test header_call_bindings_resolve_known_aliases_and_keep_unknown_targets_unknown ... ok
+test supplied_header_bindings_match_complete_live_graphs ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s
+
+     Running tests/inactive_declaration_context.rs (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/target/debug/deps/inactive_declaration_context-7e482c22c62bc865)
+
+running 2 tests
+test inactive_directives_cannot_mutate_retained_array_macro_expansions ... ok
+test retained_inactive_declarations_match_complete_live_graphs ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running tests/macro_cast_context.rs (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/target/debug/deps/macro_cast_context-951da4d1a25f3ba7)
+
+running 2 tests
+test sizeof_typedef_context_distinguishes_parameter_shadowing ... ok
+test known_typedef_cast_context_matches_complete_live_graphs ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.14s
+
+     Running tests/macro_definitions.rs (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/target/debug/deps/macro_definitions-408965e93aa6e118)
+
+running 2 tests
+test logical_macro_definitions_match_complete_isolated_live_graphs ... ok
+test macro_wrapper_types_match_complete_live_graph ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests/macro_recovery.rs (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/target/debug/deps/macro_recovery-2dafd3b3208d8403)
+
+running 1 test
+test macro_recovery_matches_complete_isolated_live_graphs ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.18s
+
+     Running tests/nested_macro_casts.rs (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/target/debug/deps/nested_macro_casts-c7513ad151bbaf19)
+
+running 5 tests
+test a_known_macro_suffix_does_not_expand_inside_a_unicode_identifier ... ok
+test nested_type_arguments_and_rawtt_match_complete_live_graph ... ok
+test ordinary_calls_literals_recursion_and_nested_arguments_remain_exact ... ok
+test composite_descriptors_render_once_and_preserve_nested_value_casts ... ok
+test expanded_cast_types_preserve_qualifiers_and_distinct_type_identity ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests/numeric_literals.rs (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/target/debug/deps/numeric_literals-f6d4bb344d04e9a8)
+
+running 2 tests
+test signed_children_keep_suffix_types_and_hex_digits_are_not_float_suffixes ... ok
+test numeric_literals_match_complete_live_graph ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s
+
+     Running tests/numeric_macro_roots.rs (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/target/debug/deps/numeric_macro_roots-b6b28f7417811e1e)
+
+running 1 test
+test numeric_macro_roots_match_complete_live_graphs ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running tests/predefined_c_macros.rs (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/target/debug/deps/predefined_c_macros-49779077c5153067)
+
+running 1 test
+test default_c_macros_match_complete_live_graphs ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.09s
+
+     Running tests/primitive_roles.rs (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/target/debug/deps/primitive_roles-53ca22f846bceb5e)
+
+running 3 tests
+test function_pointer_parameters_keep_declaration_types_and_resolve_call_results ... ok
+test definition_prototype_and_call_result_types_stay_distinct ... ok
+test primitive_roles_match_each_complete_isolated_live_graph ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.22s
+
+     Running tests/rd_scheduling.rs (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/target/debug/deps/rd_scheduling-2fbc551c03809435)
+
+running 6 tests
+test loop_tail_without_standalone_blocks_is_also_exact ... ok
+test ordered_control_composition_matches_the_complete_live_graph ... ok
+test former_standalone_block_loop_tail_differences_are_exact ... ok
+test scheduling_matches_all_sections_of_the_live_graph ... ok
+test an_unscheduled_call_can_define_exit_without_receiving_call_site_edges ... ok
+test broader_macro_ordering_diagnostic_is_now_exact ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.09s
+
+     Running tests/sixth_context_interactions.rs (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/target/debug/deps/sixth_context_interactions-671391e2c256343d)
+
+running 1 test
+test declaration_typedef_and_sizeof_contexts_match_complete_live_graphs ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s
+
+     Running tests/sixth_integration_promotions.rs (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/target/debug/deps/sixth_integration_promotions-ebd7d33532345f0f)
+
+running 1 test
+test combined_type_binding_repairs_match_complete_live_graphs ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/sizeof_expansion.rs (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/target/debug/deps/sizeof_expansion-1cf10ae848639849)
+
+running 2 tests
+test malformed_sizeof_parentheses_retain_all_recovered_source_children ... ok
+test expanded_sizeof_matches_complete_live_graphs ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.09s
+
+     Running tests/spaced_method_names.rs (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/target/debug/deps/spaced_method_names-da993fb4132af238)
+
+running 3 tests
+test method_prefix_collision_cannot_steal_header_or_macro_entry_edges ... ok
+test code_property_markers_preserve_method_origin_edges ... ok
+test complete_method_names_preserve_cfg_and_reaching_definitions ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running tests/standalone_blocks.rs (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/target/debug/deps/standalone_blocks-6a5450a77f73ff81)
+
+running 3 tests
+test standalone_block_is_a_cfg_node_after_its_statements ... ok
+test standalone_scope_restores_parameter_references_and_pointer_dispatch ... ok
+test standalone_blocks_match_complete_live_graph ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running tests/statement_macros.rs (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/target/debug/deps/statement_macros-4a43c49b84993f68)
+
+running 4 tests
+test macro_comments_do_not_create_file_scope_declarations ... ok
+test generated_statement_nodes_remain_at_their_own_invocation ... ok
+test statement_macro_findings_match_all_live_positive_and_negative_outcomes ... ok
+test statement_macros_match_complete_isolated_live_graphs ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.20s
+
+     Running tests/static_modifiers.rs (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/target/debug/deps/static_modifiers-aae4e3fd78d158ae)
+
+running 2 tests
+test static_modifiers_match_the_complete_live_graph ... ok
+test only_a_leading_static_token_adds_a_modifier_and_shifts_the_return ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests/typedef_aggregates.rs (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/target/debug/deps/typedef_aggregates-aa70ae54e48e2d0d)
+
+running 5 tests
+test aggregate_pointer_and_array_aliases_keep_underlying_types_and_initializers ... ok
+test lua_typedef_body_and_initializer_survive_production_import ... ok
+test every_member_dimension_reaches_the_initializer ... ok
+test typedef_tags_aliases_and_source_order_remain_distinct ... ok
+test typedef_aggregates_match_complete_isolated_live_graphs ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s
+
+     Running tests/typedef_existence.rs (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/target/debug/deps/typedef_existence-b4b68f2a04db6db2)
+
+running 2 tests
+test typedef_existence_preserves_complete_exact_controls ... ok
+test expanded_typedef_validity_preserves_cast_and_pointer_call_context ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.52s
+
+   Doc-tests cpg_analysis
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests cpg_lang_c
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

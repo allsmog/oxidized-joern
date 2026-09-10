@@ -1,0 +1,175 @@
+{
+  "status": "PASS_BOUNDED_V8_SOURCE_AND_76_PROJECT_PACKAGE",
+  "createdAtUtc": "2026-09-08T20:47:13.516253+00:00",
+  "scope": "Independent read-only review and frozen small producers only; not whole-project, resource, integration, release, or full-port acceptance.",
+  "baselineCommit": "26f4cef3775c0f77988187e04bc1693e8d43fc0d",
+  "baselineSource": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-macro-state/before/exact.rs",
+    "sha256": "8b132fab7d079a97e774b10d5b1f14c1a1df4f093ef8f437ebfcaadfdde33b3b",
+    "bytes": 387069
+  },
+  "source": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-macro-state/candidate-v8/exact.rs",
+    "sha256": "f8dd06912d8acddeae363ee398df4b10c1502f4d0b47acd64cbe449c34789ec1",
+    "bytes": 399178
+  },
+  "binary": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-macro-state/candidate-v8/joern-parity",
+    "sha256": "cc3e84176ed1bc01fc0ad8a10e7f2f61fcedaa420e3e40ac277831143241289a",
+    "bytes": 11832064
+  },
+  "pairedBuild": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-macro-state/candidate-v8/bindings.json",
+    "sha256": "bae8c3456418fc6db2bbf98a79e00374504b81a4f8317ffd7c1ec00998353fae",
+    "bytes": 899
+  },
+  "packageManifest": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-macro-state/package-v8/manifest.json",
+    "sha256": "27f9fb7958d042d77dc327809cb59ce85614990792706900299d57dcb0d823c5",
+    "bytes": 431693
+  },
+  "supplementalManifest": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-macro-state/package-v8-supplemental/manifest.json",
+    "sha256": "2b921525e336a691cefda7cfa358bbb7443b8e6f2b8492d92c7c771bfe67922c",
+    "bytes": 2827
+  },
+  "measurement": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/cpg-rs/joern-parity/tests/fixtures/body-macro-state/measurement.json",
+    "sha256": "c79f132b0c662c12d6afd1b39272cad1b962ba8817edde24d39ca0c9438ecb05",
+    "bytes": 870860
+  },
+  "README": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/cpg-rs/joern-parity/tests/fixtures/body-macro-state/README.md",
+    "sha256": "75b945b68ef54d4ccf1f67d794f3df830dce31bb98456bdbf36ff1bcd3b32c89",
+    "bytes": 6518
+  },
+  "test": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/cpg-rs/joern-parity/tests/body_macro_state.rs",
+    "sha256": "2b36d9d5ace7e8b7cde363bbffd247f00985ff8030c97db7a75ba6c4f8acd19c",
+    "bytes": 4390
+  },
+  "QUIRKS": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/cpg-rs/joern-parity/QUIRKS.md",
+    "sha256": "456c0e34112134fcc909b2175a03b9d4e608888d0c7e7941c36e783f3f9da9a7",
+    "bytes": 19738
+  },
+  "packageReview": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-v8-review/package-review.json",
+    "sha256": "7238bbca310ee90053ce87d8bb737be97d04d982267b52581dbb4eb6bea95618",
+    "bytes": 955702
+  },
+  "rawReview": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-v8-review/raw-reference-inventory.json",
+    "sha256": "bd4846df12b984348415478185d683c10e88c7c97e891a36679ebabdfaebb4ec",
+    "bytes": 78054
+  },
+  "independentReplay": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-v8-review/replay.json",
+    "sha256": "42982832a5918713864b5a84491108356a7401b96e5042e785149a24d3bca9c0",
+    "bytes": 215684
+  },
+  "objectCalleeIndependentReview": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/v8-independent/final-review.json",
+    "sha256": "6a3366df3d3f80a47379f71e6fa577f213ab7f4afeb07d9f7d01427315f62267",
+    "bytes": 37814
+  },
+  "sourcePatch": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-macro-state/package-v8/final-source.patch",
+    "sha256": "a6064866b6d14d33f42b4bd65175ffdc1ddfa7cee0f6078d97c6958bc292d1a0",
+    "bytes": 52162
+  },
+  "sourcePatchReconstructsFrozenSource": true,
+  "immutablePackageFiles": 1870,
+  "liveWorkingFilesEqualImmutablePackage": 1867,
+  "supplementalHeldReplayFiles": 7,
+  "projectCount": 76,
+  "beforeExact": 11,
+  "currentExact": 54,
+  "previouslyExactLost": [],
+  "rawMatchingSelectedRecordGains": 555,
+  "rawMatchingSelectedRecordLosses": 0,
+  "canonicalLinesIncludingSeparators": 13694,
+  "nonemptySelectedRecords": 13294,
+  "diagnosticCount": 22,
+  "abortedCase": "duplicate_clinit_tag",
+  "abortInterpretation": "Baseline and V8 both fail importer duplicate identity. Complete live reference, empty stdout, stderr, and each actual exit status retained; not a successful baseline graph or new exact gate.",
+  "productionTests": {
+    "binary": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/target/debug/deps/body_macro_state-c0dc4c5f287440e0",
+      "sha256": "0b44aac29f611413d9ca35f68c7ab0609822755bccc4018174cf72c3b852c4d3",
+      "bytes": 11705472
+    },
+    "log": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-v8-review/production-tests.log",
+      "sha256": "2e0d2fbc366f250d0e3e69fd69a7ee0268652f9ebdba1794c636c355df613b77",
+      "bytes": 254
+    },
+    "passed": 2,
+    "failed": 0,
+    "ignored": 0,
+    "fullGraphCases": 54,
+    "completeMethodAssertions": 2,
+    "freshBuildRunByReviewer": false
+  },
+  "priorReviewChain": {
+    "initialSevenControls": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-body-state-review/challenge-review.json",
+      "sha256": "c409dab206f90bc3ce17e4714b794b5f4c16743b09ab9ed75722dac90c14a466",
+      "bytes": 13618
+    },
+    "definitionSelection": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/definition-selection-final.json",
+      "sha256": "7a1a6eb8216e1681ecb5fa29351abf90730b160130a728efda31338d3698f9b7",
+      "bytes": 17976
+    },
+    "heldV4": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-v4-review/v4-review-held.json",
+      "sha256": "559d2ef7a74eb71eb73dae159b6b87f264d4e7d1b5d04a3082e8af38bca93311",
+      "bytes": 23231
+    },
+    "literalRegression": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-v4-review/literal-events/introduced-regression.json",
+      "sha256": "05bffe844c61b7ac2ceaeb8d48cd83e752b66ab1ae9786baa7a986c9533ef801",
+      "bytes": 10060
+    },
+    "heldV5": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-v5-review/review-held.json",
+      "sha256": "4a16cae74e91cb2d2e970c93a76c5a2da23f8c03ae7d3682c35d0db19fe08aee",
+      "bytes": 10047
+    },
+    "deferredFieldProtection": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-deferred-field-review/review.json",
+      "sha256": "37a607c7970c83c8ecc72d3a92de7299e5e45dbaee8af329821136fb1bfbcca8",
+      "bytes": 22483
+    }
+  },
+  "v6ToV8ChangedOriginal71Graphs": [
+    "local_inactive_prototype",
+    "local_inactive_prototype_header"
+  ],
+  "sourceReview": {
+    "sourceSnapshots": "One original source buffer/tree, sparse Arc changes and nonoverlapping outer body ranges; temporary/recovery/copy contexts explicitly suppress automatic lookup. Type tree state and macro state restored around emission.",
+    "macroStateOrder": "Directive effects persist lexically through C blocks/runtime branches and later functions/includes; inactive body effects remain skipped, lexical typedef names remain separate.",
+    "metadataReplay": "Stable numeric-offset event order, immutable unique original invocation placement records, explicit TU dump ordinals/byte ranges/CALL-edge indices; first registration by complete resulting full name. Repeated method/global render copies do not independently consume events.",
+    "literalOpacity": "Quoted and character literal token trees excluded from event scanning; all four fresh literal regressions now complete exact.",
+    "prototypeRepair": "Body-local prototype traversal uses the shared selected-branch context; file-scope inactive declarations retain previous behavior. Both fresh prototype graphs now exact, only graph changes among original71 fromV6.",
+    "terminalEligibility": "Uses eligibility state from existing bounded recursive expander while disabled set is active; empty/trivia preserves last significant token, unavailable recursive token stays unavailable. Analysis independently validates String expansion unchanged and 17 full live controls.",
+    "protectedSourceSuffixesUnchanged": {
+      "fn parse_dump_block(": true,
+      "fn reaching_def_flows(": true,
+      "fn captured_identifier_flows(": true
+    }
+  },
+  "limitations": [
+    "The nine-property canonical projection cannot certify every raw Joern property or source column; CODE transport remains noninjective.",
+    "Function-like preprocessor conditions, body-include declarations, nested GNU functions and some object-callee/type-position expressions remain complete diagnostics.",
+    "If the modeled metadata queue yields no eligible event, Rust retains current metadata rather than reproducing upstream None/no-wrapper behavior.",
+    "No whole-project method/body or performance claim is made before root runs the combined frozen build."
+  ],
+  "requiredFixes": [],
+  "reviewerPreparationFailure": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-v8-review/verify-package-first-attempt.txt",
+    "sha256": "9d102eb27c68de9cacfa3724c58fdea20f1b080c26b268c8d0791b69e1fc01ba",
+    "bytes": 163
+  }
+}

@@ -1,0 +1,36 @@
+--- live
++++ candidate
+@@ -18,12 +18,10 @@
+ NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE_DECL NAME=Kind FULL_NAME=Kind CODE=Kind IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE_DECL NAME=Kind* FULL_NAME=Kind* CODE=Kind* IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+-NODES|TYPE_DECL NAME=kind FULL_NAME=kind CODE=kind IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE_DECL NAME=<global> FULL_NAME=registration.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=registration.c:<global> FILENAME=registration.c ORDER=1
+ NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+ NODES|TYPE NAME=Kind FULL_NAME=Kind TYPE_DECL_FULL_NAME=Kind
+ NODES|TYPE NAME=Kind* FULL_NAME=Kind* TYPE_DECL_FULL_NAME=Kind*
+-NODES|TYPE NAME=kind FULL_NAME=kind TYPE_DECL_FULL_NAME=kind
+ EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+ EDGES|CFG registration.c:<global>#0 -> registration.c:<global>#3
+ EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+@@ -32,7 +30,6 @@
+ EDGES|CONTAINS F:<includes> -> D:ANY
+ EDGES|CONTAINS F:<includes> -> D:Kind
+ EDGES|CONTAINS F:<includes> -> D:Kind*
+-EDGES|CONTAINS F:<includes> -> D:kind
+ EDGES|CONTAINS F:registration.c -> D:registration.c:<global>
+ EDGES|CONTAINS registration.c:<global>#0 -> registration.c:<global>#1
+ EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+@@ -46,12 +43,10 @@
+ EDGES|REF T:ANY -> D:ANY
+ EDGES|REF T:Kind -> D:Kind
+ EDGES|REF T:Kind* -> D:Kind*
+-EDGES|REF T:kind -> D:kind
+ EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+ EDGES|SOURCE_FILE D:ANY -> F:<includes>
+ EDGES|SOURCE_FILE D:Kind -> F:<includes>
+ EDGES|SOURCE_FILE D:Kind* -> F:<includes>
+-EDGES|SOURCE_FILE D:kind -> F:<includes>
+ EDGES|SOURCE_FILE D:registration.c:<global> -> F:registration.c
+ EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
+ EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>

@@ -1,0 +1,204 @@
+METHOD NAME=luaD_seterrorobj CODE=void luaD_seterrorobj (lua_State *L, int errcode, StkId oldtop) {\n  switch (errcode) {\n    case LUA_ERRMEM: {  /* memory error? */\n      setsvalue2s(L, oldtop, G(L)->memerrmsg); /* reuse preregistered msg. */\n      break;\n    }\n    case LUA_ERRERR: {\n      setsvalue2s(L, oldtop, luaS_newliteral(L, "error in error handling"));\n      break;\n    }\n    case LUA_OK: {  /* special case only for closing upvalues */\n      setnilvalue(s2v(oldtop));  /* no error message */\n      break;\n    }\n    default: {\n      lua_assert(errorstatus(errcode));  /* real error */\n      setobjs2s(L, oldtop, L->top.p - 1);  /* error message on current top */\n      break;\n    }\n  }\n  L->top.p = oldtop + 1;\n} FULL_NAME=luaD_seterrorobj SIGNATURE=void(lua_State*,int,StkId) ORDER=1
+  METHOD_PARAMETER_IN NAME=L CODE=lua_State *L TYPE_FULL_NAME=lua_State* ORDER=1
+  METHOD_PARAMETER_OUT NAME=L CODE=lua_State *L TYPE_FULL_NAME=lua_State* ORDER=1
+  METHOD_PARAMETER_IN NAME=errcode CODE=int errcode TYPE_FULL_NAME=int ORDER=2
+  METHOD_PARAMETER_OUT NAME=errcode CODE=int errcode TYPE_FULL_NAME=int ORDER=2
+  METHOD_PARAMETER_IN NAME=oldtop CODE=StkId oldtop TYPE_FULL_NAME=StkId ORDER=3
+  METHOD_PARAMETER_OUT NAME=oldtop CODE=StkId oldtop TYPE_FULL_NAME=StkId ORDER=3
+  BLOCK CODE={\n  switch (errcode) {\n    case LUA_ERRMEM: {  /* memory error? */\n      setsvalue2s(L, oldtop, G(L)->memerrmsg); /* reuse preregistered msg. */\n      break;\n    }\n    case LUA_ERRERR: {\n      setsvalue2s(L, oldtop, luaS_newliteral(L, "error in error handling"));\n      break;\n    }\n    case LUA_OK: {  /* special case only for closing upvalues */\n      setnilvalue(s2v(oldtop));  /* no error message */\n      break;\n    }\n    default: {\n      lua_assert(errorstatus(errcode));  /* real error */\n      setobjs2s(L, oldtop, L->top.p - 1);  /* error message on current top */\n      break;\n    }\n  }\n  L->top.p = oldtop + 1;\n} TYPE_FULL_NAME=void ORDER=4
+    LOCAL NAME=gc CODE=<unknown> gc TYPE_FULL_NAME=ANY ORDER=0
+    LOCAL NAME=char CODE=char TYPE_FULL_NAME=char ORDER=0
+    CONTROL_STRUCTURE CODE=switch (errcode) {\n    case LUA_ERRMEM: {  /* memory error? */\n      setsvalue2s(L, oldtop, G(L)->memerrmsg); /* reuse preregistered msg. */\n      break;\n    }\n    case LUA_ERRERR: {\n      setsvalue2s(L, oldtop, luaS_newliteral(L, "error in error handling"));\n      break;\n    }\n    case LUA_OK: {  /* special case only for closing upvalues */\n      setnilvalue(s2v(oldtop));  /* no error message */\n      break;\n    }\n    default: {\n      lua_assert(errorstatus(errcode));  /* real error */\n      setobjs2s(L, oldtop, L->top.p - 1);  /* error message on current top */\n      break;\n    }\n  } ORDER=1
+      IDENTIFIER NAME=errcode CODE=errcode TYPE_FULL_NAME=int ORDER=1
+      BLOCK CODE={\n    case LUA_ERRMEM: {  /* memory error? */\n      setsvalue2s(L, oldtop, G(L)->memerrmsg); /* reuse preregistered msg. */\n      break;\n    }\n    case LUA_ERRERR: {\n      setsvalue2s(L, oldtop, luaS_newliteral(L, "error in error handling"));\n      break;\n    }\n    case LUA_OK: {  /* special case only for closing upvalues */\n      setnilvalue(s2v(oldtop));  /* no error message */\n      break;\n    }\n    default: {\n      lua_assert(errorstatus(errcode));  /* real error */\n      setobjs2s(L, oldtop, L->top.p - 1);  /* error message on current top */\n      break;\n    }\n  } TYPE_FULL_NAME=void ORDER=2
+        JUMP_TARGET NAME=case CODE=case LUA_ERRMEM: ORDER=1
+        CALL NAME=LUA_ERRMEM CODE=LUA_ERRMEM TYPE_FULL_NAME=int METHOD_FULL_NAME=lua.h:LUA_ERRMEM:int(0) SIGNATURE=int(0) ORDER=2 DISPATCH_TYPE=INLINED
+          BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+            LITERAL CODE=4 TYPE_FULL_NAME=int ORDER=1
+        BLOCK CODE={  /* memory error? */\n      setsvalue2s(L, oldtop, G(L)->memerrmsg); /* reuse preregistered msg. */\n      break;\n    } TYPE_FULL_NAME=void ORDER=3
+          CALL NAME=setsvalue2s CODE=setsvalue2s(L, oldtop, G(L)->memerrmsg) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=lobject.h:setsvalue2s:ANY(3) SIGNATURE=ANY(3) ORDER=1 DISPATCH_TYPE=INLINED
+            IDENTIFIER NAME=L CODE=L TYPE_FULL_NAME=lua_State* ORDER=1 ARGUMENT_INDEX=1
+            IDENTIFIER NAME=oldtop CODE=oldtop TYPE_FULL_NAME=StkId ORDER=2 ARGUMENT_INDEX=2
+            BLOCK CODE=setsvalue2s(L, oldtop, G(L)->memerrmsg) TYPE_FULL_NAME=void ORDER=3 ARGUMENT_INDEX=3
+              LOCAL NAME=io CODE=setsvalue2s(L, oldtop, G(L)->memerrmsg) TYPE_FULL_NAME=TValue* ORDER=1
+              CALL NAME=<operator>.assignment CODE=TValue * TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+                IDENTIFIER NAME=io CODE=setsvalue2s(L, oldtop, G(L)->memerrmsg) TYPE_FULL_NAME=TValue* ORDER=1 ARGUMENT_INDEX=1
+                CALL NAME=<operator>.addressOf CODE=&(oldtop)->val TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addressOf ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+                  CALL NAME=<operator>.indirectFieldAccess CODE=(oldtop)->val TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                    IDENTIFIER NAME=oldtop CODE=oldtop TYPE_FULL_NAME=StkId ORDER=1 ARGUMENT_INDEX=1
+                    FIELD_IDENTIFIER CODE=val ORDER=2 ARGUMENT_INDEX=2
+              LOCAL NAME=x_ CODE=setsvalue2s(L, oldtop, G(L)->memerrmsg) TYPE_FULL_NAME=TString* ORDER=3
+              CALL NAME=<operator>.assignment CODE=TString * TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=4 DISPATCH_TYPE=STATIC_DISPATCH
+                IDENTIFIER NAME=x_ CODE=setsvalue2s(L, oldtop, G(L)->memerrmsg) TYPE_FULL_NAME=TString* ORDER=1 ARGUMENT_INDEX=1
+                CALL NAME=<operator>.indirectFieldAccess CODE=(L->l_G)->memerrmsg TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+                  CALL NAME=<operator>.indirectFieldAccess CODE=L->l_G TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                    IDENTIFIER NAME=L CODE=L TYPE_FULL_NAME=lua_State* ORDER=1 ARGUMENT_INDEX=1
+                    FIELD_IDENTIFIER CODE=l_G ORDER=2 ARGUMENT_INDEX=2
+                  FIELD_IDENTIFIER CODE=memerrmsg ORDER=2 ARGUMENT_INDEX=2
+              CALL NAME=<operator>.assignment CODE=((io)->value_).gc = (&(cast(union GCUnion *, (x_)->gc)) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=5 DISPATCH_TYPE=STATIC_DISPATCH
+                CALL NAME=<operator>.fieldAccess CODE=((io)->value_).gc TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.fieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                  CALL NAME=<operator>.indirectFieldAccess CODE=(io)->value_ TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                    IDENTIFIER NAME=io CODE=io TYPE_FULL_NAME=TValue* ORDER=1 ARGUMENT_INDEX=1
+                    FIELD_IDENTIFIER CODE=value_ ORDER=2 ARGUMENT_INDEX=2
+                  FIELD_IDENTIFIER CODE=gc ORDER=2 ARGUMENT_INDEX=2
+                CALL NAME=<operator>.addressOf CODE=&(cast(union GCUnion *, (x_)->gc) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addressOf ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+              CALL NAME=<operator>.assignment CODE=(io)->tt_ = (((x_->tt) | (1 << 6))) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=6 DISPATCH_TYPE=STATIC_DISPATCH
+                CALL NAME=<operator>.indirectFieldAccess CODE=(io)->tt_ TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                  IDENTIFIER NAME=io CODE=io TYPE_FULL_NAME=TValue* ORDER=1 ARGUMENT_INDEX=1
+                  FIELD_IDENTIFIER CODE=tt_ ORDER=2 ARGUMENT_INDEX=2
+                CALL NAME=<operator>.or CODE=(x_->tt) | (1 << 6) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.or ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+                  CALL NAME=<operator>.indirectFieldAccess CODE=x_->tt TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                    IDENTIFIER NAME=x_ CODE=x_ TYPE_FULL_NAME=TString* ORDER=1 ARGUMENT_INDEX=1
+                    FIELD_IDENTIFIER CODE=tt ORDER=2 ARGUMENT_INDEX=2
+                  CALL NAME=<operator>.shiftLeft CODE=1 << 6 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.shiftLeft ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+                    LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+                    LITERAL CODE=6 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+              BLOCK TYPE_FULL_NAME=ANY ORDER=7
+                CALL NAME=<operator>.cast CODE=(void)L TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.cast ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+                  TYPE_REF CODE=void TYPE_FULL_NAME=void ORDER=1 ARGUMENT_INDEX=1
+                  IDENTIFIER NAME=L CODE=L TYPE_FULL_NAME=lua_State* ORDER=2 ARGUMENT_INDEX=2
+                CALL NAME=<operator>.cast CODE=(void)0 TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.cast ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+                  TYPE_REF CODE=void TYPE_FULL_NAME=void ORDER=1 ARGUMENT_INDEX=1
+                  LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+          CONTROL_STRUCTURE CODE=break; ORDER=2
+        JUMP_TARGET NAME=case CODE=case LUA_ERRERR: ORDER=4
+        CALL NAME=LUA_ERRERR CODE=LUA_ERRERR TYPE_FULL_NAME=int METHOD_FULL_NAME=lua.h:LUA_ERRERR:int(0) SIGNATURE=int(0) ORDER=5 DISPATCH_TYPE=INLINED
+          BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+            LITERAL CODE=5 TYPE_FULL_NAME=int ORDER=1
+        BLOCK CODE={\n      setsvalue2s(L, oldtop, luaS_newliteral(L, "error in error handling"));\n      break;\n    } TYPE_FULL_NAME=void ORDER=6
+          CALL NAME=setsvalue2s CODE=setsvalue2s(L, oldtop, luaS_newliteral(L, "error in error handling")) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=lobject.h:setsvalue2s:ANY(3) SIGNATURE=ANY(3) ORDER=1 DISPATCH_TYPE=INLINED
+            IDENTIFIER NAME=L CODE=L TYPE_FULL_NAME=lua_State* ORDER=1 ARGUMENT_INDEX=1
+            IDENTIFIER NAME=oldtop CODE=oldtop TYPE_FULL_NAME=StkId ORDER=2 ARGUMENT_INDEX=2
+            BLOCK CODE=setsvalue2s(L, oldtop, luaS_newliteral(L, "error in error handling")) TYPE_FULL_NAME=void ORDER=3 ARGUMENT_INDEX=3
+              LOCAL NAME=io CODE=setsvalue2s(L, oldtop, luaS_newliteral(L, "error in error handling")) TYPE_FULL_NAME=TValue* ORDER=1
+              CALL NAME=<operator>.assignment CODE=TValue * TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+                IDENTIFIER NAME=io CODE=setsvalue2s(L, oldtop, luaS_newliteral(L, "error in error handling")) TYPE_FULL_NAME=TValue* ORDER=1 ARGUMENT_INDEX=1
+                CALL NAME=<operator>.addressOf CODE=&(oldtop)->val TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addressOf ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+                  CALL NAME=<operator>.indirectFieldAccess CODE=(oldtop)->val TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                    IDENTIFIER NAME=oldtop CODE=oldtop TYPE_FULL_NAME=StkId ORDER=1 ARGUMENT_INDEX=1
+                    FIELD_IDENTIFIER CODE=val ORDER=2 ARGUMENT_INDEX=2
+              LOCAL NAME=x_ CODE=setsvalue2s(L, oldtop, luaS_newliteral(L, "error in error handling")) TYPE_FULL_NAME=TString* ORDER=3
+              CALL NAME=<operator>.assignment CODE=TString * TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=4 DISPATCH_TYPE=STATIC_DISPATCH
+                IDENTIFIER NAME=x_ CODE=setsvalue2s(L, oldtop, luaS_newliteral(L, "error in error handling")) TYPE_FULL_NAME=TString* ORDER=1 ARGUMENT_INDEX=1
+                CALL NAME=luaS_newlstr CODE=luaS_newlstr(L, "error in error handling", (sizeof("error in error handling") / sizeof(char)) - 1) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=luaS_newlstr ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+                  IDENTIFIER NAME=L CODE=L TYPE_FULL_NAME=lua_State* ORDER=1 ARGUMENT_INDEX=1
+                  LITERAL CODE="error in error handling" TYPE_FULL_NAME=char* ORDER=2 ARGUMENT_INDEX=2
+                  CALL NAME=<operator>.subtraction CODE=(sizeof("error in error handling") / sizeof(char)) - 1 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.subtraction ORDER=3 ARGUMENT_INDEX=3 DISPATCH_TYPE=STATIC_DISPATCH
+                    CALL NAME=<operator>.division CODE=sizeof("error in error handling") / sizeof(char) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.division ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                      CALL NAME=<operator>.sizeOf CODE=sizeof("error in error handling") TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.sizeOf ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                        LITERAL CODE="error in error handling" TYPE_FULL_NAME=char* ORDER=1 ARGUMENT_INDEX=1
+                      CALL NAME=<operator>.sizeOf CODE=sizeof(char) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.sizeOf ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+                        IDENTIFIER NAME=char CODE=char TYPE_FULL_NAME=char ORDER=1 ARGUMENT_INDEX=1
+                    LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+              CALL NAME=<operator>.assignment CODE=((io)->value_).gc = (&(cast(union GCUnion *, (x_)->gc)) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=5 DISPATCH_TYPE=STATIC_DISPATCH
+                CALL NAME=<operator>.fieldAccess CODE=((io)->value_).gc TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.fieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                  CALL NAME=<operator>.indirectFieldAccess CODE=(io)->value_ TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                    IDENTIFIER NAME=io CODE=io TYPE_FULL_NAME=TValue* ORDER=1 ARGUMENT_INDEX=1
+                    FIELD_IDENTIFIER CODE=value_ ORDER=2 ARGUMENT_INDEX=2
+                  FIELD_IDENTIFIER CODE=gc ORDER=2 ARGUMENT_INDEX=2
+                CALL NAME=<operator>.addressOf CODE=&(cast(union GCUnion *, (x_)->gc) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addressOf ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+              CALL NAME=<operator>.assignment CODE=(io)->tt_ = (((x_->tt) | (1 << 6))) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=6 DISPATCH_TYPE=STATIC_DISPATCH
+                CALL NAME=<operator>.indirectFieldAccess CODE=(io)->tt_ TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                  IDENTIFIER NAME=io CODE=io TYPE_FULL_NAME=TValue* ORDER=1 ARGUMENT_INDEX=1
+                  FIELD_IDENTIFIER CODE=tt_ ORDER=2 ARGUMENT_INDEX=2
+                CALL NAME=<operator>.or CODE=(x_->tt) | (1 << 6) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.or ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+                  CALL NAME=<operator>.indirectFieldAccess CODE=x_->tt TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                    IDENTIFIER NAME=x_ CODE=x_ TYPE_FULL_NAME=TString* ORDER=1 ARGUMENT_INDEX=1
+                    FIELD_IDENTIFIER CODE=tt ORDER=2 ARGUMENT_INDEX=2
+                  CALL NAME=<operator>.shiftLeft CODE=1 << 6 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.shiftLeft ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+                    LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+                    LITERAL CODE=6 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+              BLOCK TYPE_FULL_NAME=ANY ORDER=7
+                CALL NAME=<operator>.cast CODE=(void)L TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.cast ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+                  TYPE_REF CODE=void TYPE_FULL_NAME=void ORDER=1 ARGUMENT_INDEX=1
+                  IDENTIFIER NAME=L CODE=L TYPE_FULL_NAME=lua_State* ORDER=2 ARGUMENT_INDEX=2
+                CALL NAME=<operator>.cast CODE=(void)0 TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.cast ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+                  TYPE_REF CODE=void TYPE_FULL_NAME=void ORDER=1 ARGUMENT_INDEX=1
+                  LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+          CONTROL_STRUCTURE CODE=break; ORDER=2
+        JUMP_TARGET NAME=case CODE=case LUA_OK: ORDER=7
+        CALL NAME=LUA_OK CODE=LUA_OK TYPE_FULL_NAME=int METHOD_FULL_NAME=lua.h:LUA_OK:int(0) SIGNATURE=int(0) ORDER=8 DISPATCH_TYPE=INLINED
+          BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+            LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=1
+        BLOCK CODE={  /* special case only for closing upvalues */\n      setnilvalue(s2v(oldtop));  /* no error message */\n      break;\n    } TYPE_FULL_NAME=void ORDER=9
+          CALL NAME=setnilvalue CODE=setnilvalue(s2v(oldtop)) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=lobject.h:setnilvalue:ANY(1) SIGNATURE=ANY(1) ORDER=1 DISPATCH_TYPE=INLINED
+            BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+              CALL NAME=<operator>.assignment CODE=((&(oldtop)->val))->tt_ = (((0) | ((0) << 4))) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+                CALL NAME=<operator>.indirectFieldAccess CODE=((&(oldtop)->val))->tt_ TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                  CALL NAME=<operator>.addressOf CODE=&(oldtop)->val TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addressOf ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                    CALL NAME=<operator>.indirectFieldAccess CODE=(oldtop)->val TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                      IDENTIFIER NAME=oldtop CODE=oldtop TYPE_FULL_NAME=StkId ORDER=1 ARGUMENT_INDEX=1
+                      FIELD_IDENTIFIER CODE=val ORDER=2 ARGUMENT_INDEX=2
+                  FIELD_IDENTIFIER CODE=tt_ ORDER=2 ARGUMENT_INDEX=2
+                CALL NAME=<operator>.or CODE=(0) | ((0) << 4) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.or ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+                  LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+                  CALL NAME=<operator>.shiftLeft CODE=(0) << 4 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.shiftLeft ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+                    LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+                    LITERAL CODE=4 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+          CONTROL_STRUCTURE CODE=break; ORDER=2
+        JUMP_TARGET NAME=default CODE=default: ORDER=10
+        BLOCK CODE={\n      lua_assert(errorstatus(errcode));  /* real error */\n      setobjs2s(L, oldtop, L->top.p - 1);  /* error message on current top */\n      break;\n    } TYPE_FULL_NAME=void ORDER=11
+          CALL NAME=lua_assert CODE=lua_assert(errorstatus(errcode)) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=llimits.h:lua_assert:ANY(1) SIGNATURE=ANY(1) ORDER=1 DISPATCH_TYPE=INLINED
+            BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+              CALL NAME=<operator>.cast CODE=(void)0 TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.cast ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+                TYPE_REF CODE=void TYPE_FULL_NAME=void ORDER=1 ARGUMENT_INDEX=1
+                LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+          CALL NAME=setobjs2s CODE=setobjs2s(L, oldtop, L->top.p - 1) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=lobject.h:setobjs2s:ANY(3) SIGNATURE=ANY(3) ORDER=2 DISPATCH_TYPE=INLINED
+            IDENTIFIER NAME=L CODE=L TYPE_FULL_NAME=lua_State* ORDER=1 ARGUMENT_INDEX=1
+            IDENTIFIER NAME=oldtop CODE=oldtop TYPE_FULL_NAME=StkId ORDER=2 ARGUMENT_INDEX=2
+            BLOCK CODE=setobjs2s(L, oldtop, L->top.p - 1) TYPE_FULL_NAME=void ORDER=3 ARGUMENT_INDEX=3
+              LOCAL NAME=io1 CODE=setobjs2s(L, oldtop, L->top.p - 1) TYPE_FULL_NAME=TValue* ORDER=1
+              CALL NAME=<operator>.assignment CODE=TValue * TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+                IDENTIFIER NAME=io1 CODE=setobjs2s(L, oldtop, L->top.p - 1) TYPE_FULL_NAME=TValue* ORDER=1 ARGUMENT_INDEX=1
+                CALL NAME=<operator>.addressOf CODE=&(oldtop)->val TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addressOf ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+                  CALL NAME=<operator>.indirectFieldAccess CODE=(oldtop)->val TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                    IDENTIFIER NAME=oldtop CODE=oldtop TYPE_FULL_NAME=StkId ORDER=1 ARGUMENT_INDEX=1
+                    FIELD_IDENTIFIER CODE=val ORDER=2 ARGUMENT_INDEX=2
+              LOCAL NAME=io2 CODE=setobjs2s(L, oldtop, L->top.p - 1) TYPE_FULL_NAME=TValue* ORDER=3
+              CALL NAME=<operator>.assignment CODE=const TValue * TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=4 DISPATCH_TYPE=STATIC_DISPATCH
+                IDENTIFIER NAME=io2 CODE=setobjs2s(L, oldtop, L->top.p - 1) TYPE_FULL_NAME=TValue* ORDER=1 ARGUMENT_INDEX=1
+                CALL NAME=<operator>.addressOf CODE=&(L->top.p - 1)->val TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addressOf ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+                  CALL NAME=<operator>.indirectFieldAccess CODE=(L->top.p - 1)->val TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                    CALL NAME=<operator>.subtraction CODE=L->top.p - 1 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.subtraction ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                      CALL NAME=<operator>.fieldAccess CODE=L->top.p TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.fieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                        CALL NAME=<operator>.indirectFieldAccess CODE=L->top TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                          IDENTIFIER NAME=L CODE=L TYPE_FULL_NAME=lua_State* ORDER=1 ARGUMENT_INDEX=1
+                          FIELD_IDENTIFIER CODE=top ORDER=2 ARGUMENT_INDEX=2
+                        FIELD_IDENTIFIER CODE=p ORDER=2 ARGUMENT_INDEX=2
+                      LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+                    FIELD_IDENTIFIER CODE=val ORDER=2 ARGUMENT_INDEX=2
+              CALL NAME=<operator>.assignment CODE=io1->value_ = io2->value_ TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=5 DISPATCH_TYPE=STATIC_DISPATCH
+                CALL NAME=<operator>.indirectFieldAccess CODE=io1->value_ TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                  IDENTIFIER NAME=io1 CODE=io1 TYPE_FULL_NAME=TValue* ORDER=1 ARGUMENT_INDEX=1
+                  FIELD_IDENTIFIER CODE=value_ ORDER=2 ARGUMENT_INDEX=2
+                CALL NAME=<operator>.indirectFieldAccess CODE=io2->value_ TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+                  IDENTIFIER NAME=io2 CODE=io2 TYPE_FULL_NAME=TValue* ORDER=1 ARGUMENT_INDEX=1
+                  FIELD_IDENTIFIER CODE=value_ ORDER=2 ARGUMENT_INDEX=2
+              CALL NAME=<operator>.assignment CODE=(io1)->tt_ = (io2->tt_) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=6 DISPATCH_TYPE=STATIC_DISPATCH
+                CALL NAME=<operator>.indirectFieldAccess CODE=(io1)->tt_ TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                  IDENTIFIER NAME=io1 CODE=io1 TYPE_FULL_NAME=TValue* ORDER=1 ARGUMENT_INDEX=1
+                  FIELD_IDENTIFIER CODE=tt_ ORDER=2 ARGUMENT_INDEX=2
+                CALL NAME=<operator>.indirectFieldAccess CODE=io2->tt_ TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+                  IDENTIFIER NAME=io2 CODE=io2 TYPE_FULL_NAME=TValue* ORDER=1 ARGUMENT_INDEX=1
+                  FIELD_IDENTIFIER CODE=tt_ ORDER=2 ARGUMENT_INDEX=2
+              BLOCK TYPE_FULL_NAME=ANY ORDER=7
+                CALL NAME=<operator>.cast CODE=(void)L TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.cast ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+                  TYPE_REF CODE=void TYPE_FULL_NAME=void ORDER=1 ARGUMENT_INDEX=1
+                  IDENTIFIER NAME=L CODE=L TYPE_FULL_NAME=lua_State* ORDER=2 ARGUMENT_INDEX=2
+                CALL NAME=<operator>.cast CODE=(void)0 TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.cast ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+                  TYPE_REF CODE=void TYPE_FULL_NAME=void ORDER=1 ARGUMENT_INDEX=1
+                  LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+              CALL NAME=<operator>.cast CODE=(void)0 TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.cast ORDER=8 DISPATCH_TYPE=STATIC_DISPATCH
+                TYPE_REF CODE=void TYPE_FULL_NAME=void ORDER=1 ARGUMENT_INDEX=1
+                LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+          CONTROL_STRUCTURE CODE=break; ORDER=3
+    CALL NAME=<operator>.assignment CODE=L->top.p = oldtop + 1 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+      CALL NAME=<operator>.fieldAccess CODE=L->top.p TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.fieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+        CALL NAME=<operator>.indirectFieldAccess CODE=L->top TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=L CODE=L TYPE_FULL_NAME=lua_State* ORDER=1 ARGUMENT_INDEX=1
+          FIELD_IDENTIFIER CODE=top ORDER=2 ARGUMENT_INDEX=2
+        FIELD_IDENTIFIER CODE=p ORDER=2 ARGUMENT_INDEX=2
+      CALL NAME=<operator>.addition CODE=oldtop + 1 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=oldtop CODE=oldtop TYPE_FULL_NAME=StkId ORDER=1 ARGUMENT_INDEX=1
+        LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=5

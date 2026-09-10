@@ -1,0 +1,391 @@
+{
+  "status": "READ_ONLY_DIAGNOSIS_COMPLETE_NO_IMPLEMENTATION",
+  "sourceSha256": "8b132fab7d079a97e774b10d5b1f14c1a1df4f093ef8f437ebfcaadfdde33b3b",
+  "importerSha256": "3fb6695576fe87e463b5e44160bcbe828321bf32149d67abcc2256eb88d11aba",
+  "baselineBinary": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/.local/body-preprocessor/candidate-v4/joern-parity",
+    "sha256": "575397f4a349231a559641e6ca12e76ed4fc42e6e1bc77e8ffeb12cb30f48b4a"
+  },
+  "referenceVersion": "Joern4.0.555",
+  "officialArchiveSha256": "12989883d6b5aeacc97b2dc0ecc4e2951bf50e48cb244f8c8f333d11a8be0c7e",
+  "rawStdoutSha256": "3f0e83f61d7c8a97462ab60461905cbb2feaa54d7b54629154379d0842390c81",
+  "rawStderrSha256": "900912864d251b34af701fc3d1fa018c49a8260a3ee9af7b03021390be479b38",
+  "oracleScriptSha256": "56431f14868678e64f9eb41026b44f1d3d7738404d28d2db62711b520c98c742",
+  "liveRunSha256": "88202313462e8060cf4a277995b346dbc1c9cae2b4cbd2f892f23271571a8060",
+  "baselineReplaySha256": "82b46c8072c1e01c69ff73e2c5572751ca337596a6a670ce69be0e543799479e",
+  "projectCount": 17,
+  "baselineCompleteExact": 2,
+  "canonicalLinesIncludingSeparators": 2286,
+  "nonemptySelectedRecords": 2221,
+  "originalLocalDefinitionReferenceUnchanged": true,
+  "sourceCitations": {
+    "macroStateRepresentation": "source/exact.rs:929",
+    "functionEntrySnapshot": "source/exact.rs:1590",
+    "snapshotCollectionStopsAtFunction": "source/exact.rs:5060",
+    "directiveUpdatesAtVisitedNodesOnly": "source/exact.rs:5127",
+    "typeSiteWalk": "source/exact.rs:1170",
+    "temporaryTypeTrees": "source/exact.rs:1285",
+    "localTypedefUnderlyingRegistration": "source/exact.rs:1336",
+    "preScanAndOrder": "source/exact.rs:2649",
+    "phantomWalker": "source/exact.rs:2747",
+    "bodyEmitter": "source/exact.rs:3001",
+    "statementBranchSelection": "source/exact.rs:3084",
+    "declarationShadowWalk": "source/exact.rs:7492",
+    "legacyActiveView": "source/exact.rs:7567",
+    "bodyBranchHelper": "source/exact.rs:7759",
+    "emptyMacroRecoveryOverrides": "source/exact.rs:2750",
+    "expandedMacroOverrides": "source/exact.rs:2531",
+    "sourceMethodLocationContext": "source/exact.rs:5866",
+    "independentCodeTransportGap": "source/import.rs:630"
+  },
+  "cases": [
+    {
+      "case": "body_state_then_include",
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/.local/body-preprocessor/candidate-v4/joern-parity",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/.local/ninth-body-macro-diagnosis/input/body_state_then_include/api.h",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/.local/ninth-body-macro-diagnosis/input/body_state_then_include/main.c"
+      ],
+      "exitCode": 0,
+      "seconds": 0.01120716700097546,
+      "exact": false,
+      "inputHashes": {
+        "api.h": "9dc974d4444114f759132e2e04ce3d95297a358f35032f780d7f950580f06443",
+        "main.c": "003a30b80183427fdc5e694c1d66b11e90f6cfe758a48264bae7b7055b9a8840"
+      },
+      "expectedSha256": "251de29563c3ca9bbcf717dca96fdd68fc22724992a50802ea45298647442583",
+      "actualSha256": "ba93b13c3b83b4bf415699be51cba3aaae7e2b491b04cff9f96013f3120725b1",
+      "diffSha256": "be60b02f077c59b37297821b767d8bb677b9a9648e5fec3efe198ba95ccb1f56",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "canonicalLinesIncludingSeparators": 152,
+      "nonemptySelectedRecords": 147,
+      "finding": "A body definition changes a later supplied header branch and the following function."
+    },
+    {
+      "case": "conditional_local_typedef",
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/.local/body-preprocessor/candidate-v4/joern-parity",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/.local/ninth-body-macro-diagnosis/input/conditional_local_typedef/main.c"
+      ],
+      "exitCode": 0,
+      "seconds": 0.0034434169938322157,
+      "exact": false,
+      "inputHashes": {
+        "main.c": "2cc7eee69d4790e6465147e56c976b960da648e36e2a38bf3c83fc44a1549e0e"
+      },
+      "expectedSha256": "f6572ce3338c133fff0bd4d5ab93569d37b7616071e14ad4fd19e8d64d91115f",
+      "actualSha256": "5351ccc0b30f7583900321d2d2a246334df73cd4061485a4d58aa11a79443726",
+      "diffSha256": "33e676bc72cbdcf6c82427721552f87a76f5a56182752d4cf3ca222f4a2771e2",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "canonicalLinesIncludingSeparators": 150,
+      "nonemptySelectedRecords": 146,
+      "finding": "Live selects typedef T and emits cast; baseline phantom T/pointerCall. Macro and type-site consumers must agree."
+    },
+    {
+      "case": "cross_function_state",
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/.local/body-preprocessor/candidate-v4/joern-parity",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/.local/ninth-body-macro-diagnosis/input/cross_function_state/main.c"
+      ],
+      "exitCode": 0,
+      "seconds": 0.003237333003198728,
+      "exact": false,
+      "inputHashes": {
+        "main.c": "f976c907536f435c7b8ccf786fd0a02f51989d61cff36250a62463fe28452534"
+      },
+      "expectedSha256": "897ce63f842d7b806990cdbbb2416e86c851131d0c58ea8eebbd90c3819a86c3",
+      "actualSha256": "08c099ca0bc01d6d159e62b59480b966c705d44b425853ccd3cc800d4d1a7607",
+      "diffSha256": "78b9d5af0ca1af60e57bf0acdb70e09085ae9d43c22ce0c4341c255e14a24bbb",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "canonicalLinesIncludingSeparators": 135,
+      "nonemptySelectedRecords": 131,
+      "finding": "A body directive affects a later function in the translation unit."
+    },
+    {
+      "case": "elif_definition",
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/.local/body-preprocessor/candidate-v4/joern-parity",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/.local/ninth-body-macro-diagnosis/input/elif_definition/main.c"
+      ],
+      "exitCode": 0,
+      "seconds": 0.0030803330009803176,
+      "exact": false,
+      "inputHashes": {
+        "main.c": "4bbe900f4b80fcddea8d4221af64d6f548406cdc614d75e626e7782f877fbdc6"
+      },
+      "expectedSha256": "a1654d7b24375f7998e7cbad21fa649c20cc60899e5b4dba1c01ccad3f131d24",
+      "actualSha256": "7b12596c4cf832a9610bc637f564c1c5fb4c7ce2e009e5a6497bcf0d0c041d63",
+      "diffSha256": "6afa2a4addf14b89558ce98ca2a2a57289f591b3a4622d28ae69692cb4d1219d",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "canonicalLinesIncludingSeparators": 101,
+      "nonemptySelectedRecords": 98,
+      "finding": "Selected #elif definition affects following code; inactive alternatives do not."
+    },
+    {
+      "case": "header_then_local_undef",
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/.local/body-preprocessor/candidate-v4/joern-parity",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/.local/ninth-body-macro-diagnosis/input/header_then_local_undef/main.c",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/.local/ninth-body-macro-diagnosis/input/header_then_local_undef/switch.h"
+      ],
+      "exitCode": 0,
+      "seconds": 0.003308165993075818,
+      "exact": false,
+      "inputHashes": {
+        "main.c": "57d8ea5cc1a0af6d0f967dc18e40345ff5a7c8c022b8305eafe37f5c9cc80b3f",
+        "switch.h": "7d406f17bc190d8bc555a2d3d3e3c4eea926d3427db073ca8e8ef62cab1fb32e"
+      },
+      "expectedSha256": "75c9b8f2f7b29594e800e15354b099793be0fe1f7c60729befc0769d71749400",
+      "actualSha256": "de2282362d59a2e8600f2fb4719349006a113ac35f081f6ab83b0f4941848637",
+      "diffSha256": "45444ff70a152d2e591a0f6086435b014ddd2028ac18e2f572fed93512a2f57c",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "canonicalLinesIncludingSeparators": 117,
+      "nonemptySelectedRecords": 113,
+      "finding": "Body undef overrides a supplied-header definition."
+    },
+    {
+      "case": "inactive_effects",
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/.local/body-preprocessor/candidate-v4/joern-parity",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/.local/ninth-body-macro-diagnosis/input/inactive_effects/main.c"
+      ],
+      "exitCode": 0,
+      "seconds": 0.0028620829980354756,
+      "exact": true,
+      "inputHashes": {
+        "main.c": "d892debdf34ad365c4fcf5e926b21a6bb6bb965b29c24650f3840f0f2b731cf3"
+      },
+      "expectedSha256": "2b36c816be5e6281a3126a37f018828007a6e3989282331c4acfd4f346519c87",
+      "actualSha256": "2b36c816be5e6281a3126a37f018828007a6e3989282331c4acfd4f346519c87",
+      "diffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "canonicalLinesIncludingSeparators": 101,
+      "nonemptySelectedRecords": 98,
+      "finding": "Complete exact control: inactive define/undef do not leak."
+    },
+    {
+      "case": "inactive_function_effects",
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/.local/body-preprocessor/candidate-v4/joern-parity",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/.local/ninth-body-macro-diagnosis/input/inactive_function_effects/main.c"
+      ],
+      "exitCode": 0,
+      "seconds": 0.0028287919994909316,
+      "exact": true,
+      "inputHashes": {
+        "main.c": "352132c6d1fd737dfe3e5eb684824b629a11707c6719111f39522381221c72c9"
+      },
+      "expectedSha256": "f8f943b6f89d5e917b2c9c2f1094f12260384d855d35c9ae42bb8d00ffd88843",
+      "actualSha256": "f8f943b6f89d5e917b2c9c2f1094f12260384d855d35c9ae42bb8d00ffd88843",
+      "diffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "canonicalLinesIncludingSeparators": 134,
+      "nonemptySelectedRecords": 130,
+      "finding": "Complete exact control: directives within an inactive function have no effects."
+    },
+    {
+      "case": "inactive_typedef_shadow",
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/.local/body-preprocessor/candidate-v4/joern-parity",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/.local/ninth-body-macro-diagnosis/input/inactive_typedef_shadow/main.c"
+      ],
+      "exitCode": 0,
+      "seconds": 0.0030762920068809763,
+      "exact": false,
+      "inputHashes": {
+        "main.c": "0b0455ad63f9f00c75900c81d2df64a9e7259ec8b2bf8534dee9eacdcab7ba0e"
+      },
+      "expectedSha256": "874c354fcc3838f1136795f84d18c2352cb079369b491e6275ccb459134d4828",
+      "actualSha256": "faf78bcd440a3e1b02e40ab18d1e05829d219d084a89d23e198f4708c06fed29",
+      "diffSha256": "e03efa464a723f4a746da91f874b69fd3f925a6209cc05cd3dbfbf4d8482c95f",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "canonicalLinesIncludingSeparators": 149,
+      "nonemptySelectedRecords": 145,
+      "finding": "Independent preexisting CODE transport diagnostic: literal space+T=0 is parsed as a property; body cast and selected statements already agree."
+    },
+    {
+      "case": "local_definition",
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/.local/body-preprocessor/candidate-v4/joern-parity",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/.local/ninth-body-macro-diagnosis/input/local_definition/main.c"
+      ],
+      "exitCode": 0,
+      "seconds": 0.002730833992245607,
+      "exact": false,
+      "inputHashes": {
+        "main.c": "5e4b9f11c86743b408483ceb47c5e1dc078c6b493018ec57095f58b6cbd7dd78"
+      },
+      "expectedSha256": "1e3dca8eea1a14311a33a386f3f15e73d72d9a3241ca9daadfa884f8f46ed790",
+      "actualSha256": "22483368954c812bf6ffd898471efe2311ac2bc0ac9d2b72430dd4fe92ea3b8f",
+      "diffSha256": "1b321272ec1ff52188a3f4e81c6d9926218be7bd5752810df9d178a1d1794bad",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "canonicalLinesIncludingSeparators": 101,
+      "nonemptySelectedRecords": 98,
+      "finding": "Confirmed original defect: live selects return x, baseline return 0."
+    },
+    {
+      "case": "local_function_macro",
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/.local/body-preprocessor/candidate-v4/joern-parity",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/.local/ninth-body-macro-diagnosis/input/local_function_macro/main.c"
+      ],
+      "exitCode": 0,
+      "seconds": 0.00292491698928643,
+      "exact": false,
+      "inputHashes": {
+        "main.c": "8d24f9d0ec77db568dbd637230a9fcee07adefe0ec00cc194a94032dd56efddd"
+      },
+      "expectedSha256": "6efd91eb51c60b887cd193d04f7dcea58b5cdbacae906b5ae35b2016f23f582a",
+      "actualSha256": "e6bdcb273f9634da9876bf737b355c812e0f05d75e3c5de343ed6417498d5aae",
+      "diffSha256": "08c3941034df41dac241c6722a890c7d6469230323f57f3657c512dc1d4b5447",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "canonicalLinesIncludingSeparators": 140,
+      "nonemptySelectedRecords": 136,
+      "finding": "Body-defined function macro must expand instead of becoming an unresolved ordinary call."
+    },
+    {
+      "case": "local_redefinition",
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/.local/body-preprocessor/candidate-v4/joern-parity",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/.local/ninth-body-macro-diagnosis/input/local_redefinition/main.c"
+      ],
+      "exitCode": 0,
+      "seconds": 0.003424333001021296,
+      "exact": false,
+      "inputHashes": {
+        "main.c": "7788d90026e01941a1ea99ae2df86678dfab465a87d1b65a115c838c4796d956"
+      },
+      "expectedSha256": "9be3c4b13a1523ccea111ebff9bfa0493c440adefd2bc849b6c51729b9f88245",
+      "actualSha256": "fa7babfa9e6cb657baded23ea595c6fcd683bad99c434cce16d0737f37cb50c3",
+      "diffSha256": "173e8ccabad71ff79d5f5e973b4763aae44cecba5d0aba594859dd19e0ae3e6c",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "canonicalLinesIncludingSeparators": 249,
+      "nonemptySelectedRecords": 243,
+      "finding": "Only the later macro expansion is wrong: live literal2, baseline literal1; earlier VALUE1 remains correct."
+    },
+    {
+      "case": "local_type_macro",
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/.local/body-preprocessor/candidate-v4/joern-parity",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/.local/ninth-body-macro-diagnosis/input/local_type_macro/main.c"
+      ],
+      "exitCode": 0,
+      "seconds": 0.0029180410056142136,
+      "exact": false,
+      "inputHashes": {
+        "main.c": "6670a53e36fe87a285d7768f0cd049c963c03359c34019f3b6829a9fe6538052"
+      },
+      "expectedSha256": "ecc65a942c029179e2fdc5c202fb85b7983ec2aee750720fb23c0101b298d065",
+      "actualSha256": "40a930d36e3b4abc4e4437623f9b71271507dad4d1eaf11e49a3fca4d9f7a230",
+      "diffSha256": "0a35d047d6aed98e36b2ad5c007390d6de22a59c3100dd9b567390cbad330621",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "canonicalLinesIncludingSeparators": 150,
+      "nonemptySelectedRecords": 146,
+      "finding": "Alias/cast shape already agrees; raw underlying TYPE BASE is extra. emit_local_typedef currently ignores macro context for underlying type registration."
+    },
+    {
+      "case": "local_undef",
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/.local/body-preprocessor/candidate-v4/joern-parity",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/.local/ninth-body-macro-diagnosis/input/local_undef/main.c"
+      ],
+      "exitCode": 0,
+      "seconds": 0.002798792003886774,
+      "exact": false,
+      "inputHashes": {
+        "main.c": "02f06beebd22b4ec69fb5f132b5e7f58ae46b18cdf22f8119e9525851ff1a4f3"
+      },
+      "expectedSha256": "e2ada46940c0fc2243bf2c9d96107b0f2bb0ea54b7688c59ea947aa90cbbc81f",
+      "actualSha256": "3137dd716b4f4706b8ad2597a14906843f52f981772b80bcd37f83925b75453e",
+      "diffSha256": "6532e78e1896f2ebec92e8d7c022cfbcf530e0a1cb55f3c83fab3b5199ff325d",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "canonicalLinesIncludingSeparators": 100,
+      "nonemptySelectedRecords": 97,
+      "finding": "Removing the entry FLAG must affect the following body condition."
+    },
+    {
+      "case": "nested_block_persistence",
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/.local/body-preprocessor/candidate-v4/joern-parity",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/.local/ninth-body-macro-diagnosis/input/nested_block_persistence/main.c"
+      ],
+      "exitCode": 0,
+      "seconds": 0.0029660419968422502,
+      "exact": false,
+      "inputHashes": {
+        "main.c": "1d9400dfdcb3d7da8a60269dbddbc2d3ce5c8009c6760d104857dd3509ffa505"
+      },
+      "expectedSha256": "9e30f34bed13c5508d0f887fb76900c204d8d1e54addbd1eab078dacc23beea7",
+      "actualSha256": "7782c3ed454531ba0b6c6a0a74fa7853815061169364613341f9a4b3bba3f962",
+      "diffSha256": "7c80da6f553b3fa39b49f0476353b07d780852361872458e66edf017d34e5c31",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "canonicalLinesIncludingSeparators": 107,
+      "nonemptySelectedRecords": 104,
+      "finding": "Live macro state persists after the nested C block."
+    },
+    {
+      "case": "no_backwards_leak",
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/.local/body-preprocessor/candidate-v4/joern-parity",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/.local/ninth-body-macro-diagnosis/input/no_backwards_leak/main.c"
+      ],
+      "exitCode": 0,
+      "seconds": 0.003082124996581115,
+      "exact": false,
+      "inputHashes": {
+        "main.c": "7a6e8a655788219e2d7d38e4cc5c8589f1536af2eb8a4c687f859d13840d55e3"
+      },
+      "expectedSha256": "8a2b7fba4433f6d70fe1ac1330d711e82d8798713997df46553165ed1994c3ca",
+      "actualSha256": "24ad4baa8ddef353f3e53717b8b4b80101b42f8f63cd1dcebe07a4c77f0b1fe1",
+      "diffSha256": "699d08b7813bf52014aef0e667bb6ff5fe525946947d0dffff77937db1fce226",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "canonicalLinesIncludingSeparators": 183,
+      "nonemptySelectedRecords": 178,
+      "finding": "The later definition changes only the later function; the earlier function remains in its original state."
+    },
+    {
+      "case": "runtime_if_directive",
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/.local/body-preprocessor/candidate-v4/joern-parity",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/.local/ninth-body-macro-diagnosis/input/runtime_if_directive/main.c"
+      ],
+      "exitCode": 0,
+      "seconds": 0.002832250000210479,
+      "exact": false,
+      "inputHashes": {
+        "main.c": "7ec14c2c8bc1dbb5397e8d498d80b90be4ffa1a87ec4b4eefd26a370efbd9092"
+      },
+      "expectedSha256": "5917b5036b7f53a232bb37c665bab0c3b4a7abdb27418f2f003f306d97a9f8e9",
+      "actualSha256": "1dd9a7c6b819d80fadf07c5c1166def4f286c4ab5058451635716f9aba072a2a",
+      "diffSha256": "363d625c3f19628a1ef4dab8a6997198a929d0e70c36b20796b8b29f74d6a13c",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "canonicalLinesIncludingSeparators": 116,
+      "nonemptySelectedRecords": 113,
+      "finding": "Live preprocessing observes a directive within runtime if(0), before runtime control flow."
+    },
+    {
+      "case": "selected_arm_definition",
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/.local/body-preprocessor/candidate-v4/joern-parity",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/.local/ninth-body-macro-diagnosis/input/selected_arm_definition/main.c"
+      ],
+      "exitCode": 0,
+      "seconds": 0.00282770799822174,
+      "exact": false,
+      "inputHashes": {
+        "main.c": "def66e87ae0324f3457239584fc013c09175c969b1c050fa4d19ff82b85a7f52"
+      },
+      "expectedSha256": "adaa3273efb123b566fa0266a61a12cb252a1a099f6adee64ffee728180f7ae6",
+      "actualSha256": "bf09c306479a608d2924cffd5b2e2e89600d84ae4fc39bdb55bd3e43c29cfbb7",
+      "diffSha256": "2f42dea6ee6d9f2dea93b49fdd75abe8403ca91e1812878b3f9fb929cf3c3af9",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "canonicalLinesIncludingSeparators": 101,
+      "nonemptySelectedRecords": 98,
+      "finding": "Selected preprocessor arm supplies the next conditional state."
+    }
+  ],
+  "activity": "No source edits or Cargo builds; one root-authorized17-project Joern run and tiny baseline replays are complete. All producers idle.",
+  "baselineStatus": "integrated eighth candidate; final acceptance pending at diagnosis time",
+  "planSha256": "1ae202c55c45cea789d7d72252cb9818032edba9c1690b1f432624e7332a2f58",
+  "implementationStatus": "not started; awaiting parent plan review and committed eighth base for a separate ninth worktree"
+}

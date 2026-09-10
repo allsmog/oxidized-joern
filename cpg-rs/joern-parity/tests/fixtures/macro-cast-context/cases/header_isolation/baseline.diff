@@ -1,0 +1,268 @@
+--- joern
++++ before
+@@ -1,14 +1,6 @@
+ METHOD NAME=<global> CODE=<global> FULL_NAME=<includes>:<global> ORDER=1
+   BLOCK TYPE_FULL_NAME=ANY ORDER=1
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+-
+-METHOD NAME=<operator>.cast FULL_NAME=<operator>.cast ORDER=0
+-  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+-  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+-  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+-  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+-  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+-  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+ 
+ METHOD NAME=<operator>.pointerCall FULL_NAME=<operator>.pointerCall ORDER=0
+   METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+@@ -21,13 +13,14 @@
+     METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+     METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+     BLOCK CODE={ return CAST(x); } TYPE_FULL_NAME=void ORDER=2
++      LOCAL NAME=T CODE=<unknown> T TYPE_FULL_NAME=ANY ORDER=0
+       RETURN CODE=return CAST(x); ORDER=1
+         CALL NAME=CAST CODE=CAST(x) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=a.c:CAST:ANY(1) SIGNATURE=ANY(1) ORDER=1 DISPATCH_TYPE=INLINED
+           IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+           BLOCK TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+-            CALL NAME=<operator>.cast CODE=(T)(x) TYPE_FULL_NAME=T METHOD_FULL_NAME=<operator>.cast ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+-              TYPE_REF CODE=T TYPE_FULL_NAME=T ORDER=1 ARGUMENT_INDEX=1
+-              IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
++            CALL NAME=<operator>.pointerCall CODE=(T)(x) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.pointerCall ORDER=1 DISPATCH_TYPE=DYNAMIC_DISPATCH
++              IDENTIFIER NAME=T CODE=<unknown> T TYPE_FULL_NAME=ANY ORDER=1
++              IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=1
+     METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+   BLOCK TYPE_FULL_NAME=ANY ORDER=1
+     TYPE_DECL NAME=T CODE=typedef int T; FULL_NAME=T ORDER=1
+@@ -68,13 +61,14 @@
+   METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+   METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+   BLOCK CODE={ return CAST(x); } TYPE_FULL_NAME=void ORDER=2
++    LOCAL NAME=T CODE=<unknown> T TYPE_FULL_NAME=ANY ORDER=0
+     RETURN CODE=return CAST(x); ORDER=1
+       CALL NAME=CAST CODE=CAST(x) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=a.c:CAST:ANY(1) SIGNATURE=ANY(1) ORDER=1 DISPATCH_TYPE=INLINED
+         IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+         BLOCK TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+-          CALL NAME=<operator>.cast CODE=(T)(x) TYPE_FULL_NAME=T METHOD_FULL_NAME=<operator>.cast ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+-            TYPE_REF CODE=T TYPE_FULL_NAME=T ORDER=1 ARGUMENT_INDEX=1
+-            IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
++          CALL NAME=<operator>.pointerCall CODE=(T)(x) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.pointerCall ORDER=1 DISPATCH_TYPE=DYNAMIC_DISPATCH
++            IDENTIFIER NAME=T CODE=<unknown> T TYPE_FULL_NAME=ANY ORDER=1
++            IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=1
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+ 
+ METHOD NAME=second CODE=int second(int x) { return CAST(x); } FULL_NAME=second SIGNATURE=int(int) ORDER=1
+@@ -115,34 +109,31 @@
+ NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+ NODES|TYPE NAME=second FULL_NAME=second TYPE_DECL_FULL_NAME=second
+ NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+-EDGES|ARGUMENT first#4 -> first#5
+ EDGES|ARGUMENT first#5 -> first#6
+-EDGES|ARGUMENT first#8 -> first#10
+-EDGES|ARGUMENT first#8 -> first#9
++EDGES|ARGUMENT first#6 -> first#7
++EDGES|ARGUMENT first#9 -> first#11
+ EDGES|ARGUMENT second#5 -> second#6
+ EDGES|ARGUMENT second#6 -> second#7
+ EDGES|ARGUMENT second#9 -> second#11
+-EDGES|CALL first#5 -> a.c:CAST:ANY(1)#0
+-EDGES|CALL first#8 -> <operator>.cast#0
++EDGES|CALL first#6 -> a.c:CAST:ANY(1)#0
+ EDGES|CALL second#6 -> b.c:CAST:ANY(1)#0
+ EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+-EDGES|CFG <operator>.cast#0 -> <operator>.cast#5
+ EDGES|CFG <operator>.pointerCall#0 -> <operator>.pointerCall#4
+-EDGES|CFG a.c:<global>#0 -> a.c:<global>#15
+-EDGES|CFG a.c:<global>#1 -> first#6
+-EDGES|CFG a.c:<global>#15 -> a.c:<global>#16
++EDGES|CFG a.c:<global>#0 -> a.c:<global>#16
++EDGES|CFG a.c:<global>#1 -> first#7
++EDGES|CFG a.c:<global>#16 -> a.c:<global>#17
+ EDGES|CFG a.c:CAST:ANY(1)#0 -> a.c:CAST:ANY(1)#4
+ EDGES|CFG b.c:<global>#0 -> b.c:<global>#15
+ EDGES|CFG b.c:<global>#1 -> second#7
+ EDGES|CFG b.c:<global>#15 -> b.c:<global>#16
+ EDGES|CFG b.c:CAST:ANY(1)#0 -> b.c:CAST:ANY(1)#4
+-EDGES|CFG first#10 -> first#8
+-EDGES|CFG first#4 -> first#11
+-EDGES|CFG first#5 -> first#4
+-EDGES|CFG first#5 -> first#9
++EDGES|CFG first#10 -> first#11
++EDGES|CFG first#11 -> first#9
++EDGES|CFG first#5 -> first#12
++EDGES|CFG first#6 -> first#10
+ EDGES|CFG first#6 -> first#5
+-EDGES|CFG first#8 -> first#4
+-EDGES|CFG first#9 -> first#10
++EDGES|CFG first#7 -> first#6
++EDGES|CFG first#9 -> first#5
+ EDGES|CFG second#10 -> second#11
+ EDGES|CFG second#11 -> second#9
+ EDGES|CFG second#5 -> second#12
+@@ -151,7 +142,6 @@
+ EDGES|CFG second#7 -> second#6
+ EDGES|CFG second#9 -> second#5
+ EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+-EDGES|CONTAINS <operator>.cast#0 -> <operator>.cast#2
+ EDGES|CONTAINS <operator>.pointerCall#0 -> <operator>.pointerCall#2
+ EDGES|CONTAINS D:a.c:<global> -> D:first
+ EDGES|CONTAINS D:a.c:<global> -> a.c:<global>#0
+@@ -166,12 +156,12 @@
+ EDGES|CONTAINS F:a.c -> D:a.c:<global>
+ EDGES|CONTAINS F:b.c -> D:b.c:<global>
+ EDGES|CONTAINS a.c:<global>#0 -> a.c:<global>#1
+-EDGES|CONTAINS a.c:<global>#0 -> a.c:<global>#13
+ EDGES|CONTAINS a.c:<global>#0 -> a.c:<global>#14
+ EDGES|CONTAINS a.c:<global>#0 -> a.c:<global>#15
++EDGES|CONTAINS a.c:<global>#0 -> a.c:<global>#16
+ EDGES|CONTAINS a.c:<global>#1 -> first#10
++EDGES|CONTAINS a.c:<global>#1 -> first#11
+ EDGES|CONTAINS a.c:<global>#1 -> first#3
+-EDGES|CONTAINS a.c:<global>#1 -> first#4
+ EDGES|CONTAINS a.c:<global>#1 -> first#5
+ EDGES|CONTAINS a.c:<global>#1 -> first#6
+ EDGES|CONTAINS a.c:<global>#1 -> first#7
+@@ -192,19 +182,13 @@
+ EDGES|CONTAINS b.c:CAST:ANY(1)#0 -> b.c:CAST:ANY(1)#3
+ EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+ EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+-EDGES|EVAL_TYPE <operator>.cast#1 -> T:ANY
+-EDGES|EVAL_TYPE <operator>.cast#2 -> T:ANY
+-EDGES|EVAL_TYPE <operator>.cast#3 -> T:ANY
+-EDGES|EVAL_TYPE <operator>.cast#4 -> T:ANY
+-EDGES|EVAL_TYPE <operator>.cast#5 -> T:ANY
+-EDGES|EVAL_TYPE <operator>.cast#6 -> T:ANY
+ EDGES|EVAL_TYPE <operator>.pointerCall#1 -> T:ANY
+ EDGES|EVAL_TYPE <operator>.pointerCall#2 -> T:ANY
+ EDGES|EVAL_TYPE <operator>.pointerCall#3 -> T:ANY
+ EDGES|EVAL_TYPE <operator>.pointerCall#4 -> T:ANY
+-EDGES|EVAL_TYPE a.c:<global>#13 -> T:ANY
+-EDGES|EVAL_TYPE a.c:<global>#15 -> T:first
+-EDGES|EVAL_TYPE a.c:<global>#16 -> T:ANY
++EDGES|EVAL_TYPE a.c:<global>#14 -> T:ANY
++EDGES|EVAL_TYPE a.c:<global>#16 -> T:first
++EDGES|EVAL_TYPE a.c:<global>#17 -> T:ANY
+ EDGES|EVAL_TYPE a.c:CAST:ANY(1)#1 -> T:ANY
+ EDGES|EVAL_TYPE a.c:CAST:ANY(1)#2 -> T:ANY
+ EDGES|EVAL_TYPE a.c:CAST:ANY(1)#3 -> T:ANY
+@@ -217,15 +201,16 @@
+ EDGES|EVAL_TYPE b.c:CAST:ANY(1)#3 -> T:ANY
+ EDGES|EVAL_TYPE b.c:CAST:ANY(1)#4 -> T:ANY
+ EDGES|EVAL_TYPE first#1 -> T:int
+-EDGES|EVAL_TYPE first#10 -> T:int
++EDGES|EVAL_TYPE first#10 -> T:ANY
+ EDGES|EVAL_TYPE first#11 -> T:int
++EDGES|EVAL_TYPE first#12 -> T:int
+ EDGES|EVAL_TYPE first#2 -> T:int
+ EDGES|EVAL_TYPE first#3 -> T:void
+-EDGES|EVAL_TYPE first#5 -> T:ANY
+-EDGES|EVAL_TYPE first#6 -> T:int
+-EDGES|EVAL_TYPE first#7 -> T:ANY
+-EDGES|EVAL_TYPE first#8 -> T:T
+-EDGES|EVAL_TYPE first#9 -> T:T
++EDGES|EVAL_TYPE first#4 -> T:ANY
++EDGES|EVAL_TYPE first#6 -> T:ANY
++EDGES|EVAL_TYPE first#7 -> T:int
++EDGES|EVAL_TYPE first#8 -> T:ANY
++EDGES|EVAL_TYPE first#9 -> T:ANY
+ EDGES|EVAL_TYPE second#1 -> T:int
+ EDGES|EVAL_TYPE second#10 -> T:ANY
+ EDGES|EVAL_TYPE second#11 -> T:int
+@@ -237,8 +222,6 @@
+ EDGES|EVAL_TYPE second#7 -> T:int
+ EDGES|EVAL_TYPE second#8 -> T:ANY
+ EDGES|EVAL_TYPE second#9 -> T:ANY
+-EDGES|PARAMETER_LINK <operator>.cast#1 -> <operator>.cast#3
+-EDGES|PARAMETER_LINK <operator>.cast#4 -> <operator>.cast#6
+ EDGES|PARAMETER_LINK <operator>.pointerCall#1 -> <operator>.pointerCall#3
+ EDGES|PARAMETER_LINK a.c:CAST:ANY(1)#1 -> a.c:CAST:ANY(1)#2
+ EDGES|PARAMETER_LINK b.c:CAST:ANY(1)#1 -> b.c:CAST:ANY(1)#2
+@@ -249,14 +232,15 @@
+ EDGES|REF NB:a.c:<global> -> NS:<global>
+ EDGES|REF NB:b.c:<global> -> NS:<global>
+ EDGES|REF T:ANY -> D:ANY
+-EDGES|REF T:T -> a.c:<global>#14
++EDGES|REF T:T -> a.c:<global>#15
+ EDGES|REF T:first -> D:first
+ EDGES|REF T:int -> D:int
+ EDGES|REF T:second -> D:second
+ EDGES|REF T:void -> D:void
+-EDGES|REF a.c:<global>#15 -> a.c:<global>#1
++EDGES|REF a.c:<global>#16 -> a.c:<global>#1
+ EDGES|REF b.c:<global>#15 -> b.c:<global>#1
+-EDGES|REF first#10 -> first#1
++EDGES|REF first#10 -> first#4
++EDGES|REF first#11 -> first#1
+ EDGES|REF second#10 -> second#4
+ EDGES|REF second#11 -> second#1
+ EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+@@ -273,28 +257,25 @@
+ EDGES|SOURCE_FILE NB:b.c:<global> -> F:b.c
+ EDGES|SOURCE_FILE a.c:<global>#0 -> F:a.c
+ EDGES|SOURCE_FILE a.c:<global>#1 -> F:a.c
+-EDGES|SOURCE_FILE a.c:<global>#14 -> F:a.c
++EDGES|SOURCE_FILE a.c:<global>#15 -> F:a.c
+ EDGES|SOURCE_FILE a.c:CAST:ANY(1)#0 -> F:a.c
+ EDGES|SOURCE_FILE b.c:<global>#0 -> F:b.c
+ EDGES|SOURCE_FILE b.c:<global>#1 -> F:b.c
+ EDGES|SOURCE_FILE b.c:CAST:ANY(1)#0 -> F:b.c
+-FLOWS|REACHING_DEF[(T)(x)] first#8 -> first#11
++FLOWS|REACHING_DEF[(T)(x)] first#9 -> first#12
+ FLOWS|REACHING_DEF[(T)(x)] second#9 -> second#12
+-FLOWS|REACHING_DEF[<RET>] first#4 -> first#11
++FLOWS|REACHING_DEF[<RET>] first#5 -> first#12
+ FLOWS|REACHING_DEF[<RET>] second#5 -> second#12
+-FLOWS|REACHING_DEF[CAST(x)] first#5 -> first#11
+-FLOWS|REACHING_DEF[CAST(x)] first#5 -> first#4
++FLOWS|REACHING_DEF[CAST(x)] first#6 -> first#12
++FLOWS|REACHING_DEF[CAST(x)] first#6 -> first#5
+ FLOWS|REACHING_DEF[CAST(x)] second#6 -> second#12
+ FLOWS|REACHING_DEF[CAST(x)] second#6 -> second#5
+-FLOWS|REACHING_DEF[T] first#9 -> first#8
+-FLOWS|REACHING_DEF[] <operator>.cast#0 -> <operator>.cast#1
+-FLOWS|REACHING_DEF[] <operator>.cast#0 -> <operator>.cast#4
+ FLOWS|REACHING_DEF[] <operator>.pointerCall#0 -> <operator>.pointerCall#1
+-FLOWS|REACHING_DEF[] a.c:<global>#0 -> a.c:<global>#15
++FLOWS|REACHING_DEF[] a.c:<global>#0 -> a.c:<global>#16
+ FLOWS|REACHING_DEF[] a.c:<global>#1 -> first#1
+ FLOWS|REACHING_DEF[] a.c:<global>#1 -> first#10
+-FLOWS|REACHING_DEF[] a.c:<global>#1 -> first#6
+-FLOWS|REACHING_DEF[] a.c:<global>#1 -> first#9
++FLOWS|REACHING_DEF[] a.c:<global>#1 -> first#11
++FLOWS|REACHING_DEF[] a.c:<global>#1 -> first#7
+ FLOWS|REACHING_DEF[] a.c:CAST:ANY(1)#0 -> a.c:CAST:ANY(1)#1
+ FLOWS|REACHING_DEF[] b.c:<global>#0 -> b.c:<global>#15
+ FLOWS|REACHING_DEF[] b.c:<global>#1 -> second#1
+@@ -302,25 +283,21 @@
+ FLOWS|REACHING_DEF[] b.c:<global>#1 -> second#11
+ FLOWS|REACHING_DEF[] b.c:<global>#1 -> second#7
+ FLOWS|REACHING_DEF[] b.c:CAST:ANY(1)#0 -> b.c:CAST:ANY(1)#1
+-FLOWS|REACHING_DEF[p1] <operator>.cast#1 -> <operator>.cast#3
+-FLOWS|REACHING_DEF[p1] <operator>.cast#1 -> <operator>.cast#5
+ FLOWS|REACHING_DEF[p1] <operator>.pointerCall#1 -> <operator>.pointerCall#3
+ FLOWS|REACHING_DEF[p1] <operator>.pointerCall#1 -> <operator>.pointerCall#4
+ FLOWS|REACHING_DEF[p1] a.c:CAST:ANY(1)#1 -> a.c:CAST:ANY(1)#2
+ FLOWS|REACHING_DEF[p1] a.c:CAST:ANY(1)#1 -> a.c:CAST:ANY(1)#4
+ FLOWS|REACHING_DEF[p1] b.c:CAST:ANY(1)#1 -> b.c:CAST:ANY(1)#2
+ FLOWS|REACHING_DEF[p1] b.c:CAST:ANY(1)#1 -> b.c:CAST:ANY(1)#4
+-FLOWS|REACHING_DEF[p2] <operator>.cast#4 -> <operator>.cast#5
+-FLOWS|REACHING_DEF[p2] <operator>.cast#4 -> <operator>.cast#6
+ FLOWS|REACHING_DEF[x] first#1 -> first#2
+-FLOWS|REACHING_DEF[x] first#1 -> first#6
+-FLOWS|REACHING_DEF[x] first#10 -> first#11
+-FLOWS|REACHING_DEF[x] first#10 -> first#2
+-FLOWS|REACHING_DEF[x] first#10 -> first#8
+-FLOWS|REACHING_DEF[x] first#6 -> first#10
+-FLOWS|REACHING_DEF[x] first#6 -> first#11
+-FLOWS|REACHING_DEF[x] first#6 -> first#2
+-FLOWS|REACHING_DEF[x] first#6 -> first#5
++FLOWS|REACHING_DEF[x] first#1 -> first#7
++FLOWS|REACHING_DEF[x] first#11 -> first#12
++FLOWS|REACHING_DEF[x] first#11 -> first#2
++FLOWS|REACHING_DEF[x] first#11 -> first#9
++FLOWS|REACHING_DEF[x] first#7 -> first#11
++FLOWS|REACHING_DEF[x] first#7 -> first#12
++FLOWS|REACHING_DEF[x] first#7 -> first#2
++FLOWS|REACHING_DEF[x] first#7 -> first#6
+ FLOWS|REACHING_DEF[x] second#1 -> second#2
+ FLOWS|REACHING_DEF[x] second#1 -> second#7
+ FLOWS|REACHING_DEF[x] second#11 -> second#12

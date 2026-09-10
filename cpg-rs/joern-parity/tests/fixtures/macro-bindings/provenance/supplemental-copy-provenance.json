@@ -1,0 +1,38 @@
+[
+  {
+    "source": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/fourteenth-macro-binding-observer-v1/runs/first-complete-four-macro-binding-saved-cpg-observation/snapshot/observer-release.json",
+    "destination": "provenance/releases/observer-release.json",
+    "sha256": "0563c132c052c0b2ccf579e6dee93be6e2999960ba616cfae8ccaba13893029d",
+    "bytes": 2176
+  },
+  {
+    "source": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/fourteenth-macro-binding-observer-v1/runs/first-complete-four-macro-binding-saved-cpg-observation/snapshot/run-observer.py",
+    "destination": "provenance/observer/snapshot/run-observer.py",
+    "sha256": "e58c798b239ced8fb207fc40c15a6b82c13aea7aa941356ebf46ad358a6e6a79",
+    "bytes": 29923
+  },
+  {
+    "source": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/fourteenth-macro-binding-observer-v1/runs/first-complete-four-macro-binding-saved-cpg-observation/snapshot/prepared.json",
+    "destination": "provenance/observer/snapshot/prepared.json",
+    "sha256": "10fb42a19a4f4b310765dee02c5572eb0889ce56fc284ddfabf88b8839a63d4d",
+    "bytes": 6310
+  },
+  {
+    "source": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/fourteenth-macro-binding-observer-v1/derive.py",
+    "destination": "provenance/observer/prepared/derive.py",
+    "sha256": "39c0b0a06549b8ce966627f15b6f8d4ddaf35836a88d2aa2e16e69501b69eeb8",
+    "bytes": 2947
+  },
+  {
+    "source": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/fourteenth-macro-binding-observer-v1/predecessor-to-v1.patch",
+    "destination": "provenance/observer/prepared/predecessor-to-v1.patch",
+    "sha256": "d82a002e509f3efcfdffbe00bbf815ed5b6c5d635ec41060aacd3b13596670a0",
+    "bytes": 8416
+  },
+  {
+    "source": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/fourteenth-macro-binding-observer-v1/observer-release.template.json",
+    "destination": "provenance/observer/prepared/observer-release.template.json",
+    "sha256": "60be53408b5a1a772862e40531976be4814e1523a94346c50dc7aa46f530ee19",
+    "bytes": 1193
+  }
+]

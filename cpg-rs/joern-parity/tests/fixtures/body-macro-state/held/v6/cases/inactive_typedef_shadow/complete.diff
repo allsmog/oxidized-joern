@@ -1,0 +1,28 @@
+--- Joern4.0.555
++++ /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-macro-state/candidate-v6/joern-parity
+@@ -10,10 +10,10 @@
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+   METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+ 
+-METHOD NAME=choose CODE=int choose(int x) {\n#define DISABLED 0\n#if DISABLED\n int T=0;\n#endif\n return (T)(x);\n} FULL_NAME=choose SIGNATURE=int(int) ORDER=1
++METHOD NAME=choose CODE=int choose(int x) {\n#define DISABLED 0\n#if DISABLED\n int FULL_NAME=choose SIGNATURE=int(int) ORDER=1
+   METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+   METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+-  BLOCK CODE={\n#define DISABLED 0\n#if DISABLED\n int T=0;\n#endif\n return (T)(x);\n} TYPE_FULL_NAME=void ORDER=2
++  BLOCK CODE={\n#define DISABLED 0\n#if DISABLED\n int TYPE_FULL_NAME=void ORDER=2
+     RETURN CODE=return (T)(x); ORDER=1
+       CALL NAME=<operator>.cast CODE=(T)(x) TYPE_FULL_NAME=T METHOD_FULL_NAME=<operator>.cast ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+         TYPE_REF CODE=T TYPE_FULL_NAME=T ORDER=1 ARGUMENT_INDEX=1
+@@ -21,10 +21,10 @@
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+ 
+ METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1
+-  METHOD NAME=choose CODE=int choose(int x) {\n#define DISABLED 0\n#if DISABLED\n int T=0;\n#endif\n return (T)(x);\n} FULL_NAME=choose SIGNATURE=int(int) ORDER=1
++  METHOD NAME=choose CODE=int choose(int x) {\n#define DISABLED 0\n#if DISABLED\n int FULL_NAME=choose SIGNATURE=int(int) ORDER=1
+     METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+     METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+-    BLOCK CODE={\n#define DISABLED 0\n#if DISABLED\n int T=0;\n#endif\n return (T)(x);\n} TYPE_FULL_NAME=void ORDER=2
++    BLOCK CODE={\n#define DISABLED 0\n#if DISABLED\n int TYPE_FULL_NAME=void ORDER=2
+       RETURN CODE=return (T)(x); ORDER=1
+         CALL NAME=<operator>.cast CODE=(T)(x) TYPE_FULL_NAME=T METHOD_FULL_NAME=<operator>.cast ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+           TYPE_REF CODE=T TYPE_FULL_NAME=T ORDER=1 ARGUMENT_INDEX=1

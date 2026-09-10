@@ -1,0 +1,362 @@
+{
+  "schemaVersion": 1,
+  "codeRevision": "b8c2ae132edc2d0317df853673e5d94ac7ca40a5",
+  "baselineCodeRevision": "c5ea712dbfd03d114af4450f79c89629a360b6a6",
+  "integrationStartedAtUtc": "2026-09-08T08:36:00+00:00",
+  "validationCompletedAtUtc": "2026-09-08T09:42:07.296793+00:00",
+  "integrationAcceptanceElapsedMinutes": 66.12,
+  "timingScope": "Integration and acceptance window only. Numeric/static preparation overlapped the prior batch closeout; parallel agents and reviews also contributed. This is not from-scratch implementation time, person-hours, or a forecast.",
+  "oracle": {
+    "version": "4.0.555",
+    "jdk": "21.0.12",
+    "sourceFiles": 42,
+    "sourceLines": 563,
+    "methodBlocks": 291,
+    "sectionBlocks": 17,
+    "comparisonBlocks": 308,
+    "nonemptyAstRecords": 5363,
+    "nodeRecords": 534,
+    "edgeRecords": 9532,
+    "flowRecords": 3685,
+    "canonicalLinesIncludingAstSeparators": 19405,
+    "referencePath": "cpg-rs/joern-parity/oracle_all.txt",
+    "referenceSha256": "0cd3403a367ae297f2ddf60b70684f0b84cd81c9e2ca0c149f6663749df70abf",
+    "scriptPath": "cpg-rs/joern-parity/oracle.sc",
+    "scriptSha256": "bd2e18fab06ecd7897d796f5b31dac6669dc45ecf70c54fb1d5cc0fe29f3c1ab",
+    "wholeProjectsRegeneratedFresh": true,
+    "transport": "Physical LF in reaching-definition labels is escaped as literal backslash-n before sorting. This is not an injective or lossless property encoding; CRLF differences remain diagnosed."
+  },
+  "gates": {
+    "lockedWorkspaceTestsPassed": 381,
+    "checkerTestsPassed": 17,
+    "formatting": "passed",
+    "strictWorkspaceAllTargetsClippy": "passed",
+    "dependencyAudit": "passed",
+    "lockedDependenciesAudited": 73,
+    "committedParity": "308/308",
+    "strictFreshLiveParity": "308/308",
+    "nativeRelease": "passed",
+    "nativeArchive": "passed",
+    "officialRealProjectAcceptance": "passed",
+    "containerAndOtherPlatforms": "not run in this batch"
+  },
+  "binaries": {
+    "cpg": {
+      "path": "cpg-rs/target/release/cpg",
+      "sha256": "53c7a0ac0126bad0b455133f3fdf855c4b0e63fb745fa23343c20b0b6190302b"
+    },
+    "joern-parity": {
+      "path": "cpg-rs/target/release/joern-parity",
+      "sha256": "e33e19a2988c12db59548189be0880ce54ba88349b5d12e154546f4b0443ce26"
+    }
+  },
+  "archive": {
+    "path": ".local/astra-sprint/third-batch/final/dist/oxidized-joern-cpg-macos-arm64.tar.gz",
+    "sha256": "bd2e4935ae8ea759acc5d465393aa0925875828add177606f71337ec7044f967",
+    "platform": "macos-arm64",
+    "version": "0.1.1"
+  },
+  "realProjectMeasurements": {
+    "zlib-1.3.1-core": {
+      "expected": {
+        "sourceFiles": 26,
+        "nodes": 18076,
+        "graphSha256": "b9cfcbdbecafc7ace881f0f955e900b207d1c9fea305c75f7b23562a3530d1c5",
+        "edgesSha256": "b8094e8b1411d6c2266f7154b294ba0255b580b02507e71b48fb12527732e3a8",
+        "exportSha256": "9f948140819db73de6aeb48115da4a687fc10cd37d12f4dea479ff1d19a48f0f",
+        "sarifSha256": "0becad10ba8527f8055f00b8752fa550f27725d671483aa6f0171d81c335aeec",
+        "findings": 0
+      },
+      "trials": [
+        {
+          "sourceFiles": 26,
+          "nodes": 18076,
+          "findings": 0,
+          "graphSha256": "b9cfcbdbecafc7ace881f0f955e900b207d1c9fea305c75f7b23562a3530d1c5",
+          "edgesSha256": "b8094e8b1411d6c2266f7154b294ba0255b580b02507e71b48fb12527732e3a8",
+          "exportSha256": "9f948140819db73de6aeb48115da4a687fc10cd37d12f4dea479ff1d19a48f0f",
+          "sarifSha256": "0becad10ba8527f8055f00b8752fa550f27725d671483aa6f0171d81c335aeec",
+          "buildSeconds": 5.973526250003488,
+          "buildRssMiB": 147.3125,
+          "exportSeconds": 0.13494666700717062,
+          "exportRssMiB": 255.34375,
+          "scanSeconds": 0.08187312498921528,
+          "scanRssMiB": 23.296875
+        },
+        {
+          "sourceFiles": 26,
+          "nodes": 18076,
+          "findings": 0,
+          "graphSha256": "b9cfcbdbecafc7ace881f0f955e900b207d1c9fea305c75f7b23562a3530d1c5",
+          "edgesSha256": "b8094e8b1411d6c2266f7154b294ba0255b580b02507e71b48fb12527732e3a8",
+          "exportSha256": "9f948140819db73de6aeb48115da4a687fc10cd37d12f4dea479ff1d19a48f0f",
+          "sarifSha256": "0becad10ba8527f8055f00b8752fa550f27725d671483aa6f0171d81c335aeec",
+          "buildSeconds": 5.157244542002445,
+          "buildRssMiB": 148.421875,
+          "exportSeconds": 0.13289941599941812,
+          "exportRssMiB": 255.171875,
+          "scanSeconds": 0.05213216600532178,
+          "scanRssMiB": 22.515625
+        }
+      ],
+      "update": {
+        "seconds": 15.442696084006457,
+        "rssMiB": 190.15625,
+        "output": "update-equivalent 26 files"
+      }
+    },
+    "lua-5.4.7": {
+      "expected": {
+        "sourceFiles": 61,
+        "nodes": 82939,
+        "graphSha256": "2d4d5e8358c83816ca3a88b91771dd49077f91a4aaece7e9635e9952d238659b",
+        "edgesSha256": "b0fd0f87a8dbfa1ee2b6a62bf75f8e2a140389e3f1d0f456ccad7fd9c4ff73c2",
+        "exportSha256": "4cdb17e3c2beeb764de29402838b0323539e32440ad11ee0e7141ee7b3efe1a5",
+        "sarifSha256": "0becad10ba8527f8055f00b8752fa550f27725d671483aa6f0171d81c335aeec",
+        "findings": 0
+      },
+      "trials": [
+        {
+          "sourceFiles": 61,
+          "nodes": 82939,
+          "findings": 0,
+          "graphSha256": "2d4d5e8358c83816ca3a88b91771dd49077f91a4aaece7e9635e9952d238659b",
+          "edgesSha256": "b0fd0f87a8dbfa1ee2b6a62bf75f8e2a140389e3f1d0f456ccad7fd9c4ff73c2",
+          "exportSha256": "4cdb17e3c2beeb764de29402838b0323539e32440ad11ee0e7141ee7b3efe1a5",
+          "sarifSha256": "0becad10ba8527f8055f00b8752fa550f27725d671483aa6f0171d81c335aeec",
+          "buildSeconds": 3.4338979580061277,
+          "buildRssMiB": 381.234375,
+          "exportSeconds": 0.5696707500028424,
+          "exportRssMiB": 1010.265625,
+          "scanSeconds": 0.40756279199558776,
+          "scanRssMiB": 72.125
+        },
+        {
+          "sourceFiles": 61,
+          "nodes": 82939,
+          "findings": 0,
+          "graphSha256": "2d4d5e8358c83816ca3a88b91771dd49077f91a4aaece7e9635e9952d238659b",
+          "edgesSha256": "b0fd0f87a8dbfa1ee2b6a62bf75f8e2a140389e3f1d0f456ccad7fd9c4ff73c2",
+          "exportSha256": "4cdb17e3c2beeb764de29402838b0323539e32440ad11ee0e7141ee7b3efe1a5",
+          "sarifSha256": "0becad10ba8527f8055f00b8752fa550f27725d671483aa6f0171d81c335aeec",
+          "buildSeconds": 3.3396324580098735,
+          "buildRssMiB": 380.90625,
+          "exportSeconds": 0.5459156670112861,
+          "exportRssMiB": 1010.265625,
+          "scanSeconds": 0.41055541699461173,
+          "scanRssMiB": 72.0
+        }
+      ],
+      "update": {
+        "seconds": 9.709123416992952,
+        "rssMiB": 522.0625,
+        "output": "update-equivalent 61 files"
+      }
+    }
+  },
+  "realProjectOfficialOutput": [
+    "PASS zlib-1.3.1-core: 26 files, 18076 nodes, build <= 20s, peak RSS 255.7 MiB, incremental equivalence 22.24s",
+    "PASS lua-5.4.7: 61 files, 82939 nodes, build <= 20s, peak RSS 1009.8 MiB, incremental equivalence 10.20s"
+  ],
+  "manifest": {
+    "path": "cpg-rs/acceptance/real-projects/manifest.json",
+    "sha256": "c15239cd9738c2e3846a4d0713a79e850fe1a5424cd83c58f92655fcacee2cf3",
+    "sourceInputsLicensesExclusionsAndBudgetsUnchanged": true,
+    "onlyExpectedFieldsChanged": true,
+    "finalExportsByteIdenticalToReviewedPreviews": true,
+    "beforeSha256": "93973163f353c3fc12d03f27ac12a58e18427408a77055ac783f3a49780acd42",
+    "afterSha256": "c15239cd9738c2e3846a4d0713a79e850fe1a5424cd83c58f92655fcacee2cf3"
+  },
+  "semanticReview": {
+    "status": "pass",
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-registration/.local/third-export-review/final-review.json",
+    "sha256": "99a75a96eba23f61f9e75b9dbcc8f7504c57e3b513dc1b2ee14bcd837de96e24",
+    "reviewedAtUtc": "2026-09-08T09:42:07.296793+00:00",
+    "summary": "All source-body methods and declared locals retained, with owning-method multiplicity, call locations/targets and local references checked. All removals classified; repeated final artifacts and independent exports are byte-identical. This is retention review, not Joern graph equivalence.",
+    "projects": [
+      {
+        "project": "zlib-1.3.1-core",
+        "sourceBodyMethods": {
+          "before": 141,
+          "after": 141,
+          "lost": 0
+        },
+        "allMethodAndLocalMultiplicityLossWithinOwningMethod": 0,
+        "callMultiplicityLossAfterExplicit16SpellingReplacement": 0,
+        "callLocationChanges": 0,
+        "callTargetEdgeLoss": 0,
+        "localReferenceEdgeLoss": 0,
+        "localCounts": {
+          "before": {
+            "allLocals": 764,
+            "declarationCodeLocals": 394
+          },
+          "final": {
+            "allLocals": 764,
+            "declarationCodeLocals": 394
+          }
+        },
+        "allFourArtifactHashesDeterministic": true
+      },
+      {
+        "project": "lua-5.4.7",
+        "sourceBodyMethods": {
+          "before": 1130,
+          "after": 1130,
+          "lost": 0
+        },
+        "allMethodAndLocalMultiplicityLossWithinOwningMethod": 0,
+        "callMultiplicityLossAfterExplicit16SpellingReplacement": 0,
+        "callLocationChanges": 0,
+        "callTargetEdgeLoss": 0,
+        "localReferenceEdgeLoss": 0,
+        "localCounts": {
+          "before": {
+            "allLocals": 3838,
+            "declarationCodeLocals": 1796
+          },
+          "final": {
+            "allLocals": 3987,
+            "declarationCodeLocals": 1945
+          }
+        },
+        "allFourArtifactHashesDeterministic": true
+      }
+    ]
+  },
+  "fixtureMeasurements": {
+    "numeric-literals": {
+      "path": "cpg-rs/joern-parity/tests/fixtures/numeric-literals/measurement.json",
+      "sha256": "c3cc634e0adadc53d80f82f9c23262e62c766aaa7bebb6126239829199b76dc4"
+    },
+    "static-modifiers": {
+      "path": "cpg-rs/joern-parity/tests/fixtures/static-modifiers/measurement.json",
+      "sha256": "8a4a4d14977df18b126dccd94597801337264373b8548ff6f5b5b412ddb25b9f"
+    },
+    "primitive-roles": {
+      "path": "cpg-rs/joern-parity/tests/fixtures/primitive-roles/measurement.json",
+      "sha256": "8a7837c96baf17307c98fb4f19b044a7dc6388112e675ab56f2cf1d9d3c91176"
+    },
+    "combined-c-types": {
+      "path": "cpg-rs/joern-parity/tests/fixtures/combined-c-types/measurement.json",
+      "sha256": "462a7017e844dd1414316dbf2861eeadd749a67c4bbcd8436fb817f036e4aa28"
+    },
+    "standalone-blocks": {
+      "path": "cpg-rs/joern-parity/tests/fixtures/standalone-blocks/measurement.json",
+      "sha256": "8e4f80b6137251ccdbc52f7b286817b17ddeffbeb2269f184af989c25d3659dd"
+    },
+    "declaration-registration": {
+      "path": "cpg-rs/joern-parity/tests/fixtures/declaration-registration/measurement.json",
+      "sha256": "64b427a426d157e2545c952349dd53d137f946aa593e5e8c92ac0992571d9491"
+    },
+    "concatenated-strings": {
+      "path": "cpg-rs/joern-parity/tests/fixtures/concatenated-strings/measurement.json",
+      "sha256": "379b2ab8629b32b1ef18925bafdef6467e02ca02dc75e7fd5bb49b908240e7fb"
+    }
+  },
+  "supplementaryMeasurements": {
+    "commonBaselineNumericStaticAndCombined": {
+      "path": ".local/astra-sprint/third-batch/targeted-baselines/measurements.json",
+      "sha256": "9cd7fd2c7dd296b03500bd018bbe0d79d4b721a2dbdf8f1f0b588c738c0b9ffa"
+    },
+    "freshWholeProjectOracles": {
+      "path": ".local/astra-sprint/third-batch/fresh-real-oracles/runs.json",
+      "sha256": "c49f91fda3ced075b56361c7ea682c9bd0e549c9b9ddfb0d8f5885685855815e"
+    },
+    "wholeProjectMetrics": {
+      "path": "docs/conformance/astra-third-batch-metrics.json",
+      "sha256": "dcaef00385c10094a9c93026c9c373794606235ff6c69c744122d304063362ce"
+    },
+    "intermediateLuaFailure": {
+      "path": ".local/astra-sprint/real-project-review/lua-5.4.7/third-block-preview-1/build.log",
+      "sha256": "c36f64eb87f0b5487f875bc2f166fde5149e64fa0bcece989fd33d40e2859502"
+    },
+    "intermediateBinaryBinding": {
+      "path": ".local/astra-sprint/third-batch/block-preview-bin/receipt.json",
+      "sha256": "b7bcaa329d4cf2ab21b72c4412c49e38dbfe081206cf401889aa4d71dccb1da1"
+    },
+    "reviewedManifestRefresh": {
+      "path": ".local/astra-sprint/third-batch/manifest-refresh.json",
+      "sha256": "33845694ccdd42ed84424b26b5336dbb0b6d33b23f08242228d32ab8daca6748"
+    }
+  },
+  "logs": {
+    "archive-release.log": {
+      "path": ".local/astra-sprint/third-batch/final/archive-release.log",
+      "sha256": "8b4f71b99b71bf2187b77db6a7927c08f61bc55c26d08baab0431d454e5554ed"
+    },
+    "audit.log": {
+      "path": ".local/astra-sprint/third-batch/final/audit.log",
+      "sha256": "2a91a692bdd0f166d94bb45220a29b5f469072246f9ef0b5205b36dd0375393b"
+    },
+    "checker-tests.log": {
+      "path": ".local/astra-sprint/third-batch/final/checker-tests.log",
+      "sha256": "2d3e4cb4e2c68fa6975736f9d88ffd272259f5e7eea4f54d600db8c8b5f459c3"
+    },
+    "clippy.log": {
+      "path": ".local/astra-sprint/third-batch/final/clippy.log",
+      "sha256": "5c5392c4ba9c5f81771a7e141400e3e0bf9bbcaa8a3ef7a46344eb57462e921f"
+    },
+    "committed-parity.log": {
+      "path": ".local/astra-sprint/third-batch/final/committed-parity.log",
+      "sha256": "c105179d62065e9cbf9f398ff94754c29ec03add1206db7dff281cb4c07b6be6"
+    },
+    "fmt.log": {
+      "path": ".local/astra-sprint/third-batch/final/fmt.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "live-parity.log": {
+      "path": ".local/astra-sprint/third-batch/final/live-parity.log",
+      "sha256": "715e0c188ca0e7a744ace60c9fa451649f34143022f2a1a163bd46303772dd68"
+    },
+    "native-release.log": {
+      "path": ".local/astra-sprint/third-batch/final/native-release.log",
+      "sha256": "067b37fe7900624b97bb349271bb70786aa89f49f5a27dea3ffe6388eac1f8ad"
+    },
+    "real-differential.log": {
+      "path": ".local/astra-sprint/third-batch/final/real-differential.log",
+      "sha256": "ce9cda9a1420a8228379892bb2a23a43c4d0e2b3198933cb2d8885674d07b0ea"
+    },
+    "real-project-acceptance.log": {
+      "path": ".local/astra-sprint/third-batch/final/real-project-acceptance.log",
+      "sha256": "1256bfdfd1c3a7553efbf569d89101d5244211d1a85bebb941ca88d601904376"
+    },
+    "real-project-measurements.log": {
+      "path": ".local/astra-sprint/third-batch/final/real-project-measurements.log",
+      "sha256": "22cc430b0ca9bba8625393e21675b69aeb5125a5920ca9f1f678bab8708a22cc"
+    },
+    "release-build.log": {
+      "path": ".local/astra-sprint/third-batch/final/release-build.log",
+      "sha256": "8ec12e4df685313658c0dd4be7fb0350600c2ec2b5b56071285bd358c4c174f3"
+    },
+    "workspace-tests.log": {
+      "path": ".local/astra-sprint/third-batch/final/workspace-tests.log",
+      "sha256": "a9d656c6bb9631dc560575ad6334d7f10fe00733256855759699d304917e4f61"
+    }
+  },
+  "limitations": [
+    "Selected graph projection and finite outcomes; not whole-language or product parity.",
+    "Fixture measurements preserve their own baseline and candidate revisions; whole-project before/after uses the preceding accepted source revision c5ea712db.",
+    "Acceptance runner RSS is cumulative child-process high-water; per-command RSS is recorded separately.",
+    "Zero built-in scan findings establish deterministic output, not absence of vulnerabilities.",
+    "Ignored .local evidence is retained on this host, not distributed by a git clone."
+  ],
+  "independentVerification": {
+    "finalGates": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-types/.local/third-batch-verification/final-gates-verification.json",
+      "sha256": "de14f5fab3e7ff17772c7f46e067a3824aabe4849532041db5de63a83fb136ed"
+    },
+    "fixtureHashes": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-types/.local/third-batch-verification/fixture-hash-verification.json",
+      "sha256": "379774f466cfda270df58bb3976801f6881c4081f388fdf1a69b67b3ff87fb30"
+    },
+    "wholeProjectOracleTransport": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-types/.local/third-batch-verification/whole-project-oracle-verification.json",
+      "sha256": "0bb0a5af796a1c4a069d1cce7b9e5b4bbb257830bceb321ce62df894d5f08ea6"
+    },
+    "wholeProjectMetrics": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-types/.local/third-batch-verification/whole-project-metrics-verification.json",
+      "sha256": "9fd4b0a2a918bcbb73d7deac85ee131bd1f86962c6ef289861e486d56e3a1813"
+    }
+  }
+}

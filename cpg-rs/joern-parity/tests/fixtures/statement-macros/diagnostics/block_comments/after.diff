@@ -1,0 +1,113 @@
+--- Joern
++++ after
+@@ -57,7 +57,11 @@
+             IDENTIFIER NAME=v CODE=v TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+     METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=4
+   BLOCK TYPE_FULL_NAME=ANY ORDER=1
+-    METHOD_REF CODE=f TYPE_FULL_NAME=f METHOD_FULL_NAME=f ORDER=1
++    LOCAL NAME=slot CODE=int *slot TYPE_FULL_NAME=int* ORDER=1
++    CALL NAME=<operator>.assignment CODE=*slot=(p) TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
++      IDENTIFIER NAME=slot CODE=slot TYPE_FULL_NAME=int* ORDER=1 ARGUMENT_INDEX=1
++      IDENTIFIER NAME=p CODE=<unknown> p TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
++    METHOD_REF CODE=f TYPE_FULL_NAME=f METHOD_FULL_NAME=f ORDER=3
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+ 
+ METHOD NAME=SET CODE=#define SET(p,v) { /* slot */ int *slot=(p); /* store */ *slot=(v); } FULL_NAME=main.c:SET:ANY(2) SIGNATURE=ANY(2) ORDER=1
+@@ -94,10 +98,13 @@
+ EDGES|ARGUMENT f#15 -> f#16
+ EDGES|ARGUMENT f#6 -> f#7
+ EDGES|ARGUMENT f#6 -> f#8
++EDGES|ARGUMENT main.c:<global>#22 -> main.c:<global>#23
++EDGES|ARGUMENT main.c:<global>#22 -> main.c:<global>#24
+ EDGES|CALL f#11 -> <operator>.assignment#0
+ EDGES|CALL f#14 -> <operator>.assignment#0
+ EDGES|CALL f#15 -> <operator>.indirection#0
+ EDGES|CALL f#6 -> main.c:SET:ANY(2)#0
++EDGES|CALL main.c:<global>#22 -> <operator>.assignment#0
+ EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+ EDGES|CFG <operator>.assignment#0 -> <operator>.assignment#5
+ EDGES|CFG <operator>.indirection#0 -> <operator>.indirection#4
+@@ -113,8 +120,11 @@
+ EDGES|CFG f#6 -> f#18
+ EDGES|CFG f#7 -> f#8
+ EDGES|CFG f#8 -> f#6
+-EDGES|CFG main.c:<global>#0 -> main.c:<global>#21
+-EDGES|CFG main.c:<global>#21 -> main.c:<global>#22
++EDGES|CFG main.c:<global>#0 -> main.c:<global>#23
++EDGES|CFG main.c:<global>#22 -> main.c:<global>#25
++EDGES|CFG main.c:<global>#23 -> main.c:<global>#24
++EDGES|CFG main.c:<global>#24 -> main.c:<global>#22
++EDGES|CFG main.c:<global>#25 -> main.c:<global>#26
+ EDGES|CFG main.c:SET:ANY(2)#0 -> main.c:SET:ANY(2)#6
+ EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+ EDGES|CONTAINS <operator>.assignment#0 -> <operator>.assignment#2
+@@ -142,7 +152,10 @@
+ EDGES|CONTAINS f#0 -> f#9
+ EDGES|CONTAINS main.c:<global>#0 -> f#0
+ EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#20
+-EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#21
++EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#22
++EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#23
++EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#24
++EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#25
+ EDGES|CONTAINS main.c:SET:ANY(2)#0 -> main.c:SET:ANY(2)#5
+ EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+ EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+@@ -175,8 +188,12 @@
+ EDGES|EVAL_TYPE f#8 -> T:int
+ EDGES|EVAL_TYPE f#9 -> T:void
+ EDGES|EVAL_TYPE main.c:<global>#20 -> T:ANY
+-EDGES|EVAL_TYPE main.c:<global>#21 -> T:f
+-EDGES|EVAL_TYPE main.c:<global>#22 -> T:ANY
++EDGES|EVAL_TYPE main.c:<global>#21 -> T:int*
++EDGES|EVAL_TYPE main.c:<global>#22 -> T:void
++EDGES|EVAL_TYPE main.c:<global>#23 -> T:int*
++EDGES|EVAL_TYPE main.c:<global>#24 -> T:ANY
++EDGES|EVAL_TYPE main.c:<global>#25 -> T:f
++EDGES|EVAL_TYPE main.c:<global>#26 -> T:ANY
+ EDGES|EVAL_TYPE main.c:SET:ANY(2)#1 -> T:ANY
+ EDGES|EVAL_TYPE main.c:SET:ANY(2)#2 -> T:ANY
+ EDGES|EVAL_TYPE main.c:SET:ANY(2)#3 -> T:ANY
+@@ -202,7 +219,8 @@
+ EDGES|REF f#13 -> f#1
+ EDGES|REF f#16 -> f#10
+ EDGES|REF f#17 -> f#3
+-EDGES|REF main.c:<global>#21 -> f#0
++EDGES|REF main.c:<global>#23 -> main.c:<global>#21
++EDGES|REF main.c:<global>#25 -> f#0
+ EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+ EDGES|SOURCE_FILE D:ANY -> F:<includes>
+ EDGES|SOURCE_FILE D:f -> F:main.c
+@@ -216,7 +234,12 @@
+ EDGES|SOURCE_FILE f#0 -> F:main.c
+ EDGES|SOURCE_FILE main.c:<global>#0 -> F:main.c
+ EDGES|SOURCE_FILE main.c:SET:ANY(2)#0 -> F:main.c
++FLOWS|REACHING_DEF[*slot=(p)] main.c:<global>#22 -> main.c:<global>#26
+ FLOWS|REACHING_DEF[*slot] f#15 -> f#14
++FLOWS|REACHING_DEF[<unknown> p] main.c:<global>#24 -> f#7
++FLOWS|REACHING_DEF[<unknown> p] main.c:<global>#24 -> main.c:<global>#22
++FLOWS|REACHING_DEF[<unknown> p] main.c:<global>#24 -> main.c:<global>#23
++FLOWS|REACHING_DEF[<unknown> p] main.c:<global>#24 -> main.c:<global>#26
+ FLOWS|REACHING_DEF[SET(p,v)] f#12 -> f#11
+ FLOWS|REACHING_DEF[SET(p,v)] f#12 -> f#16
+ FLOWS|REACHING_DEF[SET(p,v)] f#6 -> f#18
+@@ -230,7 +253,8 @@
+ FLOWS|REACHING_DEF[] f#0 -> f#3
+ FLOWS|REACHING_DEF[] f#0 -> f#7
+ FLOWS|REACHING_DEF[] f#0 -> f#8
+-FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#21
++FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#24
++FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#25
+ FLOWS|REACHING_DEF[] main.c:SET:ANY(2)#0 -> main.c:SET:ANY(2)#1
+ FLOWS|REACHING_DEF[] main.c:SET:ANY(2)#0 -> main.c:SET:ANY(2)#3
+ FLOWS|REACHING_DEF[p1] <operator>.assignment#1 -> <operator>.assignment#3
+@@ -252,6 +276,9 @@
+ FLOWS|REACHING_DEF[p] f#7 -> f#2
+ FLOWS|REACHING_DEF[p] f#7 -> f#6
+ FLOWS|REACHING_DEF[p] f#7 -> f#8
++FLOWS|REACHING_DEF[slot] main.c:<global>#23 -> f#12
++FLOWS|REACHING_DEF[slot] main.c:<global>#23 -> main.c:<global>#22
++FLOWS|REACHING_DEF[slot] main.c:<global>#23 -> main.c:<global>#26
+ FLOWS|REACHING_DEF[v] f#17 -> f#14
+ FLOWS|REACHING_DEF[v] f#17 -> f#15
+ FLOWS|REACHING_DEF[v] f#3 -> f#4

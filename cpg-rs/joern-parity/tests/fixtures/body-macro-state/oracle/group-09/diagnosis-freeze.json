@@ -1,0 +1,184 @@
+{
+  "status": "COMPLETE_REFERENCE_DIAGNOSIS_CANDIDATE_V2_HELD",
+  "createdAtUtc": "2026-09-08T20:07:36.137966+00:00",
+  "purpose": "Deferred metadata updates must change explicit generated fields while preserving identical old full-name text in ordinary CODE and flow-variable properties, including supplied header filenames with spaces.",
+  "rows": [
+    {
+      "case": "deferred_full_name_literal",
+      "completeCanonicalLines": 177,
+      "nonemptySelectedRecords": 171,
+      "previouslyCorrectOrdinaryCodeAndFlowRecords": [
+        "METHOD NAME=choose CODE=int choose(void) {\\n /* Preserve ordinary source text: api.h:PICK:int(0). */\\n consume(\"api.h:PICK:int(0)\");\\n return PICK;\\n} FULL_NAME=choose SIGNATURE=int(void) ORDER=1",
+        "  BLOCK CODE={\\n /* Preserve ordinary source text: api.h:PICK:int(0). */\\n consume(\"api.h:PICK:int(0)\");\\n return PICK;\\n} TYPE_FULL_NAME=void ORDER=2",
+        "    CALL NAME=consume CODE=consume(\"api.h:PICK:int(0)\") TYPE_FULL_NAME=int METHOD_FULL_NAME=consume ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH",
+        "      LITERAL CODE=\"api.h:PICK:int(0)\" TYPE_FULL_NAME=char* ORDER=1 ARGUMENT_INDEX=1",
+        "  METHOD NAME=choose CODE=int choose(void) {\\n /* Preserve ordinary source text: api.h:PICK:int(0). */\\n consume(\"api.h:PICK:int(0)\");\\n return PICK;\\n} FULL_NAME=choose SIGNATURE=int(void) ORDER=1",
+        "    BLOCK CODE={\\n /* Preserve ordinary source text: api.h:PICK:int(0). */\\n consume(\"api.h:PICK:int(0)\");\\n return PICK;\\n} TYPE_FULL_NAME=void ORDER=2",
+        "      CALL NAME=consume CODE=consume(\"api.h:PICK:int(0)\") TYPE_FULL_NAME=int METHOD_FULL_NAME=consume ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH",
+        "        LITERAL CODE=\"api.h:PICK:int(0)\" TYPE_FULL_NAME=char* ORDER=1 ARGUMENT_INDEX=1",
+        "FLOWS|REACHING_DEF[\"api.h:PICK:int(0)\"] choose#5 -> choose#4"
+      ],
+      "liveMacroMethod": "main.c:PICK:int(0)",
+      "currentWrongMacroMethod": "api.h:PICK:int(0)",
+      "baselineExact": false,
+      "v2Exact": false
+    },
+    {
+      "case": "deferred_full_name_spaces",
+      "completeCanonicalLines": 177,
+      "nonemptySelectedRecords": 171,
+      "previouslyCorrectOrdinaryCodeAndFlowRecords": [
+        "METHOD NAME=choose CODE=int choose(void) {\\n /* Preserve ordinary source text: api header.h:PICK:int(0). */\\n consume(\"api header.h:PICK:int(0)\");\\n return PICK;\\n} FULL_NAME=choose SIGNATURE=int(void) ORDER=1",
+        "  BLOCK CODE={\\n /* Preserve ordinary source text: api header.h:PICK:int(0). */\\n consume(\"api header.h:PICK:int(0)\");\\n return PICK;\\n} TYPE_FULL_NAME=void ORDER=2",
+        "    CALL NAME=consume CODE=consume(\"api header.h:PICK:int(0)\") TYPE_FULL_NAME=int METHOD_FULL_NAME=consume ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH",
+        "      LITERAL CODE=\"api header.h:PICK:int(0)\" TYPE_FULL_NAME=char* ORDER=1 ARGUMENT_INDEX=1",
+        "  METHOD NAME=choose CODE=int choose(void) {\\n /* Preserve ordinary source text: api header.h:PICK:int(0). */\\n consume(\"api header.h:PICK:int(0)\");\\n return PICK;\\n} FULL_NAME=choose SIGNATURE=int(void) ORDER=1",
+        "    BLOCK CODE={\\n /* Preserve ordinary source text: api header.h:PICK:int(0). */\\n consume(\"api header.h:PICK:int(0)\");\\n return PICK;\\n} TYPE_FULL_NAME=void ORDER=2",
+        "      CALL NAME=consume CODE=consume(\"api header.h:PICK:int(0)\") TYPE_FULL_NAME=int METHOD_FULL_NAME=consume ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH",
+        "        LITERAL CODE=\"api header.h:PICK:int(0)\" TYPE_FULL_NAME=char* ORDER=1 ARGUMENT_INDEX=1",
+        "FLOWS|REACHING_DEF[\"api header.h:PICK:int(0)\"] choose#5 -> choose#4"
+      ],
+      "liveMacroMethod": "main.c:PICK:int(0)",
+      "currentWrongMacroMethod": "api header.h:PICK:int(0)",
+      "baselineExact": false,
+      "v2Exact": false
+    }
+  ],
+  "files": {
+    "baseline-eighth/deferred_full_name_literal/actual.txt": {
+      "bytes": 9755,
+      "sha256": "b615191ec33aef893dd3639a655067e05118cfcebb29723d74c38a33b2089887"
+    },
+    "baseline-eighth/deferred_full_name_literal/complete.diff": {
+      "bytes": 5606,
+      "sha256": "79427c78c929c8b04ebbcd656e673f278bb8da23c0f168594a80c902197347ff"
+    },
+    "baseline-eighth/deferred_full_name_literal/run.json": {
+      "bytes": 1738,
+      "sha256": "1102233cae2bedf7aa50faf90f6017c667c56c851e35c88282582ac34a895404"
+    },
+    "baseline-eighth/deferred_full_name_literal/stderr.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "baseline-eighth/deferred_full_name_spaces/actual.txt": {
+      "bytes": 10105,
+      "sha256": "10778dc4dcdcccba496dfae6f4ee0f57b353c1c1d25e7a50d2b75f92555e1dba"
+    },
+    "baseline-eighth/deferred_full_name_spaces/complete.diff": {
+      "bytes": 5837,
+      "sha256": "4aa5bf2a44d287ae7db3518623c5f39b84358ede0cb4303a32f3944268921d38"
+    },
+    "baseline-eighth/deferred_full_name_spaces/run.json": {
+      "bytes": 1756,
+      "sha256": "51cfbe03fb7af2fa3f2953986856afcf232ba0c188e28ea51dcab5bf4206e980"
+    },
+    "baseline-eighth/deferred_full_name_spaces/stderr.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "baseline-eighth/replay.json": {
+      "bytes": 4528,
+      "sha256": "df297df888514d48678221d108b97773e9267b6e0097839a140b5be1f2feec2e"
+    },
+    "candidate-v2/deferred_full_name_literal/actual.txt": {
+      "bytes": 9755,
+      "sha256": "b615191ec33aef893dd3639a655067e05118cfcebb29723d74c38a33b2089887"
+    },
+    "candidate-v2/deferred_full_name_literal/complete.diff": {
+      "bytes": 5603,
+      "sha256": "86f4cc1a4b266ae4fd8fd9072fdde4df7ff490ed6951ec30aaee606b75e73d10"
+    },
+    "candidate-v2/deferred_full_name_literal/run.json": {
+      "bytes": 1724,
+      "sha256": "6f25e8a4e38926c1d88a55c241c490a9638cbb4fd7e399e725968563d00f3d90"
+    },
+    "candidate-v2/deferred_full_name_literal/stderr.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "candidate-v2/deferred_full_name_spaces/actual.txt": {
+      "bytes": 10105,
+      "sha256": "10778dc4dcdcccba496dfae6f4ee0f57b353c1c1d25e7a50d2b75f92555e1dba"
+    },
+    "candidate-v2/deferred_full_name_spaces/complete.diff": {
+      "bytes": 5834,
+      "sha256": "75407373c714744aa19ff1b73cf34d5376f7b4e46bad7594440b1585e08e9ea4"
+    },
+    "candidate-v2/deferred_full_name_spaces/run.json": {
+      "bytes": 1742,
+      "sha256": "c1f4b819645b5d0285cccc8da96236f8ad707919ffe40e6fd18e21a12883a6f0"
+    },
+    "candidate-v2/deferred_full_name_spaces/stderr.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "candidate-v2/replay.json": {
+      "bytes": 4486,
+      "sha256": "89c713224aad4524e1ee560d7fb6895ae0c0229c1b295e4a048cee11bbc3dba9"
+    },
+    "cases.json": {
+      "bytes": 678,
+      "sha256": "1aa1899523d66cbf6a5707004fc8ce85bbc6d38eab80f345c88192145a207862"
+    },
+    "input/deferred_full_name_literal/api.h": {
+      "bytes": 27,
+      "sha256": "9313885ae7f29e87c31882a352bfe60f303796aedbb0a3b40ef6dc64037c8dc3"
+    },
+    "input/deferred_full_name_literal/expected.txt": {
+      "bytes": 9767,
+      "sha256": "c25f09289b059a979adddcaba94719f3a84678184a1e9a4be9d3804dc826fdd8"
+    },
+    "input/deferred_full_name_literal/main.c": {
+      "bytes": 208,
+      "sha256": "8983979c5217cd67b1c16f8d1b533e6d453928101f1e8d68440967c0ba15b481"
+    },
+    "input/deferred_full_name_spaces/api header.h": {
+      "bytes": 27,
+      "sha256": "9313885ae7f29e87c31882a352bfe60f303796aedbb0a3b40ef6dc64037c8dc3"
+    },
+    "input/deferred_full_name_spaces/expected.txt": {
+      "bytes": 10033,
+      "sha256": "369f74ebb48c924503fd81c8edd2dadfa6196c40ccd201345d15894f23bd9592"
+    },
+    "input/deferred_full_name_spaces/main.c": {
+      "bytes": 229,
+      "sha256": "4d73e94d0a034059ccbf3ecffb0edf154a9102b7fbcb0feb33a3aca419d37b66"
+    },
+    "live-run.json": {
+      "bytes": 2106,
+      "sha256": "1cb8fb78135c41f9ee90b166a816a5440e4050300091ac8c143a93536355f23c"
+    },
+    "live.stderr": {
+      "bytes": 2526,
+      "sha256": "401b9a83548b806c95730400e64f8f9395d9591dc214073a6bd9ba1716af4563"
+    },
+    "live.stdout": {
+      "bytes": 35480,
+      "sha256": "bf1bfcfce7f9f92e2a01ad79f2acf24ddfc3df4292a02053f829b70fc68538dd"
+    },
+    "oracle-started.json": {
+      "bytes": 3,
+      "sha256": "ca3d163bab055381827226140568f3bef7eaac187cebd76878e0b63e9e442356"
+    },
+    "oracle.sc": {
+      "bytes": 4709,
+      "sha256": "56431f14868678e64f9eb41026b44f1d3d7738404d28d2db62711b520c98c742"
+    },
+    "replay-preflight-original.py": {
+      "bytes": 1368,
+      "sha256": "fc09242abb3580cca1ec2b3fddefcf3fa8259856ad58225d25d36a310b680dec"
+    },
+    "replay.py": {
+      "bytes": 3002,
+      "sha256": "2ac54d8445d268a3aeb83d231d52f7540cf4a92f8934f41ea07ad90c22bccfa2"
+    },
+    "run_oracle.py": {
+      "bytes": 2607,
+      "sha256": "f49e1f86d12cf09c669f3ba9f6b22a2a6793ceb1a8bfaee8846935ace10b02cd"
+    }
+  },
+  "oracleProjection": "Complete unchanged standard AST/NODES/EDGES/FLOWS projection, with all raw producer output and full differences retained. No dropped records.",
+  "baselineReceipt": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/ninth-batch/deferred-field-controls/baseline-eighth/replay.json",
+  "candidateReceipt": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/ninth-batch/deferred-field-controls/candidate-v2/replay.json"
+}

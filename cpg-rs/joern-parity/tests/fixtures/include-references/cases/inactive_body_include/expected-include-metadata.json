@@ -1,0 +1,80 @@
+{
+  "absenceBridge": "Every observed Import/Dependency property is retained. Omitted properties remain omitted; ORDER requires explicit Absent or Present, never Unknown.",
+  "edgePayloadBoundary": "All observed incident payloads are null; Rust payload storage is unsupported. The gate compares every incident edge kind, endpoint and occurrence, not payload storage.",
+  "globalOrderBoundary": "The existing owner global TYPE_DECL dense ORDER value is compared separately. No claim is made that its Joern ORDER presence is stored.",
+  "integerBridge": "Exact integer values: observed Java Integer is checked in i32 domain; nonnegative LINE_NUMBER is represented by Rust u32. Java class names remain only in the untouched raw reference.",
+  "ownerGlobalTypeDeclOrders": [
+    {
+      "denseOrder": 3,
+      "file": "main.c",
+      "fullName": "main.c:<global>"
+    }
+  ],
+  "pairs": [
+    {
+      "dependency": {
+        "DEPENDENCY_GROUP_ID": "inactive.h",
+        "NAME": "inactive.h",
+        "VERSION": "include"
+      },
+      "import": {
+        "CODE": "#include \"inactive.h\"",
+        "COLUMN_NUMBER": 1,
+        "IMPORTED_AS": "inactive.h",
+        "IMPORTED_ENTITY": "inactive.h",
+        "LINE_NUMBER": 16,
+        "ORDER": 2
+      },
+      "incidentEdges": [
+        [
+          "import",
+          "IMPORTS",
+          "dependency"
+        ],
+        [
+          "owner",
+          "AST",
+          "import"
+        ]
+      ],
+      "owner": {
+        "FILENAME": "main.c",
+        "FULL_NAME": "main.c:<global>",
+        "NAME": "<global>"
+      }
+    },
+    {
+      "dependency": {
+        "DEPENDENCY_GROUP_ID": "inactive.h",
+        "NAME": "inactive.h",
+        "VERSION": "include"
+      },
+      "import": {
+        "CODE": "#include \"inactive.h\"",
+        "COLUMN_NUMBER": 1,
+        "IMPORTED_AS": "inactive.h",
+        "IMPORTED_ENTITY": "inactive.h",
+        "LINE_NUMBER": 3,
+        "ORDER": 1
+      },
+      "incidentEdges": [
+        [
+          "import",
+          "IMPORTS",
+          "dependency"
+        ],
+        [
+          "owner",
+          "AST",
+          "import"
+        ]
+      ],
+      "owner": {
+        "FILENAME": "main.c",
+        "FULL_NAME": "main.c:<global>",
+        "NAME": "<global>"
+      }
+    }
+  ],
+  "schemaVersion": 1
+}

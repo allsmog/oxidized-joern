@@ -1,0 +1,78 @@
+--- Joern
++++ before
+@@ -12,10 +12,10 @@
+   METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+   METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+   BLOCK CODE={ return sizeof(const int *); } TYPE_FULL_NAME=void ORDER=2
+-    LOCAL NAME=const int CODE=const int TYPE_FULL_NAME=int ORDER=0
++    LOCAL NAME=const int * CODE=const int * TYPE_FULL_NAME=const int * ORDER=0
+     RETURN CODE=return sizeof(const int *); ORDER=1
+       CALL NAME=<operator>.sizeOf CODE=sizeof(const int *) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.sizeOf ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+-        IDENTIFIER NAME=const int CODE=const int TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
++        IDENTIFIER NAME=const int * CODE=const int * TYPE_FULL_NAME=const int * ORDER=1 ARGUMENT_INDEX=1
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+ 
+ METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1
+@@ -23,10 +23,10 @@
+     METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+     METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+     BLOCK CODE={ return sizeof(const int *); } TYPE_FULL_NAME=void ORDER=2
+-      LOCAL NAME=const int CODE=const int TYPE_FULL_NAME=int ORDER=0
++      LOCAL NAME=const int * CODE=const int * TYPE_FULL_NAME=const int * ORDER=0
+       RETURN CODE=return sizeof(const int *); ORDER=1
+         CALL NAME=<operator>.sizeOf CODE=sizeof(const int *) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.sizeOf ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+-          IDENTIFIER NAME=const int CODE=const int TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
++          IDENTIFIER NAME=const int * CODE=const int * TYPE_FULL_NAME=const int * ORDER=1 ARGUMENT_INDEX=1
+     METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+   BLOCK TYPE_FULL_NAME=ANY ORDER=1
+     METHOD_REF CODE=f TYPE_FULL_NAME=f METHOD_FULL_NAME=f ORDER=1
+@@ -41,11 +41,13 @@
+ NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+ NODES|NAMESPACE NAME=<global>
+ NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
++NODES|TYPE_DECL NAME=const int * FULL_NAME=const int * CODE=const int * IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE_DECL NAME=f FULL_NAME=f CODE=f AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+ NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE_DECL NAME=<global> FULL_NAME=main.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+ NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
++NODES|TYPE NAME=const int * FULL_NAME=const int * TYPE_DECL_FULL_NAME=const int *
+ NODES|TYPE NAME=f FULL_NAME=f TYPE_DECL_FULL_NAME=f
+ NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+ NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+@@ -66,6 +68,7 @@
+ EDGES|CONTAINS D:main.c:<global> -> main.c:<global>#0
+ EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+ EDGES|CONTAINS F:<includes> -> D:ANY
++EDGES|CONTAINS F:<includes> -> D:const int *
+ EDGES|CONTAINS F:<includes> -> D:int
+ EDGES|CONTAINS F:<includes> -> D:void
+ EDGES|CONTAINS F:main.c -> D:main.c:<global>
+@@ -85,9 +88,9 @@
+ EDGES|EVAL_TYPE f#1 -> T:void
+ EDGES|EVAL_TYPE f#2 -> T:void
+ EDGES|EVAL_TYPE f#3 -> T:void
+-EDGES|EVAL_TYPE f#4 -> T:int
++EDGES|EVAL_TYPE f#4 -> T:const int *
+ EDGES|EVAL_TYPE f#6 -> T:ANY
+-EDGES|EVAL_TYPE f#7 -> T:int
++EDGES|EVAL_TYPE f#7 -> T:const int *
+ EDGES|EVAL_TYPE f#8 -> T:int
+ EDGES|EVAL_TYPE main.c:<global>#10 -> T:ANY
+ EDGES|EVAL_TYPE main.c:<global>#11 -> T:f
+@@ -98,6 +101,7 @@
+ EDGES|REF NB:<includes>:<global> -> NS:<global>
+ EDGES|REF NB:main.c:<global> -> NS:<global>
+ EDGES|REF T:ANY -> D:ANY
++EDGES|REF T:const int * -> D:const int *
+ EDGES|REF T:f -> D:f
+ EDGES|REF T:int -> D:int
+ EDGES|REF T:void -> D:void
+@@ -105,6 +109,7 @@
+ EDGES|REF main.c:<global>#11 -> f#0
+ EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+ EDGES|SOURCE_FILE D:ANY -> F:<includes>
++EDGES|SOURCE_FILE D:const int * -> F:<includes>
+ EDGES|SOURCE_FILE D:f -> F:main.c
+ EDGES|SOURCE_FILE D:int -> F:<includes>
+ EDGES|SOURCE_FILE D:main.c:<global> -> F:main.c

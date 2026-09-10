@@ -1,0 +1,5 @@
+# Preserve complete oracle/diff transcript whitespace without rewriting evidence.
+*.diff -whitespace
+*.log -whitespace
+*.stderr -whitespace
+provenance/review/live.stdout -whitespace

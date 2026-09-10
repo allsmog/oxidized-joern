@@ -1,0 +1,508 @@
+{
+  "status": "WORKER_BOUNDED_VALIDATION_PASS_ROOT_ACCEPTANCE_PENDING",
+  "baselineCommit": "f235a0f898c4e19fda90998b903f57741b776ec7",
+  "productionSourceSha256": "a76495894a72f4e1a023dea997e4308d60122bbf3ceb812538e1dd31a4161893",
+  "frozenBuildBindings": "provenance/frozen-v1/bindings.json",
+  "frozenBuildBindingsSha256": "9a036a96c94a34c9bffc85ba101b5db0ea0af40f581f6621cc8c40851cfb98b9",
+  "binaries": {
+    "cpg": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/frozen-v1/cpg",
+      "sha256": "b2a849c94eb25b4fdbe5da0d6fa3fe59b30c9bac92cb2505bf074a146cb41447"
+    },
+    "joern-parity": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/frozen-v1/joern-parity",
+      "sha256": "fe5dd8c3036ca44e1112dadc08a748f46165e782894c77c38165ca8c4565cf2c"
+    }
+  },
+  "cases": [
+    {
+      "case": "base_qualified_pointer",
+      "retainedAnchor": false,
+      "classification": "complete_exact_gate",
+      "inputs": {
+        "main.c": "cases/base_qualified_pointer/main.c"
+      },
+      "inputHashes": {
+        "main.c": "683671d135a3d3d8385a92bba5f8fc1b87e1650c0b698282ee8416a11d110e0d"
+      },
+      "expected": "cases/base_qualified_pointer/expected.txt",
+      "expectedSha256": "53b149c0c3b91fc21969901c294099353666c6e0842f621bf49d596a9017cb5c",
+      "beforeExact": false,
+      "candidateExact": true,
+      "beforeCandidateIdentical": false,
+      "matchingGainsNonempty": 7,
+      "matchingLossesNonempty": 0,
+      "replay": "provenance/replay19/base_qualified_pointer/run.json"
+    },
+    {
+      "case": "const_unsigned_short",
+      "retainedAnchor": false,
+      "classification": "complete_exact_gate",
+      "inputs": {
+        "main.c": "cases/const_unsigned_short/main.c"
+      },
+      "inputHashes": {
+        "main.c": "57e3d6a3da034eaeda3da20d1ba518bac47a740b3aa62c4f5bf16def20bbc385"
+      },
+      "expected": "cases/const_unsigned_short/expected.txt",
+      "expectedSha256": "7ffc36c68f07466a0ab2f31de41b75a9f73e7e130ddf547cbc96d1b4fa774284",
+      "beforeExact": false,
+      "candidateExact": true,
+      "beforeCandidateIdentical": false,
+      "matchingGainsNonempty": 7,
+      "matchingLossesNonempty": 0,
+      "replay": "provenance/replay19/const_unsigned_short/run.json"
+    },
+    {
+      "case": "mixed_declarator_shapes",
+      "retainedAnchor": false,
+      "classification": "complete_exact_gate",
+      "inputs": {
+        "main.c": "cases/mixed_declarator_shapes/main.c"
+      },
+      "inputHashes": {
+        "main.c": "78a9ab60868e0c24ba739ac8c1ed1cffb97913d16e6c14a8da5e985a0976dfe7"
+      },
+      "expected": "cases/mixed_declarator_shapes/expected.txt",
+      "expectedSha256": "1d3402f00cd066767d6a87552aa217b8292a66629c72309165bafaa1a8d4ff0d",
+      "beforeExact": false,
+      "candidateExact": true,
+      "beforeCandidateIdentical": false,
+      "matchingGainsNonempty": 21,
+      "matchingLossesNonempty": 0,
+      "replay": "provenance/replay19/mixed_declarator_shapes/run.json"
+    },
+    {
+      "case": "nonprimitive_scalar_control",
+      "retainedAnchor": false,
+      "classification": "retained_complete_diagnostic",
+      "inputs": {
+        "main.c": "cases/nonprimitive_scalar_control/main.c"
+      },
+      "inputHashes": {
+        "main.c": "30f7610f6251619e111dccd66822d2b620b131a00520a94432f29a23737cbcee"
+      },
+      "expected": "cases/nonprimitive_scalar_control/expected.txt",
+      "expectedSha256": "d01b88fb2012eb6671de933e8be87c445c1cc7d951aeee509276ddd6373dd34c",
+      "beforeExact": false,
+      "candidateExact": false,
+      "beforeCandidateIdentical": true,
+      "matchingGainsNonempty": 0,
+      "matchingLossesNonempty": 0,
+      "replay": "provenance/replay19/nonprimitive_scalar_control/run.json"
+    },
+    {
+      "case": "ordinary_numeric_control",
+      "retainedAnchor": false,
+      "classification": "complete_exact_gate",
+      "inputs": {
+        "main.c": "cases/ordinary_numeric_control/main.c"
+      },
+      "inputHashes": {
+        "main.c": "ca63fcf93080419061d59acd5f7cefe2818a399a29190125a011d7397e52caa6"
+      },
+      "expected": "cases/ordinary_numeric_control/expected.txt",
+      "expectedSha256": "4528adacb40f21e1aa33eb4195cfb87470e8f5a3a288a1678486d1800c63aef1",
+      "beforeExact": true,
+      "candidateExact": true,
+      "beforeCandidateIdentical": true,
+      "matchingGainsNonempty": 0,
+      "matchingLossesNonempty": 0,
+      "replay": "provenance/replay19/ordinary_numeric_control/run.json"
+    },
+    {
+      "case": "pointer_qualified_pointer",
+      "retainedAnchor": false,
+      "classification": "complete_exact_gate",
+      "inputs": {
+        "main.c": "cases/pointer_qualified_pointer/main.c"
+      },
+      "inputHashes": {
+        "main.c": "ce703562d1d768702fd9d0f4177d315a354346fd5924b53feca86633ab49dd29"
+      },
+      "expected": "cases/pointer_qualified_pointer/expected.txt",
+      "expectedSha256": "1efb5791f73bc51f3d36709eb8f61cd5e9850b3b01fe4687ff8a64f26e01b625",
+      "beforeExact": false,
+      "candidateExact": true,
+      "beforeCandidateIdentical": false,
+      "matchingGainsNonempty": 7,
+      "matchingLossesNonempty": 0,
+      "replay": "provenance/replay19/pointer_qualified_pointer/run.json"
+    },
+    {
+      "case": "short_int_unsigned",
+      "retainedAnchor": false,
+      "classification": "complete_exact_gate",
+      "inputs": {
+        "main.c": "cases/short_int_unsigned/main.c"
+      },
+      "inputHashes": {
+        "main.c": "0c049f5c6fd7eb24665d96d4ff592154b323a755cc58e92d5fe0a499dd596648"
+      },
+      "expected": "cases/short_int_unsigned/expected.txt",
+      "expectedSha256": "92cfd06fee6b3bcb4a94e9eb9f76234322feb6f521fafbbcd7ab928d2d4b92e0",
+      "beforeExact": false,
+      "candidateExact": true,
+      "beforeCandidateIdentical": false,
+      "matchingGainsNonempty": 7,
+      "matchingLossesNonempty": 0,
+      "replay": "provenance/replay19/short_int_unsigned/run.json"
+    },
+    {
+      "case": "short_unsigned",
+      "retainedAnchor": false,
+      "classification": "complete_exact_gate",
+      "inputs": {
+        "main.c": "cases/short_unsigned/main.c"
+      },
+      "inputHashes": {
+        "main.c": "5fb6e70b45823d56203bd1b7c9e35750e574fd671788cf67cad78b17bb7c10a2"
+      },
+      "expected": "cases/short_unsigned/expected.txt",
+      "expectedSha256": "33b6a8ed56ff9b624cfa8bf0410d5bd9372fcdbf1cb41fde895ef129446ba90f",
+      "beforeExact": false,
+      "candidateExact": true,
+      "beforeCandidateIdentical": false,
+      "matchingGainsNonempty": 7,
+      "matchingLossesNonempty": 0,
+      "replay": "provenance/replay19/short_unsigned/run.json"
+    },
+    {
+      "case": "signed_char",
+      "retainedAnchor": false,
+      "classification": "complete_exact_gate",
+      "inputs": {
+        "main.c": "cases/signed_char/main.c"
+      },
+      "inputHashes": {
+        "main.c": "65222d14e53a108d3e98d3e3efa30aeda2b6df4dbed97b88e92698dee74d32c0"
+      },
+      "expected": "cases/signed_char/expected.txt",
+      "expectedSha256": "01213a09ac6d7a925b92e76fa1e9424a8c6e1d1f60201de3f0701c987ac794aa",
+      "beforeExact": false,
+      "candidateExact": true,
+      "beforeCandidateIdentical": false,
+      "matchingGainsNonempty": 7,
+      "matchingLossesNonempty": 0,
+      "replay": "provenance/replay19/signed_char/run.json"
+    },
+    {
+      "case": "signed_short",
+      "retainedAnchor": false,
+      "classification": "complete_exact_gate",
+      "inputs": {
+        "main.c": "cases/signed_short/main.c"
+      },
+      "inputHashes": {
+        "main.c": "da4b39f4cbd65496ecfcfe1a217413da07c5d35378b3a80ba7bc4fecec5dae79"
+      },
+      "expected": "cases/signed_short/expected.txt",
+      "expectedSha256": "d1a36fa051100458c9a44e8cafb4499d361950fe1e5f8ff5fd4f0b2e9aa22d39",
+      "beforeExact": false,
+      "candidateExact": true,
+      "beforeCandidateIdentical": false,
+      "matchingGainsNonempty": 7,
+      "matchingLossesNonempty": 0,
+      "replay": "provenance/replay19/signed_short/run.json"
+    },
+    {
+      "case": "tiny_fixedtables_include",
+      "retainedAnchor": true,
+      "classification": "complete_exact_gate",
+      "inputs": {
+        "fixed.h": "cases/tiny_fixedtables_include/fixed.h",
+        "main.c": "cases/tiny_fixedtables_include/main.c"
+      },
+      "inputHashes": {
+        "fixed.h": "3039380a12e6dba1fb44314f13292d1b5ec6744aa80eff5599566a29ea94ea86",
+        "main.c": "7203039d3be732abfb9abaad7177eaa77efa51d6e9fa58d58733346eb6cb4dda"
+      },
+      "expected": "cases/tiny_fixedtables_include/expected.txt",
+      "expectedSha256": "fc4a1360d6f10152edb364c346a47ae73d2df2460fe5ef12da2d2e79cbb7dd3f",
+      "beforeExact": false,
+      "candidateExact": true,
+      "beforeCandidateIdentical": false,
+      "matchingGainsNonempty": 7,
+      "matchingLossesNonempty": 0,
+      "replay": "provenance/replay19/tiny_fixedtables_include/run.json"
+    },
+    {
+      "case": "tiny_fixedtables_inline",
+      "retainedAnchor": true,
+      "classification": "complete_exact_gate",
+      "inputs": {
+        "main.c": "cases/tiny_fixedtables_inline/main.c"
+      },
+      "inputHashes": {
+        "main.c": "8af2a0a9531deec50f16e8c125de4000c0636b443b11628e232bb9e9413d2a6f"
+      },
+      "expected": "cases/tiny_fixedtables_inline/expected.txt",
+      "expectedSha256": "6d613c7085ab54541cc1d9fa83494748e33fe70bfc5c541ee39f12aa8046cadd",
+      "beforeExact": false,
+      "candidateExact": true,
+      "beforeCandidateIdentical": false,
+      "matchingGainsNonempty": 7,
+      "matchingLossesNonempty": 0,
+      "replay": "provenance/replay19/tiny_fixedtables_inline/run.json"
+    },
+    {
+      "case": "unsigned_char",
+      "retainedAnchor": false,
+      "classification": "complete_exact_gate",
+      "inputs": {
+        "main.c": "cases/unsigned_char/main.c"
+      },
+      "inputHashes": {
+        "main.c": "ab73e292cafb2ac78baf257cb5a3710955bcfb9f71d82078478916590e813721"
+      },
+      "expected": "cases/unsigned_char/expected.txt",
+      "expectedSha256": "4a794f1b11f8d0b222bdc91d3e45abe0c55ecbdbaf64db736a95f91828aec8d4",
+      "beforeExact": true,
+      "candidateExact": true,
+      "beforeCandidateIdentical": true,
+      "matchingGainsNonempty": 0,
+      "matchingLossesNonempty": 0,
+      "replay": "provenance/replay19/unsigned_char/run.json"
+    },
+    {
+      "case": "unsigned_long_long_int",
+      "retainedAnchor": false,
+      "classification": "complete_exact_gate",
+      "inputs": {
+        "main.c": "cases/unsigned_long_long_int/main.c"
+      },
+      "inputHashes": {
+        "main.c": "c772a4b67dd1cfb5cf2943b6d97525c24063c4a476c33a2fba23664f480bae26"
+      },
+      "expected": "cases/unsigned_long_long_int/expected.txt",
+      "expectedSha256": "8cdd2dbee080157990c124b09867988f64b4c790a00ab92b5be48b270c61a720",
+      "beforeExact": false,
+      "candidateExact": true,
+      "beforeCandidateIdentical": false,
+      "matchingGainsNonempty": 7,
+      "matchingLossesNonempty": 0,
+      "replay": "provenance/replay19/unsigned_long_long_int/run.json"
+    },
+    {
+      "case": "unsigned_short",
+      "retainedAnchor": false,
+      "classification": "complete_exact_gate",
+      "inputs": {
+        "main.c": "cases/unsigned_short/main.c"
+      },
+      "inputHashes": {
+        "main.c": "15c28619bfdeb3b65e60afb2011092c2c52d425ef4f4b67be09083a3657aea47"
+      },
+      "expected": "cases/unsigned_short/expected.txt",
+      "expectedSha256": "67200ecf8fbbbf5beacd4025936a0f959c30ede649497118d7510d2bea4f7b88",
+      "beforeExact": false,
+      "candidateExact": true,
+      "beforeCandidateIdentical": false,
+      "matchingGainsNonempty": 7,
+      "matchingLossesNonempty": 0,
+      "replay": "provenance/replay19/unsigned_short/run.json"
+    },
+    {
+      "case": "unsigned_short_array",
+      "retainedAnchor": false,
+      "classification": "complete_exact_gate",
+      "inputs": {
+        "main.c": "cases/unsigned_short_array/main.c"
+      },
+      "inputHashes": {
+        "main.c": "e30c69af8869ef328c2de4270ab270fc6a23211fac7b55533efadd02ccc3aa49"
+      },
+      "expected": "cases/unsigned_short_array/expected.txt",
+      "expectedSha256": "500f0b8fd015d905346cdc8b0d9dea88b91ecb24bf068504ff9ddb59b1916ef0",
+      "beforeExact": false,
+      "candidateExact": true,
+      "beforeCandidateIdentical": false,
+      "matchingGainsNonempty": 7,
+      "matchingLossesNonempty": 0,
+      "replay": "provenance/replay19/unsigned_short_array/run.json"
+    },
+    {
+      "case": "unsigned_short_int",
+      "retainedAnchor": false,
+      "classification": "complete_exact_gate",
+      "inputs": {
+        "main.c": "cases/unsigned_short_int/main.c"
+      },
+      "inputHashes": {
+        "main.c": "76277bee00be9bb521ee0bc24c5127ef632678fc3e0aa233f4bba4de713fed85"
+      },
+      "expected": "cases/unsigned_short_int/expected.txt",
+      "expectedSha256": "2f53a7bf0e015f6d42627dde4d6c54bafcd2e55b0b81a3f2b80b70f9a46cf3d1",
+      "beforeExact": false,
+      "candidateExact": true,
+      "beforeCandidateIdentical": false,
+      "matchingGainsNonempty": 7,
+      "matchingLossesNonempty": 0,
+      "replay": "provenance/replay19/unsigned_short_int/run.json"
+    },
+    {
+      "case": "unsigned_short_pointer",
+      "retainedAnchor": false,
+      "classification": "complete_exact_gate",
+      "inputs": {
+        "main.c": "cases/unsigned_short_pointer/main.c"
+      },
+      "inputHashes": {
+        "main.c": "7b5de0d2a5dc3eb44e456043dd90fba8820cb2f3c7c839919a8b3eec34c1a97e"
+      },
+      "expected": "cases/unsigned_short_pointer/expected.txt",
+      "expectedSha256": "75c4b6060b1e8d56e967c641dd7050a696c00ab95b37b284633ca58ad5fdb0f9",
+      "beforeExact": false,
+      "candidateExact": true,
+      "beforeCandidateIdentical": false,
+      "matchingGainsNonempty": 7,
+      "matchingLossesNonempty": 0,
+      "replay": "provenance/replay19/unsigned_short_pointer/run.json"
+    },
+    {
+      "case": "volatile_unsigned_short",
+      "retainedAnchor": false,
+      "classification": "complete_exact_gate",
+      "inputs": {
+        "main.c": "cases/volatile_unsigned_short/main.c"
+      },
+      "inputHashes": {
+        "main.c": "e80f725b99b57290699d3daf7f4bb116df52d666ad1c6973bea83f82d0675d64"
+      },
+      "expected": "cases/volatile_unsigned_short/expected.txt",
+      "expectedSha256": "3dc76afa755430aab0204df9f9ef02f714b67b2468229d70a316746460e2e8d9",
+      "beforeExact": false,
+      "candidateExact": true,
+      "beforeCandidateIdentical": false,
+      "matchingGainsNonempty": 7,
+      "matchingLossesNonempty": 0,
+      "replay": "provenance/replay19/volatile_unsigned_short/run.json"
+    }
+  ],
+  "summary": {
+    "projects": 19,
+    "newProjects": 17,
+    "retainedAnchors": 2,
+    "beforeExact": 2,
+    "candidateExact": 18,
+    "newCompleteGraphGates": 16,
+    "retainedAnchorCompleteGraphGates": 2,
+    "completeDiagnostics": 1,
+    "referenceLfLines": 3493,
+    "referenceNonemptyRecords": 3423,
+    "matchingGainsNonempty": 126,
+    "matchingLossesNonempty": 0,
+    "counterTerminalEmptyPolicy": "Replay counters split on LF and include a terminal empty entry in includingSeparators; 3512 such entries across19. Nonempty totals3423 and LF line count3493 are distinct."
+  },
+  "priorCaseInstances": 228,
+  "additionalMemberTypesDiagnostic": 1,
+  "priorSummary": [
+    {
+      "family": "primitive-roles",
+      "cases": 39,
+      "beforeExact": 39,
+      "candidateExact": 39,
+      "successfulPairs": 39,
+      "sameOutputs": 39,
+      "matchingGains": 0,
+      "matchingLosses": 0
+    },
+    {
+      "family": "typedef-aggregates",
+      "cases": 26,
+      "beforeExact": 26,
+      "candidateExact": 26,
+      "successfulPairs": 26,
+      "sameOutputs": 26,
+      "matchingGains": 0,
+      "matchingLosses": 0
+    },
+    {
+      "family": "array-initializers",
+      "cases": 69,
+      "beforeExact": 69,
+      "candidateExact": 69,
+      "successfulPairs": 69,
+      "sameOutputs": 69,
+      "matchingGains": 0,
+      "matchingLosses": 0
+    },
+    {
+      "family": "body-includes",
+      "cases": 14,
+      "beforeExact": 10,
+      "candidateExact": 12,
+      "successfulPairs": 14,
+      "sameOutputs": 12,
+      "matchingGains": 14,
+      "matchingLosses": 0
+    },
+    {
+      "family": "array-dimension-macros",
+      "cases": 4,
+      "beforeExact": 4,
+      "candidateExact": 4,
+      "successfulPairs": 4,
+      "sameOutputs": 4,
+      "matchingGains": 0,
+      "matchingLosses": 0
+    },
+    {
+      "family": "body-macro-state",
+      "cases": 76,
+      "beforeExact": 55,
+      "candidateExact": 55,
+      "successfulPairs": 75,
+      "sameOutputs": 76,
+      "matchingGains": 0,
+      "matchingLosses": 0
+    },
+    {
+      "family": "array-initializers-diagnostic",
+      "cases": 1,
+      "beforeExact": 0,
+      "candidateExact": 0,
+      "successfulPairs": 1,
+      "sameOutputs": 1,
+      "matchingGains": 0,
+      "matchingLosses": 0
+    }
+  ],
+  "priorReceipt": "provenance/prior-replay/replay.json",
+  "priorReceiptSha256": "1ec133c54770652fc9384877ed88a0785f8f6e245c851fa8395fb2e14602fa31",
+  "retainedAbort": {
+    "family": "body-macro-state",
+    "case": "duplicate_clinit_tag",
+    "beforeExit": -6,
+    "candidateExit": -6,
+    "outputIdentical": true,
+    "includedInSuccessfulMatchingClaims": false
+  },
+  "priorGainOverlap": "The14 prior gains are the same two tiny-fixedtables anchors already included in the19-project gain count. Do not add them twice.",
+  "validation": {
+    "receipt": "provenance/validation/checks.json",
+    "sha256": "1b583646d0dee5c0040033c7ec32b9d7afa23471d2282803134ef15bcd6f5d72",
+    "focusedTests": 21,
+    "newRustTests": 2,
+    "newTestGroup": 1,
+    "mainComparisonBlocks": 308,
+    "fmt": true,
+    "strictClippyPackages": [
+      "cpg-lang-c",
+      "joern-parity"
+    ],
+    "rootFinalGatesRunByWorker": false
+  },
+  "test": {
+    "path": "cpg-rs/joern-parity/tests/primitive_members.rs",
+    "sha256": "920fe8b29a06e76a263eb8cf49dbe8470c81c5dc32b1879188bf0c58e352babe",
+    "initialDraftPreserved": "provenance/frozen-v1/source/cpg-rs/joern-parity/tests/primitive_members.rs",
+    "finalTestSnapshot": "provenance/validation/primitive_members.rs",
+    "draftChange": "Remove nonprimitive_scalar_control from complete-exact test after replay confirms unchanged scaffold diagnostic; production source/binary unchanged."
+  },
+  "sourceScope": "One field-base call site reuses declaration_type(..., TypeRole::Declaration); no helper, enum, suffix, clinit, other role, importer, solver, cache or oracle changes.",
+  "pending": [
+    "independent final source/package review",
+    "root integration and final workspace/live/whole/resource acceptance"
+  ]
+}

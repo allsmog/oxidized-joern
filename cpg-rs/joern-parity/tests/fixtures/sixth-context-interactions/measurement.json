@@ -1,0 +1,458 @@
+{
+  "joernVersion": "v4.0.555",
+  "officialArchiveSha256": "12989883d6b5aeacc97b2dc0ecc4e2951bf50e48cb244f8c8f333d11a8be0c7e",
+  "javaVersion": "21.0.12",
+  "projection": "Every AST/NODES/EDGES/FLOWS record from each isolated CASE, removing only AST|; selected newline encoding is not injective.",
+  "baseline": {
+    "sourceCommit": "aba030923a2eb02a7d542875e4274c1b44271608",
+    "binarySha256": "3c1ab1cb3d6833086b06105355f908a86be573f230fdbedc1bdc87faea979e17"
+  },
+  "earlyCombined": {
+    "exact.rs": "fa8423c7e9cfb5a3875b403d1958e9bf5c66b5a221f003185bd16555c58888e9",
+    "binarySha256": "9605fb168ec86edc5e05f6bf81b7cede617e8e83ce7b69efe400d307fc0827af"
+  },
+  "candidate": {
+    "exact.rs": "1603202779e066f2a9039f2fa3b075ab5722d9bb806be885e90f0b7c43a26d0d",
+    "import.rs": "3fb6695576fe87e463b5e44160bcbe828321bf32149d67abcc2256eb88d11aba",
+    "binarySha256": "d8b87819eec1b3eae2605c76b4f870774fb954d3757e62871ef480cd1e9c6f39",
+    "bindingsSha256": "6c788e766250cda33a9c0b1f7dcb0d7e0498fca72d72e81d7473ffa6f1d81d2d"
+  },
+  "totals": {
+    "projects": 18,
+    "exactBaseline": 0,
+    "exactEarlyCombined": 11,
+    "exactCandidate": 13,
+    "canonicalLines": 5123,
+    "nonemptyRecords": 4989
+  },
+  "oracleGroups": [
+    {
+      "name": "interactions",
+      "files": {
+        "live-run.json": "433c4d993bc15b2980b62d0c92b7c72f93b89293d7fb0a10820cc838b3803a3a",
+        "live.stderr": "ab18e709bdd2bb419bcdd9a5347f6db6cc382bbcb89ea8b7332a63c917eb82cb",
+        "live.stdout": "7055af12fcd0041dc7f433d8c80bebeb189b2e6c6621fa0ef177e13023a86226",
+        "oracle.sc": "56431f14868678e64f9eb41026b44f1d3d7738404d28d2db62711b520c98c742"
+      },
+      "note": "Fresh complete isolated-project run."
+    },
+    {
+      "name": "reviewer",
+      "files": {
+        "live-run.json": "5400d4f5ab6e0588b1b6e702c17dd8c262e50b36dbdf1570c013aaa37c85b0c2",
+        "live.stderr": "a774d3651279850157850ca5fc5393a290676aa3c966eccd3b7aa1ff53571771",
+        "live.stdout": "ab3567ac76486a560207d6a7ad2f59e17d85ffacff90af75c6945997a305ec13",
+        "oracle.sc": "56431f14868678e64f9eb41026b44f1d3d7738404d28d2db62711b520c98c742"
+      },
+      "note": "Fresh complete isolated-project run."
+    },
+    {
+      "name": "primary",
+      "files": {
+        "live-run.json": "1e10ad83efe4f0af4c52d6db170862146a4d877442693b0d2e36e11b006f84cd",
+        "live.stderr": "0b53a930615267894f924a0c044edf699dba4bb3c617060c33c4956b3a57e6b0",
+        "live.stdout": "4c871eb5742d68f2dd0a18a19441baceba2929c756570a5ab04268a262ba54a6",
+        "oracle.sc": "56431f14868678e64f9eb41026b44f1d3d7738404d28d2db62711b520c98c742"
+      },
+      "note": "Primary/boundaries reuse complete raw runs from the immutable macro-cast-context package; only four complete projects are promoted here, no graph-record subset."
+    },
+    {
+      "name": "boundaries",
+      "files": {
+        "live-run.json": "1f01c7c1d6c473d37fb1bb7001a9cd1a00ec7ddae4275efba0b4e1baeab37d81",
+        "live.stderr": "68e9dbeed8e1cfb6c9dd4ad931d8007f6f0f26955bd548483325b4722ca0f400",
+        "live.stdout": "b6ee6d9c3a9a261f3e184eda9b8166b82e46185b41678c293b329343451ed6e5",
+        "oracle.sc": "56431f14868678e64f9eb41026b44f1d3d7738404d28d2db62711b520c98c742"
+      },
+      "note": "Primary/boundaries reuse complete raw runs from the immutable macro-cast-context package; only four complete projects are promoted here, no graph-record subset."
+    }
+  ],
+  "projects": [
+    {
+      "name": "block_macro_parameter_shadow",
+      "directory": "cases/block_macro_parameter_shadow",
+      "oracleGroup": "interactions",
+      "oracleCase": "block_macro_parameter_shadow",
+      "exactBaseline": false,
+      "exactEarlyCombined": false,
+      "exactCandidate": true,
+      "canonicalLines": 168,
+      "nonemptyRecords": 162,
+      "files": {
+        "api.h": "52a3dd6d5ca29ae115720b12147621aeee5064dea6ee1725ef8cd448e163d1a7",
+        "baseline.diff": "d5d074c395bff6c38ebb80bd1e163a52ff4881c09faa110997cd3d0ea724a875",
+        "baseline.txt": "49a956fa8ff2e080718b1567933991f6e67a3a4ab6b210403f0177634e397aa4",
+        "candidate.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "candidate.txt": "488d7047cdb12a0b8461ca40a9080a0affe99b34e172812a5ea4361897d30572",
+        "early_combined.diff": "3013d82e6ae1cd76db24e576a488eaadfed2e0d819e2d02e1f797c265b50991a",
+        "early_combined.txt": "fed72f3999460118d5601f9c2b02b2e2ba6d6d444997868fcdde62ada3acb3df",
+        "expected.txt": "488d7047cdb12a0b8461ca40a9080a0affe99b34e172812a5ea4361897d30572",
+        "main.c": "1ff2634a86ecbe6c184b04b47012392f9fdfa860bc79b5e88ef67aab99fb090b"
+      }
+    },
+    {
+      "name": "header_alias_return",
+      "directory": "diagnostics/header_alias_return",
+      "oracleGroup": "interactions",
+      "oracleCase": "header_alias_return",
+      "exactBaseline": false,
+      "exactEarlyCombined": false,
+      "exactCandidate": false,
+      "canonicalLines": 335,
+      "nonemptyRecords": 326,
+      "files": {
+        "api.h": "15a50757368ab4301d7d0c300155874464a98274b744b9c0a90fac94656eada3",
+        "baseline.diff": "8337b8f2f9d9d512839cd4d0f49db4ef8ccd77d8a87a32a764aed310172a9647",
+        "baseline.txt": "2edc089ef169280029d8d179c8cb9f662403772bfa9798b23adc130bc95fe1a1",
+        "candidate.diff": "894a30e853701e11e4a59410508f3dc1ce82dd8fe011c5b2a4b2bcbb494c3ae6",
+        "candidate.txt": "de2d7510ab5afafca5d7d638751b820239753b20932d70c4df8d18157bd27d26",
+        "early_combined.diff": "6567f3d4b117f253db684c5c2a5923958b7b8cee13859eacc49569cf04e67dfa",
+        "early_combined.txt": "de2d7510ab5afafca5d7d638751b820239753b20932d70c4df8d18157bd27d26",
+        "expected.txt": "cef218c06e1fbe15afc049afca3fe90c930666c34f2b8ba88359e2d5f816ce3b",
+        "main.c": "e4905ce6c72f9ea2df769c7f5e3d3e9598da54737c5a3f6dda019ee7d3b74945"
+      }
+    },
+    {
+      "name": "header_cast_size_return",
+      "directory": "cases/header_cast_size_return",
+      "oracleGroup": "interactions",
+      "oracleCase": "header_cast_size_return",
+      "exactBaseline": false,
+      "exactEarlyCombined": true,
+      "exactCandidate": true,
+      "canonicalLines": 357,
+      "nonemptyRecords": 347,
+      "files": {
+        "api.h": "5c5c6863e99585c76a4a205e611720bc468df2ed827b2cdffdef56b935b46ead",
+        "baseline.diff": "515e52bd4e40dc3792bef6aac6d8c2886cc332b1f6f60b8f757be4b9d0739b94",
+        "baseline.txt": "f44d3daccf959f8283b51eb3194d9e64d2dd93351c2eaedc2e9b84bb80c7ebdf",
+        "candidate.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "candidate.txt": "0e183cfe6df120ff869de969eef4af4ea3761fdca4d376964e99c831807ef99f",
+        "early_combined.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "early_combined.txt": "0e183cfe6df120ff869de969eef4af4ea3761fdca4d376964e99c831807ef99f",
+        "expected.txt": "0e183cfe6df120ff869de969eef4af4ea3761fdca4d376964e99c831807ef99f",
+        "main.c": "11ba3e906d463b548a2a0148cf489573dd300c11fca21b6e958e7e75f35aa702"
+      }
+    },
+    {
+      "name": "header_isolated_cast",
+      "directory": "cases/header_isolated_cast",
+      "oracleGroup": "interactions",
+      "oracleCase": "header_isolated_cast",
+      "exactBaseline": false,
+      "exactEarlyCombined": true,
+      "exactCandidate": true,
+      "canonicalLines": 502,
+      "nonemptyRecords": 489,
+      "files": {
+        "a.c": "c069871ff33878e9ee5e26e8b01a9885ad5eeb171a48f02a879d052a7e0fa7a7",
+        "api.h": "bba211cee74aa178504e3fa5bc41e956a978eb062d5d05e5c665bbd2f78bed63",
+        "b.c": "3baa1cbf7341404b4e034e73921621db0f7888d3c04ee73d1a68211bd6c98293",
+        "baseline.diff": "49a45fbf6c7be6b3e3566560dedda71e7af3d4b3c908fc38bd0d47d7bfec59d8",
+        "baseline.txt": "9520b93deb964ce1038c23e0219afa9308faad9545c650ece0c79b2c4b654e1a",
+        "candidate.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "candidate.txt": "7c12bf87db80e5eb977a3700470843e8c5d20e69797956336913d8a114ed4563",
+        "early_combined.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "early_combined.txt": "7c12bf87db80e5eb977a3700470843e8c5d20e69797956336913d8a114ed4563",
+        "expected.txt": "7c12bf87db80e5eb977a3700470843e8c5d20e69797956336913d8a114ed4563"
+      }
+    },
+    {
+      "name": "header_order_cast",
+      "directory": "cases/header_order_cast",
+      "oracleGroup": "interactions",
+      "oracleCase": "header_order_cast",
+      "exactBaseline": false,
+      "exactEarlyCombined": true,
+      "exactCandidate": true,
+      "canonicalLines": 467,
+      "nonemptyRecords": 456,
+      "files": {
+        "api.h": "bba211cee74aa178504e3fa5bc41e956a978eb062d5d05e5c665bbd2f78bed63",
+        "baseline.diff": "b0349ff78cb6bb5c8118394eb7ab9665d8625221cf88b5ec629deb1b1da65b39",
+        "baseline.txt": "11a57168a8d3d03acaa100a9f9b7db602b8d303c44704a8894ad503105ec7087",
+        "candidate.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "candidate.txt": "4a01d289093d0662605f40a84549aae90788607c54bdca2a326fca3d7b33ceb2",
+        "early_combined.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "early_combined.txt": "4a01d289093d0662605f40a84549aae90788607c54bdca2a326fca3d7b33ceb2",
+        "expected.txt": "4a01d289093d0662605f40a84549aae90788607c54bdca2a326fca3d7b33ceb2",
+        "main.c": "05a07eaca774e6f35955a3d8d19dcc9b8328887bb217bf9b1b9dcb7027bd1bea"
+      }
+    },
+    {
+      "name": "macro_parameter_shadow",
+      "directory": "cases/macro_parameter_shadow",
+      "oracleGroup": "interactions",
+      "oracleCase": "macro_parameter_shadow",
+      "exactBaseline": false,
+      "exactEarlyCombined": false,
+      "exactCandidate": true,
+      "canonicalLines": 207,
+      "nonemptyRecords": 201,
+      "files": {
+        "api.h": "f31bcac5da7804b05bcd5782b6a5e6b911ca512037a9b09793e040c6b5916ea2",
+        "baseline.diff": "305aeb53948ce381d63f5ffe3cc4594ef2543749da4500ed825580b955af98ff",
+        "baseline.txt": "2c7960d3c8d1d612c21740a3e965c1cf7c0737770ac91ea16a1ef0ce873ce1a6",
+        "candidate.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "candidate.txt": "3da20cc98ae2dcd5c14e99bbc37f4a622622b1d559272cbaaa529e48809a7c52",
+        "early_combined.diff": "2fbb915d2f04d1cdb144ccbc12f108da46d913ba1b7faad047acb9bdf21f3142",
+        "early_combined.txt": "f81a85e9fddb42c829e6e6ac053301ca71195563995f810984bdceee042aa2ea",
+        "expected.txt": "3da20cc98ae2dcd5c14e99bbc37f4a622622b1d559272cbaaa529e48809a7c52",
+        "main.c": "903370b3404dfe9faab4fe325cdf861ea0e642e44bae7821a50b283bcd1483a7"
+      }
+    },
+    {
+      "name": "adjacent_methods",
+      "directory": "cases/adjacent_methods",
+      "oracleGroup": "reviewer",
+      "oracleCase": "adjacent_methods",
+      "exactBaseline": false,
+      "exactEarlyCombined": true,
+      "exactCandidate": true,
+      "canonicalLines": 298,
+      "nonemptyRecords": 291,
+      "files": {
+        "baseline.diff": "b4d20812d761429009a67929749f7aa344734f517621f76ea7e553fdbfde2047",
+        "baseline.txt": "1f3ae7ed29c20b85da94625d9748a81668a3c7eb5737fdd0e6124c3bd0684c5d",
+        "candidate.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "candidate.txt": "be4a0cf309c5524be54e035a7446c31b345f57c55509c85078597bba9645d59c",
+        "early_combined.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "early_combined.txt": "be4a0cf309c5524be54e035a7446c31b345f57c55509c85078597bba9645d59c",
+        "expected.txt": "be4a0cf309c5524be54e035a7446c31b345f57c55509c85078597bba9645d59c",
+        "main.c": "8ea79eb99fa6238ffbc24afce7a1b9b2b274214346c7aea0b1d0634d2cea10ef"
+      }
+    },
+    {
+      "name": "argument_typedef_scope",
+      "directory": "diagnostics/argument_typedef_scope",
+      "oracleGroup": "reviewer",
+      "oracleCase": "argument_typedef_scope",
+      "exactBaseline": false,
+      "exactEarlyCombined": false,
+      "exactCandidate": false,
+      "canonicalLines": 251,
+      "nonemptyRecords": 245,
+      "files": {
+        "baseline.diff": "037fce6a0be658e1121ca29d5ca8ea143d1f9fcd51991c483f88464ce33339d7",
+        "baseline.txt": "b641bb21f41bb16487b9e44b4afcee081d9769a211130fa54f0dba405a7fc46c",
+        "candidate.diff": "b81b9e2def00c227fcad159dedaafa19d5f198b35d9c20c9b88abc7929ad1e95",
+        "candidate.txt": "b641bb21f41bb16487b9e44b4afcee081d9769a211130fa54f0dba405a7fc46c",
+        "early_combined.diff": "37fdfde75f355c62aa179fb802a5482e5f6df94e446c8fc60b77ec39f55d51c4",
+        "early_combined.txt": "b641bb21f41bb16487b9e44b4afcee081d9769a211130fa54f0dba405a7fc46c",
+        "expected.txt": "1d55efbcafbc916c26c0fda72699023f2471a0ff2b0d1d69b37f8f467a02c5a2",
+        "main.c": "b29c0c3c7d27292a19f2ac282317668d5332708fa88e1942ff1d8bca8c539eaa"
+      }
+    },
+    {
+      "name": "before_after_typedef",
+      "directory": "cases/before_after_typedef",
+      "oracleGroup": "reviewer",
+      "oracleCase": "before_after_typedef",
+      "exactBaseline": false,
+      "exactEarlyCombined": true,
+      "exactCandidate": true,
+      "canonicalLines": 343,
+      "nonemptyRecords": 335,
+      "files": {
+        "baseline.diff": "00b552e1072d7a048698af94a09b5abdd8dc611c3bec00df601ee3af377c0abd",
+        "baseline.txt": "ec37692f7b56e3a709768d4624360f177bb4304c3dd519b7f5746e0a9cc276c0",
+        "candidate.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "candidate.txt": "0b43a1399b6d5023d8f0511afec977b8008f2dbf921366c8a316d89e9c7f5404",
+        "early_combined.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "early_combined.txt": "0b43a1399b6d5023d8f0511afec977b8008f2dbf921366c8a316d89e9c7f5404",
+        "expected.txt": "0b43a1399b6d5023d8f0511afec977b8008f2dbf921366c8a316d89e9c7f5404",
+        "main.c": "ffe9c47bfe9f77457b60c619ad6033dc039f421e5cadaadce5c144f9e4f8d30c"
+      }
+    },
+    {
+      "name": "block_restoration",
+      "directory": "diagnostics/block_restoration",
+      "oracleGroup": "reviewer",
+      "oracleCase": "block_restoration",
+      "exactBaseline": false,
+      "exactEarlyCombined": false,
+      "exactCandidate": false,
+      "canonicalLines": 326,
+      "nonemptyRecords": 319,
+      "files": {
+        "baseline.diff": "76e5ffb0ac27edab72d7db0212fc7349df4b869c51301447e7d4548a22905485",
+        "baseline.txt": "5b0b6d0910957e1cc241664d5f5b8234cced17226965da4c340701c28496d6c5",
+        "candidate.diff": "f13dee38cda03bb78dcabf2fc18c735d20f51380e4f1f22cd83c243ebdac448f",
+        "candidate.txt": "8698ae98bcdf29d3715ee8a63761e52e5f38ef5aea1e409f731acf311837fdc5",
+        "early_combined.diff": "e0216242eba46d1941d4a51bd8485ad12f493eab37ed50f97850183a508a26e0",
+        "early_combined.txt": "8698ae98bcdf29d3715ee8a63761e52e5f38ef5aea1e409f731acf311837fdc5",
+        "expected.txt": "cd0e4b6e053aec28a0e5ce3a605f2fd061fa64c6c4fc0ecf7c5a475b791c824f",
+        "main.c": "28355a91d60388c35d876c60b3dd4b7e0988087da793ae6eff50d27bf1061d6f"
+      }
+    },
+    {
+      "name": "comment_type_argument",
+      "directory": "diagnostics/comment_type_argument",
+      "oracleGroup": "reviewer",
+      "oracleCase": "comment_type_argument",
+      "exactBaseline": false,
+      "exactEarlyCombined": false,
+      "exactCandidate": false,
+      "canonicalLines": 207,
+      "nonemptyRecords": 202,
+      "files": {
+        "baseline.diff": "03c82092e53695675c62ba1a6f17e46c279fd8952d7e8825fb0704d16ea34ee0",
+        "baseline.txt": "4bf241d8e94e026a478627dbc60eb1feca574e9ccc2583e4056eeb4f30125a9c",
+        "candidate.diff": "9d8eb55fb86e833a2fa7fdecca68d07ede4966f5918d5516580b124ffc1fe8f9",
+        "candidate.txt": "daa32d8bf1ed73e03a53b62f60f0fc7fa4e2b9ca85a33a9eb6cd46bf3b78bb67",
+        "early_combined.diff": "9e61944e64d162f57779b3f1bcf484c54509e72317fe8598635f097eeb7c2268",
+        "early_combined.txt": "daa32d8bf1ed73e03a53b62f60f0fc7fa4e2b9ca85a33a9eb6cd46bf3b78bb67",
+        "expected.txt": "25ebbed1fc7b5000ec44c1e74d7d19fb8b0694da261b324ee136b3093c5e46e1",
+        "main.c": "a16cb28b4407e02210a65d2a9425ed7694282725e78bab6c2b4f2502c1f59aaa"
+      }
+    },
+    {
+      "name": "compound_macro_restoration",
+      "directory": "cases/compound_macro_restoration",
+      "oracleGroup": "reviewer",
+      "oracleCase": "compound_macro_restoration",
+      "exactBaseline": false,
+      "exactEarlyCombined": true,
+      "exactCandidate": true,
+      "canonicalLines": 301,
+      "nonemptyRecords": 293,
+      "files": {
+        "baseline.diff": "61ba8bf1a5ea5007c33a1ca9f64f4bec4c2e6c677880c87e6249e8767cc8bc4d",
+        "baseline.txt": "566184ebe5504a9a92cd1aa399e7afcbf2b610985bc62084f43fd7684c236ede",
+        "candidate.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "candidate.txt": "09fd8b101cc4fee06d5534b9d1317f8af1c9e91aa7751d10bc1a9ea18eb1f0bd",
+        "early_combined.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "early_combined.txt": "09fd8b101cc4fee06d5534b9d1317f8af1c9e91aa7751d10bc1a9ea18eb1f0bd",
+        "expected.txt": "09fd8b101cc4fee06d5534b9d1317f8af1c9e91aa7751d10bc1a9ea18eb1f0bd",
+        "main.c": "fcc97f20281a87b05df43bcc64fefda50dcf2d3237ec19025f6e07abe9abf82a"
+      }
+    },
+    {
+      "name": "compound_macro_typedef",
+      "directory": "cases/compound_macro_typedef",
+      "oracleGroup": "reviewer",
+      "oracleCase": "compound_macro_typedef",
+      "exactBaseline": false,
+      "exactEarlyCombined": true,
+      "exactCandidate": true,
+      "canonicalLines": 228,
+      "nonemptyRecords": 222,
+      "files": {
+        "baseline.diff": "985ab55ad720f52d59af819549819ffa6fb967b51d63cb99df5abbcda18834ee",
+        "baseline.txt": "3aa8bc0f7e5e590e9915c0c549f21bcd3b38157f59e53244e80cdbf7e7e48997",
+        "candidate.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "candidate.txt": "5f9e6870d8a280045b32fe2ef17589fc5a083abce51e0ab35bfddd2e7c0f5234",
+        "early_combined.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "early_combined.txt": "5f9e6870d8a280045b32fe2ef17589fc5a083abce51e0ab35bfddd2e7c0f5234",
+        "expected.txt": "5f9e6870d8a280045b32fe2ef17589fc5a083abce51e0ab35bfddd2e7c0f5234",
+        "main.c": "dcd645020a5db97fedd4786ae21e30e8bb176f38927d23c45c778685750592c4"
+      }
+    },
+    {
+      "name": "declaration_macro_later_cast",
+      "directory": "diagnostics/declaration_macro_later_cast",
+      "oracleGroup": "reviewer",
+      "oracleCase": "declaration_macro_later_cast",
+      "exactBaseline": false,
+      "exactEarlyCombined": false,
+      "exactCandidate": false,
+      "canonicalLines": 192,
+      "nonemptyRecords": 187,
+      "files": {
+        "baseline.diff": "a2a016faa66d877ca59fed9e03b65dea608f578d5bada19d428ec747adcb3524",
+        "baseline.txt": "fd3a82f3e8e54fcd6c41f9ebb0ae66b3b3bba08aff3f800c2cf7fb3ac0065b7c",
+        "candidate.diff": "049617fa3aa296ebd2311f9479cf36dd0229f4cb944adbaf8c0ea880b17b6358",
+        "candidate.txt": "fd3a82f3e8e54fcd6c41f9ebb0ae66b3b3bba08aff3f800c2cf7fb3ac0065b7c",
+        "early_combined.diff": "9e7d69bbf1bccad5adc53df1e4df74285f780ca436e6f53d126aac1dd8edb19b",
+        "early_combined.txt": "fd3a82f3e8e54fcd6c41f9ebb0ae66b3b3bba08aff3f800c2cf7fb3ac0065b7c",
+        "expected.txt": "289c6d95c5c6423fe8e87cbe1d448c49ff483920cac26318912bde2dd9771f36",
+        "main.c": "e00a5e1b3a742bb24dbe56b539b6caa2ea2ce010e50aaa8c85b2ec0d270635c3"
+      }
+    },
+    {
+      "name": "sizeof_typedef",
+      "directory": "cases/sizeof_typedef",
+      "oracleGroup": "primary",
+      "oracleCase": "sizeof_typedef",
+      "exactBaseline": false,
+      "exactEarlyCombined": true,
+      "exactCandidate": true,
+      "canonicalLines": 201,
+      "nonemptyRecords": 195,
+      "files": {
+        "baseline.diff": "0ae5ed4fb6004629c8b6e1b59cdae5a7e19bc32e63421faea2678902509e8ef8",
+        "baseline.txt": "7f811201b661a337424e6dee96422ae39de29677b287dfbd2ea09bb2a38911bd",
+        "candidate.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "candidate.txt": "ba6d8adfc0f27436cbd7c0fa8678e17c3bb4f6b2492a7b8d4d220a2b6133741b",
+        "early_combined.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "early_combined.txt": "ba6d8adfc0f27436cbd7c0fa8678e17c3bb4f6b2492a7b8d4d220a2b6133741b",
+        "expected.txt": "ba6d8adfc0f27436cbd7c0fa8678e17c3bb4f6b2492a7b8d4d220a2b6133741b",
+        "main.c": "3992d8896ee3f09472fb25349add0fad8e221f8f67591fe81756465609fa65fc"
+      }
+    },
+    {
+      "name": "sizeof_shadow",
+      "directory": "cases/sizeof_shadow",
+      "oracleGroup": "primary",
+      "oracleCase": "sizeof_shadow",
+      "exactBaseline": false,
+      "exactEarlyCombined": true,
+      "exactCandidate": true,
+      "canonicalLines": 198,
+      "nonemptyRecords": 192,
+      "files": {
+        "baseline.diff": "bcc01f027ff28c1c25b32aaea3b18fedad03f5025cf00dbe4e4cd617905642ad",
+        "baseline.txt": "ba7d1067cb4be32c30cade6ce55d628198a7054059bd205c7aebe1ec6ba51295",
+        "candidate.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "candidate.txt": "2522b3f7b2e90c76b5a58db99542e66f0b873b5f822bc057c94c525f7fdb6443",
+        "early_combined.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "early_combined.txt": "2522b3f7b2e90c76b5a58db99542e66f0b873b5f822bc057c94c525f7fdb6443",
+        "expected.txt": "2522b3f7b2e90c76b5a58db99542e66f0b873b5f822bc057c94c525f7fdb6443",
+        "main.c": "255f34a04fb81b24cfcd46593ef33384105f06cd7d476365f2a45c685c6b17dd"
+      }
+    },
+    {
+      "name": "sizeof_minus",
+      "directory": "cases/sizeof_minus",
+      "oracleGroup": "primary",
+      "oracleCase": "sizeof_minus",
+      "exactBaseline": false,
+      "exactEarlyCombined": true,
+      "exactCandidate": true,
+      "canonicalLines": 195,
+      "nonemptyRecords": 189,
+      "files": {
+        "baseline.diff": "720d3435c5c19f52f718c3c3d261c964b9b23cab1ddaf260b309e47ab3765b57",
+        "baseline.txt": "f515d345ed48d15e272893f229faec1d2f61fea6b579d1642a546a14f4770af5",
+        "candidate.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "candidate.txt": "7648e9ffc79ba8348c56940da9f259d0b43798069d3396e29d25fc44995b6df0",
+        "early_combined.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "early_combined.txt": "7648e9ffc79ba8348c56940da9f259d0b43798069d3396e29d25fc44995b6df0",
+        "expected.txt": "7648e9ffc79ba8348c56940da9f259d0b43798069d3396e29d25fc44995b6df0",
+        "main.c": "ba43533c16f082ad90d2ca9810fdab7060601026520024510e4e439ac2943108"
+      }
+    },
+    {
+      "name": "sizeof_grouping",
+      "directory": "cases/sizeof_grouping",
+      "oracleGroup": "boundaries",
+      "oracleCase": "sizeof_grouping",
+      "exactBaseline": false,
+      "exactEarlyCombined": true,
+      "exactCandidate": true,
+      "canonicalLines": 347,
+      "nonemptyRecords": 338,
+      "files": {
+        "baseline.diff": "e74f8a386b96a17e3cfd1ef30ad3e19540bb32cc56e7b6ab21043bcbcaae2360",
+        "baseline.txt": "61b728388c8356c84c9a5e22b6aa3448ddcc602a809e5d1bb7fc27d8f075fe96",
+        "candidate.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "candidate.txt": "166a9bf4bf51e5b26f135ebb88dd652c6f56d13d73734fafa526d487911f50b9",
+        "early_combined.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "early_combined.txt": "166a9bf4bf51e5b26f135ebb88dd652c6f56d13d73734fafa526d487911f50b9",
+        "expected.txt": "166a9bf4bf51e5b26f135ebb88dd652c6f56d13d73734fafa526d487911f50b9",
+        "main.c": "81d247d1e91933041fcb46621dd48a93315a453dfdfb8f9d3f58a18922a231f7"
+      }
+    }
+  ],
+  "sourceScope": "The two parameter-shadow cases require the integration amendment to derive parameter names from resolved_function_header with the same macro snapshot as method emission. No changes to reference inputs or outputs."
+}

@@ -1,0 +1,53 @@
+    Checking cfg-if v1.0.4
+    Checking memchr v2.8.1
+    Checking bitflags v2.13.1
+    Checking tree-sitter-language v0.1.7
+    Checking libc v0.2.189
+    Checking fastrand v2.5.0
+    Checking once_cell v1.21.4
+   Compiling zmij v1.0.21
+   Compiling itoa v1.0.18
+    Checking crc32fast v1.5.0
+    Checking crossbeam-utils v0.8.21
+    Checking regex-syntax v0.8.11
+    Checking serde_core v1.0.229
+    Checking streaming-iterator v0.1.9
+    Checking either v1.16.0
+    Checking tree-sitter-python v0.25.0
+    Checking tree-sitter-cpp v0.23.4
+    Checking tree-sitter-javascript v0.25.0
+    Checking tree-sitter-scala v0.26.2
+    Checking tree-sitter-ruby v0.23.1
+    Checking tree-sitter-rust v0.24.2
+    Checking tree-sitter-typescript v0.23.2
+    Checking tree-sitter-go v0.25.0
+    Checking tree-sitter-c v0.24.2
+    Checking tree-sitter-java v0.23.5
+    Checking aho-corasick v1.1.4
+    Checking arrayref v0.3.9
+    Checking arrayvec v0.7.8
+    Checking constant_time_eq v0.4.2
+   Compiling serde_json v1.0.151
+    Checking crossbeam-epoch v0.9.20
+    Checking blake3 v1.8.6
+    Checking crossbeam-deque v0.8.6
+    Checking errno v0.3.14
+    Checking getrandom v0.4.3
+    Checking fs2 v0.4.3
+    Checking rustix v1.1.4
+    Checking rayon-core v1.13.0
+    Checking rayon v1.12.0
+   Compiling tree-sitter v0.26.12
+    Checking tempfile v3.27.0
+    Checking regex-automata v0.4.14
+    Checking cpg-core v0.1.1 (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-format-rules/.local/format-positions/candidate-workspace/cpg-core)
+    Checking serde v1.0.229
+    Checking cpg-frontend v0.1.1 (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-format-rules/.local/format-positions/candidate-workspace/cpg-frontend)
+    Checking cpg-analysis v0.1.1 (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-format-rules/.local/format-positions/candidate-workspace/cpg-analysis)
+    Checking regex v1.12.4
+    Checking cpg-lang-python v0.1.1 (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-format-rules/.local/format-positions/candidate-workspace/cpg-lang-python)
+    Checking cpg-lang-c v0.1.1 (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-format-rules/.local/format-positions/candidate-workspace/cpg-lang-c)
+    Checking cpg-lang-ts v0.1.1 (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-format-rules/.local/format-positions/candidate-workspace/cpg-lang-ts)
+    Checking cpg-incremental v0.1.1 (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-format-rules/.local/format-positions/candidate-workspace/cpg-incremental)
+    Checking cpg-cli v0.1.1 (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-format-rules/.local/format-positions/candidate-workspace/cpg-cli)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 3.14s

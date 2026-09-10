@@ -1,0 +1,73 @@
+{
+  "command": [
+    "/Users/shayaunnejad/vibe-code/joern-oxidized/.local/astra-sprint/oracle/runtime/joern-cli/joern",
+    "--script",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/nested-casts/review-ppnumber/oracle.sc",
+    "--param",
+    "inputPath=/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/nested-casts/review-ppnumber/input"
+  ],
+  "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/nested-casts/review-ppnumber/oracle-workspace",
+  "exitCode": 0,
+  "wallSeconds": 8.565745832995162,
+  "inputHashes": {
+    "decimal": "61d2234db04051299e5bad76f331eca88e3b45b03bd097cd14804d99f0979b87",
+    "hex": "e05f386ec4c5fa07d7bafc433c4ed87185c98089b1afc217a5bb87eaca4ef1a4",
+    "exponent": "5b575c346de2ce3e1677affed98f57473f77fa0e7faafeb01dc24482df3dc494"
+  },
+  "scriptSha256": "56431f14868678e64f9eb41026b44f1d3d7738404d28d2db62711b520c98c742",
+  "rows": [
+    {
+      "case": "decimal",
+      "canonicalLines": 173,
+      "before": {
+        "exit": 0,
+        "exact": false,
+        "diffLines": 202
+      },
+      "after": {
+        "exit": 0,
+        "exact": false,
+        "diffLines": 198
+      }
+    },
+    {
+      "case": "exponent",
+      "canonicalLines": 178,
+      "before": {
+        "exit": 0,
+        "exact": false,
+        "diffLines": 203
+      },
+      "after": {
+        "exit": 0,
+        "exact": false,
+        "diffLines": 203
+      }
+    },
+    {
+      "case": "hex",
+      "canonicalLines": 173,
+      "before": {
+        "exit": 0,
+        "exact": false,
+        "diffLines": 202
+      },
+      "after": {
+        "exit": 0,
+        "exact": false,
+        "diffLines": 202
+      }
+    }
+  ],
+  "sourceSha256": "0015245bb067f2c5b46cb43aae54ff658f562554f08fba7e44d3db4b6833b7bc",
+  "binaries": {
+    "before": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/nested-casts/before-joern-parity",
+      "sha256": "ab77742564b959d53d492d9228b27cf02ee4182c208ddd1f11da83ddc15c7324"
+    },
+    "after": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/nested-casts/reviewed-joern-parity",
+      "sha256": "364f2f7462bf5e12c7f085ea38fa4a997bd8d664828b16bd022d42eb77134f6c"
+    }
+  }
+}

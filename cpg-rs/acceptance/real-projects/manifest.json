@@ -10,18 +10,31 @@
       "sourceRoot": ".",
       "license": "Zlib",
       "licenseFile": "LICENSE",
-      "extensions": ["c", "h"],
-      "excludes": ["/contrib/", "/test/", "/examples/", "/amiga/", "/msdos/", "/win32/"],
+      "extensions": [
+        "c",
+        "h"
+      ],
+      "excludes": [
+        "/contrib/",
+        "/test/",
+        "/examples/",
+        "/amiga/",
+        "/msdos/",
+        "/win32/"
+      ],
       "expected": {
         "sourceFiles": 26,
-        "nodes": 15088,
-        "graphSha256": "6b668a392a322c1579360672dbbdf0bcd4a9b0bac3bbd80aca3d7a47d45ca4c9",
-        "edgesSha256": "aa539bbb3f0c106736a71f8cdac943d4a39a4c2806760dd243ad9e3c1341dbc6",
-        "exportSha256": "a634eb3a15cd2fa97a40fff0803190bcb840ef99efc0d72ffc026bece3efbe7e",
+        "nodes": 70607,
+        "graphSha256": "13bb2877077a64b49eacc550fdc30b6ffd5383bdb79240445c481e41c418a927",
+        "edgesSha256": "2126aa766921ee882f31a2a46492626bc7a0e747cc7407e5060fed73c2555aac",
+        "exportSha256": "d4a2234d7fdfc36d74504f1f9fdd3d67675e0fa75d6751d04e2e2ddea86f7e30",
         "sarifSha256": "3e7f677599d01bd854c6a5c9a7eace4ff2ba547a5fab09333f41f78335f17bba",
         "findings": 0
       },
-      "budgets": {"buildSeconds": 20, "peakRssMiB": 512}
+      "budgets": {
+        "buildSeconds": 20,
+        "peakRssMiB": 640
+      }
     },
     {
       "id": "lua-5.4.7",
@@ -32,18 +45,24 @@
       "sourceRoot": "src",
       "license": "MIT",
       "licenseFile": "doc/readme.html",
-      "extensions": ["c", "h"],
+      "extensions": [
+        "c",
+        "h"
+      ],
       "excludes": [],
       "expected": {
         "sourceFiles": 61,
-        "nodes": 94858,
-        "graphSha256": "5735c177a5c53a941ccc45f8b0027d85b11b08775086e13bfe8bd297a2a3b4b7",
-        "edgesSha256": "27b3cf525dba6478d7c8d6dd857d89cd695b5e388b69cd15110268cecc72b982",
-        "exportSha256": "4fa3410be5f397e84d1df28442be140d8496a394763f95a0df4006a2bc0078c5",
-        "sarifSha256": "3e7f677599d01bd854c6a5c9a7eace4ff2ba547a5fab09333f41f78335f17bba",
-        "findings": 0
+        "nodes": 121857,
+        "graphSha256": "d67d29e8550d77cb90d8a202e85380785f02c4a572bc821e40f4a6b4e4659446",
+        "edgesSha256": "4ae6fb033f6f3f8300d2ba7a2837979cff9a616863aa4ca6543b667a2c4efee6",
+        "exportSha256": "feb97e86bac8f8211fceb85485a6a3007dda36468b7e76b9ef9ae95e01832a72",
+        "sarifSha256": "a21710881a907ec91c0b7f409d239a3f1eb855f0d35cb74bff48aa5487ae951d",
+        "findings": 3
       },
-      "budgets": {"buildSeconds": 30, "peakRssMiB": 1536}
+      "budgets": {
+        "buildSeconds": 30,
+        "peakRssMiB": 1536
+      }
     }
   ]
 }

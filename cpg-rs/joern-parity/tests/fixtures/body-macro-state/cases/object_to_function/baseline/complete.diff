@@ -1,0 +1,11 @@
+--- Joern4.0.555
++++ /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/eighth-batch/final-real-differential/bin/joern-parity
+@@ -42,7 +42,7 @@
+     METHOD_REF CODE=choose TYPE_FULL_NAME=choose METHOD_FULL_NAME=choose ORDER=1
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+ 
+-METHOD NAME=PICK CODE=#define PICK 1 FULL_NAME=main.c:PICK:ANY(2) SIGNATURE=ANY(2) ORDER=1
++METHOD NAME=PICK CODE=#define PICK(x,y) ((x)+(y)) FULL_NAME=main.c:PICK:ANY(2) SIGNATURE=ANY(2) ORDER=1
+   METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+   METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+   METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2

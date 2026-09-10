@@ -1,0 +1,26 @@
+{
+  "command": [
+    "/Users/shayaunnejad/vibe-code/joern-oxidized/.local/astra-sprint/oracle/runtime/joern-cli/joern",
+    "--script",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/typedef-existence/boundaries/oracle.sc",
+    "--param",
+    "inputPath=/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/typedef-existence/boundaries/input"
+  ],
+  "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/typedef-existence/boundaries/oracle-workspace",
+  "exitCode": 0,
+  "wallSeconds": 18.051328749992535,
+  "scriptSha256": "56431f14868678e64f9eb41026b44f1d3d7738404d28d2db62711b520c98c742",
+  "stdoutSha256": "32e06df8248a2a653b1e5131ebdb5516a6476410af7dbd5332fb51b987a4723b",
+  "inputs": {
+    "local_invalid/main.c": "a950d7bc9c4e991bcad2cd49e4318d5f6f2600fc55f8f0b9840b38953d04f9aa",
+    "long_double/main.c": "79b8501679c75a763d4d9582378adbffbe4f7ca2ccd43166601ef04185ddfbdc",
+    "long_unknown/main.c": "aab87ae0389428d2ef2b3b4a1dc23756ab199d19772c101ec234d3b8165c67d6",
+    "unsigned_int/main.c": "fe33617b3497131adb5fb7947e7e0410b09396ee27f6b4403589b5b9ca370289",
+    "const_unknown/main.c": "de2a606eda58c8046d402d90f6e6d855e4963bf9faef361186781f51b718efc8",
+    "signed_unknown/main.c": "eb9fdabe5ef47fda22a3185045cf4bdab1a6cc66995e166d1cffd3f487214d59",
+    "function_alias/main.c": "63ce44c9914fc8b0f0c996c30bead753a1e33d2ae66fb0b6fc4abc8a9a74ba73",
+    "unsigned_int128/main.c": "d56f92ba6fcd3ac43b9b830be127daad94138bb12f2bab2ff0b82e931be28430",
+    "unsigned_char/main.c": "cc07af0169aa69588cc27d637416e6079e2bc628f4ac159ec8c1eb1e01befbce",
+    "unsigned_known_alias/main.c": "28f583d1e17a26cbc4ad72ea2020cb73ab36c64309ee75f069068c3612346ae9"
+  }
+}

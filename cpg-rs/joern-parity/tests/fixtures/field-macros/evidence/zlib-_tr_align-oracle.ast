@@ -1,0 +1,259 @@
+METHOD NAME=_tr_align CODE=void ZLIB_INTERNAL _tr_align(deflate_state *s) {\n    send_bits(s, STATIC_TREES<<1, 3);\n    send_code(s, END_BLOCK, static_ltree);\n#ifdef ZLIB_DEBUG\n    s->compressed_len += 10L; /* 3 for block type, 7 for EOB */\n#endif\n    bi_flush(s);\n} FULL_NAME=_tr_align SIGNATURE=void(deflate_state*) ORDER=1
+  METHOD_PARAMETER_IN NAME=s CODE=deflate_state *s TYPE_FULL_NAME=deflate_state* ORDER=1
+  METHOD_PARAMETER_OUT NAME=s CODE=deflate_state *s TYPE_FULL_NAME=deflate_state* ORDER=1
+  BLOCK CODE={\n    send_bits(s, STATIC_TREES<<1, 3);\n    send_code(s, END_BLOCK, static_ltree);\n#ifdef ZLIB_DEBUG\n    s->compressed_len += 10L; /* 3 for block type, 7 for EOB */\n#endif\n    bi_flush(s);\n} TYPE_FULL_NAME=void ORDER=2
+    LOCAL NAME=static_ltree CODE=<global> static_ltree TYPE_FULL_NAME=ct_data[L_CODES+2] ORDER=0
+    CALL NAME=send_bits CODE=send_bits(s, STATIC_TREES<<1, 3) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=trees.c:send_bits:ANY(3) SIGNATURE=ANY(3) ORDER=1 DISPATCH_TYPE=INLINED
+      IDENTIFIER NAME=s CODE=s TYPE_FULL_NAME=deflate_state* ORDER=1 ARGUMENT_INDEX=1
+      LITERAL CODE=3 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=3
+      BLOCK CODE=send_bits(s, STATIC_TREES<<1, 3) TYPE_FULL_NAME=void ORDER=3 ARGUMENT_INDEX=3
+        LOCAL NAME=len CODE=send_bits(s, STATIC_TREES<<1, 3) TYPE_FULL_NAME=int ORDER=1
+        CALL NAME=<operator>.assignment CODE=int TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=len CODE=send_bits(s, STATIC_TREES<<1, 3) TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+          LITERAL CODE=3 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+        CONTROL_STRUCTURE CODE=send_bits(s, STATIC_TREES<<1, 3) ORDER=3
+          CALL NAME=<operator>.greaterThan CODE=s->bi_valid > (int)16 - len TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.greaterThan ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+            CALL NAME=<operator>.indirectFieldAccess CODE=s->bi_valid TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+              IDENTIFIER NAME=s CODE=s TYPE_FULL_NAME=deflate_state* ORDER=1 ARGUMENT_INDEX=1
+              FIELD_IDENTIFIER CODE=bi_valid ORDER=2 ARGUMENT_INDEX=2
+            CALL NAME=<operator>.subtraction CODE=(int)16 - len TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.subtraction ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+              CALL NAME=<operator>.cast CODE=(int)16 TYPE_FULL_NAME=int METHOD_FULL_NAME=<operator>.cast ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                TYPE_REF CODE=int TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+                LITERAL CODE=16 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+              IDENTIFIER NAME=len CODE=len TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+          BLOCK CODE=send_bits(s, STATIC_TREES<<1, 3) TYPE_FULL_NAME=void ORDER=2
+            LOCAL NAME=val CODE=send_bits(s, STATIC_TREES<<1, 3) TYPE_FULL_NAME=int ORDER=1
+            CALL NAME=<operator>.assignment CODE=int TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+              IDENTIFIER NAME=val CODE=send_bits(s, STATIC_TREES<<1, 3) TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+              CALL NAME=<operator>.shiftLeft CODE=(int)1 << 1 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.shiftLeft ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+                CALL NAME=<operator>.cast CODE=(int)1 TYPE_FULL_NAME=int METHOD_FULL_NAME=<operator>.cast ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                  TYPE_REF CODE=int TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+                  LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+                LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+            CALL NAME=<operators>.assignmentOr CODE=s->bi_buf |= (ush)val << s->bi_valid TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operators>.assignmentOr ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH
+              CALL NAME=<operator>.indirectFieldAccess CODE=s->bi_buf TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                IDENTIFIER NAME=s CODE=s TYPE_FULL_NAME=deflate_state* ORDER=1 ARGUMENT_INDEX=1
+                FIELD_IDENTIFIER CODE=bi_buf ORDER=2 ARGUMENT_INDEX=2
+              CALL NAME=<operator>.shiftLeft CODE=(ush)val << s->bi_valid TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.shiftLeft ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+                CALL NAME=<operator>.cast CODE=(ush)val TYPE_FULL_NAME=ush METHOD_FULL_NAME=<operator>.cast ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                  TYPE_REF CODE=ush TYPE_FULL_NAME=ush ORDER=1 ARGUMENT_INDEX=1
+                  IDENTIFIER NAME=val CODE=val TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+                CALL NAME=<operator>.indirectFieldAccess CODE=s->bi_valid TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+                  IDENTIFIER NAME=s CODE=s TYPE_FULL_NAME=deflate_state* ORDER=1 ARGUMENT_INDEX=1
+                  FIELD_IDENTIFIER CODE=bi_valid ORDER=2 ARGUMENT_INDEX=2
+            BLOCK CODE=send_bits(s, STATIC_TREES<<1, 3) TYPE_FULL_NAME=void ORDER=4
+              BLOCK CODE=send_bits(s, STATIC_TREES<<1, 3) TYPE_FULL_NAME=void ORDER=1
+                CALL NAME=<operator>.assignment CODE=s->pending_buf[s->pending++] = (Bytef)((uch)((s->bi_buf) & 0xff)) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+                  CALL NAME=<operator>.indirectIndexAccess CODE=s->pending_buf[s->pending++] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectIndexAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                    CALL NAME=<operator>.indirectFieldAccess CODE=s->pending_buf TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                      IDENTIFIER NAME=s CODE=s TYPE_FULL_NAME=deflate_state* ORDER=1 ARGUMENT_INDEX=1
+                      FIELD_IDENTIFIER CODE=pending_buf ORDER=2 ARGUMENT_INDEX=2
+                    CALL NAME=<operator>.postIncrement CODE=s->pending++ TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.postIncrement ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+                      CALL NAME=<operator>.indirectFieldAccess CODE=s->pending TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                        IDENTIFIER NAME=s CODE=s TYPE_FULL_NAME=deflate_state* ORDER=1 ARGUMENT_INDEX=1
+                        FIELD_IDENTIFIER CODE=pending ORDER=2 ARGUMENT_INDEX=2
+                  CALL NAME=<operator>.cast CODE=(Bytef)((uch)((s->bi_buf) & 0xff)) TYPE_FULL_NAME=Bytef METHOD_FULL_NAME=<operator>.cast ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+                    TYPE_REF CODE=Bytef TYPE_FULL_NAME=Bytef ORDER=1 ARGUMENT_INDEX=1
+                    CALL NAME=<operator>.cast CODE=(uch)((s->bi_buf) & 0xff) TYPE_FULL_NAME=uch METHOD_FULL_NAME=<operator>.cast ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+                      TYPE_REF CODE=uch TYPE_FULL_NAME=uch ORDER=1 ARGUMENT_INDEX=1
+                      CALL NAME=<operator>.and CODE=(s->bi_buf) & 0xff TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.and ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+                        CALL NAME=<operator>.indirectFieldAccess CODE=s->bi_buf TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                          IDENTIFIER NAME=s CODE=s TYPE_FULL_NAME=deflate_state* ORDER=1 ARGUMENT_INDEX=1
+                          FIELD_IDENTIFIER CODE=bi_buf ORDER=2 ARGUMENT_INDEX=2
+                        LITERAL CODE=0xff TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+              BLOCK CODE=send_bits(s, STATIC_TREES<<1, 3) TYPE_FULL_NAME=void ORDER=2
+                CALL NAME=<operator>.assignment CODE=s->pending_buf[s->pending++] = (Bytef)((uch)((ush)(s->bi_buf) >> 8)) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+                  CALL NAME=<operator>.indirectIndexAccess CODE=s->pending_buf[s->pending++] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectIndexAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                    CALL NAME=<operator>.indirectFieldAccess CODE=s->pending_buf TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                      IDENTIFIER NAME=s CODE=s TYPE_FULL_NAME=deflate_state* ORDER=1 ARGUMENT_INDEX=1
+                      FIELD_IDENTIFIER CODE=pending_buf ORDER=2 ARGUMENT_INDEX=2
+                    CALL NAME=<operator>.postIncrement CODE=s->pending++ TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.postIncrement ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+                      CALL NAME=<operator>.indirectFieldAccess CODE=s->pending TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                        IDENTIFIER NAME=s CODE=s TYPE_FULL_NAME=deflate_state* ORDER=1 ARGUMENT_INDEX=1
+                        FIELD_IDENTIFIER CODE=pending ORDER=2 ARGUMENT_INDEX=2
+                  CALL NAME=<operator>.cast CODE=(Bytef)((uch)((ush)(s->bi_buf) >> 8)) TYPE_FULL_NAME=Bytef METHOD_FULL_NAME=<operator>.cast ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+                    TYPE_REF CODE=Bytef TYPE_FULL_NAME=Bytef ORDER=1 ARGUMENT_INDEX=1
+                    CALL NAME=<operator>.cast CODE=(uch)((ush)(s->bi_buf) >> 8) TYPE_FULL_NAME=uch METHOD_FULL_NAME=<operator>.cast ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+                      TYPE_REF CODE=uch TYPE_FULL_NAME=uch ORDER=1 ARGUMENT_INDEX=1
+                      CALL NAME=<operator>.arithmeticShiftRight CODE=(ush)(s->bi_buf) >> 8 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.arithmeticShiftRight ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+                        CALL NAME=<operator>.cast CODE=(ush)(s->bi_buf) TYPE_FULL_NAME=ush METHOD_FULL_NAME=<operator>.cast ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                          TYPE_REF CODE=ush TYPE_FULL_NAME=ush ORDER=1 ARGUMENT_INDEX=1
+                          CALL NAME=<operator>.indirectFieldAccess CODE=s->bi_buf TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+                            IDENTIFIER NAME=s CODE=s TYPE_FULL_NAME=deflate_state* ORDER=1 ARGUMENT_INDEX=1
+                            FIELD_IDENTIFIER CODE=bi_buf ORDER=2 ARGUMENT_INDEX=2
+                        LITERAL CODE=8 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+            CALL NAME=<operator>.assignment CODE=s->bi_buf = (ush)val >> (16 - s->bi_valid) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=5 DISPATCH_TYPE=STATIC_DISPATCH
+              CALL NAME=<operator>.indirectFieldAccess CODE=s->bi_buf TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                IDENTIFIER NAME=s CODE=s TYPE_FULL_NAME=deflate_state* ORDER=1 ARGUMENT_INDEX=1
+                FIELD_IDENTIFIER CODE=bi_buf ORDER=2 ARGUMENT_INDEX=2
+              CALL NAME=<operator>.arithmeticShiftRight CODE=(ush)val >> (16 - s->bi_valid) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.arithmeticShiftRight ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+                CALL NAME=<operator>.cast CODE=(ush)val TYPE_FULL_NAME=ush METHOD_FULL_NAME=<operator>.cast ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                  TYPE_REF CODE=ush TYPE_FULL_NAME=ush ORDER=1 ARGUMENT_INDEX=1
+                  IDENTIFIER NAME=val CODE=val TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+                CALL NAME=<operator>.subtraction CODE=16 - s->bi_valid TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.subtraction ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+                  LITERAL CODE=16 TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+                  CALL NAME=<operator>.indirectFieldAccess CODE=s->bi_valid TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+                    IDENTIFIER NAME=s CODE=s TYPE_FULL_NAME=deflate_state* ORDER=1 ARGUMENT_INDEX=1
+                    FIELD_IDENTIFIER CODE=bi_valid ORDER=2 ARGUMENT_INDEX=2
+            CALL NAME=<operator>.assignmentPlus CODE=s->bi_valid += len - 16 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignmentPlus ORDER=6 DISPATCH_TYPE=STATIC_DISPATCH
+              CALL NAME=<operator>.indirectFieldAccess CODE=s->bi_valid TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                IDENTIFIER NAME=s CODE=s TYPE_FULL_NAME=deflate_state* ORDER=1 ARGUMENT_INDEX=1
+                FIELD_IDENTIFIER CODE=bi_valid ORDER=2 ARGUMENT_INDEX=2
+              CALL NAME=<operator>.subtraction CODE=len - 16 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.subtraction ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+                IDENTIFIER NAME=len CODE=len TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+                LITERAL CODE=16 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+          CONTROL_STRUCTURE CODE=else ORDER=3
+            BLOCK CODE=send_bits(s, STATIC_TREES<<1, 3) TYPE_FULL_NAME=void ORDER=1
+              CALL NAME=<operators>.assignmentOr CODE=s->bi_buf |= (ush)(1 << 1) << s->bi_valid TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operators>.assignmentOr ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+                CALL NAME=<operator>.indirectFieldAccess CODE=s->bi_buf TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                  IDENTIFIER NAME=s CODE=s TYPE_FULL_NAME=deflate_state* ORDER=1 ARGUMENT_INDEX=1
+                  FIELD_IDENTIFIER CODE=bi_buf ORDER=2 ARGUMENT_INDEX=2
+                CALL NAME=<operator>.shiftLeft CODE=(ush)(1 << 1) << s->bi_valid TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.shiftLeft ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+                  CALL NAME=<operator>.cast CODE=(ush)(1 << 1) TYPE_FULL_NAME=ush METHOD_FULL_NAME=<operator>.cast ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                    TYPE_REF CODE=ush TYPE_FULL_NAME=ush ORDER=1 ARGUMENT_INDEX=1
+                    CALL NAME=<operator>.shiftLeft CODE=1 << 1 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.shiftLeft ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+                      LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+                      LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+                  CALL NAME=<operator>.indirectFieldAccess CODE=s->bi_valid TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+                    IDENTIFIER NAME=s CODE=s TYPE_FULL_NAME=deflate_state* ORDER=1 ARGUMENT_INDEX=1
+                    FIELD_IDENTIFIER CODE=bi_valid ORDER=2 ARGUMENT_INDEX=2
+              CALL NAME=<operator>.assignmentPlus CODE=s->bi_valid += len TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignmentPlus ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+                CALL NAME=<operator>.indirectFieldAccess CODE=s->bi_valid TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                  IDENTIFIER NAME=s CODE=s TYPE_FULL_NAME=deflate_state* ORDER=1 ARGUMENT_INDEX=1
+                  FIELD_IDENTIFIER CODE=bi_valid ORDER=2 ARGUMENT_INDEX=2
+                IDENTIFIER NAME=len CODE=len TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+    CALL NAME=send_code CODE=send_code(s, END_BLOCK, static_ltree) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=trees.c:send_code:ANY(3) SIGNATURE=ANY(3) ORDER=2 DISPATCH_TYPE=INLINED
+      IDENTIFIER NAME=s CODE=s TYPE_FULL_NAME=deflate_state* ORDER=1 ARGUMENT_INDEX=1
+      BLOCK CODE=send_code(s, END_BLOCK, static_ltree) TYPE_FULL_NAME=void ORDER=2 ARGUMENT_INDEX=2
+        LOCAL NAME=len CODE=send_code(s, END_BLOCK, static_ltree) TYPE_FULL_NAME=int ORDER=1
+        CALL NAME=<operator>.assignment CODE=int TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=len CODE=send_code(s, END_BLOCK, static_ltree) TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+          CALL NAME=<operator>.fieldAccess CODE=static_ltree[256].dl.len TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.fieldAccess ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+            CALL NAME=<operator>.fieldAccess CODE=static_ltree[256].dl TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.fieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+              CALL NAME=<operator>.indirectIndexAccess CODE=static_ltree[256] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectIndexAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                IDENTIFIER NAME=static_ltree CODE=<global> static_ltree TYPE_FULL_NAME=ct_data[L_CODES+2] ORDER=1 ARGUMENT_INDEX=1
+                LITERAL CODE=256 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+              FIELD_IDENTIFIER CODE=dl ORDER=2 ARGUMENT_INDEX=2
+            FIELD_IDENTIFIER CODE=len ORDER=2 ARGUMENT_INDEX=2
+        CONTROL_STRUCTURE CODE=send_code(s, END_BLOCK, static_ltree) ORDER=3
+          CALL NAME=<operator>.greaterThan CODE=s->bi_valid > (int)16 - len TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.greaterThan ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+            CALL NAME=<operator>.indirectFieldAccess CODE=s->bi_valid TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+              IDENTIFIER NAME=s CODE=s TYPE_FULL_NAME=deflate_state* ORDER=1 ARGUMENT_INDEX=1
+              FIELD_IDENTIFIER CODE=bi_valid ORDER=2 ARGUMENT_INDEX=2
+            CALL NAME=<operator>.subtraction CODE=(int)16 - len TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.subtraction ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+              CALL NAME=<operator>.cast CODE=(int)16 TYPE_FULL_NAME=int METHOD_FULL_NAME=<operator>.cast ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                TYPE_REF CODE=int TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+                LITERAL CODE=16 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+              IDENTIFIER NAME=len CODE=len TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+          BLOCK CODE=send_code(s, END_BLOCK, static_ltree) TYPE_FULL_NAME=void ORDER=2
+            LOCAL NAME=val CODE=send_code(s, END_BLOCK, static_ltree) TYPE_FULL_NAME=int ORDER=1
+            CALL NAME=<operator>.assignment CODE=int TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+              IDENTIFIER NAME=val CODE=send_code(s, END_BLOCK, static_ltree) TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+              CALL NAME=<operator>.cast CODE=(int)static_ltree[256].fc.code TYPE_FULL_NAME=int METHOD_FULL_NAME=<operator>.cast ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+                TYPE_REF CODE=int TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+                CALL NAME=<operator>.fieldAccess CODE=static_ltree[256].fc.code TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.fieldAccess ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+                  CALL NAME=<operator>.fieldAccess CODE=static_ltree[256].fc TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.fieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                    CALL NAME=<operator>.indirectIndexAccess CODE=static_ltree[256] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectIndexAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                      IDENTIFIER NAME=static_ltree CODE=<global> static_ltree TYPE_FULL_NAME=ct_data[L_CODES+2] ORDER=1 ARGUMENT_INDEX=1
+                      LITERAL CODE=256 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+                    FIELD_IDENTIFIER CODE=fc ORDER=2 ARGUMENT_INDEX=2
+                  FIELD_IDENTIFIER CODE=code ORDER=2 ARGUMENT_INDEX=2
+            CALL NAME=<operators>.assignmentOr CODE=s->bi_buf |= (ush)val << s->bi_valid TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operators>.assignmentOr ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH
+              CALL NAME=<operator>.indirectFieldAccess CODE=s->bi_buf TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                IDENTIFIER NAME=s CODE=s TYPE_FULL_NAME=deflate_state* ORDER=1 ARGUMENT_INDEX=1
+                FIELD_IDENTIFIER CODE=bi_buf ORDER=2 ARGUMENT_INDEX=2
+              CALL NAME=<operator>.shiftLeft CODE=(ush)val << s->bi_valid TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.shiftLeft ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+                CALL NAME=<operator>.cast CODE=(ush)val TYPE_FULL_NAME=ush METHOD_FULL_NAME=<operator>.cast ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                  TYPE_REF CODE=ush TYPE_FULL_NAME=ush ORDER=1 ARGUMENT_INDEX=1
+                  IDENTIFIER NAME=val CODE=val TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+                CALL NAME=<operator>.indirectFieldAccess CODE=s->bi_valid TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+                  IDENTIFIER NAME=s CODE=s TYPE_FULL_NAME=deflate_state* ORDER=1 ARGUMENT_INDEX=1
+                  FIELD_IDENTIFIER CODE=bi_valid ORDER=2 ARGUMENT_INDEX=2
+            BLOCK CODE=send_code(s, END_BLOCK, static_ltree) TYPE_FULL_NAME=void ORDER=4
+              BLOCK CODE=send_code(s, END_BLOCK, static_ltree) TYPE_FULL_NAME=void ORDER=1
+                CALL NAME=<operator>.assignment CODE=s->pending_buf[s->pending++] = (Bytef)((uch)((s->bi_buf) & 0xff)) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+                  CALL NAME=<operator>.indirectIndexAccess CODE=s->pending_buf[s->pending++] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectIndexAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                    CALL NAME=<operator>.indirectFieldAccess CODE=s->pending_buf TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                      IDENTIFIER NAME=s CODE=s TYPE_FULL_NAME=deflate_state* ORDER=1 ARGUMENT_INDEX=1
+                      FIELD_IDENTIFIER CODE=pending_buf ORDER=2 ARGUMENT_INDEX=2
+                    CALL NAME=<operator>.postIncrement CODE=s->pending++ TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.postIncrement ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+                      CALL NAME=<operator>.indirectFieldAccess CODE=s->pending TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                        IDENTIFIER NAME=s CODE=s TYPE_FULL_NAME=deflate_state* ORDER=1 ARGUMENT_INDEX=1
+                        FIELD_IDENTIFIER CODE=pending ORDER=2 ARGUMENT_INDEX=2
+                  CALL NAME=<operator>.cast CODE=(Bytef)((uch)((s->bi_buf) & 0xff)) TYPE_FULL_NAME=Bytef METHOD_FULL_NAME=<operator>.cast ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+                    TYPE_REF CODE=Bytef TYPE_FULL_NAME=Bytef ORDER=1 ARGUMENT_INDEX=1
+                    CALL NAME=<operator>.cast CODE=(uch)((s->bi_buf) & 0xff) TYPE_FULL_NAME=uch METHOD_FULL_NAME=<operator>.cast ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+                      TYPE_REF CODE=uch TYPE_FULL_NAME=uch ORDER=1 ARGUMENT_INDEX=1
+                      CALL NAME=<operator>.and CODE=(s->bi_buf) & 0xff TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.and ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+                        CALL NAME=<operator>.indirectFieldAccess CODE=s->bi_buf TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                          IDENTIFIER NAME=s CODE=s TYPE_FULL_NAME=deflate_state* ORDER=1 ARGUMENT_INDEX=1
+                          FIELD_IDENTIFIER CODE=bi_buf ORDER=2 ARGUMENT_INDEX=2
+                        LITERAL CODE=0xff TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+              BLOCK CODE=send_code(s, END_BLOCK, static_ltree) TYPE_FULL_NAME=void ORDER=2
+                CALL NAME=<operator>.assignment CODE=s->pending_buf[s->pending++] = (Bytef)((uch)((ush)(s->bi_buf) >> 8)) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+                  CALL NAME=<operator>.indirectIndexAccess CODE=s->pending_buf[s->pending++] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectIndexAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                    CALL NAME=<operator>.indirectFieldAccess CODE=s->pending_buf TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                      IDENTIFIER NAME=s CODE=s TYPE_FULL_NAME=deflate_state* ORDER=1 ARGUMENT_INDEX=1
+                      FIELD_IDENTIFIER CODE=pending_buf ORDER=2 ARGUMENT_INDEX=2
+                    CALL NAME=<operator>.postIncrement CODE=s->pending++ TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.postIncrement ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+                      CALL NAME=<operator>.indirectFieldAccess CODE=s->pending TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                        IDENTIFIER NAME=s CODE=s TYPE_FULL_NAME=deflate_state* ORDER=1 ARGUMENT_INDEX=1
+                        FIELD_IDENTIFIER CODE=pending ORDER=2 ARGUMENT_INDEX=2
+                  CALL NAME=<operator>.cast CODE=(Bytef)((uch)((ush)(s->bi_buf) >> 8)) TYPE_FULL_NAME=Bytef METHOD_FULL_NAME=<operator>.cast ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+                    TYPE_REF CODE=Bytef TYPE_FULL_NAME=Bytef ORDER=1 ARGUMENT_INDEX=1
+                    CALL NAME=<operator>.cast CODE=(uch)((ush)(s->bi_buf) >> 8) TYPE_FULL_NAME=uch METHOD_FULL_NAME=<operator>.cast ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+                      TYPE_REF CODE=uch TYPE_FULL_NAME=uch ORDER=1 ARGUMENT_INDEX=1
+                      CALL NAME=<operator>.arithmeticShiftRight CODE=(ush)(s->bi_buf) >> 8 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.arithmeticShiftRight ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+                        CALL NAME=<operator>.cast CODE=(ush)(s->bi_buf) TYPE_FULL_NAME=ush METHOD_FULL_NAME=<operator>.cast ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                          TYPE_REF CODE=ush TYPE_FULL_NAME=ush ORDER=1 ARGUMENT_INDEX=1
+                          CALL NAME=<operator>.indirectFieldAccess CODE=s->bi_buf TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+                            IDENTIFIER NAME=s CODE=s TYPE_FULL_NAME=deflate_state* ORDER=1 ARGUMENT_INDEX=1
+                            FIELD_IDENTIFIER CODE=bi_buf ORDER=2 ARGUMENT_INDEX=2
+                        LITERAL CODE=8 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+            CALL NAME=<operator>.assignment CODE=s->bi_buf = (ush)val >> (16 - s->bi_valid) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=5 DISPATCH_TYPE=STATIC_DISPATCH
+              CALL NAME=<operator>.indirectFieldAccess CODE=s->bi_buf TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                IDENTIFIER NAME=s CODE=s TYPE_FULL_NAME=deflate_state* ORDER=1 ARGUMENT_INDEX=1
+                FIELD_IDENTIFIER CODE=bi_buf ORDER=2 ARGUMENT_INDEX=2
+              CALL NAME=<operator>.arithmeticShiftRight CODE=(ush)val >> (16 - s->bi_valid) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.arithmeticShiftRight ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+                CALL NAME=<operator>.cast CODE=(ush)val TYPE_FULL_NAME=ush METHOD_FULL_NAME=<operator>.cast ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                  TYPE_REF CODE=ush TYPE_FULL_NAME=ush ORDER=1 ARGUMENT_INDEX=1
+                  IDENTIFIER NAME=val CODE=val TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+                CALL NAME=<operator>.subtraction CODE=16 - s->bi_valid TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.subtraction ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+                  LITERAL CODE=16 TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+                  CALL NAME=<operator>.indirectFieldAccess CODE=s->bi_valid TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+                    IDENTIFIER NAME=s CODE=s TYPE_FULL_NAME=deflate_state* ORDER=1 ARGUMENT_INDEX=1
+                    FIELD_IDENTIFIER CODE=bi_valid ORDER=2 ARGUMENT_INDEX=2
+            CALL NAME=<operator>.assignmentPlus CODE=s->bi_valid += len - 16 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignmentPlus ORDER=6 DISPATCH_TYPE=STATIC_DISPATCH
+              CALL NAME=<operator>.indirectFieldAccess CODE=s->bi_valid TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                IDENTIFIER NAME=s CODE=s TYPE_FULL_NAME=deflate_state* ORDER=1 ARGUMENT_INDEX=1
+                FIELD_IDENTIFIER CODE=bi_valid ORDER=2 ARGUMENT_INDEX=2
+              CALL NAME=<operator>.subtraction CODE=len - 16 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.subtraction ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+                IDENTIFIER NAME=len CODE=len TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+                LITERAL CODE=16 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+          CONTROL_STRUCTURE CODE=else ORDER=3
+            BLOCK CODE=send_code(s, END_BLOCK, static_ltree) TYPE_FULL_NAME=void ORDER=1
+              CALL NAME=<operators>.assignmentOr CODE=s->bi_buf |= (ush)(static_ltree[256].fc.code) << s->bi_valid TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operators>.assignmentOr ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+                CALL NAME=<operator>.indirectFieldAccess CODE=s->bi_buf TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                  IDENTIFIER NAME=s CODE=s TYPE_FULL_NAME=deflate_state* ORDER=1 ARGUMENT_INDEX=1
+                  FIELD_IDENTIFIER CODE=bi_buf ORDER=2 ARGUMENT_INDEX=2
+                CALL NAME=<operator>.shiftLeft CODE=(ush)(static_ltree[256].fc.code) << s->bi_valid TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.shiftLeft ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+                  CALL NAME=<operator>.cast CODE=(ush)(static_ltree[256].fc.code) TYPE_FULL_NAME=ush METHOD_FULL_NAME=<operator>.cast ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                    TYPE_REF CODE=ush TYPE_FULL_NAME=ush ORDER=1 ARGUMENT_INDEX=1
+                    CALL NAME=<operator>.fieldAccess CODE=static_ltree[256].fc.code TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.fieldAccess ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+                      CALL NAME=<operator>.fieldAccess CODE=static_ltree[256].fc TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.fieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                        CALL NAME=<operator>.indirectIndexAccess CODE=static_ltree[256] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectIndexAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                          IDENTIFIER NAME=static_ltree CODE=<global> static_ltree TYPE_FULL_NAME=ct_data[L_CODES+2] ORDER=1 ARGUMENT_INDEX=1
+                          LITERAL CODE=256 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+                        FIELD_IDENTIFIER CODE=fc ORDER=2 ARGUMENT_INDEX=2
+                      FIELD_IDENTIFIER CODE=code ORDER=2 ARGUMENT_INDEX=2
+                  CALL NAME=<operator>.indirectFieldAccess CODE=s->bi_valid TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+                    IDENTIFIER NAME=s CODE=s TYPE_FULL_NAME=deflate_state* ORDER=1 ARGUMENT_INDEX=1
+                    FIELD_IDENTIFIER CODE=bi_valid ORDER=2 ARGUMENT_INDEX=2
+              CALL NAME=<operator>.assignmentPlus CODE=s->bi_valid += len TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignmentPlus ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+                CALL NAME=<operator>.indirectFieldAccess CODE=s->bi_valid TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                  IDENTIFIER NAME=s CODE=s TYPE_FULL_NAME=deflate_state* ORDER=1 ARGUMENT_INDEX=1
+                  FIELD_IDENTIFIER CODE=bi_valid ORDER=2 ARGUMENT_INDEX=2
+                IDENTIFIER NAME=len CODE=len TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+    CALL NAME=bi_flush CODE=bi_flush(s) TYPE_FULL_NAME=void METHOD_FULL_NAME=bi_flush ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH
+      IDENTIFIER NAME=s CODE=s TYPE_FULL_NAME=deflate_state* ORDER=1 ARGUMENT_INDEX=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3

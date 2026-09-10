@@ -655,9 +655,39 @@ fn columns(
         strings(Cpg::type_full_name_of),
     );
     add_string(&mut result, "SIGNATURE", strings(Cpg::signature_of));
+    for (label, getter) in [
+        (
+            "MODIFIER_TYPE",
+            Cpg::modifier_type_of as fn(&Cpg, NodeId) -> Option<&str>,
+        ),
+        ("IMPORTED_ENTITY", Cpg::imported_entity_of),
+        ("IMPORTED_AS", Cpg::imported_as_of),
+        ("DEPENDENCY_GROUP_ID", Cpg::dependency_group_id_of),
+        ("VERSION", Cpg::version_of),
+    ] {
+        add_string(&mut result, label, strings(getter));
+    }
+    result.push((
+        "COLUMN_NUMBER".into(),
+        Column::Ints(
+            nodes
+                .iter()
+                .map(|&n| cpg.column_number_of(n).into_iter().collect())
+                .collect(),
+        ),
+    ));
+
     result.push((
         "ORDER".to_string(),
-        Column::Ints(nodes.iter().map(|&n| vec![cpg.order_of(n)]).collect()),
+        Column::Ints(
+            nodes
+                .iter()
+                .map(|&n| match cpg.order_property_of(n) {
+                    cpg_core::OrderProperty::Absent => Vec::new(),
+                    _ => vec![cpg.order_of(n)],
+                })
+                .collect(),
+        ),
     ));
     result.push((
         "ARGUMENT_INDEX".to_string(),
@@ -862,6 +892,8 @@ fn property_valid(kind: NodeKind, property: &str) -> bool {
                 | NodeKind::FieldIdentifier
                 | NodeKind::JumpTarget
                 | NodeKind::Modifier
+                | NodeKind::Binding
+                | NodeKind::Dependency
         ),
         "FULL_NAME" => matches!(
             kind,
@@ -883,15 +915,19 @@ fn property_valid(kind: NodeKind, property: &str) -> bool {
                 | NodeKind::TypeRef
                 | NodeKind::Unknown
         ),
-        "SIGNATURE" => matches!(kind, NodeKind::Method | NodeKind::Call),
-        "ORDER" | "ARGUMENT_INDEX" | "LINE_NUMBER" => {
+        "SIGNATURE" => matches!(kind, NodeKind::Method | NodeKind::Call | NodeKind::Binding),
+        "MODIFIER_TYPE" => kind == NodeKind::Modifier,
+        "IMPORTED_ENTITY" | "IMPORTED_AS" => kind == NodeKind::Import,
+        "DEPENDENCY_GROUP_ID" => kind == NodeKind::Dependency,
+        "ORDER" | "ARGUMENT_INDEX" | "LINE_NUMBER" | "COLUMN_NUMBER" => {
             !matches!(kind, NodeKind::Type | NodeKind::MetaData)
         }
         "FILENAME" => matches!(
             kind,
             NodeKind::Method | NodeKind::TypeDecl | NodeKind::NamespaceBlock
         ),
-        "LANGUAGE" | "VERSION" => kind == NodeKind::MetaData,
+        "LANGUAGE" => kind == NodeKind::MetaData,
+        "VERSION" => matches!(kind, NodeKind::MetaData | NodeKind::Dependency),
         "IS_EXTERNAL" => matches!(kind, NodeKind::Method | NodeKind::TypeDecl),
         "INDEX" | "IS_VARIADIC" => matches!(
             kind,
@@ -1232,6 +1268,11 @@ fn apply_properties(
         ("CODE", Cpg::set_code),
         ("TYPE_FULL_NAME", Cpg::set_type_full_name),
         ("SIGNATURE", Cpg::set_signature),
+        ("MODIFIER_TYPE", Cpg::set_modifier_type),
+        ("IMPORTED_ENTITY", Cpg::set_imported_entity),
+        ("IMPORTED_AS", Cpg::set_imported_as),
+        ("DEPENDENCY_GROUP_ID", Cpg::set_dependency_group_id),
+        ("VERSION", Cpg::set_version),
     ] {
         if let Some(value) = scalar_string(properties, label, property, seq) {
             let symbol = cpg.intern(value);
@@ -1244,7 +1285,12 @@ fn apply_properties(
         cpg.set_line(node, value);
     }
     if let Some(value) = scalar_int(properties, label, "ORDER", seq) {
-        cpg.set_order(node, value);
+        cpg.set_order_property(node, value);
+    } else {
+        cpg.clear_order_property(node);
+    }
+    if let Some(value) = scalar_int(properties, label, "COLUMN_NUMBER", seq) {
+        cpg.set_column_number(node, value);
     }
     if let Some(value) = scalar_int(properties, label, "ARGUMENT_INDEX", seq)
         .or_else(|| scalar_int(properties, label, "INDEX", seq))
@@ -1405,6 +1451,7 @@ fn edge_label(kind: EdgeKind) -> Option<&'static str> {
         EdgeKind::PostDominate => "POST_DOMINATE",
         EdgeKind::InheritsFrom => "INHERITS_FROM",
         EdgeKind::Capture => "CAPTURE",
+        EdgeKind::Imports => "IMPORTS",
         EdgeKind::TrueBody
         | EdgeKind::FalseBody
         | EdgeKind::ForInit
@@ -1487,6 +1534,71 @@ mod tests {
                 .filter_map(|value| value.map(|symbol| restored.strings.resolve(symbol)))
                 .collect::<Vec<_>>(),
             vec!["fixture.Dynamic"]
+        );
+    }
+
+    #[test]
+    fn native_parity_metadata_survives_flatgraph_and_cpg2() {
+        let mut cpg = fixture();
+        let file = cpg.file_id("flat.c");
+        let import = cpg.add_node(NodeKind::Import, file);
+        let dependency = cpg.add_node(NodeKind::Dependency, file);
+        let modifier = cpg.add_node(NodeKind::Modifier, file);
+        let binding = cpg.add_node(NodeKind::Binding, file);
+        let header = cpg.intern("header.h");
+        let empty = cpg.intern("");
+        let static_type = cpg.intern("STATIC");
+        cpg.set_imported_entity(import, header);
+        cpg.set_imported_as(import, empty);
+        cpg.set_column_number(import, 7);
+        cpg.set_order_property(import, 2);
+        cpg.set_name(dependency, header);
+        cpg.set_dependency_group_id(dependency, empty);
+        cpg.set_version(dependency, empty);
+        cpg.clear_order_property(dependency);
+        cpg.set_modifier_type(modifier, static_type);
+        cpg.set_name(binding, header);
+        cpg.set_signature(binding, empty);
+        cpg.add_edge(import, dependency, EdgeKind::Imports);
+        let encoded = encode(&cpg, "c").unwrap();
+        let restored = decode(&encoded).unwrap();
+        let restored = Cpg::from_bytes(&restored.to_bytes()).unwrap();
+        let node = |kind| {
+            restored
+                .nodes()
+                .find(|&n| restored.kind_of(n) == kind)
+                .unwrap()
+        };
+        let import = node(NodeKind::Import);
+        let dependency = node(NodeKind::Dependency);
+        assert_eq!(restored.imported_entity_of(import), Some("header.h"));
+        assert_eq!(restored.imported_as_of(import), Some(""));
+        assert_eq!(restored.column_number_of(import), Some(7));
+        assert_eq!(
+            restored.order_property_of(import),
+            cpg_core::OrderProperty::Present(2)
+        );
+        assert_eq!(
+            restored.order_property_of(dependency),
+            cpg_core::OrderProperty::Absent
+        );
+        assert_eq!(restored.dependency_group_id_of(dependency), Some(""));
+        assert_eq!(restored.version_of(dependency), Some(""));
+        assert_eq!(
+            restored.modifier_type_of(node(NodeKind::Modifier)),
+            Some("STATIC")
+        );
+        assert_eq!(restored.name_of(node(NodeKind::Binding)), Some("header.h"));
+        assert_eq!(restored.signature_of(node(NodeKind::Binding)), Some(""));
+        assert_eq!(
+            restored
+                .out_kind(import, EdgeKind::Imports)
+                .collect::<Vec<_>>(),
+            [dependency]
+        );
+        assert_eq!(
+            digest_bytes(&encoded).unwrap(),
+            digest_bytes(&encode(&restored, "c").unwrap()).unwrap()
         );
     }
 

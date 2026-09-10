@@ -1,0 +1,158 @@
+METHOD NAME=<global> CODE=<global> FULL_NAME=<includes>:<global> ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.indirectFieldAccess FULL_NAME=<operator>.indirectFieldAccess ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1
+  TYPE_DECL NAME=Item CODE=struct Item { int len; int code; } FULL_NAME=Item ORDER=1
+    MEMBER NAME=len CODE=len TYPE_FULL_NAME=int ORDER=1
+    MEMBER NAME=code CODE=code TYPE_FULL_NAME=int ORDER=2
+  METHOD NAME=read CODE=int read(struct Item *p) { return p->Len; } FULL_NAME=read SIGNATURE=int(Item*) ORDER=1
+    METHOD_PARAMETER_IN NAME=p CODE=struct Item *p TYPE_FULL_NAME=Item* ORDER=1
+    METHOD_PARAMETER_OUT NAME=p CODE=struct Item *p TYPE_FULL_NAME=Item* ORDER=1
+    BLOCK CODE={ return p->Len; } TYPE_FULL_NAME=void ORDER=2
+      RETURN CODE=return p->Len; ORDER=1
+        CALL NAME=<operator>.indirectFieldAccess CODE=p->Len TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=p CODE=p TYPE_FULL_NAME=Item* ORDER=1 ARGUMENT_INDEX=1
+          FIELD_IDENTIFIER CODE=len ORDER=2 ARGUMENT_INDEX=2
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+    TYPE_REF CODE=struct Item { int len; int code; } TYPE_FULL_NAME=Item ORDER=1
+    METHOD_REF CODE=read TYPE_FULL_NAME=read METHOD_FULL_NAME=read ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=read CODE=int read(struct Item *p) { return p->Len; } FULL_NAME=read SIGNATURE=int(Item*) ORDER=1
+  METHOD_PARAMETER_IN NAME=p CODE=struct Item *p TYPE_FULL_NAME=Item* ORDER=1
+  METHOD_PARAMETER_OUT NAME=p CODE=struct Item *p TYPE_FULL_NAME=Item* ORDER=1
+  BLOCK CODE={ return p->Len; } TYPE_FULL_NAME=void ORDER=2
+    RETURN CODE=return p->Len; ORDER=1
+      CALL NAME=<operator>.indirectFieldAccess CODE=p->Len TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=p CODE=p TYPE_FULL_NAME=Item* ORDER=1 ARGUMENT_INDEX=1
+        FIELD_IDENTIFIER CODE=len ORDER=2 ARGUMENT_INDEX=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+
+NODES|META_DATA LANGUAGE=NEWC
+NODES|FILE NAME=<includes> ORDER=1
+NODES|FILE NAME=<unknown> ORDER=0
+NODES|FILE NAME=main.c ORDER=0
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<global> FILENAME=<unknown> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<includes>:<global> FILENAME=<includes> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|NAMESPACE NAME=<global>
+NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=Item FULL_NAME=Item CODE=struct Item { int len; int code; } AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=Item* FULL_NAME=Item* CODE=Item* IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=<global> FULL_NAME=main.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=read FULL_NAME=read CODE=read AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+NODES|TYPE NAME=Item FULL_NAME=Item TYPE_DECL_FULL_NAME=Item
+NODES|TYPE NAME=Item* FULL_NAME=Item* TYPE_DECL_FULL_NAME=Item*
+NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+NODES|TYPE NAME=read FULL_NAME=read TYPE_DECL_FULL_NAME=read
+NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+EDGES|ARGUMENT read#4 -> read#5
+EDGES|ARGUMENT read#5 -> read#6
+EDGES|ARGUMENT read#5 -> read#7
+EDGES|CALL read#5 -> <operator>.indirectFieldAccess#0
+EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+EDGES|CFG <operator>.indirectFieldAccess#0 -> <operator>.indirectFieldAccess#5
+EDGES|CFG main.c:<global>#0 -> main.c:<global>#14
+EDGES|CFG main.c:<global>#14 -> main.c:<global>#15
+EDGES|CFG main.c:<global>#15 -> main.c:<global>#16
+EDGES|CFG main.c:<global>#4 -> read#6
+EDGES|CFG read#4 -> read#8
+EDGES|CFG read#5 -> read#4
+EDGES|CFG read#6 -> read#7
+EDGES|CFG read#7 -> read#5
+EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+EDGES|CONTAINS <operator>.indirectFieldAccess#0 -> <operator>.indirectFieldAccess#2
+EDGES|CONTAINS D:main.c:<global> -> D:read
+EDGES|CONTAINS D:main.c:<global> -> main.c:<global>#0
+EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+EDGES|CONTAINS F:<includes> -> D:ANY
+EDGES|CONTAINS F:<includes> -> D:Item*
+EDGES|CONTAINS F:<includes> -> D:int
+EDGES|CONTAINS F:<includes> -> D:void
+EDGES|CONTAINS F:main.c -> D:main.c:<global>
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#1
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#13
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#14
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#15
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#4
+EDGES|CONTAINS main.c:<global>#4 -> read#3
+EDGES|CONTAINS main.c:<global>#4 -> read#4
+EDGES|CONTAINS main.c:<global>#4 -> read#5
+EDGES|CONTAINS main.c:<global>#4 -> read#6
+EDGES|CONTAINS main.c:<global>#4 -> read#7
+EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectFieldAccess#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectFieldAccess#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectFieldAccess#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectFieldAccess#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectFieldAccess#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectFieldAccess#6 -> T:ANY
+EDGES|EVAL_TYPE main.c:<global>#13 -> T:ANY
+EDGES|EVAL_TYPE main.c:<global>#14 -> T:Item
+EDGES|EVAL_TYPE main.c:<global>#15 -> T:read
+EDGES|EVAL_TYPE main.c:<global>#16 -> T:ANY
+EDGES|EVAL_TYPE main.c:<global>#2 -> T:int
+EDGES|EVAL_TYPE main.c:<global>#3 -> T:int
+EDGES|EVAL_TYPE read#1 -> T:Item*
+EDGES|EVAL_TYPE read#2 -> T:Item*
+EDGES|EVAL_TYPE read#3 -> T:void
+EDGES|EVAL_TYPE read#5 -> T:ANY
+EDGES|EVAL_TYPE read#6 -> T:Item*
+EDGES|EVAL_TYPE read#8 -> T:int
+EDGES|PARAMETER_LINK <operator>.indirectFieldAccess#1 -> <operator>.indirectFieldAccess#3
+EDGES|PARAMETER_LINK <operator>.indirectFieldAccess#4 -> <operator>.indirectFieldAccess#6
+EDGES|PARAMETER_LINK read#1 -> read#2
+EDGES|REF NB:<global> -> NS:<global>
+EDGES|REF NB:<includes>:<global> -> NS:<global>
+EDGES|REF NB:main.c:<global> -> NS:<global>
+EDGES|REF T:ANY -> D:ANY
+EDGES|REF T:Item -> main.c:<global>#1
+EDGES|REF T:Item* -> D:Item*
+EDGES|REF T:int -> D:int
+EDGES|REF T:read -> D:read
+EDGES|REF T:void -> D:void
+EDGES|REF main.c:<global>#15 -> main.c:<global>#4
+EDGES|REF read#6 -> read#1
+EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+EDGES|SOURCE_FILE D:ANY -> F:<includes>
+EDGES|SOURCE_FILE D:Item* -> F:<includes>
+EDGES|SOURCE_FILE D:int -> F:<includes>
+EDGES|SOURCE_FILE D:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE D:read -> F:main.c
+EDGES|SOURCE_FILE D:void -> F:<includes>
+EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
+EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>
+EDGES|SOURCE_FILE NB:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#0 -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#1 -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#4 -> F:main.c
+FLOWS|REACHING_DEF[<RET>] read#4 -> read#8
+FLOWS|REACHING_DEF[] <operator>.indirectFieldAccess#0 -> <operator>.indirectFieldAccess#1
+FLOWS|REACHING_DEF[] <operator>.indirectFieldAccess#0 -> <operator>.indirectFieldAccess#4
+FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#14
+FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#15
+FLOWS|REACHING_DEF[] main.c:<global>#4 -> read#1
+FLOWS|REACHING_DEF[] main.c:<global>#4 -> read#6
+FLOWS|REACHING_DEF[p->Len] read#5 -> read#4
+FLOWS|REACHING_DEF[p1] <operator>.indirectFieldAccess#1 -> <operator>.indirectFieldAccess#3
+FLOWS|REACHING_DEF[p1] <operator>.indirectFieldAccess#1 -> <operator>.indirectFieldAccess#5
+FLOWS|REACHING_DEF[p2] <operator>.indirectFieldAccess#4 -> <operator>.indirectFieldAccess#5
+FLOWS|REACHING_DEF[p2] <operator>.indirectFieldAccess#4 -> <operator>.indirectFieldAccess#6
+FLOWS|REACHING_DEF[p] read#1 -> read#2
+FLOWS|REACHING_DEF[p] read#1 -> read#5
+FLOWS|REACHING_DEF[p] read#1 -> read#6
+FLOWS|REACHING_DEF[p] read#1 -> read#8

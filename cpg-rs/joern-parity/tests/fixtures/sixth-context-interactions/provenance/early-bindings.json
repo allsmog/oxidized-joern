@@ -1,0 +1,12 @@
+{
+  "createdAtUtc": "2026-09-08T15:30:23.193720+00:00",
+  "scope": "Early combined debug parity producer; no CLI artifact or final acceptance claim. Frontend parameter-comment and importer anchor fixes still pending.",
+  "parentRevision": "4b6a7ebb6531bd4371112efc27f8993d33f92670",
+  "sources": {
+    "cpg-rs/cpg-lang-c/src/exact.rs": "fa8423c7e9cfb5a3875b403d1958e9bf5c66b5a221f003185bd16555c58888e9",
+    "cpg-rs/cpg-lang-c/src/import.rs": "c46783747a5e0189678b95b29354e143c901af9039f40796d85f46f68c54dfc5"
+  },
+  "binaries": {
+    "joern-parity": "9605fb168ec86edc5e05f6bf81b7cede617e8e83ce7b69efe400d307fc0827af"
+  }
+}

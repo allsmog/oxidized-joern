@@ -1,0 +1,108 @@
+=======================================================================================================
+Invoking CPG generator in a separate process. Note that the new process will consume additional memory.
+If you are importing a large codebase (and/or running into memory issues), please try the following:
+1) exit joern
+2) invoke the frontend: /Users/shayaunnejad/vibe-code/joern-oxidized/.local/astra-sprint/oracle/runtime/joern-cli/c2cpg.sh -J-Xmx4096m /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-statement-macros/.local/statement-macros/final/cases/macro_flows/input --output /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-statement-macros/.local/statement-macros/flow-oracle/workspace/input/cpg.bin.zip
+3) start joern, import the cpg: `importCpg("path/to/cpg")`
+=======================================================================================================
+
+[INFO ] initialising from existing storage (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-statement-macros/.local/statement-macros/flow-oracle/workspace/input/cpg.bin.tmp)
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.FileCreationPass
+[INFO ] Pass io.joern.x2cpg.passes.base.FileCreationPass completed in 11 ms (70% on mutations). 32 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.NamespaceCreator
+[INFO ] Pass io.joern.x2cpg.passes.base.NamespaceCreator completed in 3 ms (49% on mutations). 4 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.TypeDeclStubCreator
+[INFO ] Pass io.joern.x2cpg.passes.base.TypeDeclStubCreator completed in 1 ms (59% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.MethodStubCreator
+[INFO ] Pass io.joern.x2cpg.passes.base.MethodStubCreator completed in 8 ms (17% on mutations). 18 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.ParameterIndexCompatPass
+[INFO ] Pass io.joern.x2cpg.passes.base.ParameterIndexCompatPass completed in 1 ms (61% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.MethodDecoratorPass
+[INFO ] Pass io.joern.x2cpg.passes.base.MethodDecoratorPass completed in 2 ms (29% on mutations). 63 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.AstLinkerPass
+[INFO ] Pass io.joern.x2cpg.passes.base.AstLinkerPass completed in 2 ms (16% on mutations). 20 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.ContainsEdgePass
+[INFO ] Pass io.joern.x2cpg.passes.base.ContainsEdgePass completed in 1 ms (36% on mutations). 140 + 0 changes committed from 33 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.TypeRefPass
+[INFO ] Pass io.joern.x2cpg.passes.base.TypeRefPass completed in 1 ms (32% on mutations). 10 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.TypeEvalPass
+[INFO ] Pass io.joern.x2cpg.passes.base.TypeEvalPass completed in 1 ms (39% on mutations). 178 + 0 changes committed from 2 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 1 ms (29% on mutations). 1 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.controlflow.CfgCreationPass
+[WARN ] Using order fallback for break statement jump argument
+[INFO ] Pass io.joern.x2cpg.passes.controlflow.CfgCreationPass completed in 15 ms (6% on mutations). 108 + 0 changes committed from 19 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.controlflow.cfgdominator.CfgDominatorPass
+[INFO ] Pass io.joern.x2cpg.passes.controlflow.cfgdominator.CfgDominatorPass completed in 5 ms (10% on mutations). 194 + 0 changes committed from 19 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.controlflow.codepencegraph.CdgPass
+[INFO ] Pass io.joern.x2cpg.passes.controlflow.codepencegraph.CdgPass completed in 2 ms (12% on mutations). 47 + 0 changes committed from 19 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 0 ms (80% on mutations). 1 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.typerelations.TypeHierarchyPass
+[INFO ] Pass io.joern.x2cpg.passes.typerelations.TypeHierarchyPass completed in 1 ms (22% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.typerelations.AliasLinkerPass
+[INFO ] Pass io.joern.x2cpg.passes.typerelations.AliasLinkerPass completed in 1 ms (54% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.typerelations.FieldAccessLinkerPass
+[INFO ] Pass io.joern.x2cpg.passes.typerelations.FieldAccessLinkerPass completed in 1 ms (14% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 0 ms (79% on mutations). 1 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.callgraph.MethodRefLinker
+[INFO ] Pass io.joern.x2cpg.passes.callgraph.MethodRefLinker completed in 0 ms (45% on mutations). 7 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.callgraph.StaticCallLinker
+[INFO ] Pass io.joern.x2cpg.passes.callgraph.StaticCallLinker completed in 1 ms (38% on mutations). 33 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.callgraph.DynamicCallLinker
+[INFO ] Pass io.joern.x2cpg.passes.callgraph.DynamicCallLinker completed in 0 ms (50% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 0 ms (71% on mutations). 1 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.dataflowengineoss.passes.reachingdef.ReachingDefPass
+[INFO ] Calculating reaching definitions for: main.c:<global> in main.c
+[INFO ] Calculating reaching definitions for: while_entry in main.c
+[INFO ] Calculating reaching definitions for: if_entry in main.c
+[INFO ] Calculating reaching definitions for: do_entry in main.c
+[INFO ] Calculating reaching definitions for: main.c:LOOP:ANY(1) in main.c
+[INFO ] Calculating reaching definitions for: overwritten_entry in main.c
+[INFO ] Calculating reaching definitions for: clean_entry in main.c
+[INFO ] Calculating reaching definitions for: main.c:IF:ANY(2) in main.c
+[INFO ] Calculating reaching definitions for: main.c:REPEAT:ANY(2) in main.c
+[INFO ] Calculating reaching definitions for: main.c:BRACE:ANY(1) in main.c
+[INFO ] Number of definitions for main.c:<global>: 0
+[INFO ] Number of definitions for main.c:BRACE:ANY(1): 1
+[INFO ] Number of definitions for main.c:REPEAT:ANY(2): 2
+[INFO ] Number of definitions for main.c:IF:ANY(2): 2
+[INFO ] Number of definitions for main.c:LOOP:ANY(1): 1
+[INFO ] Calculating reaching definitions for: brace_entry in main.c
+[INFO ] Number of definitions for clean_entry: 6
+[INFO ] Number of definitions for while_entry: 12
+[INFO ] Number of definitions for if_entry: 12
+[INFO ] Number of definitions for overwritten_entry: 14
+[INFO ] Number of definitions for do_entry: 12
+[INFO ] Number of definitions for brace_entry: 12
+[INFO ] Calculating reaching definitions for: sink in main.c
+[INFO ] Calculating reaching definitions for: <operator>.assignment in <empty>
+[INFO ] Number of definitions for sink: 1
+[INFO ] Number of definitions for <operator>.assignment: 2
+[INFO ] Calculating reaching definitions for: main.c:SAFE:ANY(1) in main.c
+[INFO ] Calculating reaching definitions for: main.c:DROP:ANY(1) in main.c
+[INFO ] Number of definitions for main.c:SAFE:ANY(1): 1
+[INFO ] Calculating reaching definitions for: source in main.c
+[INFO ] Number of definitions for main.c:DROP:ANY(1): 1
+[INFO ] Calculating reaching definitions for: <operator>.notEquals in <empty>
+[INFO ] Calculating reaching definitions for: dropped_entry in main.c
+[INFO ] Calculating reaching definitions for: <includes>:<global> in <includes>
+[INFO ] Number of definitions for <operator>.notEquals: 2
+[INFO ] Number of definitions for source: 1
+[INFO ] Number of definitions for <includes>:<global>: 0
+[INFO ] Number of definitions for dropped_entry: 7
+[INFO ] Pass io.joern.dataflowengineoss.passes.reachingdef.ReachingDefPass completed in 29 ms (2% on mutations). 211 + 0 changes committed from 19 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 0 ms (72% on mutations). 1 + 0 changes committed from 1 parts.
+RESULT|brace_entry|true
+[INFO ] Attempting to determine flows from empty list of sources.
+RESULT|clean_entry|false
+RESULT|do_entry|true
+RESULT|dropped_entry|false
+RESULT|if_entry|true
+RESULT|overwritten_entry|false
+RESULT|while_entry|true
+[INFO ] writing to storage at `/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-statement-macros/.local/statement-macros/flow-oracle/workspace/input/cpg.bin.tmp`
+[INFO ] closed graph at /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-statement-macros/.local/statement-macros/flow-oracle/workspace/input/cpg.bin.tmp

@@ -1,0 +1,250 @@
+METHOD NAME=<global> CODE=<global> FULL_NAME=<includes>:<global> ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.conditional FULL_NAME=<operator>.conditional ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_IN NAME=p3 CODE=p3 TYPE_FULL_NAME=ANY ORDER=3
+  METHOD_PARAMETER_OUT NAME=p3 CODE=p3 TYPE_FULL_NAME=ANY ORDER=3
+
+METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1
+  METHOD NAME=probe CODE=int probe(int a) { return OFF(a); } FULL_NAME=probe SIGNATURE=int(int) ORDER=1
+    METHOD_PARAMETER_IN NAME=a CODE=int a TYPE_FULL_NAME=int ORDER=1
+    METHOD_PARAMETER_OUT NAME=a CODE=int a TYPE_FULL_NAME=int ORDER=1
+    BLOCK CODE={ return OFF(a); } TYPE_FULL_NAME=void ORDER=2
+      RETURN CODE=return OFF(a); ORDER=1
+        CALL NAME=OFF CODE=OFF(a) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=main.c:OFF:ANY(1) SIGNATURE=ANY(1) ORDER=1 DISPATCH_TYPE=INLINED
+          IDENTIFIER NAME=a CODE=a TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+          BLOCK TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+            CALL NAME=<operator>.conditional CODE=(a) ? offsetof(A, x) : 0 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.conditional ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+              IDENTIFIER NAME=a CODE=a TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+              CALL NAME=offsetof CODE=offsetof(A, x) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=offsetof ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+                IDENTIFIER NAME=A CODE=A TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+                IDENTIFIER NAME=x CODE=<unknown> x TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+              LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=3 ARGUMENT_INDEX=3
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+    TYPE_DECL NAME=A CODE=typedef struct { int x; } A; FULL_NAME=A ORDER=1
+    METHOD_REF CODE=probe TYPE_FULL_NAME=probe METHOD_FULL_NAME=probe ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=OFF CODE=#define OFF(a) ((a)?offsetof(A,x):0) FULL_NAME=main.c:OFF:ANY(1) SIGNATURE=ANY(1) ORDER=1
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=3
+
+METHOD NAME=offsetof FULL_NAME=offsetof ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=probe CODE=int probe(int a) { return OFF(a); } FULL_NAME=probe SIGNATURE=int(int) ORDER=1
+  METHOD_PARAMETER_IN NAME=a CODE=int a TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=a CODE=int a TYPE_FULL_NAME=int ORDER=1
+  BLOCK CODE={ return OFF(a); } TYPE_FULL_NAME=void ORDER=2
+    RETURN CODE=return OFF(a); ORDER=1
+      CALL NAME=OFF CODE=OFF(a) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=main.c:OFF:ANY(1) SIGNATURE=ANY(1) ORDER=1 DISPATCH_TYPE=INLINED
+        IDENTIFIER NAME=a CODE=a TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+        BLOCK TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+          CALL NAME=<operator>.conditional CODE=(a) ? offsetof(A, x) : 0 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.conditional ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+            IDENTIFIER NAME=a CODE=a TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+            CALL NAME=offsetof CODE=offsetof(A, x) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=offsetof ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+              IDENTIFIER NAME=A CODE=A TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+              IDENTIFIER NAME=x CODE=<unknown> x TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+            LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=3 ARGUMENT_INDEX=3
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+
+NODES|META_DATA LANGUAGE=NEWC
+NODES|FILE NAME=<includes> ORDER=1
+NODES|FILE NAME=<unknown> ORDER=0
+NODES|FILE NAME=main.c ORDER=0
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<global> FILENAME=<unknown> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<includes>:<global> FILENAME=<includes> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|NAMESPACE NAME=<global>
+NODES|TYPE_DECL NAME=A FULL_NAME=A CODE=typedef struct { int x; } A; AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=<global> FULL_NAME=main.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=2
+NODES|TYPE_DECL NAME=probe FULL_NAME=probe CODE=probe AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE NAME=A FULL_NAME=A TYPE_DECL_FULL_NAME=A
+NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+NODES|TYPE NAME=probe FULL_NAME=probe TYPE_DECL_FULL_NAME=probe
+NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+EDGES|ARGUMENT probe#10 -> probe#11
+EDGES|ARGUMENT probe#10 -> probe#12
+EDGES|ARGUMENT probe#4 -> probe#5
+EDGES|ARGUMENT probe#5 -> probe#6
+EDGES|ARGUMENT probe#8 -> probe#10
+EDGES|ARGUMENT probe#8 -> probe#13
+EDGES|ARGUMENT probe#8 -> probe#9
+EDGES|CALL probe#10 -> offsetof#0
+EDGES|CALL probe#5 -> main.c:OFF:ANY(1)#0
+EDGES|CALL probe#8 -> <operator>.conditional#0
+EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+EDGES|CFG <operator>.conditional#0 -> <operator>.conditional#5
+EDGES|CFG main.c:<global>#0 -> main.c:<global>#18
+EDGES|CFG main.c:<global>#1 -> probe#6
+EDGES|CFG main.c:<global>#18 -> main.c:<global>#19
+EDGES|CFG main.c:OFF:ANY(1)#0 -> main.c:OFF:ANY(1)#4
+EDGES|CFG offsetof#0 -> offsetof#5
+EDGES|CFG probe#10 -> probe#8
+EDGES|CFG probe#11 -> probe#12
+EDGES|CFG probe#12 -> probe#10
+EDGES|CFG probe#13 -> probe#8
+EDGES|CFG probe#4 -> probe#14
+EDGES|CFG probe#5 -> probe#4
+EDGES|CFG probe#5 -> probe#9
+EDGES|CFG probe#6 -> probe#5
+EDGES|CFG probe#8 -> probe#4
+EDGES|CFG probe#9 -> probe#11
+EDGES|CFG probe#9 -> probe#13
+EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+EDGES|CONTAINS <operator>.conditional#0 -> <operator>.conditional#2
+EDGES|CONTAINS D:main.c:<global> -> D:probe
+EDGES|CONTAINS D:main.c:<global> -> main.c:<global>#0
+EDGES|CONTAINS D:main.c:<global> -> main.c:OFF:ANY(1)#0
+EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+EDGES|CONTAINS F:<includes> -> D:ANY
+EDGES|CONTAINS F:<includes> -> D:int
+EDGES|CONTAINS F:<includes> -> D:void
+EDGES|CONTAINS F:main.c -> D:main.c:<global>
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#1
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#16
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#17
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#18
+EDGES|CONTAINS main.c:<global>#1 -> probe#10
+EDGES|CONTAINS main.c:<global>#1 -> probe#11
+EDGES|CONTAINS main.c:<global>#1 -> probe#12
+EDGES|CONTAINS main.c:<global>#1 -> probe#13
+EDGES|CONTAINS main.c:<global>#1 -> probe#3
+EDGES|CONTAINS main.c:<global>#1 -> probe#4
+EDGES|CONTAINS main.c:<global>#1 -> probe#5
+EDGES|CONTAINS main.c:<global>#1 -> probe#6
+EDGES|CONTAINS main.c:<global>#1 -> probe#7
+EDGES|CONTAINS main.c:<global>#1 -> probe#8
+EDGES|CONTAINS main.c:<global>#1 -> probe#9
+EDGES|CONTAINS main.c:OFF:ANY(1)#0 -> main.c:OFF:ANY(1)#3
+EDGES|CONTAINS offsetof#0 -> offsetof#2
+EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.conditional#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.conditional#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.conditional#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.conditional#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.conditional#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.conditional#6 -> T:ANY
+EDGES|EVAL_TYPE <operator>.conditional#7 -> T:ANY
+EDGES|EVAL_TYPE <operator>.conditional#8 -> T:ANY
+EDGES|EVAL_TYPE main.c:<global>#16 -> T:ANY
+EDGES|EVAL_TYPE main.c:<global>#18 -> T:probe
+EDGES|EVAL_TYPE main.c:<global>#19 -> T:ANY
+EDGES|EVAL_TYPE main.c:OFF:ANY(1)#1 -> T:ANY
+EDGES|EVAL_TYPE main.c:OFF:ANY(1)#2 -> T:ANY
+EDGES|EVAL_TYPE main.c:OFF:ANY(1)#3 -> T:ANY
+EDGES|EVAL_TYPE main.c:OFF:ANY(1)#4 -> T:ANY
+EDGES|EVAL_TYPE offsetof#1 -> T:ANY
+EDGES|EVAL_TYPE offsetof#2 -> T:ANY
+EDGES|EVAL_TYPE offsetof#3 -> T:ANY
+EDGES|EVAL_TYPE offsetof#4 -> T:ANY
+EDGES|EVAL_TYPE offsetof#5 -> T:ANY
+EDGES|EVAL_TYPE offsetof#6 -> T:ANY
+EDGES|EVAL_TYPE probe#1 -> T:int
+EDGES|EVAL_TYPE probe#10 -> T:ANY
+EDGES|EVAL_TYPE probe#11 -> T:ANY
+EDGES|EVAL_TYPE probe#12 -> T:ANY
+EDGES|EVAL_TYPE probe#13 -> T:int
+EDGES|EVAL_TYPE probe#14 -> T:int
+EDGES|EVAL_TYPE probe#2 -> T:int
+EDGES|EVAL_TYPE probe#3 -> T:void
+EDGES|EVAL_TYPE probe#5 -> T:ANY
+EDGES|EVAL_TYPE probe#6 -> T:int
+EDGES|EVAL_TYPE probe#7 -> T:ANY
+EDGES|EVAL_TYPE probe#8 -> T:ANY
+EDGES|EVAL_TYPE probe#9 -> T:int
+EDGES|PARAMETER_LINK <operator>.conditional#1 -> <operator>.conditional#3
+EDGES|PARAMETER_LINK <operator>.conditional#4 -> <operator>.conditional#6
+EDGES|PARAMETER_LINK <operator>.conditional#7 -> <operator>.conditional#8
+EDGES|PARAMETER_LINK main.c:OFF:ANY(1)#1 -> main.c:OFF:ANY(1)#2
+EDGES|PARAMETER_LINK offsetof#1 -> offsetof#3
+EDGES|PARAMETER_LINK offsetof#4 -> offsetof#6
+EDGES|PARAMETER_LINK probe#1 -> probe#2
+EDGES|REF NB:<global> -> NS:<global>
+EDGES|REF NB:<includes>:<global> -> NS:<global>
+EDGES|REF NB:main.c:<global> -> NS:<global>
+EDGES|REF T:A -> main.c:<global>#17
+EDGES|REF T:ANY -> D:ANY
+EDGES|REF T:int -> D:int
+EDGES|REF T:probe -> D:probe
+EDGES|REF T:void -> D:void
+EDGES|REF main.c:<global>#18 -> main.c:<global>#1
+EDGES|REF probe#9 -> probe#1
+EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+EDGES|SOURCE_FILE D:ANY -> F:<includes>
+EDGES|SOURCE_FILE D:int -> F:<includes>
+EDGES|SOURCE_FILE D:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE D:probe -> F:main.c
+EDGES|SOURCE_FILE D:void -> F:<includes>
+EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
+EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>
+EDGES|SOURCE_FILE NB:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#0 -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#1 -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#17 -> F:main.c
+EDGES|SOURCE_FILE main.c:OFF:ANY(1)#0 -> F:main.c
+FLOWS|REACHING_DEF[(a) ? offsetof(A, x) : 0] probe#8 -> probe#14
+FLOWS|REACHING_DEF[0] probe#13 -> probe#8
+FLOWS|REACHING_DEF[<RET>] probe#4 -> probe#14
+FLOWS|REACHING_DEF[<unknown> x] probe#12 -> probe#10
+FLOWS|REACHING_DEF[<unknown> x] probe#12 -> probe#11
+FLOWS|REACHING_DEF[<unknown> x] probe#12 -> probe#14
+FLOWS|REACHING_DEF[A] probe#11 -> probe#10
+FLOWS|REACHING_DEF[A] probe#11 -> probe#12
+FLOWS|REACHING_DEF[A] probe#11 -> probe#14
+FLOWS|REACHING_DEF[OFF(a)] probe#5 -> probe#14
+FLOWS|REACHING_DEF[OFF(a)] probe#5 -> probe#4
+FLOWS|REACHING_DEF[] <operator>.conditional#0 -> <operator>.conditional#1
+FLOWS|REACHING_DEF[] <operator>.conditional#0 -> <operator>.conditional#4
+FLOWS|REACHING_DEF[] <operator>.conditional#0 -> <operator>.conditional#7
+FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#18
+FLOWS|REACHING_DEF[] main.c:<global>#1 -> probe#1
+FLOWS|REACHING_DEF[] main.c:<global>#1 -> probe#11
+FLOWS|REACHING_DEF[] main.c:<global>#1 -> probe#12
+FLOWS|REACHING_DEF[] main.c:<global>#1 -> probe#13
+FLOWS|REACHING_DEF[] main.c:<global>#1 -> probe#6
+FLOWS|REACHING_DEF[] main.c:OFF:ANY(1)#0 -> main.c:OFF:ANY(1)#1
+FLOWS|REACHING_DEF[] offsetof#0 -> offsetof#1
+FLOWS|REACHING_DEF[] offsetof#0 -> offsetof#4
+FLOWS|REACHING_DEF[a] probe#1 -> probe#2
+FLOWS|REACHING_DEF[a] probe#1 -> probe#6
+FLOWS|REACHING_DEF[a] probe#6 -> probe#14
+FLOWS|REACHING_DEF[a] probe#6 -> probe#2
+FLOWS|REACHING_DEF[a] probe#6 -> probe#5
+FLOWS|REACHING_DEF[a] probe#9 -> probe#14
+FLOWS|REACHING_DEF[a] probe#9 -> probe#2
+FLOWS|REACHING_DEF[a] probe#9 -> probe#8
+FLOWS|REACHING_DEF[offsetof(A, x)] probe#10 -> probe#14
+FLOWS|REACHING_DEF[offsetof(A, x)] probe#10 -> probe#8
+FLOWS|REACHING_DEF[p1] <operator>.conditional#1 -> <operator>.conditional#3
+FLOWS|REACHING_DEF[p1] <operator>.conditional#1 -> <operator>.conditional#5
+FLOWS|REACHING_DEF[p1] main.c:OFF:ANY(1)#1 -> main.c:OFF:ANY(1)#2
+FLOWS|REACHING_DEF[p1] main.c:OFF:ANY(1)#1 -> main.c:OFF:ANY(1)#4
+FLOWS|REACHING_DEF[p1] offsetof#1 -> offsetof#3
+FLOWS|REACHING_DEF[p1] offsetof#1 -> offsetof#5
+FLOWS|REACHING_DEF[p2] <operator>.conditional#4 -> <operator>.conditional#5
+FLOWS|REACHING_DEF[p2] <operator>.conditional#4 -> <operator>.conditional#6
+FLOWS|REACHING_DEF[p2] offsetof#4 -> offsetof#5
+FLOWS|REACHING_DEF[p2] offsetof#4 -> offsetof#6
+FLOWS|REACHING_DEF[p3] <operator>.conditional#7 -> <operator>.conditional#5
+FLOWS|REACHING_DEF[p3] <operator>.conditional#7 -> <operator>.conditional#8

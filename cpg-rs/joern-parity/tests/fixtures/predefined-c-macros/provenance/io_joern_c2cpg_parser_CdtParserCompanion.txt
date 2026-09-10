@@ -1,0 +1,298 @@
+Compiled from "CdtParser.scala"
+public final class io.joern.c2cpg.parser.CdtParser$ implements java.io.Serializable {
+  public static final org.slf4j.Logger io$joern$c2cpg$parser$CdtParser$$$logger;
+
+  public static final io.joern.c2cpg.parser.CdtParser$HeaderFileParserLanguage$ HeaderFileParserLanguage;
+
+  public static final io.joern.c2cpg.parser.CdtParser$ParseResult$ io$joern$c2cpg$parser$CdtParser$$$ParseResult;
+
+  public static final io.joern.c2cpg.parser.CdtParser$ MODULE$;
+
+  private io.joern.c2cpg.parser.CdtParser$();
+    Code:
+       0: aload_0
+       1: invokespecial #42                 // Method java/lang/Object."<init>":()V
+       4: return
+
+  public static {};
+    Code:
+       0: new           #2                  // class io/joern/c2cpg/parser/CdtParser$
+       3: dup
+       4: invokespecial #45                 // Method "<init>":()V
+       7: putstatic     #47                 // Field MODULE$:Lio/joern/c2cpg/parser/CdtParser$;
+      10: ldc           #11                 // class io/joern/c2cpg/parser/CdtParser
+      12: invokestatic  #53                 // Method org/slf4j/LoggerFactory.getLogger:(Ljava/lang/Class;)Lorg/slf4j/Logger;
+      15: putstatic     #55                 // Field io$joern$c2cpg$parser$CdtParser$$$logger:Lorg/slf4j/Logger;
+      18: return
+
+  private java.lang.Object writeReplace();
+    Code:
+       0: new           #59                 // class scala/runtime/ModuleSerializationProxy
+       3: dup
+       4: ldc           #2                  // class io/joern/c2cpg/parser/CdtParser$
+       6: invokespecial #62                 // Method scala/runtime/ModuleSerializationProxy."<init>":(Ljava/lang/Class;)V
+       9: areturn
+
+  public org.eclipse.cdt.core.parser.FileContent io$joern$c2cpg$parser$CdtParser$$$readFileAsFileContent(java.nio.file.Path, scala.Option<char[]>);
+    Code:
+       0: aload_2
+       1: aload_1
+       2: invokedynamic #88,  0             // InvokeDynamic #0:apply:(Ljava/nio/file/Path;)Lscala/Function0;
+       7: invokevirtual #94                 // Method scala/Option.getOrElse:(Lscala/Function0;)Ljava/lang/Object;
+      10: checkcast     #96                 // class "[C"
+      13: astore_3
+      14: aload_1
+      15: invokeinterface #102,  1          // InterfaceMethod java/nio/file/Path.toString:()Ljava/lang/String;
+      20: iconst_1
+      21: aload_3
+      22: invokestatic  #108                // Method org/eclipse/cdt/core/parser/FileContent.create:(Ljava/lang/String;Z[C)Lorg/eclipse/cdt/core/parser/FileContent;
+      25: areturn
+
+  public scala.Option<char[]> io$joern$c2cpg$parser$CdtParser$$$readFileAsFileContent$default$2();
+    Code:
+       0: getstatic     #119                // Field scala/None$.MODULE$:Lscala/None$;
+       3: areturn
+
+  public scala.collection.immutable.Seq<scala.Tuple2<java.nio.file.Path, org.eclipse.cdt.core.model.ILanguage>> languageMappingForSourceFile(java.nio.file.Path, scala.collection.immutable.Map<java.lang.String, io.joern.c2cpg.parser.CdtParser$HeaderFileParserLanguage>, io.joern.c2cpg.Config);
+    Code:
+       0: aload_1
+       1: iconst_0
+       2: anewarray     #127                // class java/nio/file/LinkOption
+       5: invokestatic  #133                // Method java/nio/file/Files.isRegularFile:(Ljava/nio/file/Path;[Ljava/nio/file/LinkOption;)Z
+       8: ifne          43
+      11: getstatic     #55                 // Field io$joern$c2cpg$parser$CdtParser$$$logger:Lorg/slf4j/Logger;
+      14: aload_1
+      15: invokeinterface #102,  1          // InterfaceMethod java/nio/file/Path.toString:()Ljava/lang/String;
+      20: invokedynamic #145,  0            // InvokeDynamic #1:makeConcatWithConstants:(Ljava/lang/String;)Ljava/lang/String;
+      25: invokeinterface #151,  2          // InterfaceMethod org/slf4j/Logger.warn:(Ljava/lang/String;)V
+      30: getstatic     #156                // Field scala/package$.MODULE$:Lscala/package$;
+      33: invokevirtual #160                // Method scala/package$.Seq:()Lscala/collection/immutable/Seq$;
+      36: invokevirtual #166                // Method scala/collection/immutable/Seq$.empty:()Lscala/collection/SeqOps;
+      39: checkcast     #168                // class scala/collection/immutable/Seq
+      42: areturn
+      43: aload_1
+      44: invokeinterface #102,  1          // InterfaceMethod java/nio/file/Path.toString:()Ljava/lang/String;
+      49: astore        4
+      51: getstatic     #173                // Field io/joern/c2cpg/parser/FileDefaults$.MODULE$:Lio/joern/c2cpg/parser/FileDefaults$;
+      54: aload         4
+      56: invokevirtual #177                // Method io/joern/c2cpg/parser/FileDefaults$.hasCHeaderFileExtension:(Ljava/lang/String;)Z
+      59: ifne          110
+      62: getstatic     #182                // Field io/shiftleft/utils/IOUtils$.MODULE$:Lio/shiftleft/utils/IOUtils$;
+      65: aload_1
+      66: invokevirtual #186                // Method io/shiftleft/utils/IOUtils$.readLinesInFile:(Ljava/nio/file/Path;)Lscala/collection/immutable/Seq;
+      69: ldc           #188                // String \n
+      71: invokeinterface #191,  2          // InterfaceMethod scala/collection/immutable/Seq.mkString:(Ljava/lang/String;)Ljava/lang/String;
+      76: astore        5
+      78: new           #193                // class scala/collection/immutable/$colon$colon
+      81: dup
+      82: getstatic     #198                // Field scala/Tuple2$.MODULE$:Lscala/Tuple2$;
+      85: aload_1
+      86: aload_0
+      87: aload_1
+      88: aload         5
+      90: aload_3
+      91: invokevirtual #202                // Method io$joern$c2cpg$parser$CdtParser$$$createParseLanguage:(Ljava/nio/file/Path;Ljava/lang/String;Lio/joern/c2cpg/Config;)Lorg/eclipse/cdt/core/model/ILanguage;
+      94: invokevirtual #205                // Method scala/Tuple2$.apply:(Ljava/lang/Object;Ljava/lang/Object;)Lscala/Tuple2;
+      97: getstatic     #210                // Field scala/collection/immutable/Nil$.MODULE$:Lscala/collection/immutable/Nil$;
+     100: invokespecial #213                // Method scala/collection/immutable/$colon$colon."<init>":(Ljava/lang/Object;Lscala/collection/immutable/List;)V
+     103: checkcast     #215                // class scala/collection/SeqOps
+     106: checkcast     #168                // class scala/collection/immutable/Seq
+     109: areturn
+     110: aload_2
+     111: aload         4
+     113: invokeinterface #221,  2          // InterfaceMethod scala/collection/immutable/Map.get:(Ljava/lang/Object;)Lscala/Option;
+     118: astore        6
+     120: getstatic     #119                // Field scala/None$.MODULE$:Lscala/None$;
+     123: aload         6
+     125: invokevirtual #225                // Method java/lang/Object.equals:(Ljava/lang/Object;)Z
+     128: ifeq          134
+     131: goto          186
+     134: aload         6
+     136: instanceof    #227                // class scala/Some
+     139: ifeq          183
+     142: aload         6
+     144: checkcast     #227                // class scala/Some
+     147: astore        7
+     149: getstatic     #231                // Field io/joern/c2cpg/parser/CdtParser$HeaderFileParserLanguage$.C:Lio/joern/c2cpg/parser/CdtParser$HeaderFileParserLanguage;
+     152: aload         7
+     154: invokevirtual #234                // Method scala/Some.value:()Ljava/lang/Object;
+     157: astore        8
+     159: dup
+     160: ifnonnull     172
+     163: pop
+     164: aload         8
+     166: ifnull        180
+     169: goto          183
+     172: aload         8
+     174: invokevirtual #225                // Method java/lang/Object.equals:(Ljava/lang/Object;)Z
+     177: ifeq          183
+     180: goto          186
+     183: goto          213
+     186: new           #193                // class scala/collection/immutable/$colon$colon
+     189: dup
+     190: getstatic     #198                // Field scala/Tuple2$.MODULE$:Lscala/Tuple2$;
+     193: aload_1
+     194: invokestatic  #240                // Method org/eclipse/cdt/core/dom/ast/gnu/c/GCCLanguage.getDefault:()Lorg/eclipse/cdt/core/dom/ast/gnu/c/GCCLanguage;
+     197: invokevirtual #205                // Method scala/Tuple2$.apply:(Ljava/lang/Object;Ljava/lang/Object;)Lscala/Tuple2;
+     200: getstatic     #210                // Field scala/collection/immutable/Nil$.MODULE$:Lscala/collection/immutable/Nil$;
+     203: invokespecial #213                // Method scala/collection/immutable/$colon$colon."<init>":(Ljava/lang/Object;Lscala/collection/immutable/List;)V
+     206: checkcast     #215                // class scala/collection/SeqOps
+     209: checkcast     #168                // class scala/collection/immutable/Seq
+     212: areturn
+     213: aload         6
+     215: instanceof    #227                // class scala/Some
+     218: ifeq          286
+     221: aload         6
+     223: checkcast     #227                // class scala/Some
+     226: astore        9
+     228: getstatic     #243                // Field io/joern/c2cpg/parser/CdtParser$HeaderFileParserLanguage$.Cpp:Lio/joern/c2cpg/parser/CdtParser$HeaderFileParserLanguage;
+     231: aload         9
+     233: invokevirtual #234                // Method scala/Some.value:()Ljava/lang/Object;
+     236: astore        10
+     238: dup
+     239: ifnonnull     251
+     242: pop
+     243: aload         10
+     245: ifnull        259
+     248: goto          286
+     251: aload         10
+     253: invokevirtual #225                // Method java/lang/Object.equals:(Ljava/lang/Object;)Z
+     256: ifeq          286
+     259: new           #193                // class scala/collection/immutable/$colon$colon
+     262: dup
+     263: getstatic     #198                // Field scala/Tuple2$.MODULE$:Lscala/Tuple2$;
+     266: aload_1
+     267: invokestatic  #248                // Method org/eclipse/cdt/core/dom/ast/gnu/cpp/GPPLanguage.getDefault:()Lorg/eclipse/cdt/core/dom/ast/gnu/cpp/GPPLanguage;
+     270: invokevirtual #205                // Method scala/Tuple2$.apply:(Ljava/lang/Object;Ljava/lang/Object;)Lscala/Tuple2;
+     273: getstatic     #210                // Field scala/collection/immutable/Nil$.MODULE$:Lscala/collection/immutable/Nil$;
+     276: invokespecial #213                // Method scala/collection/immutable/$colon$colon."<init>":(Ljava/lang/Object;Lscala/collection/immutable/List;)V
+     279: checkcast     #215                // class scala/collection/SeqOps
+     282: checkcast     #168                // class scala/collection/immutable/Seq
+     285: areturn
+     286: new           #193                // class scala/collection/immutable/$colon$colon
+     289: dup
+     290: getstatic     #198                // Field scala/Tuple2$.MODULE$:Lscala/Tuple2$;
+     293: aload_1
+     294: invokestatic  #240                // Method org/eclipse/cdt/core/dom/ast/gnu/c/GCCLanguage.getDefault:()Lorg/eclipse/cdt/core/dom/ast/gnu/c/GCCLanguage;
+     297: invokevirtual #205                // Method scala/Tuple2$.apply:(Ljava/lang/Object;Ljava/lang/Object;)Lscala/Tuple2;
+     300: new           #193                // class scala/collection/immutable/$colon$colon
+     303: dup
+     304: getstatic     #198                // Field scala/Tuple2$.MODULE$:Lscala/Tuple2$;
+     307: aload_1
+     308: invokestatic  #248                // Method org/eclipse/cdt/core/dom/ast/gnu/cpp/GPPLanguage.getDefault:()Lorg/eclipse/cdt/core/dom/ast/gnu/cpp/GPPLanguage;
+     311: invokevirtual #205                // Method scala/Tuple2$.apply:(Ljava/lang/Object;Ljava/lang/Object;)Lscala/Tuple2;
+     314: getstatic     #210                // Field scala/collection/immutable/Nil$.MODULE$:Lscala/collection/immutable/Nil$;
+     317: invokespecial #213                // Method scala/collection/immutable/$colon$colon."<init>":(Ljava/lang/Object;Lscala/collection/immutable/List;)V
+     320: invokespecial #213                // Method scala/collection/immutable/$colon$colon."<init>":(Ljava/lang/Object;Lscala/collection/immutable/List;)V
+     323: checkcast     #215                // class scala/collection/SeqOps
+     326: checkcast     #168                // class scala/collection/immutable/Seq
+     329: areturn
+
+  public org.eclipse.cdt.core.model.ILanguage io$joern$c2cpg$parser$CdtParser$$$createParseLanguage(java.nio.file.Path, java.lang.String, io.joern.c2cpg.Config);
+    Code:
+       0: getstatic     #173                // Field io/joern/c2cpg/parser/FileDefaults$.MODULE$:Lio/joern/c2cpg/parser/FileDefaults$;
+       3: aload_1
+       4: invokeinterface #102,  1          // InterfaceMethod java/nio/file/Path.toString:()Ljava/lang/String;
+       9: invokevirtual #260                // Method io/joern/c2cpg/parser/FileDefaults$.hasCppFileExtension:(Ljava/lang/String;)Z
+      12: ifne          25
+      15: aload_0
+      16: aload_1
+      17: aload_2
+      18: aload_3
+      19: invokespecial #264                // Method preprocessedFileIsFromCPPFile:(Ljava/nio/file/Path;Ljava/lang/String;Lio/joern/c2cpg/Config;)Z
+      22: ifeq          29
+      25: invokestatic  #248                // Method org/eclipse/cdt/core/dom/ast/gnu/cpp/GPPLanguage.getDefault:()Lorg/eclipse/cdt/core/dom/ast/gnu/cpp/GPPLanguage;
+      28: areturn
+      29: invokestatic  #240                // Method org/eclipse/cdt/core/dom/ast/gnu/c/GCCLanguage.getDefault:()Lorg/eclipse/cdt/core/dom/ast/gnu/c/GCCLanguage;
+      32: areturn
+
+  private boolean preprocessedFileIsFromCPPFile(java.nio.file.Path, java.lang.String, io.joern.c2cpg.Config);
+    Code:
+       0: aload_3
+       1: invokevirtual #268                // Method io/joern/c2cpg/Config.withPreprocessedFiles:()Z
+       4: ifeq          95
+       7: getstatic     #173                // Field io/joern/c2cpg/parser/FileDefaults$.MODULE$:Lio/joern/c2cpg/parser/FileDefaults$;
+      10: aload_1
+      11: invokeinterface #102,  1          // InterfaceMethod java/nio/file/Path.toString:()Ljava/lang/String;
+      16: invokevirtual #271                // Method io/joern/c2cpg/parser/FileDefaults$.hasPreprocessedFileExtension:(Ljava/lang/String;)Z
+      19: ifeq          95
+      22: aload_1
+      23: invokeinterface #102,  1          // InterfaceMethod java/nio/file/Path.toString:()Ljava/lang/String;
+      28: iconst_0
+      29: aload_1
+      30: invokeinterface #102,  1          // InterfaceMethod java/nio/file/Path.toString:()Ljava/lang/String;
+      35: ldc_w         #273                // String .
+      38: invokevirtual #277                // Method java/lang/String.lastIndexOf:(Ljava/lang/String;)I
+      41: invokevirtual #281                // Method java/lang/String.substring:(II)Ljava/lang/String;
+      44: astore        4
+      46: getstatic     #173                // Field io/joern/c2cpg/parser/FileDefaults$.MODULE$:Lio/joern/c2cpg/parser/FileDefaults$;
+      49: invokevirtual #285                // Method io/joern/c2cpg/parser/FileDefaults$.CppFileExtensions:()Lscala/collection/immutable/Set;
+      52: aload         4
+      54: invokedynamic #296,  0            // InvokeDynamic #2:apply:(Ljava/lang/String;)Lscala/Function1;
+      59: invokeinterface #302,  2          // InterfaceMethod scala/collection/immutable/Set.map:(Lscala/Function1;)Ljava/lang/Object;
+      64: checkcast     #298                // class scala/collection/immutable/Set
+      67: astore        5
+      69: getstatic     #307                // Field scala/collection/StringOps$.MODULE$:Lscala/collection/StringOps$;
+      72: getstatic     #312                // Field scala/Predef$.MODULE$:Lscala/Predef$;
+      75: aload_2
+      76: invokevirtual #315                // Method scala/Predef$.augmentString:(Ljava/lang/String;)Ljava/lang/String;
+      79: invokevirtual #319                // Method scala/collection/StringOps$.linesIterator$extension:(Ljava/lang/String;)Lscala/collection/Iterator;
+      82: aload         5
+      84: invokedynamic #329,  0            // InvokeDynamic #3:apply:(Lscala/collection/immutable/Set;)Lscala/Function1;
+      89: invokeinterface #335,  2          // InterfaceMethod scala/collection/Iterator.exists:(Lscala/Function1;)Z
+      94: ireturn
+      95: iconst_0
+      96: ireturn
+
+  private static final char[] $anonfun$6(java.nio.file.Path);
+    Code:
+       0: getstatic     #307                // Field scala/collection/StringOps$.MODULE$:Lscala/collection/StringOps$;
+       3: getstatic     #312                // Field scala/Predef$.MODULE$:Lscala/Predef$;
+       6: getstatic     #182                // Field io/shiftleft/utils/IOUtils$.MODULE$:Lio/shiftleft/utils/IOUtils$;
+       9: aload_0
+      10: invokevirtual #186                // Method io/shiftleft/utils/IOUtils$.readLinesInFile:(Ljava/nio/file/Path;)Lscala/collection/immutable/Seq;
+      13: ldc           #188                // String \n
+      15: invokeinterface #191,  2          // InterfaceMethod scala/collection/immutable/Seq.mkString:(Ljava/lang/String;)Ljava/lang/String;
+      20: invokevirtual #315                // Method scala/Predef$.augmentString:(Ljava/lang/String;)Ljava/lang/String;
+      23: getstatic     #344                // Field scala/reflect/ClassTag$.MODULE$:Lscala/reflect/ClassTag$;
+      26: getstatic     #350                // Field java/lang/Character.TYPE:Ljava/lang/Class;
+      29: invokevirtual #353                // Method scala/reflect/ClassTag$.apply:(Ljava/lang/Class;)Lscala/reflect/ClassTag;
+      32: invokevirtual #357                // Method scala/collection/StringOps$.toArray$extension:(Ljava/lang/String;Lscala/reflect/ClassTag;)Ljava/lang/Object;
+      35: checkcast     #96                 // class "[C"
+      38: areturn
+
+  private static final java.lang.String $anonfun$7(java.lang.String, java.lang.String);
+    Code:
+       0: getstatic     #364                // Field io/shiftleft/semanticcpg/utils/FileUtil$.MODULE$:Lio/shiftleft/semanticcpg/utils/FileUtil$;
+       3: aload_0
+       4: aload_1
+       5: invokedynamic #368,  0            // InvokeDynamic #4:makeConcatWithConstants:(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
+      10: iconst_0
+      11: anewarray     #255                // class java/lang/String
+      14: invokestatic  #373                // Method java/nio/file/Paths.get:(Ljava/lang/String;[Ljava/lang/String;)Ljava/nio/file/Path;
+      17: invokevirtual #376                // Method io/shiftleft/semanticcpg/utils/FileUtil$.PathExt:(Ljava/nio/file/Path;)Lio/shiftleft/semanticcpg/utils/FileUtil$PathExt;
+      20: invokevirtual #379                // Method io/shiftleft/semanticcpg/utils/FileUtil$PathExt.fileName:()Ljava/lang/String;
+      23: areturn
+
+  private static final boolean preprocessedFileIsFromCPPFile$$anonfun$1$$anonfun$1(java.lang.String, java.lang.String);
+    Code:
+       0: aload_0
+       1: aload_1
+       2: invokedynamic #386,  0            // InvokeDynamic #5:makeConcatWithConstants:(Ljava/lang/String;)Ljava/lang/String;
+       7: invokevirtual #390                // Method java/lang/String.contains:(Ljava/lang/CharSequence;)Z
+      10: ireturn
+
+  private static final boolean preprocessedFileIsFromCPPFile$$anonfun$1(scala.collection.immutable.Set, java.lang.String);
+    Code:
+       0: aload_0
+       1: aload_1
+       2: invokedynamic #396,  0            // InvokeDynamic #6:apply:(Ljava/lang/String;)Lscala/Function1;
+       7: invokeinterface #397,  2          // InterfaceMethod scala/collection/immutable/Set.exists:(Lscala/Function1;)Z
+      12: ireturn
+
+  private static java.lang.Object $deserializeLambda$(java.lang.invoke.SerializedLambda);
+    Code:
+       0: aload_0
+       1: invokedynamic #409,  0            // InvokeDynamic #7:lambdaDeserialize:(Ljava/lang/invoke/SerializedLambda;)Ljava/lang/Object;
+       6: areturn
+}

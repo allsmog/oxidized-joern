@@ -1,0 +1,19 @@
+{
+  "status": "PASS_READ_ONLY_PLAN_BINDINGS",
+  "atUtc": "2026-09-09T00:17:32.461128+00:00",
+  "baselineCommit": "f235a0f898c4e19fda90998b903f57741b776ec7",
+  "worktree": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members",
+  "trackedStateCleanBeforeAndAfter": true,
+  "originalPreparation": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/primitive-member-preparation-v2",
+  "originalPreparationFreezeSha256": "62d88bc3d29479138135f871c95058ca88118b724f28549c4a1ae207010f2bc3",
+  "originalPreparationFilesUnchanged": 27,
+  "sourceSha256": "7ea06ac7361e2580b9d6fc77fdf6fa7e06cbb4b9bb294aa57787c3e8f9ce2da8",
+  "sourceCitationsVerified": 9,
+  "retainedReferenceCaseInstances": 228,
+  "memberTypesDiagnosticFiles": 5,
+  "parentReleaseRequiredBeforeSourceEdits": true,
+  "newExpectedValues": null,
+  "producerRuns": 0,
+  "builds": 0,
+  "sourceTestOrFixtureEdits": false
+}

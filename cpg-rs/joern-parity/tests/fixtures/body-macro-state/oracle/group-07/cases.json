@@ -1,0 +1,8 @@
+{
+  "object_to_function": {
+    "main.c": "#define PICK 1\n#if PICK\n#undef PICK\n#define PICK(x,y) ((x)+(y))\n#endif\nint choose(int value) { return PICK(value,2); }\n"
+  },
+  "global_before_function": {
+    "main.c": "#define PICK 1\nint global = PICK;\n#undef PICK\n#define PICK 2\nint choose(void) { return PICK; }\n"
+  }
+}

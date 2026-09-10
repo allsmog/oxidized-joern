@@ -1,0 +1,27 @@
+METHOD NAME=setfield CODE=static void setfield (lua_State *L, const char *key, int value, int delta) {\n  #if (defined(LUA_NUMTIME) && LUA_MAXINTEGER <= INT_MAX)\n    if (l_unlikely(value > LUA_MAXINTEGER - delta))\n      luaL_error(L, "field '%s' is out-of-bound", key);\n  #endif\n  lua_pushinteger(L, (lua_Integer)value + delta);\n  lua_setfield(L, -2, key);\n} FULL_NAME=setfield SIGNATURE=void(lua_State*,char*,int,int) ORDER=1
+  METHOD_PARAMETER_IN NAME=L CODE=lua_State *L TYPE_FULL_NAME=lua_State* ORDER=1
+  METHOD_PARAMETER_OUT NAME=L CODE=lua_State *L TYPE_FULL_NAME=lua_State* ORDER=1
+  METHOD_PARAMETER_IN NAME=key CODE=const char *key TYPE_FULL_NAME=char* ORDER=2
+  METHOD_PARAMETER_OUT NAME=key CODE=const char *key TYPE_FULL_NAME=char* ORDER=2
+  METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=3
+  METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=3
+  METHOD_PARAMETER_IN NAME=delta CODE=int delta TYPE_FULL_NAME=int ORDER=4
+  METHOD_PARAMETER_OUT NAME=delta CODE=int delta TYPE_FULL_NAME=int ORDER=4
+  BLOCK CODE={\n  #if (defined(LUA_NUMTIME) && LUA_MAXINTEGER <= INT_MAX)\n    if (l_unlikely(value > LUA_MAXINTEGER - delta))\n      luaL_error(L, "field '%s' is out-of-bound", key);\n  #endif\n  lua_pushinteger(L, (lua_Integer)value + delta);\n  lua_setfield(L, -2, key);\n} TYPE_FULL_NAME=void ORDER=5
+    LOCAL NAME=LUA_MAXINTEGER CODE=<unknown> LUA_MAXINTEGER TYPE_FULL_NAME=ANY ORDER=0
+    LOCAL NAME=INT_MAX CODE=<unknown> INT_MAX TYPE_FULL_NAME=ANY ORDER=0
+    LOCAL NAME=LUA_NUMTIME CODE=<unknown> LUA_NUMTIME TYPE_FULL_NAME=ANY ORDER=0
+    CALL NAME=lua_pushinteger CODE=lua_pushinteger(L, (lua_Integer)value + delta) TYPE_FULL_NAME=void METHOD_FULL_NAME=lua_pushinteger ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+      IDENTIFIER NAME=L CODE=L TYPE_FULL_NAME=lua_State* ORDER=1 ARGUMENT_INDEX=1
+      CALL NAME=<operator>.addition CODE=(lua_Integer)value + delta TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+        CALL NAME=<operator>.cast CODE=(lua_Integer)value TYPE_FULL_NAME=lua_Integer METHOD_FULL_NAME=<operator>.cast ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+          TYPE_REF CODE=lua_Integer TYPE_FULL_NAME=lua_Integer ORDER=1 ARGUMENT_INDEX=1
+          IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+        IDENTIFIER NAME=delta CODE=delta TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+    CALL NAME=lua_setfield CODE=lua_setfield(L, -2, key) TYPE_FULL_NAME=void METHOD_FULL_NAME=lua_setfield ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+      IDENTIFIER NAME=L CODE=L TYPE_FULL_NAME=lua_State* ORDER=1 ARGUMENT_INDEX=1
+      CALL NAME=<operator>.minus CODE=-2 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.minus ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+        LITERAL CODE=2 TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+      IDENTIFIER NAME=key CODE=key TYPE_FULL_NAME=char* ORDER=3 ARGUMENT_INDEX=3
+  MODIFIER ORDER=6
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=7

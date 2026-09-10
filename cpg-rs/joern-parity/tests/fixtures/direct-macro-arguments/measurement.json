@@ -1,0 +1,459 @@
+{
+  "joernVersion": "v4.0.555",
+  "officialArchiveSha256": "12989883d6b5aeacc97b2dc0ecc4e2951bf50e48cb244f8c8f333d11a8be0c7e",
+  "javaVersion": "21.0.12",
+  "projection": "Every AST, NODES, EDGES and FLOWS record from each isolated CASE; remove only AST| prefix. Existing newline encoding is not injective.",
+  "before": {
+    "sourceSha256": "ff4fb5699c560b17a3fe838b8b3f93f328df4cbf4e561d968289bc99c387aad0",
+    "binarySha256": "8653a2966f5e6f974d3a51368e946c7f105246eb8af0996f317acb6d68a654ed",
+    "sourcePath": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/fifth-batch/final-debug/exact.rs"
+  },
+  "candidate": {
+    "joern-parity": "4e6217f855eef725b46032a45951078bb6340568d78b3180f57cb0001dd21ea1",
+    "exact.rs": "41c3d86167b4fdcc0ae3e035fe24417968730e93f2d47181dae98f1666e3873c"
+  },
+  "totals": {
+    "projects": 16,
+    "exactBefore": 4,
+    "exactAfter": 12,
+    "canonicalLines": 4531,
+    "nonemptyRecords": 4435
+  },
+  "oracleGroups": [
+    {
+      "name": "operators",
+      "sourceDirectory": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/direct-macro-arguments",
+      "rawFiles": {
+        "live.stderr": "29bc382afdaff1ae11f715eb9f3aaff9c6412086e95222804aaf15544bdd04da",
+        "live-run.json": "1dc7b49a86bf2ed9cee7dc45937aef51fb04a75e8f0f423d6103b6694777baed",
+        "oracle.sc": "56431f14868678e64f9eb41026b44f1d3d7738404d28d2db62711b520c98c742",
+        "live.stdout": "7f69d2f66a87fd04e130c4cd3d217850a76f019acd800fb4ba00c6ae7fa233bd"
+      },
+      "cases": [
+        "comment_operator",
+        "first_type",
+        "nested_comma",
+        "operators"
+      ]
+    },
+    {
+      "name": "boundaries",
+      "sourceDirectory": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/direct-macro-argument-boundaries",
+      "rawFiles": {
+        "live.stderr": "acc8df752dd97da11330e62f1d1bbb9b02bf5438fd147d45c7ea8fc2cf567ef8",
+        "live-run.json": "57b8974a9c80a2d54225bfe9d4aa890d232ca145312d2565b9011635b200ae86",
+        "oracle.sc": "56431f14868678e64f9eb41026b44f1d3d7738404d28d2db62711b520c98c742",
+        "live.stdout": "4749e3c0bc8331e40665e6977c646821015224cd18ded6ab40e87b0413f06807"
+      },
+      "cases": [
+        "continued_comment",
+        "quoted_whitespace",
+        "spliced_block_comment"
+      ]
+    },
+    {
+      "name": "extended",
+      "sourceDirectory": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-arguments/.local/macro-arguments",
+      "rawFiles": {
+        "live.stderr": "a61eecee14ffa48f8682e676c4f5f544483d688f4fa78c597549dec4a15bf7d3",
+        "live-run.json": "03a63cead892121d8938124ddbf39c8eea26016f32cc4fc1f280aec70ce2f2f8",
+        "oracle.sc": "56431f14868678e64f9eb41026b44f1d3d7738404d28d2db62711b520c98c742",
+        "live.stdout": "375bf5520cadce78fb5c2357e4e282f4ecaa5128b3c85fe27304d4b4435a4ec3"
+      },
+      "cases": [
+        "continued_comment",
+        "empty_slots",
+        "lua_intop",
+        "nested_operator",
+        "operator_slots",
+        "quoted_tokens",
+        "shifts",
+        "spliced_operator",
+        "unknown_operand"
+      ]
+    }
+  ],
+  "cases": [
+    {
+      "case": "comment_operator",
+      "oracleCase": "comment_operator",
+      "oracleGroup": "operators",
+      "directory": "cases/comment_operator",
+      "sourceOriginal": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/direct-macro-arguments/input/comment_operator/main.c",
+      "exactBefore": false,
+      "exactAfter": true,
+      "candidateUnchanged": false,
+      "canonicalLines": 228,
+      "nonemptyRecords": 223,
+      "sha256": {
+        "before.diff": "ce271dfcb4ef9655db52e97f270411451674ae1df1f0c470819e85c006b22caa",
+        "before.txt": "d29fd3de363a3be24621f89bb50210f21fa1e0652418599d7c7ef0bb96f0fe02",
+        "candidate.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "candidate.txt": "be2e52b0e4795f248f5836c508a38c51638928c3a26c43566ef146b013f5bc05",
+        "expected.txt": "be2e52b0e4795f248f5836c508a38c51638928c3a26c43566ef146b013f5bc05",
+        "main.c": "e29b6e8edc5ef08fd8889ce5a68cf20f9360e4de28874f135d6f861f842e9971"
+      }
+    },
+    {
+      "case": "first_type",
+      "oracleCase": "first_type",
+      "oracleGroup": "operators",
+      "directory": "cases/first_type",
+      "sourceOriginal": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/direct-macro-arguments/input/first_type/main.c",
+      "exactBefore": false,
+      "exactAfter": true,
+      "candidateUnchanged": false,
+      "canonicalLines": 197,
+      "nonemptyRecords": 192,
+      "sha256": {
+        "before.diff": "fe92bf1cd4b0e425ad5ccaf3c38308892ea9e2f9684defa7355e0ba827bfe12d",
+        "before.txt": "45a30e274206c63ce8a7ced3f1569301fe8e0cec6d1ca60249bd6448246baf9a",
+        "candidate.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "candidate.txt": "f49bd15bcc54faaa2e06937ba7fb9c67bf582e69d2075d858745f0df4470e618",
+        "expected.txt": "f49bd15bcc54faaa2e06937ba7fb9c67bf582e69d2075d858745f0df4470e618",
+        "main.c": "39eef1e4d9d5e157027a7d02b31b9bc821f068db6e6218f999d1ccf88e65923b"
+      }
+    },
+    {
+      "case": "nested_comma",
+      "oracleCase": "nested_comma",
+      "oracleGroup": "operators",
+      "directory": "cases/nested_comma",
+      "sourceOriginal": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/direct-macro-arguments/input/nested_comma/main.c",
+      "exactBefore": false,
+      "exactAfter": true,
+      "candidateUnchanged": false,
+      "canonicalLines": 234,
+      "nonemptyRecords": 229,
+      "sha256": {
+        "before.diff": "f726b9f23b4cd86971f2cb11cbeaab28aafe7949968b7308f8a55e4ba13f957e",
+        "before.txt": "9cd61217c15292083d4bbf787a790c78c73b41029668a633b324abe7ac24d545",
+        "candidate.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "candidate.txt": "1fdf03442a91531e528710d94f333f522d8ef5a26b01a3104ab2b1adf0e2e322",
+        "expected.txt": "1fdf03442a91531e528710d94f333f522d8ef5a26b01a3104ab2b1adf0e2e322",
+        "main.c": "ae6cde5ebbad74eaed73fef936a3e46c6e423685508644390b7a3aa742f16f6e"
+      }
+    },
+    {
+      "case": "operators",
+      "oracleCase": "operators",
+      "oracleGroup": "operators",
+      "directory": "cases/operators",
+      "sourceOriginal": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/direct-macro-arguments/input/operators/main.c",
+      "exactBefore": false,
+      "exactAfter": true,
+      "candidateUnchanged": false,
+      "canonicalLines": 510,
+      "nonemptyRecords": 501,
+      "sha256": {
+        "before.diff": "6ac0c7d8482fadea9003815b8709d1b1b89500f3fa7f968ba16607808441f1d8",
+        "before.txt": "168209239d3adf27234c3b396a1386fa97677c68ff0f11eaec771aa22413d008",
+        "candidate.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "candidate.txt": "cf7e8eef0ff38312edbdae45f3147c7208b8309075c7448b03ef8a0466c81e25",
+        "expected.txt": "cf7e8eef0ff38312edbdae45f3147c7208b8309075c7448b03ef8a0466c81e25",
+        "main.c": "612232397b3998174205c11d351c140bac6106444fcc52534664896590bf5c3c"
+      }
+    },
+    {
+      "case": "continued_comment_boundary",
+      "oracleCase": "continued_comment",
+      "oracleGroup": "boundaries",
+      "directory": "cases/continued_comment_boundary",
+      "sourceOriginal": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/direct-macro-argument-boundaries/input/continued_comment/main.c",
+      "exactBefore": false,
+      "exactAfter": true,
+      "candidateUnchanged": false,
+      "canonicalLines": 158,
+      "nonemptyRecords": 154,
+      "sha256": {
+        "before.diff": "1aba61e9bf28315bac94b3c96fd251a56ed222ccf4ff2cc69048bb0a2781566a",
+        "before.txt": "385e4b41780819460e80298bc5046eef8774dbe679f8c9a60452bc6eaa718fea",
+        "candidate.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "candidate.txt": "c3a4328e60d97b633181e4524e9605424528fc4b7a75a17007e9069dc8eb36a1",
+        "expected.txt": "c3a4328e60d97b633181e4524e9605424528fc4b7a75a17007e9069dc8eb36a1",
+        "main.c": "a149a86af08b9b1fd9c78afe6c02e2d3d3aebab9988011d46ec7a5c3660e26e0"
+      }
+    },
+    {
+      "case": "quoted_whitespace",
+      "oracleCase": "quoted_whitespace",
+      "oracleGroup": "boundaries",
+      "directory": "cases/quoted_whitespace",
+      "sourceOriginal": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/direct-macro-argument-boundaries/input/quoted_whitespace/main.c",
+      "exactBefore": true,
+      "exactAfter": true,
+      "candidateUnchanged": true,
+      "canonicalLines": 240,
+      "nonemptyRecords": 234,
+      "sha256": {
+        "before.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "before.txt": "07419b4bfabbe21bda5475997bcb7f5ed3e10378fdad726096122d5fedd5c544",
+        "candidate.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "candidate.txt": "07419b4bfabbe21bda5475997bcb7f5ed3e10378fdad726096122d5fedd5c544",
+        "expected.txt": "07419b4bfabbe21bda5475997bcb7f5ed3e10378fdad726096122d5fedd5c544",
+        "main.c": "41a36fe4fe1a51cff8db5cc94f2303dd584af6eec6cfe9ab350b196f90a40242"
+      }
+    },
+    {
+      "case": "spliced_block_comment",
+      "oracleCase": "spliced_block_comment",
+      "oracleGroup": "boundaries",
+      "directory": "diagnostics/spliced_block_comment",
+      "sourceOriginal": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/direct-macro-argument-boundaries/input/spliced_block_comment/main.c",
+      "exactBefore": false,
+      "exactAfter": false,
+      "candidateUnchanged": false,
+      "canonicalLines": 158,
+      "nonemptyRecords": 154,
+      "sha256": {
+        "before.diff": "2b6180f8780d51635e8011cabb2422bc5a9186ff9098beafb6c737fbc2df25d6",
+        "before.txt": "465b998a6fde889231b9d1166daa1b6a75c09d232e99f60fc49a200b2a5565d7",
+        "candidate.diff": "a2ad3928bbf02eeab1e342f033787ba928dbbfef0fb8d1923c525195e09d049b",
+        "candidate.txt": "90120c83c6976effd82b0e8cbcaed5d5b0c7d03f315a3fb14096b9ba1541a72c",
+        "expected.txt": "61c69eebd57921d0995d45914983519d0cbb0d9862148430e90a739e5f236693",
+        "main.c": "d236382ed583126ed80f77f687949fc4a563fd786be2ca893805308545766db0"
+      }
+    },
+    {
+      "case": "continued_comment",
+      "oracleCase": "continued_comment",
+      "oracleGroup": "extended",
+      "directory": "cases/continued_comment",
+      "sourceOriginal": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-arguments/.local/macro-arguments/input/continued_comment/main.c",
+      "exactBefore": false,
+      "exactAfter": true,
+      "candidateUnchanged": false,
+      "canonicalLines": 226,
+      "nonemptyRecords": 221,
+      "sha256": {
+        "before.diff": "1760ffd9682fc8c5bec57dd8bfbd2aae1f471292ce4e1ad8d1e6251144c7b9d2",
+        "before.txt": "5fc39e06995f35dc7d777ab68165de512547fb4bfd5e8241ac051e7353f6593f",
+        "candidate.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "candidate.txt": "ba4c39a15d027c7fd01e625115c669f3c8ce1fb4eaf3be485fd5098d5e35f694",
+        "expected.txt": "ba4c39a15d027c7fd01e625115c669f3c8ce1fb4eaf3be485fd5098d5e35f694",
+        "main.c": "91a50d454a1ccfc1a53dd5f900bc269c91d3cc462c3952cd031d5fdb2bbf5708"
+      }
+    },
+    {
+      "case": "empty_slots",
+      "oracleCase": "empty_slots",
+      "oracleGroup": "extended",
+      "directory": "diagnostics/empty_slots",
+      "sourceOriginal": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-arguments/.local/macro-arguments/input/empty_slots/main.c",
+      "exactBefore": false,
+      "exactAfter": false,
+      "candidateUnchanged": false,
+      "canonicalLines": 245,
+      "nonemptyRecords": 239,
+      "sha256": {
+        "before.diff": "1ac7bad924fa90906f1e6955d4f54234049d08959416b03cb9e5eab1a7aafd97",
+        "before.txt": "50b49aead3df499c7568ac27060a05572b903abf168794fe3e5f131a87038a26",
+        "candidate.diff": "c99b63983136efd9366e3350f0bd6195812aa505a76199f460735db719f2a29f",
+        "candidate.txt": "9e490f1af9036e6296c2f9e3bb5b3221fe6e475310574651ecf34728950038d9",
+        "expected.txt": "3c3c8e3d64695a92896d20e73d003b9d1de4ef59ac3c6111f910788fa36b4416",
+        "main.c": "f4ce15ab7479a9d75c7a829cfd27f5d2fcec63085f1d452d13d76f8ee416bf4e"
+      }
+    },
+    {
+      "case": "lua_intop",
+      "oracleCase": "lua_intop",
+      "oracleGroup": "extended",
+      "directory": "diagnostics/lua_intop",
+      "sourceOriginal": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-arguments/.local/macro-arguments/input/lua_intop/main.c",
+      "exactBefore": false,
+      "exactAfter": false,
+      "candidateUnchanged": false,
+      "canonicalLines": 738,
+      "nonemptyRecords": 727,
+      "sha256": {
+        "before.diff": "048a9ec4e84c967fa1a482d8dcc87ed632ca7fc24016794d4cd1ee5ace9dd582",
+        "before.txt": "4df83472372c28963ad5c9fd51288113c15f0cbd1a252f6caf24bcbc8f69b9e8",
+        "candidate.diff": "5306811b86ad98347fb3705008e78308f1ac205c3018a649fb3e54cf92cf6d59",
+        "candidate.txt": "0afd1eca4b71dfb0ca3e2ab20d5b66145241f45f60baf52b92988f432dc7b627",
+        "expected.txt": "0fdd48bcff81639143209c075370ffbd5c4be38442b01ee8c8a0fd3445af1037",
+        "main.c": "8f162f7fd6daa119f40fbd74b8011972c8c5d3e2426a67b9ef2e49db4aaa178f"
+      }
+    },
+    {
+      "case": "nested_operator",
+      "oracleCase": "nested_operator",
+      "oracleGroup": "extended",
+      "directory": "cases/nested_operator",
+      "sourceOriginal": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-arguments/.local/macro-arguments/input/nested_operator/main.c",
+      "exactBefore": true,
+      "exactAfter": true,
+      "candidateUnchanged": true,
+      "canonicalLines": 218,
+      "nonemptyRecords": 213,
+      "sha256": {
+        "before.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "before.txt": "719e9817fa8f531b9f4a904d6e9f45e380adbb96dad298da7e6b05adfe7f50b3",
+        "candidate.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "candidate.txt": "719e9817fa8f531b9f4a904d6e9f45e380adbb96dad298da7e6b05adfe7f50b3",
+        "expected.txt": "719e9817fa8f531b9f4a904d6e9f45e380adbb96dad298da7e6b05adfe7f50b3",
+        "main.c": "ef63ad182e4b39569ff825d49c164859f55e90e945e757b77eb9f3ecfdc9b829"
+      }
+    },
+    {
+      "case": "operator_slots",
+      "oracleCase": "operator_slots",
+      "oracleGroup": "extended",
+      "directory": "cases/operator_slots",
+      "sourceOriginal": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-arguments/.local/macro-arguments/input/operator_slots/main.c",
+      "exactBefore": false,
+      "exactAfter": true,
+      "candidateUnchanged": false,
+      "canonicalLines": 344,
+      "nonemptyRecords": 336,
+      "sha256": {
+        "before.diff": "712bd6b54511304e63673c392be732df6d4d2c038366150f0dc465e8c1b2701a",
+        "before.txt": "a5811c5e15732334881299bb22a4fdf09d5e403969f94df2b9705900a71ba817",
+        "candidate.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "candidate.txt": "6977727b2228411c1a67bf8ca05821bde7f2793997bbe4431a582b0a56a681cd",
+        "expected.txt": "6977727b2228411c1a67bf8ca05821bde7f2793997bbe4431a582b0a56a681cd",
+        "main.c": "33266a9d81a0444a22c716881df25a0029d6de2e9ea6c6ebd3e00e052fb80ede"
+      }
+    },
+    {
+      "case": "quoted_tokens",
+      "oracleCase": "quoted_tokens",
+      "oracleGroup": "extended",
+      "directory": "cases/quoted_tokens",
+      "sourceOriginal": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-arguments/.local/macro-arguments/input/quoted_tokens/main.c",
+      "exactBefore": true,
+      "exactAfter": true,
+      "candidateUnchanged": true,
+      "canonicalLines": 198,
+      "nonemptyRecords": 193,
+      "sha256": {
+        "before.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "before.txt": "5dd2c1da98294572d884e8df91b6a5cc913fe74a478d8eb95f20ac81139ffecd",
+        "candidate.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "candidate.txt": "5dd2c1da98294572d884e8df91b6a5cc913fe74a478d8eb95f20ac81139ffecd",
+        "expected.txt": "5dd2c1da98294572d884e8df91b6a5cc913fe74a478d8eb95f20ac81139ffecd",
+        "main.c": "df5e3c02d6508f2f8aa99c9fa7a0d607efec760e2ee50145bbc7aaf27739577e"
+      }
+    },
+    {
+      "case": "shifts",
+      "oracleCase": "shifts",
+      "oracleGroup": "extended",
+      "directory": "cases/shifts",
+      "sourceOriginal": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-arguments/.local/macro-arguments/input/shifts/main.c",
+      "exactBefore": true,
+      "exactAfter": true,
+      "candidateUnchanged": true,
+      "canonicalLines": 404,
+      "nonemptyRecords": 396,
+      "sha256": {
+        "before.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "before.txt": "fe84cf9bb9540093a0fbff7dfcd91460666c61663586635f61ceca6c6385dd0a",
+        "candidate.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "candidate.txt": "fe84cf9bb9540093a0fbff7dfcd91460666c61663586635f61ceca6c6385dd0a",
+        "expected.txt": "fe84cf9bb9540093a0fbff7dfcd91460666c61663586635f61ceca6c6385dd0a",
+        "main.c": "0120b86766500984cdb30da79713dc47e9df8f8ee5e37254afbeff76f15919ea"
+      }
+    },
+    {
+      "case": "spliced_operator",
+      "oracleCase": "spliced_operator",
+      "oracleGroup": "extended",
+      "directory": "diagnostics/spliced_operator",
+      "sourceOriginal": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-arguments/.local/macro-arguments/input/spliced_operator/main.c",
+      "exactBefore": false,
+      "exactAfter": false,
+      "candidateUnchanged": true,
+      "canonicalLines": 228,
+      "nonemptyRecords": 223,
+      "sha256": {
+        "before.diff": "e254c1ec411fff0aa67d19d5b5eac7f1ba0e5ebc25558afb3fe2bfc2b58c4575",
+        "before.txt": "c3a4207677bf985e9616009aae9ff8c816be0a2d5ef5077d1886d9fac66641f2",
+        "candidate.diff": "9b9c3a88b1df54200f3940b012326630cad696605290a5e853601450fef84e53",
+        "candidate.txt": "c3a4207677bf985e9616009aae9ff8c816be0a2d5ef5077d1886d9fac66641f2",
+        "expected.txt": "c443bbf9307d72f5731fde96575d443008ff4fb698ee53ebf08e83658062e47f",
+        "main.c": "3498cda46ec83c610fd62de86a8fded19f10a283773c148a6eb74081afc8c2a3"
+      }
+    },
+    {
+      "case": "unknown_operand",
+      "oracleCase": "unknown_operand",
+      "oracleGroup": "extended",
+      "directory": "cases/unknown_operand",
+      "sourceOriginal": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-arguments/.local/macro-arguments/input/unknown_operand/main.c",
+      "exactBefore": false,
+      "exactAfter": true,
+      "candidateUnchanged": false,
+      "canonicalLines": 205,
+      "nonemptyRecords": 200,
+      "sha256": {
+        "before.diff": "f585b3d2aa0bf056445c57d5f64d8afa937130aa958bbd41936f4014febe9883",
+        "before.txt": "2a9ee93ba4dc7d5a233dd4b6fa783b65a2022db32ac0aa1bf676ca99c2d78fb9",
+        "candidate.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "candidate.txt": "a016a85ef66601cf528949f0181f9244ee676423f5913bc175bb7de444a93a79",
+        "expected.txt": "a016a85ef66601cf528949f0181f9244ee676423f5913bc175bb7de444a93a79",
+        "main.c": "28e9ccb9093fb0e1eb08b08448c8fe73e3fed23b331a8aebac736af4043a5de5"
+      }
+    }
+  ],
+  "upstream": {
+    "baseUrl": "https://raw.githubusercontent.com/joernio/joern/v4.0.555/joern-cli/frontends/c2cpg/src/main/scala/io/joern/c2cpg/astcreation/",
+    "sha256": {
+      "MacroHandler.scala": "73cdeb7c41d9356cc6ba2fe2f276bb198a1a26b77d67e13fb1830491289f0ab6",
+      "MacroArgumentExtractor.scala": "f148bc8258087c3e0c1650b52971681df08108f93fb5cc4096f4a482a30041bb"
+    }
+  },
+  "independentReview": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/direct-macro-arguments/review.json",
+    "sha256": "9345a79d2e1dd037a3cce499989d0bafe018106e300f5c26eb55c8e2be6367e6"
+  },
+  "validation": {
+    "workspace": {
+      "command": "CARGO_TARGET_DIR=<dedicated target> cargo test --manifest-path cpg-rs/Cargo.toml --workspace --no-fail-fast",
+      "passed": 415,
+      "failed": 0,
+      "ignored": 0,
+      "scope": "All fourth-checkpoint workspace tests against frozen repaired frontend, before adding the two new production tests. Parent performs final integrated fifth-batch workspace validation.",
+      "log": "provenance/workspace-tests.log"
+    },
+    "newProductionTests": {
+      "passed": 2,
+      "failed": 0,
+      "log": "provenance/focused-tests.log"
+    },
+    "mainCommitted": {
+      "blocks": 308,
+      "exact": 308,
+      "log": "provenance/main-committed.log"
+    },
+    "clippy": {
+      "command": "cargo clippy -p cpg-lang-c -p joern-parity --all-targets -- -D warnings",
+      "exitCode": 0,
+      "log": "provenance/clippy.log"
+    }
+  },
+  "luaReplay": {
+    "receipt": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-arguments/.local/macro-arguments/lua-replay/run.json",
+    "receiptSha256": "9d482745150393be8e873735989b19996783d27904b5a98a820e1950a97736ec",
+    "fullOutput": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-arguments/.local/macro-arguments/lua-replay/rust.stdout",
+    "fullOutputSha256": "be69e912f5d4421c259f60476c2e5103c14d2c63cbf5b82bab8c6c6500135e48",
+    "semanticReview": {
+      "path": "provenance/lua-semantic-review.json",
+      "sha256": "0cffc78e41e0e57c711af52ec7e242f3800f789a70586af3166ce6245801723d",
+      "result": "PASS_BOUNDED_LUA_OPERAND_REGRESSION_REPAIR",
+      "restoredPriorProjectedFacts": 45,
+      "structural": 26,
+      "flows": 19,
+      "limitation": "Full Lua graph remains nonexact; source occurrences matched with nearest RETURN and full ancestor evidence."
+    }
+  },
+  "artifactSha256": {
+    "provenance/MacroArgumentExtractor.scala": "f148bc8258087c3e0c1650b52971681df08108f93fb5cc4096f4a482a30041bb",
+    "provenance/MacroHandler.scala": "73cdeb7c41d9356cc6ba2fe2f276bb198a1a26b77d67e13fb1830491289f0ab6",
+    "provenance/clippy.log": "3ec26ebc9501a077a03275cfa878272d7185d1e041098d2e55efc247badacd7e",
+    "provenance/focused-tests.log": "91e7102714565776583b1123a6c3daf8a7d5c5915063a2589fbb49047850afc1",
+    "provenance/main-committed.log": "c105179d62065e9cbf9f398ff94754c29ec03add1206db7dff281cb4c07b6be6",
+    "provenance/tokenizer-review.json": "9345a79d2e1dd037a3cce499989d0bafe018106e300f5c26eb55c8e2be6367e6",
+    "provenance/workspace-tests.log": "8f15f2c314c08fa99e026c69e4da4f76afbba3069bc713e175d60a7b45afe757",
+    "provenance/lua-semantic-review.json": "0cffc78e41e0e57c711af52ec7e242f3800f789a70586af3166ce6245801723d"
+  }
+}

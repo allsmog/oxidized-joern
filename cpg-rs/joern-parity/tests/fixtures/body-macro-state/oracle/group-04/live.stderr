@@ -1,0 +1,56 @@
+executing /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/oracle.sc with params=Map(inputPath -> /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/input)
+Using generator for language: NEWC: CCpgGenerator
+Creating project `conditional_before_redefine` for code at `/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/input/conditional_before_redefine`
+moving cpg.bin.zip to cpg.bin because it is already a database file
+Creating working copy of CPG to be safe
+Loading base CPG from: /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/oracle-workspace/workspace/conditional_before_redefine/cpg.bin.tmp
+Code successfully imported. You can now query it using `cpg`.
+For an overview of all imported code, type `workspace`.
+Adding default overlays to base CPG
+The graph has been modified. You may want to use the `save` command to persist changes to disk.  All changes will also be saved collectively on exit
+The graph has been modified. You may want to use the `save` command to persist changes to disk.  All changes will also be saved collectively on exit
+Using generator for language: NEWC: CCpgGenerator
+Creating project `defined_before_redefine` for code at `/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/input/defined_before_redefine`
+moving cpg.bin.zip to cpg.bin because it is already a database file
+Creating working copy of CPG to be safe
+Loading base CPG from: /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/oracle-workspace/workspace/defined_before_redefine/cpg.bin.tmp
+Code successfully imported. You can now query it using `cpg`.
+For an overview of all imported code, type `workspace`.
+Adding default overlays to base CPG
+The graph has been modified. You may want to use the `save` command to persist changes to disk.  All changes will also be saved collectively on exit
+The graph has been modified. You may want to use the `save` command to persist changes to disk.  All changes will also be saved collectively on exit
+Using generator for language: NEWC: CCpgGenerator
+Creating project `earlier_function_condition` for code at `/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/input/earlier_function_condition`
+moving cpg.bin.zip to cpg.bin because it is already a database file
+Creating working copy of CPG to be safe
+Loading base CPG from: /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/oracle-workspace/workspace/earlier_function_condition/cpg.bin.tmp
+Code successfully imported. You can now query it using `cpg`.
+For an overview of all imported code, type `workspace`.
+Adding default overlays to base CPG
+The graph has been modified. You may want to use the `save` command to persist changes to disk.  All changes will also be saved collectively on exit
+The graph has been modified. You may want to use the `save` command to persist changes to disk.  All changes will also be saved collectively on exit
+Using generator for language: NEWC: CCpgGenerator
+Creating project `intervening_nonmatching` for code at `/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/input/intervening_nonmatching`
+moving cpg.bin.zip to cpg.bin because it is already a database file
+Creating working copy of CPG to be safe
+Loading base CPG from: /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/oracle-workspace/workspace/intervening_nonmatching/cpg.bin.tmp
+Code successfully imported. You can now query it using `cpg`.
+For an overview of all imported code, type `workspace`.
+Adding default overlays to base CPG
+The graph has been modified. You may want to use the `save` command to persist changes to disk.  All changes will also be saved collectively on exit
+The graph has been modified. You may want to use the `save` command to persist changes to disk.  All changes will also be saved collectively on exit
+Using generator for language: NEWC: CCpgGenerator
+Creating project `ordinary_references_redefined` for code at `/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/input/ordinary_references_redefined`
+moving cpg.bin.zip to cpg.bin because it is already a database file
+Creating working copy of CPG to be safe
+Loading base CPG from: /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/oracle-workspace/workspace/ordinary_references_redefined/cpg.bin.tmp
+Code successfully imported. You can now query it using `cpg`.
+For an overview of all imported code, type `workspace`.
+Adding default overlays to base CPG
+The graph has been modified. You may want to use the `save` command to persist changes to disk.  All changes will also be saved collectively on exit
+The graph has been modified. You may want to use the `save` command to persist changes to disk.  All changes will also be saved collectively on exit
+closing/saving project `conditional_before_redefine`
+closing/saving project `defined_before_redefine`
+closing/saving project `earlier_function_condition`
+closing/saving project `intervening_nonmatching`
+closing/saving project `ordinary_references_redefined`

@@ -1,0 +1,58 @@
+[
+  {
+    "jar": "/Users/shayaunnejad/vibe-code/joern-oxidized/.local/astra-sprint/oracle/runtime/joern-cli/frontends/c2cpg/lib/io.joern.c2cpg-4.0.555.jar",
+    "jarSha256": "e2a3738f52da673de8d1f2364e28d50a9b93ab5381771332f962321ab5c855a7",
+    "command": [
+      "/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home/bin/javap",
+      "-c",
+      "-p",
+      "-classpath",
+      "/Users/shayaunnejad/vibe-code/joern-oxidized/.local/astra-sprint/oracle/runtime/joern-cli/frontends/c2cpg/lib/io.joern.c2cpg-4.0.555.jar",
+      "io.joern.c2cpg.parser.CdtParser$"
+    ],
+    "output": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/sixth-batch/pinned-predefines/io_joern_c2cpg_parser_CdtParserCompanion.txt",
+    "sha256": "2ba3f6c3213e8631b42f0b916b6a4aa426453ae387d5f31679cc25a1e2d275d0"
+  },
+  {
+    "jar": "/Users/shayaunnejad/vibe-code/joern-oxidized/.local/astra-sprint/oracle/runtime/joern-cli/frontends/c2cpg/lib/io.joern.c2cpg-4.0.555.jar",
+    "jarSha256": "e2a3738f52da673de8d1f2364e28d50a9b93ab5381771332f962321ab5c855a7",
+    "command": [
+      "/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home/bin/javap",
+      "-c",
+      "-p",
+      "-classpath",
+      "/Users/shayaunnejad/vibe-code/joern-oxidized/.local/astra-sprint/oracle/runtime/joern-cli/frontends/c2cpg/lib/io.joern.c2cpg-4.0.555.jar",
+      "io.joern.c2cpg.parser.CdtParser"
+    ],
+    "output": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/sixth-batch/pinned-predefines/io_joern_c2cpg_parser_CdtParser.txt",
+    "sha256": "c2880fe7c653b9bdaea72e8c249ad605648448a50d8931b1fda754a6757df4ac"
+  },
+  {
+    "jar": "/Users/shayaunnejad/vibe-code/joern-oxidized/.local/astra-sprint/oracle/runtime/joern-cli/frontends/c2cpg/lib/io.joern.eclipse-cdt-core-9.2.100.202507101054+1.jar",
+    "jarSha256": "14f94a408d2e780378e7d4c9c431dd44f408d56704fd58a216c620abd5aed250",
+    "command": [
+      "/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home/bin/javap",
+      "-c",
+      "-p",
+      "-classpath",
+      "/Users/shayaunnejad/vibe-code/joern-oxidized/.local/astra-sprint/oracle/runtime/joern-cli/frontends/c2cpg/lib/io.joern.eclipse-cdt-core-9.2.100.202507101054+1.jar",
+      "org.eclipse.cdt.core.dom.parser.c.GCCScannerExtensionConfiguration"
+    ],
+    "output": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/sixth-batch/pinned-predefines/org_eclipse_cdt_core_dom_parser_c_GCCScannerExtensionConfiguration.txt",
+    "sha256": "0829c2cc5523ae67d4d7e61e7a504f862cd0b8ef6074b0a5d082731116f86ca6"
+  },
+  {
+    "jar": "/Users/shayaunnejad/vibe-code/joern-oxidized/.local/astra-sprint/oracle/runtime/joern-cli/frontends/c2cpg/lib/io.joern.eclipse-cdt-core-9.2.100.202507101054+1.jar",
+    "jarSha256": "14f94a408d2e780378e7d4c9c431dd44f408d56704fd58a216c620abd5aed250",
+    "command": [
+      "/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home/bin/javap",
+      "-c",
+      "-p",
+      "-classpath",
+      "/Users/shayaunnejad/vibe-code/joern-oxidized/.local/astra-sprint/oracle/runtime/joern-cli/frontends/c2cpg/lib/io.joern.eclipse-cdt-core-9.2.100.202507101054+1.jar",
+      "org.eclipse.cdt.core.dom.parser.GNUScannerExtensionConfiguration"
+    ],
+    "output": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/sixth-batch/pinned-predefines/org_eclipse_cdt_core_dom_parser_GNUScannerExtensionConfiguration.txt",
+    "sha256": "8035fe7253f737dce2c4b2c6c016da2434f4a5d906f00c676910481bbaeaa707"
+  }
+]

@@ -1,0 +1,11 @@
+--- joern
++++ before
+@@ -57,8 +57,6 @@
+ EDGES|ARGUMENT f#4 -> f#5
+ EDGES|CALL f#5 -> a b.h:VALUE:int(0)#0
+ EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+-EDGES|CFG a b.h:<global>#0 -> a b.h:<global>#2
+-EDGES|CFG a b.h:VALUE:int(0)#0 -> a b.h:VALUE:int(0)#2
+ EDGES|CFG f#0 -> f#5
+ EDGES|CFG f#4 -> f#8
+ EDGES|CFG f#5 -> f#4

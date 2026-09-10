@@ -1,0 +1,76 @@
+{
+  "case": "outer_nested_body_argument",
+  "family": "body-macro-state",
+  "inputHashes": {
+    "main.c": "c4988e7d4685323b2ff3b6435cad1f1f70507358b4cc842f775130a1314f6d39"
+  },
+  "runs": {
+    "accepted-tenth": {
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/tenth-batch/repaired-final-real-differential/bin/joern-parity",
+        "--production",
+        "main.c"
+      ],
+      "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay-prior-v1/body-macro-state/outer_nested_body_argument/input",
+      "exitCode": 0,
+      "timeout": false,
+      "error": null,
+      "seconds": 0.0036132500099483877,
+      "exact": true
+    },
+    "candidate-v1": {
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/frozen-v1/joern-parity",
+        "--production",
+        "main.c"
+      ],
+      "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay-prior-v1/body-macro-state/outer_nested_body_argument/input",
+      "exitCode": 0,
+      "timeout": false,
+      "error": null,
+      "seconds": 0.003443249996053055,
+      "exact": true
+    }
+  },
+  "successfulPair": true,
+  "sameOutput": true,
+  "counts": {
+    "includingSeparators": {
+      "expected": 172,
+      "before": 172,
+      "candidate": 172,
+      "matchingBefore": 172,
+      "matchingCandidate": 172,
+      "gained": 0,
+      "lost": 0,
+      "gainedRecords": {},
+      "lostRecords": {},
+      "successfulPair": true
+    },
+    "nonempty": {
+      "expected": 166,
+      "before": 166,
+      "candidate": 166,
+      "matchingBefore": 166,
+      "matchingCandidate": 166,
+      "gained": 0,
+      "lost": 0,
+      "gainedRecords": {},
+      "lostRecords": {},
+      "successfulPair": true
+    }
+  },
+  "files": {
+    "accepted-tenth.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "accepted-tenth.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "accepted-tenth.stdout": "361ada5d5c493cf3bd81d96541e693fedd249f641c162e6421265225b8a780cf",
+    "accepted-tenth.txt": "361ada5d5c493cf3bd81d96541e693fedd249f641c162e6421265225b8a780cf",
+    "before-current.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "candidate-v1.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "candidate-v1.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "candidate-v1.stdout": "361ada5d5c493cf3bd81d96541e693fedd249f641c162e6421265225b8a780cf",
+    "candidate-v1.txt": "361ada5d5c493cf3bd81d96541e693fedd249f641c162e6421265225b8a780cf",
+    "expected.txt": "361ada5d5c493cf3bd81d96541e693fedd249f641c162e6421265225b8a780cf",
+    "input/main.c": "c4988e7d4685323b2ff3b6435cad1f1f70507358b4cc842f775130a1314f6d39"
+  }
+}

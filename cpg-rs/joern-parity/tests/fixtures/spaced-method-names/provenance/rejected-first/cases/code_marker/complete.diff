@@ -1,0 +1,45 @@
+--- joern
++++ actual
+@@ -2,10 +2,10 @@
+   BLOCK TYPE_FULL_NAME=ANY ORDER=1
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+ 
+-METHOD NAME=invoke CODE=int invoke(int x){ /* FULL_NAME=other */ return x; } FULL_NAME=invoke SIGNATURE=int(int) ORDER=1
++METHOD NAME=invoke CODE=int invoke(int x){ /* FULL_NAME=invoke SIGNATURE=int(int) ORDER=1
+   METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+   METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+-  BLOCK CODE={ /* FULL_NAME=other */ return x; } TYPE_FULL_NAME=void ORDER=2
++  BLOCK CODE={ /* TYPE_FULL_NAME=void FULL_NAME=other */ return x; } ORDER=2
+     RETURN CODE=return x; ORDER=1
+       IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+@@ -18,10 +18,10 @@
+       RETURN CODE=return x; ORDER=1
+         IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1
+     METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+-  METHOD NAME=invoke CODE=int invoke(int x){ /* FULL_NAME=other */ return x; } FULL_NAME=invoke SIGNATURE=int(int) ORDER=1
++  METHOD NAME=invoke CODE=int invoke(int x){ /* FULL_NAME=invoke SIGNATURE=int(int) ORDER=1
+     METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+     METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+-    BLOCK CODE={ /* FULL_NAME=other */ return x; } TYPE_FULL_NAME=void ORDER=2
++    BLOCK CODE={ /* TYPE_FULL_NAME=void FULL_NAME=other */ return x; } ORDER=2
+       RETURN CODE=return x; ORDER=1
+         IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1
+     METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+@@ -60,7 +60,6 @@
+ EDGES|ARGUMENT invoke#4 -> invoke#5
+ EDGES|ARGUMENT other#4 -> other#5
+ EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+-EDGES|CFG invoke#0 -> invoke#5
+ EDGES|CFG invoke#4 -> invoke#6
+ EDGES|CFG invoke#5 -> invoke#4
+ EDGES|CFG main.c:<global>#0 -> main.c:<global>#16
+@@ -134,8 +133,6 @@
+ EDGES|SOURCE_FILE main.c:<global>#1 -> F:main.c
+ FLOWS|REACHING_DEF[<RET>] invoke#4 -> invoke#6
+ FLOWS|REACHING_DEF[<RET>] other#4 -> other#6
+-FLOWS|REACHING_DEF[] invoke#0 -> invoke#1
+-FLOWS|REACHING_DEF[] invoke#0 -> invoke#5
+ FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#16
+ FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#17
+ FLOWS|REACHING_DEF[] main.c:<global>#1 -> other#1

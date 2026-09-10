@@ -1,0 +1,338 @@
+{
+  "status": "HELD_CONFIRMED_NEW_LITERAL_REGRESSIONS",
+  "source": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-macro-state/candidate-v4/exact.rs",
+    "sha256": "35dd9430be3309294dc84aa7e76796f9997c4ff0845a2f56013aa3e01513b096"
+  },
+  "binary": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-macro-state/candidate-v4/joern-parity",
+    "sha256": "5584f11047e1358ef7645386cfe79244787cd5cd9e942645e38e2540f7304673"
+  },
+  "bindings": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-macro-state/candidate-v4/bindings.json",
+    "sha256": "cf8218ed2d295a85c65d013c8e4cb6825e7576f3d6efdc4eaf645f786f6079a8"
+  },
+  "sourceDiff": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-v4-review/source.diff",
+    "sha256": "dae25e0bc5993489f5368ea68b54bab66d84fa93d800dd1123cd0dfb4e14a6df"
+  },
+  "independentCompleteReplay": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-v4-review/replay.json",
+    "sha256": "86b12b7bc44dbbdce6dacc0d394920a5fea6802c95ebd5b9e14959ab748c2545"
+  },
+  "original50": {
+    "projectCount": 50,
+    "eighthExact": 7,
+    "v4Exact": 45,
+    "priorExactLosses": [],
+    "matchingRecordLosses": 0,
+    "matchingRecordGains": 427,
+    "allPeerOutputsIndependentlyReproduced": true,
+    "rawExtractionGroups": [
+      {
+        "group": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/.local/ninth-body-macro-diagnosis",
+        "caseCount": 17,
+        "raw": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/.local/ninth-body-macro-diagnosis/live.stdout",
+          "sha256": "3f0e83f61d7c8a97462ab60461905cbb2feaa54d7b54629154379d0842390c81"
+        },
+        "liveRun": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/.local/ninth-body-macro-diagnosis/live-run.json",
+          "sha256": "88202313462e8060cf4a277995b346dbc1c9cae2b4cbd2f892f23271571a8060"
+        },
+        "oracle": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/.local/ninth-body-macro-diagnosis/oracle.sc",
+          "sha256": "56431f14868678e64f9eb41026b44f1d3d7738404d28d2db62711b520c98c742"
+        }
+      },
+      {
+        "group": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-body-state-review",
+        "caseCount": 7,
+        "raw": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-body-state-review/live.stdout",
+          "sha256": "82fd1a4d1007ddef8880bd35600c8a75f5db8dec7e3019477701f5e44592f97e"
+        },
+        "liveRun": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-body-state-review/live-run.json",
+          "sha256": "1373e65ee32be9b21d3548e6b71d315da709cc4141c61f471d3dfd3db669ba8c"
+        },
+        "oracle": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-body-state-review/oracle.sc",
+          "sha256": "56431f14868678e64f9eb41026b44f1d3d7738404d28d2db62711b520c98c742"
+        }
+      },
+      {
+        "group": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-macro-state/boundaries",
+        "caseCount": 8,
+        "raw": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-macro-state/boundaries/live.stdout",
+          "sha256": "c9b5cf6e0c2337908b0b5111ca9a026c709d34b364aa807734c87acd46476e88"
+        },
+        "liveRun": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-macro-state/boundaries/live-run.json",
+          "sha256": "956e3dd281135e78c626c902bcf611fb42ccb6a698dbbbfedc812f57d0eecf71"
+        },
+        "oracle": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-macro-state/boundaries/oracle.sc",
+          "sha256": "56431f14868678e64f9eb41026b44f1d3d7738404d28d2db62711b520c98c742"
+        }
+      },
+      {
+        "group": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review",
+        "caseCount": 5,
+        "raw": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/live.stdout",
+          "sha256": "552a15da2b75709e4bcb5a2110c0273098f5ce0d4df222d72da2e0e8e86b863a"
+        },
+        "liveRun": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/live-run.json",
+          "sha256": "82768079dd02717200539ad3224e4cd9cadab44bea1677fd3a6e9c389b7f1f40"
+        },
+        "oracle": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/oracle.sc",
+          "sha256": "56431f14868678e64f9eb41026b44f1d3d7738404d28d2db62711b520c98c742"
+        }
+      },
+      {
+        "group": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/ownership-boundaries",
+        "caseCount": 3,
+        "raw": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/ownership-boundaries/live.stdout",
+          "sha256": "ff9879f95eaf881f5a538e7a196696b87a6c175636eba8461353aa04f9df618a"
+        },
+        "liveRun": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/ownership-boundaries/live-run.json",
+          "sha256": "a32b866b7e70c1a851a1840960d3b6e79d11052973c352df39dab96d3d8519a5"
+        },
+        "oracle": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/ownership-boundaries/oracle.sc",
+          "sha256": "56431f14868678e64f9eb41026b44f1d3d7738404d28d2db62711b520c98c742"
+        }
+      },
+      {
+        "group": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/nested-events",
+        "caseCount": 3,
+        "raw": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/nested-events/live.stdout",
+          "sha256": "7c912e0cf03701003de87d6359e3ffe0827d140914fa6bebfd44b05fb2ff7a13"
+        },
+        "liveRun": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/nested-events/live-run.json",
+          "sha256": "dbc6ed7e88dc22d4756e17c4029d0295f2ecf8491efc63a391dc00b862a2d615"
+        },
+        "oracle": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/nested-events/oracle.sc",
+          "sha256": "56431f14868678e64f9eb41026b44f1d3d7738404d28d2db62711b520c98c742"
+        }
+      },
+      {
+        "group": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/arity-order",
+        "caseCount": 2,
+        "raw": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/arity-order/live.stdout",
+          "sha256": "2f6dd34cd4310adedaaab7add7c957d8f747c2f87de9a5fef3ac88acac558f4e"
+        },
+        "liveRun": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/arity-order/live-run.json",
+          "sha256": "618d9bada99efd6b365ab511798d0cd40d990d20fd8a79ff7491313627c829ac"
+        },
+        "oracle": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/arity-order/oracle.sc",
+          "sha256": "56431f14868678e64f9eb41026b44f1d3d7738404d28d2db62711b520c98c742"
+        }
+      },
+      {
+        "group": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/ties-and-order",
+        "caseCount": 3,
+        "raw": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/ties-and-order/live.stdout",
+          "sha256": "44933bed5425e8d085c8ae780988a50027c6883dd2fd3e2a8688d2678ce03344"
+        },
+        "liveRun": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/ties-and-order/live-run.json",
+          "sha256": "cb4f10a5c904d6e3e7ae556d0710ae12afe8eee25731ed6f7787f3a9ad9f7d90"
+        },
+        "oracle": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/ties-and-order/oracle.sc",
+          "sha256": "56431f14868678e64f9eb41026b44f1d3d7738404d28d2db62711b520c98c742"
+        }
+      },
+      {
+        "group": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/ninth-batch/deferred-field-controls",
+        "caseCount": 2,
+        "raw": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/ninth-batch/deferred-field-controls/live.stdout",
+          "sha256": "bf1bfcfce7f9f92e2a01ad79f2acf24ddfc3df4292a02053f829b70fc68538dd"
+        },
+        "liveRun": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/ninth-batch/deferred-field-controls/live-run.json",
+          "sha256": "1cb8fb78135c41f9ee90b166a816a5440e4050300091ac8c143a93536355f23c"
+        },
+        "oracle": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/ninth-batch/deferred-field-controls/oracle.sc",
+          "sha256": "56431f14868678e64f9eb41026b44f1d3d7738404d28d2db62711b520c98c742"
+        }
+      }
+    ],
+    "diagnostics": [
+      {
+        "case": "inactive_typedef_shadow",
+        "classification": "PREEXISTING_IDENTICAL",
+        "reason": "Both graphs are byte-identical; generic CODE transport misreads literal source T=0 as an uppercase property marker and truncates METHOD/BLOCK CODE. Other projection sections match live.",
+        "baselineCurrentBytesIdentical": true,
+        "live": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/.local/ninth-body-macro-diagnosis/input/inactive_typedef_shadow/expected.txt",
+          "sha256": "874c354fcc3838f1136795f84d18c2352cb079369b491e6275ccb459134d4828"
+        },
+        "baseline": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-v4-review/projects/inactive_typedef_shadow/eighth.stdout",
+          "sha256": "faf78bcd440a3e1b02e40ab18d1e05829d219d084a89d23e198f4708c06fed29"
+        },
+        "candidate": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-v4-review/projects/inactive_typedef_shadow/v4.stdout",
+          "sha256": "faf78bcd440a3e1b02e40ab18d1e05829d219d084a89d23e198f4708c06fed29"
+        },
+        "completeLiveCandidateDiff": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-v4-review/projects/inactive_typedef_shadow/v4.complete.diff",
+          "sha256": "27221c0c6e196082a6c08d4822de604eb818933311f04a378f0f97ecb49e8818"
+        },
+        "completeBaselineCandidateDiff": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-v4-review/projects/inactive_typedef_shadow/before-after.complete.diff",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "previouslyMatchingRecordLosses": {}
+      },
+      {
+        "case": "body_include_macro_only",
+        "classification": "NEWLY_EXPOSED_PARTIAL_PREEXISTING_MEMBER_OMISSION",
+        "reason": "Branch becomes correct return x, replacing wrong return0; macro effects from supplied body include now apply. Header LOCAL included and file-global TYPE_DECL ORDER remain missing/wrong in both versions. Full before/current changes retain all earlier live-matching serialized facts; removed old literal/flows belong to inactive source branch.",
+        "baselineCurrentBytesIdentical": false,
+        "live": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-macro-state/boundaries/input/body_include_macro_only/expected.txt",
+          "sha256": "c158364df1717bdc80e6d94d22b9567689d8c7d8d8517a96eabc44b8a993f49a"
+        },
+        "baseline": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-v4-review/projects/body_include_macro_only/eighth.stdout",
+          "sha256": "394a177094c4637f0ca6e3c3171d197785157acb91afdc9a56df4753b3814ab8"
+        },
+        "candidate": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-v4-review/projects/body_include_macro_only/v4.stdout",
+          "sha256": "18fe1622a2ea7cfa96c304ef51aca49fc29abfa0c14be8a6f03765147c84ea77"
+        },
+        "completeLiveCandidateDiff": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-v4-review/projects/body_include_macro_only/v4.complete.diff",
+          "sha256": "be27aa75fca22059703bf1b748acb3a9bbe4895b0cc5a4cc1c6aee1656232ad3"
+        },
+        "completeBaselineCandidateDiff": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-v4-review/projects/body_include_macro_only/before-after.complete.diff",
+          "sha256": "bf4e5dc1d151d2837f1f4c9f5c262a6328625d24c4956c09c99abe63a843a0a2"
+        },
+        "previouslyMatchingRecordLosses": {}
+      },
+      {
+        "case": "body_typedef_does_not_escape",
+        "classification": "IMPROVED_SCAFFOLD_PREEXISTING_ALIAS_TYPE_OMISSION",
+        "reason": "Method ASTs/flow behavior unchanged. Candidate removes five incorrect BASE TYPE/TYPE_DECL/structural records absent from live; missing T TYPE and REF T:T -> setup#4 were also absent in eighth. Typedef remains local; later T call does not incorrectly become a cast.",
+        "baselineCurrentBytesIdentical": false,
+        "live": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-macro-state/boundaries/input/body_typedef_does_not_escape/expected.txt",
+          "sha256": "1acfd8b30eff9932d4c80db207f3aaf46fa389ba183c3f92e9a47b9dd7f389a3"
+        },
+        "baseline": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-v4-review/projects/body_typedef_does_not_escape/eighth.stdout",
+          "sha256": "754e4086ef1e4a05535a7996a5be422c6df259deb576b55de75ec4428279482f"
+        },
+        "candidate": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-v4-review/projects/body_typedef_does_not_escape/v4.stdout",
+          "sha256": "44b9c39dcecd846cd034bfca95d9f0c5735d9f02926555526738765311ef05d0"
+        },
+        "completeLiveCandidateDiff": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-v4-review/projects/body_typedef_does_not_escape/v4.complete.diff",
+          "sha256": "5505945d4195b4d1e982b220ce51e87801a586615bd18ea21c1cb7604746dfe8"
+        },
+        "completeBaselineCandidateDiff": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-v4-review/projects/body_typedef_does_not_escape/before-after.complete.diff",
+          "sha256": "2ece376ee0d5472c89b65f14ad36b2fae549ffaa443a2d99847ef5762613d2b6"
+        },
+        "previouslyMatchingRecordLosses": {}
+      },
+      {
+        "case": "formal_list_redefined",
+        "classification": "PREEXISTING_IDENTICAL",
+        "reason": "Both graphs are byte-identical; function-like macro in #if fails to select redefinition, retaining one argument/current wrong expansion. Full graph diagnostic preserved.",
+        "baselineCurrentBytesIdentical": true,
+        "live": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/ownership-boundaries/input/formal_list_redefined/expected.txt",
+          "sha256": "97240d96ac9bf156a6af5d99adb89f479546e6d5bdd261fa4c66ac26fa33f273"
+        },
+        "baseline": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-v4-review/projects/formal_list_redefined/eighth.stdout",
+          "sha256": "68b144759e4c61e575073c94926e64d98d595b80d25f32df51f0d885974d4ea9"
+        },
+        "candidate": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-v4-review/projects/formal_list_redefined/v4.stdout",
+          "sha256": "68b144759e4c61e575073c94926e64d98d595b80d25f32df51f0d885974d4ea9"
+        },
+        "completeLiveCandidateDiff": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-v4-review/projects/formal_list_redefined/v4.complete.diff",
+          "sha256": "9a076e175bee26adf067c3712fc995e62cb38ad53fca11d2aff4dee09ba0f5fc"
+        },
+        "completeBaselineCandidateDiff": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-v4-review/projects/formal_list_redefined/before-after.complete.diff",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "previouslyMatchingRecordLosses": {}
+      },
+      {
+        "case": "condition_function_and_defined",
+        "classification": "PREEXISTING_IDENTICAL",
+        "reason": "Both graphs are byte-identical; function-like macro in #if fails to select new arithmetic replacement, so expanded AST/operators/flows remain absent.",
+        "baselineCurrentBytesIdentical": true,
+        "live": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/nested-events/input/condition_function_and_defined/expected.txt",
+          "sha256": "61fc46aab4c42f9fd15bbecf15f1818cc9c9d5c06676182aa9dce2bcd8dbadc4"
+        },
+        "baseline": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-v4-review/projects/condition_function_and_defined/eighth.stdout",
+          "sha256": "81f5d6f388bce67be273ea99d130314d92cb765379c5900d6e0922e337f7b98d"
+        },
+        "candidate": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-v4-review/projects/condition_function_and_defined/v4.stdout",
+          "sha256": "81f5d6f388bce67be273ea99d130314d92cb765379c5900d6e0922e337f7b98d"
+        },
+        "completeLiveCandidateDiff": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-v4-review/projects/condition_function_and_defined/v4.complete.diff",
+          "sha256": "776fde2f6555b0389e649fda7c2433a3a450ffd853e4d0760e9a22dc1e658f62"
+        },
+        "completeBaselineCandidateDiff": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-v4-review/projects/condition_function_and_defined/before-after.complete.diff",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "previouslyMatchingRecordLosses": {}
+      }
+    ]
+  },
+  "newLiteralCounterexamples": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-v4-review/literal-events/introduced-regression.json",
+    "sha256": "05bffe844c61b7ac2ceaeb8d48cd83e752b66ab1ae9786baa7a986c9533ef801"
+  },
+  "sourceReview": {
+    "soundWithinMeasuredControls": [
+      "Source-position macro selection explicitly yields to recovering_expression, copying_macro_argument, and macro_expansion_code guards; temporary type-tree collection receives no original snapshot lookup.",
+      "Macro uses keyed by original node identity/name/arity/return type, sorted once by source offset; placements preserve both primary and embedded method views.",
+      "METHOD_FULL_NAME spans captured at serialization time and replaced in descending byte order; ordinary CODE/quoted VARIABLE fields are untouched. Root deferred full-name literal/spaced-header controls now complete exact.",
+      "Metadata queue selection and first-full-name registration restore original PICK/MODE/BAD controls, header ties, source/global order, and current type/arity distinction."
+    ],
+    "requiredCorrections": [
+      "Literal-token subtrees must be excluded from event collection; new4 full graphs expose3 exact regressions.",
+      "Nested body-range handling is under separate peer/root review and pending repaired freeze.",
+      "Object-like callee argument event ownership is under independent analysis_scope review."
+    ],
+    "explicitLimitations": [
+      "resolve_macro_metadata falls back to current metadata when no matching eligible event exists; pinned extractMatchingMacro returns None. This is retained fallback behavior, not complete MacroHandler equivalence.",
+      "The event collector approximates CDT outer expansion ownership using Tree-sitter; the new literal and object-callee boundaries demonstrate why complete fresh controls and whole-project checks remain required.",
+      "No full source acceptance until repaired source and all previous/new references are replayed."
+    ]
+  },
+  "protectedScope": "No source/oracle/test edits or root mutations by reviewer; no Cargo or whole-project producers. Only frozen parity replays and four small live oracle controls."
+}

@@ -1,0 +1,1169 @@
+CASE|parenthesized_unknown
+=======================================================================================================
+Invoking CPG generator in a separate process. Note that the new process will consume additional memory.
+If you are importing a large codebase (and/or running into memory issues), please try the following:
+1) exit joern
+2) invoke the frontend: /Users/shayaunnejad/vibe-code/joern-oxidized/.local/astra-sprint/oracle/runtime/joern-cli/c2cpg.sh -J-Xmx4096m /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-declaration-macros/.local/header-return-regression/phantom/input/parenthesized_unknown --output /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-declaration-macros/.local/header-return-regression/phantom/oracle-workspace/workspace/parenthesized_unknown/cpg.bin.zip
+3) start joern, import the cpg: `importCpg("path/to/cpg")`
+=======================================================================================================
+
+[INFO ] initialising from existing storage (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-declaration-macros/.local/header-return-regression/phantom/oracle-workspace/workspace/parenthesized_unknown/cpg.bin.tmp)
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.FileCreationPass
+[INFO ] Pass io.joern.x2cpg.passes.base.FileCreationPass completed in 24 ms (62% on mutations). 17 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.NamespaceCreator
+[INFO ] Pass io.joern.x2cpg.passes.base.NamespaceCreator completed in 5 ms (42% on mutations). 5 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.TypeDeclStubCreator
+[INFO ] Pass io.joern.x2cpg.passes.base.TypeDeclStubCreator completed in 2 ms (46% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.MethodStubCreator
+[INFO ] Pass io.joern.x2cpg.passes.base.MethodStubCreator completed in 12 ms (15% on mutations). 23 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.ParameterIndexCompatPass
+[INFO ] Pass io.joern.x2cpg.passes.base.ParameterIndexCompatPass completed in 2 ms (51% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.MethodDecoratorPass
+[INFO ] Pass io.joern.x2cpg.passes.base.MethodDecoratorPass completed in 5 ms (29% on mutations). 18 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.AstLinkerPass
+[INFO ] Pass io.joern.x2cpg.passes.base.AstLinkerPass completed in 4 ms (14% on mutations). 9 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.ContainsEdgePass
+[INFO ] Pass io.joern.x2cpg.passes.base.ContainsEdgePass completed in 2 ms (24% on mutations). 28 + 0 changes committed from 19 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.TypeRefPass
+[INFO ] Pass io.joern.x2cpg.passes.base.TypeRefPass completed in 2 ms (21% on mutations). 5 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.TypeEvalPass
+[INFO ] Pass io.joern.x2cpg.passes.base.TypeEvalPass completed in 1 ms (43% on mutations). 36 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 2 ms (38% on mutations). 1 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.controlflow.CfgCreationPass
+[INFO ] Pass io.joern.x2cpg.passes.controlflow.CfgCreationPass completed in 12 ms (4% on mutations). 16 + 0 changes committed from 8 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.controlflow.cfgdominator.CfgDominatorPass
+[INFO ] Pass io.joern.x2cpg.passes.controlflow.cfgdominator.CfgDominatorPass completed in 4 ms (13% on mutations). 32 + 0 changes committed from 8 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.controlflow.codepencegraph.CdgPass
+[INFO ] Pass io.joern.x2cpg.passes.controlflow.codepencegraph.CdgPass completed in 1 ms (16% on mutations). 0 + 0 changes committed from 8 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 0 ms (76% on mutations). 1 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.typerelations.TypeHierarchyPass
+[INFO ] Pass io.joern.x2cpg.passes.typerelations.TypeHierarchyPass completed in 1 ms (32% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.typerelations.AliasLinkerPass
+[INFO ] Pass io.joern.x2cpg.passes.typerelations.AliasLinkerPass completed in 1 ms (20% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.typerelations.FieldAccessLinkerPass
+[INFO ] Pass io.joern.x2cpg.passes.typerelations.FieldAccessLinkerPass completed in 1 ms (18% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 1 ms (77% on mutations). 1 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.callgraph.MethodRefLinker
+[INFO ] Pass io.joern.x2cpg.passes.callgraph.MethodRefLinker completed in 2 ms (70% on mutations). 1 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.callgraph.StaticCallLinker
+[INFO ] Pass io.joern.x2cpg.passes.callgraph.StaticCallLinker completed in 1 ms (28% on mutations). 2 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.callgraph.DynamicCallLinker
+[INFO ] Unable to link dynamic CALL with METHOD_FULL_NAME <operator>.pointerCall and context: (Unknown)(x) @ line Some(2)
+[INFO ] Pass io.joern.x2cpg.passes.callgraph.DynamicCallLinker completed in 5 ms (4% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 0 ms (71% on mutations). 1 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.dataflowengineoss.passes.reachingdef.ReachingDefPass
+[INFO ] Calculating reaching definitions for: declared in <empty>
+[INFO ] Calculating reaching definitions for: g in main.c
+[INFO ] Calculating reaching definitions for: api.h:<global> in api.h
+[INFO ] Calculating reaching definitions for: <unresolvedNamespace>.declared in api.h
+[INFO ] Calculating reaching definitions for: <operator>.addition in <empty>
+[INFO ] Calculating reaching definitions for: <operator>.pointerCall in <empty>
+[INFO ] Calculating reaching definitions for: main.c:<global> in main.c
+[INFO ] Calculating reaching definitions for: <includes>:<global> in <includes>
+[INFO ] Number of definitions for <includes>:<global>: 0
+[INFO ] Number of definitions for main.c:<global>: 0
+[INFO ] Number of definitions for <operator>.addition: 2
+[INFO ] Number of definitions for api.h:<global>: 0
+[INFO ] Number of definitions for declared: 1
+[INFO ] Number of definitions for <operator>.pointerCall: 1
+[INFO ] Number of definitions for <unresolvedNamespace>.declared: 1
+[INFO ] Number of definitions for g: 8
+[INFO ] Pass io.joern.dataflowengineoss.passes.reachingdef.ReachingDefPass completed in 35 ms (1% on mutations). 34 + 0 changes committed from 8 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 0 ms (74% on mutations). 1 + 0 changes committed from 1 parts.
+AST|METHOD NAME=<global> CODE=<global> FULL_NAME=<includes>:<global> ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=<operator>.addition FULL_NAME=<operator>.addition ORDER=0
+AST|  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=<operator>.pointerCall FULL_NAME=<operator>.pointerCall ORDER=0
+AST|  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=declared CODE=extern Unknown extern Unknown  ()(int); FULL_NAME=<unresolvedNamespace>.declared SIGNATURE=Unknown(int) ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+AST|  METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=Unknown ORDER=3
+AST|
+AST|METHOD NAME=<global> CODE=<global> FULL_NAME=api.h:<global> ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=declared FULL_NAME=declared ORDER=0
+AST|  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=g CODE=int g(int x) { return (Unknown)(x) + declared(x); } FULL_NAME=g SIGNATURE=int(int) ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+AST|  METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+AST|  BLOCK CODE={ return (Unknown)(x) + declared(x); } TYPE_FULL_NAME=void ORDER=2
+AST|    LOCAL NAME=Unknown CODE=<unknown> Unknown TYPE_FULL_NAME=ANY ORDER=0
+AST|    RETURN CODE=return (Unknown)(x) + declared(x); ORDER=1
+AST|      CALL NAME=<operator>.addition CODE=(Unknown)(x) + declared(x) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        CALL NAME=<operator>.pointerCall CODE=(Unknown)(x) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.pointerCall ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=DYNAMIC_DISPATCH
+AST|          IDENTIFIER NAME=Unknown CODE=<unknown> Unknown TYPE_FULL_NAME=ANY ORDER=1
+AST|          IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=1
+AST|        CALL NAME=declared CODE=declared(x) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=declared ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+AST|
+AST|METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1
+AST|  METHOD NAME=g CODE=int g(int x) { return (Unknown)(x) + declared(x); } FULL_NAME=g SIGNATURE=int(int) ORDER=1
+AST|    METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+AST|    METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+AST|    BLOCK CODE={ return (Unknown)(x) + declared(x); } TYPE_FULL_NAME=void ORDER=2
+AST|      LOCAL NAME=Unknown CODE=<unknown> Unknown TYPE_FULL_NAME=ANY ORDER=0
+AST|      RETURN CODE=return (Unknown)(x) + declared(x); ORDER=1
+AST|        CALL NAME=<operator>.addition CODE=(Unknown)(x) + declared(x) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          CALL NAME=<operator>.pointerCall CODE=(Unknown)(x) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.pointerCall ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=DYNAMIC_DISPATCH
+AST|            IDENTIFIER NAME=Unknown CODE=<unknown> Unknown TYPE_FULL_NAME=ANY ORDER=1
+AST|            IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=1
+AST|          CALL NAME=declared CODE=declared(x) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=declared ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|            IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+AST|    METHOD_REF CODE=g TYPE_FULL_NAME=g METHOD_FULL_NAME=g ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|
+NODES|META_DATA LANGUAGE=NEWC
+NODES|FILE NAME=<includes> ORDER=1
+NODES|FILE NAME=<unknown> ORDER=0
+NODES|FILE NAME=api.h ORDER=0
+NODES|FILE NAME=main.c ORDER=0
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<global> FILENAME=<unknown> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<includes>:<global> FILENAME=<includes> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=api.h:<global> FILENAME=api.h ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|NAMESPACE NAME=<global>
+NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=Unknown FULL_NAME=Unknown CODE=Unknown IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=<global> FULL_NAME=api.h:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=api.h:<global> FILENAME=api.h ORDER=1
+NODES|TYPE_DECL NAME=g FULL_NAME=g CODE=g AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=<global> FULL_NAME=main.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=2
+NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+NODES|TYPE NAME=Unknown FULL_NAME=Unknown TYPE_DECL_FULL_NAME=Unknown
+NODES|TYPE NAME=g FULL_NAME=g TYPE_DECL_FULL_NAME=g
+NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+EDGES|ARGUMENT g#10 -> g#11
+EDGES|ARGUMENT g#5 -> g#6
+EDGES|ARGUMENT g#6 -> g#10
+EDGES|ARGUMENT g#6 -> g#7
+EDGES|ARGUMENT g#7 -> g#9
+EDGES|CALL g#10 -> declared#0
+EDGES|CALL g#6 -> <operator>.addition#0
+EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+EDGES|CFG <operator>.addition#0 -> <operator>.addition#5
+EDGES|CFG <operator>.pointerCall#0 -> <operator>.pointerCall#4
+EDGES|CFG <unresolvedNamespace>.declared#0 -> <unresolvedNamespace>.declared#4
+EDGES|CFG api.h:<global>#0 -> api.h:<global>#2
+EDGES|CFG declared#0 -> declared#4
+EDGES|CFG g#0 -> g#8
+EDGES|CFG g#10 -> g#6
+EDGES|CFG g#11 -> g#10
+EDGES|CFG g#5 -> g#12
+EDGES|CFG g#6 -> g#5
+EDGES|CFG g#7 -> g#11
+EDGES|CFG g#8 -> g#9
+EDGES|CFG g#9 -> g#7
+EDGES|CFG main.c:<global>#0 -> main.c:<global>#15
+EDGES|CFG main.c:<global>#15 -> main.c:<global>#16
+EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+EDGES|CONTAINS <operator>.addition#0 -> <operator>.addition#2
+EDGES|CONTAINS <operator>.pointerCall#0 -> <operator>.pointerCall#2
+EDGES|CONTAINS <unresolvedNamespace>.declared#0 -> <unresolvedNamespace>.declared#3
+EDGES|CONTAINS D:api.h:<global> -> <unresolvedNamespace>.declared#0
+EDGES|CONTAINS D:api.h:<global> -> api.h:<global>#0
+EDGES|CONTAINS D:main.c:<global> -> D:g
+EDGES|CONTAINS D:main.c:<global> -> main.c:<global>#0
+EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+EDGES|CONTAINS F:<includes> -> D:ANY
+EDGES|CONTAINS F:<includes> -> D:Unknown
+EDGES|CONTAINS F:<includes> -> D:int
+EDGES|CONTAINS F:<includes> -> D:void
+EDGES|CONTAINS F:api.h -> D:api.h:<global>
+EDGES|CONTAINS F:main.c -> D:main.c:<global>
+EDGES|CONTAINS api.h:<global>#0 -> api.h:<global>#1
+EDGES|CONTAINS declared#0 -> declared#2
+EDGES|CONTAINS g#0 -> g#10
+EDGES|CONTAINS g#0 -> g#11
+EDGES|CONTAINS g#0 -> g#3
+EDGES|CONTAINS g#0 -> g#5
+EDGES|CONTAINS g#0 -> g#6
+EDGES|CONTAINS g#0 -> g#7
+EDGES|CONTAINS g#0 -> g#8
+EDGES|CONTAINS g#0 -> g#9
+EDGES|CONTAINS main.c:<global>#0 -> g#0
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#14
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#15
+EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#6 -> T:ANY
+EDGES|EVAL_TYPE <operator>.pointerCall#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.pointerCall#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.pointerCall#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.pointerCall#4 -> T:ANY
+EDGES|EVAL_TYPE <unresolvedNamespace>.declared#1 -> T:int
+EDGES|EVAL_TYPE <unresolvedNamespace>.declared#2 -> T:int
+EDGES|EVAL_TYPE <unresolvedNamespace>.declared#3 -> T:ANY
+EDGES|EVAL_TYPE <unresolvedNamespace>.declared#4 -> T:Unknown
+EDGES|EVAL_TYPE api.h:<global>#1 -> T:ANY
+EDGES|EVAL_TYPE api.h:<global>#2 -> T:ANY
+EDGES|EVAL_TYPE declared#1 -> T:ANY
+EDGES|EVAL_TYPE declared#2 -> T:ANY
+EDGES|EVAL_TYPE declared#3 -> T:ANY
+EDGES|EVAL_TYPE declared#4 -> T:ANY
+EDGES|EVAL_TYPE g#1 -> T:int
+EDGES|EVAL_TYPE g#10 -> T:ANY
+EDGES|EVAL_TYPE g#11 -> T:int
+EDGES|EVAL_TYPE g#12 -> T:int
+EDGES|EVAL_TYPE g#2 -> T:int
+EDGES|EVAL_TYPE g#3 -> T:void
+EDGES|EVAL_TYPE g#4 -> T:ANY
+EDGES|EVAL_TYPE g#6 -> T:ANY
+EDGES|EVAL_TYPE g#7 -> T:ANY
+EDGES|EVAL_TYPE g#8 -> T:ANY
+EDGES|EVAL_TYPE g#9 -> T:int
+EDGES|EVAL_TYPE main.c:<global>#14 -> T:ANY
+EDGES|EVAL_TYPE main.c:<global>#15 -> T:g
+EDGES|EVAL_TYPE main.c:<global>#16 -> T:ANY
+EDGES|PARAMETER_LINK <operator>.addition#1 -> <operator>.addition#3
+EDGES|PARAMETER_LINK <operator>.addition#4 -> <operator>.addition#6
+EDGES|PARAMETER_LINK <operator>.pointerCall#1 -> <operator>.pointerCall#3
+EDGES|PARAMETER_LINK <unresolvedNamespace>.declared#1 -> <unresolvedNamespace>.declared#2
+EDGES|PARAMETER_LINK declared#1 -> declared#3
+EDGES|PARAMETER_LINK g#1 -> g#2
+EDGES|REF NB:<global> -> NS:<global>
+EDGES|REF NB:<includes>:<global> -> NS:<global>
+EDGES|REF NB:api.h:<global> -> NS:<global>
+EDGES|REF NB:main.c:<global> -> NS:<global>
+EDGES|REF T:ANY -> D:ANY
+EDGES|REF T:Unknown -> D:Unknown
+EDGES|REF T:g -> D:g
+EDGES|REF T:int -> D:int
+EDGES|REF T:void -> D:void
+EDGES|REF g#11 -> g#1
+EDGES|REF g#8 -> g#4
+EDGES|REF g#9 -> g#1
+EDGES|REF main.c:<global>#15 -> g#0
+EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+EDGES|SOURCE_FILE <unresolvedNamespace>.declared#0 -> F:api.h
+EDGES|SOURCE_FILE D:ANY -> F:<includes>
+EDGES|SOURCE_FILE D:Unknown -> F:<includes>
+EDGES|SOURCE_FILE D:api.h:<global> -> F:api.h
+EDGES|SOURCE_FILE D:g -> F:main.c
+EDGES|SOURCE_FILE D:int -> F:<includes>
+EDGES|SOURCE_FILE D:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE D:void -> F:<includes>
+EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
+EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>
+EDGES|SOURCE_FILE NB:api.h:<global> -> F:api.h
+EDGES|SOURCE_FILE NB:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE api.h:<global>#0 -> F:api.h
+EDGES|SOURCE_FILE g#0 -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#0 -> F:main.c
+FLOWS|REACHING_DEF[(Unknown)(x) + declared(x)] g#6 -> g#12
+FLOWS|REACHING_DEF[(Unknown)(x) + declared(x)] g#6 -> g#5
+FLOWS|REACHING_DEF[(Unknown)(x)] g#7 -> g#12
+FLOWS|REACHING_DEF[(Unknown)(x)] g#7 -> g#6
+FLOWS|REACHING_DEF[<RET>] g#5 -> g#12
+FLOWS|REACHING_DEF[] <operator>.addition#0 -> <operator>.addition#1
+FLOWS|REACHING_DEF[] <operator>.addition#0 -> <operator>.addition#4
+FLOWS|REACHING_DEF[] <operator>.pointerCall#0 -> <operator>.pointerCall#1
+FLOWS|REACHING_DEF[] <unresolvedNamespace>.declared#0 -> <unresolvedNamespace>.declared#1
+FLOWS|REACHING_DEF[] declared#0 -> declared#1
+FLOWS|REACHING_DEF[] g#0 -> g#1
+FLOWS|REACHING_DEF[] g#0 -> g#11
+FLOWS|REACHING_DEF[] g#0 -> g#8
+FLOWS|REACHING_DEF[] g#0 -> g#9
+FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#15
+FLOWS|REACHING_DEF[declared(x)] g#10 -> g#12
+FLOWS|REACHING_DEF[declared(x)] g#10 -> g#6
+FLOWS|REACHING_DEF[p1] <operator>.addition#1 -> <operator>.addition#3
+FLOWS|REACHING_DEF[p1] <operator>.addition#1 -> <operator>.addition#5
+FLOWS|REACHING_DEF[p1] <operator>.pointerCall#1 -> <operator>.pointerCall#3
+FLOWS|REACHING_DEF[p1] <operator>.pointerCall#1 -> <operator>.pointerCall#4
+FLOWS|REACHING_DEF[p1] declared#1 -> declared#3
+FLOWS|REACHING_DEF[p1] declared#1 -> declared#4
+FLOWS|REACHING_DEF[p2] <operator>.addition#4 -> <operator>.addition#5
+FLOWS|REACHING_DEF[p2] <operator>.addition#4 -> <operator>.addition#6
+FLOWS|REACHING_DEF[x] <unresolvedNamespace>.declared#1 -> <unresolvedNamespace>.declared#2
+FLOWS|REACHING_DEF[x] <unresolvedNamespace>.declared#1 -> <unresolvedNamespace>.declared#4
+FLOWS|REACHING_DEF[x] g#1 -> g#2
+FLOWS|REACHING_DEF[x] g#1 -> g#9
+FLOWS|REACHING_DEF[x] g#11 -> g#10
+FLOWS|REACHING_DEF[x] g#11 -> g#12
+FLOWS|REACHING_DEF[x] g#11 -> g#2
+FLOWS|REACHING_DEF[x] g#9 -> g#11
+FLOWS|REACHING_DEF[x] g#9 -> g#7
+CASE|prefix_primitive
+=======================================================================================================
+Invoking CPG generator in a separate process. Note that the new process will consume additional memory.
+If you are importing a large codebase (and/or running into memory issues), please try the following:
+1) exit joern
+2) invoke the frontend: /Users/shayaunnejad/vibe-code/joern-oxidized/.local/astra-sprint/oracle/runtime/joern-cli/c2cpg.sh -J-Xmx4096m /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-declaration-macros/.local/header-return-regression/phantom/input/prefix_primitive --output /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-declaration-macros/.local/header-return-regression/phantom/oracle-workspace/workspace/prefix_primitive/cpg.bin.zip
+3) start joern, import the cpg: `importCpg("path/to/cpg")`
+=======================================================================================================
+
+[INFO ] initialising from existing storage (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-declaration-macros/.local/header-return-regression/phantom/oracle-workspace/workspace/prefix_primitive/cpg.bin.tmp)
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.FileCreationPass
+[INFO ] Pass io.joern.x2cpg.passes.base.FileCreationPass completed in 1 ms (63% on mutations). 19 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.NamespaceCreator
+[INFO ] Pass io.joern.x2cpg.passes.base.NamespaceCreator completed in 0 ms (78% on mutations). 5 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.TypeDeclStubCreator
+[INFO ] Pass io.joern.x2cpg.passes.base.TypeDeclStubCreator completed in 0 ms (51% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.MethodStubCreator
+[INFO ] Pass io.joern.x2cpg.passes.base.MethodStubCreator completed in 0 ms (60% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.ParameterIndexCompatPass
+[INFO ] Pass io.joern.x2cpg.passes.base.ParameterIndexCompatPass completed in 0 ms (74% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.MethodDecoratorPass
+[INFO ] Pass io.joern.x2cpg.passes.base.MethodDecoratorPass completed in 0 ms (78% on mutations). 6 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.AstLinkerPass
+[INFO ] Pass io.joern.x2cpg.passes.base.AstLinkerPass completed in 0 ms (56% on mutations). 8 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.ContainsEdgePass
+[INFO ] Pass io.joern.x2cpg.passes.base.ContainsEdgePass completed in 1 ms (41% on mutations). 23 + 0 changes committed from 18 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.TypeRefPass
+[INFO ] Pass io.joern.x2cpg.passes.base.TypeRefPass completed in 0 ms (58% on mutations). 7 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.TypeEvalPass
+[INFO ] Pass io.joern.x2cpg.passes.base.TypeEvalPass completed in 0 ms (50% on mutations). 17 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 0 ms (74% on mutations). 1 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.controlflow.CfgCreationPass
+[INFO ] Pass io.joern.x2cpg.passes.controlflow.CfgCreationPass completed in 1 ms (40% on mutations). 9 + 0 changes committed from 5 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.controlflow.cfgdominator.CfgDominatorPass
+[INFO ] Pass io.joern.x2cpg.passes.controlflow.cfgdominator.CfgDominatorPass completed in 1 ms (39% on mutations). 18 + 0 changes committed from 5 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.controlflow.codepencegraph.CdgPass
+[INFO ] Pass io.joern.x2cpg.passes.controlflow.codepencegraph.CdgPass completed in 0 ms (44% on mutations). 0 + 0 changes committed from 5 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 0 ms (72% on mutations). 1 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.typerelations.TypeHierarchyPass
+[INFO ] Pass io.joern.x2cpg.passes.typerelations.TypeHierarchyPass completed in 0 ms (59% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.typerelations.AliasLinkerPass
+[INFO ] Pass io.joern.x2cpg.passes.typerelations.AliasLinkerPass completed in 0 ms (76% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.typerelations.FieldAccessLinkerPass
+[INFO ] Pass io.joern.x2cpg.passes.typerelations.FieldAccessLinkerPass completed in 0 ms (71% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 0 ms (75% on mutations). 1 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.callgraph.MethodRefLinker
+[INFO ] Pass io.joern.x2cpg.passes.callgraph.MethodRefLinker completed in 1 ms (72% on mutations). 1 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.callgraph.StaticCallLinker
+[INFO ] Pass io.joern.x2cpg.passes.callgraph.StaticCallLinker completed in 1 ms (65% on mutations). 1 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.callgraph.DynamicCallLinker
+[INFO ] Pass io.joern.x2cpg.passes.callgraph.DynamicCallLinker completed in 0 ms (81% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 1 ms (78% on mutations). 1 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.dataflowengineoss.passes.reachingdef.ReachingDefPass
+[INFO ] Calculating reaching definitions for: g in main.c
+[INFO ] Calculating reaching definitions for: main.c:<global> in main.c
+[INFO ] Calculating reaching definitions for: <includes>:<global> in <includes>
+[INFO ] Calculating reaching definitions for: declared in api.h
+[INFO ] Calculating reaching definitions for: api.h:<global> in api.h
+[INFO ] Number of definitions for api.h:<global>: 0
+[INFO ] Number of definitions for main.c:<global>: 0
+[INFO ] Number of definitions for declared: 1
+[INFO ] Number of definitions for <includes>:<global>: 0
+[INFO ] Number of definitions for g: 3
+[INFO ] Pass io.joern.dataflowengineoss.passes.reachingdef.ReachingDefPass completed in 2 ms (16% on mutations). 14 + 0 changes committed from 5 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 1 ms (69% on mutations). 1 + 0 changes committed from 1 parts.
+AST|METHOD NAME=<global> CODE=<global> FULL_NAME=<includes>:<global> ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=<global> CODE=<global> FULL_NAME=api.h:<global> ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=declared CODE=extern long unsigned extern long unsigned (int); FULL_NAME=declared SIGNATURE=longunsigned(int) ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+AST|  METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=longunsigned ORDER=3
+AST|
+AST|METHOD NAME=g CODE=unsigned long g(int x) { return declared(x); } FULL_NAME=g SIGNATURE=unsigned long(int) ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+AST|  METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+AST|  BLOCK CODE={ return declared(x); } TYPE_FULL_NAME=void ORDER=2
+AST|    RETURN CODE=return declared(x); ORDER=1
+AST|      CALL NAME=declared CODE=declared(x) TYPE_FULL_NAME=unsigned longint METHOD_FULL_NAME=declared ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=unsigned long ORDER=3
+AST|
+AST|METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1
+AST|  METHOD NAME=g CODE=unsigned long g(int x) { return declared(x); } FULL_NAME=g SIGNATURE=unsigned long(int) ORDER=1
+AST|    METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+AST|    METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+AST|    BLOCK CODE={ return declared(x); } TYPE_FULL_NAME=void ORDER=2
+AST|      RETURN CODE=return declared(x); ORDER=1
+AST|        CALL NAME=declared CODE=declared(x) TYPE_FULL_NAME=unsigned longint METHOD_FULL_NAME=declared ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|    METHOD_RETURN CODE=RET TYPE_FULL_NAME=unsigned long ORDER=3
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+AST|    METHOD_REF CODE=g TYPE_FULL_NAME=g METHOD_FULL_NAME=g ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|
+NODES|META_DATA LANGUAGE=NEWC
+NODES|FILE NAME=<includes> ORDER=1
+NODES|FILE NAME=<unknown> ORDER=0
+NODES|FILE NAME=api.h ORDER=0
+NODES|FILE NAME=main.c ORDER=0
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<global> FILENAME=<unknown> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<includes>:<global> FILENAME=<includes> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=api.h:<global> FILENAME=api.h ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|NAMESPACE NAME=<global>
+NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=<global> FULL_NAME=api.h:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=api.h:<global> FILENAME=api.h ORDER=1
+NODES|TYPE_DECL NAME=g FULL_NAME=g CODE=g AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=longunsigned FULL_NAME=longunsigned CODE=longunsigned IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=<global> FULL_NAME=main.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=2
+NODES|TYPE_DECL NAME=unsigned long FULL_NAME=unsigned long CODE=unsigned long IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=unsigned longint FULL_NAME=unsigned longint CODE=unsigned longint IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+NODES|TYPE NAME=g FULL_NAME=g TYPE_DECL_FULL_NAME=g
+NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+NODES|TYPE NAME=longunsigned FULL_NAME=longunsigned TYPE_DECL_FULL_NAME=longunsigned
+NODES|TYPE NAME=unsigned long FULL_NAME=unsigned long TYPE_DECL_FULL_NAME=unsigned long
+NODES|TYPE NAME=unsigned longint FULL_NAME=unsigned longint TYPE_DECL_FULL_NAME=unsigned longint
+NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+EDGES|ARGUMENT g#4 -> g#5
+EDGES|ARGUMENT g#5 -> g#6
+EDGES|CALL g#5 -> declared#0
+EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+EDGES|CFG api.h:<global>#0 -> api.h:<global>#2
+EDGES|CFG declared#0 -> declared#4
+EDGES|CFG g#0 -> g#6
+EDGES|CFG g#4 -> g#7
+EDGES|CFG g#5 -> g#4
+EDGES|CFG g#6 -> g#5
+EDGES|CFG main.c:<global>#0 -> main.c:<global>#10
+EDGES|CFG main.c:<global>#10 -> main.c:<global>#11
+EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+EDGES|CONTAINS D:api.h:<global> -> api.h:<global>#0
+EDGES|CONTAINS D:api.h:<global> -> declared#0
+EDGES|CONTAINS D:main.c:<global> -> D:g
+EDGES|CONTAINS D:main.c:<global> -> main.c:<global>#0
+EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+EDGES|CONTAINS F:<includes> -> D:ANY
+EDGES|CONTAINS F:<includes> -> D:int
+EDGES|CONTAINS F:<includes> -> D:longunsigned
+EDGES|CONTAINS F:<includes> -> D:unsigned long
+EDGES|CONTAINS F:<includes> -> D:unsigned longint
+EDGES|CONTAINS F:<includes> -> D:void
+EDGES|CONTAINS F:api.h -> D:api.h:<global>
+EDGES|CONTAINS F:main.c -> D:main.c:<global>
+EDGES|CONTAINS api.h:<global>#0 -> api.h:<global>#1
+EDGES|CONTAINS declared#0 -> declared#3
+EDGES|CONTAINS g#0 -> g#3
+EDGES|CONTAINS g#0 -> g#4
+EDGES|CONTAINS g#0 -> g#5
+EDGES|CONTAINS g#0 -> g#6
+EDGES|CONTAINS main.c:<global>#0 -> g#0
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#10
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#9
+EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+EDGES|EVAL_TYPE api.h:<global>#1 -> T:ANY
+EDGES|EVAL_TYPE api.h:<global>#2 -> T:ANY
+EDGES|EVAL_TYPE declared#1 -> T:int
+EDGES|EVAL_TYPE declared#2 -> T:int
+EDGES|EVAL_TYPE declared#3 -> T:ANY
+EDGES|EVAL_TYPE declared#4 -> T:longunsigned
+EDGES|EVAL_TYPE g#1 -> T:int
+EDGES|EVAL_TYPE g#2 -> T:int
+EDGES|EVAL_TYPE g#3 -> T:void
+EDGES|EVAL_TYPE g#5 -> T:unsigned longint
+EDGES|EVAL_TYPE g#6 -> T:int
+EDGES|EVAL_TYPE g#7 -> T:unsigned long
+EDGES|EVAL_TYPE main.c:<global>#10 -> T:g
+EDGES|EVAL_TYPE main.c:<global>#11 -> T:ANY
+EDGES|EVAL_TYPE main.c:<global>#9 -> T:ANY
+EDGES|PARAMETER_LINK declared#1 -> declared#2
+EDGES|PARAMETER_LINK g#1 -> g#2
+EDGES|REF NB:<global> -> NS:<global>
+EDGES|REF NB:<includes>:<global> -> NS:<global>
+EDGES|REF NB:api.h:<global> -> NS:<global>
+EDGES|REF NB:main.c:<global> -> NS:<global>
+EDGES|REF T:ANY -> D:ANY
+EDGES|REF T:g -> D:g
+EDGES|REF T:int -> D:int
+EDGES|REF T:longunsigned -> D:longunsigned
+EDGES|REF T:unsigned long -> D:unsigned long
+EDGES|REF T:unsigned longint -> D:unsigned longint
+EDGES|REF T:void -> D:void
+EDGES|REF g#6 -> g#1
+EDGES|REF main.c:<global>#10 -> g#0
+EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+EDGES|SOURCE_FILE D:ANY -> F:<includes>
+EDGES|SOURCE_FILE D:api.h:<global> -> F:api.h
+EDGES|SOURCE_FILE D:g -> F:main.c
+EDGES|SOURCE_FILE D:int -> F:<includes>
+EDGES|SOURCE_FILE D:longunsigned -> F:<includes>
+EDGES|SOURCE_FILE D:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE D:unsigned long -> F:<includes>
+EDGES|SOURCE_FILE D:unsigned longint -> F:<includes>
+EDGES|SOURCE_FILE D:void -> F:<includes>
+EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
+EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>
+EDGES|SOURCE_FILE NB:api.h:<global> -> F:api.h
+EDGES|SOURCE_FILE NB:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE api.h:<global>#0 -> F:api.h
+EDGES|SOURCE_FILE declared#0 -> F:api.h
+EDGES|SOURCE_FILE g#0 -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#0 -> F:main.c
+FLOWS|REACHING_DEF[<RET>] g#4 -> g#7
+FLOWS|REACHING_DEF[] declared#0 -> declared#1
+FLOWS|REACHING_DEF[] g#0 -> g#1
+FLOWS|REACHING_DEF[] g#0 -> g#6
+FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#10
+FLOWS|REACHING_DEF[declared(x)] g#5 -> g#4
+FLOWS|REACHING_DEF[declared(x)] g#5 -> g#7
+FLOWS|REACHING_DEF[x] declared#1 -> declared#2
+FLOWS|REACHING_DEF[x] declared#1 -> declared#4
+FLOWS|REACHING_DEF[x] g#1 -> g#2
+FLOWS|REACHING_DEF[x] g#1 -> g#6
+FLOWS|REACHING_DEF[x] g#6 -> g#2
+FLOWS|REACHING_DEF[x] g#6 -> g#5
+FLOWS|REACHING_DEF[x] g#6 -> g#7
+CASE|prefix_unknown
+=======================================================================================================
+Invoking CPG generator in a separate process. Note that the new process will consume additional memory.
+If you are importing a large codebase (and/or running into memory issues), please try the following:
+1) exit joern
+2) invoke the frontend: /Users/shayaunnejad/vibe-code/joern-oxidized/.local/astra-sprint/oracle/runtime/joern-cli/c2cpg.sh -J-Xmx4096m /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-declaration-macros/.local/header-return-regression/phantom/input/prefix_unknown --output /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-declaration-macros/.local/header-return-regression/phantom/oracle-workspace/workspace/prefix_unknown/cpg.bin.zip
+3) start joern, import the cpg: `importCpg("path/to/cpg")`
+=======================================================================================================
+
+[INFO ] initialising from existing storage (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-declaration-macros/.local/header-return-regression/phantom/oracle-workspace/workspace/prefix_unknown/cpg.bin.tmp)
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.FileCreationPass
+[INFO ] Pass io.joern.x2cpg.passes.base.FileCreationPass completed in 1 ms (91% on mutations). 17 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.NamespaceCreator
+[INFO ] Pass io.joern.x2cpg.passes.base.NamespaceCreator completed in 0 ms (74% on mutations). 5 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.TypeDeclStubCreator
+[INFO ] Pass io.joern.x2cpg.passes.base.TypeDeclStubCreator completed in 0 ms (68% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.MethodStubCreator
+[INFO ] Pass io.joern.x2cpg.passes.base.MethodStubCreator completed in 1 ms (83% on mutations). 16 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.ParameterIndexCompatPass
+[INFO ] Pass io.joern.x2cpg.passes.base.ParameterIndexCompatPass completed in 0 ms (77% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.MethodDecoratorPass
+[INFO ] Pass io.joern.x2cpg.passes.base.MethodDecoratorPass completed in 0 ms (85% on mutations). 15 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.AstLinkerPass
+[INFO ] Pass io.joern.x2cpg.passes.base.AstLinkerPass completed in 1 ms (46% on mutations). 8 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.ContainsEdgePass
+[INFO ] Pass io.joern.x2cpg.passes.base.ContainsEdgePass completed in 7 ms (7% on mutations). 27 + 0 changes committed from 18 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.TypeRefPass
+[INFO ] Pass io.joern.x2cpg.passes.base.TypeRefPass completed in 1 ms (53% on mutations). 5 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.TypeEvalPass
+[INFO ] Pass io.joern.x2cpg.passes.base.TypeEvalPass completed in 1 ms (54% on mutations). 32 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 0 ms (74% on mutations). 1 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.controlflow.CfgCreationPass
+[INFO ] Pass io.joern.x2cpg.passes.controlflow.CfgCreationPass completed in 1 ms (34% on mutations). 15 + 0 changes committed from 7 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.controlflow.cfgdominator.CfgDominatorPass
+[INFO ] Pass io.joern.x2cpg.passes.controlflow.cfgdominator.CfgDominatorPass completed in 1 ms (51% on mutations). 30 + 0 changes committed from 7 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.controlflow.codepencegraph.CdgPass
+[INFO ] Pass io.joern.x2cpg.passes.controlflow.codepencegraph.CdgPass completed in 1 ms (31% on mutations). 0 + 0 changes committed from 7 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 1 ms (79% on mutations). 1 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.typerelations.TypeHierarchyPass
+[INFO ] Pass io.joern.x2cpg.passes.typerelations.TypeHierarchyPass completed in 1 ms (62% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.typerelations.AliasLinkerPass
+[INFO ] Pass io.joern.x2cpg.passes.typerelations.AliasLinkerPass completed in 0 ms (79% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.typerelations.FieldAccessLinkerPass
+[INFO ] Pass io.joern.x2cpg.passes.typerelations.FieldAccessLinkerPass completed in 0 ms (56% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 1 ms (94% on mutations). 1 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.callgraph.MethodRefLinker
+[INFO ] Pass io.joern.x2cpg.passes.callgraph.MethodRefLinker completed in 2 ms (86% on mutations). 1 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.callgraph.StaticCallLinker
+[INFO ] Pass io.joern.x2cpg.passes.callgraph.StaticCallLinker completed in 1 ms (78% on mutations). 2 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.callgraph.DynamicCallLinker
+[INFO ] Unable to link dynamic CALL with METHOD_FULL_NAME <operator>.pointerCall and context: (Unknown)(x) @ line Some(2)
+[INFO ] Pass io.joern.x2cpg.passes.callgraph.DynamicCallLinker completed in 1 ms (36% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 1 ms (89% on mutations). 1 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.dataflowengineoss.passes.reachingdef.ReachingDefPass
+[INFO ] Calculating reaching definitions for: declared in api.h
+[INFO ] Calculating reaching definitions for: main.c:<global> in main.c
+[INFO ] Number of definitions for declared: 1
+[INFO ] Number of definitions for main.c:<global>: 0
+[INFO ] Calculating reaching definitions for: <operator>.addition in <empty>
+[INFO ] Calculating reaching definitions for: <includes>:<global> in <includes>
+[INFO ] Calculating reaching definitions for: g in main.c
+[INFO ] Number of definitions for <operator>.addition: 2
+[INFO ] Number of definitions for <includes>:<global>: 0
+[INFO ] Calculating reaching definitions for: api.h:<global> in api.h
+[INFO ] Calculating reaching definitions for: <operator>.pointerCall in <empty>
+[INFO ] Number of definitions for api.h:<global>: 0
+[INFO ] Number of definitions for g: 8
+[INFO ] Number of definitions for <operator>.pointerCall: 1
+[INFO ] Pass io.joern.dataflowengineoss.passes.reachingdef.ReachingDefPass completed in 5 ms (11% on mutations). 31 + 0 changes committed from 7 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 1 ms (77% on mutations). 1 + 0 changes committed from 1 parts.
+AST|METHOD NAME=<global> CODE=<global> FULL_NAME=<includes>:<global> ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=<operator>.addition FULL_NAME=<operator>.addition ORDER=0
+AST|  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=<operator>.pointerCall FULL_NAME=<operator>.pointerCall ORDER=0
+AST|  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=<global> CODE=<global> FULL_NAME=api.h:<global> ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=declared CODE=extern Unknown extern Unknown (int); FULL_NAME=declared SIGNATURE=Unknown(int) ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+AST|  METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=Unknown ORDER=3
+AST|
+AST|METHOD NAME=g CODE=int g(int x) { return (Unknown)(x) + declared(x); } FULL_NAME=g SIGNATURE=int(int) ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+AST|  METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+AST|  BLOCK CODE={ return (Unknown)(x) + declared(x); } TYPE_FULL_NAME=void ORDER=2
+AST|    LOCAL NAME=Unknown CODE=<unknown> Unknown TYPE_FULL_NAME=ANY ORDER=0
+AST|    RETURN CODE=return (Unknown)(x) + declared(x); ORDER=1
+AST|      CALL NAME=<operator>.addition CODE=(Unknown)(x) + declared(x) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        CALL NAME=<operator>.pointerCall CODE=(Unknown)(x) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.pointerCall ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=DYNAMIC_DISPATCH
+AST|          IDENTIFIER NAME=Unknown CODE=<unknown> Unknown TYPE_FULL_NAME=ANY ORDER=1
+AST|          IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=1
+AST|        CALL NAME=declared CODE=declared(x) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=declared ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+AST|
+AST|METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1
+AST|  METHOD NAME=g CODE=int g(int x) { return (Unknown)(x) + declared(x); } FULL_NAME=g SIGNATURE=int(int) ORDER=1
+AST|    METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+AST|    METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+AST|    BLOCK CODE={ return (Unknown)(x) + declared(x); } TYPE_FULL_NAME=void ORDER=2
+AST|      LOCAL NAME=Unknown CODE=<unknown> Unknown TYPE_FULL_NAME=ANY ORDER=0
+AST|      RETURN CODE=return (Unknown)(x) + declared(x); ORDER=1
+AST|        CALL NAME=<operator>.addition CODE=(Unknown)(x) + declared(x) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          CALL NAME=<operator>.pointerCall CODE=(Unknown)(x) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.pointerCall ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=DYNAMIC_DISPATCH
+AST|            IDENTIFIER NAME=Unknown CODE=<unknown> Unknown TYPE_FULL_NAME=ANY ORDER=1
+AST|            IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=1
+AST|          CALL NAME=declared CODE=declared(x) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=declared ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|            IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+AST|    METHOD_REF CODE=g TYPE_FULL_NAME=g METHOD_FULL_NAME=g ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|
+NODES|META_DATA LANGUAGE=NEWC
+NODES|FILE NAME=<includes> ORDER=1
+NODES|FILE NAME=<unknown> ORDER=0
+NODES|FILE NAME=api.h ORDER=0
+NODES|FILE NAME=main.c ORDER=0
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<global> FILENAME=<unknown> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<includes>:<global> FILENAME=<includes> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=api.h:<global> FILENAME=api.h ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|NAMESPACE NAME=<global>
+NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=Unknown FULL_NAME=Unknown CODE=Unknown IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=<global> FULL_NAME=api.h:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=api.h:<global> FILENAME=api.h ORDER=1
+NODES|TYPE_DECL NAME=g FULL_NAME=g CODE=g AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=<global> FULL_NAME=main.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=2
+NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+NODES|TYPE NAME=Unknown FULL_NAME=Unknown TYPE_DECL_FULL_NAME=Unknown
+NODES|TYPE NAME=g FULL_NAME=g TYPE_DECL_FULL_NAME=g
+NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+EDGES|ARGUMENT g#10 -> g#11
+EDGES|ARGUMENT g#5 -> g#6
+EDGES|ARGUMENT g#6 -> g#10
+EDGES|ARGUMENT g#6 -> g#7
+EDGES|ARGUMENT g#7 -> g#9
+EDGES|CALL g#10 -> declared#0
+EDGES|CALL g#6 -> <operator>.addition#0
+EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+EDGES|CFG <operator>.addition#0 -> <operator>.addition#5
+EDGES|CFG <operator>.pointerCall#0 -> <operator>.pointerCall#4
+EDGES|CFG api.h:<global>#0 -> api.h:<global>#2
+EDGES|CFG declared#0 -> declared#4
+EDGES|CFG g#0 -> g#8
+EDGES|CFG g#10 -> g#6
+EDGES|CFG g#11 -> g#10
+EDGES|CFG g#5 -> g#12
+EDGES|CFG g#6 -> g#5
+EDGES|CFG g#7 -> g#11
+EDGES|CFG g#8 -> g#9
+EDGES|CFG g#9 -> g#7
+EDGES|CFG main.c:<global>#0 -> main.c:<global>#15
+EDGES|CFG main.c:<global>#15 -> main.c:<global>#16
+EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+EDGES|CONTAINS <operator>.addition#0 -> <operator>.addition#2
+EDGES|CONTAINS <operator>.pointerCall#0 -> <operator>.pointerCall#2
+EDGES|CONTAINS D:api.h:<global> -> api.h:<global>#0
+EDGES|CONTAINS D:api.h:<global> -> declared#0
+EDGES|CONTAINS D:main.c:<global> -> D:g
+EDGES|CONTAINS D:main.c:<global> -> main.c:<global>#0
+EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+EDGES|CONTAINS F:<includes> -> D:ANY
+EDGES|CONTAINS F:<includes> -> D:Unknown
+EDGES|CONTAINS F:<includes> -> D:int
+EDGES|CONTAINS F:<includes> -> D:void
+EDGES|CONTAINS F:api.h -> D:api.h:<global>
+EDGES|CONTAINS F:main.c -> D:main.c:<global>
+EDGES|CONTAINS api.h:<global>#0 -> api.h:<global>#1
+EDGES|CONTAINS declared#0 -> declared#3
+EDGES|CONTAINS g#0 -> g#10
+EDGES|CONTAINS g#0 -> g#11
+EDGES|CONTAINS g#0 -> g#3
+EDGES|CONTAINS g#0 -> g#5
+EDGES|CONTAINS g#0 -> g#6
+EDGES|CONTAINS g#0 -> g#7
+EDGES|CONTAINS g#0 -> g#8
+EDGES|CONTAINS g#0 -> g#9
+EDGES|CONTAINS main.c:<global>#0 -> g#0
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#14
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#15
+EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#6 -> T:ANY
+EDGES|EVAL_TYPE <operator>.pointerCall#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.pointerCall#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.pointerCall#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.pointerCall#4 -> T:ANY
+EDGES|EVAL_TYPE api.h:<global>#1 -> T:ANY
+EDGES|EVAL_TYPE api.h:<global>#2 -> T:ANY
+EDGES|EVAL_TYPE declared#1 -> T:int
+EDGES|EVAL_TYPE declared#2 -> T:int
+EDGES|EVAL_TYPE declared#3 -> T:ANY
+EDGES|EVAL_TYPE declared#4 -> T:Unknown
+EDGES|EVAL_TYPE g#1 -> T:int
+EDGES|EVAL_TYPE g#10 -> T:ANY
+EDGES|EVAL_TYPE g#11 -> T:int
+EDGES|EVAL_TYPE g#12 -> T:int
+EDGES|EVAL_TYPE g#2 -> T:int
+EDGES|EVAL_TYPE g#3 -> T:void
+EDGES|EVAL_TYPE g#4 -> T:ANY
+EDGES|EVAL_TYPE g#6 -> T:ANY
+EDGES|EVAL_TYPE g#7 -> T:ANY
+EDGES|EVAL_TYPE g#8 -> T:ANY
+EDGES|EVAL_TYPE g#9 -> T:int
+EDGES|EVAL_TYPE main.c:<global>#14 -> T:ANY
+EDGES|EVAL_TYPE main.c:<global>#15 -> T:g
+EDGES|EVAL_TYPE main.c:<global>#16 -> T:ANY
+EDGES|PARAMETER_LINK <operator>.addition#1 -> <operator>.addition#3
+EDGES|PARAMETER_LINK <operator>.addition#4 -> <operator>.addition#6
+EDGES|PARAMETER_LINK <operator>.pointerCall#1 -> <operator>.pointerCall#3
+EDGES|PARAMETER_LINK declared#1 -> declared#2
+EDGES|PARAMETER_LINK g#1 -> g#2
+EDGES|REF NB:<global> -> NS:<global>
+EDGES|REF NB:<includes>:<global> -> NS:<global>
+EDGES|REF NB:api.h:<global> -> NS:<global>
+EDGES|REF NB:main.c:<global> -> NS:<global>
+EDGES|REF T:ANY -> D:ANY
+EDGES|REF T:Unknown -> D:Unknown
+EDGES|REF T:g -> D:g
+EDGES|REF T:int -> D:int
+EDGES|REF T:void -> D:void
+EDGES|REF g#11 -> g#1
+EDGES|REF g#8 -> g#4
+EDGES|REF g#9 -> g#1
+EDGES|REF main.c:<global>#15 -> g#0
+EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+EDGES|SOURCE_FILE D:ANY -> F:<includes>
+EDGES|SOURCE_FILE D:Unknown -> F:<includes>
+EDGES|SOURCE_FILE D:api.h:<global> -> F:api.h
+EDGES|SOURCE_FILE D:g -> F:main.c
+EDGES|SOURCE_FILE D:int -> F:<includes>
+EDGES|SOURCE_FILE D:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE D:void -> F:<includes>
+EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
+EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>
+EDGES|SOURCE_FILE NB:api.h:<global> -> F:api.h
+EDGES|SOURCE_FILE NB:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE api.h:<global>#0 -> F:api.h
+EDGES|SOURCE_FILE declared#0 -> F:api.h
+EDGES|SOURCE_FILE g#0 -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#0 -> F:main.c
+FLOWS|REACHING_DEF[(Unknown)(x) + declared(x)] g#6 -> g#12
+FLOWS|REACHING_DEF[(Unknown)(x) + declared(x)] g#6 -> g#5
+FLOWS|REACHING_DEF[(Unknown)(x)] g#7 -> g#12
+FLOWS|REACHING_DEF[(Unknown)(x)] g#7 -> g#6
+FLOWS|REACHING_DEF[<RET>] g#5 -> g#12
+FLOWS|REACHING_DEF[] <operator>.addition#0 -> <operator>.addition#1
+FLOWS|REACHING_DEF[] <operator>.addition#0 -> <operator>.addition#4
+FLOWS|REACHING_DEF[] <operator>.pointerCall#0 -> <operator>.pointerCall#1
+FLOWS|REACHING_DEF[] declared#0 -> declared#1
+FLOWS|REACHING_DEF[] g#0 -> g#1
+FLOWS|REACHING_DEF[] g#0 -> g#11
+FLOWS|REACHING_DEF[] g#0 -> g#8
+FLOWS|REACHING_DEF[] g#0 -> g#9
+FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#15
+FLOWS|REACHING_DEF[declared(x)] g#10 -> g#12
+FLOWS|REACHING_DEF[declared(x)] g#10 -> g#6
+FLOWS|REACHING_DEF[p1] <operator>.addition#1 -> <operator>.addition#3
+FLOWS|REACHING_DEF[p1] <operator>.addition#1 -> <operator>.addition#5
+FLOWS|REACHING_DEF[p1] <operator>.pointerCall#1 -> <operator>.pointerCall#3
+FLOWS|REACHING_DEF[p1] <operator>.pointerCall#1 -> <operator>.pointerCall#4
+FLOWS|REACHING_DEF[p2] <operator>.addition#4 -> <operator>.addition#5
+FLOWS|REACHING_DEF[p2] <operator>.addition#4 -> <operator>.addition#6
+FLOWS|REACHING_DEF[x] declared#1 -> declared#2
+FLOWS|REACHING_DEF[x] declared#1 -> declared#4
+FLOWS|REACHING_DEF[x] g#1 -> g#2
+FLOWS|REACHING_DEF[x] g#1 -> g#9
+FLOWS|REACHING_DEF[x] g#11 -> g#10
+FLOWS|REACHING_DEF[x] g#11 -> g#12
+FLOWS|REACHING_DEF[x] g#11 -> g#2
+FLOWS|REACHING_DEF[x] g#9 -> g#11
+FLOWS|REACHING_DEF[x] g#9 -> g#7
+CASE|unresolved_prefix
+=======================================================================================================
+Invoking CPG generator in a separate process. Note that the new process will consume additional memory.
+If you are importing a large codebase (and/or running into memory issues), please try the following:
+1) exit joern
+2) invoke the frontend: /Users/shayaunnejad/vibe-code/joern-oxidized/.local/astra-sprint/oracle/runtime/joern-cli/c2cpg.sh -J-Xmx4096m /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-declaration-macros/.local/header-return-regression/phantom/input/unresolved_prefix --output /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-declaration-macros/.local/header-return-regression/phantom/oracle-workspace/workspace/unresolved_prefix/cpg.bin.zip
+3) start joern, import the cpg: `importCpg("path/to/cpg")`
+=======================================================================================================
+
+[INFO ] initialising from existing storage (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-declaration-macros/.local/header-return-regression/phantom/oracle-workspace/workspace/unresolved_prefix/cpg.bin.tmp)
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.FileCreationPass
+[INFO ] Pass io.joern.x2cpg.passes.base.FileCreationPass completed in 1 ms (74% on mutations). 17 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.NamespaceCreator
+[INFO ] Pass io.joern.x2cpg.passes.base.NamespaceCreator completed in 0 ms (80% on mutations). 5 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.TypeDeclStubCreator
+[INFO ] Pass io.joern.x2cpg.passes.base.TypeDeclStubCreator completed in 0 ms (70% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.MethodStubCreator
+[INFO ] Pass io.joern.x2cpg.passes.base.MethodStubCreator completed in 1 ms (63% on mutations). 16 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.ParameterIndexCompatPass
+[INFO ] Pass io.joern.x2cpg.passes.base.ParameterIndexCompatPass completed in 0 ms (58% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.MethodDecoratorPass
+[INFO ] Pass io.joern.x2cpg.passes.base.MethodDecoratorPass completed in 0 ms (76% on mutations). 15 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.AstLinkerPass
+[INFO ] Pass io.joern.x2cpg.passes.base.AstLinkerPass completed in 0 ms (65% on mutations). 8 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.ContainsEdgePass
+[INFO ] Pass io.joern.x2cpg.passes.base.ContainsEdgePass completed in 1 ms (61% on mutations). 28 + 0 changes committed from 18 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.TypeRefPass
+[INFO ] Pass io.joern.x2cpg.passes.base.TypeRefPass completed in 1 ms (63% on mutations). 5 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.TypeEvalPass
+[INFO ] Pass io.joern.x2cpg.passes.base.TypeEvalPass completed in 1 ms (52% on mutations). 32 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 0 ms (80% on mutations). 1 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.controlflow.CfgCreationPass
+[INFO ] Pass io.joern.x2cpg.passes.controlflow.CfgCreationPass completed in 1 ms (38% on mutations). 16 + 0 changes committed from 7 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.controlflow.cfgdominator.CfgDominatorPass
+[INFO ] Pass io.joern.x2cpg.passes.controlflow.cfgdominator.CfgDominatorPass completed in 1 ms (54% on mutations). 32 + 0 changes committed from 7 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.controlflow.codepencegraph.CdgPass
+[INFO ] Pass io.joern.x2cpg.passes.controlflow.codepencegraph.CdgPass completed in 0 ms (49% on mutations). 0 + 0 changes committed from 7 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 0 ms (79% on mutations). 1 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.typerelations.TypeHierarchyPass
+[INFO ] Pass io.joern.x2cpg.passes.typerelations.TypeHierarchyPass completed in 0 ms (74% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.typerelations.AliasLinkerPass
+[INFO ] Pass io.joern.x2cpg.passes.typerelations.AliasLinkerPass completed in 0 ms (80% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.typerelations.FieldAccessLinkerPass
+[INFO ] Pass io.joern.x2cpg.passes.typerelations.FieldAccessLinkerPass completed in 0 ms (82% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 0 ms (87% on mutations). 1 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.callgraph.MethodRefLinker
+[INFO ] Pass io.joern.x2cpg.passes.callgraph.MethodRefLinker completed in 0 ms (74% on mutations). 1 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.callgraph.StaticCallLinker
+[INFO ] Pass io.joern.x2cpg.passes.callgraph.StaticCallLinker completed in 0 ms (59% on mutations). 2 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.callgraph.DynamicCallLinker
+[INFO ] Unable to link dynamic CALL with METHOD_FULL_NAME <operator>.pointerCall and context: (Unknown)(x) @ line Some(2)
+[INFO ] Pass io.joern.x2cpg.passes.callgraph.DynamicCallLinker completed in 0 ms (36% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 0 ms (73% on mutations). 1 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.dataflowengineoss.passes.reachingdef.ReachingDefPass
+[INFO ] Calculating reaching definitions for: declared in api.h
+[INFO ] Calculating reaching definitions for: g in main.c
+[INFO ] Calculating reaching definitions for: <includes>:<global> in <includes>
+[INFO ] Calculating reaching definitions for: main.c:<global> in main.c
+[INFO ] Calculating reaching definitions for: <operator>.pointerCall in <empty>
+[INFO ] Calculating reaching definitions for: <operator>.addition in <empty>
+[INFO ] Number of definitions for declared: 1
+[INFO ] Number of definitions for <includes>:<global>: 0
+[INFO ] Calculating reaching definitions for: api.h:<global> in api.h
+[INFO ] Number of definitions for <operator>.pointerCall: 1
+[INFO ] Number of definitions for <operator>.addition: 2
+[INFO ] Number of definitions for api.h:<global>: 0
+[INFO ] Number of definitions for main.c:<global>: 0
+[INFO ] Number of definitions for g: 8
+[INFO ] Pass io.joern.dataflowengineoss.passes.reachingdef.ReachingDefPass completed in 2 ms (16% on mutations). 31 + 0 changes committed from 7 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 0 ms (82% on mutations). 1 + 0 changes committed from 1 parts.
+AST|METHOD NAME=<global> CODE=<global> FULL_NAME=<includes>:<global> ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=<operator>.addition FULL_NAME=<operator>.addition ORDER=0
+AST|  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=<operator>.pointerCall FULL_NAME=<operator>.pointerCall ORDER=0
+AST|  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=<global> CODE=<global> FULL_NAME=api.h:<global> ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+AST|    UNKNOWN CODE=API ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=declared CODE=Unknown declared(int x); FULL_NAME=declared SIGNATURE=Unknown(int) ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+AST|  METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=Unknown ORDER=3
+AST|
+AST|METHOD NAME=g CODE=int g(int x) { return (Unknown)(x) + declared(x); } FULL_NAME=g SIGNATURE=int(int) ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+AST|  METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+AST|  BLOCK CODE={ return (Unknown)(x) + declared(x); } TYPE_FULL_NAME=void ORDER=2
+AST|    LOCAL NAME=Unknown CODE=<unknown> Unknown TYPE_FULL_NAME=ANY ORDER=0
+AST|    RETURN CODE=return (Unknown)(x) + declared(x); ORDER=1
+AST|      CALL NAME=<operator>.addition CODE=(Unknown)(x) + declared(x) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|        CALL NAME=<operator>.pointerCall CODE=(Unknown)(x) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.pointerCall ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=DYNAMIC_DISPATCH
+AST|          IDENTIFIER NAME=Unknown CODE=<unknown> Unknown TYPE_FULL_NAME=ANY ORDER=1
+AST|          IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=1
+AST|        CALL NAME=declared CODE=declared(x) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=declared ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+AST|
+AST|METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1
+AST|  METHOD NAME=g CODE=int g(int x) { return (Unknown)(x) + declared(x); } FULL_NAME=g SIGNATURE=int(int) ORDER=1
+AST|    METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+AST|    METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+AST|    BLOCK CODE={ return (Unknown)(x) + declared(x); } TYPE_FULL_NAME=void ORDER=2
+AST|      LOCAL NAME=Unknown CODE=<unknown> Unknown TYPE_FULL_NAME=ANY ORDER=0
+AST|      RETURN CODE=return (Unknown)(x) + declared(x); ORDER=1
+AST|        CALL NAME=<operator>.addition CODE=(Unknown)(x) + declared(x) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|          CALL NAME=<operator>.pointerCall CODE=(Unknown)(x) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.pointerCall ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=DYNAMIC_DISPATCH
+AST|            IDENTIFIER NAME=Unknown CODE=<unknown> Unknown TYPE_FULL_NAME=ANY ORDER=1
+AST|            IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=1
+AST|          CALL NAME=declared CODE=declared(x) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=declared ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|            IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+AST|    METHOD_REF CODE=g TYPE_FULL_NAME=g METHOD_FULL_NAME=g ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|
+NODES|META_DATA LANGUAGE=NEWC
+NODES|FILE NAME=<includes> ORDER=1
+NODES|FILE NAME=<unknown> ORDER=0
+NODES|FILE NAME=api.h ORDER=0
+NODES|FILE NAME=main.c ORDER=0
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<global> FILENAME=<unknown> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<includes>:<global> FILENAME=<includes> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=api.h:<global> FILENAME=api.h ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|NAMESPACE NAME=<global>
+NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=Unknown FULL_NAME=Unknown CODE=Unknown IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=<global> FULL_NAME=api.h:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=api.h:<global> FILENAME=api.h ORDER=1
+NODES|TYPE_DECL NAME=g FULL_NAME=g CODE=g AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=<global> FULL_NAME=main.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=2
+NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+NODES|TYPE NAME=Unknown FULL_NAME=Unknown TYPE_DECL_FULL_NAME=Unknown
+NODES|TYPE NAME=g FULL_NAME=g TYPE_DECL_FULL_NAME=g
+NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+EDGES|ARGUMENT g#10 -> g#11
+EDGES|ARGUMENT g#5 -> g#6
+EDGES|ARGUMENT g#6 -> g#10
+EDGES|ARGUMENT g#6 -> g#7
+EDGES|ARGUMENT g#7 -> g#9
+EDGES|CALL g#10 -> declared#0
+EDGES|CALL g#6 -> <operator>.addition#0
+EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+EDGES|CFG <operator>.addition#0 -> <operator>.addition#5
+EDGES|CFG <operator>.pointerCall#0 -> <operator>.pointerCall#4
+EDGES|CFG api.h:<global>#0 -> api.h:<global>#2
+EDGES|CFG api.h:<global>#2 -> api.h:<global>#3
+EDGES|CFG declared#0 -> declared#4
+EDGES|CFG g#0 -> g#8
+EDGES|CFG g#10 -> g#6
+EDGES|CFG g#11 -> g#10
+EDGES|CFG g#5 -> g#12
+EDGES|CFG g#6 -> g#5
+EDGES|CFG g#7 -> g#11
+EDGES|CFG g#8 -> g#9
+EDGES|CFG g#9 -> g#7
+EDGES|CFG main.c:<global>#0 -> main.c:<global>#15
+EDGES|CFG main.c:<global>#15 -> main.c:<global>#16
+EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+EDGES|CONTAINS <operator>.addition#0 -> <operator>.addition#2
+EDGES|CONTAINS <operator>.pointerCall#0 -> <operator>.pointerCall#2
+EDGES|CONTAINS D:api.h:<global> -> api.h:<global>#0
+EDGES|CONTAINS D:api.h:<global> -> declared#0
+EDGES|CONTAINS D:main.c:<global> -> D:g
+EDGES|CONTAINS D:main.c:<global> -> main.c:<global>#0
+EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+EDGES|CONTAINS F:<includes> -> D:ANY
+EDGES|CONTAINS F:<includes> -> D:Unknown
+EDGES|CONTAINS F:<includes> -> D:int
+EDGES|CONTAINS F:<includes> -> D:void
+EDGES|CONTAINS F:api.h -> D:api.h:<global>
+EDGES|CONTAINS F:main.c -> D:main.c:<global>
+EDGES|CONTAINS api.h:<global>#0 -> api.h:<global>#1
+EDGES|CONTAINS api.h:<global>#0 -> api.h:<global>#2
+EDGES|CONTAINS declared#0 -> declared#3
+EDGES|CONTAINS g#0 -> g#10
+EDGES|CONTAINS g#0 -> g#11
+EDGES|CONTAINS g#0 -> g#3
+EDGES|CONTAINS g#0 -> g#5
+EDGES|CONTAINS g#0 -> g#6
+EDGES|CONTAINS g#0 -> g#7
+EDGES|CONTAINS g#0 -> g#8
+EDGES|CONTAINS g#0 -> g#9
+EDGES|CONTAINS main.c:<global>#0 -> g#0
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#14
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#15
+EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#6 -> T:ANY
+EDGES|EVAL_TYPE <operator>.pointerCall#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.pointerCall#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.pointerCall#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.pointerCall#4 -> T:ANY
+EDGES|EVAL_TYPE api.h:<global>#1 -> T:ANY
+EDGES|EVAL_TYPE api.h:<global>#3 -> T:ANY
+EDGES|EVAL_TYPE declared#1 -> T:int
+EDGES|EVAL_TYPE declared#2 -> T:int
+EDGES|EVAL_TYPE declared#3 -> T:ANY
+EDGES|EVAL_TYPE declared#4 -> T:Unknown
+EDGES|EVAL_TYPE g#1 -> T:int
+EDGES|EVAL_TYPE g#10 -> T:ANY
+EDGES|EVAL_TYPE g#11 -> T:int
+EDGES|EVAL_TYPE g#12 -> T:int
+EDGES|EVAL_TYPE g#2 -> T:int
+EDGES|EVAL_TYPE g#3 -> T:void
+EDGES|EVAL_TYPE g#4 -> T:ANY
+EDGES|EVAL_TYPE g#6 -> T:ANY
+EDGES|EVAL_TYPE g#7 -> T:ANY
+EDGES|EVAL_TYPE g#8 -> T:ANY
+EDGES|EVAL_TYPE g#9 -> T:int
+EDGES|EVAL_TYPE main.c:<global>#14 -> T:ANY
+EDGES|EVAL_TYPE main.c:<global>#15 -> T:g
+EDGES|EVAL_TYPE main.c:<global>#16 -> T:ANY
+EDGES|PARAMETER_LINK <operator>.addition#1 -> <operator>.addition#3
+EDGES|PARAMETER_LINK <operator>.addition#4 -> <operator>.addition#6
+EDGES|PARAMETER_LINK <operator>.pointerCall#1 -> <operator>.pointerCall#3
+EDGES|PARAMETER_LINK declared#1 -> declared#2
+EDGES|PARAMETER_LINK g#1 -> g#2
+EDGES|REF NB:<global> -> NS:<global>
+EDGES|REF NB:<includes>:<global> -> NS:<global>
+EDGES|REF NB:api.h:<global> -> NS:<global>
+EDGES|REF NB:main.c:<global> -> NS:<global>
+EDGES|REF T:ANY -> D:ANY
+EDGES|REF T:Unknown -> D:Unknown
+EDGES|REF T:g -> D:g
+EDGES|REF T:int -> D:int
+EDGES|REF T:void -> D:void
+EDGES|REF g#11 -> g#1
+EDGES|REF g#8 -> g#4
+EDGES|REF g#9 -> g#1
+EDGES|REF main.c:<global>#15 -> g#0
+EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+EDGES|SOURCE_FILE D:ANY -> F:<includes>
+EDGES|SOURCE_FILE D:Unknown -> F:<includes>
+EDGES|SOURCE_FILE D:api.h:<global> -> F:api.h
+EDGES|SOURCE_FILE D:g -> F:main.c
+EDGES|SOURCE_FILE D:int -> F:<includes>
+EDGES|SOURCE_FILE D:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE D:void -> F:<includes>
+EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
+EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>
+EDGES|SOURCE_FILE NB:api.h:<global> -> F:api.h
+EDGES|SOURCE_FILE NB:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE api.h:<global>#0 -> F:api.h
+EDGES|SOURCE_FILE declared#0 -> F:api.h
+EDGES|SOURCE_FILE g#0 -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#0 -> F:main.c
+FLOWS|REACHING_DEF[(Unknown)(x) + declared(x)] g#6 -> g#12
+FLOWS|REACHING_DEF[(Unknown)(x) + declared(x)] g#6 -> g#5
+FLOWS|REACHING_DEF[(Unknown)(x)] g#7 -> g#12
+FLOWS|REACHING_DEF[(Unknown)(x)] g#7 -> g#6
+FLOWS|REACHING_DEF[<RET>] g#5 -> g#12
+FLOWS|REACHING_DEF[] <operator>.addition#0 -> <operator>.addition#1
+FLOWS|REACHING_DEF[] <operator>.addition#0 -> <operator>.addition#4
+FLOWS|REACHING_DEF[] <operator>.pointerCall#0 -> <operator>.pointerCall#1
+FLOWS|REACHING_DEF[] declared#0 -> declared#1
+FLOWS|REACHING_DEF[] g#0 -> g#1
+FLOWS|REACHING_DEF[] g#0 -> g#11
+FLOWS|REACHING_DEF[] g#0 -> g#8
+FLOWS|REACHING_DEF[] g#0 -> g#9
+FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#15
+FLOWS|REACHING_DEF[declared(x)] g#10 -> g#12
+FLOWS|REACHING_DEF[declared(x)] g#10 -> g#6
+FLOWS|REACHING_DEF[p1] <operator>.addition#1 -> <operator>.addition#3
+FLOWS|REACHING_DEF[p1] <operator>.addition#1 -> <operator>.addition#5
+FLOWS|REACHING_DEF[p1] <operator>.pointerCall#1 -> <operator>.pointerCall#3
+FLOWS|REACHING_DEF[p1] <operator>.pointerCall#1 -> <operator>.pointerCall#4
+FLOWS|REACHING_DEF[p2] <operator>.addition#4 -> <operator>.addition#5
+FLOWS|REACHING_DEF[p2] <operator>.addition#4 -> <operator>.addition#6
+FLOWS|REACHING_DEF[x] declared#1 -> declared#2
+FLOWS|REACHING_DEF[x] declared#1 -> declared#4
+FLOWS|REACHING_DEF[x] g#1 -> g#2
+FLOWS|REACHING_DEF[x] g#1 -> g#9
+FLOWS|REACHING_DEF[x] g#11 -> g#10
+FLOWS|REACHING_DEF[x] g#11 -> g#12
+FLOWS|REACHING_DEF[x] g#11 -> g#2
+FLOWS|REACHING_DEF[x] g#9 -> g#11
+FLOWS|REACHING_DEF[x] g#9 -> g#7
+[INFO ] writing to storage at `/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-declaration-macros/.local/header-return-regression/phantom/oracle-workspace/workspace/parenthesized_unknown/cpg.bin.tmp`
+[INFO ] closed graph at /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-declaration-macros/.local/header-return-regression/phantom/oracle-workspace/workspace/parenthesized_unknown/cpg.bin.tmp
+[INFO ] writing to storage at `/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-declaration-macros/.local/header-return-regression/phantom/oracle-workspace/workspace/prefix_primitive/cpg.bin.tmp`
+[INFO ] closed graph at /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-declaration-macros/.local/header-return-regression/phantom/oracle-workspace/workspace/prefix_primitive/cpg.bin.tmp
+[INFO ] writing to storage at `/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-declaration-macros/.local/header-return-regression/phantom/oracle-workspace/workspace/prefix_unknown/cpg.bin.tmp`
+[INFO ] closed graph at /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-declaration-macros/.local/header-return-regression/phantom/oracle-workspace/workspace/prefix_unknown/cpg.bin.tmp
+[INFO ] writing to storage at `/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-declaration-macros/.local/header-return-regression/phantom/oracle-workspace/workspace/unresolved_prefix/cpg.bin.tmp`
+[INFO ] closed graph at /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-declaration-macros/.local/header-return-regression/phantom/oracle-workspace/workspace/unresolved_prefix/cpg.bin.tmp

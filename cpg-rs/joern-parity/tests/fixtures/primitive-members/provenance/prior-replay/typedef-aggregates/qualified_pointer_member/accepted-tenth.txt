@@ -1,0 +1,74 @@
+METHOD NAME=<global> CODE=<global> FULL_NAME=<includes>:<global> ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1
+  TYPE_DECL NAME=RN CODE=typedef struct { const int *pointer; unsigned long count; } FULL_NAME=RN ORDER=1
+    MEMBER NAME=pointer CODE=*pointer TYPE_FULL_NAME=int* ORDER=1
+    MEMBER NAME=count CODE=count TYPE_FULL_NAME=longunsigned ORDER=2
+  LOCAL NAME=RN CODE=typedef struct { const int *pointer; unsigned long count; } RN TYPE_FULL_NAME=struct ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+    TYPE_REF CODE=typedef struct { const int *pointer; unsigned long count; } TYPE_FULL_NAME=RN ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+NODES|META_DATA LANGUAGE=NEWC
+NODES|FILE NAME=<includes> ORDER=1
+NODES|FILE NAME=<unknown> ORDER=0
+NODES|FILE NAME=main.c ORDER=0
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<global> FILENAME=<unknown> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<includes>:<global> FILENAME=<includes> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|NAMESPACE NAME=<global>
+NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=RN FULL_NAME=RN CODE=typedef struct { const int *pointer; unsigned long count; } AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=int* FULL_NAME=int* CODE=int* IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=longunsigned FULL_NAME=longunsigned CODE=longunsigned IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=<global> FULL_NAME=main.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=struct FULL_NAME=struct CODE=struct IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+NODES|TYPE NAME=RN FULL_NAME=RN TYPE_DECL_FULL_NAME=RN
+NODES|TYPE NAME=int* FULL_NAME=int* TYPE_DECL_FULL_NAME=int*
+NODES|TYPE NAME=longunsigned FULL_NAME=longunsigned TYPE_DECL_FULL_NAME=longunsigned
+NODES|TYPE NAME=struct FULL_NAME=struct TYPE_DECL_FULL_NAME=struct
+EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+EDGES|CFG main.c:<global>#0 -> main.c:<global>#6
+EDGES|CFG main.c:<global>#6 -> main.c:<global>#7
+EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+EDGES|CONTAINS D:main.c:<global> -> main.c:<global>#0
+EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+EDGES|CONTAINS F:<includes> -> D:ANY
+EDGES|CONTAINS F:<includes> -> D:int*
+EDGES|CONTAINS F:<includes> -> D:longunsigned
+EDGES|CONTAINS F:<includes> -> D:struct
+EDGES|CONTAINS F:main.c -> D:main.c:<global>
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#1
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#5
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#6
+EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+EDGES|EVAL_TYPE main.c:<global>#2 -> T:int*
+EDGES|EVAL_TYPE main.c:<global>#3 -> T:longunsigned
+EDGES|EVAL_TYPE main.c:<global>#4 -> T:struct
+EDGES|EVAL_TYPE main.c:<global>#5 -> T:ANY
+EDGES|EVAL_TYPE main.c:<global>#6 -> T:RN
+EDGES|EVAL_TYPE main.c:<global>#7 -> T:ANY
+EDGES|REF NB:<global> -> NS:<global>
+EDGES|REF NB:<includes>:<global> -> NS:<global>
+EDGES|REF NB:main.c:<global> -> NS:<global>
+EDGES|REF T:ANY -> D:ANY
+EDGES|REF T:RN -> main.c:<global>#1
+EDGES|REF T:int* -> D:int*
+EDGES|REF T:longunsigned -> D:longunsigned
+EDGES|REF T:struct -> D:struct
+EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+EDGES|SOURCE_FILE D:ANY -> F:<includes>
+EDGES|SOURCE_FILE D:int* -> F:<includes>
+EDGES|SOURCE_FILE D:longunsigned -> F:<includes>
+EDGES|SOURCE_FILE D:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE D:struct -> F:<includes>
+EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
+EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>
+EDGES|SOURCE_FILE NB:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#0 -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#1 -> F:main.c
+FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#6

@@ -1,0 +1,70 @@
+   Compiling cpg-core v0.1.1 (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/cpg-core)
+   Compiling cpg-frontend v0.1.1 (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/cpg-frontend)
+   Compiling cpg-analysis v0.1.1 (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/cpg-analysis)
+   Compiling cpg-lang-c v0.1.1 (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/cpg-lang-c)
+   Compiling cpg-incremental v0.1.1 (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/cpg-incremental)
+   Compiling joern-parity v0.1.1 (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/cpg-rs/joern-parity)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.25s
+     Running tests/array_dimension_macros.rs (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/target/debug/deps/array_dimension_macros-b3d713312526e1ed)
+
+running 1 test
+test array_dimension_macros_match_complete_live_graphs ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests/array_initializers.rs (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/target/debug/deps/array_initializers-0eb8fcc1cfd96a10)
+
+running 5 tests
+test ordinary_assignments_do_not_borrow_nested_declaration_locations ... ok
+test all_local_allocations_precede_explicit_initializers ... ok
+test array_initializers_preserve_source_lines_across_repeated_methods ... ok
+test allocation_views_do_not_consume_declaration_or_following_statement_locations ... ok
+test array_initializers_match_complete_isolated_live_graphs ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.19s
+
+     Running tests/body_includes.rs (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/target/debug/deps/body_includes-4f840c528273dbfc)
+
+running 3 tests
+test generated_header_method_registration_preserves_both_macro_owners ... ok
+test included_arrays_preserve_complete_supported_method_subtrees ... ok
+test body_includes_match_complete_live_graphs ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+
+     Running tests/body_macro_state.rs (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/target/debug/deps/body_macro_state-b977641cb6f04920)
+
+running 2 tests
+test type_position_argument_events_preserve_complete_macro_methods ... ok
+test body_macro_state_matches_complete_isolated_live_graphs ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.18s
+
+     Running tests/primitive_members.rs (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/target/debug/deps/primitive_members-6d3a78bb224ce90b)
+
+running 2 tests
+test retained_fixedtables_anchors_match_complete_live_graphs ... ok
+test primitive_members_match_complete_live_graphs ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests/primitive_roles.rs (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/target/debug/deps/primitive_roles-1902e547d3bd0681)
+
+running 3 tests
+test definition_prototype_and_call_result_types_stay_distinct ... ok
+test function_pointer_parameters_keep_declaration_types_and_resolve_call_results ... ok
+test primitive_roles_match_each_complete_isolated_live_graph ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.22s
+
+     Running tests/typedef_aggregates.rs (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/target/debug/deps/typedef_aggregates-b6cfd0f5576af698)
+
+running 5 tests
+test lua_typedef_body_and_initializer_survive_production_import ... ok
+test every_member_dimension_reaches_the_initializer ... ok
+test aggregate_pointer_and_array_aliases_keep_underlying_types_and_initializers ... ok
+test typedef_tags_aliases_and_source_order_remain_distinct ... ok
+test typedef_aggregates_match_complete_isolated_live_graphs ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+

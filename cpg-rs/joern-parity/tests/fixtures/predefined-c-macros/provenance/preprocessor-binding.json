@@ -1,0 +1,14 @@
+{
+  "jar": "/Users/shayaunnejad/vibe-code/joern-oxidized/.local/astra-sprint/oracle/runtime/joern-cli/frontends/c2cpg/lib/io.joern.eclipse-cdt-core-9.2.100.202507101054+1.jar",
+  "jarSha256": "14f94a408d2e780378e7d4c9c431dd44f408d56704fd58a216c620abd5aed250",
+  "command": [
+    "/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home/bin/javap",
+    "-c",
+    "-p",
+    "-classpath",
+    "/Users/shayaunnejad/vibe-code/joern-oxidized/.local/astra-sprint/oracle/runtime/joern-cli/frontends/c2cpg/lib/io.joern.eclipse-cdt-core-9.2.100.202507101054+1.jar",
+    "org.eclipse.cdt.internal.core.parser.scanner.CPreprocessor"
+  ],
+  "output": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/sixth-batch/pinned-predefines/CPreprocessor.txt",
+  "sha256": "17f813d083f28d2139790aacfa6b8ce75a6c25a8df4b4e7a1e28cb94c5046871"
+}

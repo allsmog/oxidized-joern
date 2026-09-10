@@ -1,0 +1,14 @@
+{
+  "self_comment": {
+    "main.c": "int invoke(int x){ /* FULL_NAME=invoke */ return x; }\n"
+  },
+  "self_literal": {
+    "main.c": "const char *invoke(int x){return \" FULL_NAME=invoke \";}\n"
+  },
+  "self_order_comment": {
+    "main.c": "int invoke(int x){ /* FULL_NAME=invoke ORDER=1 */ return x; }\n"
+  },
+  "fullname_property_in_code": {
+    "main.c": "int invoke(int x){ /* TYPE_FULL_NAME=int FULL_NAME=invoke */ return x; }\n"
+  }
+}

@@ -1,0 +1,27 @@
+   Compiling cpg-lang-c v0.1.1 (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-declaration-macros/cpg-rs/cpg-lang-c)
+   Compiling joern-parity v0.1.1 (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-declaration-macros/cpg-rs/joern-parity)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.26s
+     Running tests/declaration_macros.rs (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/target/debug/deps/declaration_macros-55c28d9b973576aa)
+
+running 3 tests
+test empty_declaration_prefix_retains_method_and_call_locations ... FAILED
+test header_call_types_follow_each_importing_translation_unit ... ok
+test declaration_macros_match_complete_isolated_live_graphs ... ok
+
+failures:
+
+---- empty_declaration_prefix_retains_method_and_call_locations stdout ----
+
+thread 'empty_declaration_prefix_retains_method_and_call_locations' (10472381) panicked at joern-parity/tests/declaration_macros.rs:107:5:
+assertion `left == right` failed
+  left: None
+ right: Some(3)
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    empty_declaration_prefix_retains_method_and_call_locations
+
+test result: FAILED. 2 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.09s
+
+error: test failed, to rerun pass `-p joern-parity --test declaration_macros`

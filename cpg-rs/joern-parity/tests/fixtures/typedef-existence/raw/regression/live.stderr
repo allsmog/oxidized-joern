@@ -1,0 +1,89 @@
+executing /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-cast-context/.local/cast-regression/oracle.sc with params=Map(inputPath -> /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-cast-context/.local/cast-regression/input)
+Using generator for language: NEWC: CCpgGenerator
+Creating project `known_outer_unknown_inner` for code at `/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-cast-context/.local/cast-regression/input/known_outer_unknown_inner`
+moving cpg.bin.zip to cpg.bin because it is already a database file
+Creating working copy of CPG to be safe
+Loading base CPG from: /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-cast-context/.local/cast-regression/oracle-workspace/workspace/known_outer_unknown_inner/cpg.bin.tmp
+Code successfully imported. You can now query it using `cpg`.
+For an overview of all imported code, type `workspace`.
+Adding default overlays to base CPG
+The graph has been modified. You may want to use the `save` command to persist changes to disk.  All changes will also be saved collectively on exit
+The graph has been modified. You may want to use the `save` command to persist changes to disk.  All changes will also be saved collectively on exit
+Using generator for language: NEWC: CCpgGenerator
+Creating project `lua_all_headers` for code at `/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-cast-context/.local/cast-regression/input/lua_all_headers`
+moving cpg.bin.zip to cpg.bin because it is already a database file
+Creating working copy of CPG to be safe
+Loading base CPG from: /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-cast-context/.local/cast-regression/oracle-workspace/workspace/lua_all_headers/cpg.bin.tmp
+Code successfully imported. You can now query it using `cpg`.
+For an overview of all imported code, type `workspace`.
+Adding default overlays to base CPG
+The graph has been modified. You may want to use the `save` command to persist changes to disk.  All changes will also be saved collectively on exit
+The graph has been modified. You may want to use the `save` command to persist changes to disk.  All changes will also be saved collectively on exit
+Using generator for language: NEWC: CCpgGenerator
+Creating project `lua_type_headers` for code at `/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-cast-context/.local/cast-regression/input/lua_type_headers`
+moving cpg.bin.zip to cpg.bin because it is already a database file
+Creating working copy of CPG to be safe
+Loading base CPG from: /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-cast-context/.local/cast-regression/oracle-workspace/workspace/lua_type_headers/cpg.bin.tmp
+Code successfully imported. You can now query it using `cpg`.
+For an overview of all imported code, type `workspace`.
+Adding default overlays to base CPG
+The graph has been modified. You may want to use the `save` command to persist changes to disk.  All changes will also be saved collectively on exit
+The graph has been modified. You may want to use the `save` command to persist changes to disk.  All changes will also be saved collectively on exit
+Using generator for language: NEWC: CCpgGenerator
+Creating project `macro_underlying` for code at `/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-cast-context/.local/cast-regression/input/macro_underlying`
+moving cpg.bin.zip to cpg.bin because it is already a database file
+Creating working copy of CPG to be safe
+Loading base CPG from: /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-cast-context/.local/cast-regression/oracle-workspace/workspace/macro_underlying/cpg.bin.tmp
+Code successfully imported. You can now query it using `cpg`.
+For an overview of all imported code, type `workspace`.
+Adding default overlays to base CPG
+The graph has been modified. You may want to use the `save` command to persist changes to disk.  All changes will also be saved collectively on exit
+The graph has been modified. You may want to use the `save` command to persist changes to disk.  All changes will also be saved collectively on exit
+Using generator for language: NEWC: CCpgGenerator
+Creating project `no_typedef_nested` for code at `/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-cast-context/.local/cast-regression/input/no_typedef_nested`
+moving cpg.bin.zip to cpg.bin because it is already a database file
+Creating working copy of CPG to be safe
+Loading base CPG from: /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-cast-context/.local/cast-regression/oracle-workspace/workspace/no_typedef_nested/cpg.bin.tmp
+Code successfully imported. You can now query it using `cpg`.
+For an overview of all imported code, type `workspace`.
+Adding default overlays to base CPG
+The graph has been modified. You may want to use the `save` command to persist changes to disk.  All changes will also be saved collectively on exit
+The graph has been modified. You may want to use the `save` command to persist changes to disk.  All changes will also be saved collectively on exit
+Using generator for language: NEWC: CCpgGenerator
+Creating project `plain_type_contexts` for code at `/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-cast-context/.local/cast-regression/input/plain_type_contexts`
+moving cpg.bin.zip to cpg.bin because it is already a database file
+Creating working copy of CPG to be safe
+Loading base CPG from: /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-cast-context/.local/cast-regression/oracle-workspace/workspace/plain_type_contexts/cpg.bin.tmp
+Code successfully imported. You can now query it using `cpg`.
+For an overview of all imported code, type `workspace`.
+Adding default overlays to base CPG
+The graph has been modified. You may want to use the `save` command to persist changes to disk.  All changes will also be saved collectively on exit
+The graph has been modified. You may want to use the `save` command to persist changes to disk.  All changes will also be saved collectively on exit
+Using generator for language: NEWC: CCpgGenerator
+Creating project `undefined_underlying` for code at `/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-cast-context/.local/cast-regression/input/undefined_underlying`
+moving cpg.bin.zip to cpg.bin because it is already a database file
+Creating working copy of CPG to be safe
+Loading base CPG from: /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-cast-context/.local/cast-regression/oracle-workspace/workspace/undefined_underlying/cpg.bin.tmp
+Code successfully imported. You can now query it using `cpg`.
+For an overview of all imported code, type `workspace`.
+Adding default overlays to base CPG
+The graph has been modified. You may want to use the `save` command to persist changes to disk.  All changes will also be saved collectively on exit
+The graph has been modified. You may want to use the `save` command to persist changes to disk.  All changes will also be saved collectively on exit
+Using generator for language: NEWC: CCpgGenerator
+Creating project `unsigned_undefined` for code at `/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-cast-context/.local/cast-regression/input/unsigned_undefined`
+moving cpg.bin.zip to cpg.bin because it is already a database file
+Creating working copy of CPG to be safe
+Loading base CPG from: /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-cast-context/.local/cast-regression/oracle-workspace/workspace/unsigned_undefined/cpg.bin.tmp
+Code successfully imported. You can now query it using `cpg`.
+For an overview of all imported code, type `workspace`.
+Adding default overlays to base CPG
+The graph has been modified. You may want to use the `save` command to persist changes to disk.  All changes will also be saved collectively on exit
+The graph has been modified. You may want to use the `save` command to persist changes to disk.  All changes will also be saved collectively on exit
+closing/saving project `known_outer_unknown_inner`
+closing/saving project `lua_all_headers`
+closing/saving project `lua_type_headers`
+closing/saving project `macro_underlying`
+closing/saving project `no_typedef_nested`
+closing/saving project `plain_type_contexts`
+closing/saving project `undefined_underlying`
+closing/saving project `unsigned_undefined`

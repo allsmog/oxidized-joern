@@ -1,0 +1,21 @@
+{
+  "original": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/twelfth-supplemental-gap-report-v2/REPORT.md",
+    "sha256": "b5b27db1f32d12883f42102d7eff90b89006d333573994dea78c1ac2aef48e36"
+  },
+  "delivered": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/docs/conformance/astra-twelfth-supplemental-gaps.md",
+    "sha256": "c19bd52ac0e79dd3dadb0245459f54e9b2618a5f21a005eea3e2f8a83828977d"
+  },
+  "linkRemappings": {
+    "../twelfth-root-eleven-review-v2/result/final-review.json": "astra-twelfth-evidence/capture-review.json",
+    "../twelfth-lint-continuity-review/review.json": "astra-twelfth-evidence/lint-continuity-review.json",
+    "evidence.json": "astra-twelfth-evidence/supplemental-gap-evidence.json",
+    "</Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/joern-parity/tests/fixtures/body-macro-state/provenance/upstream/AstCreatorHelper.scala:179>": "../../cpg-rs/joern-parity/tests/fixtures/body-macro-state/provenance/upstream/AstCreatorHelper.scala#L179"
+  },
+  "addedContent": "Explicit availability boundary for large local candidate diffs; included reference snapshots are not described as committed before the checkpoint commit.",
+  "originalContentT8": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/twelfth-gap-draft-t8-v2/review.json",
+    "sha256": "b5990211efd7dfe983aa8c8a467f305a3a10996cfb30ce7c4e5e6093392d8f03"
+  }
+}

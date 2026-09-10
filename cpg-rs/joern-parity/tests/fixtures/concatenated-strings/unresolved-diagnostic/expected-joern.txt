@@ -1,0 +1,506 @@
+METHOD NAME=<global> CODE=<global> FULL_NAME=<includes>:<global> ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.conditional FULL_NAME=<operator>.conditional ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_IN NAME=p3 CODE=p3 TYPE_FULL_NAME=ANY ORDER=3
+  METHOD_PARAMETER_OUT NAME=p3 CODE=p3 TYPE_FULL_NAME=ANY ORDER=3
+
+METHOD NAME=argument CODE=void argument(void) { consume("first" "second"); } FULL_NAME=argument SIGNATURE=void(void) ORDER=1
+  METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  BLOCK CODE={ consume("first" "second"); } TYPE_FULL_NAME=void ORDER=2
+    CALL NAME=consume CODE=consume("first" "second") TYPE_FULL_NAME=void METHOD_FULL_NAME=consume ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+      LITERAL CODE="first" "second" TYPE_FULL_NAME=char* ORDER=1 ARGUMENT_INDEX=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+
+METHOD NAME=commented CODE=char *commented(int condition) { return condition ? "first" /* join */ "second" : "safe"; } FULL_NAME=commented SIGNATURE=char*(int) ORDER=1
+  METHOD_PARAMETER_IN NAME=condition CODE=int condition TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=condition CODE=int condition TYPE_FULL_NAME=int ORDER=1
+  BLOCK CODE={ return condition ? "first" /* join */ "second" : "safe"; } TYPE_FULL_NAME=void ORDER=2
+    RETURN CODE=return condition ? "first" /* join */ "second" : "safe"; ORDER=1
+      CALL NAME=<operator>.conditional CODE=condition ? "first" /* join */ "second" : "safe" TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.conditional ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=condition CODE=condition TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+        LITERAL CODE="first" /* join */ "second" TYPE_FULL_NAME=char* ORDER=2 ARGUMENT_INDEX=2
+        LITERAL CODE="safe" TYPE_FULL_NAME=char* ORDER=3 ARGUMENT_INDEX=3
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=char* ORDER=3
+
+METHOD NAME=consume CODE=void consume(char *value); FULL_NAME=consume SIGNATURE=void(char*) ORDER=1
+  METHOD_PARAMETER_IN NAME=value CODE=char *value TYPE_FULL_NAME=char* ORDER=1
+  METHOD_PARAMETER_OUT NAME=value CODE=char *value TYPE_FULL_NAME=char* ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+
+METHOD NAME=defined CODE=char *defined(int condition) { return condition ? "0x%" WIDTH "x" : FORMAT; } FULL_NAME=defined SIGNATURE=char*(int) ORDER=1
+  METHOD_PARAMETER_IN NAME=condition CODE=int condition TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=condition CODE=int condition TYPE_FULL_NAME=int ORDER=1
+  BLOCK CODE={ return condition ? "0x%" WIDTH "x" : FORMAT; } TYPE_FULL_NAME=void ORDER=2
+    RETURN CODE=return condition ? "0x%" WIDTH "x" : FORMAT; ORDER=1
+      CALL NAME=<operator>.conditional CODE=condition ? "0x%" WIDTH "x" : FORMAT TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.conditional ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=condition CODE=condition TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+        LITERAL CODE="0x%" WIDTH "x" TYPE_FULL_NAME=char* ORDER=2 ARGUMENT_INDEX=2
+        CALL NAME=FORMAT CODE=FORMAT TYPE_FULL_NAME=char* METHOD_FULL_NAME=strings.c:FORMAT:char*(0) SIGNATURE=char*(0) ORDER=3 ARGUMENT_INDEX=3 DISPATCH_TYPE=INLINED
+          BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+            LITERAL CODE="%lld" TYPE_FULL_NAME=char* ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=char* ORDER=3
+
+METHOD NAME=literal_return CODE=char *literal_return(void) { return "first" "second"; } FULL_NAME=literal_return SIGNATURE=char*(void) ORDER=1
+  METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  BLOCK CODE={ return "first" "second"; } TYPE_FULL_NAME=void ORDER=2
+    RETURN CODE=return "first" "second"; ORDER=1
+      LITERAL CODE="first" "second" TYPE_FULL_NAME=char* ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=char* ORDER=3
+
+METHOD NAME=plain CODE=char *plain(int condition) { return condition ? "left" "right" : "fallback"; } FULL_NAME=plain SIGNATURE=char*(int) ORDER=1
+  METHOD_PARAMETER_IN NAME=condition CODE=int condition TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=condition CODE=int condition TYPE_FULL_NAME=int ORDER=1
+  BLOCK CODE={ return condition ? "left" "right" : "fallback"; } TYPE_FULL_NAME=void ORDER=2
+    RETURN CODE=return condition ? "left" "right" : "fallback"; ORDER=1
+      CALL NAME=<operator>.conditional CODE=condition ? "left" "right" : "fallback" TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.conditional ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=condition CODE=condition TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+        LITERAL CODE="left" "right" TYPE_FULL_NAME=char* ORDER=2 ARGUMENT_INDEX=2
+        LITERAL CODE="fallback" TYPE_FULL_NAME=char* ORDER=3 ARGUMENT_INDEX=3
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=char* ORDER=3
+
+METHOD NAME=<global> CODE=<global> FULL_NAME=strings.c:<global> ORDER=1
+  METHOD NAME=plain CODE=char *plain(int condition) { return condition ? "left" "right" : "fallback"; } FULL_NAME=plain SIGNATURE=char*(int) ORDER=1
+    METHOD_PARAMETER_IN NAME=condition CODE=int condition TYPE_FULL_NAME=int ORDER=1
+    METHOD_PARAMETER_OUT NAME=condition CODE=int condition TYPE_FULL_NAME=int ORDER=1
+    BLOCK CODE={ return condition ? "left" "right" : "fallback"; } TYPE_FULL_NAME=void ORDER=2
+      RETURN CODE=return condition ? "left" "right" : "fallback"; ORDER=1
+        CALL NAME=<operator>.conditional CODE=condition ? "left" "right" : "fallback" TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.conditional ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=condition CODE=condition TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+          LITERAL CODE="left" "right" TYPE_FULL_NAME=char* ORDER=2 ARGUMENT_INDEX=2
+          LITERAL CODE="fallback" TYPE_FULL_NAME=char* ORDER=3 ARGUMENT_INDEX=3
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=char* ORDER=3
+  METHOD NAME=unresolved CODE=char *unresolved(int condition) {\n    { const char *format = condition ? "0x%" UNKNOWN_WIDTH "x" : UNKNOWN_FORMAT; return format; }\n} FULL_NAME=unresolved SIGNATURE=char*(int) ORDER=1
+    METHOD_PARAMETER_IN NAME=condition CODE=int condition TYPE_FULL_NAME=int ORDER=1
+    METHOD_PARAMETER_OUT NAME=condition CODE=int condition TYPE_FULL_NAME=int ORDER=1
+    BLOCK CODE={\n    { const char *format = condition ? "0x%" UNKNOWN_WIDTH "x" : UNKNOWN_FORMAT; return format; }\n} TYPE_FULL_NAME=void ORDER=2
+      LOCAL NAME=format CODE=<unknown> format TYPE_FULL_NAME=ANY ORDER=0
+      BLOCK CODE={ const char *format = condition ? "0x%" UNKNOWN_WIDTH "x" : UNKNOWN_FORMAT; return format; } TYPE_FULL_NAME=void ORDER=1
+        RETURN CODE=return format; ORDER=1
+          IDENTIFIER NAME=format CODE=<unknown> format TYPE_FULL_NAME=ANY ORDER=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=char* ORDER=3
+  METHOD NAME=defined CODE=char *defined(int condition) { return condition ? "0x%" WIDTH "x" : FORMAT; } FULL_NAME=defined SIGNATURE=char*(int) ORDER=1
+    METHOD_PARAMETER_IN NAME=condition CODE=int condition TYPE_FULL_NAME=int ORDER=1
+    METHOD_PARAMETER_OUT NAME=condition CODE=int condition TYPE_FULL_NAME=int ORDER=1
+    BLOCK CODE={ return condition ? "0x%" WIDTH "x" : FORMAT; } TYPE_FULL_NAME=void ORDER=2
+      RETURN CODE=return condition ? "0x%" WIDTH "x" : FORMAT; ORDER=1
+        CALL NAME=<operator>.conditional CODE=condition ? "0x%" WIDTH "x" : FORMAT TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.conditional ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=condition CODE=condition TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+          LITERAL CODE="0x%" WIDTH "x" TYPE_FULL_NAME=char* ORDER=2 ARGUMENT_INDEX=2
+          CALL NAME=FORMAT CODE=FORMAT TYPE_FULL_NAME=char* METHOD_FULL_NAME=strings.c:FORMAT:char*(0) SIGNATURE=char*(0) ORDER=3 ARGUMENT_INDEX=3 DISPATCH_TYPE=INLINED
+            BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+              LITERAL CODE="%lld" TYPE_FULL_NAME=char* ORDER=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=char* ORDER=3
+  METHOD NAME=literal_return CODE=char *literal_return(void) { return "first" "second"; } FULL_NAME=literal_return SIGNATURE=char*(void) ORDER=1
+    METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    BLOCK CODE={ return "first" "second"; } TYPE_FULL_NAME=void ORDER=2
+      RETURN CODE=return "first" "second"; ORDER=1
+        LITERAL CODE="first" "second" TYPE_FULL_NAME=char* ORDER=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=char* ORDER=3
+  METHOD NAME=commented CODE=char *commented(int condition) { return condition ? "first" /* join */ "second" : "safe"; } FULL_NAME=commented SIGNATURE=char*(int) ORDER=1
+    METHOD_PARAMETER_IN NAME=condition CODE=int condition TYPE_FULL_NAME=int ORDER=1
+    METHOD_PARAMETER_OUT NAME=condition CODE=int condition TYPE_FULL_NAME=int ORDER=1
+    BLOCK CODE={ return condition ? "first" /* join */ "second" : "safe"; } TYPE_FULL_NAME=void ORDER=2
+      RETURN CODE=return condition ? "first" /* join */ "second" : "safe"; ORDER=1
+        CALL NAME=<operator>.conditional CODE=condition ? "first" /* join */ "second" : "safe" TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.conditional ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=condition CODE=condition TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+          LITERAL CODE="first" /* join */ "second" TYPE_FULL_NAME=char* ORDER=2 ARGUMENT_INDEX=2
+          LITERAL CODE="safe" TYPE_FULL_NAME=char* ORDER=3 ARGUMENT_INDEX=3
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=char* ORDER=3
+  METHOD NAME=argument CODE=void argument(void) { consume("first" "second"); } FULL_NAME=argument SIGNATURE=void(void) ORDER=1
+    METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    BLOCK CODE={ consume("first" "second"); } TYPE_FULL_NAME=void ORDER=2
+      CALL NAME=consume CODE=consume("first" "second") TYPE_FULL_NAME=void METHOD_FULL_NAME=consume ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+        LITERAL CODE="first" "second" TYPE_FULL_NAME=char* ORDER=1 ARGUMENT_INDEX=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+    METHOD_REF CODE=plain TYPE_FULL_NAME=plain METHOD_FULL_NAME=plain ORDER=1
+    METHOD_REF CODE=unresolved TYPE_FULL_NAME=unresolved METHOD_FULL_NAME=unresolved ORDER=2
+    METHOD_REF CODE=defined TYPE_FULL_NAME=defined METHOD_FULL_NAME=defined ORDER=3
+    METHOD_REF CODE=literal_return TYPE_FULL_NAME=literal_return METHOD_FULL_NAME=literal_return ORDER=4
+    METHOD_REF CODE=commented TYPE_FULL_NAME=commented METHOD_FULL_NAME=commented ORDER=5
+    METHOD_REF CODE=argument TYPE_FULL_NAME=argument METHOD_FULL_NAME=argument ORDER=6
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=FORMAT CODE=#define FORMAT "%lld" FULL_NAME=strings.c:FORMAT:char*(0) SIGNATURE=char*(0) ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=char* ORDER=2
+
+METHOD NAME=unresolved CODE=char *unresolved(int condition) {\n    { const char *format = condition ? "0x%" UNKNOWN_WIDTH "x" : UNKNOWN_FORMAT; return format; }\n} FULL_NAME=unresolved SIGNATURE=char*(int) ORDER=1
+  METHOD_PARAMETER_IN NAME=condition CODE=int condition TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=condition CODE=int condition TYPE_FULL_NAME=int ORDER=1
+  BLOCK CODE={\n    { const char *format = condition ? "0x%" UNKNOWN_WIDTH "x" : UNKNOWN_FORMAT; return format; }\n} TYPE_FULL_NAME=void ORDER=2
+    LOCAL NAME=format CODE=<unknown> format TYPE_FULL_NAME=ANY ORDER=0
+    BLOCK CODE={ const char *format = condition ? "0x%" UNKNOWN_WIDTH "x" : UNKNOWN_FORMAT; return format; } TYPE_FULL_NAME=void ORDER=1
+      RETURN CODE=return format; ORDER=1
+        IDENTIFIER NAME=format CODE=<unknown> format TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=char* ORDER=3
+
+NODES|META_DATA LANGUAGE=NEWC
+NODES|FILE NAME=<includes> ORDER=1
+NODES|FILE NAME=<unknown> ORDER=0
+NODES|FILE NAME=strings.c ORDER=0
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<global> FILENAME=<unknown> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<includes>:<global> FILENAME=<includes> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=strings.c:<global> FILENAME=strings.c ORDER=1
+NODES|NAMESPACE NAME=<global>
+NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=argument FULL_NAME=argument CODE=argument AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=strings.c:<global> FILENAME=strings.c ORDER=1
+NODES|TYPE_DECL NAME=char* FULL_NAME=char* CODE=char* IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=commented FULL_NAME=commented CODE=commented AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=strings.c:<global> FILENAME=strings.c ORDER=1
+NODES|TYPE_DECL NAME=defined FULL_NAME=defined CODE=defined AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=strings.c:<global> FILENAME=strings.c ORDER=1
+NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=literal_return FULL_NAME=literal_return CODE=literal_return AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=strings.c:<global> FILENAME=strings.c ORDER=1
+NODES|TYPE_DECL NAME=plain FULL_NAME=plain CODE=plain AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=strings.c:<global> FILENAME=strings.c ORDER=1
+NODES|TYPE_DECL NAME=<global> FULL_NAME=strings.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=strings.c:<global> FILENAME=strings.c ORDER=1
+NODES|TYPE_DECL NAME=unresolved FULL_NAME=unresolved CODE=unresolved AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=strings.c:<global> FILENAME=strings.c ORDER=1
+NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+NODES|TYPE NAME=argument FULL_NAME=argument TYPE_DECL_FULL_NAME=argument
+NODES|TYPE NAME=char* FULL_NAME=char* TYPE_DECL_FULL_NAME=char*
+NODES|TYPE NAME=commented FULL_NAME=commented TYPE_DECL_FULL_NAME=commented
+NODES|TYPE NAME=defined FULL_NAME=defined TYPE_DECL_FULL_NAME=defined
+NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+NODES|TYPE NAME=literal_return FULL_NAME=literal_return TYPE_DECL_FULL_NAME=literal_return
+NODES|TYPE NAME=plain FULL_NAME=plain TYPE_DECL_FULL_NAME=plain
+NODES|TYPE NAME=unresolved FULL_NAME=unresolved TYPE_DECL_FULL_NAME=unresolved
+NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+EDGES|ARGUMENT argument#4 -> argument#5
+EDGES|ARGUMENT commented#4 -> commented#5
+EDGES|ARGUMENT commented#5 -> commented#6
+EDGES|ARGUMENT commented#5 -> commented#7
+EDGES|ARGUMENT commented#5 -> commented#8
+EDGES|ARGUMENT defined#4 -> defined#5
+EDGES|ARGUMENT defined#5 -> defined#6
+EDGES|ARGUMENT defined#5 -> defined#7
+EDGES|ARGUMENT defined#5 -> defined#8
+EDGES|ARGUMENT literal_return#4 -> literal_return#5
+EDGES|ARGUMENT plain#4 -> plain#5
+EDGES|ARGUMENT plain#5 -> plain#6
+EDGES|ARGUMENT plain#5 -> plain#7
+EDGES|ARGUMENT plain#5 -> plain#8
+EDGES|ARGUMENT unresolved#6 -> unresolved#7
+EDGES|CALL argument#4 -> consume#0
+EDGES|CALL commented#5 -> <operator>.conditional#0
+EDGES|CALL defined#5 -> <operator>.conditional#0
+EDGES|CALL defined#8 -> strings.c:FORMAT:char*(0)#0
+EDGES|CALL plain#5 -> <operator>.conditional#0
+EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+EDGES|CFG <operator>.conditional#0 -> <operator>.conditional#5
+EDGES|CFG argument#0 -> argument#5
+EDGES|CFG argument#4 -> argument#6
+EDGES|CFG argument#5 -> argument#4
+EDGES|CFG commented#0 -> commented#6
+EDGES|CFG commented#4 -> commented#9
+EDGES|CFG commented#5 -> commented#4
+EDGES|CFG commented#6 -> commented#7
+EDGES|CFG commented#6 -> commented#8
+EDGES|CFG commented#7 -> commented#5
+EDGES|CFG commented#8 -> commented#5
+EDGES|CFG consume#0 -> consume#4
+EDGES|CFG defined#0 -> defined#6
+EDGES|CFG defined#10 -> defined#5
+EDGES|CFG defined#4 -> defined#11
+EDGES|CFG defined#5 -> defined#4
+EDGES|CFG defined#6 -> defined#7
+EDGES|CFG defined#6 -> defined#8
+EDGES|CFG defined#7 -> defined#5
+EDGES|CFG defined#8 -> defined#10
+EDGES|CFG defined#8 -> defined#5
+EDGES|CFG literal_return#0 -> literal_return#5
+EDGES|CFG literal_return#4 -> literal_return#6
+EDGES|CFG literal_return#5 -> literal_return#4
+EDGES|CFG plain#0 -> plain#6
+EDGES|CFG plain#4 -> plain#9
+EDGES|CFG plain#5 -> plain#4
+EDGES|CFG plain#6 -> plain#7
+EDGES|CFG plain#6 -> plain#8
+EDGES|CFG plain#7 -> plain#5
+EDGES|CFG plain#8 -> plain#5
+EDGES|CFG strings.c:<global>#0 -> strings.c:<global>#57
+EDGES|CFG strings.c:<global>#11 -> unresolved#7
+EDGES|CFG strings.c:<global>#57 -> strings.c:<global>#58
+EDGES|CFG strings.c:<global>#58 -> strings.c:<global>#59
+EDGES|CFG strings.c:<global>#59 -> strings.c:<global>#60
+EDGES|CFG strings.c:<global>#60 -> strings.c:<global>#61
+EDGES|CFG strings.c:<global>#61 -> strings.c:<global>#62
+EDGES|CFG strings.c:<global>#62 -> strings.c:<global>#63
+EDGES|CFG strings.c:FORMAT:char*(0)#0 -> strings.c:FORMAT:char*(0)#2
+EDGES|CFG unresolved#5 -> unresolved#8
+EDGES|CFG unresolved#6 -> unresolved#8
+EDGES|CFG unresolved#7 -> unresolved#6
+EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+EDGES|CONTAINS <operator>.conditional#0 -> <operator>.conditional#2
+EDGES|CONTAINS D:strings.c:<global> -> D:argument
+EDGES|CONTAINS D:strings.c:<global> -> D:commented
+EDGES|CONTAINS D:strings.c:<global> -> D:defined
+EDGES|CONTAINS D:strings.c:<global> -> D:literal_return
+EDGES|CONTAINS D:strings.c:<global> -> D:plain
+EDGES|CONTAINS D:strings.c:<global> -> D:unresolved
+EDGES|CONTAINS D:strings.c:<global> -> consume#0
+EDGES|CONTAINS D:strings.c:<global> -> strings.c:<global>#0
+EDGES|CONTAINS D:strings.c:<global> -> strings.c:FORMAT:char*(0)#0
+EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+EDGES|CONTAINS F:<includes> -> D:ANY
+EDGES|CONTAINS F:<includes> -> D:char*
+EDGES|CONTAINS F:<includes> -> D:int
+EDGES|CONTAINS F:<includes> -> D:void
+EDGES|CONTAINS F:strings.c -> D:strings.c:<global>
+EDGES|CONTAINS argument#0 -> argument#3
+EDGES|CONTAINS argument#0 -> argument#4
+EDGES|CONTAINS argument#0 -> argument#5
+EDGES|CONTAINS commented#0 -> commented#3
+EDGES|CONTAINS commented#0 -> commented#4
+EDGES|CONTAINS commented#0 -> commented#5
+EDGES|CONTAINS commented#0 -> commented#6
+EDGES|CONTAINS commented#0 -> commented#7
+EDGES|CONTAINS commented#0 -> commented#8
+EDGES|CONTAINS consume#0 -> consume#3
+EDGES|CONTAINS defined#0 -> defined#10
+EDGES|CONTAINS defined#0 -> defined#3
+EDGES|CONTAINS defined#0 -> defined#4
+EDGES|CONTAINS defined#0 -> defined#5
+EDGES|CONTAINS defined#0 -> defined#6
+EDGES|CONTAINS defined#0 -> defined#7
+EDGES|CONTAINS defined#0 -> defined#8
+EDGES|CONTAINS defined#0 -> defined#9
+EDGES|CONTAINS literal_return#0 -> literal_return#3
+EDGES|CONTAINS literal_return#0 -> literal_return#4
+EDGES|CONTAINS literal_return#0 -> literal_return#5
+EDGES|CONTAINS plain#0 -> plain#3
+EDGES|CONTAINS plain#0 -> plain#4
+EDGES|CONTAINS plain#0 -> plain#5
+EDGES|CONTAINS plain#0 -> plain#6
+EDGES|CONTAINS plain#0 -> plain#7
+EDGES|CONTAINS plain#0 -> plain#8
+EDGES|CONTAINS strings.c:<global>#0 -> argument#0
+EDGES|CONTAINS strings.c:<global>#0 -> commented#0
+EDGES|CONTAINS strings.c:<global>#0 -> defined#0
+EDGES|CONTAINS strings.c:<global>#0 -> literal_return#0
+EDGES|CONTAINS strings.c:<global>#0 -> plain#0
+EDGES|CONTAINS strings.c:<global>#0 -> strings.c:<global>#11
+EDGES|CONTAINS strings.c:<global>#0 -> strings.c:<global>#56
+EDGES|CONTAINS strings.c:<global>#0 -> strings.c:<global>#57
+EDGES|CONTAINS strings.c:<global>#0 -> strings.c:<global>#58
+EDGES|CONTAINS strings.c:<global>#0 -> strings.c:<global>#59
+EDGES|CONTAINS strings.c:<global>#0 -> strings.c:<global>#60
+EDGES|CONTAINS strings.c:<global>#0 -> strings.c:<global>#61
+EDGES|CONTAINS strings.c:<global>#0 -> strings.c:<global>#62
+EDGES|CONTAINS strings.c:<global>#11 -> unresolved#3
+EDGES|CONTAINS strings.c:<global>#11 -> unresolved#5
+EDGES|CONTAINS strings.c:<global>#11 -> unresolved#6
+EDGES|CONTAINS strings.c:<global>#11 -> unresolved#7
+EDGES|CONTAINS strings.c:FORMAT:char*(0)#0 -> strings.c:FORMAT:char*(0)#1
+EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.conditional#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.conditional#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.conditional#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.conditional#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.conditional#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.conditional#6 -> T:ANY
+EDGES|EVAL_TYPE <operator>.conditional#7 -> T:ANY
+EDGES|EVAL_TYPE <operator>.conditional#8 -> T:ANY
+EDGES|EVAL_TYPE argument#1 -> T:void
+EDGES|EVAL_TYPE argument#2 -> T:void
+EDGES|EVAL_TYPE argument#3 -> T:void
+EDGES|EVAL_TYPE argument#4 -> T:void
+EDGES|EVAL_TYPE argument#5 -> T:char*
+EDGES|EVAL_TYPE argument#6 -> T:void
+EDGES|EVAL_TYPE commented#1 -> T:int
+EDGES|EVAL_TYPE commented#2 -> T:int
+EDGES|EVAL_TYPE commented#3 -> T:void
+EDGES|EVAL_TYPE commented#5 -> T:ANY
+EDGES|EVAL_TYPE commented#6 -> T:int
+EDGES|EVAL_TYPE commented#7 -> T:char*
+EDGES|EVAL_TYPE commented#8 -> T:char*
+EDGES|EVAL_TYPE commented#9 -> T:char*
+EDGES|EVAL_TYPE consume#1 -> T:char*
+EDGES|EVAL_TYPE consume#2 -> T:char*
+EDGES|EVAL_TYPE consume#3 -> T:ANY
+EDGES|EVAL_TYPE consume#4 -> T:void
+EDGES|EVAL_TYPE defined#1 -> T:int
+EDGES|EVAL_TYPE defined#10 -> T:char*
+EDGES|EVAL_TYPE defined#11 -> T:char*
+EDGES|EVAL_TYPE defined#2 -> T:int
+EDGES|EVAL_TYPE defined#3 -> T:void
+EDGES|EVAL_TYPE defined#5 -> T:ANY
+EDGES|EVAL_TYPE defined#6 -> T:int
+EDGES|EVAL_TYPE defined#7 -> T:char*
+EDGES|EVAL_TYPE defined#8 -> T:char*
+EDGES|EVAL_TYPE defined#9 -> T:ANY
+EDGES|EVAL_TYPE literal_return#1 -> T:void
+EDGES|EVAL_TYPE literal_return#2 -> T:void
+EDGES|EVAL_TYPE literal_return#3 -> T:void
+EDGES|EVAL_TYPE literal_return#5 -> T:char*
+EDGES|EVAL_TYPE literal_return#6 -> T:char*
+EDGES|EVAL_TYPE plain#1 -> T:int
+EDGES|EVAL_TYPE plain#2 -> T:int
+EDGES|EVAL_TYPE plain#3 -> T:void
+EDGES|EVAL_TYPE plain#5 -> T:ANY
+EDGES|EVAL_TYPE plain#6 -> T:int
+EDGES|EVAL_TYPE plain#7 -> T:char*
+EDGES|EVAL_TYPE plain#8 -> T:char*
+EDGES|EVAL_TYPE plain#9 -> T:char*
+EDGES|EVAL_TYPE strings.c:<global>#56 -> T:ANY
+EDGES|EVAL_TYPE strings.c:<global>#57 -> T:plain
+EDGES|EVAL_TYPE strings.c:<global>#58 -> T:unresolved
+EDGES|EVAL_TYPE strings.c:<global>#59 -> T:defined
+EDGES|EVAL_TYPE strings.c:<global>#60 -> T:literal_return
+EDGES|EVAL_TYPE strings.c:<global>#61 -> T:commented
+EDGES|EVAL_TYPE strings.c:<global>#62 -> T:argument
+EDGES|EVAL_TYPE strings.c:<global>#63 -> T:ANY
+EDGES|EVAL_TYPE strings.c:FORMAT:char*(0)#1 -> T:ANY
+EDGES|EVAL_TYPE strings.c:FORMAT:char*(0)#2 -> T:char*
+EDGES|EVAL_TYPE unresolved#1 -> T:int
+EDGES|EVAL_TYPE unresolved#2 -> T:int
+EDGES|EVAL_TYPE unresolved#3 -> T:void
+EDGES|EVAL_TYPE unresolved#4 -> T:ANY
+EDGES|EVAL_TYPE unresolved#5 -> T:void
+EDGES|EVAL_TYPE unresolved#7 -> T:ANY
+EDGES|EVAL_TYPE unresolved#8 -> T:char*
+EDGES|PARAMETER_LINK <operator>.conditional#1 -> <operator>.conditional#3
+EDGES|PARAMETER_LINK <operator>.conditional#4 -> <operator>.conditional#6
+EDGES|PARAMETER_LINK <operator>.conditional#7 -> <operator>.conditional#8
+EDGES|PARAMETER_LINK argument#1 -> argument#2
+EDGES|PARAMETER_LINK commented#1 -> commented#2
+EDGES|PARAMETER_LINK consume#1 -> consume#2
+EDGES|PARAMETER_LINK defined#1 -> defined#2
+EDGES|PARAMETER_LINK literal_return#1 -> literal_return#2
+EDGES|PARAMETER_LINK plain#1 -> plain#2
+EDGES|PARAMETER_LINK unresolved#1 -> unresolved#2
+EDGES|REF NB:<global> -> NS:<global>
+EDGES|REF NB:<includes>:<global> -> NS:<global>
+EDGES|REF NB:strings.c:<global> -> NS:<global>
+EDGES|REF T:ANY -> D:ANY
+EDGES|REF T:argument -> D:argument
+EDGES|REF T:char* -> D:char*
+EDGES|REF T:commented -> D:commented
+EDGES|REF T:defined -> D:defined
+EDGES|REF T:int -> D:int
+EDGES|REF T:literal_return -> D:literal_return
+EDGES|REF T:plain -> D:plain
+EDGES|REF T:unresolved -> D:unresolved
+EDGES|REF T:void -> D:void
+EDGES|REF commented#6 -> commented#1
+EDGES|REF defined#6 -> defined#1
+EDGES|REF plain#6 -> plain#1
+EDGES|REF strings.c:<global>#57 -> plain#0
+EDGES|REF strings.c:<global>#58 -> strings.c:<global>#11
+EDGES|REF strings.c:<global>#59 -> defined#0
+EDGES|REF strings.c:<global>#60 -> literal_return#0
+EDGES|REF strings.c:<global>#61 -> commented#0
+EDGES|REF strings.c:<global>#62 -> argument#0
+EDGES|REF unresolved#7 -> unresolved#4
+EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+EDGES|SOURCE_FILE D:ANY -> F:<includes>
+EDGES|SOURCE_FILE D:argument -> F:strings.c
+EDGES|SOURCE_FILE D:char* -> F:<includes>
+EDGES|SOURCE_FILE D:commented -> F:strings.c
+EDGES|SOURCE_FILE D:defined -> F:strings.c
+EDGES|SOURCE_FILE D:int -> F:<includes>
+EDGES|SOURCE_FILE D:literal_return -> F:strings.c
+EDGES|SOURCE_FILE D:plain -> F:strings.c
+EDGES|SOURCE_FILE D:strings.c:<global> -> F:strings.c
+EDGES|SOURCE_FILE D:unresolved -> F:strings.c
+EDGES|SOURCE_FILE D:void -> F:<includes>
+EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
+EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>
+EDGES|SOURCE_FILE NB:strings.c:<global> -> F:strings.c
+EDGES|SOURCE_FILE argument#0 -> F:strings.c
+EDGES|SOURCE_FILE commented#0 -> F:strings.c
+EDGES|SOURCE_FILE consume#0 -> F:strings.c
+EDGES|SOURCE_FILE defined#0 -> F:strings.c
+EDGES|SOURCE_FILE literal_return#0 -> F:strings.c
+EDGES|SOURCE_FILE plain#0 -> F:strings.c
+EDGES|SOURCE_FILE strings.c:<global>#0 -> F:strings.c
+EDGES|SOURCE_FILE strings.c:<global>#11 -> F:strings.c
+EDGES|SOURCE_FILE strings.c:FORMAT:char*(0)#0 -> F:strings.c
+FLOWS|REACHING_DEF["0x%" WIDTH "x"] defined#7 -> defined#5
+FLOWS|REACHING_DEF["fallback"] plain#8 -> plain#5
+FLOWS|REACHING_DEF["first" "second"] argument#5 -> argument#4
+FLOWS|REACHING_DEF["first" "second"] literal_return#5 -> literal_return#4
+FLOWS|REACHING_DEF["first" /* join */ "second"] commented#7 -> commented#5
+FLOWS|REACHING_DEF["left" "right"] plain#7 -> plain#5
+FLOWS|REACHING_DEF["safe"] commented#8 -> commented#5
+FLOWS|REACHING_DEF[<RET>] commented#4 -> commented#9
+FLOWS|REACHING_DEF[<RET>] defined#4 -> defined#11
+FLOWS|REACHING_DEF[<RET>] literal_return#4 -> literal_return#6
+FLOWS|REACHING_DEF[<RET>] plain#4 -> plain#9
+FLOWS|REACHING_DEF[<RET>] unresolved#6 -> unresolved#8
+FLOWS|REACHING_DEF[<unknown> format] unresolved#7 -> unresolved#6
+FLOWS|REACHING_DEF[FORMAT] defined#8 -> defined#11
+FLOWS|REACHING_DEF[FORMAT] defined#8 -> defined#5
+FLOWS|REACHING_DEF[] <operator>.conditional#0 -> <operator>.conditional#1
+FLOWS|REACHING_DEF[] <operator>.conditional#0 -> <operator>.conditional#4
+FLOWS|REACHING_DEF[] <operator>.conditional#0 -> <operator>.conditional#7
+FLOWS|REACHING_DEF[] argument#0 -> argument#1
+FLOWS|REACHING_DEF[] argument#0 -> argument#5
+FLOWS|REACHING_DEF[] argument#1 -> argument#2
+FLOWS|REACHING_DEF[] argument#1 -> argument#6
+FLOWS|REACHING_DEF[] commented#0 -> commented#1
+FLOWS|REACHING_DEF[] commented#0 -> commented#7
+FLOWS|REACHING_DEF[] commented#0 -> commented#8
+FLOWS|REACHING_DEF[] consume#0 -> consume#1
+FLOWS|REACHING_DEF[] defined#0 -> defined#1
+FLOWS|REACHING_DEF[] defined#0 -> defined#10
+FLOWS|REACHING_DEF[] defined#0 -> defined#7
+FLOWS|REACHING_DEF[] defined#0 -> defined#8
+FLOWS|REACHING_DEF[] literal_return#0 -> literal_return#1
+FLOWS|REACHING_DEF[] literal_return#0 -> literal_return#4
+FLOWS|REACHING_DEF[] literal_return#0 -> literal_return#5
+FLOWS|REACHING_DEF[] literal_return#1 -> literal_return#2
+FLOWS|REACHING_DEF[] literal_return#1 -> literal_return#6
+FLOWS|REACHING_DEF[] plain#0 -> plain#1
+FLOWS|REACHING_DEF[] plain#0 -> plain#7
+FLOWS|REACHING_DEF[] plain#0 -> plain#8
+FLOWS|REACHING_DEF[] strings.c:<global>#0 -> strings.c:<global>#57
+FLOWS|REACHING_DEF[] strings.c:<global>#0 -> strings.c:<global>#58
+FLOWS|REACHING_DEF[] strings.c:<global>#0 -> strings.c:<global>#59
+FLOWS|REACHING_DEF[] strings.c:<global>#0 -> strings.c:<global>#60
+FLOWS|REACHING_DEF[] strings.c:<global>#0 -> strings.c:<global>#61
+FLOWS|REACHING_DEF[] strings.c:<global>#0 -> strings.c:<global>#62
+FLOWS|REACHING_DEF[] strings.c:<global>#11 -> unresolved#1
+FLOWS|REACHING_DEF[] strings.c:<global>#11 -> unresolved#6
+FLOWS|REACHING_DEF[] strings.c:<global>#11 -> unresolved#7
+FLOWS|REACHING_DEF[condition ? "0x%" WIDTH "x" : FORMAT] defined#5 -> defined#11
+FLOWS|REACHING_DEF[condition ? "0x%" WIDTH "x" : FORMAT] defined#5 -> defined#4
+FLOWS|REACHING_DEF[condition ? "first" /* join */ "second" : "safe"] commented#5 -> commented#4
+FLOWS|REACHING_DEF[condition ? "first" /* join */ "second" : "safe"] commented#5 -> commented#9
+FLOWS|REACHING_DEF[condition ? "left" "right" : "fallback"] plain#5 -> plain#4
+FLOWS|REACHING_DEF[condition ? "left" "right" : "fallback"] plain#5 -> plain#9
+FLOWS|REACHING_DEF[condition] commented#1 -> commented#2
+FLOWS|REACHING_DEF[condition] commented#6 -> commented#2
+FLOWS|REACHING_DEF[condition] commented#6 -> commented#5
+FLOWS|REACHING_DEF[condition] commented#6 -> commented#9
+FLOWS|REACHING_DEF[condition] defined#1 -> defined#2
+FLOWS|REACHING_DEF[condition] defined#6 -> defined#11
+FLOWS|REACHING_DEF[condition] defined#6 -> defined#2
+FLOWS|REACHING_DEF[condition] defined#6 -> defined#5
+FLOWS|REACHING_DEF[condition] plain#1 -> plain#2
+FLOWS|REACHING_DEF[condition] plain#6 -> plain#2
+FLOWS|REACHING_DEF[condition] plain#6 -> plain#5
+FLOWS|REACHING_DEF[condition] plain#6 -> plain#9
+FLOWS|REACHING_DEF[condition] unresolved#1 -> unresolved#2
+FLOWS|REACHING_DEF[condition] unresolved#1 -> unresolved#8
+FLOWS|REACHING_DEF[consume("first" "second")] argument#4 -> argument#6
+FLOWS|REACHING_DEF[p1] <operator>.conditional#1 -> <operator>.conditional#3
+FLOWS|REACHING_DEF[p1] <operator>.conditional#1 -> <operator>.conditional#5
+FLOWS|REACHING_DEF[p2] <operator>.conditional#4 -> <operator>.conditional#5
+FLOWS|REACHING_DEF[p2] <operator>.conditional#4 -> <operator>.conditional#6
+FLOWS|REACHING_DEF[p3] <operator>.conditional#7 -> <operator>.conditional#5
+FLOWS|REACHING_DEF[p3] <operator>.conditional#7 -> <operator>.conditional#8
+FLOWS|REACHING_DEF[value] consume#1 -> consume#2
+FLOWS|REACHING_DEF[value] consume#1 -> consume#4

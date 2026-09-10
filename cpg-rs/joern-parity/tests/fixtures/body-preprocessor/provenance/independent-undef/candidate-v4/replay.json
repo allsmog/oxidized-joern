@@ -1,0 +1,92 @@
+{
+  "binary": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/eighth-body-review/frozen-v4/joern-parity",
+    "sha256": "575397f4a349231a559641e6ca12e76ed4fc42e6e1bc77e8ffeb12cb30f48b4a"
+  },
+  "liveReceipt": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/eighth-body-review/undef-token/live-run.json",
+    "sha256": "4a58e5dcc6e32f5cc39a04d4f127111482a9bb8b8142d4eaa2af6a83d24d5b6c"
+  },
+  "results": [
+    {
+      "case": "comment_between",
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/eighth-body-review/frozen-v4/joern-parity",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/eighth-body-review/undef-token/input/comment_between/main.c"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 0.009307999993325211,
+      "exact": false,
+      "completeDiffLines": 113,
+      "inputHashes": {
+        "main.c": "b75a240ce6afbdc7d996db32dee403769ada08efb4e4886756fa7335f394a3e0"
+      },
+      "expectedSha256": "ea434dcbfbaea4fd56a7c0e37fb256679ed9d7bdfdd9c54a4ded12ccc9a7d32b",
+      "actualSha256": "a83cafc3067a43136a30e5211698a749cb4c47cbbe5a2cb0c7d951036515a447"
+    },
+    {
+      "case": "formfeed_space",
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/eighth-body-review/frozen-v4/joern-parity",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/eighth-body-review/undef-token/input/formfeed_space/main.c"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 0.0035987500014016405,
+      "exact": false,
+      "completeDiffLines": 113,
+      "inputHashes": {
+        "main.c": "8f4f8b90713b9b1e132839032ef7f43f9a46d83d2d67b350f7da06b9f2df5ba5"
+      },
+      "expectedSha256": "ea434dcbfbaea4fd56a7c0e37fb256679ed9d7bdfdd9c54a4ded12ccc9a7d32b",
+      "actualSha256": "a83cafc3067a43136a30e5211698a749cb4c47cbbe5a2cb0c7d951036515a447"
+    },
+    {
+      "case": "spliced_keyword",
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/eighth-body-review/frozen-v4/joern-parity",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/eighth-body-review/undef-token/input/spliced_keyword/main.c"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 0.0037905000062892213,
+      "exact": false,
+      "completeDiffLines": 46,
+      "inputHashes": {
+        "main.c": "64949cfc5597ab390ce0164d9dd05f5e6bb129e7182bf4cf3fcd70cc6470d2d4"
+      },
+      "expectedSha256": "ea434dcbfbaea4fd56a7c0e37fb256679ed9d7bdfdd9c54a4ded12ccc9a7d32b",
+      "actualSha256": "a9904a40a5961b61dd48027fd43d8fca49ca3eb22d5df8f3589c3dda4d9bb8a8"
+    },
+    {
+      "case": "trailing_comment",
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/eighth-body-review/frozen-v4/joern-parity",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/eighth-body-review/undef-token/input/trailing_comment/main.c"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 0.0032047080021584406,
+      "exact": true,
+      "completeDiffLines": 0,
+      "inputHashes": {
+        "main.c": "69583b98f750cf97abab1877b1ed787fe13605d0fe3a8dc0b5397c4b24fdc1aa"
+      },
+      "expectedSha256": "ea434dcbfbaea4fd56a7c0e37fb256679ed9d7bdfdd9c54a4ded12ccc9a7d32b",
+      "actualSha256": "ea434dcbfbaea4fd56a7c0e37fb256679ed9d7bdfdd9c54a4ded12ccc9a7d32b"
+    },
+    {
+      "case": "unknown_directive",
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/eighth-body-review/frozen-v4/joern-parity",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/eighth-body-review/undef-token/input/unknown_directive/main.c"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 0.003402292000828311,
+      "exact": true,
+      "completeDiffLines": 0,
+      "inputHashes": {
+        "main.c": "4029c4ca8dfaa837ba36f426a0a27aaf40f7c192d30f338af5234e64c04e4958"
+      },
+      "expectedSha256": "a9904a40a5961b61dd48027fd43d8fca49ca3eb22d5df8f3589c3dda4d9bb8a8",
+      "actualSha256": "a9904a40a5961b61dd48027fd43d8fca49ca3eb22d5df8f3589c3dda4d9bb8a8"
+    }
+  ]
+}

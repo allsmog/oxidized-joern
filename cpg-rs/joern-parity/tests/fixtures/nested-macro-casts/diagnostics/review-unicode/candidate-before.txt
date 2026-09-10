@@ -1,0 +1,227 @@
+METHOD NAME=<global> CODE=<global> FULL_NAME=<includes>:<global> ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.addition FULL_NAME=<operator>.addition ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=ordinary_unicode CODE=int ordinary_unicode(int x) { return OUT(x); } FULL_NAME=ordinary_unicode SIGNATURE=int(int) ORDER=1
+  METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+  BLOCK CODE={ return OUT(x); } TYPE_FULL_NAME=void ORDER=2
+    RETURN CODE=return OUT(x); ORDER=1
+      CALL NAME=OUT CODE=OUT(x) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=probe.c:OUT:ANY(1) SIGNATURE=ANY(1) ORDER=1 DISPATCH_TYPE=INLINED
+        IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+        BLOCK TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+          CALL NAME=é CODE=é((x) + 7) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=é ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+            CALL NAME=<operator>.addition CODE=(x) + 7 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+              IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+              LITERAL CODE=7 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+
+METHOD NAME=<global> CODE=<global> FULL_NAME=probe.c:<global> ORDER=1
+  METHOD NAME=ordinary_unicode CODE=int ordinary_unicode(int x) { return OUT(x); } FULL_NAME=ordinary_unicode SIGNATURE=int(int) ORDER=1
+    METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+    METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+    BLOCK CODE={ return OUT(x); } TYPE_FULL_NAME=void ORDER=2
+      RETURN CODE=return OUT(x); ORDER=1
+        CALL NAME=OUT CODE=OUT(x) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=probe.c:OUT:ANY(1) SIGNATURE=ANY(1) ORDER=1 DISPATCH_TYPE=INLINED
+          IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+          BLOCK TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+            CALL NAME=é CODE=é((x) + 7) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=é ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+              CALL NAME=<operator>.addition CODE=(x) + 7 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+                LITERAL CODE=7 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+    METHOD_REF CODE=ordinary_unicode TYPE_FULL_NAME=ordinary_unicode METHOD_FULL_NAME=ordinary_unicode ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=OUT CODE=#define OUT(x) éM(x) FULL_NAME=probe.c:OUT:ANY(1) SIGNATURE=ANY(1) ORDER=1
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=3
+
+METHOD NAME=é FULL_NAME=é ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=éM CODE=int éM(int x); FULL_NAME=éM SIGNATURE=int(int) ORDER=1
+  METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+
+NODES|META_DATA LANGUAGE=NEWC
+NODES|FILE NAME=<includes> ORDER=1
+NODES|FILE NAME=<unknown> ORDER=0
+NODES|FILE NAME=probe.c ORDER=0
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<global> FILENAME=<unknown> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<includes>:<global> FILENAME=<includes> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=probe.c:<global> FILENAME=probe.c ORDER=1
+NODES|NAMESPACE NAME=<global>
+NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=ordinary_unicode FULL_NAME=ordinary_unicode CODE=ordinary_unicode AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=probe.c:<global> FILENAME=probe.c ORDER=1
+NODES|TYPE_DECL NAME=<global> FULL_NAME=probe.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=probe.c:<global> FILENAME=probe.c ORDER=1
+NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+NODES|TYPE NAME=ordinary_unicode FULL_NAME=ordinary_unicode TYPE_DECL_FULL_NAME=ordinary_unicode
+NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+EDGES|ARGUMENT ordinary_unicode#4 -> ordinary_unicode#5
+EDGES|ARGUMENT ordinary_unicode#5 -> ordinary_unicode#6
+EDGES|ARGUMENT ordinary_unicode#8 -> ordinary_unicode#9
+EDGES|ARGUMENT ordinary_unicode#9 -> ordinary_unicode#10
+EDGES|ARGUMENT ordinary_unicode#9 -> ordinary_unicode#11
+EDGES|CALL ordinary_unicode#5 -> probe.c:OUT:ANY(1)#0
+EDGES|CALL ordinary_unicode#8 -> é#0
+EDGES|CALL ordinary_unicode#9 -> <operator>.addition#0
+EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+EDGES|CFG <operator>.addition#0 -> <operator>.addition#5
+EDGES|CFG ordinary_unicode#0 -> ordinary_unicode#6
+EDGES|CFG ordinary_unicode#10 -> ordinary_unicode#11
+EDGES|CFG ordinary_unicode#11 -> ordinary_unicode#9
+EDGES|CFG ordinary_unicode#4 -> ordinary_unicode#12
+EDGES|CFG ordinary_unicode#5 -> ordinary_unicode#10
+EDGES|CFG ordinary_unicode#5 -> ordinary_unicode#4
+EDGES|CFG ordinary_unicode#6 -> ordinary_unicode#5
+EDGES|CFG ordinary_unicode#8 -> ordinary_unicode#4
+EDGES|CFG ordinary_unicode#9 -> ordinary_unicode#8
+EDGES|CFG probe.c:<global>#0 -> probe.c:<global>#15
+EDGES|CFG probe.c:<global>#15 -> probe.c:<global>#16
+EDGES|CFG probe.c:OUT:ANY(1)#0 -> probe.c:OUT:ANY(1)#4
+EDGES|CFG é#0 -> é#4
+EDGES|CFG éM#0 -> éM#4
+EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+EDGES|CONTAINS <operator>.addition#0 -> <operator>.addition#2
+EDGES|CONTAINS D:probe.c:<global> -> D:ordinary_unicode
+EDGES|CONTAINS D:probe.c:<global> -> probe.c:<global>#0
+EDGES|CONTAINS D:probe.c:<global> -> probe.c:OUT:ANY(1)#0
+EDGES|CONTAINS D:probe.c:<global> -> éM#0
+EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+EDGES|CONTAINS F:<includes> -> D:ANY
+EDGES|CONTAINS F:<includes> -> D:int
+EDGES|CONTAINS F:<includes> -> D:void
+EDGES|CONTAINS F:probe.c -> D:probe.c:<global>
+EDGES|CONTAINS ordinary_unicode#0 -> ordinary_unicode#10
+EDGES|CONTAINS ordinary_unicode#0 -> ordinary_unicode#11
+EDGES|CONTAINS ordinary_unicode#0 -> ordinary_unicode#3
+EDGES|CONTAINS ordinary_unicode#0 -> ordinary_unicode#4
+EDGES|CONTAINS ordinary_unicode#0 -> ordinary_unicode#5
+EDGES|CONTAINS ordinary_unicode#0 -> ordinary_unicode#6
+EDGES|CONTAINS ordinary_unicode#0 -> ordinary_unicode#7
+EDGES|CONTAINS ordinary_unicode#0 -> ordinary_unicode#8
+EDGES|CONTAINS ordinary_unicode#0 -> ordinary_unicode#9
+EDGES|CONTAINS probe.c:<global>#0 -> ordinary_unicode#0
+EDGES|CONTAINS probe.c:<global>#0 -> probe.c:<global>#14
+EDGES|CONTAINS probe.c:<global>#0 -> probe.c:<global>#15
+EDGES|CONTAINS probe.c:OUT:ANY(1)#0 -> probe.c:OUT:ANY(1)#3
+EDGES|CONTAINS é#0 -> é#2
+EDGES|CONTAINS éM#0 -> éM#3
+EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#6 -> T:ANY
+EDGES|EVAL_TYPE ordinary_unicode#1 -> T:int
+EDGES|EVAL_TYPE ordinary_unicode#10 -> T:int
+EDGES|EVAL_TYPE ordinary_unicode#11 -> T:int
+EDGES|EVAL_TYPE ordinary_unicode#12 -> T:int
+EDGES|EVAL_TYPE ordinary_unicode#2 -> T:int
+EDGES|EVAL_TYPE ordinary_unicode#3 -> T:void
+EDGES|EVAL_TYPE ordinary_unicode#5 -> T:ANY
+EDGES|EVAL_TYPE ordinary_unicode#6 -> T:int
+EDGES|EVAL_TYPE ordinary_unicode#7 -> T:ANY
+EDGES|EVAL_TYPE ordinary_unicode#8 -> T:ANY
+EDGES|EVAL_TYPE ordinary_unicode#9 -> T:ANY
+EDGES|EVAL_TYPE probe.c:<global>#14 -> T:ANY
+EDGES|EVAL_TYPE probe.c:<global>#15 -> T:ordinary_unicode
+EDGES|EVAL_TYPE probe.c:<global>#16 -> T:ANY
+EDGES|EVAL_TYPE probe.c:OUT:ANY(1)#1 -> T:ANY
+EDGES|EVAL_TYPE probe.c:OUT:ANY(1)#2 -> T:ANY
+EDGES|EVAL_TYPE probe.c:OUT:ANY(1)#3 -> T:ANY
+EDGES|EVAL_TYPE probe.c:OUT:ANY(1)#4 -> T:ANY
+EDGES|EVAL_TYPE é#1 -> T:ANY
+EDGES|EVAL_TYPE é#2 -> T:ANY
+EDGES|EVAL_TYPE é#3 -> T:ANY
+EDGES|EVAL_TYPE é#4 -> T:ANY
+EDGES|EVAL_TYPE éM#1 -> T:int
+EDGES|EVAL_TYPE éM#2 -> T:int
+EDGES|EVAL_TYPE éM#3 -> T:ANY
+EDGES|EVAL_TYPE éM#4 -> T:int
+EDGES|PARAMETER_LINK <operator>.addition#1 -> <operator>.addition#3
+EDGES|PARAMETER_LINK <operator>.addition#4 -> <operator>.addition#6
+EDGES|PARAMETER_LINK ordinary_unicode#1 -> ordinary_unicode#2
+EDGES|PARAMETER_LINK probe.c:OUT:ANY(1)#1 -> probe.c:OUT:ANY(1)#2
+EDGES|PARAMETER_LINK é#1 -> é#3
+EDGES|PARAMETER_LINK éM#1 -> éM#2
+EDGES|REF NB:<global> -> NS:<global>
+EDGES|REF NB:<includes>:<global> -> NS:<global>
+EDGES|REF NB:probe.c:<global> -> NS:<global>
+EDGES|REF T:ANY -> D:ANY
+EDGES|REF T:int -> D:int
+EDGES|REF T:ordinary_unicode -> D:ordinary_unicode
+EDGES|REF T:void -> D:void
+EDGES|REF ordinary_unicode#10 -> ordinary_unicode#1
+EDGES|REF probe.c:<global>#15 -> ordinary_unicode#0
+EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+EDGES|SOURCE_FILE D:ANY -> F:<includes>
+EDGES|SOURCE_FILE D:int -> F:<includes>
+EDGES|SOURCE_FILE D:ordinary_unicode -> F:probe.c
+EDGES|SOURCE_FILE D:probe.c:<global> -> F:probe.c
+EDGES|SOURCE_FILE D:void -> F:<includes>
+EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
+EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>
+EDGES|SOURCE_FILE NB:probe.c:<global> -> F:probe.c
+EDGES|SOURCE_FILE ordinary_unicode#0 -> F:probe.c
+EDGES|SOURCE_FILE probe.c:<global>#0 -> F:probe.c
+EDGES|SOURCE_FILE probe.c:OUT:ANY(1)#0 -> F:probe.c
+EDGES|SOURCE_FILE éM#0 -> F:probe.c
+FLOWS|REACHING_DEF[(x) + 7] ordinary_unicode#9 -> ordinary_unicode#12
+FLOWS|REACHING_DEF[(x) + 7] ordinary_unicode#9 -> ordinary_unicode#8
+FLOWS|REACHING_DEF[7] ordinary_unicode#11 -> ordinary_unicode#9
+FLOWS|REACHING_DEF[<RET>] ordinary_unicode#4 -> ordinary_unicode#12
+FLOWS|REACHING_DEF[OUT(x)] ordinary_unicode#5 -> ordinary_unicode#12
+FLOWS|REACHING_DEF[OUT(x)] ordinary_unicode#5 -> ordinary_unicode#4
+FLOWS|REACHING_DEF[] <operator>.addition#0 -> <operator>.addition#1
+FLOWS|REACHING_DEF[] <operator>.addition#0 -> <operator>.addition#4
+FLOWS|REACHING_DEF[] ordinary_unicode#0 -> ordinary_unicode#1
+FLOWS|REACHING_DEF[] ordinary_unicode#0 -> ordinary_unicode#10
+FLOWS|REACHING_DEF[] ordinary_unicode#0 -> ordinary_unicode#11
+FLOWS|REACHING_DEF[] ordinary_unicode#0 -> ordinary_unicode#6
+FLOWS|REACHING_DEF[] probe.c:<global>#0 -> probe.c:<global>#15
+FLOWS|REACHING_DEF[] probe.c:OUT:ANY(1)#0 -> probe.c:OUT:ANY(1)#1
+FLOWS|REACHING_DEF[] é#0 -> é#1
+FLOWS|REACHING_DEF[] éM#0 -> éM#1
+FLOWS|REACHING_DEF[p1] <operator>.addition#1 -> <operator>.addition#3
+FLOWS|REACHING_DEF[p1] <operator>.addition#1 -> <operator>.addition#5
+FLOWS|REACHING_DEF[p1] probe.c:OUT:ANY(1)#1 -> probe.c:OUT:ANY(1)#2
+FLOWS|REACHING_DEF[p1] probe.c:OUT:ANY(1)#1 -> probe.c:OUT:ANY(1)#4
+FLOWS|REACHING_DEF[p1] é#1 -> é#3
+FLOWS|REACHING_DEF[p1] é#1 -> é#4
+FLOWS|REACHING_DEF[p2] <operator>.addition#4 -> <operator>.addition#5
+FLOWS|REACHING_DEF[p2] <operator>.addition#4 -> <operator>.addition#6
+FLOWS|REACHING_DEF[x] ordinary_unicode#1 -> ordinary_unicode#2
+FLOWS|REACHING_DEF[x] ordinary_unicode#1 -> ordinary_unicode#6
+FLOWS|REACHING_DEF[x] ordinary_unicode#10 -> ordinary_unicode#12
+FLOWS|REACHING_DEF[x] ordinary_unicode#10 -> ordinary_unicode#2
+FLOWS|REACHING_DEF[x] ordinary_unicode#10 -> ordinary_unicode#9
+FLOWS|REACHING_DEF[x] ordinary_unicode#6 -> ordinary_unicode#10
+FLOWS|REACHING_DEF[x] ordinary_unicode#6 -> ordinary_unicode#12
+FLOWS|REACHING_DEF[x] ordinary_unicode#6 -> ordinary_unicode#2
+FLOWS|REACHING_DEF[x] ordinary_unicode#6 -> ordinary_unicode#5
+FLOWS|REACHING_DEF[x] éM#1 -> éM#2
+FLOWS|REACHING_DEF[x] éM#1 -> éM#4
+FLOWS|REACHING_DEF[é((x) + 7)] ordinary_unicode#8 -> ordinary_unicode#12

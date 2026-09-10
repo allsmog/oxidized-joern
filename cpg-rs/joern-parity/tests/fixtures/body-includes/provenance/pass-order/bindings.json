@@ -1,0 +1,53 @@
+{
+  "status": "PINNED_PASS_ORDER_CONFIRMED",
+  "version": "v4.0.555",
+  "commit": "d95237aeaf3d12cb4e63336def3a4d9d7315dfb4",
+  "files": [
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/tenth-body-include-v1-review/pass-order/C2Cpg.scala",
+      "url": "https://raw.githubusercontent.com/joernio/joern/d95237aeaf3d12cb4e63336def3a4d9d7315dfb4/joern-cli/frontends/c2cpg/src/main/scala/io/joern/c2cpg/C2Cpg.scala",
+      "resolvedUrl": "https://raw.githubusercontent.com/joernio/joern/d95237aeaf3d12cb4e63336def3a4d9d7315dfb4/joern-cli/frontends/c2cpg/src/main/scala/io/joern/c2cpg/C2Cpg.scala",
+      "httpStatus": 200,
+      "sha256": "57aca4c1784c7e91bdd68eca17d17cdf86526b3c759c90fb8a8d9721140c51bc",
+      "bytes": 3164,
+      "source": "fresh pinned commit source download; not a graph producer"
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/tenth-body-include-v1-review/pass-order/FileDefaults.scala",
+      "url": "https://raw.githubusercontent.com/joernio/joern/d95237aeaf3d12cb4e63336def3a4d9d7315dfb4/joern-cli/frontends/c2cpg/src/main/scala/io/joern/c2cpg/parser/FileDefaults.scala",
+      "resolvedUrl": "https://raw.githubusercontent.com/joernio/joern/d95237aeaf3d12cb4e63336def3a4d9d7315dfb4/joern-cli/frontends/c2cpg/src/main/scala/io/joern/c2cpg/parser/FileDefaults.scala",
+      "httpStatus": 200,
+      "sha256": "c3384c9a3c097dae90e32a9c4277972bd2dce2d7137290ea2737e3b3929dbec6",
+      "bytes": 1253,
+      "source": "fresh pinned commit source download; not a graph producer"
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/tenth-body-include-v1-review/pass-order/AstCreationPass.scala",
+      "copiedFrom": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/joern-parity/tests/fixtures/body-macro-state/provenance/upstream/AstCreationPass.scala",
+      "sha256": "561c1a211fd9f94fdbd24c1377113d4d7782fb41d26e93877737743185399a07",
+      "bytes": 9020,
+      "source": "unchanged committed ninth provenance"
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/tenth-body-include-v1-review/pass-order/MacroHandler.scala",
+      "copiedFrom": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/joern-parity/tests/fixtures/body-macro-state/provenance/upstream/MacroHandler.scala",
+      "sha256": "73cdeb7c41d9356cc6ba2fe2f276bb198a1a26b77d67e13fb1830491289f0ab6",
+      "bytes": 9211,
+      "source": "unchanged committed ninth provenance"
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/tenth-body-include-v1-review/pass-order/FunctionDeclNodePass.scala",
+      "copiedFrom": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/joern-parity/tests/fixtures/body-macro-state/provenance/upstream/FunctionDeclNodePass.scala",
+      "sha256": "e2d3dbed15138359375f1c8111da4e419f6d4c75de15698474ad4d89328b9f82",
+      "bytes": 8801,
+      "source": "unchanged committed ninth provenance"
+    }
+  ],
+  "noGraphProducers": true,
+  "noBuilds": true,
+  "noSourceEdits": true,
+  "construction": "C2Cpg.scala29-43 source pass then separate .h header pass; method declaration pass consumes header accumulator.",
+  "merge": "AstCreationPass.scala110-112 merges previous source accumulator into new header accumulator. mergeWith63-64 inserts only absent method-declaration full names.",
+  "methodFilename": "MacroHandler.scala155 writes current AstCreator filename; FunctionDeclNodePass.scala135 copies that MethodInfo filename into METHOD.",
+  "scopeLimit": "This proves inter-pass precedence, not arbitrary within-pass file ordering or C++ parity."
+}

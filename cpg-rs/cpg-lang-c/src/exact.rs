@@ -9,7 +9,7 @@
 //! the output diffs cleanly against the oracle.
 
 use std::collections::{BTreeMap, HashMap, HashSet};
-use std::path::Path;
+use std::sync::Arc;
 use tree_sitter::{Node, Parser};
 
 /// Deterministic compiler inputs that affect C preprocessing. Paths are
@@ -39,7 +39,7 @@ impl PreprocessorConfig {
     fn for_translation_unit(&self, file: &str) -> TranslationUnitConfig {
         let mut effective = self
             .translation_units
-            .get(&normalize_source_path(file))
+            .get(&normalize_source_path(std::path::Path::new(file)))
             .cloned()
             .unwrap_or_default();
         effective
@@ -61,86 +61,188 @@ impl PreprocessorConfig {
     }
 }
 
-struct PreprocessorEnvironment<'a> {
-    sources: HashMap<String, &'a str>,
-    config: &'a PreprocessorConfig,
-}
-
-struct TranslationUnitEnvironment<'a, 'sources> {
-    project: &'a PreprocessorEnvironment<'sources>,
-    inputs: &'a TranslationUnitConfig,
+struct SourceUnit {
+    file: String,
+    src: String,
+    tree: tree_sitter::Tree,
 }
 
 pub fn canonical_dump_paths(paths: &[String]) -> String {
-    let sources: Vec<(String, String)> = paths
+    canonical_dump_sources(&read_sources_from_paths(paths).expect("read exact C inputs"))
+}
+
+/// Retain source names relative to the common input directory. Flattening
+/// filenames loses quoted include targets and conflates equal basenames.
+pub fn read_sources_from_paths(paths: &[String]) -> std::io::Result<Vec<(String, String)>> {
+    let paths: Vec<std::path::PathBuf> = paths
+        .iter()
+        .map(std::path::absolute)
+        .collect::<std::io::Result<_>>()?;
+    let Some(first) = paths.first() else {
+        return Ok(Vec::new());
+    };
+    let mut root = first.parent().expect("input file parent").to_path_buf();
+    for path in &paths[1..] {
+        while !path.starts_with(&root) {
+            if !root.pop() {
+                break;
+            }
+        }
+    }
+    paths
         .iter()
         .map(|path| {
-            let source = std::fs::read_to_string(path)
-                .unwrap_or_else(|e| panic!("read exact C input {path}: {e}"));
-            let file = std::path::Path::new(path)
-                .file_name()
-                .unwrap_or_else(|| panic!("input has no filename: {path}"))
+            let source = std::fs::read_to_string(path).map_err(|error| {
+                std::io::Error::new(error.kind(), format!("{}: {error}", path.display()))
+            })?;
+            let file = path
+                .strip_prefix(&root)
+                .expect("common input directory")
                 .to_string_lossy()
                 .into_owned();
-            (file, source)
+            Ok((file, source))
         })
-        .collect();
-    canonical_dump_sources(&sources)
+        .collect()
 }
 
 pub fn canonical_dump_sources(sources: &[(String, String)]) -> String {
-    canonical_dump_sources_with_config(sources, &PreprocessorConfig::default())
+    canonical_dump_sources_with_origins(sources).0
+}
+
+/// Included declarations keep the caller AST ownership while their line
+/// coordinates come from the original header span. This internal side channel
+/// does not change the canonical projection or add graph file properties.
+pub(crate) struct IncludedSourceOrigin {
+    pub block: String,
+    pub nodes: std::ops::Range<usize>,
+    pub file: String,
+    pub span: std::ops::Range<usize>,
+}
+
+/// Properties omitted by the canonical oracle, retained for the production CPG.
+#[derive(Default)]
+pub(crate) struct ExactMetadata {
+    pub bindings: Vec<FunctionBinding>,
+    pub macro_bindings: Vec<FunctionBinding>,
+    pub modifiers: Vec<ModifierMetadata>,
+    pub reference_origins: Vec<MethodReferenceOrigin>,
+    pub include_references: Vec<IncludeReference>,
+}
+
+/// A physical include directive, independent of resolving or executing its
+/// header. CDT retains inactive and repeated directives in this inventory.
+pub(crate) struct IncludeReference {
+    pub file: String,
+    pub code: String,
+    pub name: String,
+    pub line: u32,
+    pub column: i32,
+    pub order: i32,
+}
+
+pub(crate) struct FunctionBinding {
+    pub name: String,
+    pub full_name: String,
+    pub type_decl_full_name: String,
+    pub signature: Option<String>,
+    /// Physical definition start, independent of project-wide duplicate suffix.
+    pub source_start: Option<usize>,
+}
+
+pub(crate) struct ModifierMetadata {
+    pub address: String,
+    pub modifier_type: &'static str,
+    pub line: Option<u32>,
+}
+
+/// Physical definition represented by a file-global METHOD_REF. Its actual REF
+/// edge can intentionally point to another same-named method after linking.
+pub(crate) struct MethodReferenceOrigin {
+    pub address: String,
+    pub definition_full_name: String,
+}
+
+pub(crate) fn canonical_dump_sources_with_origins(
+    sources: &[(String, String)],
+) -> (String, Vec<IncludedSourceOrigin>) {
+    let (dump, origins, _) = canonical_dump_sources_with_metadata(sources);
+    (dump, origins)
+}
+
+pub(crate) fn canonical_dump_sources_with_metadata(
+    sources: &[(String, String)],
+) -> (String, Vec<IncludedSourceOrigin>, ExactMetadata) {
+    canonical_dump_sources_with_metadata_and_config(sources, &PreprocessorConfig::default())
 }
 
 pub fn canonical_dump_sources_with_config(
     sources: &[(String, String)],
     config: &PreprocessorConfig,
 ) -> String {
+    canonical_dump_sources_with_metadata_and_config(sources, config).0
+}
+
+pub(crate) fn canonical_dump_sources_with_metadata_and_config(
+    sources: &[(String, String)],
+    config: &PreprocessorConfig,
+) -> (String, Vec<IncludedSourceOrigin>, ExactMetadata) {
+    let mut included_origins = Vec::new();
+    let mut metadata = ExactMetadata::default();
     let mut parser = Parser::new();
     parser
         .set_language(&tree_sitter_c::LANGUAGE.into())
         .unwrap();
 
-    struct Unit {
-        file: String,
-        src: String,
-        tree: tree_sitter::Tree,
-    }
-    let units: Vec<Unit> = sources
+    let units: Vec<SourceUnit> = sources
         .iter()
         .map(|(file, src)| {
             let tree = parser.parse(src, None).unwrap();
-            Unit {
+            SourceUnit {
                 file: file.clone(),
                 src: src.clone(),
                 tree,
             }
         })
         .collect();
-    let preprocessor = PreprocessorEnvironment {
-        sources: sources
-            .iter()
-            .map(|(path, source)| (normalize_source_path(path), source.as_str()))
-            .collect(),
-        config,
-    };
 
+    let retain_inactive = config == &PreprocessorConfig::default();
     // Project-wide registries: defined functions (calls to these never become
     // stubs; each also gets a method TYPE_DECL) and struct definitions.
     let mut defined: Vec<String> = Vec::new();
-    let mut raw_fn_decls: Vec<(String, String)> = Vec::new(); // (name, file)
+    let mut raw_fn_decls: Vec<(String, String, usize)> = Vec::new(); // (name, file, node id)
+    let mut definition_locations = HashMap::new();
+    let mut static_definitions = HashSet::new();
+    let mut parenthesized_definitions = HashSet::new();
     let mut struct_decls: Vec<(String, String, String)> = Vec::new(); // (tag, code, file)
+    let mut type_alias_full_names: HashMap<(usize, usize, usize), String> = HashMap::new();
     let mut used_types: std::collections::BTreeSet<String> = std::collections::BTreeSet::new();
     for u in &units {
         let b = u.src.as_bytes();
-        let (top_level, _) =
-            preprocess_translation_unit(u.tree.root_node(), b, &u.file, &preprocessor);
-        for f in top_level {
+        // Keep only one translation unit's include/macro history in memory.
+        // Default CDT header discovery does not need a preprocessing walk.
+        let items = if retain_inactive {
+            translation_unit_items(u.tree.root_node(), b)
+        } else {
+            body_macro_context_with_config(u.tree.root_node(), b, &u.file, &units, config).items
+        };
+        for f in items {
             match f.kind() {
                 "function_definition" => {
                     if let Some((name, _, _)) = fn_header(f, b) {
-                        defined.push(name.clone());
-                        raw_fn_decls.push((name, u.file.clone()));
+                        if f.child_by_field_name("declarator")
+                            .and_then(parenthesized_function_parts)
+                            .is_some()
+                        {
+                            parenthesized_definitions.insert(f.id());
+                            defined.push(format!("<unresolvedNamespace>.{name}"));
+                        } else {
+                            defined.push(name.clone());
+                        }
+                        raw_fn_decls.push((name, u.file.clone(), f.id()));
+                        definition_locations.insert(f.id(), f.start_position());
+                        if has_leading_static(text(f, b)) {
+                            static_definitions.insert(f.id());
+                        }
                     }
                 }
                 "struct_specifier" | "union_specifier" | "enum_specifier"
@@ -153,41 +255,200 @@ pub fn canonical_dump_sources_with_config(
                     struct_decls.push((tag, esc(text(f, b)), u.file.clone()));
                 }
                 "type_definition" => {
-                    let tag = f
-                        .child_by_field_name("declarator")
-                        .map(|x| text(x, b).to_string())
-                        .unwrap_or_default();
-                    struct_decls.push((tag, esc(text(f, b)), u.file.clone()));
-                    // The typedef's underlying type registers as a used type,
-                    // with its RAW source spelling (`unsigned int` is not
-                    // normalised here, unlike variable types).
-                    if let Some(t) = f.child_by_field_name("type") {
-                        used_types.insert(normalize_type(text(t, b)));
+                    if let Some(aggregate) = typedef_aggregate(f) {
+                        let name = aggregate_name(aggregate, b);
+                        used_types.insert(name.clone());
+                        struct_decls.push((
+                            name.clone(),
+                            aggregate_code(aggregate, b),
+                            u.file.clone(),
+                        ));
+                        if aggregate.child_by_field_name("name").is_some() {
+                            for alias in typedef_declarators(f) {
+                                used_types.insert(typedef_alias_name(alias, b));
+                                let suffix = decl_suffix(alias, b);
+                                let prefix = if array_dimensions(alias).is_empty() {
+                                    ""
+                                } else {
+                                    "typedef"
+                                };
+                                used_types.insert(format!("{prefix}{name}{suffix}"));
+                                struct_decls.push((
+                                    aggregate_alias_full_name(aggregate, alias, b),
+                                    esc(text(f, b)),
+                                    u.file.clone(),
+                                ));
+                            }
+                        }
+                        continue;
+                    }
+                    let aliases = typedef_declarators(f);
+                    for alias in &aliases {
+                        let tag = type_binding_name(*alias, b);
+                        used_types.insert(tag.clone());
+                        used_types.insert(typedef_underlying_type(f, *alias, b));
+                        type_alias_full_names
+                            .insert((u.tree.root_node().id(), 0, alias.id()), tag.clone());
+                        struct_decls.push((tag, esc(text(f, b)), u.file.clone()));
                     }
                 }
                 _ => {}
             }
         }
     }
-    let mut definition_counts: HashMap<String, usize> = HashMap::new();
-    for (name, _) in &raw_fn_decls {
-        *definition_counts.entry(name.clone()).or_default() += 1;
-    }
-    let ambiguous_functions: HashSet<String> = definition_counts
-        .iter()
-        .filter_map(|(name, &count)| (count > 1).then_some(name.clone()))
-        .collect();
-    let method_full = |name: &str, file: &str| {
-        if ambiguous_functions.contains(name) {
-            format!("{file}:{name}")
-        } else {
-            name.to_string()
-        }
-    };
+    // Joern establishes uniqueness after AST creation, sorted by physical
+    // filename/line/column. The initial name remains the call/reference name.
+    raw_fn_decls.sort_by(|a, b| {
+        let ap = definition_locations[&a.2];
+        let bp = definition_locations[&b.2];
+        (&a.1, ap.row, ap.column).cmp(&(&b.1, bp.row, bp.column))
+    });
+    let mut definition_full_names = HashMap::new();
+    let mut occurrences: HashMap<String, usize> = HashMap::new();
+    let mut first_definition_files = HashMap::new();
+    let mut call_renames: HashMap<String, HashMap<String, String>> = HashMap::new();
     let fn_decls: Vec<(String, String)> = raw_fn_decls
         .iter()
-        .map(|(name, file)| (method_full(name, file), file.clone()))
+        .map(|(name, file, id)| {
+            let base = if parenthesized_definitions.contains(id) {
+                format!("<unresolvedNamespace>.{name}")
+            } else {
+                name.clone()
+            };
+            let first_file = first_definition_files
+                .entry(base.clone())
+                .or_insert_with(|| file.clone());
+            let occurrence = occurrences.entry(base.clone()).or_default();
+            let full = if *occurrence == 0 {
+                base.clone()
+            } else {
+                format!("{base}<duplicate>{}", *occurrence - 1)
+            };
+            // FullNameUniquenessPass excludes the first method's entire file,
+            // even when another duplicate STATIC method occurs in that file.
+            if *occurrence > 0 && first_file != file && static_definitions.contains(id) {
+                call_renames
+                    .entry(file.clone())
+                    .or_default()
+                    .insert(base, full.clone());
+            }
+            *occurrence += 1;
+            definition_full_names.insert(*id, full.clone());
+            (full, file.clone())
+        })
         .collect();
+
+    // Function declarations remain external METHODs even when never called.
+    // A definition wins over its declarations; repeated prototypes coalesce.
+    let mut prototypes = std::collections::BTreeMap::new();
+    let mut unknown_declaration_prefixes = HashMap::new();
+    for u in &units {
+        let context = body_macro_context_with_config(
+            u.tree.root_node(),
+            u.src.as_bytes(),
+            &u.file,
+            &units,
+            config,
+        );
+        let context = &context;
+        let root = u.tree.root_node();
+        let bytes = u.src.as_bytes();
+        let active: HashSet<_> = context.items.iter().map(Node::id).collect();
+        let declarations = configured_items(root, bytes, context, retain_inactive)
+            .into_iter()
+            .filter(|node| node.kind() != "function_definition" || active.contains(&node.id()))
+            .flat_map(|node| prototype_declarations(node, bytes, &context.body_macro_sites, 0));
+        for (declaration, source_view) in declarations {
+            let bytes = context.body_macro_sites.bytes_for(source_view, bytes);
+            let macros = context
+                .macro_states
+                .get(&declaration.id())
+                .or_else(|| {
+                    context
+                        .body_macro_sites
+                        .at_view(source_view, declaration, bytes)
+                })
+                .cloned()
+                .unwrap_or_default();
+            let declaration_macros = macros
+                .iter()
+                .filter(|(_, definition)| definition.params.is_none())
+                .map(|(name, definition)| (name.clone(), definition.body.clone()))
+                .collect::<HashMap<_, _>>();
+            for (declarator, _) in prototype_header_entries(declaration, bytes) {
+                let Some(resolved) =
+                    resolved_function_header(declaration, declarator, bytes, &macros)
+                else {
+                    continue;
+                };
+                let header = resolved.header;
+                let parenthesized = parenthesized_function_parts(declarator);
+                let full = if parenthesized.is_some() {
+                    format!("<unresolvedNamespace>.{}", header.0)
+                } else {
+                    header.0.clone()
+                };
+                if !defined.contains(&full) {
+                    let mut code = resolved
+                        .expanded_code
+                        .unwrap_or_else(|| esc(text(declaration, bytes)));
+                    if macro_declaration_return(declaration).is_some() {
+                        let prefix = declaration
+                            .child_by_field_name("type")
+                            .map(|node| text(node, bytes))
+                            .unwrap_or("");
+                        if declaration_macros.contains_key(prefix) {
+                            let mut budget = 65_536;
+                            let expansion = expand_preproc_objects(
+                                prefix,
+                                &declaration_macros,
+                                &mut HashSet::new(),
+                                &mut budget,
+                            );
+                            let specifier = format!("{} {}", expansion.trim(), header.1)
+                                .trim()
+                                .to_string();
+                            let declarations = prototype_header_entries(declaration, bytes)
+                                .into_iter()
+                                .map(|(declarator, (_, _, parameters))| {
+                                    let parameter_types = parameters
+                                        .iter()
+                                        .map(|parameter| {
+                                            substitute(
+                                                &parameter.code,
+                                                std::slice::from_ref(&parameter.name),
+                                                &[String::new()],
+                                            )
+                                            .trim()
+                                            .to_string()
+                                        })
+                                        .collect::<Vec<_>>()
+                                        .join(", ");
+                                    if parenthesized_function_parts(declarator).is_some() {
+                                        format!("{specifier}  ()({parameter_types})")
+                                    } else {
+                                        format!("{specifier} ({parameter_types})")
+                                    }
+                                })
+                                .collect::<Vec<_>>()
+                                .join(" ");
+                            code = esc(&format!("{specifier} {declarations};"));
+                        } else {
+                            unknown_declaration_prefixes
+                                .insert(declaration.id(), prefix.to_string());
+                            code = esc(text(declaration, bytes)
+                                .strip_prefix(prefix)
+                                .unwrap_or(text(declaration, bytes))
+                                .trim());
+                        }
+                    }
+                    prototypes
+                        .entry(full)
+                        .or_insert_with(|| (u.file.clone(), code, header));
+                }
+            }
+        }
+    }
 
     // Each dump is one method subtree keyed by FULL_NAME; Joern's oracle sorts
     // all methods (user, <global> wrappers, <operator> stubs) by fullName.
@@ -195,35 +456,104 @@ pub fn canonical_dump_sources_with_config(
     let mut stub_uses: HashMap<String, usize> = HashMap::new();
     let mut edges: Vec<(String, String, String)> = Vec::new();
     let mut placements: HashMap<String, Vec<(String, usize)>> = HashMap::new();
+    let mut macro_method_files = HashMap::new();
+    let mut expansion_control_kinds = HashMap::new();
     let mut used_macros: std::collections::BTreeMap<String, (String, String, usize, String)> =
         std::collections::BTreeMap::new();
-    // #include directives become IMPORT nodes that consume earlier sibling
-    // slots: the file-global TYPE_DECL's ORDER is 1 + #includes.
+    // This physical inventory is separate from preprocessing execution: even
+    // inactive, guarded repeats and unresolved includes consume IMPORT slots.
+    // The canonical view records their effect on the global TYPE_DECL order;
+    // typed metadata carries the actual nodes omitted by that projection.
     let include_counts: HashMap<String, usize> = units
         .iter()
         .map(|u| {
-            let b = u.src.as_bytes();
-            let (top_level, _) =
-                preprocess_translation_unit(u.tree.root_node(), b, &u.file, &preprocessor);
-            let n = top_level
-                .iter()
-                .filter(|f| f.kind() == "preproc_include")
-                .count();
-            (u.file.clone(), n)
+            let mut pending = vec![u.tree.root_node()];
+            let mut includes = Vec::new();
+            while let Some(node) = pending.pop() {
+                if node.kind() == "preproc_include" {
+                    includes.push(node);
+                }
+                pending.extend(translation_unit_children(node, u.src.as_bytes()));
+            }
+            includes.sort_by_key(Node::start_byte);
+            for (index, node) in includes.iter().copied().enumerate() {
+                let Some(path) = node.child_by_field_name("path") else {
+                    continue;
+                };
+                let spelling = text(path, u.src.as_bytes());
+                let name = spelling
+                    .strip_prefix('"')
+                    .and_then(|s| s.strip_suffix('"'))
+                    .or_else(|| spelling.strip_prefix('<').and_then(|s| s.strip_suffix('>')));
+                // Macro-computed include names need their own CDT observation
+                // and expansion transport; do not invent their resolved name.
+                let Some(name) = name else { continue };
+                let position = node.start_position();
+                let line_start = node.start_byte() - position.column;
+                let column = u.src[line_start..node.start_byte()].encode_utf16().count() + 1;
+                metadata.include_references.push(IncludeReference {
+                    file: u.file.clone(),
+                    code: preproc_raw_directive(node, u.src.as_bytes()).to_owned(),
+                    name: name.to_owned(),
+                    line: u32::try_from(position.row + 1).expect("include line fits CPG storage"),
+                    column: i32::try_from(column).expect("include column fits CPG storage"),
+                    order: i32::try_from(index + 1).expect("include order fits CPG storage"),
+                });
+            }
+            (u.file.clone(), includes.len())
         })
         .collect();
 
     for u in &units {
+        let context = body_macro_context_with_config(
+            u.tree.root_node(),
+            u.src.as_bytes(),
+            &u.file,
+            &units,
+            config,
+        );
+        let context = &context;
+        let first_dump = dumps.len();
         let b = u.src.as_bytes();
         let root = u.tree.root_node();
+        let BodyMacroContext {
+            items: active_items,
+            macros,
+            macro_states,
+            body_macro_sites,
+            header_declarations,
+            typedef_states,
+        } = context;
+        let mut type_sites = HashMap::new();
+        for item in configured_items(root, b, context, retain_inactive) {
+            type_sites.extend(collect_type_sites(
+                item,
+                b,
+                typedef_states.get(&item.id()).cloned().unwrap_or_default(),
+                macro_states.get(&item.id()).unwrap_or(macros),
+                Some(body_macro_sites),
+                0,
+            ));
+        }
+        let active_methods: HashSet<usize> = active_items
+            .iter()
+            .filter(|node| node.kind() == "function_definition")
+            .map(Node::id)
+            .collect();
+
+        let active_declarations: HashSet<usize> = active_items
+            .iter()
+            .filter(|node| node.kind() == "declaration")
+            .map(Node::id)
+            .collect();
 
         // Per-file tables (c2cpg resolves within the translation unit).
         let mut functions: HashMap<String, String> = HashMap::new();
+        let mut function_call_types: HashMap<String, String> = HashMap::new();
         let mut function_full_names: HashMap<String, String> = HashMap::new();
         let mut globals: HashMap<String, String> = HashMap::new();
-        let (top_level, macros) = preprocess_translation_unit(root, b, &u.file, &preprocessor);
         let mut enumerators: Vec<String> = Vec::new();
-        for &f in &top_level {
+        for f in configured_items(root, b, context, retain_inactive) {
             if f.kind() == "enum_specifier" {
                 if let Some(body) = f.child_by_field_name("body") {
                     for e in named_children(body) {
@@ -236,36 +566,59 @@ pub fn canonical_dump_sources_with_config(
                 }
             }
         }
-        for &f in &top_level {
+        for f in configured_items(root, b, context, retain_inactive) {
             match f.kind() {
                 "function_definition" => {
-                    if let Some((name, ret, _)) = fn_header(f, b) {
-                        function_full_names.insert(name.clone(), method_full(&name, &u.file));
+                    let macros = macro_states.get(&f.id()).cloned().unwrap_or_default();
+                    if let Some(resolved) = f
+                        .child_by_field_name("declarator")
+                        .and_then(|decl| resolved_function_header(f, decl, b, &macros))
+                    {
+                        let (name, ret, _) = resolved.header;
+                        function_full_names.insert(name.clone(), name.clone());
+                        function_call_types.insert(name.clone(), resolved.call_type);
                         functions.insert(name, ret);
                     }
                 }
                 "declaration" => {
-                    let base = normalize_type(
-                        &f.child_by_field_name("type")
-                            .map(|t| text(t, b).to_string())
-                            .unwrap_or("ANY".into()),
-                    );
+                    let macros = macro_states.get(&f.id()).cloned().unwrap_or_default();
+                    for (declarator, _) in prototype_header_entries(f, b) {
+                        if !active_declarations.contains(&f.id()) {
+                            continue;
+                        }
+                        let Some(resolved) = resolved_function_header(f, declarator, b, &macros)
+                        else {
+                            continue;
+                        };
+                        let (name, ret, _) = resolved.header;
+                        function_full_names
+                            .entry(name.clone())
+                            .or_insert_with(|| name.clone());
+                        function_call_types
+                            .entry(name.clone())
+                            .or_insert(resolved.call_type);
+                        functions.entry(name).or_insert(ret);
+                    }
+
                     for d in named_children(f) {
                         let decl = if d.kind() == "init_declarator" {
                             d.child_by_field_name("declarator")
                         } else if matches!(
                             d.kind(),
-                            "identifier" | "pointer_declarator" | "array_declarator"
+                            "identifier"
+                                | "pointer_declarator"
+                                | "array_declarator"
+                                | "function_declarator"
                         ) {
                             Some(d)
                         } else {
                             None
                         };
                         if let Some(decl) = decl {
-                            if find_function_declarator(decl).is_none() {
+                            if !is_function_declaration(decl) {
                                 let name = innermost_id(decl, b);
                                 if !name.is_empty() {
-                                    globals.insert(name, format!("{base}{}", decl_suffix(decl, b)));
+                                    globals.insert(name, declared_object_type(f, decl, b, &macros));
                                 }
                             }
                         }
@@ -275,23 +628,64 @@ pub fn canonical_dump_sources_with_config(
             }
         }
 
+        for declaration in header_declarations {
+            let (name, ret, _) = &declaration.header;
+            function_full_names
+                .entry(name.clone())
+                .or_insert_with(|| name.clone());
+            functions.entry(name.clone()).or_insert_with(|| ret.clone());
+            function_call_types
+                .entry(name.clone())
+                .or_insert_with(|| declaration.call_type.clone());
+        }
+
         let mut ctx = Ctx {
             functions: &functions,
+            function_call_types: &function_call_types,
             function_full_names: &function_full_names,
-            ambiguous_functions: &ambiguous_functions,
+            definition_full_names: &definition_full_names,
+            call_renames: call_renames.get(&u.file),
             globals: &globals,
             enumerators: &enumerators,
-            macros: &macros,
-            preprocessor: &preprocessor,
+            macros: macros.clone(),
+            macro_states,
+            body_macro_sites,
+            source_view: 0,
+            included_origins: &mut included_origins,
+            metadata: &mut metadata,
+            macro_uses: Vec::new(),
+            macro_use_ids: HashMap::new(),
+            last_mfn_span: None,
+            last_call_edge: None,
+            dump_index: 0,
+            type_sites,
+            default_typedefs: TypeNameState::default(),
+            unknown_declaration_prefixes: &unknown_declaration_prefixes,
+            file: u.file.clone(),
+            copying_macro_argument: false,
+            macro_expansion_code: None,
+            macro_expansion_root: None,
+            recovering_expression: false,
+            recovered_bindings: HashSet::new(),
+            recovery_candidates: HashMap::new(),
+            field_macro_codes: HashMap::new(),
+            field_macro_piece: None,
+            expansion_control_kinds: &mut expansion_control_kinds,
+            macro_method_files: &mut macro_method_files,
             used_macros: &mut used_macros,
             symbols: HashMap::new(),
-            expanding_macros: HashSet::new(),
+            symbol_call_types: HashMap::new(),
+            method_functions: HashMap::new(),
+            method_call_types: HashMap::new(),
             phantoms: Vec::new(),
             stubs: &mut stub_uses,
             types: &mut used_types,
+            type_declarations: &mut struct_decls,
+            type_alias_full_names: &mut type_alias_full_names,
             out: String::new(),
             block: String::new(),
             line_no: 0,
+            argument_count: 0,
             suppress_below: None,
             ctx_stack: Vec::new(),
             parent_stack: Vec::new(),
@@ -302,30 +696,31 @@ pub fn canonical_dump_sources_with_config(
         };
 
         // Standalone dump per user method, plus one per struct <clinit>.
-        for &f in &top_level {
+        for f in configured_items(root, b, context, retain_inactive) {
+            ctx.macros = macro_states.get(&f.id()).cloned().unwrap_or_default();
+            let aggregate = typedef_aggregate(f).unwrap_or(f);
             match f.kind() {
                 "function_definition" => {
                     if let Some((name, _, _)) = fn_header(f, b) {
                         let full = ctx
-                            .function_full_names
-                            .get(&name)
+                            .definition_full_names
+                            .get(&f.id())
                             .cloned()
                             .unwrap_or_else(|| name.clone());
                         ctx.begin_block(&full);
-                        ctx.emit_method(f, b, 0);
+                        ctx.emit_method(f, b, 0, active_methods.contains(&f.id()));
                         ctx.edge("SOURCE_FILE", format!("M:{full}"), format!("F:{}", u.file));
                         dumps.push((full, std::mem::take(&mut ctx.out)));
                     }
                 }
-                "struct_specifier" | "union_specifier" | "enum_specifier" if needs_clinit(f, b) => {
-                    let tag = f
-                        .child_by_field_name("name")
-                        .map(|x| text(x, b).to_string())
-                        .unwrap_or_default();
-                    let members = count_members(f);
+                "struct_specifier" | "union_specifier" | "enum_specifier" | "type_definition"
+                    if needs_clinit(aggregate, b) =>
+                {
+                    let tag = aggregate_name(aggregate, b);
+                    let members = count_members(aggregate);
                     let key = format!("{tag}.<clinit>:{tag}()");
                     ctx.begin_block(&key);
-                    ctx.emit_clinit(f, b, 0, members + 1);
+                    ctx.emit_clinit(aggregate, b, 0, members + 1);
                     ctx.edge("SOURCE_FILE", format!("M:{key}"), format!("F:{}", u.file));
                     dumps.push((key, std::mem::take(&mut ctx.out)));
                 }
@@ -336,37 +731,73 @@ pub fn canonical_dump_sources_with_config(
         // The per-file `<global>` wrapper method.
         let gkey = format!("{}:<global>", u.file);
         ctx.begin_block(&gkey);
-        ctx.emit_file_global(root, b, &u.file);
+        ctx.emit_file_global(
+            &configured_items(root, b, context, retain_inactive),
+            b,
+            &u.file,
+            &active_methods,
+        );
         ctx.edge("SOURCE_FILE", format!("M:{gkey}"), format!("F:{}", u.file));
         dumps.push((gkey, std::mem::take(&mut ctx.out)));
+        ctx.resolve_macro_metadata(&mut dumps[first_dump..]);
     }
 
     // Operator stubs and the synthetic <includes>:<global>, emitted through
     // an instrumented Ctx so they too produce addresses and edges.
     let empty_fns: HashMap<String, String> = HashMap::new();
     let empty_full_names: HashMap<String, String> = HashMap::new();
-    let empty_ambiguous: HashSet<String> = HashSet::new();
     let empty_globals: HashMap<String, String> = HashMap::new();
     let mut stub_uses2: HashMap<String, usize> = HashMap::new();
     let empty_enums: Vec<String> = Vec::new();
-    let empty_macros: HashMap<String, MacroDef> = HashMap::new();
+    let empty_macro_states = HashMap::new();
+    let empty_body_macro_sites = BodyMacroSites::default();
     let mut sctx = Ctx {
         functions: &empty_fns,
+        function_call_types: &empty_fns,
         function_full_names: &empty_full_names,
-        ambiguous_functions: &empty_ambiguous,
+        definition_full_names: &definition_full_names,
+        call_renames: None,
         globals: &empty_globals,
         enumerators: &empty_enums,
-        macros: &empty_macros,
-        preprocessor: &preprocessor,
+        macros: Arc::new(HashMap::new()),
+        macro_states: &empty_macro_states,
+        body_macro_sites: &empty_body_macro_sites,
+        source_view: 0,
+        included_origins: &mut included_origins,
+        metadata: &mut metadata,
+        macro_uses: Vec::new(),
+        macro_use_ids: HashMap::new(),
+        last_mfn_span: None,
+        last_call_edge: None,
+        dump_index: 0,
+        type_sites: HashMap::new(),
+        default_typedefs: TypeNameState::default(),
+        unknown_declaration_prefixes: &unknown_declaration_prefixes,
+        file: String::new(),
+        copying_macro_argument: false,
+        macro_expansion_code: None,
+        macro_expansion_root: None,
+        recovering_expression: false,
+        recovered_bindings: HashSet::new(),
+        recovery_candidates: HashMap::new(),
+        field_macro_codes: HashMap::new(),
+        field_macro_piece: None,
+        expansion_control_kinds: &mut expansion_control_kinds,
+        macro_method_files: &mut macro_method_files,
         used_macros: &mut used_macros,
         symbols: HashMap::new(),
-        expanding_macros: HashSet::new(),
+        symbol_call_types: HashMap::new(),
+        method_functions: HashMap::new(),
+        method_call_types: HashMap::new(),
         phantoms: Vec::new(),
         stubs: &mut stub_uses2,
         types: &mut used_types,
+        type_declarations: &mut struct_decls,
+        type_alias_full_names: &mut type_alias_full_names,
         out: String::new(),
         block: String::new(),
         line_no: 0,
+        argument_count: 0,
         suppress_below: None,
         ctx_stack: Vec::new(),
         parent_stack: Vec::new(),
@@ -377,13 +808,24 @@ pub fn canonical_dump_sources_with_config(
     };
     let mut stub_list: Vec<(String, usize)> = stub_uses
         .into_iter()
-        .filter(|(n, _)| !defined.contains(n))
+        .filter(|(n, _)| !defined.contains(n) && !prototypes.contains_key(n))
         .collect();
     stub_list.sort();
     for (name, arity) in stub_list {
         sctx.begin_block(&name);
         sctx.emit_stub(&name, arity);
         dumps.push((name, std::mem::take(&mut sctx.out)));
+    }
+    for (name, (file, code, (method_name, ret, params))) in &prototypes {
+        sctx.begin_block(name);
+        sctx.emit_prototype(method_name, name, code, ret, params);
+        sctx.edge("SOURCE_FILE", format!("M:{name}"), format!("F:{file}"));
+        sctx.edge(
+            "CONTAINS",
+            format!("D:{file}:<global>"),
+            format!("M:{name}"),
+        );
+        dumps.push((name.clone(), std::mem::take(&mut sctx.out)));
     }
     let macro_methods: Vec<(String, (String, String, usize, String))> = sctx
         .used_macros
@@ -393,6 +835,17 @@ pub fn canonical_dump_sources_with_config(
     for (full, (name, directive, nparams, ret)) in macro_methods {
         sctx.begin_block(&full);
         sctx.emit_macro_method(&full, &name, &directive, nparams, &ret);
+        let file = sctx
+            .macro_method_files
+            .get(&full)
+            .expect("finalized macro method must have an owning translation unit");
+        sctx.metadata.macro_bindings.push(FunctionBinding {
+            name,
+            full_name: full.clone(),
+            type_decl_full_name: format!("{file}:<global>"),
+            signature: Some(format!("{ret}({nparams})")),
+            source_start: None,
+        });
         dumps.push((full, std::mem::take(&mut sctx.out)));
     }
     sctx.begin_block("<includes>:<global>");
@@ -439,13 +892,30 @@ pub fn canonical_dump_sources_with_config(
     let struct_tags: Vec<&String> = struct_decls.iter().map(|(t, _, _)| t).collect();
     let mut tds: Vec<(String, String)> = Vec::new();
     for (tag, code, file) in &struct_decls {
+        let order = placements
+            .get(&format!("TD:{tag}"))
+            .and_then(|positions| positions.iter().min())
+            .and_then(|(block, index)| {
+                dumps
+                    .iter()
+                    .find(|(name, _)| name == block)
+                    .and_then(|(_, dump)| dump.lines().nth(*index))
+            })
+            .and_then(|line| line.rsplit_once(" ORDER="))
+            .and_then(|(_, order)| order.split_whitespace().next())
+            .unwrap_or("1");
+        let name = tag.split("<duplicate>").next().unwrap_or(tag);
         tds.push((tag.clone(), format!(
-            "NODES|TYPE_DECL NAME={tag} FULL_NAME={tag} CODE={code} AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME={file} ORDER=1\n"
+            "NODES|TYPE_DECL NAME={name} FULL_NAME={tag} CODE={code} AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME={file} ORDER={order}\n"
         )));
     }
     for (name, file) in &fn_decls {
+        let declaration_code = name.split("<duplicate>").next().unwrap_or(name);
+        let display_name = declaration_code
+            .strip_prefix("<unresolvedNamespace>.")
+            .unwrap_or(declaration_code);
         tds.push((name.clone(), format!(
-            "NODES|TYPE_DECL NAME={name} FULL_NAME={name} CODE={name} AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME={file}:<global> FILENAME={file} ORDER=1\n"
+            "NODES|TYPE_DECL NAME={display_name} FULL_NAME={name} CODE={declaration_code} AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME={file}:<global> FILENAME={file} ORDER=1\n"
         )));
     }
     for f in &files {
@@ -467,8 +937,9 @@ pub fn canonical_dump_sources_with_config(
         out.push_str(&l);
     }
     for t in &used_types {
+        let display_name = t.strip_prefix("<unresolvedNamespace>.").unwrap_or(t);
         out.push_str(&format!(
-            "NODES|TYPE NAME={t} FULL_NAME={t} TYPE_DECL_FULL_NAME={t}\n"
+            "NODES|TYPE NAME={display_name} FULL_NAME={t} TYPE_DECL_FULL_NAME={t}\n"
         ));
     }
 
@@ -477,7 +948,7 @@ pub fn canonical_dump_sources_with_config(
     // subtrees are transparent there, so each CFG is generated exactly once,
     // from its home block).
     for (key, text) in &dumps {
-        for (s, d) in cfg_edges_for_block(key, text) {
+        for (s, d) in cfg_edges_for_block(key, text, &expansion_control_kinds) {
             edges.push(("CFG".into(), s, d));
         }
     }
@@ -485,7 +956,7 @@ pub fn canonical_dump_sources_with_config(
     // REACHING_DEF flows (the FLOWS| section).
     let mut flows: Vec<(String, String, String)> = Vec::new();
     for (key, text) in &dumps {
-        for (var, s, d) in reaching_def_flows(key, text) {
+        for (var, s, d) in reaching_def_flows(key, text, &expansion_control_kinds, &defined) {
             flows.push((var, s, d));
         }
     }
@@ -534,10 +1005,10 @@ pub fn canonical_dump_sources_with_config(
             format!("F:{f}"),
         ));
     }
-    // Macro methods: SOURCE_FILE to their defining file and CONTAINS from the
-    // file-global TYPE_DECL.
+    // Macro identity uses the defining file; Joern registers the stub beneath
+    // the first calling translation unit and uses that unit for SOURCE_FILE.
     for full in used_macros.keys() {
-        if let Some(file) = full.split(':').next() {
+        if let Some(file) = macro_method_files.get(full) {
             edges.push((
                 "SOURCE_FILE".into(),
                 format!("M:{full}"),
@@ -627,24 +1098,24 @@ pub fn canonical_dump_sources_with_config(
         }
     };
     let mut edge_lines: std::collections::BTreeSet<String> = std::collections::BTreeSet::new();
-    for (k, src, dst) in &edges {
-        if let (Some(s), Some(d)) = (resolve(src), resolve(dst)) {
+    for (k, src, dst) in edges {
+        if let (Some(s), Some(d)) = (resolve(&src), resolve(&dst)) {
             edge_lines.insert(format!("{k} {s} -> {d}"));
         }
     }
-    for l in &edge_lines {
+    for l in edge_lines {
         out.push_str(&format!("EDGES|{l}\n"));
     }
     let mut flow_lines: std::collections::BTreeSet<String> = std::collections::BTreeSet::new();
-    for (var, src, dst) in &flows {
-        if let (Some(s), Some(d)) = (resolve(src), resolve(dst)) {
+    for (var, src, dst) in flows {
+        if let (Some(s), Some(d)) = (resolve(&src), resolve(&dst)) {
             flow_lines.insert(format!("REACHING_DEF[{var}] {s} -> {d}"));
         }
     }
-    for l in &flow_lines {
+    for l in flow_lines {
         out.push_str(&format!("FLOWS|{l}\n"));
     }
-    out
+    (out, included_origins, metadata)
 }
 
 fn count_members(n: Node) -> i64 {
@@ -669,548 +1140,339 @@ fn count_members(n: Node) -> i64 {
         .sum()
 }
 
-/// An in-file #define. CDT expands these; invocations become INLINED calls
+/// A source #define, including supplied headers. Expanded invocations become INLINED calls
 /// and each *used* macro also gets a METHOD whose CODE is the directive.
-#[derive(Clone, Debug)]
+#[derive(Clone)]
 struct MacroDef {
     params: Option<Vec<String>>, // None = object-like
     body: String,
     directive: String,
-    origin: String,
+    file: String,
 }
 
-/// Preprocess top-level nodes and collect the final active macro environment
-/// in one source-ordered pass. Directives in inactive branches never leak,
-/// and a later `#undef` cannot retroactively change an earlier branch choice.
-fn preprocess_translation_unit<'tree>(
+type MacroState = Arc<HashMap<String, MacroDef>>;
+type TypeNameState = Arc<HashSet<String>>;
+type TypeSites = HashMap<(usize, usize), TypeNameState>;
+
+#[derive(Clone, PartialEq, Eq)]
+struct MacroMetadata {
+    name: String,
+    directive: String,
+    file: String,
+}
+
+struct MacroUse {
+    offset: usize,
+    include_order: Vec<usize>,
+    metadata: MacroMetadata,
+    arity: usize,
+    ret: String,
+    placements: Vec<(usize, std::ops::Range<usize>, Option<usize>)>,
+}
+
+/// Immutable preprocessing environments at directive boundaries in one original
+/// active function body in one source buffer. File-scope declarations retain
+/// their separate header snapshots. Temporary parse trees have their own bytes and never use these
+/// offsets. Unchanged stretches share one Arc rather than a map per AST node.
+#[derive(Default)]
+struct BodyMacroSites<'tree> {
+    source: usize,
+    tree: usize,
+    len: usize,
+    changes: Vec<(usize, MacroState)>,
+    bodies: Vec<(usize, usize)>,
+    definitions: Vec<MacroMetadata>,
+    expansions: Vec<(usize, usize)>,
+    includes: HashMap<(usize, usize), usize>,
+    headers: Vec<IncludedBodyView<'tree>>,
+}
+
+/// One executed include occurrence, borrowing the supplied original tree. A
+/// nested occurrence is reached through its parent view plus include node ID.
+struct IncludedBodyView<'tree> {
     root: Node<'tree>,
-    b: &[u8],
-    file: &str,
-    environment: &PreprocessorEnvironment<'_>,
-) -> (Vec<Node<'tree>>, HashMap<String, MacroDef>) {
-    let inputs = environment.config.for_translation_unit(file);
-    let mut macros = command_line_macros(&inputs, file);
-    let translation_unit = TranslationUnitEnvironment {
-        project: environment,
-        inputs: &inputs,
+    bytes: &'tree [u8],
+    file: &'tree str,
+    include_order: Vec<usize>,
+    items: Vec<Node<'tree>>,
+    changes: Vec<(usize, MacroState)>,
+}
+
+/// An object callee that resolves to an ordinary function expands only the
+/// callee token. If its replacement ends in a function macro, rescanning that
+/// token with the original parentheses consumes the complete invocation.
+fn macro_consumes_arguments(name: &str, macros: &MacroState) -> bool {
+    let Some(definition) = macros.get(name) else {
+        return false;
     };
-    let mut active = Vec::new();
-    let mut include_stack = HashSet::from([normalize_source_path(file)]);
-    for forced in &inputs.forced_includes {
-        if let Some(included) = resolve_include(file, forced, false, &translation_unit) {
-            apply_include_file(
-                &included,
-                &translation_unit,
-                &mut macros,
-                &mut include_stack,
-            );
-        }
+    if definition.params.is_some() {
+        return true;
     }
-    for child in named_children(root) {
-        preprocess_child(
-            child,
-            b,
-            file,
-            &translation_unit,
-            &mut macros,
-            &mut active,
-            &mut include_stack,
-        );
-    }
-    (active, macros)
+    let mut tail_function = false;
+    expand_declaration_tokens_with_tail(
+        &macro_argument_text(&definition.body),
+        macros,
+        &mut HashSet::from([name.to_string()]),
+        &mut 65_536,
+        &mut tail_function,
+    )
+    .is_some()
+        && tail_function
 }
 
-fn preprocess_child<'tree>(
-    child: Node<'tree>,
-    b: &[u8],
-    file: &str,
-    environment: &TranslationUnitEnvironment<'_, '_>,
-    macros: &mut HashMap<String, MacroDef>,
-    active: &mut Vec<Node<'tree>>,
-    include_stack: &mut HashSet<String>,
+fn collect_macro_expansions(
+    node: Node,
+    bytes: &[u8],
+    macros: &MacroState,
+    sites: &mut BodyMacroSites,
 ) {
-    match child.kind() {
-        "preproc_def" | "preproc_function_def" => {
-            if let Some((name, definition)) = macro_definition(child, b, file) {
-                macros.insert(name, definition);
-            }
-            active.push(child);
+    if matches!(
+        node.kind(),
+        "preproc_defined" | "comment" | "string_literal" | "char_literal"
+    ) {
+        return;
+    }
+    if let Some(function) = node.child_by_field_name("function") {
+        let name = text(function, bytes);
+        if macro_consumes_arguments(name, macros) {
+            sites.expansion(function.start_byte(), name, &macros[name]);
+            return;
         }
-        "preproc_include" => {
-            if let Some((target, angled)) = include_target(text(child, b)) {
-                if let Some(included) = resolve_include(file, &target, angled, environment) {
-                    apply_include_file(&included, environment, macros, include_stack);
-                }
-            }
-            active.push(child);
+    }
+    if node.named_child_count() == 0 {
+        let name = text(node, bytes);
+        if let Some(definition) = macros
+            .get(name)
+            .filter(|definition| definition.params.is_none())
+        {
+            sites.expansion(node.start_byte(), name, definition);
         }
-        "preproc_if" | "preproc_ifdef" => {
-            for selected in selected_preproc_children(child, b, macros) {
-                preprocess_child(
-                    selected,
-                    b,
-                    file,
-                    environment,
-                    macros,
-                    active,
-                    include_stack,
-                );
-            }
+    } else {
+        for child in named_children(node) {
+            collect_macro_expansions(child, bytes, macros, sites);
         }
-        "preproc_call" if text(child, b).trim_start().starts_with("#undef") => {
-            if let Some(name) = text(child, b).split_whitespace().nth(1) {
-                macros.remove(name);
-            }
-            active.push(child);
-        }
-        _ => active.push(child),
     }
 }
 
-fn macro_definition(node: Node, b: &[u8], file: &str) -> Option<(String, MacroDef)> {
-    let name = node
-        .child_by_field_name("name")
-        .map(|value| text(value, b).to_string())?;
-    let body = node
-        .child_by_field_name("value")
-        .map(|value| text(value, b).to_string())
-        .unwrap_or_default();
-    let params = (node.kind() == "preproc_function_def").then(|| {
-        node.child_by_field_name("parameters")
-            .map(|parameters| {
-                let mut names: Vec<String> = named_children(parameters)
-                    .iter()
-                    .map(|parameter| text(*parameter, b).to_string())
-                    .collect();
-                // The tree-sitter C grammar keeps `...` anonymous. Model it
-                // as the standard replacement parameter so variadic arity,
-                // substitution, and macro-method signatures stay explicit.
-                if text(parameters, b).contains("...") {
-                    names.push("__VA_ARGS__".to_string());
-                }
-                names
-            })
-            .unwrap_or_default()
-    });
-    Some((
-        name,
-        MacroDef {
-            params,
-            body,
-            directive: text(node, b).trim_end().to_string(),
-            origin: normalize_source_path(file),
-        },
-    ))
+impl<'tree> BodyMacroSites<'tree> {
+    fn new(root: Node, bytes: &[u8]) -> Self {
+        Self {
+            source: bytes.as_ptr() as usize,
+            tree: root.id(),
+            len: bytes.len(),
+            changes: Vec::new(),
+            bodies: Vec::new(),
+            definitions: Vec::new(),
+            expansions: Vec::new(),
+            includes: HashMap::new(),
+            headers: Vec::new(),
+        }
+    }
+
+    fn bytes_for<'a>(&'a self, view: usize, caller: &'a [u8]) -> &'a [u8] {
+        if view == 0 {
+            caller
+        } else {
+            self.headers[view - 1].bytes
+        }
+    }
+
+    fn owns_view_node(&self, view: usize, mut node: Node) -> bool {
+        while let Some(parent) = node.parent() {
+            node = parent;
+        }
+        node.id()
+            == if view == 0 {
+                self.tree
+            } else {
+                self.headers[view - 1].root.id()
+            }
+    }
+
+    fn included(
+        &self,
+        view: usize,
+        node: Node,
+        bytes: &[u8],
+    ) -> Option<(usize, &IncludedBodyView<'tree>)> {
+        let target = *self.includes.get(&(view, node.id()))?;
+        if !self.owns_view_node(view, node) {
+            return None;
+        }
+        let owned = if view == 0 {
+            self.owns(bytes)
+        } else {
+            let source = self.headers[view - 1].bytes;
+            source.as_ptr() == bytes.as_ptr() && source.len() == bytes.len()
+        };
+        if !owned {
+            return None;
+        }
+        Some((target, &self.headers[target - 1]))
+    }
+
+    fn record_view(&mut self, view: usize, bytes: &[u8], offset: usize, macros: &MacroState) {
+        if view == 0 {
+            self.record(bytes, offset, macros);
+        } else {
+            let changes = &mut self.headers[view - 1].changes;
+            if changes
+                .last()
+                .is_none_or(|(_, prior)| !Arc::ptr_eq(prior, macros))
+            {
+                changes.push((offset, macros.clone()));
+            }
+        }
+    }
+
+    fn at_view(&self, view: usize, node: Node, bytes: &[u8]) -> Option<&MacroState> {
+        if view == 0 {
+            return self.at(node, bytes);
+        }
+        let header = &self.headers[view - 1];
+        if header.bytes.as_ptr() != bytes.as_ptr()
+            || header.bytes.len() != bytes.len()
+            || !self.owns_view_node(view, node)
+        {
+            return None;
+        }
+        let index = header
+            .changes
+            .partition_point(|(offset, _)| *offset <= node.start_byte());
+        index.checked_sub(1).map(|index| &header.changes[index].1)
+    }
+
+    fn expansion(&mut self, offset: usize, name: &str, definition: &MacroDef) {
+        let metadata = MacroMetadata {
+            name: name.to_string(),
+            directive: definition.directive.clone(),
+            file: definition.file.clone(),
+        };
+        let index = self
+            .definitions
+            .iter()
+            .position(|prior| prior == &metadata)
+            .unwrap_or_else(|| {
+                self.definitions.push(metadata);
+                self.definitions.len() - 1
+            });
+        self.expansions.push((offset, index));
+    }
+
+    fn owns(&self, bytes: &[u8]) -> bool {
+        self.source == bytes.as_ptr() as usize && self.len == bytes.len()
+    }
+
+    fn record(&mut self, bytes: &[u8], offset: usize, macros: &MacroState) {
+        if self.owns(bytes)
+            && self
+                .changes
+                .last()
+                .is_none_or(|(_, prior)| !Arc::ptr_eq(prior, macros))
+        {
+            self.changes.push((offset, macros.clone()));
+        }
+    }
+
+    fn at(&self, node: Node, bytes: &[u8]) -> Option<&MacroState> {
+        if !self.owns(bytes) {
+            return None;
+        }
+        let body = self
+            .bodies
+            .partition_point(|(start, _)| *start <= node.start_byte());
+        if body == 0 || node.end_byte() > self.bodies[body - 1].1 {
+            return None;
+        }
+        let index = self
+            .changes
+            .partition_point(|(offset, _)| *offset <= node.start_byte());
+        index.checked_sub(1).map(|index| &self.changes[index].1)
+    }
 }
 
-fn command_line_macros(config: &TranslationUnitConfig, file: &str) -> HashMap<String, MacroDef> {
-    config
-        .defines
-        .iter()
-        .filter_map(|definition| {
-            let (name, body) = definition
-                .split_once('=')
-                .map_or((definition.as_str(), "1"), |(name, value)| (name, value));
-            let name = name.trim();
-            (!name.is_empty()).then(|| {
+// The pinned CDT C scanner supplies these even without compiler definitions.
+// Source #undef and #define directives can still remove or replace them.
+const PREDEFINED_C_MACROS: [(&str, &str); 3] = [
+    ("__STDC__", "1"),
+    ("__STDC_VERSION__", "199901L"),
+    ("__STDC_HOSTED__", "1"),
+];
+
+fn predefined_c_macros(file: &str) -> MacroState {
+    Arc::new(
+        PREDEFINED_C_MACROS
+            .into_iter()
+            .map(|(name, value)| {
                 (
                     name.to_string(),
                     MacroDef {
                         params: None,
-                        body: body.to_string(),
-                        directive: format!("#define {name} {body}"),
-                        origin: normalize_source_path(file),
+                        body: value.to_string(),
+                        // Builtin expansion methods have an explicitly empty CODE.
+                        directive: String::new(),
+                        file: file.to_string(),
                     },
                 )
             })
-        })
-        .collect()
-}
-
-fn include_target(directive: &str) -> Option<(String, bool)> {
-    let directive = directive.trim();
-    if let Some(start) = directive.find('"') {
-        let rest = &directive[start + 1..];
-        return rest.find('"').map(|end| (rest[..end].to_string(), false));
-    }
-    let start = directive.find('<')?;
-    let rest = &directive[start + 1..];
-    rest.find('>').map(|end| (rest[..end].to_string(), true))
-}
-
-fn resolve_include(
-    current_file: &str,
-    target: &str,
-    angled: bool,
-    environment: &TranslationUnitEnvironment<'_, '_>,
-) -> Option<String> {
-    let target = normalize_source_path(target);
-    let mut candidates = Vec::new();
-    if !angled {
-        let parent = Path::new(current_file)
-            .parent()
-            .unwrap_or_else(|| Path::new(""));
-        candidates.push(normalize_source_path(
-            &parent.join(&target).to_string_lossy(),
-        ));
-    }
-    candidates.extend(
-        environment.inputs.include_paths.iter().map(|include| {
-            normalize_source_path(&Path::new(include).join(&target).to_string_lossy())
-        }),
-    );
-    candidates.push(target);
-    candidates
-        .into_iter()
-        .find(|candidate| environment.project.sources.contains_key(candidate))
-}
-
-fn apply_include_file(
-    included: &str,
-    environment: &TranslationUnitEnvironment<'_, '_>,
-    macros: &mut HashMap<String, MacroDef>,
-    include_stack: &mut HashSet<String>,
-) {
-    let included = normalize_source_path(included);
-    if !include_stack.insert(included.clone()) {
-        return;
-    }
-    let Some(source) = environment.project.sources.get(&included).copied() else {
-        include_stack.remove(&included);
-        return;
-    };
-    let mut parser = Parser::new();
-    if parser
-        .set_language(&tree_sitter_c::LANGUAGE.into())
-        .is_err()
-    {
-        include_stack.remove(&included);
-        return;
-    }
-    if let Some(tree) = parser.parse(source, None) {
-        let mut ignored = Vec::new();
-        for child in named_children(tree.root_node()) {
-            preprocess_child(
-                child,
-                source.as_bytes(),
-                &included,
-                environment,
-                macros,
-                &mut ignored,
-                include_stack,
-            );
-        }
-    }
-    include_stack.remove(&included);
-}
-
-fn normalize_source_path(path: &str) -> String {
-    let path = path.replace('\\', "/");
-    let absolute = path.starts_with('/');
-    let mut parts = Vec::new();
-    for part in path.split('/') {
-        match part {
-            "" | "." => {}
-            ".." if parts.last().is_some_and(|part| *part != "..") => {
-                parts.pop();
-            }
-            ".." if !absolute => parts.push(part),
-            ".." => {}
-            _ => parts.push(part),
-        }
-    }
-    let normalized = parts.join("/");
-    if absolute {
-        format!("/{normalized}")
-    } else {
-        normalized
-    }
-}
-
-fn selected_preproc_children<'tree>(
-    directive: Node<'tree>,
-    b: &[u8],
-    macros: &HashMap<String, MacroDef>,
-) -> Vec<Node<'tree>> {
-    let take =
-        match directive.kind() {
-            "preproc_if" | "preproc_elif" => directive
-                .child_by_field_name("condition")
-                .is_some_and(|condition| {
-                    eval_pp_node(condition, b, macros, 0, &mut HashSet::new()) != 0
-                }),
-            "preproc_ifdef" | "preproc_elifdef" => {
-                let name = directive
-                    .child_by_field_name("name")
-                    .map(|value| text(value, b))
-                    .unwrap_or_default();
-                let negated = directive
-                    .child(0)
-                    .map(|token| matches!(text(token, b), "#ifndef" | "#elifndef"))
-                    .unwrap_or(false);
-                macros.contains_key(name) != negated
-            }
-            "preproc_else" => true,
-            _ => false,
-        };
-    if !take {
-        return directive
-            .child_by_field_name("alternative")
-            .map(|alternative| selected_preproc_children(alternative, b, macros))
-            .unwrap_or_default();
-    }
-    let condition = directive
-        .child_by_field_name("condition")
-        .map(|node| node.id());
-    let name = directive.child_by_field_name("name").map(|node| node.id());
-    let alternative = directive
-        .child_by_field_name("alternative")
-        .map(|node| node.id());
-    named_children(directive)
-        .into_iter()
-        .filter(|child| {
-            ![condition, name, alternative]
-                .into_iter()
-                .flatten()
-                .any(|excluded| excluded == child.id())
-        })
-        .collect()
-}
-
-/// Evaluate the integer constant-expression subset accepted by the C
-/// preprocessor. Undefined identifiers are zero; object/function macros are
-/// recursively expanded with a hard depth/cycle bound.
-fn eval_pp_node(
-    node: Node,
-    b: &[u8],
-    macros: &HashMap<String, MacroDef>,
-    depth: usize,
-    expanding: &mut HashSet<String>,
-) -> i64 {
-    if depth >= 64 {
-        return 0;
-    }
-    match node.kind() {
-        "number_literal" => parse_pp_integer(text(node, b)).unwrap_or(0),
-        "char_literal" => parse_pp_char(text(node, b)),
-        "identifier" => {
-            let name = text(node, b);
-            let Some(definition) = macros
-                .get(name)
-                .filter(|definition| definition.params.is_none())
-            else {
-                return 0;
-            };
-            if !expanding.insert(name.to_string()) {
-                return 0;
-            }
-            let value = if definition.body.trim().is_empty() {
-                1
-            } else {
-                eval_pp_text(&definition.body, macros, depth + 1, expanding)
-            };
-            expanding.remove(name);
-            value
-        }
-        "preproc_defined" => named_children(node)
-            .first()
-            .map(|name| i64::from(macros.contains_key(text(*name, b))))
-            .unwrap_or(0),
-        "parenthesized_expression" => named_children(node)
-            .first()
-            .map(|child| eval_pp_node(*child, b, macros, depth + 1, expanding))
-            .unwrap_or(0),
-        "unary_expression" => {
-            let Some(argument) = node
-                .child_by_field_name("argument")
-                .or_else(|| named_children(node).last().copied())
-            else {
-                return 0;
-            };
-            let value = eval_pp_node(argument, b, macros, depth + 1, expanding);
-            let operator = text(node, b)[..argument.start_byte() - node.start_byte()].trim();
-            match operator {
-                "!" => i64::from(value == 0),
-                "~" => !value,
-                "-" => value.wrapping_neg(),
-                "+" => value,
-                _ => 0,
-            }
-        }
-        "binary_expression" => {
-            let (Some(left), Some(right)) = (
-                node.child_by_field_name("left"),
-                node.child_by_field_name("right"),
-            ) else {
-                return 0;
-            };
-            let lhs = eval_pp_node(left, b, macros, depth + 1, expanding);
-            let operator = text(node, b)
-                [left.end_byte() - node.start_byte()..right.start_byte() - node.start_byte()]
-                .trim();
-            if operator == "&&" && lhs == 0 {
-                return 0;
-            }
-            if operator == "||" && lhs != 0 {
-                return 1;
-            }
-            let rhs = eval_pp_node(right, b, macros, depth + 1, expanding);
-            match operator {
-                "*" => lhs.wrapping_mul(rhs),
-                "/" => lhs.checked_div(rhs).unwrap_or(0),
-                "%" => lhs.checked_rem(rhs).unwrap_or(0),
-                "+" => lhs.wrapping_add(rhs),
-                "-" => lhs.wrapping_sub(rhs),
-                "<<" => lhs.wrapping_shl(rhs.clamp(0, 63) as u32),
-                ">>" => lhs.wrapping_shr(rhs.clamp(0, 63) as u32),
-                "<" => i64::from(lhs < rhs),
-                "<=" => i64::from(lhs <= rhs),
-                ">" => i64::from(lhs > rhs),
-                ">=" => i64::from(lhs >= rhs),
-                "==" => i64::from(lhs == rhs),
-                "!=" => i64::from(lhs != rhs),
-                "&" => lhs & rhs,
-                "^" => lhs ^ rhs,
-                "|" => lhs | rhs,
-                "&&" => i64::from(lhs != 0 && rhs != 0),
-                "||" => i64::from(lhs != 0 || rhs != 0),
-                _ => 0,
-            }
-        }
-        "call_expression" => {
-            let Some(function) = node.child_by_field_name("function") else {
-                return 0;
-            };
-            let name = text(function, b);
-            let Some(definition) = macros.get(name) else {
-                return 0;
-            };
-            let Some(parameters) = definition.params.as_ref() else {
-                return 0;
-            };
-            let arguments: Vec<String> = node
-                .child_by_field_name("arguments")
-                .map(named_children)
-                .unwrap_or_default()
-                .iter()
-                .map(|argument| text(*argument, b).to_string())
-                .collect();
-            if !expanding.insert(name.to_string()) {
-                return 0;
-            }
-            let expanded = substitute(&definition.body, parameters, &arguments);
-            let value = eval_pp_text(&expanded, macros, depth + 1, expanding);
-            expanding.remove(name);
-            value
-        }
-        _ => 0,
-    }
-}
-
-fn eval_pp_text(
-    expression: &str,
-    macros: &HashMap<String, MacroDef>,
-    depth: usize,
-    expanding: &mut HashSet<String>,
-) -> i64 {
-    if depth >= 64 {
-        return 0;
-    }
-    let source = format!("#if {expression}\nint __cpg_pp;\n#endif\n");
-    let mut parser = Parser::new();
-    if parser
-        .set_language(&tree_sitter_c::LANGUAGE.into())
-        .is_err()
-    {
-        return 0;
-    }
-    let Some(tree) = parser.parse(&source, None) else {
-        return 0;
-    };
-    let Some(directive) = named_children(tree.root_node())
-        .into_iter()
-        .find(|child| child.kind() == "preproc_if")
-    else {
-        return 0;
-    };
-    directive
-        .child_by_field_name("condition")
-        .map(|condition| eval_pp_node(condition, source.as_bytes(), macros, depth + 1, expanding))
-        .unwrap_or(0)
-}
-
-fn parse_pp_integer(token: &str) -> Option<i64> {
-    let token = token.trim();
-    let end = token
-        .char_indices()
-        .rev()
-        .find(|(_, ch)| !matches!(ch, 'u' | 'U' | 'l' | 'L'))
-        .map(|(index, ch)| index + ch.len_utf8())
-        .unwrap_or(0);
-    let token = &token[..end];
-    if let Some(value) = token
-        .strip_prefix("0x")
-        .or_else(|| token.strip_prefix("0X"))
-    {
-        i64::from_str_radix(value, 16).ok()
-    } else if let Some(value) = token
-        .strip_prefix("0b")
-        .or_else(|| token.strip_prefix("0B"))
-    {
-        i64::from_str_radix(value, 2).ok()
-    } else if token.len() > 1 && token.starts_with('0') {
-        i64::from_str_radix(&token[1..], 8).ok()
-    } else {
-        token.parse().ok()
-    }
-}
-
-fn parse_pp_char(token: &str) -> i64 {
-    let Some(inner) = token
-        .strip_prefix('\'')
-        .and_then(|value| value.strip_suffix('\''))
-    else {
-        return 0;
-    };
-    match inner {
-        "\\n" => '\n' as i64,
-        "\\r" => '\r' as i64,
-        "\\t" => '\t' as i64,
-        "\\0" => 0,
-        "\\\\" => '\\' as i64,
-        "\\'" => '\'' as i64,
-        value => value.chars().next().map(|value| value as i64).unwrap_or(0),
-    }
+            .collect(),
+    )
 }
 
 /// Per-function emission context.
 struct Ctx<'a> {
     functions: &'a HashMap<String, String>,
-    /// Translation-unit-local method identities. Duplicate C names are valid
-    /// for `static` helpers across files; qualify those identities by file so
-    /// they remain distinct and local calls resolve deterministically.
+    function_call_types: &'a HashMap<String, String>,
+    /// Initial method identities, before the later duplicate-name fixup.
     function_full_names: &'a HashMap<String, String>,
-    /// Project-wide duplicate definition names. A call without a local target
-    /// stays unresolved instead of acquiring an arbitrary first candidate.
-    ambiguous_functions: &'a HashSet<String>,
+    /// Distinct declaration identities for same-name preprocessor alternatives.
+    /// Calls and METHOD_REFs continue to use the first declaration's identity.
+    definition_full_names: &'a HashMap<usize, String>,
+    /// Only STATIC duplicates outside the first definition's file rename calls.
+    call_renames: Option<&'a HashMap<String, String>>,
     globals: &'a HashMap<String, String>,
     enumerators: &'a Vec<String>,
-    macros: &'a HashMap<String, MacroDef>,
-    preprocessor: &'a PreprocessorEnvironment<'a>,
+    macros: MacroState,
+    macro_states: &'a HashMap<usize, MacroState>,
+    body_macro_sites: &'a BodyMacroSites<'a>,
+    source_view: usize,
+    included_origins: &'a mut Vec<IncludedSourceOrigin>,
+    metadata: &'a mut ExactMetadata,
+    macro_uses: Vec<MacroUse>,
+    macro_use_ids: HashMap<(usize, usize, String, usize, String), usize>,
+    last_mfn_span: Option<std::ops::Range<usize>>,
+    last_call_edge: Option<usize>,
+    dump_index: usize,
+    type_sites: TypeSites,
+    default_typedefs: TypeNameState,
+    unknown_declaration_prefixes: &'a HashMap<usize, String>,
+    file: String,
+    copying_macro_argument: bool,
+    macro_expansion_code: Option<String>,
+    macro_expansion_root: Option<usize>,
+    recovering_expression: bool,
+    recovered_bindings: HashSet<String>,
+    recovery_candidates: HashMap<(usize, usize), bool>,
+    /// Original source spelling for expressions introduced by a field-token macro.
+    field_macro_codes: HashMap<usize, String>,
+    /// First pure replacement expression can own the macro wrapper in CDT.
+    field_macro_piece: Option<(usize, String)>,
+    expansion_control_kinds: &'a mut HashMap<String, String>,
+    macro_method_files: &'a mut HashMap<String, String>,
     // used macros: full_name -> (name, directive, nparams, ret type)
     used_macros: &'a mut std::collections::BTreeMap<String, (String, String, usize, String)>,
-    symbols: HashMap<String, String>, // local/param name -> type
-    /// Macro names disabled while their replacement list is being lowered.
-    /// The C preprocessor leaves a recursively encountered name unexpanded;
-    /// carrying that state into AST emission prevents recursive macro pairs
-    /// from re-entering `emit_macro_call` until the process stack overflows.
-    expanding_macros: HashSet<String>,
+    symbols: HashMap<String, String>, // local/param name -> declaration type
+    symbol_call_types: HashMap<String, String>, // callable parameter -> result type
+    method_functions: HashMap<String, String>, // block-scoped prototype reference types
+    method_call_types: HashMap<String, String>, // independently rendered call result types
     // Joern's local-creation pass materialises a LOCAL at ORDER=0 atop the
     // method body BLOCK for each referenced global (CODE `<global> name`)
     // and each type name used as a sizeof(T) argument.
     phantoms: Vec<Phantom>,
     stubs: &'a mut HashMap<String, usize>,
     types: &'a mut std::collections::BTreeSet<String>,
+    type_declarations: &'a mut Vec<(String, String, String)>,
+    type_alias_full_names: &'a mut HashMap<(usize, usize, usize), String>,
     out: String,
     // --- edge layer (M4) ---
     // Current dump block name and 0-based line index within it; every node's
@@ -1220,6 +1482,7 @@ struct Ctx<'a> {
     // first-wins assignment across sorted method walks.
     block: String,
     line_no: usize,
+    argument_count: usize,
     suppress_below: Option<usize>, // depth of a nested METHOD whose interior is foreign
     ctx_stack: Vec<(usize, String)>, // CONTAINS contexts: (depth, src addr)
     parent_stack: Vec<(usize, String, String, bool)>, // (depth, label, addr, inlined)
@@ -1268,8 +1531,540 @@ struct P {
     dispatch: Option<String>,
 }
 
+/// A typedef name exists only when its declaration remains valid after the
+/// macros visible at that definition have expanded. An unresolved plain type
+/// name is accepted by CDT, but a primitive modifier followed by a type name
+/// (`unsigned UNKNOWN`) is not. Tree-sitter accepts that latter shape without
+/// an ERROR node, so it needs a separate check before populating cast context.
+fn valid_type_definition_names(
+    node: Node,
+    bytes: &[u8],
+    macros: &HashMap<String, MacroDef>,
+) -> Vec<String> {
+    fn names(node: Node, bytes: &[u8]) -> Vec<String> {
+        if node.kind() != "type_definition" || node.has_error() {
+            return Vec::new();
+        }
+        let Some(specifier) = node.child_by_field_name("type") else {
+            return Vec::new();
+        };
+        if specifier.kind() == "sized_type_specifier"
+            && named_children(specifier)
+                .iter()
+                .any(|child| child.kind() == "type_identifier")
+        {
+            return Vec::new();
+        }
+        let mut cursor = node.walk();
+        let bindings: Vec<_> = node
+            .children_by_field_name("declarator", &mut cursor)
+            .map(|decl| type_binding_name(decl, bytes))
+            .collect();
+        if bindings.iter().any(String::is_empty) {
+            Vec::new()
+        } else {
+            bindings
+        }
+    }
+
+    let raw = text(node, bytes);
+    let Some(expanded) = expand_declaration_tokens(raw, macros, &mut HashSet::new(), &mut 65_536)
+    else {
+        return Vec::new();
+    };
+    if expanded == raw {
+        return names(node, bytes);
+    }
+    let mut parser = Parser::new();
+    parser
+        .set_language(&tree_sitter_c::LANGUAGE.into())
+        .unwrap();
+    let Some(tree) = parser.parse(&expanded, None) else {
+        return Vec::new();
+    };
+    let root = tree.root_node();
+    if root.has_error() {
+        return Vec::new();
+    }
+    let mut cursor = root.walk();
+    let mut declarations = root
+        .named_children(&mut cursor)
+        .filter(|child| child.kind() != "comment");
+    let Some(declaration) = declarations.next() else {
+        return Vec::new();
+    };
+    if declarations.next().is_some() {
+        return Vec::new();
+    }
+    names(declaration, expanded.as_bytes())
+}
+
+fn type_binding_name(node: Node, bytes: &[u8]) -> String {
+    if matches!(node.kind(), "identifier" | "type_identifier") {
+        return text(node, bytes).to_string();
+    }
+    node.child_by_field_name("declarator")
+        .or_else(|| {
+            (node.kind() == "parenthesized_declarator")
+                .then(|| node.named_child(0))
+                .flatten()
+        })
+        .map(|child| type_binding_name(child, bytes))
+        .unwrap_or_default()
+}
+
+/// A recovered parenthesized expression may contain ERROR siblings. Only a
+/// single complete non-comment token can be reinterpreted as a known type.
+fn sole_parenthesized_child(node: Node) -> Option<Node> {
+    if node.kind() != "parenthesized_expression" || node.has_error() {
+        return None;
+    }
+    let mut cursor = node.walk();
+    let mut children = node
+        .named_children(&mut cursor)
+        .filter(|child| child.kind() != "comment");
+    let child = children.next()?;
+    children.next().is_none().then_some(child)
+}
+
+fn collect_type_sites(
+    root: Node,
+    bytes: &[u8],
+    initial: TypeNameState,
+    macros: &MacroState,
+    macro_sites: Option<&BodyMacroSites>,
+    source_view: usize,
+) -> TypeSites {
+    fn shadow(types: &mut TypeNameState, name: &str) {
+        if types.contains(name) {
+            Arc::make_mut(types).remove(name);
+        }
+    }
+    fn visit(
+        node: Node,
+        bytes: &[u8],
+        types: &mut TypeNameState,
+        sites: &mut TypeSites,
+        macros: &MacroState,
+        macro_sites: Option<&BodyMacroSites>,
+        source_view: usize,
+    ) {
+        let macros = macro_sites
+            .and_then(|sites| sites.at_view(source_view, node, bytes))
+            .unwrap_or(macros);
+        if matches!(
+            node.kind(),
+            "call_expression" | "sizeof_expression" | "identifier" | "field_expression"
+        ) {
+            sites.insert((source_view, node.id()), types.clone());
+        }
+        if let Some((view, header)) =
+            macro_sites.and_then(|sites| sites.included(source_view, node, bytes))
+        {
+            for item in &header.items {
+                visit(*item, header.bytes, types, sites, macros, macro_sites, view);
+            }
+            return;
+        }
+        match node.kind() {
+            "function_definition" => {
+                let mut inner = types.clone();
+                // Parameter macros must shadow typedefs with the same resolved
+                // names that method emission uses for this declaration.
+                let header = node
+                    .child_by_field_name("declarator")
+                    .and_then(|decl| resolved_function_header(node, decl, bytes, macros))
+                    .map(|resolved| resolved.header)
+                    .or_else(|| fn_header(node, bytes));
+                if let Some((_, _, params)) = header {
+                    for param in params {
+                        shadow(&mut inner, &param.name);
+                    }
+                }
+                if let Some(body) = node.child_by_field_name("body") {
+                    visit(
+                        body,
+                        bytes,
+                        &mut inner,
+                        sites,
+                        macros,
+                        macro_sites,
+                        source_view,
+                    );
+                }
+            }
+            "compound_statement" | "for_statement" => {
+                let mut inner = types.clone();
+                for child in named_children(node) {
+                    visit(
+                        child,
+                        bytes,
+                        &mut inner,
+                        sites,
+                        macros,
+                        macro_sites,
+                        source_view,
+                    );
+                }
+            }
+            "preproc_if" | "preproc_ifdef" | "preproc_elif" | "preproc_elifdef"
+            | "preproc_else" => {
+                for child in kept_preproc_children(node, bytes, macros) {
+                    visit(child, bytes, types, sites, macros, macro_sites, source_view);
+                }
+            }
+            "enumerator" => {
+                for child in named_children(node) {
+                    visit(child, bytes, types, sites, macros, macro_sites, source_view);
+                }
+                if let Some(name) = node.child_by_field_name("name") {
+                    shadow(types, text(name, bytes));
+                }
+            }
+            "type_definition" => {
+                for child in named_children(node) {
+                    visit(child, bytes, types, sites, macros, macro_sites, source_view);
+                }
+                for name in valid_type_definition_names(node, bytes, macros) {
+                    Arc::make_mut(types).insert(name);
+                }
+            }
+            "declaration" => {
+                let mut cursor = node.walk();
+                let declarators: HashSet<_> = node
+                    .children_by_field_name("declarator", &mut cursor)
+                    .map(|node| node.id())
+                    .collect();
+                for child in named_children(node) {
+                    if declarators.contains(&child.id()) {
+                        let decl = child
+                            .child_by_field_name("declarator")
+                            .filter(|_| child.kind() == "init_declarator")
+                            .unwrap_or(child);
+                        visit(decl, bytes, types, sites, macros, macro_sites, source_view);
+                        shadow(types, &type_binding_name(decl, bytes));
+                        if child.kind() == "init_declarator" {
+                            if let Some(value) = child.child_by_field_name("value") {
+                                visit(value, bytes, types, sites, macros, macro_sites, source_view);
+                            }
+                        }
+                    } else {
+                        visit(child, bytes, types, sites, macros, macro_sites, source_view);
+                    }
+                }
+            }
+            _ => {
+                for child in named_children(node) {
+                    visit(child, bytes, types, sites, macros, macro_sites, source_view);
+                }
+            }
+        }
+    }
+    let mut sites = HashMap::new();
+    visit(
+        root,
+        bytes,
+        &mut initial.clone(),
+        &mut sites,
+        macros,
+        macro_sites,
+        source_view,
+    );
+    sites
+}
+
 impl Ctx<'_> {
+    /// C2Cpg merges the source-pass declarations into the later .h pass.
+    /// Select the complete MethodInfo together: a generated header-pass entry
+    /// wins over a source-pass entry, and each class keeps its first entry.
+    fn register_macro_method(
+        &mut self,
+        full: &str,
+        name: &str,
+        directive: &str,
+        arity: usize,
+        ret: &str,
+    ) {
+        let header_pass = |file: &str| {
+            file.get(file.len().saturating_sub(2)..)
+                .is_some_and(|suffix| suffix.eq_ignore_ascii_case(".h"))
+        };
+        let replace = self
+            .macro_method_files
+            .get(full)
+            .is_none_or(|prior| header_pass(&self.file) && !header_pass(prior));
+        if replace {
+            self.macro_method_files
+                .insert(full.to_string(), self.file.clone());
+            self.used_macros.insert(
+                full.to_string(),
+                (
+                    name.to_string(),
+                    directive.to_string(),
+                    arity,
+                    ret.to_string(),
+                ),
+            );
+        }
+    }
+
+    fn resolve_macro_metadata(&mut self, dumps: &mut [(String, String)]) {
+        let mut uses = std::mem::take(&mut self.macro_uses);
+        // Uses follow C source traversal across include occurrences. Only the
+        // separate pinned expansion queue sorts file-local offsets alone.
+        uses.sort_by(|a, b| {
+            a.include_order
+                .iter()
+                .chain(std::iter::once(&a.offset))
+                .cmp(b.include_order.iter().chain(std::iter::once(&b.offset)))
+        });
+        let mut cursor = 0;
+        let mut replacements: HashMap<usize, Vec<(std::ops::Range<usize>, String)>> =
+            HashMap::new();
+        for use_ in uses {
+            let mut metadata = &use_.metadata;
+            while let Some(&(offset, definition)) = self.body_macro_sites.expansions.get(cursor) {
+                if offset > use_.offset {
+                    break;
+                }
+                cursor += 1;
+                let candidate = &self.body_macro_sites.definitions[definition];
+                if candidate.name == use_.metadata.name {
+                    metadata = candidate;
+                    break;
+                }
+            }
+            let full = format!(
+                "{}:{}:{}({})",
+                metadata.file, metadata.name, use_.ret, use_.arity
+            );
+            self.register_macro_method(
+                &full,
+                &metadata.name,
+                &metadata.directive,
+                use_.arity,
+                &use_.ret,
+            );
+            for (block, span, edge) in use_.placements {
+                replacements
+                    .entry(block)
+                    .or_default()
+                    .push((span, full.clone()));
+                if let Some(edge) = edge {
+                    self.edges[edge].2 = format!("M:{full}");
+                }
+            }
+        }
+        for (block, (_, dump)) in dumps.iter_mut().enumerate() {
+            if let Some(mut edits) = replacements.remove(&block) {
+                edits.sort_by_key(|(span, _)| std::cmp::Reverse(span.start));
+                for (span, full) in edits {
+                    if dump[span.clone()] != full {
+                        dump.replace_range(span, &full);
+                    }
+                }
+            }
+        }
+    }
+
+    fn source_macros_at(&self, node: Node, bytes: &[u8]) -> Option<&MacroState> {
+        if self.recovering_expression
+            || self.copying_macro_argument
+            || self.macro_expansion_code.is_some()
+        {
+            return None;
+        }
+        self.body_macro_sites.at_view(self.source_view, node, bytes)
+    }
+
+    fn typedefs_at(&self, node: Node) -> TypeNameState {
+        self.type_sites
+            .get(&(self.source_view, node.id()))
+            .cloned()
+            .unwrap_or_else(|| self.default_typedefs.clone())
+    }
+
+    fn enter_type_tree(
+        &mut self,
+        root: Node,
+        bytes: &[u8],
+        types: TypeNameState,
+    ) -> (TypeSites, TypeNameState) {
+        let sites = collect_type_sites(
+            root,
+            bytes,
+            types.clone(),
+            &self.macros,
+            None,
+            self.source_view,
+        );
+        (
+            std::mem::replace(&mut self.type_sites, sites),
+            std::mem::replace(&mut self.default_typedefs, types),
+        )
+    }
+
+    fn leave_type_tree(&mut self, previous: (TypeSites, TypeNameState)) {
+        (self.type_sites, self.default_typedefs) = previous;
+    }
+
+    fn typedef_cast(&self, node: Node, bytes: &[u8]) -> Option<String> {
+        if node.kind() != "call_expression" || self.recovering_expression || node.has_error() {
+            return None;
+        }
+        let function = node.child_by_field_name("function")?;
+        let name = sole_parenthesized_child(function)?;
+        let arguments = node.child_by_field_name("arguments")?;
+        if !named_children(arguments)
+            .iter()
+            .any(|child| child.kind() != "comment")
+        {
+            return None;
+        }
+        if name.kind() != "identifier" {
+            return None;
+        }
+        let spelling = text(name, bytes);
+        self.typedefs_at(node)
+            .contains(spelling)
+            .then(|| spelling.to_string())
+    }
+
+    fn typedef_cast_identifier(&self, node: Node, bytes: &[u8]) -> Option<String> {
+        let parent = node.parent()?;
+        if sole_parenthesized_child(parent) != Some(node) {
+            return None;
+        }
+        let call = parent.parent()?;
+        if call.child_by_field_name("function") != Some(parent) {
+            return None;
+        }
+        self.typedef_cast(call, bytes)
+    }
+
+    fn emit_local_typedef(&mut self, node: Node, bytes: &[u8], depth: usize, order: &mut i64) {
+        for alias in typedef_declarators(node) {
+            let name = type_binding_name(alias, bytes);
+            let underlying = resolved_typedef_underlying_type(node, alias, bytes, &self.macros);
+            self.types.insert(underlying.clone());
+            if let Some(code) = &self.macro_expansion_code {
+                // CDT expands a declaration macro's typedef as a LOCAL, even
+                // though it remains a type binding within this expansion tree.
+                let code = format!("{code} {code}");
+                self.line(
+                    depth,
+                    "LOCAL",
+                    P {
+                        name: Some(name),
+                        code: Some(esc(&code)),
+                        tfn: Some(underlying),
+                        order: Some(*order),
+                        ..Default::default()
+                    },
+                );
+            } else {
+                let full = if let Some(full) = self.type_alias_full_names.get(&(
+                    self.body_macro_sites.tree,
+                    self.source_view,
+                    alias.id(),
+                )) {
+                    full.clone()
+                } else {
+                    let count = self
+                        .type_declarations
+                        .iter()
+                        .filter(|(full, _, _)| {
+                            full.split("<duplicate>").next() == Some(name.as_str())
+                        })
+                        .count();
+                    let next = if count == 0 {
+                        name.clone()
+                    } else {
+                        format!("{name}<duplicate>{}", count - 1)
+                    };
+                    // The project registry reserves standalone header aliases
+                    // before body emission. An earlier include occurrence uses
+                    // that first identity; advance only the still-unemitted
+                    // reservation for this exact physical header declarator.
+                    let reserved = (self.source_view > 0)
+                        .then(|| {
+                            (
+                                self.body_macro_sites.headers[self.source_view - 1]
+                                    .root
+                                    .id(),
+                                0,
+                                alias.id(),
+                            )
+                        })
+                        .and_then(|key| {
+                            let full = self.type_alias_full_names.get(&key)?.clone();
+                            (!self.placements.contains_key(&format!("TD:{full}")))
+                                .then_some((key, full))
+                        });
+                    let full = if let Some((key, full)) = reserved {
+                        if let Some(entry) = self
+                            .type_declarations
+                            .iter_mut()
+                            .find(|entry| entry.0 == full)
+                        {
+                            entry.0 = next.clone();
+                        }
+                        self.type_alias_full_names.insert(key, next);
+                        full
+                    } else {
+                        next
+                    };
+                    self.type_alias_full_names.insert(
+                        (self.body_macro_sites.tree, self.source_view, alias.id()),
+                        full.clone(),
+                    );
+                    self.type_declarations.push((
+                        full.clone(),
+                        esc(text(node, bytes)),
+                        if self.source_view == 0 {
+                            self.file.clone()
+                        } else {
+                            self.body_macro_sites.headers[self.source_view - 1]
+                                .file
+                                .to_string()
+                        },
+                    ));
+                    full
+                };
+                self.line(
+                    depth,
+                    "TYPE_DECL",
+                    P {
+                        name: Some(name),
+                        code: Some(esc(text(node, bytes))),
+                        full: Some(full),
+                        order: Some(*order),
+                        ..Default::default()
+                    },
+                );
+            }
+            *order += 1;
+        }
+    }
+
+    fn sizeof_identifier(&self, node: Node, bytes: &[u8]) -> Option<Phantom> {
+        if let Some(desc) = node.child_by_field_name("type") {
+            return Some(sizeof_type_identifier(desc, bytes));
+        }
+        let value = node.child_by_field_name("value")?;
+        let identifier = sole_parenthesized_child(value)?;
+        let name = text(identifier, bytes);
+        (identifier.kind() == "identifier" && self.typedefs_at(node).contains(name)).then(|| {
+            Phantom {
+                name: name.into(),
+                code: name.into(),
+                ty: name.into(),
+            }
+        })
+    }
+
     fn begin_block(&mut self, name: &str) {
+        self.dump_index += 1;
         self.block = name.to_string();
         self.line_no = 0;
         self.suppress_below = None;
@@ -1277,6 +2072,9 @@ impl Ctx<'_> {
         self.parent_stack.clear();
         self.sym_line.clear();
         self.param_in_line.clear();
+        self.recovering_expression = false;
+        self.recovered_bindings.clear();
+        self.recovery_candidates.clear();
     }
 
     fn at(&self, idx: usize) -> String {
@@ -1289,7 +2087,21 @@ impl Ctx<'_> {
         }
     }
 
-    fn line(&mut self, depth: usize, label: &str, p: P) {
+    fn line(&mut self, depth: usize, label: &str, mut p: P) {
+        if label == "CALL" {
+            if let Some((full, renamed)) = p.mfn.as_ref().and_then(|full| {
+                self.call_renames
+                    .and_then(|renames| renames.get(full))
+                    .map(|renamed| (full, renamed))
+            }) {
+                let suffix = renamed.strip_prefix(full).expect("duplicate suffix");
+                if let Some(name) = &mut p.name {
+                    name.push_str(suffix);
+                }
+                p.mfn = Some(renamed.clone());
+            }
+        }
+        self.last_call_edge = None;
         if let Some(t) = &p.tfn {
             self.types.insert(t.clone());
         }
@@ -1309,6 +2121,13 @@ impl Ctx<'_> {
         }
         while self.ctx_stack.last().is_some_and(|t| t.0 >= depth) {
             self.ctx_stack.pop();
+        }
+        if let Some((_, parent_label, _, parent_inlined)) = self.parent_stack.last() {
+            if (parent_label == "CALL" && p.arg.is_some() && !(*parent_inlined && label == "BLOCK"))
+                || parent_label == "RETURN"
+            {
+                self.argument_count += 1;
+            }
         }
         if !suppressed {
             if let ("METHOD" | "TYPE_DECL", Some(f)) = (label, &p.full) {
@@ -1343,10 +2162,9 @@ impl Ctx<'_> {
             }
             if label == "CALL" && p.dispatch.as_deref() != Some("DYNAMIC_DISPATCH") {
                 if let Some(mfn) = &p.mfn {
-                    if !self.ambiguous_functions.contains(mfn) || mfn.contains(':') {
-                        self.edges
-                            .push(("CALL".into(), my_addr.clone(), format!("M:{mfn}")));
-                    }
+                    self.last_call_edge = Some(self.edges.len());
+                    self.edges
+                        .push(("CALL".into(), my_addr.clone(), format!("M:{mfn}")));
                 }
             }
             if label == "METHOD_REF" {
@@ -1361,7 +2179,7 @@ impl Ctx<'_> {
                 .parent_stack
                 .last()
                 .is_some_and(|(_, pl, _, pi)| *pi && pl == "CALL");
-            if label == "IDENTIFIER" && !under_inlined_call {
+            if label == "IDENTIFIER" && !under_inlined_call && !self.copying_macro_argument {
                 if let Some(n) = &p.name {
                     if let Some(i) = self.sym_line.get(n) {
                         let dst = format!("{}#{}", self.block, i);
@@ -1391,7 +2209,17 @@ impl Ctx<'_> {
             .push((depth, label.to_string(), my_addr, inlined));
         self.line_no += 1;
         let mut s = format!("{}{label}", "  ".repeat(depth));
-        let mut kv = |k: &str, v: &str| s.push_str(&format!(" {k}={v}"));
+        let line_start = self.out.len();
+        let mut mfn_span = None;
+        let mut kv = |k: &str, v: &str| {
+            s.push(' ');
+            s.push_str(k);
+            s.push('=');
+            if k == "METHOD_FULL_NAME" {
+                mfn_span = Some(line_start + s.len()..line_start + s.len() + v.len());
+            }
+            s.push_str(v);
+        };
         if let Some(v) = &p.name {
             kv("NAME", v);
         }
@@ -1425,6 +2253,7 @@ impl Ctx<'_> {
         if let Some(v) = &p.dispatch {
             kv("DISPATCH_TYPE", v);
         }
+        self.last_mfn_span = mfn_span;
         self.out.push_str(&s);
         self.out.push('\n');
     }
@@ -1436,12 +2265,24 @@ impl Ctx<'_> {
         }
     }
 
-    fn emit_method(&mut self, f: Node, b: &[u8], d: usize) {
+    fn emit_method(&mut self, f: Node, b: &[u8], d: usize, active: bool) {
+        self.macros = self.macro_states.get(&f.id()).cloned().unwrap_or_default();
         self.symbols.clear();
-        let (name, ret, params) = fn_header(f, b).expect("function header");
+        self.recovered_bindings.clear();
+        self.symbol_call_types.clear();
+        self.method_functions.clear();
+        self.method_call_types.clear();
+        let resolved = resolved_function_header(
+            f,
+            f.child_by_field_name("declarator").unwrap(),
+            b,
+            &self.macros,
+        )
+        .expect("function header");
+        let (name, ret, params) = resolved.header;
         let full = self
-            .function_full_names
-            .get(&name)
+            .definition_full_names
+            .get(&f.id())
             .cloned()
             .unwrap_or_else(|| name.clone());
         let nested = d > 0;
@@ -1449,16 +2290,29 @@ impl Ctx<'_> {
             "{ret}({})",
             params
                 .iter()
-                .map(|p| p.ty.clone())
+                .map(|p| p.signature_type().to_string())
                 .collect::<Vec<_>>()
                 .join(",")
         );
+        if !nested {
+            let suffix = full
+                .find("<duplicate>")
+                .map(|index| &full[index..])
+                .unwrap_or("");
+            self.metadata.bindings.push(FunctionBinding {
+                name: format!("{name}{suffix}"),
+                full_name: full.clone(),
+                type_decl_full_name: full.clone(),
+                signature: Some(sig.clone()),
+                source_start: Some(f.start_byte()),
+            });
+        }
         self.line(
             d,
             "METHOD",
             P {
                 name: Some(name.clone()),
-                code: Some(esc(text(f, b))),
+                code: Some(resolved.expanded_code.unwrap_or_else(|| esc(text(f, b)))),
                 full: Some(full),
                 sig: Some(sig),
                 order: Some(1),
@@ -1474,6 +2328,10 @@ impl Ctx<'_> {
         // Parameters: a METHOD_PARAMETER_IN and a mirrored _OUT, sharing ORDER.
         for (i, p) in params.iter().enumerate() {
             self.symbols.insert(p.name.clone(), p.ty.clone());
+            if let Some(call_type) = &p.call_type {
+                self.symbol_call_types
+                    .insert(p.name.clone(), call_type.clone());
+            }
             let order = (i + 1) as i64;
             for label in ["METHOD_PARAMETER_IN", "METHOD_PARAMETER_OUT"] {
                 self.line(
@@ -1493,13 +2351,33 @@ impl Ctx<'_> {
         // Body block, then the synthetic method return.
         let block_order = (params.len() + 1) as i64;
         if let Some(body) = f.child_by_field_name("body") {
-            self.collect_phantoms(body, b);
-            self.emit_block(body, b, block_order, d + 1);
+            if active {
+                self.collect_phantoms(body, b);
+                self.emit_block(body, b, block_order, d + 1);
+            } else {
+                // CDT retains inactive function declarations, but their body
+                // blocks contain no executable children or phantom locals.
+                self.line(
+                    d + 1,
+                    "BLOCK",
+                    P {
+                        code: Some(esc(text(body, b))),
+                        tfn: Some("void".into()),
+                        order: Some(block_order),
+                        ..Default::default()
+                    },
+                );
+            }
         }
-        let static_modifier = named_children(f).iter().any(|child| {
-            child.kind() == "storage_class_specifier" && text(*child, b).trim() == "static"
-        });
-        if static_modifier {
+        let is_static = has_leading_static(text(f, b));
+        if is_static {
+            if !nested {
+                self.metadata.modifiers.push(ModifierMetadata {
+                    address: format!("{}#{}", self.block, self.line_no),
+                    modifier_type: "STATIC",
+                    line: Some((f.start_position().row + 1) as u32),
+                });
+            }
             self.line(
                 d + 1,
                 "MODIFIER",
@@ -1515,7 +2393,7 @@ impl Ctx<'_> {
             P {
                 code: Some("RET".into()),
                 tfn: Some(ret),
-                order: Some((params.len() + 2 + usize::from(static_modifier)) as i64),
+                order: Some((params.len() + 2 + usize::from(is_static)) as i64),
                 ..Default::default()
             },
         );
@@ -1541,11 +2419,33 @@ impl Ctx<'_> {
             order: Some(k as i64),
             ..Default::default()
         };
-        let first = if arity == 0 { 0 } else { 1 };
-        self.line(1, "METHOD_PARAMETER_IN", pin(first));
         if arity == 0 {
-            self.line(1, "METHOD_PARAMETER_OUT", pin(first));
+            // Joern represents an unresolved zero-argument call with p0.
+            self.line(1, "METHOD_PARAMETER_IN", pin(0));
+            self.line(1, "METHOD_PARAMETER_OUT", pin(0));
+            self.line(
+                1,
+                "BLOCK",
+                P {
+                    tfn: Some("ANY".into()),
+                    order: Some(1),
+                    arg: Some(1),
+                    ..Default::default()
+                },
+            );
+            self.line(
+                1,
+                "METHOD_RETURN",
+                P {
+                    code: Some("RET".into()),
+                    tfn: Some("ANY".into()),
+                    order: Some(2),
+                    ..Default::default()
+                },
+            );
+            return;
         }
+        self.line(1, "METHOD_PARAMETER_IN", pin(1));
         self.line(
             1,
             "BLOCK",
@@ -1556,9 +2456,7 @@ impl Ctx<'_> {
                 ..Default::default()
             },
         );
-        if arity != 0 {
-            self.line(1, "METHOD_PARAMETER_OUT", pin(first));
-        }
+        self.line(1, "METHOD_PARAMETER_OUT", pin(1));
         let ret = P {
             code: Some("RET".into()),
             tfn: Some("ANY".into()),
@@ -1576,6 +2474,73 @@ impl Ctx<'_> {
         } else {
             self.line(1, "METHOD_RETURN", ret);
         }
+    }
+
+    fn emit_prototype(&mut self, name: &str, full: &str, code: &str, ret: &str, params: &[Param]) {
+        self.line(
+            0,
+            "METHOD",
+            P {
+                name: Some(name.into()),
+                code: Some(code.into()),
+                full: Some(full.into()),
+                sig: Some(format!(
+                    "{ret}({})",
+                    params
+                        .iter()
+                        .map(Param::signature_type)
+                        .collect::<Vec<_>>()
+                        .join(",")
+                )),
+                order: Some(1),
+                ..Default::default()
+            },
+        );
+        for (i, param) in params.iter().enumerate() {
+            for label in ["METHOD_PARAMETER_IN", "METHOD_PARAMETER_OUT"] {
+                self.line(
+                    1,
+                    label,
+                    P {
+                        name: Some(param.name.clone()),
+                        code: Some(esc(&param.code)),
+                        tfn: Some(param.ty.clone()),
+                        order: Some((i + 1) as i64),
+                        ..Default::default()
+                    },
+                );
+            }
+        }
+        self.line(
+            1,
+            "BLOCK",
+            P {
+                tfn: Some("ANY".into()),
+                order: Some((params.len() + 1) as i64),
+                ..Default::default()
+            },
+        );
+        let is_static = has_leading_static(code);
+        if is_static {
+            self.line(
+                1,
+                "MODIFIER",
+                P {
+                    order: Some((params.len() + 2) as i64),
+                    ..Default::default()
+                },
+            );
+        }
+        self.line(
+            1,
+            "METHOD_RETURN",
+            P {
+                code: Some("RET".into()),
+                tfn: Some(ret.into()),
+                order: Some((params.len() + 2 + usize::from(is_static)) as i64),
+                ..Default::default()
+            },
+        );
     }
 
     fn emit_includes_global(&mut self) {
@@ -1616,7 +2581,13 @@ impl Ctx<'_> {
     /// top-level construct in source order — TYPE_REF for a struct def, LOCAL
     /// per global object declarator, METHOD_REF per function definition;
     /// prototypes consume no slot — then METHOD_RETURN.
-    fn emit_file_global(&mut self, root: Node, b: &[u8], file: &str) {
+    fn emit_file_global(
+        &mut self,
+        items: &[Node],
+        b: &[u8],
+        file: &str,
+        active_methods: &HashSet<usize>,
+    ) {
         self.line(
             0,
             "METHOD",
@@ -1628,18 +2599,71 @@ impl Ctx<'_> {
                 ..Default::default()
             },
         );
-        let (top_level, _) = preprocess_translation_unit(root, b, file, self.preprocessor);
-        for &n in &top_level {
+        for &n in items {
+            self.macros = self.macro_states.get(&n.id()).cloned().unwrap_or_default();
             match n.kind() {
                 "struct_specifier" | "union_specifier" | "enum_specifier"
                     if n.child_by_field_name("body").is_some() =>
                 {
                     self.emit_type_decl(n, b, 1);
                 }
-                "function_definition" => self.emit_method(n, b, 1),
+                "type_definition" if typedef_aggregate(n).is_some() => {
+                    let aggregate = typedef_aggregate(n).unwrap();
+                    self.emit_type_decl(aggregate, b, 1);
+                    for alias in typedef_declarators(n) {
+                        let name = typedef_alias_name(alias, b);
+                        if aggregate.child_by_field_name("name").is_some() {
+                            self.line(
+                                1,
+                                "TYPE_DECL",
+                                P {
+                                    name: Some(name.clone()),
+                                    code: Some(esc(text(n, b))),
+                                    full: Some(aggregate_alias_full_name(aggregate, alias, b)),
+                                    order: Some(1),
+                                    ..Default::default()
+                                },
+                            );
+                        } else {
+                            let keyword = if !array_dimensions(alias).is_empty() {
+                                "typedef"
+                            } else if aggregate.kind() == "union_specifier" {
+                                "union"
+                            } else {
+                                "struct"
+                            };
+                            self.line(
+                                1,
+                                "LOCAL",
+                                P {
+                                    name: Some(name),
+                                    code: Some(format!(
+                                        "{} {}",
+                                        text(n, b)[..aggregate.end_byte() - n.start_byte()]
+                                            .split_whitespace()
+                                            .collect::<Vec<_>>()
+                                            .join(" "),
+                                        esc(text(alias, b))
+                                    )),
+                                    tfn: Some(format!("{keyword}{}", decl_suffix(alias, b))),
+                                    order: Some(1),
+                                    ..Default::default()
+                                },
+                            );
+                        }
+                    }
+                }
+                "function_definition" => {
+                    self.emit_method(n, b, 1, active_methods.contains(&n.id()));
+                }
                 _ => {}
             }
         }
+        self.symbols.clear();
+        self.recovered_bindings.clear();
+        self.symbol_call_types.clear();
+        self.method_functions.clear();
+        self.method_call_types.clear();
         self.line(
             1,
             "BLOCK",
@@ -1650,7 +2674,8 @@ impl Ctx<'_> {
             },
         );
         let mut slot = 1i64;
-        for &n in &top_level {
+        for &n in items {
+            self.macros = self.macro_states.get(&n.id()).cloned().unwrap_or_default();
             match n.kind() {
                 "struct_specifier" | "union_specifier" | "enum_specifier"
                     if n.child_by_field_name("body").is_some() =>
@@ -1671,45 +2696,107 @@ impl Ctx<'_> {
                     );
                     slot += 1;
                 }
-                "type_definition" => {
-                    // typedef: a TYPE_DECL *inside* the global BLOCK, CODE
-                    // keeps the whole statement incl. the semicolon.
-                    let name = n
-                        .child_by_field_name("declarator")
-                        .map(|x| text(x, b).to_string())
-                        .unwrap_or_default();
+                "type_definition" if typedef_aggregate(n).is_some() => {
+                    let aggregate = typedef_aggregate(n).unwrap();
                     self.line(
                         2,
-                        "TYPE_DECL",
+                        "TYPE_REF",
                         P {
-                            name: Some(name.clone()),
-                            code: Some(esc(text(n, b))),
-                            full: Some(name),
+                            code: Some(aggregate_code(aggregate, b)),
+                            tfn: Some(aggregate_name(aggregate, b)),
                             order: Some(slot),
                             ..Default::default()
                         },
                     );
                     slot += 1;
+                    for alias in typedef_declarators(n) {
+                        let dimensions = array_dimensions(alias);
+                        if dimensions.is_empty() {
+                            continue;
+                        }
+                        let sizes: Vec<_> = dimensions.into_iter().flatten().collect();
+                        self.note_call("<operator>.arrayInitializer", sizes.len());
+                        self.line(
+                            2,
+                            "CALL",
+                            P {
+                                name: Some("<operator>.arrayInitializer".into()),
+                                code: Some(esc(text(alias, b))),
+                                tfn: Some("ANY".into()),
+                                mfn: Some("<operator>.arrayInitializer".into()),
+                                order: Some(slot),
+                                dispatch: Some("STATIC_DISPATCH".into()),
+                                ..Default::default()
+                            },
+                        );
+                        for (i, size) in sizes.into_iter().enumerate() {
+                            let index = (i + 1) as i64;
+                            self.emit_expr(size, b, 3, index, Some(index));
+                        }
+                        slot += 1;
+                    }
+                }
+                "type_definition" => {
+                    // Each ordinary alias keeps the complete statement CODE.
+                    // Function and function-pointer typedef declarators do not
+                    // produce Joern alias nodes or consume a global slot.
+                    for alias in typedef_declarators(n) {
+                        let name = type_binding_name(alias, b);
+                        let full = self
+                            .type_alias_full_names
+                            .get(&(self.body_macro_sites.tree, 0, alias.id()))
+                            .cloned()
+                            .unwrap_or_else(|| name.clone());
+                        self.line(
+                            2,
+                            "TYPE_DECL",
+                            P {
+                                name: Some(name.clone()),
+                                code: Some(esc(text(n, b))),
+                                full: Some(full),
+                                order: Some(slot),
+                                ..Default::default()
+                            },
+                        );
+                        slot += 1;
+                    }
                 }
                 "declaration" => {
-                    // Same lowering as in a method body: LOCAL per declarator,
-                    // plus an assignment CALL when initialised (`int g = 5;`).
-                    // Prototypes contribute nothing and consume no slot.
-                    if named_children(n)
-                        .iter()
-                        .any(|d| find_function_declarator(*d).is_some())
-                    {
-                        continue;
+                    if let Some(prefix) = self.unknown_declaration_prefixes.get(&n.id()).cloned() {
+                        self.line(
+                            2,
+                            "UNKNOWN",
+                            P {
+                                code: Some(prefix),
+                                order: Some(slot),
+                                ..Default::default()
+                            },
+                        );
+                        slot += 1;
                     }
-                    self.emit_declaration(n, b, &mut slot, 2, None);
+                    // LOCAL per object, then an assignment when initialised.
+                    // Uninitialised file-scope arrays retain their dimensions
+                    // without the allocation synthesized inside methods.
+                    // Prototypes contribute nothing and consume no slot.
+                    self.emit_declaration(n, b, &mut slot, 2, None, true);
                 }
                 "function_definition" => {
                     if let Some((name, _, _)) = fn_header(n, b) {
                         let full = self
-                            .function_full_names
-                            .get(&name)
-                            .cloned()
+                            .definition_full_names
+                            .get(&n.id())
+                            .map(|full| {
+                                full.split("<duplicate>").next().unwrap_or(full).to_string()
+                            })
                             .unwrap_or_else(|| name.clone());
+                        self.metadata.reference_origins.push(MethodReferenceOrigin {
+                            address: format!("{}#{}", self.block, self.line_no),
+                            definition_full_name: self
+                                .definition_full_names
+                                .get(&n.id())
+                                .cloned()
+                                .unwrap_or_else(|| name.clone()),
+                        });
                         self.line(
                             2,
                             "METHOD_REF",
@@ -1744,16 +2831,13 @@ impl Ctx<'_> {
     /// sized array, a `<clinit>` method follows the members to host the
     /// `<operator>.arrayInitializer` calls.
     fn emit_type_decl(&mut self, n: Node, b: &[u8], depth: usize) {
-        let name = n
-            .child_by_field_name("name")
-            .map(|x| text(x, b).to_string())
-            .unwrap_or_default();
+        let name = aggregate_name(n, b);
         self.line(
             depth,
             "TYPE_DECL",
             P {
                 name: Some(name.clone()),
-                code: Some(esc(text(n, b))),
+                code: Some(aggregate_code(n, b)),
                 full: Some(name.clone()),
                 order: Some(1),
                 ..Default::default()
@@ -1789,11 +2873,7 @@ impl Ctx<'_> {
             if f.kind() != "field_declaration" {
                 continue;
             }
-            let ty = normalize_type(
-                &f.child_by_field_name("type")
-                    .map(|t| text(t, b).to_string())
-                    .unwrap_or("ANY".into()),
-            );
+            let ty = declaration_type(f, b, TypeRole::Declaration);
             for d in named_children(f) {
                 if matches!(
                     d.kind(),
@@ -1809,7 +2889,7 @@ impl Ctx<'_> {
                         P {
                             name: Some(mname),
                             code: Some(text(d, b).to_string()),
-                            tfn: Some(format!("{ty}{}", decl_suffix(d, b))),
+                            tfn: Some(format!("{ty}{}", member_decl_suffix(d, b, &self.macros))),
                             order: Some(order),
                             ..Default::default()
                         },
@@ -1828,10 +2908,16 @@ impl Ctx<'_> {
     /// `<operator>.arrayInitializer` call per sized array, two bare MODIFIERs,
     /// and a METHOD_RETURN typed as the struct.
     fn emit_clinit(&mut self, n: Node, b: &[u8], depth: usize, order: i64) {
-        let tag = n
-            .child_by_field_name("name")
-            .map(|x| text(x, b).to_string())
-            .unwrap_or_default();
+        let tag = aggregate_name(n, b);
+        if depth == 0 {
+            self.metadata.bindings.push(FunctionBinding {
+                name: "<clinit>".into(),
+                full_name: format!("{tag}.<clinit>:{tag}()"),
+                type_decl_full_name: format!("{}:<global>", self.file),
+                signature: None,
+                source_start: None,
+            });
+        }
         self.line(
             depth,
             "METHOD",
@@ -1921,8 +3007,9 @@ impl Ctx<'_> {
                 }
                 for d in named_children(f) {
                     if d.kind() == "array_declarator" {
-                        if let Some(sz) = d.child_by_field_name("size") {
-                            self.note_call("<operator>.arrayInitializer", 1);
+                        let sizes: Vec<_> = array_dimensions(d).into_iter().flatten().collect();
+                        if !sizes.is_empty() {
+                            self.note_call("<operator>.arrayInitializer", sizes.len());
                             self.line(
                                 depth + 2,
                                 "CALL",
@@ -1936,12 +3023,22 @@ impl Ctx<'_> {
                                     ..Default::default()
                                 },
                             );
-                            self.emit_expr(sz, b, depth + 3, 1, Some(1));
+                            for (i, size) in sizes.into_iter().enumerate() {
+                                let index = (i + 1) as i64;
+                                self.emit_expr(size, b, depth + 3, index, Some(index));
+                            }
                             co += 1;
                         }
                     }
                 }
             }
+        }
+        if depth == 0 {
+            self.metadata.modifiers.push(ModifierMetadata {
+                address: format!("{}#{}", self.block, self.line_no),
+                modifier_type: "CONSTRUCTOR",
+                line: None,
+            });
         }
         self.line(
             depth + 1,
@@ -1951,6 +3048,13 @@ impl Ctx<'_> {
                 ..Default::default()
             },
         );
+        if depth == 0 {
+            self.metadata.modifiers.push(ModifierMetadata {
+                address: format!("{}#{}", self.block, self.line_no),
+                modifier_type: "STATIC",
+                line: None,
+            });
+        }
         self.line(
             depth + 1,
             "MODIFIER",
@@ -1980,87 +3084,219 @@ impl Ctx<'_> {
         &mut self,
         name: &str,
         code: &str,
-        arg_nodes: &[Node],
-        _site: Node,
-        b: &[u8],
+        arg_texts: &[String],
+        site: Node,
         depth: usize,
         order: i64,
         arg: Option<i64>,
+        replacement_override: Option<&str>,
     ) {
-        let (params, body, directive) = {
+        let (params, body, directive, defining_file) = {
             let m = &self.macros[name];
             (
                 m.params.clone().unwrap_or_default(),
                 m.body.clone(),
                 m.directive.clone(),
+                m.file.clone(),
             )
         };
-        let arg_texts: Vec<String> = arg_nodes.iter().map(|a| text(*a, b).to_string()).collect();
-        let substituted = substitute(&body, &params, &arg_texts);
-        let mut expanding = HashSet::from([name.to_string()]);
-        let expansion = expand_macros_text(&substituted, self.macros, 0, &mut expanding);
-        let ret = expansion_type(&expansion, &self.symbols, self.functions);
-        let origin = &self.macros[name].origin;
-        let full = format!("{origin}:{name}:{ret}({})", params.len());
-        self.used_macros.entry(full.clone()).or_insert((
-            name.to_string(),
-            directive,
-            params.len(),
-            ret.clone(),
-        ));
+        let replacement = replacement_override
+            .map(str::to_string)
+            .unwrap_or_else(|| substitute(&body, &params, arg_texts));
+        let expansion = expand_body_expression(
+            &replacement,
+            &self.macros,
+            &mut HashSet::from([name.to_string()]),
+            &mut 65_536,
+        );
+        let ret = if site
+            .parent()
+            .is_some_and(|parent| parent.kind() == "expression_statement")
+        {
+            "ANY".to_string()
+        } else {
+            expansion_type(&expansion, &self.symbols, self.globals)
+        };
+        let full = format!("{defining_file}:{name}:{ret}({})", params.len());
+        let source_owned = self.body_macro_sites.owns_view_node(self.source_view, site);
+        if !source_owned {
+            self.register_macro_method(&full, name, &directive, params.len(), &ret);
+        }
         self.line(
             depth,
             "CALL",
             P {
                 name: Some(name.to_string()),
                 code: Some(code.to_string()),
-                tfn: Some(ret),
-                mfn: Some(full),
-                sig: Some(format!(
-                    "{}({})",
-                    expansion_type(&expansion, &self.symbols, self.functions),
-                    params.len()
-                )),
+                tfn: Some(ret.clone()),
+                mfn: Some(full.clone()),
+                sig: Some(format!("{ret}({})", params.len())),
                 order: Some(order),
                 arg,
                 dispatch: Some("INLINED".into()),
                 ..Default::default()
             },
         );
-        let ordinary = ordinary_macro_parameters(&body, &params);
-        let fixed_count = params
-            .iter()
-            .position(|param| param == "__VA_ARGS__")
-            .unwrap_or(params.len());
-        let mut visible_args = Vec::new();
-        for (index, used) in ordinary.into_iter().enumerate() {
-            if !used {
-                continue;
+        if source_owned {
+            let key = (
+                self.source_view,
+                site.id(),
+                name.to_string(),
+                params.len(),
+                ret.clone(),
+            );
+            let index = *self.macro_use_ids.entry(key).or_insert_with(|| {
+                self.macro_uses.push(MacroUse {
+                    offset: site.start_byte(),
+                    include_order: if self.source_view == 0 {
+                        Vec::new()
+                    } else {
+                        self.body_macro_sites.headers[self.source_view - 1]
+                            .include_order
+                            .clone()
+                    },
+                    metadata: MacroMetadata {
+                        name: name.to_string(),
+                        directive,
+                        file: defining_file,
+                    },
+                    arity: params.len(),
+                    ret,
+                    placements: Vec::new(),
+                });
+                self.macro_uses.len() - 1
+            });
+            self.macro_uses[index].placements.push((
+                self.dump_index - 1,
+                self.last_mfn_span
+                    .clone()
+                    .expect("generated macro call has a method name"),
+                self.last_call_edge,
+            ));
+        }
+        let invocation_types = self.typedefs_at(site);
+        let expansion_source = format!("void __m() {{ {expansion}; }}");
+        let mut parser = Parser::new();
+        parser
+            .set_language(&tree_sitter_c::LANGUAGE.into())
+            .unwrap();
+        let tree = parser.parse(&expansion_source, None).unwrap();
+        let previous_types = self.enter_type_tree(
+            tree.root_node(),
+            expansion_source.as_bytes(),
+            invocation_types,
+        );
+        let mut candidates = vec![tree.root_node()];
+        let mut expression_nodes = Vec::new();
+        while let Some(node) = candidates.pop() {
+            if !matches!(node.kind(), "parenthesized_expression" | "field_identifier") {
+                expression_nodes.push(node);
             }
-            if params.get(index).is_some_and(|p| p == "__VA_ARGS__") {
-                visible_args.extend(arg_nodes.iter().skip(fixed_count).copied());
-            } else if let Some(argument) = arg_nodes.get(index) {
-                visible_args.push(*argument);
+            candidates.extend(named_children(node).into_iter().rev());
+        }
+        let before_args = self.argument_count;
+        let mut emitted_args = 0;
+        for (i, a) in arg_texts.iter().enumerate() {
+            let normalized = macro_argument_match_code(a);
+            let found = expression_nodes.iter().find(|node| {
+                let raw = text(**node, expansion_source.as_bytes());
+                if node.kind() == "identifier" {
+                    if self
+                        .typedef_cast_identifier(**node, expansion_source.as_bytes())
+                        .is_some()
+                    {
+                        return raw == normalized;
+                    }
+                    if node.parent().is_some_and(|parent| {
+                        parent.kind() == "call_expression"
+                            && parent.child_by_field_name("function") == Some(**node)
+                    }) {
+                        return false;
+                    }
+                    if self.globals.contains_key(raw) {
+                        format!("<global> {raw}") == normalized
+                    } else if self.symbols.contains_key(raw)
+                        && self.recovered_bindings.contains(raw)
+                    {
+                        format!("<unknown> {raw}") == normalized
+                    } else if self.symbols.contains_key(raw)
+                        || self.enumerators.iter().any(|name| name == raw)
+                    {
+                        raw == normalized
+                    } else {
+                        format!("<unknown> {raw}") == normalized
+                    }
+                } else {
+                    raw == normalized
+                        && matches!(
+                            node.kind(),
+                            "call_expression"
+                                | "binary_expression"
+                                | "unary_expression"
+                                | "pointer_expression"
+                                | "update_expression"
+                                | "cast_expression"
+                                | "subscript_expression"
+                                | "field_expression"
+                                | "conditional_expression"
+                                | "number_literal"
+                                | "string_literal"
+                                | "char_literal"
+                                | "sizeof_expression"
+                        )
+                }
+            });
+            if let Some(node) = found {
+                emitted_args += 1;
+                let was_copying = self.copying_macro_argument;
+                self.copying_macro_argument = true;
+                let macros = std::mem::replace(&mut self.macros, Arc::new(HashMap::new()));
+                if let Some(ty) = self.typedef_cast_identifier(*node, expansion_source.as_bytes()) {
+                    self.line(
+                        depth + 1,
+                        "TYPE_REF",
+                        P {
+                            code: Some(ty.clone()),
+                            tfn: Some(ty),
+                            order: Some(emitted_args),
+                            arg: Some((i + 1) as i64),
+                            ..Default::default()
+                        },
+                    );
+                } else {
+                    self.emit_expr(
+                        *node,
+                        expansion_source.as_bytes(),
+                        depth + 1,
+                        emitted_args,
+                        Some((i + 1) as i64),
+                    );
+                }
+                self.macros = macros;
+                self.copying_macro_argument = was_copying;
             }
         }
-        for (i, a) in visible_args.iter().enumerate() {
-            let k = (i + 1) as i64;
-            self.emit_expr(*a, b, depth + 1, k, Some(k));
-        }
-        let bk = (visible_args.len() + 1) as i64;
+        // MacroHandler counts descendant ARGUMENT edges in copied subtrees.
+        let expansion_index = (self.argument_count - before_args) as i64 + 1;
+        let compound = expansion_expr_node(tree.root_node())
+            .is_some_and(|root| root.kind() == "compound_statement");
         self.line(
             depth + 1,
             "BLOCK",
             P {
-                tfn: Some("ANY".into()),
-                order: Some(bk),
-                arg: Some(bk),
+                code: compound.then(|| esc(code)),
+                tfn: Some(if compound { "void" } else { "ANY" }.into()),
+                order: Some(emitted_args + 1),
+                arg: Some(expansion_index),
                 ..Default::default()
             },
         );
-        self.expanding_macros.insert(name.to_string());
+        let macros = std::mem::replace(&mut self.macros, Arc::new(HashMap::new()));
+        let previous_code = self.macro_expansion_code.replace(code.to_string());
         self.emit_expansion(&expansion, depth + 2);
-        self.expanding_macros.remove(name);
+        self.macro_expansion_code = previous_code;
+        self.macros = macros;
+        self.leave_type_tree(previous_types);
     }
 
     /// Parse a macro expansion as an expression and emit it (ORDER=1, no
@@ -2078,7 +3314,34 @@ impl Ctx<'_> {
         let Some(expr) = expansion_expr_node(tree.root_node()) else {
             return;
         };
-        self.emit_expr(expr, b, depth, 1, None);
+        // CDT prints expanded adjacent strings as a single token, including
+        // inside a larger expansion expression. Ordinary source expressions
+        // retain their original token spelling in emit_expr.
+        if let Some(joined) = join_expansion_strings(tree.root_node(), b) {
+            if let Some(joined_tree) = parser.parse(&joined, None) {
+                if let Some(joined_expr) = expansion_expr_node(joined_tree.root_node()) {
+                    self.emit_expansion_root(joined_expr, joined.as_bytes(), depth);
+                    return;
+                }
+            }
+        }
+        self.emit_expansion_root(expr, b, depth);
+    }
+
+    fn emit_expansion_root(&mut self, root: Node, b: &[u8], depth: usize) {
+        let previous_types = self.enter_type_tree(root, b, self.default_typedefs.clone());
+        let previous_root = self.macro_expansion_root.replace(root.id());
+        if root.kind() == "compound_statement" {
+            // The compound is the expansion BLOCK already emitted by the
+            // macro handler; its statements are direct children of that block.
+            self.emit_block_contents(root, b, depth);
+        } else if root.kind().ends_with("_statement") || root.kind() == "declaration" {
+            self.emit_stmt(root, b, &mut 1, depth);
+        } else {
+            self.emit_expr(root, b, depth, 1, None);
+        }
+        self.macro_expansion_root = previous_root;
+        self.leave_type_tree(previous_types);
     }
 
     /// METHOD for a used macro: CODE is the #define directive, params p1..pn,
@@ -2151,18 +3414,281 @@ impl Ctx<'_> {
     /// a param or body declaration) and sizeof(T) type names.
     fn collect_phantoms(&mut self, body: Node, b: &[u8]) {
         let mut shadowed: Vec<String> = self.symbols.keys().cloned().collect();
-        collect_decl_names(body, b, &mut shadowed);
-        let mut seen: Vec<String> = Vec::new();
+        collect_decl_names(
+            body,
+            b,
+            &self.macros,
+            Some(self.body_macro_sites),
+            self.source_view,
+            &mut shadowed,
+        );
+        let mut seen = Vec::new();
+        self.walk_phantoms(body, b, &shadowed, &mut seen);
+        // VariableScopeManager prepends pending references. Its first resolved
+        // reference therefore determines each synthetic local's CODE and the
+        // reverse-last-use order of all synthetic locals.
+        let positions: HashMap<_, _> = seen
+            .into_iter()
+            .enumerate()
+            .map(|(i, name)| (name, i))
+            .collect();
+        self.phantoms
+            .sort_by_key(|phantom| std::cmp::Reverse(positions[&phantom.name]));
+    }
+
+    /// An unresolved token between string literals invalidates CDT's expanded
+    /// expression. Declaration initializers are recovered from their original
+    /// source without the preprocessor context; ordinary returns stay UNKNOWN.
+    fn needs_macro_recovery(&mut self, node: Node, bytes: &[u8]) -> bool {
+        if self.macros.is_empty() || self.macro_expansion_code.is_some() {
+            return false;
+        }
+        if let Some(&recovery) = self.recovery_candidates.get(&(self.source_view, node.id())) {
+            return recovery;
+        }
+        let mut pending = vec![node];
+        let mut has_macro = false;
+        while let Some(n) = pending.pop() {
+            if matches!(n.kind(), "identifier" | "field_identifier")
+                && self.macros.contains_key(text(n, bytes))
+            {
+                has_macro = true;
+                break;
+            }
+            pending.extend(named_children(n));
+        }
+        let recovery = if has_macro {
+            let expanded = expand_body_expression(
+                text(node, bytes),
+                &self.macros,
+                &mut HashSet::new(),
+                &mut 65_536,
+            );
+            let source = format!("void __recovery() {{ {expanded}; }}");
+            let mut parser = Parser::new();
+            parser
+                .set_language(&tree_sitter_c::LANGUAGE.into())
+                .unwrap();
+            let tree = parser.parse(&source, None).unwrap();
+            let mut pending = vec![tree.root_node()];
+            let mut invalid = false;
+            while let Some(n) = pending.pop() {
+                if n.kind() == "concatenated_string"
+                    && named_children(n).iter().any(|c| c.kind() == "identifier")
+                {
+                    // CDT recovers an enclosing call as a failed expression.
+                    // A bare string initializer has a different token-level
+                    // recovery shape, outside this path.
+                    let mut parent = n.parent();
+                    while let Some(ancestor) = parent {
+                        if ancestor.kind() == "argument_list" {
+                            invalid = true;
+                            break;
+                        }
+                        parent = ancestor.parent();
+                    }
+                    if invalid {
+                        break;
+                    }
+                }
+                pending.extend(named_children(n));
+            }
+            invalid
+        } else {
+            false
+        };
+        self.recovery_candidates
+            .insert((self.source_view, node.id()), recovery);
+        recovery
+    }
+
+    fn declaration_needs_macro_recovery(&mut self, node: Node, bytes: &[u8]) -> bool {
+        // A failed for initializer is recovered as statement fragments by CDT,
+        // rather than the original declaration used for block declarations.
+        !node
+            .parent()
+            .is_some_and(|parent| parent.kind() == "for_statement")
+            && named_children(node).into_iter().any(|declarator| {
+                declarator
+                    .child_by_field_name("value")
+                    .is_some_and(|value| self.needs_macro_recovery(value, bytes))
+            })
+    }
+
+    fn walk_phantoms(&mut self, body: Node, b: &[u8], shadowed: &[String], seen: &mut Vec<String>) {
+        let previous_macros = self.macros.clone();
         let mut stack = vec![body];
         while let Some(n) = stack.pop() {
+            let views = self.body_macro_sites;
+            if let Some((view, header)) = views.included(self.source_view, n, b) {
+                let previous_view = std::mem::replace(&mut self.source_view, view);
+                for item in &header.items {
+                    self.walk_phantoms(*item, header.bytes, shadowed, seen);
+                }
+                self.source_view = previous_view;
+                continue;
+            }
+            if let Some(macros) = self.source_macros_at(n, b).cloned() {
+                self.macros = macros;
+            }
+            if n.kind() == "declaration" && self.declaration_needs_macro_recovery(n, b) {
+                let macros = std::mem::replace(&mut self.macros, Arc::new(HashMap::new()));
+                let recovering = std::mem::replace(&mut self.recovering_expression, true);
+                self.walk_phantoms(n, b, shadowed, seen);
+                self.recovering_expression = recovering;
+                self.macros = macros;
+                continue;
+            }
+            if matches!(n.kind(), "return_statement" | "expression_statement")
+                && self.needs_macro_recovery(n, b)
+            {
+                continue;
+            }
+            if n.parent().is_some_and(|parent| {
+                matches!(
+                    parent.kind(),
+                    "if_statement" | "while_statement" | "do_statement"
+                ) && parent.child_by_field_name("condition") == Some(n)
+            }) && self.needs_macro_recovery(n, b)
+            {
+                continue;
+            }
+            let invocation = if n.kind() == "identifier" {
+                self.macros
+                    .get(text(n, b))
+                    .filter(|m| m.params.is_none())
+                    .map(|m| (text(n, b).to_string(), m.clone(), Vec::new()))
+            } else if n.kind() == "call_expression" {
+                n.child_by_field_name("function").and_then(|f| {
+                    self.macros
+                        .get(text(f, b))
+                        .filter(|m| m.params.is_some())
+                        .map(|m| {
+                            (
+                                text(f, b).to_string(),
+                                m.clone(),
+                                n.child_by_field_name("arguments")
+                                    .and_then(|args| macro_arguments(text(args, b), 0))
+                                    .map(|(args, _)| args)
+                                    .unwrap_or_default(),
+                            )
+                        })
+                })
+            } else if n.kind() == "field_expression" {
+                n.child_by_field_name("field").and_then(|field| {
+                    let name = text(field, b);
+                    self.macros
+                        .get(name)
+                        .filter(|m| m.params.is_none())
+                        .map(|m| {
+                            // Preserve the receiver so member names are not mistaken
+                            // for globals while collecting introduced index operands.
+                            let raw = text(n, b);
+                            let start = field.start_byte() - n.start_byte();
+                            let end = field.end_byte() - n.start_byte();
+                            let mut definition = m.clone();
+                            definition.body = format!("{}{}{}", &raw[..start], m.body, &raw[end..]);
+                            (name.to_string(), definition, Vec::new())
+                        })
+                })
+            } else {
+                None
+            };
+            if let Some((name, definition, args)) = invocation {
+                let replacement = substitute(
+                    &definition.body,
+                    definition.params.as_deref().unwrap_or_default(),
+                    &args,
+                );
+                let expansion = expand_body_expression(
+                    &replacement,
+                    &self.macros,
+                    &mut HashSet::from([name]),
+                    &mut 65_536,
+                );
+                let source = format!("void __m() {{ {expansion}; }}");
+                let mut parser = Parser::new();
+                parser
+                    .set_language(&tree_sitter_c::LANGUAGE.into())
+                    .unwrap();
+                let tree = parser.parse(&source, None).unwrap();
+                if let Some(expr) = expansion_expr_node(tree.root_node()) {
+                    let macros = std::mem::replace(&mut self.macros, Arc::new(HashMap::new()));
+                    let mut expansion_shadowed = shadowed.to_vec();
+                    collect_decl_names(
+                        expr,
+                        source.as_bytes(),
+                        &self.macros,
+                        None,
+                        self.source_view,
+                        &mut expansion_shadowed,
+                    );
+                    let previous_types =
+                        self.enter_type_tree(expr, source.as_bytes(), self.typedefs_at(n));
+                    self.walk_phantoms(expr, source.as_bytes(), &expansion_shadowed, seen);
+                    self.leave_type_tree(previous_types);
+                    self.macros = macros;
+                }
+                continue;
+            }
+
+            if !prototype_headers(n, b).is_empty() {
+                continue;
+            }
+            if self.typedef_cast(n, b).is_some() {
+                if let Some(args) = n.child_by_field_name("arguments") {
+                    stack.push(args);
+                }
+                continue;
+            }
             match n.kind() {
                 "identifier" => {
                     let name = text(n, b).to_string();
-                    if !shadowed.contains(&name) && !seen.contains(&name) {
+                    // A direct call target is a callable name, not an
+                    // unresolved variable. Pointer-valued callees still use
+                    // their declared local/global symbol below.
+                    let direct_callee = n.parent().is_some_and(|parent| {
+                        parent.kind() == "call_expression"
+                            && parent.child_by_field_name("function") == Some(n)
+                    });
+                    let variable_reference = self.globals.contains_key(&name)
+                        || self.enumerators.contains(&name)
+                        || (!self.macros.contains_key(&name)
+                            && (self.recovering_expression
+                                || (!self.functions.contains_key(&name)
+                                    && !self.method_functions.contains_key(&name)))
+                            && !direct_callee);
+                    if !shadowed.contains(&name) && variable_reference {
+                        if let Some(position) = seen.iter().position(|prior| prior == &name) {
+                            seen.remove(position);
+                            seen.push(name.clone());
+                            if self.globals.contains_key(&name) {
+                                if let Some(phantom) =
+                                    self.phantoms.iter_mut().find(|p| p.name == name)
+                                {
+                                    phantom.code = format!(
+                                        "{} {name}",
+                                        if self.recovering_expression {
+                                            "<unknown>"
+                                        } else {
+                                            "<global>"
+                                        }
+                                    );
+                                }
+                            }
+                            continue;
+                        }
                         if let Some(ty) = self.globals.get(&name) {
                             seen.push(name.clone());
                             self.phantoms.push(Phantom {
-                                code: format!("<global> {name}"),
+                                code: format!(
+                                    "{} {name}",
+                                    if self.recovering_expression {
+                                        "<unknown>"
+                                    } else {
+                                        "<global>"
+                                    }
+                                ),
                                 ty: ty.clone(),
                                 name,
                             });
@@ -2176,7 +3702,10 @@ impl Ctx<'_> {
                                 name,
                             });
                         } else if !self.macros.contains_key(&name)
-                            && !self.functions.contains_key(&name)
+                            && (self.recovering_expression
+                                || (!self.functions.contains_key(&name)
+                                    && !self.method_functions.contains_key(&name)))
+                            && !direct_callee
                         {
                             // Fully unresolved identifier: phantom LOCAL with
                             // CODE `<unknown> name` (e.g. NULL).
@@ -2190,7 +3719,10 @@ impl Ctx<'_> {
                     }
                 }
                 "null" => {
-                    if !seen.contains(&"NULL".to_string()) {
+                    if let Some(position) = seen.iter().position(|name| name == "NULL") {
+                        seen.remove(position);
+                        seen.push("NULL".into());
+                    } else {
                         seen.push("NULL".into());
                         self.phantoms.push(Phantom {
                             name: "NULL".into(),
@@ -2200,77 +3732,27 @@ impl Ctx<'_> {
                     }
                 }
                 "sizeof_expression" => {
-                    if let Some(t) = n.child_by_field_name("type") {
-                        let code = text(t, b).to_string();
-                        let name = normalize_type(&code);
-                        if !seen.contains(&name) {
-                            seen.push(name.clone());
-                            self.phantoms.push(Phantom {
-                                name: name.clone(),
-                                code,
-                                ty: name,
-                            });
-                        }
-                    }
-                }
-                "call_expression" => {
-                    if let Some(function) = n.child_by_field_name("function") {
-                        let name = text(function, b);
-                        if let Some(definition) = self
-                            .macros
-                            .get(name)
-                            .filter(|definition| definition.params.is_some())
-                        {
-                            let params = definition.params.as_ref().unwrap();
-                            let ordinary = ordinary_macro_parameters(&definition.body, params);
-                            let arguments = n
-                                .child_by_field_name("arguments")
-                                .map(named_children)
-                                .unwrap_or_default();
-                            let fixed_count = params
-                                .iter()
-                                .position(|param| param == "__VA_ARGS__")
-                                .unwrap_or(params.len());
-                            let mut visible = Vec::new();
-                            for (index, used) in ordinary.into_iter().enumerate() {
-                                if !used {
-                                    continue;
-                                }
-                                if params.get(index).is_some_and(|p| p == "__VA_ARGS__") {
-                                    visible.extend(arguments.iter().skip(fixed_count).copied());
-                                } else if let Some(argument) = arguments.get(index) {
-                                    visible.push(*argument);
-                                }
+                    if let Some(phantom) = self.sizeof_identifier(n, b) {
+                        if let Some(position) = seen.iter().position(|name| name == &phantom.name) {
+                            seen.remove(position);
+                            seen.push(phantom.name.clone());
+                            if let Some(previous) =
+                                self.phantoms.iter_mut().find(|p| p.name == phantom.name)
+                            {
+                                *previous = phantom;
                             }
-                            visible.reverse();
-                            stack.extend(visible);
-                            continue;
+                        } else {
+                            seen.push(phantom.name.clone());
+                            self.phantoms.push(phantom);
                         }
+                        continue;
                     }
-                    // A plain callee name denotes an unresolved function, not
-                    // a local variable. Function-pointer globals still need
-                    // their ordinary phantom-local treatment.
-                    if let Some(function) = n.child_by_field_name("function") {
-                        let name = text(function, b);
-                        if self.globals.contains_key(name) || self.symbols.contains_key(name) {
-                            stack.push(function);
-                        }
-                    }
-                    if let Some(arguments) = n.child_by_field_name("arguments") {
-                        let mut children = named_children(arguments);
-                        children.reverse();
-                        stack.extend(children);
-                    }
-                    continue;
                 }
-                // Preprocessor structure: only the selected #if/#elif/#ifdef
-                // branch contributes (directive identifiers never do).
-                "preproc_if" | "preproc_ifdef" => {
-                    let mut cs = selected_preproc_children(n, b, self.macros);
-                    cs.reverse();
-                    for c in cs {
-                        stack.push(c);
-                    }
+                // Only the selected branch contributes pending references;
+                // directive condition identifiers are not C references.
+                "preproc_if" | "preproc_ifdef" | "preproc_elif" | "preproc_elifdef"
+                | "preproc_else" => {
+                    stack.extend(kept_preproc_children(n, b, &self.macros).into_iter().rev());
                     continue;
                 }
                 "preproc_def" | "preproc_function_def" | "preproc_include" => continue,
@@ -2282,6 +3764,7 @@ impl Ctx<'_> {
                 stack.push(c);
             }
         }
+        self.macros = previous_macros;
     }
 
     /// Emit a BLOCK node and its statements, with a fresh child ORDER sequence.
@@ -2290,15 +3773,28 @@ impl Ctx<'_> {
             depth,
             "BLOCK",
             P {
-                code: Some(esc(text(body, b))),
+                code: Some(esc(self
+                    .macro_expansion_code
+                    .as_deref()
+                    .unwrap_or(text(body, b)))),
                 tfn: Some("void".into()),
                 order: Some(order),
                 ..Default::default()
             },
         );
+        self.emit_block_contents(body, b, depth + 1);
+    }
+
+    fn emit_block_contents(&mut self, body: Node, b: &[u8], depth: usize) {
+        let outer_symbols = self.symbols.clone();
+        let outer_recovered = self.recovered_bindings.clone();
+        let outer_symbol_calls = self.symbol_call_types.clone();
+        let outer_functions = self.method_functions.clone();
+        let outer_call_types = self.method_call_types.clone();
+        let outer_bindings = self.sym_line.clone();
         for ph in std::mem::take(&mut self.phantoms) {
             self.line(
-                depth + 1,
+                depth,
                 "LOCAL",
                 P {
                     name: Some(ph.name),
@@ -2311,20 +3807,101 @@ impl Ctx<'_> {
         }
         let mut so = 1i64;
         for s in named_children(body) {
-            self.emit_stmt(s, b, &mut so, depth + 1);
+            self.emit_stmt(s, b, &mut so, depth);
         }
+        self.symbols = outer_symbols;
+        self.recovered_bindings = outer_recovered;
+        self.symbol_call_types = outer_symbol_calls;
+        self.method_functions = outer_functions;
+        self.method_call_types = outer_call_types;
+        self.sym_line = outer_bindings;
     }
 
     /// A block-level statement. `order` is the running 1-based child position.
     fn emit_stmt(&mut self, n: Node, b: &[u8], order: &mut i64, depth: usize) {
+        let views = self.body_macro_sites;
+        if let Some((view, header)) = views.included(self.source_view, n, b) {
+            let previous_view = std::mem::replace(&mut self.source_view, view);
+            for item in &header.items {
+                let start = self.line_no;
+                self.emit_stmt(*item, header.bytes, order, depth);
+                // A nested include records its own physical spans. Only direct
+                // header declarations contribute new roots at this occurrence.
+                if item.kind() != "preproc_include" && start < self.line_no {
+                    self.included_origins.push(IncludedSourceOrigin {
+                        block: self.block.clone(),
+                        nodes: start..self.line_no,
+                        file: header.file.to_string(),
+                        span: item.byte_range(),
+                    });
+                }
+            }
+            self.source_view = previous_view;
+            return;
+        }
+        let previous = self
+            .source_macros_at(n, b)
+            .cloned()
+            .map(|macros| std::mem::replace(&mut self.macros, macros));
+        self.emit_stmt_in_context(n, b, order, depth);
+        if let Some(previous) = previous {
+            self.macros = previous;
+        }
+    }
+
+    fn emit_stmt_in_context(&mut self, n: Node, b: &[u8], order: &mut i64, depth: usize) {
+        if n.kind() == "return_statement" && self.needs_macro_recovery(n, b) {
+            self.line(
+                depth,
+                "UNKNOWN",
+                P {
+                    code: Some(esc(text(n, b))),
+                    order: Some(*order),
+                    ..Default::default()
+                },
+            );
+            *order += 1;
+            return;
+        }
+        if n.kind() == "expression_statement" && self.needs_macro_recovery(n, b) {
+            return;
+        }
+        // Expanded controls can carry the invocation as CODE (notably a
+        // do-while). Preserve their parsed kind independently for CFG lowering.
+        if self.macro_expansion_code.is_some()
+            && matches!(
+                n.kind(),
+                "if_statement"
+                    | "for_statement"
+                    | "while_statement"
+                    | "do_statement"
+                    | "switch_statement"
+                    | "break_statement"
+                    | "continue_statement"
+                    | "goto_statement"
+            )
+        {
+            self.expansion_control_kinds.insert(
+                self.at(self.line_no),
+                n.kind().trim_end_matches("_statement").to_string(),
+            );
+        }
         match n.kind() {
-            "declaration" => self.emit_declaration(n, b, order, depth, None),
+            "compound_statement" => {
+                self.emit_block(n, b, *order, depth);
+                *order += 1;
+            }
+            "declaration" => {
+                self.emit_declaration(n, b, order, depth, None, false);
+            }
+            "type_definition" if typedef_aggregate(n).is_none() => {
+                self.emit_local_typedef(n, b, depth, order);
+            }
             "if_statement" => self.emit_if(n, b, order, depth),
             "for_statement" => self.emit_for(n, b, order, depth),
-            "preproc_if" | "preproc_ifdef" => {
-                // The selected branch splices directly into the surrounding
-                // block, matching the preprocessed source seen by c2cpg.
-                for child in selected_preproc_children(n, b, self.macros) {
+            "preproc_if" | "preproc_ifdef" | "preproc_elif" | "preproc_elifdef"
+            | "preproc_else" => {
+                for child in kept_preproc_children(n, b, &self.macros) {
                     self.emit_stmt(child, b, order, depth);
                 }
             }
@@ -2373,7 +3950,10 @@ impl Ctx<'_> {
                     depth,
                     "CONTROL_STRUCTURE",
                     P {
-                        code: Some(esc(text(n, b))),
+                        code: Some(esc(self
+                            .macro_expansion_code
+                            .as_deref()
+                            .unwrap_or(text(n, b)))),
                         order: Some(o),
                         ..Default::default()
                     },
@@ -2444,22 +4024,38 @@ impl Ctx<'_> {
                     depth,
                     "CONTROL_STRUCTURE",
                     P {
-                        code: Some(esc(text(n, b))),
+                        code: Some(esc(&self
+                            .macro_expansion_code
+                            .as_ref()
+                            .map(|code| {
+                                format!(
+                                    "{code}{}",
+                                    if self.macro_expansion_root == Some(n.id()) {
+                                        ";"
+                                    } else {
+                                        ""
+                                    }
+                                )
+                            })
+                            .unwrap_or_else(|| text(n, b).to_string()))),
                         order: Some(o),
                         ..Default::default()
                     },
                 );
                 let cs = self.line_no - 1;
+                let body_start = self.line_no;
                 if let Some(body) = n.child_by_field_name("body") {
-                    if body.kind() == "compound_statement" {
-                        let bi = self.line_no;
-                        self.emit_block(body, b, 1, depth + 1);
-                        self.edge("DO_BODY", self.at(cs), self.at(bi));
-                    }
+                    self.emit_loop_body(body, b, depth + 1, 1, cs, "DO_BODY");
                 }
+                let condition_order = if self.line_no > body_start { 2 } else { 1 };
                 if let Some(cond) = n.child_by_field_name("condition") {
                     let ci = self.line_no;
-                    self.emit_expr(unwrap_paren(cond), b, depth + 1, 2, None);
+                    self.emit_condition(
+                        cond.named_child(0).unwrap_or(cond),
+                        b,
+                        depth + 1,
+                        condition_order,
+                    );
                     self.edge("CONDITION", self.at(cs), self.at(ci));
                 }
             }
@@ -2483,15 +4079,11 @@ impl Ctx<'_> {
                 );
                 if let Some(c) = cond {
                     let ci = self.line_no;
-                    self.emit_expr(unwrap_paren(c), b, depth + 1, 1, None);
+                    self.emit_condition(c.named_child(0).unwrap_or(c), b, depth + 1, 1);
                     self.edge("CONDITION", self.at(cs), self.at(ci));
                 }
                 if let Some(body) = n.child_by_field_name("body") {
-                    if body.kind() == "compound_statement" {
-                        let bi = self.line_no;
-                        self.emit_block(body, b, 2, depth + 1);
-                        self.edge("TRUE_BODY", self.at(cs), self.at(bi));
-                    }
+                    self.emit_loop_body(body, b, depth + 1, 2, cs, "TRUE_BODY");
                 }
             }
             "return_statement" => {
@@ -2501,7 +4093,20 @@ impl Ctx<'_> {
                     depth,
                     "RETURN",
                     P {
-                        code: Some(esc(text(n, b))),
+                        code: Some(esc(&self
+                            .macro_expansion_code
+                            .as_ref()
+                            .map(|code| {
+                                format!(
+                                    "{code}{}",
+                                    if self.macro_expansion_root == Some(n.id()) {
+                                        ";"
+                                    } else {
+                                        ""
+                                    }
+                                )
+                            })
+                            .unwrap_or_else(|| text(n, b).to_string()))),
                         order: Some(o),
                         ..Default::default()
                     },
@@ -2533,22 +4138,39 @@ impl Ctx<'_> {
             depth,
             "CONTROL_STRUCTURE",
             P {
-                code: Some(esc(text(n, b))),
+                code: Some(esc(self
+                    .macro_expansion_code
+                    .as_deref()
+                    .unwrap_or(text(n, b)))),
                 order: Some(o),
                 ..Default::default()
             },
         );
         if let Some(cond) = n.child_by_field_name("condition") {
             let ci = self.line_no;
-            self.emit_expr(unwrap_paren(cond), b, depth + 1, 1, None);
+            self.emit_condition(cond.named_child(0).unwrap_or(cond), b, depth + 1, 1);
             self.edge("CONDITION", self.at(cs), self.at(ci));
         }
         if let Some(cons) = n.child_by_field_name("consequence") {
+            let bi = self.line_no;
             if cons.kind() == "compound_statement" {
-                let bi = self.line_no;
                 self.emit_block(cons, b, 2, depth + 1);
-                self.edge("TRUE_BODY", self.at(cs), self.at(bi));
+            } else {
+                // CDT wraps a braceless consequence in a synthetic, CODE-less
+                // block, just as it does for a braceless `else` body.
+                self.line(
+                    depth + 1,
+                    "BLOCK",
+                    P {
+                        tfn: Some("ANY".into()),
+                        order: Some(2),
+                        ..Default::default()
+                    },
+                );
+                let mut so = 1i64;
+                self.emit_stmt(cons, b, &mut so, depth + 2);
             }
+            self.edge("TRUE_BODY", self.at(cs), self.at(bi));
         }
         if let Some(alt) = n.child_by_field_name("alternative") {
             let ei = self.line_no;
@@ -2591,6 +4213,12 @@ impl Ctx<'_> {
     /// its assignment carrying ARGUMENT_INDEX=1 (another quirk; the condition,
     /// update, and body carry none).
     fn emit_for(&mut self, n: Node, b: &[u8], order: &mut i64, depth: usize) {
+        let outer_symbols = self.symbols.clone();
+        let outer_recovered = self.recovered_bindings.clone();
+        let outer_symbol_calls = self.symbol_call_types.clone();
+        let outer_functions = self.method_functions.clone();
+        let outer_call_types = self.method_call_types.clone();
+        let outer_bindings = self.sym_line.clone();
         let init = n.child_by_field_name("initializer");
         let cond = n.child_by_field_name("condition");
         let update = n.child_by_field_name("update");
@@ -2606,8 +4234,16 @@ impl Ctx<'_> {
             "CONTROL_STRUCTURE",
             P {
                 code: Some(esc(&format!(
-                    "for ({};{};{})",
-                    part(init),
+                    "for ({}{}{};{})",
+                    self.macro_expansion_code
+                        .as_deref()
+                        .map(str::to_string)
+                        .unwrap_or_else(|| part(init)),
+                    if self.macro_expansion_code.is_some() {
+                        ""
+                    } else {
+                        ";"
+                    },
                     part(cond),
                     part(update)
                 ))),
@@ -2634,11 +4270,13 @@ impl Ctx<'_> {
         }
         if let Some(i) = init {
             if i.kind() == "declaration" {
-                let before = self.line_no;
-                self.emit_declaration(i, b, &mut co, depth + 1, Some(1));
-                // FOR_INIT targets the init assignment CALL, not the LOCAL.
-                if self.line_no > before + 1 {
-                    self.edge("FOR_INIT", self.at(cs), self.at(before + 1));
+                if let Some(initializer) =
+                    self.emit_declaration(i, b, &mut co, depth + 1, Some(1), false)
+                {
+                    self.edge("FOR_INIT", self.at(cs), self.at(initializer));
+                } else {
+                    // CDT reserves a single declaration's absent initializer.
+                    co += 1;
                 }
             } else {
                 let ii = self.line_no;
@@ -2649,23 +4287,107 @@ impl Ctx<'_> {
         }
         if let Some(c) = cond {
             let ci = self.line_no;
-            self.emit_expr(c, b, depth + 1, co, None);
+            self.emit_condition(c, b, depth + 1, co);
             self.edge("CONDITION", self.at(cs), self.at(ci));
-            co += 1;
         }
+        co += 1;
         if let Some(u) = update {
             let ui = self.line_no;
             self.emit_expr(u, b, depth + 1, co, None);
             self.edge("FOR_UPDATE", self.at(cs), self.at(ui));
-            co += 1;
         }
+        co += 1;
         if let Some(body) = n.child_by_field_name("body") {
-            if body.kind() == "compound_statement" {
-                let bi = self.line_no;
-                self.emit_block(body, b, co, depth + 1);
-                self.edge("FOR_BODY", self.at(cs), self.at(bi));
-            }
+            self.emit_loop_body(body, b, depth + 1, co, cs, "FOR_BODY");
         }
+        self.symbols = outer_symbols;
+        self.recovered_bindings = outer_recovered;
+        self.symbol_call_types = outer_symbol_calls;
+        self.method_functions = outer_functions;
+        self.method_call_types = outer_call_types;
+        self.sym_line = outer_bindings;
+    }
+
+    /// Loop bodies retain their actual statement shape, including a direct
+    /// CALL/RETURN/control node when braces are absent. An empty statement has
+    /// no AST node and consequently no body edge.
+    fn emit_loop_body(
+        &mut self,
+        body: Node,
+        b: &[u8],
+        depth: usize,
+        mut order: i64,
+        control: usize,
+        role: &str,
+    ) {
+        let body_index = self.line_no;
+        if body.kind() == "compound_statement" {
+            self.emit_block(body, b, order, depth);
+        } else {
+            self.emit_stmt(body, b, &mut order, depth);
+        }
+        if self.line_no > body_index {
+            self.edge(role, self.at(control), self.at(body_index));
+        }
+    }
+
+    /// CDT normalizes a bare identifier truth test, but leaves comparisons,
+    /// calls, arithmetic and logical operators as their existing expressions.
+    fn emit_condition(&mut self, expression: Node, b: &[u8], depth: usize, order: i64) {
+        let identifier = unwrap_paren(expression);
+        let name = text(identifier, b);
+        let recovery = self.needs_macro_recovery(expression, b);
+        if !recovery && (identifier.kind() != "identifier" || self.macros.contains_key(name)) {
+            self.emit_expr(expression, b, depth, order, None);
+            return;
+        }
+        let pointer = !recovery
+            && self
+                .symbols
+                .get(name)
+                .or_else(|| self.globals.get(name))
+                .is_some_and(|ty| ty.ends_with('*'));
+        let zero = if pointer { "NULL" } else { "0" };
+        self.types.insert("int".into());
+        self.note_call("<operator>.notEquals", 2);
+        self.line(
+            depth,
+            "CALL",
+            P {
+                name: Some("<operator>.notEquals".into()),
+                code: Some(esc(&format!("{} != {zero}", text(expression, b)))),
+                tfn: Some("int".into()),
+                mfn: Some("<operator>.notEquals".into()),
+                order: Some(order),
+                dispatch: Some("STATIC_DISPATCH".into()),
+                ..Default::default()
+            },
+        );
+        if recovery {
+            self.line(
+                depth + 1,
+                "UNKNOWN",
+                P {
+                    code: Some(esc(text(expression, b))),
+                    order: Some(1),
+                    arg: Some(1),
+                    ..Default::default()
+                },
+            );
+        } else {
+            self.emit_expr(identifier, b, depth + 1, 1, Some(1));
+        }
+        self.line(
+            depth + 1,
+            "LITERAL",
+            P {
+                code: Some(zero.into()),
+                tfn: Some(if pointer { "ANY" } else { "int" }.into()),
+                order: Some(2),
+                arg: Some(2),
+                ..Default::default()
+            },
+        );
     }
 
     /// A C declaration `T x = init;` → a LOCAL plus, if initialised, an
@@ -2677,16 +4399,24 @@ impl Ctx<'_> {
         order: &mut i64,
         depth: usize,
         assign_arg: Option<i64>,
-    ) {
-        let ty = normalize_type(
-            &n.child_by_field_name("type")
-                .map(|t| text(t, b).to_string())
-                .unwrap_or("ANY".into()),
-        );
-        // CDT registers the decl-SPECIFIER type separately from the declared
-        // type: `unsigned char c` also registers bare `unsigned` (pinned by
-        // musl memcmp.c); a pointer decl registers its base.
-        self.types.insert(specifier_type(&ty));
+        file_scope: bool,
+    ) -> Option<usize> {
+        for (declarator, header) in prototype_header_entries(n, b) {
+            let (name, ret, call_type) = resolved_function_header(n, declarator, b, &self.macros)
+                .map(|resolved| (resolved.header.0, resolved.header.1, resolved.call_type))
+                .unwrap_or_else(|| {
+                    (
+                        header.0,
+                        header.1,
+                        function_return_type(n, declarator, b, TypeRole::Expression),
+                    )
+                });
+            self.symbols.remove(&name);
+            self.symbol_call_types.remove(&name);
+            self.method_call_types.insert(name.clone(), call_type);
+            self.method_functions.insert(name, ret);
+        }
+        let ty = declaration_type(n, b, TypeRole::Declaration);
         // LOCAL CODE is rebuilt per declarator: the decl-specifier source text
         // (keeps `const`/`struct`/`unsigned ...` spellings the type drops)
         // plus that declarator alone — so `int a, b = 1;` yields `int a`,`int b`.
@@ -2706,7 +4436,6 @@ impl Ctx<'_> {
             init: Option<Node<'t>>,
             name: String,
             full_ty: String,
-            function_pointer: bool,
         }
         let mut items: Vec<DeclItem> = Vec::new();
         for d in named_children(n) {
@@ -2715,16 +4444,24 @@ impl Ctx<'_> {
                     d.child_by_field_name("declarator"),
                     d.child_by_field_name("value"),
                 ),
-                "identifier" | "pointer_declarator" | "array_declarator" => (Some(d), None),
+                "identifier"
+                | "pointer_declarator"
+                | "array_declarator"
+                | "function_declarator" => (Some(d), None),
                 _ => (None, None),
             };
             let Some(decl) = decl else { continue };
+            if is_function_declaration(decl) {
+                continue;
+            }
             let name = innermost_id(decl, b);
-            let pointer_type = function_pointer_type(&ty, decl, b);
-            let full_ty = pointer_type
-                .clone()
-                .unwrap_or_else(|| format!("{ty}{}", decl_suffix(decl, b)));
+            let full_ty = declared_object_type(n, decl, b, &self.macros);
+            let function_pointer = find_function_declarator(decl).is_some();
+            self.method_functions.remove(&name);
+            self.method_call_types.remove(&name);
+            self.symbol_call_types.remove(&name);
             self.symbols.insert(name.clone(), full_ty.clone());
+            self.recovered_bindings.remove(&name);
             let lo = *order;
             *order += 1;
             self.line(
@@ -2732,7 +4469,13 @@ impl Ctx<'_> {
                 "LOCAL",
                 P {
                     name: Some(name.clone()),
-                    code: Some(if pointer_type.is_some() {
+                    code: Some(if let Some(code) = &self.macro_expansion_code {
+                        esc(&if init.is_some() {
+                            code.clone()
+                        } else {
+                            format!("{code} {code}")
+                        })
+                    } else if function_pointer {
                         esc(text(n, b))
                     } else {
                         decl_code(decl)
@@ -2748,53 +4491,94 @@ impl Ctx<'_> {
                 init,
                 name,
                 full_ty,
-                function_pointer: pointer_type.is_some(),
             });
         }
-        // Pass 2: initialiser assignments / alloc lowerings, in order.
-        for it in items {
-            if let Some(v) = it.init {
-                let ao = *order;
-                *order += 1;
-                self.note_call("<operator>.assignment", 2);
-                self.line(
-                    depth,
-                    "CALL",
-                    P {
-                        name: Some("<operator>.assignment".into()),
-                        // CODE is the raw init_declarator text (`*l=vl`, `b = 1`).
-                        code: Some(esc(text(it.outer, b))),
-                        tfn: Some("void".into()),
-                        mfn: Some("<operator>.assignment".into()),
-                        order: Some(ao),
-                        arg: assign_arg,
-                        dispatch: Some("STATIC_DISPATCH".into()),
-                        ..Default::default()
-                    },
-                );
-                self.line(
-                    depth + 1,
-                    "IDENTIFIER",
-                    P {
-                        name: Some(it.name.clone()),
-                        code: Some(if it.function_pointer {
-                            String::new()
-                        } else {
-                            it.name.clone()
-                        }),
-                        tfn: Some(it.full_ty.clone()),
-                        order: Some(1),
-                        arg: Some(1),
-                        ..Default::default()
-                    },
-                );
-                self.emit_expr(v, b, depth + 1, 2, Some(2));
-                continue;
+        // CDT's astForInitializer additionally registers the first component
+        // of a primitive object's type (`unsigned char c = 0` registers
+        // `unsigned`, as pinned by memcmp.c). A declaration without an explicit
+        // initializer, including an array's implicit allocation, does not take
+        // that path. Check each declarator so an initialized nested pointer declarator
+        // cannot register the base of an uninitialized ordinary neighbor.
+        // Keep nonprimitive registration: tags also register their base via
+        // independent paths (`struct Packet *p` still needs a Packet TYPE).
+        let raw_type = n
+            .child_by_field_name("type")
+            .map(|node| text(node, b))
+            .unwrap_or("ANY");
+        let primitive = primitive_type(raw_type, TypeRole::Declaration).is_some();
+        if items.iter().any(|item| {
+            if primitive {
+                item.init.is_some() && !nested_declarator_name(item.decl)
+            } else {
+                find_function_declarator(item.decl).is_none()
             }
-            let sizes = array_sizes(it.decl);
-            if !sizes.is_empty() {
+        }) {
+            let registered = if primitive {
+                // CDT's extra decl-specifier registration uses the first word
+                // of the declared spelling (`short unsigned int` -> `short`).
+                ty.split_whitespace().next().unwrap_or(&ty)
+            } else {
+                &ty
+            };
+            self.types.insert(registered.to_string());
+        }
+        // A for declaration contributes one initializer slot after its LOCALs.
+        // Multiple declarators share a synthetic block, including an empty one
+        // when none has an initializer. Ordinary declarations stay flattened.
+        let initializer = self.line_no;
+        let grouped = assign_arg.is_some() && items.len() > 1;
+        if grouped {
+            self.line(
+                depth,
+                "BLOCK",
+                P {
+                    tfn: Some("ANY".into()),
+                    order: Some(*order),
+                    ..Default::default()
+                },
+            );
+            *order += 1;
+        }
+        let depth = depth + usize::from(grouped);
+        let mut group_order = 1;
+        let order = if grouped { &mut group_order } else { order };
+        // Pass 2: emit all array dimension/alloc lowerings before initializers.
+        for it in &items {
+            let dimensions = array_dimensions(it.decl);
+            let sizes: Vec<_> = dimensions.iter().flatten().copied().collect();
+            // Sized local arrays allocate before their explicit initializer.
+            // File-scope arrays only emit dimensions when no initializer exists,
+            // including an empty arrayInitializer for an unsized declaration.
+            if (file_scope && it.init.is_none() && !dimensions.is_empty())
+                || (!file_scope && dimensions.first().is_some_and(Option::is_some))
+            {
                 let ao = *order;
                 *order += 1;
+                // File-scope array declarations retain their dimensions in
+                // an arrayInitializer. Only block-scope arrays synthesize
+                // assignment -> alloc(type, dimensions); treating globals
+                // as allocations also inflates the project-wide alloc stub.
+                if file_scope {
+                    self.note_call("<operator>.arrayInitializer", sizes.len());
+                    self.line(
+                        depth,
+                        "CALL",
+                        P {
+                            name: Some("<operator>.arrayInitializer".into()),
+                            code: Some(esc(text(it.outer, b))),
+                            tfn: Some("ANY".into()),
+                            mfn: Some("<operator>.arrayInitializer".into()),
+                            order: Some(ao),
+                            dispatch: Some("STATIC_DISPATCH".into()),
+                            ..Default::default()
+                        },
+                    );
+                    for (i, size) in sizes.into_iter().enumerate() {
+                        let k = (i + 1) as i64;
+                        self.emit_expr(size, b, depth + 1, k, Some(k));
+                    }
+                    continue;
+                }
                 self.note_call("<operator>.assignment", 2);
                 self.note_call("<operator>.alloc", sizes.len() + 1);
                 self.line(
@@ -2802,11 +4586,15 @@ impl Ctx<'_> {
                     "CALL",
                     P {
                         name: Some("<operator>.assignment".into()),
-                        code: Some(esc(text(it.decl, b))),
+                        code: Some(if self.macro_expansion_code.is_some() {
+                            expanded_declaration_code(n, it.decl, b)
+                        } else {
+                            esc(text(it.outer, b))
+                        }),
                         tfn: Some("void".into()),
                         mfn: Some("<operator>.assignment".into()),
                         order: Some(ao),
-                        arg: assign_arg,
+                        arg: if grouped { Some(ao) } else { assign_arg },
                         dispatch: Some("STATIC_DISPATCH".into()),
                         ..Default::default()
                     },
@@ -2816,7 +4604,13 @@ impl Ctx<'_> {
                     "IDENTIFIER",
                     P {
                         name: Some(it.name.clone()),
-                        code: Some(it.name),
+                        code: Some(if let Some(code) = &self.macro_expansion_code {
+                            esc(code)
+                        } else if nested_declarator_name(it.decl) {
+                            String::new()
+                        } else {
+                            it.name.clone()
+                        }),
                         tfn: Some(it.full_ty.clone()),
                         order: Some(1),
                         arg: Some(1),
@@ -2828,7 +4622,11 @@ impl Ctx<'_> {
                     "CALL",
                     P {
                         name: Some("<operator>.alloc".into()),
-                        code: Some(esc(text(it.decl, b))),
+                        code: Some(if self.macro_expansion_code.is_some() {
+                            expanded_declaration_code(n, it.decl, b)
+                        } else {
+                            esc(text(it.outer, b))
+                        }),
                         tfn: Some(it.full_ty.clone()),
                         mfn: Some("<operator>.alloc".into()),
                         order: Some(2),
@@ -2843,7 +4641,7 @@ impl Ctx<'_> {
                     P {
                         name: Some(it.full_ty.clone()),
                         code: Some(it.full_ty.clone()),
-                        tfn: Some(it.full_ty),
+                        tfn: Some(it.full_ty.clone()),
                         order: Some(1),
                         arg: Some(1),
                         ..Default::default()
@@ -2855,10 +4653,288 @@ impl Ctx<'_> {
                 }
             }
         }
+        // CDT recovers the whole declaration, including valid sibling
+        // initializers, without macro expansion or expression name resolution.
+        let recovery = self.declaration_needs_macro_recovery(n, b);
+        // Pass 3: explicit initializers follow every declarator's allocation.
+        for it in items {
+            if let Some(v) = it.init {
+                let ao = *order;
+                *order += 1;
+                self.note_call("<operator>.assignment", 2);
+                self.line(
+                    depth,
+                    "CALL",
+                    P {
+                        name: Some("<operator>.assignment".into()),
+                        // CDT attributes expanded declarations to their macro
+                        // invocation, but the initializer CALL retains only
+                        // the declaration's specifier and pointer prefix.
+                        code: Some(if self.macro_expansion_code.is_some() {
+                            expanded_declaration_code(n, it.decl, b)
+                        } else {
+                            esc(text(it.outer, b))
+                        }),
+                        tfn: Some("void".into()),
+                        mfn: Some("<operator>.assignment".into()),
+                        order: Some(ao),
+                        arg: if grouped { Some(ao) } else { assign_arg },
+                        dispatch: Some("STATIC_DISPATCH".into()),
+                        ..Default::default()
+                    },
+                );
+                self.line(
+                    depth + 1,
+                    "IDENTIFIER",
+                    P {
+                        name: Some(it.name.clone()),
+                        code: Some(if let Some(code) = &self.macro_expansion_code {
+                            esc(code)
+                        } else if nested_declarator_name(it.decl) {
+                            String::new()
+                        } else {
+                            it.name.clone()
+                        }),
+                        tfn: Some(it.full_ty.clone()),
+                        order: Some(1),
+                        arg: Some(1),
+                        ..Default::default()
+                    },
+                );
+                if recovery {
+                    let macros = std::mem::replace(&mut self.macros, Arc::new(HashMap::new()));
+                    let recovering = std::mem::replace(&mut self.recovering_expression, true);
+                    self.emit_expr(v, b, depth + 1, 2, Some(2));
+                    self.recovering_expression = recovering;
+                    self.macros = macros;
+                    self.recovered_bindings.insert(it.name.clone());
+                } else {
+                    self.emit_expr(v, b, depth + 1, 2, Some(2));
+                }
+            }
+        }
+        (self.line_no > initializer).then_some(initializer)
+    }
+
+    /// A field-token replacement changes the expression shape. CDT attributes
+    /// generated access operators to the original access (p->Len), while field
+    /// identifiers use expanded names. A pure replacement subexpression can own
+    /// the INLINED wrapper instead of the whole access.
+    fn emit_direct_field_macro(
+        &mut self,
+        n: Node,
+        b: &[u8],
+        depth: usize,
+        order: i64,
+        arg: Option<i64>,
+    ) -> bool {
+        if self.field_macro_codes.contains_key(&n.id()) {
+            // This region was already rescanned with the disabled-macro set.
+            return false;
+        }
+        let Some(field) = n.child_by_field_name("field") else {
+            return false;
+        };
+        let name = text(field, b);
+        let Some(definition) = self.macros.get(name).filter(|m| m.params.is_none()) else {
+            return false;
+        };
+        let replacement = expand_body_expression(
+            &definition.body,
+            &self.macros,
+            &mut HashSet::from([name.to_string()]),
+            &mut 65_536,
+        );
+        if replacement == name {
+            return false;
+        }
+        let original = text(n, b);
+        let start = field.start_byte() - n.start_byte();
+        let end = field.end_byte() - n.start_byte();
+        let expression = format!("{}{}{}", &original[..start], replacement, &original[end..]);
+        let prefix = "void __m() { ";
+        let source = format!("{prefix}{expression}; }}");
+        let mut parser = Parser::new();
+        parser
+            .set_language(&tree_sitter_c::LANGUAGE.into())
+            .unwrap();
+        let tree = parser.parse(&source, None).unwrap();
+        if tree.root_node().has_error() {
+            return false;
+        }
+        let Some(root) = expansion_expr_node(tree.root_node()) else {
+            return false;
+        };
+        let mut codes = HashMap::new();
+        let mut piece = None;
+        let mut pending = vec![root];
+        while let Some(node) = pending.pop() {
+            if node.named_child_count() > 0 && node.end_byte() > prefix.len() + start {
+                codes.insert(node.id(), original.to_string());
+            }
+            if piece.is_none()
+                && node.start_byte() >= prefix.len() + start
+                && matches!(
+                    node.kind(),
+                    "identifier"
+                        | "number_literal"
+                        | "string_literal"
+                        | "char_literal"
+                        | "call_expression"
+                        | "binary_expression"
+                        | "unary_expression"
+                        | "pointer_expression"
+                        | "update_expression"
+                        | "cast_expression"
+                        | "subscript_expression"
+                        | "field_expression"
+                        | "conditional_expression"
+                        | "sizeof_expression"
+                )
+            {
+                piece = Some((node.id(), name.to_string()));
+            }
+            pending.extend(named_children(node).into_iter().rev());
+        }
+        let previous_types = self.enter_type_tree(root, source.as_bytes(), self.typedefs_at(n));
+        let previous = std::mem::replace(&mut self.field_macro_codes, codes);
+        let previous_piece = std::mem::replace(&mut self.field_macro_piece, piece);
+        self.emit_expr(root, source.as_bytes(), depth, order, arg);
+        self.field_macro_codes = previous;
+        self.field_macro_piece = previous_piece;
+        self.leave_type_tree(previous_types);
+        true
+    }
+
+    fn emit_typedef_cast(
+        &mut self,
+        node: Node,
+        bytes: &[u8],
+        ty: String,
+        depth: usize,
+        order: i64,
+        arg: Option<i64>,
+    ) {
+        self.note_call("<operator>.cast", 2);
+        self.line(
+            depth,
+            "CALL",
+            P {
+                name: Some("<operator>.cast".into()),
+                code: Some(self.expression_code(node, bytes)),
+                tfn: Some(ty.clone()),
+                mfn: Some("<operator>.cast".into()),
+                order: Some(order),
+                arg,
+                dispatch: Some("STATIC_DISPATCH".into()),
+                ..Default::default()
+            },
+        );
+        self.line(
+            depth + 1,
+            "TYPE_REF",
+            P {
+                code: Some(ty.clone()),
+                tfn: Some(ty),
+                order: Some(1),
+                arg: Some(1),
+                ..Default::default()
+            },
+        );
+        if let Some(args) = node.child_by_field_name("arguments") {
+            let values: Vec<_> = named_children(args)
+                .into_iter()
+                .filter(|child| child.kind() != "comment")
+                .collect();
+            if values.len() == 1 {
+                self.emit_expr(values[0], bytes, depth + 1, 2, Some(2));
+            } else {
+                self.line(
+                    depth + 1,
+                    "BLOCK",
+                    P {
+                        tfn: Some("ANY".into()),
+                        order: Some(2),
+                        arg: Some(2),
+                        ..Default::default()
+                    },
+                );
+                for (i, value) in values.into_iter().enumerate() {
+                    self.emit_expr(value, bytes, depth + 2, (i + 1) as i64, None);
+                }
+            }
+        }
+    }
+
+    // Macro expansion CODE uses CDT's rendered type descriptor, while type
+    // identity still comes from the original parsed cast (not its display text).
+    fn expression_code(&self, node: Node, bytes: &[u8]) -> String {
+        if let Some(code) = self.field_macro_codes.get(&node.id()) {
+            return esc(code);
+        }
+        if self.macro_expansion_code.is_none() {
+            return esc(text(node, bytes));
+        }
+        let mut pending = vec![node];
+        let mut replacements = Vec::new();
+        while let Some(current) = pending.pop() {
+            let descriptor = (current.kind() == "cast_expression")
+                .then(|| current.child_by_field_name("type"))
+                .flatten();
+            if let Some(desc) = descriptor {
+                replacements.push((desc.byte_range(), expanded_cast_descriptor(desc, bytes)));
+            }
+            // A descriptor is rendered as a whole. Its array bounds can contain
+            // casts of their own, whose byte ranges must not be replaced twice.
+            pending.extend(
+                named_children(current)
+                    .into_iter()
+                    .filter(|child| Some(*child) != descriptor),
+            );
+        }
+        replacements.sort_by_key(|(range, _)| std::cmp::Reverse(range.start));
+        let mut code = text(node, bytes).to_string();
+        for (range, replacement) in replacements {
+            code.replace_range(
+                range.start - node.start_byte()..range.end - node.start_byte(),
+                &replacement,
+            );
+        }
+        esc(&code)
     }
 
     /// Emit an expression node with the given ORDER and optional ARGUMENT_INDEX.
     fn emit_expr(&mut self, n: Node, b: &[u8], depth: usize, order: i64, arg: Option<i64>) {
+        let previous = self
+            .source_macros_at(n, b)
+            .cloned()
+            .map(|macros| std::mem::replace(&mut self.macros, macros));
+        self.emit_expr_in_context(n, b, depth, order, arg);
+        if let Some(previous) = previous {
+            self.macros = previous;
+        }
+    }
+
+    fn emit_expr_in_context(
+        &mut self,
+        n: Node,
+        b: &[u8],
+        depth: usize,
+        order: i64,
+        arg: Option<i64>,
+    ) {
+        if self
+            .field_macro_piece
+            .as_ref()
+            .is_some_and(|(node, _)| *node == n.id())
+        {
+            let (_, name) = self.field_macro_piece.take().unwrap();
+            self.emit_macro_call(&name, &name, &[], n, depth, order, arg, Some(text(n, b)));
+            return;
+        }
+        if n.kind() == "field_expression" && self.emit_direct_field_macro(n, b, depth, order, arg) {
+            return;
+        }
         match n.kind() {
             "binary_expression" => {
                 let op = n.child(1).map(|o| text(o, b)).unwrap_or("?");
@@ -2869,7 +4945,7 @@ impl Ctx<'_> {
                     "CALL",
                     P {
                         name: Some(name.clone()),
-                        code: Some(esc(text(n, b))),
+                        code: Some(self.expression_code(n, b)),
                         tfn: Some("ANY".into()),
                         mfn: Some(name),
                         order: Some(order),
@@ -2899,7 +4975,7 @@ impl Ctx<'_> {
                     "CALL",
                     P {
                         name: Some(name.clone()),
-                        code: Some(esc(text(n, b))),
+                        code: Some(self.expression_code(n, b)),
                         tfn: Some("ANY".into()),
                         mfn: Some(name),
                         order: Some(order),
@@ -2924,7 +5000,7 @@ impl Ctx<'_> {
                     "CALL",
                     P {
                         name: Some(name.clone()),
-                        code: Some(esc(text(n, b))),
+                        code: Some(self.expression_code(n, b)),
                         tfn: Some("ANY".into()),
                         mfn: Some(name),
                         order: Some(order),
@@ -2956,7 +5032,7 @@ impl Ctx<'_> {
                     "CALL",
                     P {
                         name: Some(name.clone()),
-                        code: Some(esc(text(n, b))),
+                        code: Some(self.expression_code(n, b)),
                         tfn: Some("ANY".into()),
                         mfn: Some(name),
                         order: Some(order),
@@ -2976,7 +5052,7 @@ impl Ctx<'_> {
                     "CALL",
                     P {
                         name: Some("<operator>.conditional".into()),
-                        code: Some(esc(text(n, b))),
+                        code: Some(self.expression_code(n, b)),
                         tfn: Some("ANY".into()),
                         mfn: Some("<operator>.conditional".into()),
                         order: Some(order),
@@ -3025,7 +5101,7 @@ impl Ctx<'_> {
                     "CALL",
                     P {
                         name: Some(name.clone()),
-                        code: Some(esc(text(n, b))),
+                        code: Some(self.expression_code(n, b)),
                         tfn: Some("ANY".into()),
                         mfn: Some(name),
                         order: Some(order),
@@ -3057,7 +5133,7 @@ impl Ctx<'_> {
                     "CALL",
                     P {
                         name: Some("<operator>.indirectIndexAccess".into()),
-                        code: Some(esc(text(n, b))),
+                        code: Some(self.expression_code(n, b)),
                         tfn: Some("ANY".into()),
                         mfn: Some("<operator>.indirectIndexAccess".into()),
                         order: Some(order),
@@ -3074,39 +5150,62 @@ impl Ctx<'_> {
                 }
             }
             "call_expression" => {
+                if let Some(ty) = self.typedef_cast(n, b) {
+                    self.emit_typedef_cast(n, b, ty, depth, order, arg);
+                    return;
+                }
                 let callee = n.child_by_field_name("function");
                 let name = callee
                     .map(|c| text(c, b).to_string())
                     .unwrap_or("<anon>".into());
                 let args = n.child_by_field_name("arguments");
                 let argc = args.map(|a| named_children(a).len()).unwrap_or(0);
-                if self.macros.get(&name).is_some_and(|m| m.params.is_some())
-                    && !self.expanding_macros.contains(&name)
-                {
-                    let arg_nodes: Vec<Node> = args.map(|a| named_children(a)).unwrap_or_default();
-                    let code = esc(text(n, b));
-                    self.emit_macro_call(&name, &code, &arg_nodes, n, b, depth, order, arg);
+                if self.macros.get(&name).is_some_and(|m| m.params.is_some()) {
+                    let arg_texts = args
+                        .and_then(|args| macro_arguments(text(args, b), 0))
+                        .map(|(args, _)| args)
+                        .unwrap_or_default();
+                    let code = self.expression_code(n, b);
+                    self.emit_macro_call(&name, &code, &arg_texts, n, depth, order, arg, None);
                     return;
                 }
-                if !self.functions.contains_key(&name)
-                    && (self.symbols.contains_key(&name) || self.globals.contains_key(&name))
+                if callee.is_some_and(|callee| callee.kind() != "identifier")
+                    || (!self.recovering_expression
+                        && (self.symbols.contains_key(&name) || self.globals.contains_key(&name)))
                 {
                     // Call through a pointer-valued symbol: <operator>.pointerCall,
                     // DYNAMIC_DISPATCH, receiver at ORDER=1 with no
                     // ARGUMENT_INDEX, args shifted to ORDER=2.. / INDEX=1..
                     self.note_call("<operator>.pointerCall", argc);
+                    let receiver = callee.map(unwrap_paren);
+                    let dereferenced = receiver.is_some_and(|node| node.kind() != "identifier");
+                    let receiver_name = receiver
+                        .and_then(|node| callable_identifier(node, b))
+                        .map(|node| text(node, b))
+                        .unwrap_or(&name);
                     let ty = self
-                        .symbols
-                        .get(&name)
-                        .or_else(|| self.globals.get(&name))
-                        .map(|value| function_pointer_return_type(value).to_string());
+                        .symbol_call_types
+                        .get(receiver_name)
+                        .or_else(|| {
+                            self.symbols
+                                .get(receiver_name)
+                                .or_else(|| self.globals.get(receiver_name))
+                                // Unwrapping `*` is valid for known function
+                                // pointers; it must not infer a callable type
+                                // from an arbitrary object or arithmetic node.
+                                .filter(|ty| !dereferenced || ty.contains('('))
+                        })
+                        .or_else(|| self.method_call_types.get(receiver_name))
+                        .or_else(|| self.function_call_types.get(receiver_name))
+                        .map(|ty| ty.split('(').next().unwrap_or(ty).to_string())
+                        .unwrap_or_else(|| "ANY".into());
                     self.line(
                         depth,
                         "CALL",
                         P {
                             name: Some("<operator>.pointerCall".into()),
-                            code: Some(esc(text(n, b))),
-                            tfn: ty,
+                            code: Some(self.expression_code(n, b)),
+                            tfn: Some(ty),
                             mfn: Some("<operator>.pointerCall".into()),
                             order: Some(order),
                             arg,
@@ -3123,7 +5222,15 @@ impl Ctx<'_> {
                         }
                     }
                 } else {
-                    let ty = self.functions.get(&name).cloned().unwrap_or("ANY".into());
+                    let ty = if self.recovering_expression {
+                        "ANY".into()
+                    } else {
+                        self.method_call_types
+                            .get(&name)
+                            .or_else(|| self.function_call_types.get(&name))
+                            .cloned()
+                            .unwrap_or("ANY".into())
+                    };
                     let method_full_name = self
                         .function_full_names
                         .get(&name)
@@ -3135,7 +5242,7 @@ impl Ctx<'_> {
                         "CALL",
                         P {
                             name: Some(name.clone()),
-                            code: Some(esc(text(n, b))),
+                            code: Some(self.expression_code(n, b)),
                             tfn: Some(ty),
                             mfn: Some(method_full_name),
                             order: Some(order),
@@ -3154,36 +5261,60 @@ impl Ctx<'_> {
             }
             "identifier" => {
                 let name = text(n, b).to_string();
-                if self.macros.get(&name).is_some_and(|m| m.params.is_none())
-                    && !self.expanding_macros.contains(&name)
-                {
-                    self.emit_macro_call(&name, &name, &[], n, b, depth, order, arg);
+                if self.macros.get(&name).is_some_and(|m| m.params.is_none()) {
+                    self.emit_macro_call(&name, &name, &[], n, depth, order, arg, None);
                     return;
                 }
-                if let Some(return_type) = self.functions.get(&name) {
-                    let method_full_name = self
-                        .function_full_names
+                if !self.recovering_expression
+                    && !self.symbols.contains_key(&name)
+                    && !self.globals.contains_key(&name)
+                {
+                    if let Some(ret) = self
+                        .method_functions
                         .get(&name)
+                        .or_else(|| self.functions.get(&name))
                         .cloned()
-                        .unwrap_or_else(|| name.clone());
-                    self.line(
-                        depth,
-                        "METHOD_REF",
-                        P {
-                            code: Some(name),
-                            tfn: Some(return_type.clone()),
-                            mfn: Some(method_full_name),
-                            order: Some(order),
-                            arg,
-                            ..Default::default()
-                        },
-                    );
-                    return;
+                    {
+                        let full = self
+                            .function_full_names
+                            .get(&name)
+                            .cloned()
+                            .unwrap_or_else(|| name.clone());
+                        self.line(
+                            depth,
+                            "METHOD_REF",
+                            P {
+                                code: Some(name),
+                                tfn: Some(ret),
+                                mfn: Some(full),
+                                order: Some(order),
+                                arg,
+                                ..Default::default()
+                            },
+                        );
+                        return;
+                    }
                 }
                 let (code, ty) = if let Some(t) = self.symbols.get(&name) {
-                    (name.clone(), t.clone())
+                    let code =
+                        if self.recovering_expression || self.recovered_bindings.contains(&name) {
+                            format!("<unknown> {name}")
+                        } else {
+                            name.clone()
+                        };
+                    (code, t.clone())
                 } else if let Some(t) = self.globals.get(&name) {
-                    (format!("<global> {name}"), t.clone())
+                    (
+                        format!(
+                            "{} {name}",
+                            if self.recovering_expression {
+                                "<unknown>"
+                            } else {
+                                "<global>"
+                            }
+                        ),
+                        t.clone(),
+                    )
                 } else if self.enumerators.contains(&name) {
                     (name.clone(), "ANY".to_string())
                 } else {
@@ -3229,22 +5360,14 @@ impl Ctx<'_> {
                         "LITERAL",
                         P {
                             code: Some(rest.to_string()),
-                            tfn: Some("int".into()),
+                            tfn: Some(numeric_literal_type(rest).into()),
                             order: Some(1),
                             arg: Some(1),
                             ..Default::default()
                         },
                     );
                 } else {
-                    let tfn = if t.starts_with("0x") || t.starts_with("0X") {
-                        "int"
-                    } else if t.ends_with('f') || t.ends_with('F') {
-                        "float"
-                    } else if t.contains('.') || t.contains('e') || t.contains('E') {
-                        "double"
-                    } else {
-                        "int"
-                    };
+                    let tfn = numeric_literal_type(&t);
                     self.line(
                         depth,
                         "LITERAL",
@@ -3271,12 +5394,14 @@ impl Ctx<'_> {
                     },
                 );
             }
-            "string_literal" => {
+            // CDT represents adjacent string tokens as one literal, retaining
+            // the original spelling (including intervening comments/macros).
+            "string_literal" | "concatenated_string" => {
                 self.line(
                     depth,
                     "LITERAL",
                     P {
-                        code: Some(esc(text(n, b))),
+                        code: Some(self.expression_code(n, b)),
                         tfn: Some("char*".into()),
                         order: Some(order),
                         arg,
@@ -3284,7 +5409,83 @@ impl Ctx<'_> {
                     },
                 );
             }
-            "cast_expression" => {
+            "initializer_list" | "subscript_range_designator" => {
+                let elements: Vec<_> = named_children(n)
+                    .into_iter()
+                    .filter(|child| child.kind() != "comment")
+                    .collect();
+                self.note_call("<operator>.arrayInitializer", elements.len());
+                self.line(
+                    depth,
+                    "CALL",
+                    P {
+                        name: Some("<operator>.arrayInitializer".into()),
+                        code: Some(esc(self
+                            .macro_expansion_code
+                            .as_deref()
+                            .unwrap_or(text(n, b)))),
+                        tfn: Some("ANY".into()),
+                        mfn: Some("<operator>.arrayInitializer".into()),
+                        order: Some(order),
+                        arg,
+                        dispatch: Some("STATIC_DISPATCH".into()),
+                        ..Default::default()
+                    },
+                );
+                for (index, element) in elements.into_iter().enumerate() {
+                    let position = (index + 1) as i64;
+                    self.emit_expr(element, b, depth + 1, position, Some(position));
+                }
+            }
+            "initializer_pair" => {
+                // CDT groups array designators in a synthetic block. Nested
+                // indices each assign the value independently in source order.
+                self.line(
+                    depth,
+                    "BLOCK",
+                    P {
+                        tfn: Some("ANY".into()),
+                        order: Some(order),
+                        arg,
+                        ..Default::default()
+                    },
+                );
+                let mut cursor = n.walk();
+                let designators: Vec<_> = n
+                    .children_by_field_name("designator", &mut cursor)
+                    .collect();
+                if let Some(value) = n.child_by_field_name("value") {
+                    for (index, designator) in designators.into_iter().enumerate() {
+                        let target = match designator.kind() {
+                            "subscript_designator" => designator.named_child(0),
+                            "subscript_range_designator" => Some(designator),
+                            _ => None,
+                        };
+                        let Some(target) = target else {
+                            continue;
+                        };
+                        let position = (index + 1) as i64;
+                        self.note_call("<operator>.assignment", 2);
+                        self.line(
+                            depth + 1,
+                            "CALL",
+                            P {
+                                name: Some("<operator>.assignment".into()),
+                                code: Some(self.expression_code(n, b)),
+                                tfn: Some("void".into()),
+                                mfn: Some("<operator>.assignment".into()),
+                                order: Some(position),
+                                arg: Some(position),
+                                dispatch: Some("STATIC_DISPATCH".into()),
+                                ..Default::default()
+                            },
+                        );
+                        self.emit_expr(target, b, depth + 2, 1, Some(1));
+                        self.emit_expr(value, b, depth + 2, 2, Some(2));
+                    }
+                }
+            }
+            "cast_expression" | "compound_literal_expression" => {
                 // `(T)e` → <operator>.cast. CDT quirk: the type is the BASE
                 // type only — `(char *)x` types as `char` — while the
                 // TYPE_REF CODE keeps the raw descriptor text (`char *`).
@@ -3292,7 +5493,14 @@ impl Ctx<'_> {
                 let raw = desc.map(|t| text(t, b).to_string()).unwrap_or("ANY".into());
                 let ty = desc
                     .and_then(|t| t.child_by_field_name("type"))
-                    .map(|t| normalize_type(text(t, b)))
+                    .map(|t| {
+                        if self.macro_expansion_code.is_some() {
+                            primitive_type(text(t, b), TypeRole::Declaration)
+                                .unwrap_or_else(|| normalize_type(text(t, b)))
+                        } else {
+                            normalize_type(text(t, b))
+                        }
+                    })
                     .unwrap_or_else(|| normalize_type(&raw));
                 self.note_call("<operator>.cast", 2);
                 self.line(
@@ -3300,7 +5508,7 @@ impl Ctx<'_> {
                     "CALL",
                     P {
                         name: Some("<operator>.cast".into()),
-                        code: Some(esc(text(n, b))),
+                        code: Some(self.expression_code(n, b)),
                         tfn: Some(ty.clone()),
                         mfn: Some("<operator>.cast".into()),
                         order: Some(order),
@@ -3313,7 +5521,12 @@ impl Ctx<'_> {
                     depth + 1,
                     "TYPE_REF",
                     P {
-                        code: Some(esc(&raw)),
+                        code: Some(if self.macro_expansion_code.is_some() {
+                            desc.map(|desc| esc(&expanded_cast_descriptor(desc, b)))
+                                .unwrap_or_else(|| esc(&raw))
+                        } else {
+                            esc(&raw)
+                        }),
                         tfn: Some(ty),
                         order: Some(1),
                         arg: Some(1),
@@ -3324,6 +5537,54 @@ impl Ctx<'_> {
                     self.emit_expr(v, b, depth + 1, 2, Some(2));
                 }
             }
+            "offsetof_expression" => {
+                // With no external system-header expansion, CDT retains
+                // offsetof as a call; tree-sitter gives it a distinct node.
+                self.note_call("offsetof", 2);
+                self.line(
+                    depth,
+                    "CALL",
+                    P {
+                        name: Some("offsetof".into()),
+                        code: Some(self.expression_code(n, b)),
+                        tfn: Some("ANY".into()),
+                        mfn: Some("offsetof".into()),
+                        order: Some(order),
+                        arg,
+                        dispatch: Some("STATIC_DISPATCH".into()),
+                        ..Default::default()
+                    },
+                );
+                if let Some(ty) = n.child_by_field_name("type") {
+                    self.line(
+                        depth + 1,
+                        "IDENTIFIER",
+                        P {
+                            name: Some(text(ty, b).into()),
+                            code: Some(text(ty, b).into()),
+                            tfn: Some("ANY".into()),
+                            order: Some(1),
+                            arg: Some(1),
+                            ..Default::default()
+                        },
+                    );
+                }
+                if let Some(member) = n.child_by_field_name("member") {
+                    let name = text(member, b);
+                    self.line(
+                        depth + 1,
+                        "IDENTIFIER",
+                        P {
+                            name: Some(name.into()),
+                            code: Some(format!("<unknown> {name}")),
+                            tfn: Some("ANY".into()),
+                            order: Some(2),
+                            arg: Some(2),
+                            ..Default::default()
+                        },
+                    );
+                }
+            }
             "sizeof_expression" => {
                 self.note_call("<operator>.sizeOf", 1);
                 self.line(
@@ -3331,7 +5592,7 @@ impl Ctx<'_> {
                     "CALL",
                     P {
                         name: Some("<operator>.sizeOf".into()),
-                        code: Some(esc(text(n, b))),
+                        code: Some(self.expression_code(n, b)),
                         tfn: Some("ANY".into()),
                         mfn: Some("<operator>.sizeOf".into()),
                         order: Some(order),
@@ -3340,18 +5601,15 @@ impl Ctx<'_> {
                         ..Default::default()
                     },
                 );
-                if let Some(t) = n.child_by_field_name("type") {
-                    // sizeof(T): the type name appears as an IDENTIFIER typed
-                    // as itself (and spawns the ORDER=0 phantom LOCAL).
-                    let code = text(t, b).to_string();
-                    let name = normalize_type(&code);
+                if let Some(identifier) = self.sizeof_identifier(n, b) {
+                    // Type-form sizeof shares its typed phantom identity.
                     self.line(
                         depth + 1,
                         "IDENTIFIER",
                         P {
-                            name: Some(name.clone()),
-                            code: Some(code),
-                            tfn: Some(name),
+                            name: Some(identifier.name),
+                            code: Some(identifier.code),
+                            tfn: Some(identifier.ty),
                             order: Some(1),
                             arg: Some(1),
                             ..Default::default()
@@ -3412,15 +5670,1431 @@ struct Param {
     name: String,
     ty: String,
     code: String,
+    variadic: bool,
+    // Function-pointer parameters have a declaration type that omits the
+    // pointer signature, but indirect calls still use the resolved return type.
+    call_type: Option<String>,
+}
+
+type FunctionHeader = (String, String, Vec<Param>);
+
+impl Param {
+    fn signature_type(&self) -> &str {
+        if self.variadic {
+            "..."
+        } else {
+            &self.ty
+        }
+    }
+}
+
+fn prototype_headers(declaration: Node, b: &[u8]) -> Vec<FunctionHeader> {
+    prototype_header_entries(declaration, b)
+        .into_iter()
+        .map(|(_, header)| header)
+        .collect()
+}
+
+fn macro_declaration_return(declaration: Node) -> Option<Node> {
+    let mut cursor = declaration.walk();
+    let result = declaration
+        .children_by_field_name("declarator", &mut cursor)
+        .find_map(|declarator| parenthesized_function_parts(declarator).and_then(|(_, ret)| ret));
+    result
+}
+
+fn prototype_header_entries<'tree>(
+    declaration: Node<'tree>,
+    b: &[u8],
+) -> Vec<(Node<'tree>, FunctionHeader)> {
+    if declaration.kind() != "declaration" {
+        return Vec::new();
+    }
+    let mut cursor = declaration.walk();
+    declaration
+        .children_by_field_name("declarator", &mut cursor)
+        .filter(|&decl| is_function_declaration(decl))
+        .filter_map(|decl| fn_header_declarator(declaration, decl, b).map(|header| (decl, header)))
+        .collect()
+}
+
+/// Execute available quoted headers in the importing translation unit's macro
+/// environment. Include guards and undef/redefinitions are evaluated at each
+/// inclusion; declarations retain immutable snapshots of the preceding state.
+struct BodyMacroContext<'tree> {
+    items: Vec<Node<'tree>>,
+    macros: MacroState,
+    macro_states: HashMap<usize, MacroState>,
+    body_macro_sites: BodyMacroSites<'tree>,
+    header_declarations: Vec<HeaderDeclaration>,
+    typedef_states: HashMap<usize, TypeNameState>,
+}
+
+struct HeaderDeclaration {
+    header: FunctionHeader,
+    call_type: String,
+}
+
+fn body_macro_context<'tree>(
+    root: Node<'tree>,
+    bytes: &'tree [u8],
+    file: &'tree str,
+    units: &'tree [SourceUnit],
+) -> BodyMacroContext<'tree> {
+    body_macro_context_with_config(root, bytes, file, units, &PreprocessorConfig::default())
+}
+
+fn body_macro_context_with_config<'tree>(
+    root: Node<'tree>,
+    bytes: &'tree [u8],
+    file: &'tree str,
+    units: &'tree [SourceUnit],
+    config: &PreprocessorConfig,
+) -> BodyMacroContext<'tree> {
+    // CDT retains file-scope declarations from inactive branches. They use
+    // the macro environment at that source position, while inactive directives
+    // and includes must not change the importing translation unit's state.
+    fn retain_inactive_declaration_context(
+        node: Node,
+        bytes: &[u8],
+        macros: &MacroState,
+        typedefs: &TypeNameState,
+        states: &mut HashMap<usize, MacroState>,
+        typedef_states: &mut HashMap<usize, TypeNameState>,
+    ) {
+        match node.kind() {
+            "declaration"
+            | "type_definition"
+            | "struct_specifier"
+            | "union_specifier"
+            | "enum_specifier"
+            | "function_definition" => {
+                // The declaration's header still expands in the surrounding
+                // context. It does not make an inactive function body active.
+                states.insert(node.id(), macros.clone());
+                typedef_states.insert(node.id(), typedefs.clone());
+            }
+            "preproc_if" | "preproc_ifdef" | "preproc_elif" | "preproc_elifdef"
+            | "preproc_else" => {
+                for child in translation_unit_children(node, bytes) {
+                    retain_inactive_declaration_context(
+                        child,
+                        bytes,
+                        macros,
+                        typedefs,
+                        states,
+                        typedef_states,
+                    );
+                }
+            }
+            _ => {}
+        }
+    }
+
+    #[allow(clippy::too_many_arguments)]
+    fn collect<'tree>(
+        node: Node<'tree>,
+        bytes: &'tree [u8],
+        file: &'tree str,
+        units: &'tree [SourceUnit],
+        inputs: &TranslationUnitConfig,
+        visiting: &mut HashSet<String>,
+        once: &mut HashSet<String>,
+        macros: &mut MacroState,
+        items: &mut Vec<Node<'tree>>,
+        states: &mut HashMap<usize, MacroState>,
+        header_declarations: &mut Vec<HeaderDeclaration>,
+        typedefs: &mut TypeNameState,
+        typedef_states: &mut HashMap<usize, TypeNameState>,
+        type_bindings: &mut HashMap<String, String>,
+        capture: bool,
+        in_body: bool,
+        body_sites: &mut BodyMacroSites<'tree>,
+        in_expansion: bool,
+        source_view: usize,
+        header_top: bool,
+    ) {
+        if source_view != 0 {
+            body_sites.record_view(source_view, bytes, node.start_byte(), macros);
+        }
+        match node.kind() {
+            "preproc_if" | "preproc_ifdef" | "preproc_elif" | "preproc_elifdef"
+            | "preproc_else" => {
+                if let Some(condition) = node.child_by_field_name("condition") {
+                    collect_macro_expansions(condition, bytes, macros, body_sites);
+                }
+                let take = if matches!(node.kind(), "preproc_if" | "preproc_elif") {
+                    preproc_condition(node, bytes, macros)
+                } else if let Some(name) = node.child_by_field_name("name") {
+                    let negated = node.child(0).is_some_and(|directive| {
+                        matches!(directive.kind(), "#ifndef" | "#elifndef")
+                    });
+                    macros.contains_key(text(name, bytes)) != negated
+                } else {
+                    true
+                };
+                let alternative = node.child_by_field_name("alternative");
+                if take {
+                    for child in translation_unit_children(node, bytes) {
+                        if Some(child) != node.child_by_field_name("condition")
+                            && Some(child) != node.child_by_field_name("name")
+                            && Some(child) != alternative
+                        {
+                            collect(
+                                child,
+                                bytes,
+                                file,
+                                units,
+                                inputs,
+                                visiting,
+                                once,
+                                macros,
+                                items,
+                                states,
+                                header_declarations,
+                                typedefs,
+                                typedef_states,
+                                type_bindings,
+                                capture,
+                                in_body,
+                                body_sites,
+                                in_expansion,
+                                source_view,
+                                header_top,
+                            );
+                        }
+                    }
+                    if capture && !in_body {
+                        if let Some(alternative) = alternative {
+                            retain_inactive_declaration_context(
+                                alternative,
+                                bytes,
+                                macros,
+                                typedefs,
+                                states,
+                                typedef_states,
+                            );
+                        }
+                    }
+                } else {
+                    if capture && !in_body {
+                        for child in translation_unit_children(node, bytes) {
+                            if Some(child) != alternative {
+                                retain_inactive_declaration_context(
+                                    child,
+                                    bytes,
+                                    macros,
+                                    typedefs,
+                                    states,
+                                    typedef_states,
+                                );
+                            }
+                        }
+                    }
+                    if let Some(alternative) = alternative {
+                        collect(
+                            alternative,
+                            bytes,
+                            file,
+                            units,
+                            inputs,
+                            visiting,
+                            once,
+                            macros,
+                            items,
+                            states,
+                            header_declarations,
+                            typedefs,
+                            typedef_states,
+                            type_bindings,
+                            capture,
+                            in_body,
+                            body_sites,
+                            in_expansion,
+                            source_view,
+                            header_top,
+                        );
+                    }
+                }
+            }
+            _ => {
+                if source_view != 0
+                    && header_top
+                    && matches!(
+                        node.kind(),
+                        "declaration"
+                            | "type_definition"
+                            | "struct_specifier"
+                            | "union_specifier"
+                            | "enum_specifier"
+                            | "preproc_include"
+                    )
+                {
+                    body_sites.headers[source_view - 1].items.push(node);
+                }
+                let outer_expansion = !in_expansion
+                    && node
+                        .child_by_field_name("function")
+                        .is_some_and(|function| {
+                            macro_consumes_arguments(text(function, bytes), macros)
+                        });
+                if !in_expansion {
+                    if !in_body && node.kind() == "function_definition" {
+                        for child in named_children(node) {
+                            if Some(child) != node.child_by_field_name("body") {
+                                collect_macro_expansions(child, bytes, macros, body_sites);
+                            }
+                        }
+                    } else if (!in_body && !node.kind().starts_with("preproc_"))
+                        || outer_expansion
+                        || (in_body && node.named_child_count() == 0)
+                    {
+                        collect_macro_expansions(node, bytes, macros, body_sites);
+                    }
+                }
+                if capture && !in_body {
+                    if matches!(
+                        node.kind(),
+                        "function_definition"
+                            | "declaration"
+                            | "type_definition"
+                            | "struct_specifier"
+                            | "union_specifier"
+                            | "enum_specifier"
+                    ) {
+                        states.insert(node.id(), macros.clone());
+                        typedef_states.insert(node.id(), typedefs.clone());
+                    }
+                    items.push(node);
+                }
+                if !in_body {
+                    update_header_type_bindings(node, bytes, macros, type_bindings);
+                }
+                if !capture && !in_body {
+                    header_declarations.extend(supplied_header_bindings(
+                        node,
+                        bytes,
+                        macros,
+                        type_bindings,
+                    ));
+                }
+                if !in_body && node.kind() == "type_definition" {
+                    for name in valid_type_definition_names(node, bytes, macros) {
+                        Arc::make_mut(typedefs).insert(name);
+                    }
+                }
+                if let Some(include) = configured_include_name(node, bytes, file, units, inputs) {
+                    if !once.contains(&include) && visiting.insert(include.clone()) {
+                        if let Some(unit) = units.iter().find(|unit| {
+                            normalize_source_path(std::path::Path::new(&unit.file)) == include
+                        }) {
+                            let mut header_items = Vec::new();
+                            let mut header_states = HashMap::new();
+                            let header_view = if in_body {
+                                let mut include_order = if source_view == 0 {
+                                    Vec::new()
+                                } else {
+                                    body_sites.headers[source_view - 1].include_order.clone()
+                                };
+                                include_order.push(node.start_byte());
+                                body_sites.headers.push(IncludedBodyView {
+                                    root: unit.tree.root_node(),
+                                    bytes: unit.src.as_bytes(),
+                                    file: &unit.file,
+                                    include_order,
+                                    items: Vec::new(),
+                                    changes: vec![(0, macros.clone())],
+                                });
+                                let view = body_sites.headers.len();
+                                body_sites.includes.insert((source_view, node.id()), view);
+                                view
+                            } else {
+                                source_view
+                            };
+                            for child in translation_unit_children(
+                                unit.tree.root_node(),
+                                unit.src.as_bytes(),
+                            ) {
+                                collect(
+                                    child,
+                                    unit.src.as_bytes(),
+                                    &unit.file,
+                                    units,
+                                    inputs,
+                                    visiting,
+                                    once,
+                                    macros,
+                                    &mut header_items,
+                                    &mut header_states,
+                                    header_declarations,
+                                    typedefs,
+                                    typedef_states,
+                                    type_bindings,
+                                    false,
+                                    in_body,
+                                    body_sites,
+                                    in_expansion,
+                                    header_view,
+                                    in_body,
+                                );
+                            }
+                        }
+                        visiting.remove(&include);
+                    }
+                } else if node.kind() == "preproc_call"
+                    && node
+                        .child_by_field_name("directive")
+                        .is_some_and(|d| text(d, bytes).trim() == "#pragma")
+                    && node
+                        .child_by_field_name("argument")
+                        .is_some_and(|a| text(a, bytes).trim() == "once")
+                {
+                    once.insert(normalize_source_path(std::path::Path::new(file)));
+                } else if let Some((name, definition)) = source_macro_definition(node, bytes, file)
+                {
+                    Arc::make_mut(macros).insert(name, definition);
+                } else if is_undef_directive(node, bytes) {
+                    if let Some(name) = node.child_by_field_name("argument") {
+                        Arc::make_mut(macros).remove(text(name, bytes).trim());
+                    }
+                } else if node.kind() == "function_definition" {
+                    if let Some(body) = node.child_by_field_name("body") {
+                        if capture && !in_body && body_sites.owns(bytes) {
+                            body_sites.bodies.push((body.start_byte(), body.end_byte()));
+                            body_sites.record(bytes, body.start_byte(), macros);
+                        }
+                        collect(
+                            body,
+                            bytes,
+                            file,
+                            units,
+                            inputs,
+                            visiting,
+                            once,
+                            macros,
+                            items,
+                            states,
+                            header_declarations,
+                            typedefs,
+                            typedef_states,
+                            type_bindings,
+                            capture,
+                            true,
+                            body_sites,
+                            in_expansion,
+                            source_view,
+                            header_top,
+                        );
+                    }
+                } else if in_body
+                    && !matches!(node.kind(), "string_literal" | "char_literal" | "comment")
+                {
+                    for child in translation_unit_children(node, bytes) {
+                        collect(
+                            child,
+                            bytes,
+                            file,
+                            units,
+                            inputs,
+                            visiting,
+                            once,
+                            macros,
+                            items,
+                            states,
+                            header_declarations,
+                            typedefs,
+                            typedef_states,
+                            type_bindings,
+                            capture,
+                            true,
+                            body_sites,
+                            in_expansion || outer_expansion,
+                            source_view,
+                            false,
+                        );
+                    }
+                }
+                if in_body {
+                    body_sites.record_view(source_view, bytes, node.end_byte(), macros);
+                }
+            }
+        }
+    }
+    let inputs = config.for_translation_unit(file);
+    let inputs = &inputs;
+    let mut macros = predefined_c_macros(file);
+    for definition in &inputs.defines {
+        let (name, body) = definition.split_once('=').unwrap_or((definition, "1"));
+        if !name.trim().is_empty() {
+            Arc::make_mut(&mut macros).insert(
+                name.trim().to_string(),
+                MacroDef {
+                    params: None,
+                    body: body.to_string(),
+                    directive: format!("#define {} {}", name.trim(), body),
+                    file: file.to_string(),
+                },
+            );
+        }
+    }
+    let mut body_macro_sites = BodyMacroSites::new(root, bytes);
+    let mut items = Vec::new();
+    let mut states = HashMap::new();
+    let mut header_declarations = Vec::new();
+    let mut typedefs = TypeNameState::default();
+    let mut typedef_states = HashMap::new();
+    let mut type_bindings = HashMap::new();
+    let mut once = HashSet::new();
+    let mut visiting = HashSet::from([normalize_source_path(std::path::Path::new(file))]);
+    // Forced headers participate in the same directive walk as source includes.
+    // They read only the supplied source snapshot, with one shared cycle/once set.
+    for forced in &inputs.forced_includes {
+        let name = resolve_configured_header(file, forced, false, units, inputs);
+        if let Some(unit) = name.and_then(|name| {
+            units
+                .iter()
+                .find(|unit| normalize_source_path(std::path::Path::new(&unit.file)) == name)
+        }) {
+            let mut header_items = Vec::new();
+            let mut header_states = HashMap::new();
+            for child in translation_unit_children(unit.tree.root_node(), unit.src.as_bytes()) {
+                collect(
+                    child,
+                    unit.src.as_bytes(),
+                    &unit.file,
+                    units,
+                    inputs,
+                    &mut visiting,
+                    &mut once,
+                    &mut macros,
+                    &mut header_items,
+                    &mut header_states,
+                    &mut header_declarations,
+                    &mut typedefs,
+                    &mut typedef_states,
+                    &mut type_bindings,
+                    false,
+                    false,
+                    &mut body_macro_sites,
+                    false,
+                    0,
+                    false,
+                );
+            }
+        }
+    }
+    for child in translation_unit_children(root, bytes) {
+        collect(
+            child,
+            bytes,
+            file,
+            units,
+            inputs,
+            &mut visiting,
+            &mut once,
+            &mut macros,
+            &mut items,
+            &mut states,
+            &mut header_declarations,
+            &mut typedefs,
+            &mut typedef_states,
+            &mut type_bindings,
+            true,
+            false,
+            &mut body_macro_sites,
+            false,
+            0,
+            false,
+        );
+    }
+    // CDT sorts file-local offsets alone; stable ties retain include traversal order.
+    body_macro_sites
+        .expansions
+        .sort_by_key(|(offset, _)| *offset);
+    BodyMacroContext {
+        items,
+        macros,
+        macro_states: states,
+        body_macro_sites,
+        header_declarations,
+        typedef_states,
+    }
+}
+
+fn normalize_source_path(path: &std::path::Path) -> String {
+    let mut normalized = std::path::PathBuf::new();
+    for component in path.components() {
+        match component {
+            std::path::Component::CurDir => {}
+            std::path::Component::ParentDir => {
+                if normalized.file_name().is_some_and(|name| name != "..") {
+                    normalized.pop();
+                } else if !normalized.has_root() {
+                    normalized.push("..");
+                }
+            }
+            other => normalized.push(other.as_os_str()),
+        }
+    }
+    normalized.to_string_lossy().into_owned()
+}
+
+fn configured_include_name(
+    node: Node,
+    bytes: &[u8],
+    file: &str,
+    units: &[SourceUnit],
+    inputs: &TranslationUnitConfig,
+) -> Option<String> {
+    if node.kind() != "preproc_include" {
+        return None;
+    }
+    let spelling = text(node.child_by_field_name("path")?, bytes);
+    let (name, angled) =
+        if let Some(name) = spelling.strip_prefix('"').and_then(|s| s.strip_suffix('"')) {
+            (name, false)
+        } else {
+            (spelling.strip_prefix('<')?.strip_suffix('>')?, true)
+        };
+    resolve_configured_header(file, name, angled, units, inputs)
+}
+
+fn resolve_configured_header(
+    file: &str,
+    name: &str,
+    angled: bool,
+    units: &[SourceUnit],
+    inputs: &TranslationUnitConfig,
+) -> Option<String> {
+    let mut candidates = Vec::new();
+    if !angled {
+        let parent = std::path::Path::new(file)
+            .parent()
+            .unwrap_or_else(|| std::path::Path::new(""));
+        candidates.push(parent.join(name));
+        candidates.push(std::path::PathBuf::from(name));
+    }
+    candidates.extend(
+        inputs
+            .include_paths
+            .iter()
+            .map(|dir| std::path::Path::new(dir).join(name)),
+    );
+    candidates
+        .into_iter()
+        .map(|path| normalize_source_path(&path))
+        .find(|name| {
+            units
+                .iter()
+                .any(|unit| normalize_source_path(std::path::Path::new(&unit.file)) == *name)
+        })
+}
+
+fn source_macro_definition(node: Node, bytes: &[u8], file: &str) -> Option<(String, MacroDef)> {
+    if !matches!(node.kind(), "preproc_def" | "preproc_function_def") {
+        return None;
+    }
+    let line = preproc_logical_line(node, bytes);
+    let payload = preproc_payload(&line);
+    let end = payload
+        .bytes()
+        .position(|c| !(c.is_ascii_alphanumeric() || c == b'_'))
+        .unwrap_or(payload.len());
+    if end == 0 {
+        return None;
+    }
+    let name = payload[..end].to_string();
+    let tail = &payload[end..];
+    let (params, body) = if let Some(tail) = tail.strip_prefix('(') {
+        let close = tail.find(')')?;
+        let formals = &tail[..close];
+        let params = if formals.trim().is_empty() {
+            Vec::new()
+        } else {
+            formals
+                .split(',')
+                .map(|p| {
+                    let p = p.trim();
+                    if p == "..." {
+                        "__VA_ARGS__".to_string()
+                    } else {
+                        p.to_string()
+                    }
+                })
+                .collect()
+        };
+        (Some(params), tail[close + 1..].trim().to_string())
+    } else {
+        (None, tail.trim().to_string())
+    };
+    Some((
+        name,
+        MacroDef {
+            params,
+            body,
+            directive: preproc_raw_directive(node, bytes).to_string(),
+            file: file.to_string(),
+        },
+    ))
+}
+
+/// The directive token permits whitespace between `#` and `undef`.
+/// Keep recognition shared by the include walk and local source-effect tables.
+fn is_undef_directive(node: Node, bytes: &[u8]) -> bool {
+    node.kind() == "preproc_call"
+        && node
+            .child_by_field_name("directive")
+            .is_some_and(|directive| {
+                text(directive, bytes)
+                    .trim()
+                    .strip_prefix('#')
+                    .is_some_and(|name| name.trim() == "undef")
+            })
+}
+
+/// Typedef alias declarations register the resolved underlying expression type;
+/// this is separate from the alias spelling retained on cast TYPE_REF nodes.
+fn typedef_underlying_type(node: Node, alias: Node, bytes: &[u8]) -> String {
+    format!(
+        "{}{}",
+        declaration_type(node, bytes, TypeRole::Expression),
+        decl_suffix(alias, bytes)
+    )
+}
+
+fn resolved_typedef_underlying_type(
+    node: Node,
+    alias: Node,
+    bytes: &[u8],
+    macros: &MacroState,
+) -> String {
+    let raw = text(node, bytes);
+    if let Some(expanded) = expand_declaration_tokens(raw, macros, &mut HashSet::new(), &mut 65_536)
+    {
+        if expanded != raw {
+            let mut parser = Parser::new();
+            parser
+                .set_language(&tree_sitter_c::LANGUAGE.into())
+                .unwrap();
+            if let Some(tree) = parser.parse(&expanded, None) {
+                if let Some(declaration) = named_children(tree.root_node())
+                    .into_iter()
+                    .find(|node| node.kind() == "type_definition" && !node.has_error())
+                {
+                    let name = type_binding_name(alias, bytes);
+                    if let Some(binding) = typedef_declarators(declaration)
+                        .into_iter()
+                        .find(|binding| type_binding_name(*binding, expanded.as_bytes()) == name)
+                    {
+                        return typedef_underlying_type(declaration, binding, expanded.as_bytes());
+                    }
+                }
+            }
+        }
+    }
+    typedef_underlying_type(node, alias, bytes)
+}
+
+fn typedef_declarators(node: Node) -> Vec<Node> {
+    let mut cursor = node.walk();
+    node.children_by_field_name("declarator", &mut cursor)
+        .filter(|&declarator| find_function_declarator(declarator).is_none())
+        .collect()
+}
+
+/// Parentheses around a function name do not make it a pointer object.
+/// A macro prefix such as `API int (f)(int)` is parsed as two nested function
+/// declarators: `int(f)` followed by the real parameter list.
+fn parenthesized_function_parts(decl: Node) -> Option<(Node, Option<Node>)> {
+    let fd = find_function_declarator(decl)?;
+    let name = fd.child_by_field_name("declarator")?;
+    if name.kind() == "parenthesized_declarator" {
+        let mut inner = name;
+        while inner.kind() == "parenthesized_declarator" {
+            inner = inner.named_child(0)?;
+        }
+        return (inner.kind() == "identifier").then_some((inner, None));
+    }
+    if name.kind() == "function_declarator" {
+        let ret = name.child_by_field_name("declarator")?;
+        let parameters = name.child_by_field_name("parameters")?;
+        let parameter = parameters.named_child(0)?;
+        if ret.kind() == "identifier"
+            && parameters.named_child_count() == 1
+            && parameter.kind() == "parameter_declaration"
+            && parameter.child_by_field_name("declarator").is_none()
+        {
+            let real_name = parameter.child_by_field_name("type")?;
+            return Some((real_name, Some(ret)));
+        }
+    }
+    None
+}
+
+fn is_function_declaration(decl: Node) -> bool {
+    // A pointer inside the parentheses still declares an object.
+    parenthesized_function_parts(decl).is_some()
+        || find_function_declarator(decl)
+            .and_then(|fd| fd.child_by_field_name("declarator"))
+            .is_some_and(|name| name.kind() == "identifier")
+}
+
+fn declared_object_type(declaration: Node, decl: Node, b: &[u8], macros: &MacroState) -> String {
+    let base = declaration_type(declaration, b, TypeRole::Declaration);
+    if let Some(fd) = find_function_declarator(decl) {
+        if let Some(pointer) = fd.child_by_field_name("declarator") {
+            if pointer.kind() == "parenthesized_declarator" {
+                let name = innermost_id(pointer, b);
+                let shape: String = text(pointer, b)
+                    .replacen(&name, "", 1)
+                    .chars()
+                    .filter(|ch| !ch.is_whitespace())
+                    .collect();
+                let params = fd
+                    .child_by_field_name("parameters")
+                    .map(|params| {
+                        named_children(params)
+                            .into_iter()
+                            .filter_map(|param| {
+                                if param.kind() == "variadic_parameter" {
+                                    return Some("...".to_string());
+                                }
+                                if param.kind() != "parameter_declaration" {
+                                    return None;
+                                }
+                                let base = declaration_type(param, b, TypeRole::Expression);
+                                Some(format!(
+                                    "{base}{}",
+                                    param
+                                        .child_by_field_name("declarator")
+                                        .map(|d| decl_suffix(d, b))
+                                        .unwrap_or_default()
+                                ))
+                            })
+                            .collect::<Vec<_>>()
+                            .join(",")
+                            .replace(' ', "")
+                    })
+                    .unwrap_or_default();
+                let base = declaration_type(declaration, b, TypeRole::Expression);
+                return format!("{base}{shape}({params})");
+            }
+        }
+    }
+    format!("{base}{}", object_decl_suffix(decl, b, false, macros))
+}
+
+fn prototype_declarations<'a>(
+    root: Node<'a>,
+    b: &'a [u8],
+    macro_sites: &BodyMacroSites<'a>,
+    source_view: usize,
+) -> Vec<(Node<'a>, usize)> {
+    if let Some((view, header)) = macro_sites.included(source_view, root, b) {
+        return header
+            .items
+            .iter()
+            .flat_map(|node| prototype_declarations(*node, header.bytes, macro_sites, view))
+            .collect();
+    }
+    if !prototype_headers(root, b).is_empty() {
+        return vec![(root, source_view)];
+    }
+    // File-scope inactive declarations remain retained; active body prototypes
+    // use the recorded original-source macro state.
+    let children = if matches!(
+        root.kind(),
+        "preproc_if" | "preproc_ifdef" | "preproc_elif" | "preproc_elifdef" | "preproc_else"
+    ) {
+        macro_sites
+            .at_view(source_view, root, b)
+            .map(|macros| kept_preproc_children(root, b, macros))
+            .unwrap_or_else(|| named_children(root))
+    } else {
+        named_children(root)
+    };
+    children
+        .into_iter()
+        .flat_map(|child| prototype_declarations(child, b, macro_sites, source_view))
+        .collect()
 }
 
 /// (name, return type, params) for a function_definition.
-fn fn_header(f: Node, b: &[u8]) -> Option<(String, String, Vec<Param>)> {
-    let base = f
-        .child_by_field_name("type")
-        .map(|t| text(t, b).to_string())
-        .unwrap_or("ANY".into());
-    let decl = f.child_by_field_name("declarator")?;
+pub(crate) fn function_name(f: Node, b: &[u8]) -> Option<String> {
+    fn_header(f, b).map(|(name, _, _)| name)
+}
+
+struct ResolvedFunctionHeader {
+    header: FunctionHeader,
+    call_type: String,
+    expanded_code: Option<String>,
+}
+
+enum HeaderReturnBinding {
+    Known(String),
+    Alias(String, String),
+}
+
+impl HeaderReturnBinding {
+    fn resolve(self, bindings: &HashMap<String, String>) -> String {
+        match self {
+            Self::Known(ty) => ty,
+            Self::Alias(name, suffix) => match bindings.get(&name) {
+                Some(base) if base != "ANY" => format!("{base}{suffix}"),
+                _ => "ANY".into(),
+            },
+        }
+    }
+}
+
+fn header_return_binding(f: Node, decl: Node, bytes: &[u8]) -> HeaderReturnBinding {
+    let base = parenthesized_function_parts(decl)
+        .and_then(|(_, ret)| ret)
+        .or_else(|| macro_declaration_return(f))
+        .or_else(|| f.child_by_field_name("type"));
+    let call_type = function_return_type(f, decl, bytes, TypeRole::Expression);
+    if base.is_some_and(|base| {
+        primitive_type(text(base, bytes), TypeRole::Expression).is_some()
+            || matches!(
+                base.kind(),
+                "struct_specifier" | "union_specifier" | "enum_specifier"
+            )
+    }) {
+        return HeaderReturnBinding::Known(call_type);
+    }
+    let name = base
+        .map(|base| normalize_type(text(base, bytes)))
+        .unwrap_or_else(|| "ANY".into());
+    let suffix = call_type.strip_prefix(&name).unwrap_or("").to_string();
+    HeaderReturnBinding::Alias(name, suffix)
+}
+
+// The raw parser may recover `API T f(...)` as a function named T with an
+// ERROR containing f. Included-header lookup must use the complete expanded
+// declaration, never that recovery name or its fallback return spelling.
+fn supplied_header_bindings(
+    node: Node,
+    bytes: &[u8],
+    macros: &HashMap<String, MacroDef>,
+    bindings: &HashMap<String, String>,
+) -> Vec<HeaderDeclaration> {
+    if node.kind() != "declaration" {
+        return Vec::new();
+    }
+    let Some(source) =
+        expand_declaration_tokens(text(node, bytes), macros, &mut HashSet::new(), &mut 65_536)
+    else {
+        return Vec::new();
+    };
+    let mut parser = Parser::new();
+    parser
+        .set_language(&tree_sitter_c::LANGUAGE.into())
+        .unwrap();
+    let Some(tree) = parser.parse(&source, None) else {
+        return Vec::new();
+    };
+    let root = tree.root_node();
+    let declarations: Vec<_> = named_children(root)
+        .into_iter()
+        .filter(|node| node.kind() != "comment")
+        .collect();
+    if root.has_error() || declarations.len() != 1 || declarations[0].kind() != "declaration" {
+        return Vec::new();
+    }
+    let declaration = declarations[0];
+    prototype_header_entries(declaration, source.as_bytes())
+        .into_iter()
+        // This nested-function recovery represents an unexpanded type prefix,
+        // not a valid C function declarator after preprocessing.
+        .filter(|(decl, _)| {
+            !parenthesized_function_parts(*decl).is_some_and(|(_, ret)| ret.is_some())
+        })
+        .map(|(decl, header)| HeaderDeclaration {
+            call_type: header_return_binding(declaration, decl, source.as_bytes())
+                .resolve(bindings),
+            header,
+        })
+        .collect()
+}
+
+// Callable binding types follow typedef targets, whereas METHOD/PARAMETER
+// declaration spellings retain their aliases. A syntactically recognized
+// typedef may still have an unresolved underlying binding, which yields ANY.
+fn update_header_type_bindings(
+    node: Node,
+    bytes: &[u8],
+    macros: &HashMap<String, MacroDef>,
+    bindings: &mut HashMap<String, String>,
+) {
+    if node.kind() != "type_definition" {
+        return;
+    }
+    let Some(source) =
+        expand_declaration_tokens(text(node, bytes), macros, &mut HashSet::new(), &mut 65_536)
+    else {
+        return;
+    };
+    let mut parser = Parser::new();
+    parser
+        .set_language(&tree_sitter_c::LANGUAGE.into())
+        .unwrap();
+    let Some(tree) = parser.parse(&source, None) else {
+        return;
+    };
+    let Some(declaration) = named_children(tree.root_node())
+        .into_iter()
+        .find(|node| node.kind() == "type_definition" && !node.has_error())
+    else {
+        return;
+    };
+    let Some(base) = declaration.child_by_field_name("type") else {
+        return;
+    };
+    // CDT rejects a primitive modifier applied to a typedef/unknown name.
+    // Tree-sitter accepts this shape, but it must not replace an earlier
+    // valid binding (for example `typedef int T; typedef unsigned UNKNOWN T`).
+    if base.kind() == "sized_type_specifier"
+        && named_children(base)
+            .iter()
+            .any(|child| child.kind() == "type_identifier")
+    {
+        return;
+    }
+    let raw = text(base, source.as_bytes());
+    let base_type = if primitive_type(raw, TypeRole::Expression).is_some()
+        || matches!(
+            base.kind(),
+            "struct_specifier" | "union_specifier" | "enum_specifier"
+        ) {
+        declaration_type(declaration, source.as_bytes(), TypeRole::Expression)
+    } else {
+        bindings.get(raw).cloned().unwrap_or_else(|| "ANY".into())
+    };
+    let mut cursor = declaration.walk();
+    for declarator in declaration.children_by_field_name("declarator", &mut cursor) {
+        let mut leaf = declarator;
+        while let Some(inner) = leaf.child_by_field_name("declarator") {
+            leaf = inner;
+        }
+        let name = if matches!(leaf.kind(), "identifier" | "type_identifier") {
+            text(leaf, source.as_bytes()).to_string()
+        } else {
+            String::new()
+        };
+        if name.is_empty() {
+            continue;
+        }
+        let ty = if base_type == "ANY" || find_function_declarator(declarator).is_some() {
+            "ANY".to_string()
+        } else {
+            format!(
+                "{base_type}{}",
+                object_decl_suffix(declarator, source.as_bytes(), false, &MacroState::default())
+            )
+        };
+        bindings.insert(name, ty);
+    }
+}
+
+/// Expand declaration tokens without expression rendering. In particular a
+/// type-valued replacement must not first be interpreted as a C call/cast.
+fn expand_declaration_tokens(
+    source: &str,
+    macros: &HashMap<String, MacroDef>,
+    disabled: &mut HashSet<String>,
+    budget: &mut usize,
+) -> Option<String> {
+    expand_declaration_tokens_with_tail(source, macros, disabled, budget, &mut false)
+}
+
+// Preserve eligibility while the originating expansion is still disabled.
+// A final F emitted by F(x) -> F cannot consume following source parentheses.
+// Ordinary declaration callers retain exactly the same rendered token stream.
+fn expand_declaration_tokens_with_tail(
+    source: &str,
+    macros: &HashMap<String, MacroDef>,
+    disabled: &mut HashSet<String>,
+    budget: &mut usize,
+    tail_function: &mut bool,
+) -> Option<String> {
+    let bytes = source.as_bytes();
+    let mut out = String::new();
+    let mut i = 0;
+    while i < bytes.len() {
+        if *budget == 0 {
+            return None;
+        }
+        let start = i;
+        if let Some(end) = macro_opaque_end(bytes, i) {
+            i = end;
+        } else if bytes[i].is_ascii_digit()
+            || (bytes[i] == b'.' && bytes.get(i + 1).is_some_and(u8::is_ascii_digit))
+        {
+            i += 1;
+            while i < bytes.len() {
+                if bytes[i] == b'.'
+                    || (matches!(bytes[i], b'+' | b'-')
+                        && matches!(bytes[i - 1], b'e' | b'E' | b'p' | b'P'))
+                {
+                    i += 1;
+                } else {
+                    let next = macro_identifier_unit(bytes, i, false);
+                    if next == 0 {
+                        break;
+                    }
+                    i += next;
+                }
+            }
+        } else if macro_identifier_unit(bytes, i, true) != 0 {
+            i += macro_identifier_unit(bytes, i, true);
+            while i < bytes.len() {
+                let next = macro_identifier_unit(bytes, i, false);
+                if next == 0 {
+                    break;
+                }
+                i += next;
+            }
+            let name = &source[start..i];
+            if disabled.len() < 64 && !disabled.contains(name) {
+                if let Some(definition) = macros.get(name) {
+                    let replacement = if let Some(params) = &definition.params {
+                        let mut open = i;
+                        while open < bytes.len() {
+                            if bytes[open].is_ascii_whitespace() {
+                                open += 1;
+                            } else if bytes[open..].starts_with(b"/*")
+                                || bytes[open..].starts_with(b"//")
+                            {
+                                open = macro_opaque_end(bytes, open)?;
+                            } else {
+                                break;
+                            }
+                        }
+                        if bytes.get(open) != Some(&b'(') {
+                            None
+                        } else if let Some((args, end)) = macro_arguments(source, open) {
+                            i = end + 1;
+                            Some(substitute(&definition.body, params, &args))
+                        } else {
+                            None
+                        }
+                    } else {
+                        Some(definition.body.clone())
+                    };
+                    if let Some(replacement) = replacement {
+                        *budget -= 1;
+                        disabled.insert(name.to_string());
+                        let replacement = expand_declaration_tokens_with_tail(
+                            &replacement,
+                            macros,
+                            disabled,
+                            budget,
+                            tail_function,
+                        );
+                        disabled.remove(name);
+                        out.push_str(&replacement?);
+                        continue;
+                    }
+                }
+            }
+        } else {
+            i += source[i..].chars().next()?.len_utf8();
+        }
+        let token = &source[start..i];
+        *budget = budget.checked_sub(token.len())?;
+        if !token.bytes().all(|byte| byte.is_ascii_whitespace())
+            && !token.starts_with("/*")
+            && !token.starts_with("//")
+        {
+            *tail_function = disabled.len() < 64
+                && !disabled.contains(token)
+                && macros
+                    .get(token)
+                    .is_some_and(|definition| definition.params.is_some());
+        }
+        out.push_str(token);
+    }
+    Some(out)
+}
+
+fn expanded_declaration_specifier(node: Node, bytes: &[u8]) -> String {
+    let Some(base) = node.child_by_field_name("type") else {
+        return String::new();
+    };
+    let raw = text(base, bytes);
+    let base_code = if raw == "unsigned long" {
+        "long unsigned"
+    } else {
+        raw
+    };
+    let prefix = named_children(node)
+        .into_iter()
+        .filter(|child| {
+            child.end_byte() <= base.start_byte()
+                && matches!(child.kind(), "storage_class_specifier" | "type_qualifier")
+        })
+        .map(|child| text(child, bytes))
+        .collect::<Vec<_>>()
+        .join(" ");
+    format!("{prefix} {base_code}")
+        .split_whitespace()
+        .collect::<Vec<_>>()
+        .join(" ")
+}
+
+fn expanded_declaration_declarator(node: Node, bytes: &[u8]) -> Option<String> {
+    let inner = || {
+        node.child_by_field_name("declarator")
+            .map(|child| expanded_declaration_declarator(child, bytes))
+            .unwrap_or_else(|| Some(String::new()))
+    };
+    match node.kind() {
+        "identifier" => Some(String::new()),
+        "pointer_declarator" | "abstract_pointer_declarator" => {
+            let qualifiers = named_children(node)
+                .into_iter()
+                .filter(|child| child.kind() == "type_qualifier")
+                .map(|child| text(child, bytes))
+                .collect::<Vec<_>>()
+                .join(" ");
+            let nested = inner()?;
+            Some(if qualifiers.is_empty() {
+                format!("*{nested}")
+            } else {
+                format!("* {qualifiers}{nested}")
+            })
+        }
+        "array_declarator" | "abstract_array_declarator" => Some(format!("{}[]", inner()?)),
+        "function_declarator" => {
+            let nested = inner()?;
+            let parameters = node.child_by_field_name("parameters")?;
+            let parameters = named_children(parameters)
+                .into_iter()
+                .filter(|param| {
+                    matches!(param.kind(), "parameter_declaration" | "variadic_parameter")
+                })
+                .map(|param| {
+                    if param.kind() == "variadic_parameter" {
+                        return Some("...".to_string());
+                    }
+                    let code = expanded_declaration_specifier(param, bytes);
+                    let suffix = param
+                        .child_by_field_name("declarator")
+                        .map(|decl| expanded_declaration_declarator(decl, bytes))
+                        .unwrap_or_else(|| Some(String::new()))?;
+                    Some(if suffix.is_empty() {
+                        code
+                    } else {
+                        format!("{code} {suffix}")
+                    })
+                })
+                .collect::<Option<Vec<_>>>()?
+                .join(", ");
+            Some(format!("{nested}({parameters})"))
+        }
+        _ => None,
+    }
+}
+
+fn expanded_prototype_code(node: Node, bytes: &[u8]) -> Option<String> {
+    let specifier = expanded_declaration_specifier(node, bytes);
+    let mut cursor = node.walk();
+    let declarations = node
+        .children_by_field_name("declarator", &mut cursor)
+        .map(|decl| {
+            expanded_declaration_declarator(decl, bytes)
+                .map(|declarator| format!("{specifier} {declarator}"))
+        })
+        .collect::<Option<Vec<_>>>()?;
+    Some(esc(&format!("{specifier} {};", declarations.join(" "))))
+}
+
+// CDT source ranges start after an empty leading specifier macro. A nonempty
+// leading macro instead gives declarations a synthesized specifier/declarator
+// spelling; a macro after an ordinary leading qualifier retains raw CODE.
+fn declaration_code_start(source: &str, macros: &HashMap<String, MacroDef>) -> usize {
+    let bytes = source.as_bytes();
+    let mut start = 0;
+    loop {
+        let mut end = start;
+        while end < bytes.len() {
+            let size = macro_identifier_unit(bytes, end, end == start);
+            if size == 0 {
+                break;
+            }
+            end += size;
+        }
+        if end == start || !macros.contains_key(&source[start..end]) {
+            return start;
+        }
+        if !expand_declaration_tokens(
+            &source[start..end],
+            macros,
+            &mut HashSet::new(),
+            &mut 65_536,
+        )
+        .is_some_and(|expanded| expanded.trim().is_empty())
+        {
+            return start;
+        }
+        start = end;
+        while start < bytes.len() && bytes[start].is_ascii_whitespace() {
+            start += 1;
+        }
+    }
+}
+
+pub(crate) struct EmptyMacroMethodSpan {
+    pub code: String,
+    pub start: usize,
+}
+
+/// Used lazily by location recovery only when a METHOD's CODE differs from its
+/// parsed source. Verify omitted prefixes in the same include-aware, immutable
+/// macro environment as lowering; ordinary suffix text is not an anchor.
+pub(crate) fn empty_macro_method_spans(
+    sources: &[(String, String)],
+) -> HashMap<(String, usize), EmptyMacroMethodSpan> {
+    let mut parser = Parser::new();
+    parser
+        .set_language(&tree_sitter_c::LANGUAGE.into())
+        .unwrap();
+    let units: Vec<_> = sources
+        .iter()
+        .map(|(file, src)| SourceUnit {
+            file: file.clone(),
+            src: src.clone(),
+            tree: parser.parse(src, None).unwrap(),
+        })
+        .collect();
+    let mut spans = HashMap::new();
+    for unit in &units {
+        let bytes = unit.src.as_bytes();
+        let context = body_macro_context(unit.tree.root_node(), bytes, &unit.file, &units);
+        for node in translation_unit_items(unit.tree.root_node(), bytes) {
+            if node.kind() != "function_definition" {
+                continue;
+            }
+            let Some(macros) = context.macro_states.get(&node.id()) else {
+                continue;
+            };
+            let source = text(node, bytes);
+            let offset = declaration_code_start(source, macros);
+            if offset > 0 {
+                spans.insert(
+                    (unit.file.clone(), node.start_byte()),
+                    EmptyMacroMethodSpan {
+                        code: source[offset..].replace("\\n", "\n").trim().to_string(),
+                        start: node.start_byte() + offset,
+                    },
+                );
+            }
+        }
+    }
+    spans
+}
+
+fn resolved_function_header(
+    f: Node,
+    decl: Node,
+    bytes: &[u8],
+    macros: &HashMap<String, MacroDef>,
+) -> Option<ResolvedFunctionHeader> {
+    let original = fn_header_declarator(f, decl, bytes)?;
+    let fallback = || ResolvedFunctionHeader {
+        header: fn_header_declarator(f, decl, bytes).expect("original header"),
+        call_type: function_return_type(f, decl, bytes, TypeRole::Expression),
+        expanded_code: None,
+    };
+    let end = f
+        .child_by_field_name("body")
+        .map_or(f.end_byte(), |body| body.start_byte());
+    let raw = std::str::from_utf8(&bytes[f.start_byte()..end]).ok()?;
+    let Some(expanded) = expand_declaration_tokens(raw, macros, &mut HashSet::new(), &mut 65_536)
+    else {
+        return Some(fallback());
+    };
+    if expanded == raw {
+        return Some(fallback());
+    }
+    let source = if f.kind() == "function_definition" {
+        format!("{expanded}{{}}")
+    } else {
+        expanded
+    };
+    let mut parser = Parser::new();
+    parser
+        .set_language(&tree_sitter_c::LANGUAGE.into())
+        .unwrap();
+    let tree = parser.parse(&source, None)?;
+    let node = named_children(tree.root_node())
+        .into_iter()
+        .find(|node| node.kind() == f.kind());
+    let Some(node) = node.filter(|node| !node.has_error()) else {
+        return Some(fallback());
+    };
+    let candidates = if node.kind() == "function_definition" {
+        node.child_by_field_name("declarator")
+            .into_iter()
+            .collect::<Vec<_>>()
+    } else {
+        let mut cursor = node.walk();
+        node.children_by_field_name("declarator", &mut cursor)
+            .collect()
+    };
+    let Some((expanded_decl, mut header)) = candidates
+        .into_iter()
+        .filter_map(|decl| {
+            fn_header_declarator(node, decl, source.as_bytes()).map(|header| (decl, header))
+        })
+        .find(|(_, header)| header.0 == original.0)
+    else {
+        return Some(fallback());
+    };
+    if header.2.len() != original.2.len() {
+        return Some(fallback());
+    }
+    for (parameter, original) in header.2.iter_mut().zip(original.2) {
+        parameter.code = original.code;
+    }
+    let call_type =
+        function_return_type(node, expanded_decl, source.as_bytes(), TypeRole::Expression);
+    let code = text(f, bytes);
+    let code_start = declaration_code_start(code, macros);
+    let leading = &code[code_start..];
+    let mut token_end = 0;
+    while token_end < leading.len() {
+        let size = macro_identifier_unit(leading.as_bytes(), token_end, token_end == 0);
+        if size == 0 {
+            break;
+        }
+        token_end += size;
+    }
+    let leading_macro = macros.contains_key(&leading[..token_end]);
+    let expanded_code = if node.kind() == "declaration" && leading_macro {
+        expanded_prototype_code(node, source.as_bytes())
+    } else if code_start > 0 {
+        Some(esc(leading))
+    } else {
+        None
+    };
+    Some(ResolvedFunctionHeader {
+        header,
+        call_type,
+        expanded_code,
+    })
+}
+
+fn fn_header(f: Node, b: &[u8]) -> Option<FunctionHeader> {
+    fn_header_declarator(f, f.child_by_field_name("declarator")?, b)
+}
+
+fn function_return_type(f: Node, decl: Node, b: &[u8], role: TypeRole) -> String {
+    let base_node = parenthesized_function_parts(decl)
+        .and_then(|(_, ret)| ret)
+        .or_else(|| macro_declaration_return(f))
+        .or_else(|| f.child_by_field_name("type"));
+    let base = specifier_type_for_role(f, base_node, b, role);
     // `void *bsearch(...)`: pointer levels wrap the function declarator.
     let mut stars = 0;
     let mut cur = decl;
@@ -3431,20 +7105,29 @@ fn fn_header(f: Node, b: &[u8]) -> Option<(String, String, Vec<Param>)> {
             None => break,
         }
     }
-    let ret = format!("{}{}", normalize_type(&base), "*".repeat(stars));
+    format!("{base}{}", "*".repeat(stars))
+}
+
+fn fn_header_declarator(f: Node, decl: Node, b: &[u8]) -> Option<FunctionHeader> {
+    let role = if f.kind() == "function_definition" {
+        TypeRole::DefinitionReturn
+    } else {
+        TypeRole::Declaration
+    };
+    let ret = function_return_type(f, decl, b, role);
+    let parenthesized = parenthesized_function_parts(decl);
     let fd = find_function_declarator(decl)?;
-    let name = fd
-        .child_by_field_name("declarator")
-        .map(|d| innermost_id(d, b))?;
+    let name = if let Some((name, _)) = parenthesized {
+        text(name, b).to_string()
+    } else {
+        fd.child_by_field_name("declarator")
+            .map(|d| innermost_id(d, b))?
+    };
     let mut params = Vec::new();
     if let Some(pl) = fd.child_by_field_name("parameters") {
         for p in named_children(pl) {
             if p.kind() == "parameter_declaration" {
-                let base = normalize_type(
-                    &p.child_by_field_name("type")
-                        .map(|t| text(t, b).to_string())
-                        .unwrap_or("ANY".into()),
-                );
+                let base = declaration_type(p, b, TypeRole::Declaration);
                 let decl = p.child_by_field_name("declarator");
                 let ty = format!(
                     "{base}{}",
@@ -3455,6 +7138,25 @@ fn fn_header(f: Node, b: &[u8]) -> Option<(String, String, Vec<Param>)> {
                     name,
                     ty,
                     code: text(p, b).to_string(),
+                    variadic: false,
+                    call_type: decl
+                        .filter(|decl| find_function_declarator(*decl).is_some())
+                        .map(|decl| function_return_type(p, decl, b, TypeRole::Expression)),
+                });
+            } else if p.kind() == "variadic_parameter" {
+                // CDT uses the previous parameter's type for the synthetic
+                // variadic node, while its signature component remains `...`.
+                let index = params.len() + 1;
+                let ty = params
+                    .last()
+                    .map(|param| param.ty.clone())
+                    .unwrap_or_else(|| "ANY".into());
+                params.push(Param {
+                    name: format!("<param>{index}"),
+                    code: format!("<param>{index}..."),
+                    ty,
+                    variadic: true,
+                    call_type: None,
                 });
             }
         }
@@ -3469,6 +7171,22 @@ fn find_function_declarator(n: Node) -> Option<Node> {
     named_children(n)
         .into_iter()
         .find_map(find_function_declarator)
+}
+
+/// Parentheses and function-pointer dereference retain the callable binding.
+/// Field/index/arithmetic receivers still require independent type resolution.
+fn callable_identifier<'tree>(n: Node<'tree>, b: &[u8]) -> Option<Node<'tree>> {
+    let n = unwrap_paren(n);
+    if n.kind() == "identifier" {
+        Some(n)
+    } else if n.kind() == "pointer_expression"
+        && n.child_by_field_name("operator")
+            .is_some_and(|op| text(op, b) == "*")
+    {
+        callable_identifier(n.child_by_field_name("argument")?, b)
+    } else {
+        None
+    }
 }
 
 fn unwrap_paren(n: Node) -> Node {
@@ -3494,6 +7212,35 @@ fn unary_name(op: &str) -> String {
     format!("<operator>.{n}")
 }
 
+/// Literal-node types from the pinned CDT frontend. Integer types follow the
+/// suffix, even when an unsuffixed value exceeds the range of C's `int`.
+/// Declaration normalization and non-literal macro wrappers have separate rules.
+fn numeric_literal_type(literal: &str) -> &'static str {
+    let hexadecimal = literal.starts_with("0x") || literal.starts_with("0X");
+    let floating = if hexadecimal {
+        // Hexadecimal e/E/f/F characters are digits, not floating markers.
+        literal.contains(['p', 'P'])
+    } else {
+        literal.contains(['.', 'e', 'E'])
+    };
+    if floating {
+        return match literal.as_bytes().last() {
+            Some(b'f' | b'F') => "float",
+            Some(b'l' | b'L') => "longdouble",
+            _ => "double",
+        };
+    }
+    let digits = literal.trim_end_matches(['u', 'U', 'l', 'L']);
+    match literal[digits.len()..].to_ascii_lowercase().as_str() {
+        "u" => "unsigned int",
+        "l" => "longint",
+        "ll" => "longlongint",
+        "ul" | "lu" => "unsigned longint",
+        "ull" | "llu" => "unsigned longlongint",
+        _ => "int",
+    }
+}
+
 /// Type suffix from declarator nesting: `*` per pointer level, `[]` per array
 /// level (Joern renders `int *p` as `int*` and `int vals[]` as `int[]`).
 fn decl_suffix(n: Node, b: &[u8]) -> String {
@@ -3501,8 +7248,8 @@ fn decl_suffix(n: Node, b: &[u8]) -> String {
     let mut cur = n;
     loop {
         match cur.kind() {
-            "pointer_declarator" => parts.push("*".into()),
-            "array_declarator" => {
+            "pointer_declarator" | "abstract_pointer_declarator" => parts.push("*".into()),
+            "array_declarator" | "abstract_array_declarator" => {
                 // CDT keeps the size: `int grid[2][3]` types as `int[2][3]`
                 // (declarator nesting is outermost-last, so reverse).
                 let size = cur
@@ -3522,58 +7269,127 @@ fn decl_suffix(n: Node, b: &[u8]) -> String {
     parts.concat()
 }
 
-/// CDT gives local function-pointer objects a signature-shaped type such as
-/// `int(*)(int,int)`, while function-pointer parameters retain only their base
-/// type. Keep this helper on the declaration path so the established parameter
-/// quirk remains byte-identical to Joern.
-fn function_pointer_type(base: &str, declaration: Node, b: &[u8]) -> Option<String> {
-    let function = find_function_declarator(declaration)?;
-    let target = function.child_by_field_name("declarator")?;
-    if !has_pointer_declarator(target) {
-        return None;
+/// Array members use TypeNameProvider's nodeSignature dimension spelling:
+/// an entire macro invocation expands, while a surrounding source expression
+/// retains its spelling. cleanType then removes whitespace, including within
+/// comments. The macro snapshot belongs to the aggregate's source position.
+fn member_decl_suffix(n: Node, b: &[u8], macros: &HashMap<String, MacroDef>) -> String {
+    let mut parts = Vec::new();
+    let mut cur = n;
+    loop {
+        match cur.kind() {
+            "pointer_declarator" | "abstract_pointer_declarator" => parts.push("*".into()),
+            "array_declarator" | "abstract_array_declarator" => {
+                let size = cur
+                    .child_by_field_name("size")
+                    .map(|size| {
+                        let whole_macro = match size.kind() {
+                            "identifier" => macros
+                                .get(text(size, b))
+                                .is_some_and(|m| m.params.is_none()),
+                            "call_expression" => size
+                                .child_by_field_name("function")
+                                .and_then(|function| macros.get(text(function, b)))
+                                .is_some_and(|m| m.params.is_some()),
+                            _ => false,
+                        };
+                        let spelling = if whole_macro {
+                            expand_body_expression(
+                                text(size, b),
+                                macros,
+                                &mut HashSet::new(),
+                                &mut 65_536,
+                            )
+                        } else {
+                            text(size, b).to_string()
+                        };
+                        spelling
+                            .chars()
+                            .filter(|c| !c.is_whitespace())
+                            .collect::<String>()
+                    })
+                    .unwrap_or_default();
+                parts.push(format!("[{size}]"));
+            }
+            _ => break,
+        }
+        match cur.child_by_field_name("declarator") {
+            Some(child) => cur = child,
+            None => break,
+        }
     }
-    let parameters = function
-        .child_by_field_name("parameters")
-        .map(named_children)
-        .unwrap_or_default()
-        .into_iter()
-        .filter(|parameter| parameter.kind() == "parameter_declaration")
-        .map(|parameter| {
-            let parameter_base = parameter
-                .child_by_field_name("type")
-                .map(|node| normalize_type(text(node, b)))
-                .unwrap_or_else(|| "ANY".to_string());
-            let suffix = parameter
-                .child_by_field_name("declarator")
-                .map(|node| decl_suffix(node, b))
+    parts.reverse();
+    parts.concat()
+}
+
+/// Object declarators use CDT's binding spelling; parameter/member renderers
+/// retain their distinct suffix ordering. A nested declarator contributes its
+/// pointer shape but not inner array dimensions (`*(*p[3])[2]` -> `*(*)[2]`).
+fn object_decl_suffix(n: Node, b: &[u8], nested_name: bool, macros: &MacroState) -> String {
+    let nested = || {
+        n.child_by_field_name("declarator")
+            .map(|d| object_decl_suffix(d, b, nested_name, macros))
+            .unwrap_or_default()
+    };
+    match n.kind() {
+        "pointer_declarator" | "abstract_pointer_declarator" => format!("*{}", nested()),
+        "array_declarator" | "abstract_array_declarator" if !nested_name => {
+            let size = n
+                .child_by_field_name("size")
+                .map(|sz| {
+                    // CDT binding types expand a bare macro dimension, while
+                    // compound dimensions retain their original expression.
+                    if sz.kind() == "identifier" {
+                        expand_declaration_tokens(
+                            text(sz, b),
+                            macros,
+                            &mut HashSet::new(),
+                            &mut 65_536,
+                        )
+                        .unwrap_or_else(|| text(sz, b).to_string())
+                    } else {
+                        text(sz, b).to_string()
+                    }
+                })
                 .unwrap_or_default();
-            format!("{parameter_base}{suffix}")
-        })
-        .collect::<Vec<_>>()
-        .join(",");
-    Some(format!("{base}(*)({parameters})"))
+            format!("{}[{size}]", nested())
+        }
+        "array_declarator" | "abstract_array_declarator" => nested(),
+        "parenthesized_declarator" | "abstract_parenthesized_declarator" => {
+            let inner = n
+                .named_child(0)
+                .map(|d| object_decl_suffix(d, b, true, macros))
+                .unwrap_or_default();
+            if inner.is_empty() {
+                inner
+            } else {
+                format!("({inner})")
+            }
+        }
+        _ => String::new(),
+    }
 }
 
-fn function_pointer_return_type(declared_type: &str) -> &str {
-    declared_type
-        .split_once("(*)")
-        .map_or(declared_type, |(return_type, _)| return_type)
+/// CDT's nested declarator name has empty CODE on synthesized assignment LHSs.
+fn nested_declarator_name(mut n: Node) -> bool {
+    loop {
+        if n.kind() == "parenthesized_declarator" {
+            return true;
+        }
+        let Some(next) = n.child_by_field_name("declarator") else {
+            return false;
+        };
+        n = next;
+    }
 }
 
-fn has_pointer_declarator(node: Node) -> bool {
-    node.kind() == "pointer_declarator"
-        || named_children(node).into_iter().any(has_pointer_declarator)
-}
-
-/// Size expressions of a (possibly multi-dim) array declarator, source order.
-fn array_sizes<'t>(n: Node<'t>) -> Vec<Node<'t>> {
+/// Array dimensions in source order; an absent expression retains unsized [].
+fn array_dimensions<'t>(n: Node<'t>) -> Vec<Option<Node<'t>>> {
     let mut out = Vec::new();
     let mut cur = n;
     loop {
         if cur.kind() == "array_declarator" {
-            if let Some(sz) = cur.child_by_field_name("size") {
-                out.push(sz);
-            }
+            out.push(cur.child_by_field_name("size"));
         } else if cur.kind() != "pointer_declarator" {
             break;
         }
@@ -3606,16 +7422,242 @@ fn assignment_name(op: &str) -> String {
     }
 }
 
-/// CDT renders multi-keyword primitive types reordered and unspaced
-/// (`unsigned long` → `longunsigned`, pinned by corpus/exprs.c). Extend this
-/// table only with oracle-pinned combinations.
-/// CDT's typeForDeclSpecifier rendering, where it diverges from the declared
-/// type: `unsigned char` -> `unsigned`. Extend only with oracle pins.
-fn specifier_type(normalized: &str) -> String {
-    match normalized {
-        "unsigned char" => "unsigned".into(),
-        t => t.into(),
+/// CDT uses distinct primitive spellings for declaration specifiers, definition
+/// returns and resolved expression results. Keep these roles separate: for
+/// `unsigned long`, they are `longunsigned`, `unsigned long` and
+/// `unsigned longint`, respectively (all pinned by primitive-roles fixtures).
+#[derive(Clone, Copy)]
+enum TypeRole {
+    Declaration,
+    DefinitionReturn,
+    Expression,
+}
+
+/// C2 AstForExpressionsCreator passes only sizeof's declaration specifier to
+/// astForIdentifier. Pointer, array and function declarators do not participate;
+/// named/tagged specifiers use a short NAME while primitive CODE keeps qualifiers.
+fn sizeof_type_identifier(descriptor: Node, bytes: &[u8]) -> Phantom {
+    let base = descriptor.child_by_field_name("type").unwrap_or(descriptor);
+    let specifier_end = descriptor
+        .child_by_field_name("declarator")
+        .map_or(descriptor.end_byte(), |declarator| declarator.start_byte());
+    let code = esc(
+        std::str::from_utf8(&bytes[descriptor.start_byte()..specifier_end])
+            .unwrap_or("")
+            .trim(),
+    );
+    let name = if matches!(
+        base.kind(),
+        "struct_specifier" | "union_specifier" | "enum_specifier"
+    ) {
+        base.child_by_field_name("name")
+            .map(|name| text(name, bytes).to_string())
+            .unwrap_or_else(|| code.clone())
+    } else if base.kind() == "type_identifier" {
+        text(base, bytes).to_string()
+    } else {
+        code.clone()
+    };
+    Phantom {
+        name,
+        code,
+        ty: declaration_type(descriptor, bytes, TypeRole::Declaration),
     }
+}
+
+fn declaration_type(declaration: Node, b: &[u8], role: TypeRole) -> String {
+    specifier_type_for_role(
+        declaration,
+        declaration.child_by_field_name("type"),
+        b,
+        role,
+    )
+}
+
+fn specifier_type_for_role(
+    declaration: Node,
+    type_node: Option<Node>,
+    b: &[u8],
+    role: TypeRole,
+) -> String {
+    let raw = type_node.map(|node| text(node, b)).unwrap_or("ANY");
+    let Some(primitive) = primitive_type(raw, role) else {
+        // Typedef names, tagged types and other specifiers retain their existing
+        // handling. In particular this does not change cast type rendering.
+        return normalize_type(raw);
+    };
+    // Qualifiers are siblings of the type node, not part of its source range.
+    // CDT keeps base `volatile`, drops `const`, and ignores qualifiers nested
+    // in pointer declarators for these selected declaration/return properties.
+    let volatile = named_children(declaration)
+        .iter()
+        .any(|node| node.kind() == "type_qualifier" && text(*node, b) == "volatile");
+    if volatile {
+        format!("volatile {primitive}")
+    } else {
+        primitive
+    }
+}
+
+fn primitive_type(raw: &str, role: TypeRole) -> Option<String> {
+    let words: Vec<_> = raw.split_whitespace().collect();
+    if words.is_empty()
+        || words.iter().any(|word| {
+            !matches!(
+                *word,
+                "void"
+                    | "char"
+                    | "short"
+                    | "int"
+                    | "long"
+                    | "signed"
+                    | "unsigned"
+                    | "float"
+                    | "double"
+                    | "_Bool"
+            )
+        })
+    {
+        return None;
+    }
+    let count = |word: &str| words.iter().filter(|&&w| w == word).count();
+    if words
+        .iter()
+        .any(|word| count(word) > if *word == "long" { 2 } else { 1 })
+        || (count("signed") > 0 && count("unsigned") > 0)
+        || (count("short") > 0 && count("long") > 0)
+    {
+        return None;
+    }
+    let signed = count("signed") > 0;
+    let unsigned = count("unsigned") > 0;
+    let explicit_int = count("int") > 0;
+    let width = if count("short") > 0 {
+        "short"
+    } else {
+        match count("long") {
+            0 => "",
+            1 => "long",
+            _ => "longlong",
+        }
+    };
+    for atom in ["void", "char", "float", "double", "_Bool"] {
+        if count(atom) == 0 {
+            continue;
+        }
+        let allowed = match atom {
+            "char" => {
+                width.is_empty()
+                    && !explicit_int
+                    && words.len() == 1 + usize::from(signed || unsigned)
+            }
+            "double" => {
+                !signed
+                    && !unsigned
+                    && !explicit_int
+                    && matches!(width, "" | "long")
+                    && words.len() == 1 + usize::from(width == "long")
+            }
+            _ => words.len() == 1,
+        };
+        if !allowed {
+            return None;
+        }
+        return Some(match atom {
+            "char" if signed => "signedchar".into(),
+            "char" if unsigned => "unsigned char".into(),
+            "double" if width == "long" => "longdouble".into(),
+            "_Bool" if matches!(role, TypeRole::DefinitionReturn) => "bool".into(),
+            _ => atom.into(),
+        });
+    }
+    let ty = match role {
+        TypeRole::Expression => format!("{}{width}int", if unsigned { "unsigned " } else { "" }),
+        TypeRole::DefinitionReturn => format!(
+            "{}{width}{}",
+            if unsigned {
+                if width.is_empty() && !explicit_int {
+                    "unsigned"
+                } else {
+                    "unsigned "
+                }
+            } else if signed {
+                "signed"
+            } else {
+                ""
+            },
+            if explicit_int { "int" } else { "" },
+        ),
+        TypeRole::Declaration if !width.is_empty() => format!(
+            "{width}{}",
+            if unsigned {
+                if explicit_int {
+                    " unsigned int"
+                } else {
+                    "unsigned"
+                }
+            } else if signed {
+                if explicit_int {
+                    "signedint"
+                } else {
+                    "signed"
+                }
+            } else {
+                ""
+            },
+        ),
+        TypeRole::Declaration => format!(
+            "{}{}",
+            if unsigned {
+                if explicit_int {
+                    "unsigned "
+                } else {
+                    "unsigned"
+                }
+            } else if signed {
+                "signed"
+            } else {
+                ""
+            },
+            if explicit_int { "int" } else { "" },
+        ),
+    };
+    Some(ty)
+}
+
+/// CDT's reconstructed initializer CODE for a declaration produced entirely
+/// by a macro: omit the generated name and dimensions, retain type qualifiers
+/// and spell pointer/array operators as separate tokens.
+fn expanded_declaration_code(declaration: Node, mut declarator: Node, b: &[u8]) -> String {
+    let spec_end = declaration
+        .child_by_field_name("type")
+        .map(|node| node.end_byte())
+        .unwrap_or(declaration.start_byte());
+    let mut parts: Vec<_> = std::str::from_utf8(&b[declaration.start_byte()..spec_end])
+        .unwrap_or("")
+        .split_whitespace()
+        .filter(|word| !matches!(*word, "struct" | "union" | "enum"))
+        .map(str::to_string)
+        .collect();
+    loop {
+        match declarator.kind() {
+            "pointer_declarator" => {
+                parts.push("*".into());
+                for child in named_children(declarator) {
+                    if child.kind() == "type_qualifier" {
+                        parts.push(text(child, b).to_string());
+                    }
+                }
+            }
+            "array_declarator" => parts.push("[]".into()),
+            _ => {}
+        }
+        let Some(child) = declarator.child_by_field_name("declarator") else {
+            break;
+        };
+        declarator = child;
+    }
+    esc(&parts.join(" "))
 }
 
 fn normalize_type(base: &str) -> String {
@@ -3683,322 +7725,897 @@ fn flatten_comma<'t>(n: Node<'t>, out: &mut Vec<Node<'t>>) {
     }
 }
 
+// A typedef aggregate owns one body; its tag (or first anonymous alias)
+// names that body independently of the alias declarations which follow it.
+fn typedef_aggregate(node: Node) -> Option<Node> {
+    if node.kind() != "type_definition" {
+        return None;
+    }
+    node.child_by_field_name("type").filter(|n| {
+        matches!(n.kind(), "struct_specifier" | "union_specifier")
+            && n.child_by_field_name("body").is_some()
+    })
+}
+
+fn typedef_alias_name(node: Node, bytes: &[u8]) -> String {
+    if matches!(node.kind(), "identifier" | "type_identifier") {
+        text(node, bytes).to_string()
+    } else {
+        node.child_by_field_name("declarator")
+            .map(|child| typedef_alias_name(child, bytes))
+            .unwrap_or_default()
+    }
+}
+
+fn aggregate_name(node: Node, bytes: &[u8]) -> String {
+    node.child_by_field_name("name")
+        .map(|name| text(name, bytes).to_string())
+        .or_else(|| {
+            node.parent()
+                .filter(|parent| typedef_aggregate(*parent) == Some(node))
+                .and_then(|parent| typedef_declarators(parent).first().copied())
+                .map(|alias| typedef_alias_name(alias, bytes))
+        })
+        .unwrap_or_default()
+}
+
+// A named body and its same-spelled typedef alias are distinct TYPE_DECLs.
+// Joern's duplicate suffix belongs to the alias, while TYPE references retain
+// the original aggregate name.
+fn aggregate_alias_full_name(aggregate: Node, alias: Node, bytes: &[u8]) -> String {
+    let name = typedef_alias_name(alias, bytes);
+    if aggregate
+        .child_by_field_name("name")
+        .is_some_and(|tag| text(tag, bytes) == name)
+    {
+        format!("{name}<duplicate>0")
+    } else {
+        name
+    }
+}
+
+fn aggregate_code(node: Node, bytes: &[u8]) -> String {
+    let start = node
+        .parent()
+        .filter(|parent| typedef_aggregate(*parent) == Some(node))
+        .map_or(node.start_byte(), |parent| parent.start_byte());
+    esc(std::str::from_utf8(&bytes[start..node.end_byte()]).unwrap_or(""))
+}
+
 fn needs_clinit(n: Node, _b: &[u8]) -> bool {
     let Some(body) = n.child_by_field_name("body") else {
         return false;
     };
     named_children(body).iter().any(|f| {
         (f.kind() == "field_declaration"
-            && named_children(*f)
-                .iter()
-                .any(|d| d.kind() == "array_declarator" && d.child_by_field_name("size").is_some()))
+            && named_children(*f).iter().any(|d| {
+                d.kind() == "array_declarator" && array_dimensions(*d).iter().any(Option::is_some)
+            }))
             || (f.kind() == "enumerator" && f.child_by_field_name("value").is_some())
     })
 }
 
-/// C-preprocessor substitution for a single macro body. Parameters inside
-/// ordinary string/character literals are untouched; `#param` stringizes the
-/// raw argument, `left ## right` pastes tokens, and `__VA_ARGS__` receives all
-/// arguments after the fixed parameters. Nested macro expansion is a separate
-/// pass ([`expand_macros_text`]) so the outer invocation remains the only
-/// INLINED call in the CPG, matching CDT/Joern.
-fn substitute(body: &str, params: &[String], args: &[String]) -> String {
-    const EMPTY_VARIADIC: char = '\u{1e}';
-    let variadic = params.iter().position(|param| param == "__VA_ARGS__");
-    let bindings: HashMap<&str, String> = params
-        .iter()
-        .enumerate()
-        .map(|(index, parameter)| {
-            let value = if Some(index) == variadic {
-                args.iter()
-                    .skip(index)
-                    .cloned()
-                    .collect::<Vec<_>>()
-                    .join(", ")
-            } else {
-                args.get(index).cloned().unwrap_or_default()
-            };
-            (parameter.as_str(), value)
-        })
-        .collect();
-    let mut out = String::new();
-    let bytes = body.as_bytes();
-    let mut i = 0;
-    while i < bytes.len() {
-        let c = bytes[i] as char;
-        if c == '"' || c == '\'' {
-            let quote = bytes[i];
-            out.push(c);
-            i += 1;
-            while i < bytes.len() {
-                let current = bytes[i];
-                out.push(current as char);
-                i += 1;
-                if current == b'\\' && i < bytes.len() {
-                    out.push(bytes[i] as char);
-                    i += 1;
-                } else if current == quote {
-                    break;
-                }
-            }
-        } else if c == '#'
-            && bytes.get(i + 1) != Some(&b'#')
-            && i.checked_sub(1).and_then(|index| bytes.get(index)) != Some(&b'#')
-        {
-            let mut name_start = i + 1;
-            while bytes.get(name_start).is_some_and(u8::is_ascii_whitespace) {
-                name_start += 1;
-            }
-            let mut name_end = name_start;
-            while bytes
-                .get(name_end)
-                .is_some_and(|byte| byte.is_ascii_alphanumeric() || *byte == b'_')
-            {
-                name_end += 1;
-            }
-            let name = &body[name_start..name_end];
-            if let Some(argument) = bindings.get(name) {
-                let normalized = argument.split_whitespace().collect::<Vec<_>>().join(" ");
-                out.push('"');
-                out.push_str(&normalized.replace('\\', "\\\\").replace('"', "\\\""));
-                out.push('"');
-                i = name_end;
-            } else {
-                out.push('#');
-                i += 1;
-            }
-        } else if c.is_ascii_alphabetic() || c == '_' {
-            let start = i;
-            while i < bytes.len()
-                && ((bytes[i] as char).is_ascii_alphanumeric() || bytes[i] == b'_')
-            {
-                i += 1;
-            }
-            let word = &body[start..i];
-            if let Some(argument) = bindings.get(word) {
-                if word == "__VA_ARGS__" && argument.is_empty() {
-                    out.push(EMPTY_VARIADIC);
-                } else {
-                    out.push_str(argument);
-                }
-            } else {
-                out.push_str(word);
-            }
-        } else {
-            out.push(c);
-            i += 1;
-        }
-    }
-
-    while let Some(paste) = out.find("##") {
-        let left = out[..paste].trim_end();
-        let right = out[paste + 2..].trim_start();
-        let mut joined = left.to_string();
-        let right = if let Some(rest) = right.strip_prefix(EMPTY_VARIADIC) {
-            if joined.ends_with(',') {
-                joined.pop();
-                joined = joined.trim_end().to_string();
-            }
-            rest
-        } else {
-            right
-        };
-        joined.push_str(right);
-        out = joined;
-    }
-    out.replace(EMPTY_VARIADIC, "")
-}
-
-/// Parameters that survive as ordinary expressions in the replacement list.
-/// Stringized and pasted parameters are consumed by preprocessing and do not
-/// appear as argument AST children in Joern's INLINED call.
-fn ordinary_macro_parameters(body: &str, params: &[String]) -> Vec<bool> {
-    let mut used = vec![false; params.len()];
-    let bytes = body.as_bytes();
-    let mut i = 0;
-    while i < bytes.len() {
-        if matches!(bytes[i], b'"' | b'\'') {
-            let quote = bytes[i];
-            i += 1;
-            while i < bytes.len() {
-                if bytes[i] == b'\\' {
-                    i = (i + 2).min(bytes.len());
-                } else {
-                    let done = bytes[i] == quote;
-                    i += 1;
-                    if done {
-                        break;
-                    }
-                }
-            }
-            continue;
-        }
-        if !bytes[i].is_ascii_alphabetic() && bytes[i] != b'_' {
-            i += 1;
-            continue;
-        }
-        let start = i;
-        while i < bytes.len() && (bytes[i].is_ascii_alphanumeric() || bytes[i] == b'_') {
-            i += 1;
-        }
-        let word = &body[start..i];
-        let Some(index) = params.iter().position(|param| param == word) else {
-            continue;
-        };
-        let left = body[..start].trim_end().as_bytes();
-        let right = body[i..].trim_start().as_bytes();
-        let stringized = left.ends_with(b"#") && !left.ends_with(b"##");
-        let pasted = left.ends_with(b"##") || right.starts_with(b"##");
-        if !stringized && !pasted {
-            used[index] = true;
-        }
-    }
-    used
-}
-
-/// Recursively expand object/function macros in replacement text. The active
-/// macro is kept in `expanding`, reproducing the preprocessor's recursion
-/// suppression and bounding malformed/cyclic definitions.
-fn expand_macros_text(
-    input: &str,
-    macros: &HashMap<String, MacroDef>,
-    depth: usize,
-    expanding: &mut HashSet<String>,
-) -> String {
-    if depth >= 64 {
-        return input.to_string();
-    }
-    let bytes = input.as_bytes();
+/// CDT's MacroArgumentExtractor joins lexical tokens before MacroHandler
+/// removes ASCII spaces from its lookup key. Newlines, tabs and comments
+/// between tokens therefore never participate in matching. Only this lookup
+/// key is normalized; copied nodes retain their original literal spelling.
+fn macro_argument_match_code(source: &str) -> String {
+    let bytes = source.as_bytes();
     let mut out = String::new();
     let mut i = 0;
     while i < bytes.len() {
-        if matches!(bytes[i], b'"' | b'\'') {
-            let quote = bytes[i];
-            let start = i;
-            i += 1;
-            while i < bytes.len() {
-                if bytes[i] == b'\\' {
-                    i = (i + 2).min(bytes.len());
-                } else {
-                    let done = bytes[i] == quote;
-                    i += 1;
-                    if done {
-                        break;
-                    }
-                }
+        if let Some(end) = macro_opaque_end(bytes, i) {
+            if !bytes[i..].starts_with(b"/*") && !bytes[i..].starts_with(b"//") {
+                out.extend(source[i..end].chars().filter(|&c| c != ' '));
             }
-            out.push_str(&input[start..i]);
-            continue;
-        }
-        if !bytes[i].is_ascii_alphabetic() && bytes[i] != b'_' {
-            out.push(bytes[i] as char);
-            i += 1;
-            continue;
-        }
-        let start = i;
-        while i < bytes.len() && (bytes[i].is_ascii_alphanumeric() || bytes[i] == b'_') {
-            i += 1;
-        }
-        let name = &input[start..i];
-        let Some(definition) = macros.get(name) else {
-            out.push_str(name);
-            continue;
-        };
-        if expanding.contains(name) {
-            out.push_str(name);
-            continue;
-        }
-        let (arguments, end) = if let Some(parameters) = definition.params.as_ref() {
-            let mut open = i;
-            while bytes.get(open).is_some_and(u8::is_ascii_whitespace) {
-                open += 1;
-            }
-            if bytes.get(open) != Some(&b'(') {
-                out.push_str(name);
-                continue;
-            }
-            let Some((arguments, end)) = parse_macro_arguments(input, open) else {
-                out.push_str(name);
-                continue;
-            };
-            (substitute(&definition.body, parameters, &arguments), end)
+            i = end;
         } else {
-            (definition.body.clone(), i)
-        };
-        expanding.insert(name.to_string());
-        out.push_str(&expand_macros_text(
-            &arguments,
-            macros,
-            depth + 1,
-            expanding,
-        ));
-        expanding.remove(name);
-        i = end;
+            let c = source[i..].chars().next().unwrap();
+            if !c.is_ascii_whitespace() {
+                out.push(c);
+            }
+            i += c.len_utf8();
+        }
     }
     out
 }
 
-fn parse_macro_arguments(input: &str, open: usize) -> Option<(Vec<String>, usize)> {
-    let bytes = input.as_bytes();
+/// Substitute preprocessing tokens, keeping literals opaque to # and ##.
+fn substitute(body: &str, params: &[String], args: &[String]) -> String {
+    let argument = |word: &str| -> Option<String> {
+        let index = params.iter().position(|p| p == word)?;
+        if word == "__VA_ARGS__" {
+            Some(args.get(index..).unwrap_or_default().join(", "))
+        } else {
+            args.get(index).cloned()
+        }
+    };
+    let mut out = String::new();
+    let bytes = body.as_bytes();
+    let mut i = 0;
+    while i < bytes.len() {
+        if let Some(end) = macro_opaque_end(bytes, i) {
+            out.push_str(&body[i..end]);
+            i = end;
+        } else if bytes[i..].starts_with(b"##") {
+            out.truncate(out.trim_end().len());
+            i += 2;
+            while bytes.get(i).is_some_and(u8::is_ascii_whitespace) {
+                i += 1;
+            }
+        } else if bytes[i] == b'#' {
+            let hash = i;
+            i += 1;
+            while bytes.get(i).is_some_and(u8::is_ascii_whitespace) {
+                i += 1;
+            }
+            let start = i;
+            while i < bytes.len() && (bytes[i].is_ascii_alphanumeric() || bytes[i] == b'_') {
+                i += 1;
+            }
+            if let Some(value) = argument(&body[start..i]) {
+                out.push_str(&stringify_macro_argument(&value));
+            } else {
+                out.push_str(&body[hash..i]);
+            }
+        } else if macro_identifier_unit(bytes, i, true) > 0 {
+            let start = i;
+            i += macro_identifier_unit(bytes, i, true);
+            while i < bytes.len() {
+                let next = macro_identifier_unit(bytes, i, false);
+                if next == 0 {
+                    break;
+                }
+                i += next;
+            }
+            let word = &body[start..i];
+            out.push_str(argument(word).as_deref().unwrap_or(word));
+        } else {
+            let c = body[i..].chars().next().unwrap();
+            out.push(c);
+            i += c.len_utf8();
+        }
+    }
+    out
+}
+
+fn stringify_macro_argument(source: &str) -> String {
+    let source = macro_argument_text(source);
+    let bytes = source.as_bytes();
+    let mut normalized = String::new();
+    let mut i = 0;
+    while i < bytes.len() {
+        if let Some(end) = macro_opaque_end(bytes, i) {
+            normalized.push_str(&source[i..end]);
+            i = end;
+        } else if bytes[i].is_ascii_whitespace() {
+            normalized.push(' ');
+            while bytes.get(i).is_some_and(u8::is_ascii_whitespace) {
+                i += 1;
+            }
+        } else {
+            let c = source[i..].chars().next().unwrap();
+            normalized.push(c);
+            i += c.len_utf8();
+        }
+    }
+    format!(
+        "\"{}\"",
+        normalized.replace('\\', "\\\\").replace('"', "\\\"")
+    )
+}
+
+fn expanded_cast_descriptor(desc: Node, bytes: &[u8]) -> String {
+    fn declarator_code(node: Node, bytes: &[u8]) -> String {
+        let inner = node.child_by_field_name("declarator");
+        match node.kind() {
+            "abstract_pointer_declarator" => {
+                let end = inner.map_or(node.end_byte(), |n| n.start_byte());
+                let prefix = std::str::from_utf8(&bytes[node.start_byte()..end])
+                    .unwrap_or("")
+                    .trim();
+                let qualifiers = prefix.strip_prefix('*').unwrap_or(prefix).trim();
+                let nested = inner.map(|n| declarator_code(n, bytes)).unwrap_or_default();
+                ["*", qualifiers, nested.as_str()]
+                    .into_iter()
+                    .filter(|part| !part.is_empty())
+                    .collect::<Vec<_>>()
+                    .join(" ")
+            }
+            "abstract_array_declarator" => {
+                let nested = inner.map(|n| declarator_code(n, bytes)).unwrap_or_default();
+                if nested.starts_with('(') {
+                    format!("[] {nested}")
+                } else {
+                    format!("[]{nested}")
+                }
+            }
+            "abstract_parenthesized_declarator" => {
+                let nested = inner.or_else(|| named_children(node).into_iter().next());
+                nested.map_or_else(
+                    || text(node, bytes).to_string(),
+                    |n| format!("({})", declarator_code(n, bytes)),
+                )
+            }
+            _ => text(node, bytes).to_string(),
+        }
+    }
+    let Some(base) = desc.child_by_field_name("type") else {
+        return text(desc, bytes).to_string();
+    };
+    let raw = text(base, bytes);
+    let rendered = ["struct ", "union ", "enum "]
+        .into_iter()
+        .find_map(|prefix| raw.strip_prefix(prefix))
+        .unwrap_or(raw);
+    let rendered = if rendered == "unsigned long" {
+        "long unsigned"
+    } else {
+        rendered
+    };
+    let suffix = desc.child_by_field_name("declarator").map_or_else(
+        || {
+            std::str::from_utf8(&bytes[base.end_byte()..desc.end_byte()])
+                .unwrap_or("")
+                .trim()
+                .to_string()
+        },
+        |node| declarator_code(node, bytes),
+    );
+    [
+        std::str::from_utf8(&bytes[desc.start_byte()..base.start_byte()])
+            .unwrap_or("")
+            .trim(),
+        rendered,
+        suffix.as_str(),
+    ]
+    .into_iter()
+    .filter(|part| !part.is_empty())
+    .collect::<Vec<_>>()
+    .join(" ")
+}
+
+fn macro_opaque_end(bytes: &[u8], start: usize) -> Option<usize> {
+    if bytes[start..].starts_with(b"/*") {
+        return Some(
+            bytes[start + 2..]
+                .windows(2)
+                .position(|w| w == b"*/")
+                .map_or(bytes.len(), |end| start + end + 4),
+        );
+    }
+    if bytes[start..].starts_with(b"//") {
+        let mut i = start + 2;
+        while i < bytes.len() {
+            if bytes[i..].starts_with(b"\\\r\n") {
+                i += 3;
+            } else if bytes[i..].starts_with(b"\\\n") {
+                i += 2;
+            } else if bytes[i] == b'\n' {
+                return Some(i);
+            } else {
+                i += 1;
+            }
+        }
+        return Some(i);
+    }
+    let quote = bytes[start];
+    if !matches!(quote, b'\'' | b'"') {
+        return None;
+    }
+    let mut i = start + 1;
+    while i < bytes.len() {
+        if bytes[i] == b'\\' {
+            i = (i + 2).min(bytes.len());
+        } else if bytes[i] == quote {
+            return Some(i + 1);
+        } else {
+            i += 1;
+        }
+    }
+    Some(i)
+}
+
+/// Scan one macro argument list as preprocessing tokens, before C expression
+/// parsing. Operator-only and type arguments occupy slots even when they have
+/// no named syntax node. Only parentheses nest arguments; quoted tokens and
+/// comments are opaque to commas and parentheses.
+fn macro_arguments(source: &str, open: usize) -> Option<(Vec<String>, usize)> {
+    let bytes = source.as_bytes();
     if bytes.get(open) != Some(&b'(') {
         return None;
     }
-    let mut arguments = Vec::new();
-    let mut depth = 1_u32;
-    let mut start = open + 1;
-    let mut i = start;
-    let mut quote = None;
+    // Translation phase 2 precedes comment and argument recognition. Keep
+    // offsets into the original invocation so a splice forming `/*` or `//`
+    // cannot expose a comma or close parenthesis inside the logical comment.
+    let mut spliced = String::new();
+    let mut removed = Vec::new();
+    let mut copied = open;
+    let mut i = open;
     while i < bytes.len() {
-        if let Some(delimiter) = quote {
-            if bytes[i] == b'\\' {
-                i = (i + 2).min(bytes.len());
-                continue;
-            }
-            if bytes[i] == delimiter {
-                quote = None;
-            }
+        let count = if bytes[i..].starts_with(b"\\\r\n") {
+            3
+        } else if bytes[i..].starts_with(b"\\\n") {
+            2
+        } else {
             i += 1;
             continue;
+        };
+        spliced.push_str(&source[copied..i]);
+        removed.push((spliced.len(), count));
+        i += count;
+        copied = i;
+    }
+    if !removed.is_empty() {
+        spliced.push_str(&source[copied..]);
+        let (args, end) = macro_arguments(&spliced, 0)?;
+        let removed_before_end: usize = removed
+            .iter()
+            .filter(|(at, _)| *at <= end)
+            .map(|(_, count)| count)
+            .sum();
+        return Some((args, open + end + removed_before_end));
+    }
+    let mut args = Vec::new();
+    let mut argument = open + 1;
+    let mut end = argument;
+    let mut nesting = 1;
+    while end < bytes.len() {
+        if let Some(next) = macro_opaque_end(bytes, end) {
+            end = next;
+            continue;
         }
-        match bytes[i] {
-            b'"' | b'\'' => quote = Some(bytes[i]),
-            b'(' => depth += 1,
+        match bytes[end] {
+            b'(' => nesting += 1,
             b')' => {
-                depth -= 1;
-                if depth == 0 {
-                    let final_argument = input[start..i].trim();
-                    if !final_argument.is_empty() || !arguments.is_empty() {
-                        arguments.push(final_argument.to_string());
-                    }
-                    return Some((arguments, i + 1));
+                nesting -= 1;
+                if nesting == 0 {
+                    break;
                 }
             }
-            b',' if depth == 1 => {
-                arguments.push(input[start..i].trim().to_string());
-                start = i + 1;
+            b',' if nesting == 1 => {
+                args.push(macro_argument_text(&source[argument..end]));
+                argument = end + 1;
             }
             _ => {}
         }
-        i += 1;
+        end += 1;
     }
-    None
+    if nesting != 0 {
+        return None;
+    }
+    if argument != end || !args.is_empty() {
+        args.push(macro_argument_text(&source[argument..end]));
+    }
+    Some((args, end))
 }
 
-/// The expression node of a parsed expansion (`void __m() { <exp>; }`).
+/// Comments become whitespace before substitution. Splices disappear even in
+/// quoted tokens, while escaped quotes and literal comma/parenthesis bytes stay.
+fn macro_argument_text(source: &str) -> String {
+    let spliced = source.replace("\\\r\n", "").replace("\\\n", "");
+    let bytes = spliced.as_bytes();
+    let mut out = String::new();
+    let mut copied = 0;
+    let mut i = 0;
+    while i < bytes.len() {
+        if let Some(end) = macro_opaque_end(bytes, i) {
+            if bytes[i..].starts_with(b"/*") || bytes[i..].starts_with(b"//") {
+                out.push_str(&spliced[copied..i]);
+                out.push(' ');
+                copied = end;
+            }
+            i = end;
+        } else {
+            i += 1;
+        }
+    }
+    out.push_str(&spliced[copied..]);
+    out.trim().to_string()
+}
+
+// Consume the complete token even when its spelling is outside the ASCII
+// macro-name registry. Otherwise an ASCII suffix of an extended identifier
+// could be mistaken for a separate macro invocation.
+fn macro_identifier_unit(bytes: &[u8], start: usize, first: bool) -> usize {
+    let b = bytes[start];
+    if b.is_ascii_alphabetic()
+        || matches!(b, b'_' | b'$')
+        || !b.is_ascii()
+        || (!first && b.is_ascii_digit())
+    {
+        return 1;
+    }
+    if b == b'\\' {
+        let digits = match bytes.get(start + 1) {
+            Some(b'u') => 4,
+            Some(b'U') => 8,
+            _ => return 0,
+        };
+        if bytes
+            .get(start + 2..start + 2 + digits)
+            .is_some_and(|value| value.iter().all(u8::is_ascii_hexdigit))
+        {
+            return 2 + digits;
+        }
+    }
+    0
+}
+
+/// Expand known function macros using preprocessing-token parentheses. Strings
+/// and comments are opaque; ordinary calls and type spellings remain untouched.
+fn expand_function_macro_tokens(
+    source: &str,
+    macros: &HashMap<String, MacroDef>,
+    disabled: &mut HashSet<String>,
+    budget: &mut usize,
+) -> String {
+    let bytes = source.as_bytes();
+    let mut result = String::new();
+    let mut copied = 0;
+    let mut i = 0;
+    while i < bytes.len() && *budget > 0 {
+        if let Some(end) = macro_opaque_end(bytes, i) {
+            i = end;
+            continue;
+        }
+        if bytes[i].is_ascii_digit()
+            || (bytes[i] == b'.' && bytes.get(i + 1).is_some_and(u8::is_ascii_digit))
+        {
+            // A preprocessing number includes identifier suffixes and signs
+            // after e/E/p/P, even when the resulting C literal is invalid.
+            // Do not turn its suffix into a function-macro invocation.
+            i += 1;
+            while i < bytes.len() {
+                if matches!(bytes[i], b'+' | b'-')
+                    && matches!(bytes[i - 1], b'e' | b'E' | b'p' | b'P')
+                    || bytes[i] == b'.'
+                {
+                    i += 1;
+                } else {
+                    let next = macro_identifier_unit(bytes, i, false);
+                    if next == 0 {
+                        break;
+                    }
+                    i += next;
+                }
+            }
+            continue;
+        }
+        let first = macro_identifier_unit(bytes, i, true);
+        if first == 0 {
+            i += 1;
+            continue;
+        }
+        let start = i;
+        i += first;
+        while i < bytes.len() {
+            let next = macro_identifier_unit(bytes, i, false);
+            if next == 0 {
+                break;
+            }
+            i += next;
+        }
+        let name = &source[start..i];
+        let Some(definition) = macros.get(name).filter(|m| m.params.is_some()) else {
+            continue;
+        };
+        if disabled.contains(name) || disabled.len() >= 256 {
+            continue;
+        }
+        let mut open = i;
+        loop {
+            while open < bytes.len() && bytes[open].is_ascii_whitespace() {
+                open += 1;
+            }
+            if open < bytes.len()
+                && (bytes[open..].starts_with(b"/*") || bytes[open..].starts_with(b"//"))
+            {
+                open = macro_opaque_end(bytes, open).unwrap();
+            } else {
+                break;
+            }
+        }
+        if bytes.get(open) != Some(&b'(') {
+            continue;
+        }
+        let Some((args, end)) = macro_arguments(source, open) else {
+            continue;
+        };
+        *budget -= 1;
+        disabled.insert(name.to_string());
+        let replaced = substitute(
+            &definition.body,
+            definition.params.as_deref().unwrap(),
+            &args,
+        );
+        let expanded = expand_body_expression(&replaced, macros, disabled, budget);
+        disabled.remove(name);
+        result.push_str(&source[copied..start]);
+        result.push_str(&expanded);
+        copied = end + 1;
+        i = copied;
+    }
+    result.push_str(&source[copied..]);
+    result
+}
+
+#[cfg(test)]
+mod macro_token_tests {
+    use super::*;
+
+    #[test]
+    fn substitution_preserves_literals_unicode_and_variadic_tokens() {
+        let params = vec!["x".into(), "__VA_ARGS__".into()];
+        let args = vec!["café".into(), "first".into(), "second".into()];
+        assert_eq!(
+            substitute("x ## _suffix, __VA_ARGS__, \"#x ##\"", &params, &args),
+            "café_suffix, first, second, \"#x ##\""
+        );
+        assert_eq!(
+            substitute("#x", &["x".into()], &["a   + \"b  c\"".into()]),
+            "\"a + \\\"b  c\\\"\""
+        );
+    }
+
+    #[test]
+    fn declaration_expansion_preserves_opaque_preprocessing_tokens() {
+        let macros = HashMap::from([(
+            "M".to_string(),
+            MacroDef {
+                params: None,
+                body: "int".to_string(),
+                file: "test.c".to_string(),
+                directive: String::new(),
+            },
+        )]);
+        let source = r#"M éM \u00e9M 1M 0xM 1e+M "M" 'M' /* M */"#;
+        assert_eq!(
+            expand_declaration_tokens(source, &macros, &mut HashSet::new(), &mut 65_536),
+            Some(r#"int éM \u00e9M 1M 0xM 1e+M "M" 'M' /* M */"#.to_string())
+        );
+    }
+
+    #[test]
+    fn declaration_expansion_bounds_recursive_and_oversized_replacements() {
+        let macros = HashMap::from([
+            (
+                "A".to_string(),
+                MacroDef {
+                    params: None,
+                    body: "B".to_string(),
+                    file: "test.c".to_string(),
+                    directive: String::new(),
+                },
+            ),
+            (
+                "B".to_string(),
+                MacroDef {
+                    params: None,
+                    body: "A".to_string(),
+                    file: "test.c".to_string(),
+                    directive: String::new(),
+                },
+            ),
+            (
+                "BIG".to_string(),
+                MacroDef {
+                    params: None,
+                    body: "x".repeat(65_536),
+                    file: "test.c".to_string(),
+                    directive: String::new(),
+                },
+            ),
+        ]);
+        assert_eq!(
+            expand_declaration_tokens("A f(A x)", &macros, &mut HashSet::new(), &mut 65_536),
+            Some("A f(A x)".to_string())
+        );
+        assert!(
+            expand_declaration_tokens("BIG", &macros, &mut HashSet::new(), &mut 65_536).is_none()
+        );
+    }
+
+    #[test]
+    fn argument_slots_follow_preprocessing_tokens() {
+        let source = r#"(+, (a,b), union U *, "comma,) /* // \\\"", ')',, value,) tail"#;
+        let (args, end) = macro_arguments(source, 0).unwrap();
+        assert_eq!(
+            args,
+            [
+                "+",
+                "(a,b)",
+                "union U *",
+                r#""comma,) /* // \\\"""#,
+                "')'",
+                "",
+                "value",
+                ""
+            ]
+        );
+        assert_eq!(&source[end..], ") tail");
+        assert!(macro_arguments("(a, (b)", 0).is_none());
+    }
+
+    #[test]
+    fn argument_splices_precede_comment_recognition() {
+        for newline in ["\n", "\r\n"] {
+            let source = format!(
+                "prefix(/\\{newline}* ignored , ) */ +, // ignored \\{newline}, )\n a, b) tail"
+            );
+            let (args, end) = macro_arguments(&source, 6).unwrap();
+            assert_eq!(args, ["+", "a", "b"]);
+            assert_eq!(&source[end..], ") tail");
+        }
+    }
+
+    #[test]
+    fn function_macro_names_inside_preprocessing_numbers_remain_opaque() {
+        let macros = HashMap::from([(
+            "M".to_string(),
+            MacroDef {
+                params: Some(vec!["x".to_string()]),
+                body: "7".to_string(),
+                directive: "#define M(x) 7".to_string(),
+                file: "main.c".to_string(),
+            },
+        )]);
+        for source in ["1M(2)", "0xM(2)", "1e+M(2)", "0x1p-M(2)", ".1M(2)"] {
+            assert_eq!(
+                expand_function_macro_tokens(source, &macros, &mut HashSet::new(), &mut 65_536),
+                source,
+            );
+        }
+        assert_eq!(
+            expand_function_macro_tokens("1 + M(2)", &macros, &mut HashSet::new(), &mut 65_536),
+            "1 + 7",
+        );
+    }
+}
+
+/// Render CDT's expanded expression spelling. A shared work budget and
+/// disabled-macro set stop replacement cycles before the AST emitter runs.
+fn expand_body_expression(
+    source: &str,
+    macros: &HashMap<String, MacroDef>,
+    disabled: &mut HashSet<String>,
+    budget: &mut usize,
+) -> String {
+    fn render(
+        node: Node,
+        bytes: &[u8],
+        macros: &HashMap<String, MacroDef>,
+        disabled: &mut HashSet<String>,
+        budget: &mut usize,
+    ) -> String {
+        let raw = text(node, bytes);
+        if *budget == 0 {
+            return raw.to_string();
+        }
+        *budget -= 1;
+        // Object-like macros are preprocessing tokens even after . or ->.
+        let invoked = if matches!(
+            node.kind(),
+            "identifier" | "type_identifier" | "field_identifier"
+        ) {
+            macros
+                .get(raw)
+                .filter(|m| m.params.is_none())
+                .map(|m| (raw, m, Vec::new()))
+        } else {
+            None
+        };
+        if let Some((name, definition, args)) = invoked {
+            if disabled.len() < 256 && disabled.insert(name.to_string()) {
+                let replaced = substitute(
+                    &definition.body,
+                    definition.params.as_deref().unwrap_or_default(),
+                    &args,
+                );
+                let result = expand_body_expression(&replaced, macros, disabled, budget);
+                disabled.remove(name);
+                return result;
+            }
+        }
+        let mut child = |field: &str| {
+            node.child_by_field_name(field)
+                .map(|n| render(n, bytes, macros, disabled, budget))
+                .unwrap_or_default()
+        };
+        match node.kind() {
+            "binary_expression" | "assignment_expression" => {
+                let left = child("left");
+                let op = node
+                    .child_by_field_name("operator")
+                    .map(|n| text(n, bytes))
+                    .unwrap_or("");
+                let right = child("right");
+                format!("{left} {op} {right}")
+            }
+            "unary_expression" => {
+                let op = node
+                    .child_by_field_name("operator")
+                    .map(|n| text(n, bytes))
+                    .unwrap_or("");
+                let argument = child("argument");
+                format!("{op}{argument}")
+            }
+            "comma_expression" => {
+                let left = child("left");
+                let right = child("right");
+                format!("{left}, {right}")
+            }
+            "conditional_expression" => {
+                let a = child("condition");
+                let b = child("consequence");
+                let c = child("alternative");
+                format!("{a} ? {b} : {c}")
+            }
+            "call_expression" => {
+                let function = child("function");
+                let args = node
+                    .child_by_field_name("arguments")
+                    .map(named_children)
+                    .unwrap_or_default()
+                    .into_iter()
+                    .map(|n| render(n, bytes, macros, disabled, budget))
+                    .collect::<Vec<_>>()
+                    .join(", ");
+                let call = format!("{function}({args})");
+                // An object macro can supply the function macro name. Rescan
+                // that newly formed invocation with the same disabled set.
+                if node
+                    .child_by_field_name("function")
+                    .is_some_and(|original| text(original, bytes) != function)
+                    && disabled.len() < 256
+                    && !disabled.contains(&function)
+                    && macros.get(&function).is_some_and(|m| m.params.is_some())
+                {
+                    expand_body_expression(&call, macros, disabled, budget)
+                } else {
+                    call
+                }
+            }
+            "sizeof_expression" => {
+                if node.child_by_field_name("type").is_some() {
+                    format!("sizeof ({})", child("type"))
+                } else if let Some(mut value) = node.child_by_field_name("value") {
+                    // CDT renders the operator token separately from its
+                    // operand, and removes trivia just inside parentheses.
+                    // Ordinary source CODE bypasses this expansion renderer.
+                    let mut parentheses = 0;
+                    while value.kind() == "parenthesized_expression" {
+                        let mut children = named_children(value)
+                            .into_iter()
+                            .filter(|n| n.kind() != "comment");
+                        let Some(inner) = children.next() else {
+                            break;
+                        };
+                        // Error recovery can retain multiple named children.
+                        // Keep that complete spelling instead of dropping a
+                        // sibling while removing only surrounding trivia.
+                        if children.next().is_some() {
+                            break;
+                        }
+                        parentheses += 1;
+                        value = inner;
+                    }
+                    let operand = render(value, bytes, macros, disabled, budget);
+                    format!(
+                        "sizeof {}{}{}",
+                        "(".repeat(parentheses),
+                        operand,
+                        ")".repeat(parentheses)
+                    )
+                } else {
+                    raw.to_string()
+                }
+            }
+            "offsetof_expression" => {
+                let ty = child("type");
+                let member = child("member");
+                format!("offsetof({ty}, {member})")
+            }
+            _ => {
+                let mut result = raw.to_string();
+                for n in named_children(node).into_iter().rev() {
+                    let replacement = render(n, bytes, macros, disabled, budget);
+                    result.replace_range(
+                        n.start_byte() - node.start_byte()..n.end_byte() - node.start_byte(),
+                        &replacement,
+                    );
+                }
+                result
+            }
+        }
+    }
+    // A function macro accepts preprocessing tokens, including types that are
+    // not valid C call arguments. Expand those invocations before C parsing can
+    // recover them as casts or discard their arguments as ERROR nodes.
+    let source = expand_function_macro_tokens(source, macros, disabled, budget);
+    let wrapped = format!("void __m() {{ {source}; }}");
+    let mut parser = Parser::new();
+    parser
+        .set_language(&tree_sitter_c::LANGUAGE.into())
+        .unwrap();
+    let tree = parser.parse(&wrapped, None).unwrap();
+    if let Some(expr) = expansion_expr_node(tree.root_node()) {
+        render(expr, wrapped.as_bytes(), macros, disabled, budget)
+    } else {
+        source.to_string()
+    }
+}
+
+/// Collapse adjacent string tokens only in generated macro expansion text.
+/// Keep escape spellings intact, discard inter-token comments, and retain the
+/// nonempty encoding prefix (CDT still assigns every string type `char*`).
+fn join_expansion_strings(root: Node, source: &[u8]) -> Option<String> {
+    let mut replacements = Vec::new();
+    let mut pending = vec![root];
+    while let Some(node) = pending.pop() {
+        if node.kind() != "concatenated_string" {
+            pending.extend(named_children(node));
+            continue;
+        }
+        let mut prefix = "";
+        let mut contents = String::new();
+        let mut valid = true;
+        for token in named_children(node) {
+            if token.kind() == "comment" {
+                continue;
+            }
+            if token.kind() != "string_literal" {
+                valid = false;
+                break;
+            }
+            let spelling = text(token, source);
+            let Some(quote) = spelling.find('"') else {
+                valid = false;
+                break;
+            };
+            let Some(content) = spelling[quote + 1..].strip_suffix('"') else {
+                valid = false;
+                break;
+            };
+            if prefix.is_empty() {
+                prefix = &spelling[..quote];
+            }
+            contents.push_str(content);
+        }
+        if valid {
+            replacements.push((node.byte_range(), format!("{prefix}\"{contents}\"")));
+        }
+    }
+    if replacements.is_empty() {
+        return None;
+    }
+    replacements.sort_by_key(|(range, _)| std::cmp::Reverse(range.start));
+    let mut result = String::from_utf8_lossy(source).into_owned();
+    for (range, replacement) in replacements {
+        result.replace_range(range, &replacement);
+    }
+    Some(result)
+}
+
+/// Preserve statement roots as well as expression roots in an expansion.
 fn expansion_expr_node(root: Node) -> Option<Node> {
     let f = named_children(root)
         .into_iter()
         .find(|n| n.kind() == "function_definition")?;
     let body = f.child_by_field_name("body")?;
     let stmt = named_children(body).into_iter().next()?;
-    named_children(stmt).into_iter().next()
+    if stmt.kind() == "expression_statement" {
+        named_children(stmt).into_iter().next()
+    } else {
+        Some(stmt)
+    }
 }
 
 /// Type CDT assigns to a macro expansion root (drives MFN/SIGNATURE/TYPE).
 fn expansion_type(
     expansion: &str,
     symbols: &HashMap<String, String>,
-    functions: &HashMap<String, String>,
+    globals: &HashMap<String, String>,
 ) -> String {
     let src = format!("void __m() {{ {expansion}; }}");
     let mut parser = Parser::new();
@@ -4008,40 +8625,58 @@ fn expansion_type(
     let Some(tree) = parser.parse(&src, None) else {
         return "ANY".into();
     };
-    let Some(mut e) = expansion_expr_node(tree.root_node()) else {
+    let Some(e) = expansion_expr_node(tree.root_node()) else {
         return "ANY".into();
     };
     let b = src.as_bytes();
-    while e.kind() == "parenthesized_expression" {
-        match named_children(e).into_iter().next() {
-            Some(inner) => e = inner,
-            None => break,
-        }
-    }
+    // CDT types the wrapper node itself. Parenthesized expressions use the
+    // generic node-type path (ANY), even when their final child is a literal.
     match e.kind() {
-        "number_literal" => {
-            let t = text(e, b);
-            if t.contains('.') || t.contains('e') || t.contains('E') {
-                "double".into()
-            } else {
-                "int".into()
-            }
-        }
+        // tree-sitter includes a leading sign in some number nodes. CDT
+        // instead wraps the literal in a unary expression, whose type is ANY.
+        "number_literal" if text(e, b).starts_with(['-', '+']) => "ANY".into(),
+        "number_literal" => numeric_literal_type(text(e, b)).into(),
         "char_literal" => "char".into(),
         "string_literal" => "char*".into(),
-        "identifier" => symbols.get(text(e, b)).cloned().unwrap_or("ANY".into()),
-        "call_expression" => {
-            let name = e
-                .child_by_field_name("function")
-                .map(|c| text(c, b).to_string())
-                .unwrap_or_default();
-            functions.get(&name).cloned().unwrap_or("ANY".into())
-        }
+        // A parenthesized replacement is an expression wrapper in CDT; its
+        // newly supported concatenation child does not type that wrapper.
+        "concatenated_string" if expansion_expr_node(tree.root_node()) == Some(e) => "char*".into(),
+        "concatenated_string" => "ANY".into(),
+        "identifier" => symbols
+            .get(text(e, b))
+            .or_else(|| globals.get(text(e, b)))
+            .cloned()
+            .unwrap_or("ANY".into()),
         _ => "ANY".into(),
     }
 }
 
-fn collect_decl_names(n: Node, b: &[u8], out: &mut Vec<String>) {
+fn collect_decl_names(
+    n: Node,
+    b: &[u8],
+    macros: &MacroState,
+    macro_sites: Option<&BodyMacroSites>,
+    source_view: usize,
+    out: &mut Vec<String>,
+) {
+    let macros = macro_sites
+        .and_then(|sites| sites.at_view(source_view, n, b))
+        .unwrap_or(macros);
+    if let Some((view, header)) = macro_sites.and_then(|sites| sites.included(source_view, n, b)) {
+        for item in &header.items {
+            collect_decl_names(*item, header.bytes, macros, macro_sites, view, out);
+        }
+        return;
+    }
+    if matches!(
+        n.kind(),
+        "preproc_if" | "preproc_ifdef" | "preproc_elif" | "preproc_elifdef" | "preproc_else"
+    ) {
+        for child in kept_preproc_children(n, b, macros) {
+            collect_decl_names(child, b, macros, macro_sites, source_view, out);
+        }
+        return;
+    }
     if n.kind() == "declaration" {
         for d in named_children(n) {
             let name = innermost_id(d, b);
@@ -4051,17 +8686,533 @@ fn collect_decl_names(n: Node, b: &[u8], out: &mut Vec<String>) {
         }
     }
     for c in named_children(n) {
-        collect_decl_names(c, b, out);
+        collect_decl_names(c, b, macros, macro_sites, source_view, out);
     }
 }
 
 // --- tree helpers ---
+/// A comment can end tree-sitter's recovered macro node before the actual
+/// directive ends. Tokens in the remainder still belong to that directive;
+/// they must not be visited again as file-scope declarations or definitions.
+fn translation_unit_children<'tree>(root: Node<'tree>, bytes: &[u8]) -> Vec<Node<'tree>> {
+    let mut directive_end = 0;
+    named_children(root)
+        .into_iter()
+        .filter(|node| {
+            if node.start_byte() < directive_end {
+                return false;
+            }
+            if matches!(node.kind(), "preproc_def" | "preproc_function_def") {
+                directive_end = node.start_byte() + preproc_raw_directive(*node, bytes).len();
+            }
+            true
+        })
+        .collect()
+}
+
+/// Joern retains declarations from every translation-unit preprocessor branch,
+/// including inactive `#if 0` and `#else` branches. Flatten only those wrappers;
+/// function bodies and macro-definition selection have their own semantics.
+fn configured_items<'tree>(
+    root: Node<'tree>,
+    bytes: &[u8],
+    context: &BodyMacroContext<'tree>,
+    retain_inactive: bool,
+) -> Vec<Node<'tree>> {
+    if retain_inactive {
+        translation_unit_items(root, bytes)
+    } else {
+        context.items.clone()
+    }
+}
+
+pub(crate) fn translation_unit_items<'tree>(root: Node<'tree>, b: &[u8]) -> Vec<Node<'tree>> {
+    fn collect<'tree>(node: Node<'tree>, b: &[u8], items: &mut Vec<Node<'tree>>) {
+        if matches!(
+            node.kind(),
+            "preproc_if" | "preproc_ifdef" | "preproc_else" | "preproc_elif" | "preproc_elifdef"
+        ) {
+            let condition = node.child_by_field_name("condition");
+            let name = node.child_by_field_name("name");
+            for child in translation_unit_children(node, b) {
+                if Some(child) != condition && Some(child) != name {
+                    collect(child, b, items);
+                }
+            }
+        } else {
+            items.push(node);
+        }
+    }
+
+    let mut items = Vec::new();
+    for child in translation_unit_children(root, b) {
+        collect(child, b, &mut items);
+    }
+    items
+}
+
+/// C preprocessing removes comments and splices escaped newlines before
+/// interpreting a directive. Read from the original bytes because the parser
+/// may expose only a prefix of a condition or replacement containing comments.
+fn preproc_raw_directive<'bytes>(node: Node, bytes: &'bytes [u8]) -> &'bytes str {
+    let source = std::str::from_utf8(&bytes[node.start_byte()..]).unwrap_or("");
+    let bytes = source.as_bytes();
+    let mut i = 0;
+    let mut comment = false;
+    let mut line_comment = false;
+    let mut quote = None;
+    while i < bytes.len() {
+        if bytes[i..].starts_with(b"\\\n") {
+            i += 2;
+            continue;
+        }
+        if bytes[i..].starts_with(b"\\\r\n") {
+            i += 3;
+            continue;
+        }
+        if line_comment {
+            if matches!(bytes[i], b'\n' | b'\r') {
+                break;
+            }
+            i += 1;
+            continue;
+        }
+        if comment {
+            if bytes[i..].starts_with(b"*/") {
+                comment = false;
+                i += 2;
+            } else {
+                i += 1;
+            }
+            continue;
+        }
+        if let Some(delimiter) = quote {
+            if bytes[i] == b'\\' {
+                i = (i + 2).min(bytes.len());
+                continue;
+            }
+            if bytes[i] == delimiter {
+                quote = None;
+            }
+        } else if bytes[i..].starts_with(b"//") {
+            line_comment = true;
+            i += 2;
+            continue;
+        } else if bytes[i..].starts_with(b"/*") {
+            comment = true;
+            i += 2;
+            continue;
+        } else if matches!(bytes[i], b'\'' | b'"') {
+            quote = Some(bytes[i]);
+        } else if matches!(bytes[i], b'\n' | b'\r') {
+            break;
+        }
+        i += 1;
+    }
+    source[..i].trim_end()
+}
+
+fn preproc_logical_line(node: Node, b: &[u8]) -> String {
+    let source = std::str::from_utf8(&b[node.start_byte()..]).unwrap_or("");
+    let bytes = source.as_bytes();
+    let mut out = String::new();
+    let mut i = 0;
+    let mut block_comment = false;
+    let mut quote = None;
+    while i < bytes.len() {
+        if bytes[i..].starts_with(b"\\\n") {
+            i += 2;
+            continue;
+        }
+        if bytes[i..].starts_with(b"\\\r\n") {
+            i += 3;
+            continue;
+        }
+        if block_comment {
+            if bytes[i..].starts_with(b"*/") {
+                block_comment = false;
+                i += 2;
+            } else {
+                i += 1;
+            }
+            continue;
+        }
+        if let Some(delimiter) = quote {
+            if bytes[i] == b'\\' && i + 1 < bytes.len() {
+                let end = i + 1 + source[i + 1..].chars().next().unwrap().len_utf8();
+                out.push_str(&source[i..end]);
+                i = end;
+                continue;
+            }
+            if bytes[i] == delimiter {
+                quote = None;
+            }
+        } else if bytes[i..].starts_with(b"/*") {
+            block_comment = true;
+            out.push(' ');
+            i += 2;
+            continue;
+        } else if bytes[i..].starts_with(b"//") || matches!(bytes[i], b'\n' | b'\r') {
+            break;
+        } else if matches!(bytes[i], b'\'' | b'"') {
+            quote = Some(bytes[i]);
+        }
+        let end = i + source[i..].chars().next().unwrap().len_utf8();
+        out.push_str(&source[i..end]);
+        i = end;
+    }
+    out
+}
+
+fn preproc_payload(line: &str) -> &str {
+    let line = line
+        .trim_start()
+        .strip_prefix('#')
+        .unwrap_or(line)
+        .trim_start();
+    line.trim_start_matches(|c: char| c.is_ascii_alphabetic())
+        .trim_start()
+}
+
+/// Statements and name discovery share the same selected body branch. The
+/// source-position snapshot includes preceding file, header, and body directives;
+/// conditions themselves do not become statement or phantom children.
+fn kept_preproc_children<'tree>(
+    node: Node<'tree>,
+    bytes: &[u8],
+    macros: &MacroState,
+) -> Vec<Node<'tree>> {
+    let take = if matches!(node.kind(), "preproc_if" | "preproc_elif") {
+        preproc_condition(node, bytes, macros)
+    } else if let Some(name) = node.child_by_field_name("name") {
+        let negated = node
+            .child(0)
+            .is_some_and(|directive| matches!(directive.kind(), "#ifndef" | "#elifndef"));
+        macros.contains_key(text(name, bytes)) != negated
+    } else {
+        true
+    };
+    let alternative = node.child_by_field_name("alternative");
+    if take {
+        let condition = node.child_by_field_name("condition");
+        let name = node.child_by_field_name("name");
+        named_children(node)
+            .into_iter()
+            .filter(|child| {
+                Some(*child) != condition && Some(*child) != name && Some(*child) != alternative
+            })
+            .collect()
+    } else {
+        alternative.into_iter().collect()
+    }
+}
+
+/// Expand object macro replacement tokens before parsing the condition. In
+/// particular, replacing VALUE with `1 + 2` must not implicitly parenthesize
+/// it in `VALUE * 3`. The normal C expression grammar also accepts ternaries,
+/// which tree-sitter's preprocessor-condition grammar does not represent.
+fn preproc_condition(node: Node, b: &[u8], macros: &MacroState) -> bool {
+    let definitions = macros
+        .iter()
+        .map(|(name, definition)| (name.clone(), definition.body.clone()))
+        .collect();
+    let line = preproc_logical_line(node, b);
+    let condition = preproc_payload(&line);
+    let mut budget = 65_536usize;
+    let expanded = expand_preproc_tokens(
+        condition,
+        &definitions,
+        Some(macros),
+        &mut HashSet::new(),
+        &mut budget,
+    );
+    let source = format!("int __condition(void) {{ return {expanded}; }}");
+    let mut parser = Parser::new();
+    parser
+        .set_language(&tree_sitter_c::LANGUAGE.into())
+        .unwrap();
+    let tree = parser.parse(&source, None).unwrap();
+    tree.root_node()
+        .named_child(0)
+        .and_then(|function| function.child_by_field_name("body"))
+        .and_then(|body| body.named_child(0))
+        .and_then(|returned| returned.named_child(0))
+        .is_some_and(|expression| preproc_value(expression, source.as_bytes(), 0) != 0)
+}
+
+/// Preserve literal tokens and `defined` operands while expanding object
+/// macros. A shared byte budget and cycle guard bound recursive expansion.
+fn expand_preproc_objects(
+    source: &str,
+    definitions: &HashMap<String, String>,
+    expanding: &mut HashSet<String>,
+    budget: &mut usize,
+) -> String {
+    expand_preproc_tokens(source, definitions, None, expanding, budget)
+}
+
+fn expand_preproc_tokens(
+    source: &str,
+    definitions: &HashMap<String, String>,
+    macros: Option<&HashMap<String, MacroDef>>,
+    expanding: &mut HashSet<String>,
+    budget: &mut usize,
+) -> String {
+    let bytes = source.as_bytes();
+    let mut out = String::new();
+    let mut i = 0;
+    while i < bytes.len() && *budget > 0 {
+        let start = i;
+        if matches!(bytes[i], b'\'' | b'"') {
+            let quote = bytes[i];
+            i += 1;
+            while i < bytes.len() {
+                if bytes[i] == b'\\' {
+                    i = (i + 2).min(bytes.len());
+                } else if bytes[i] == quote {
+                    i += 1;
+                    break;
+                } else {
+                    i += 1;
+                }
+            }
+        } else if bytes[i].is_ascii_digit() {
+            i += 1;
+            while i < bytes.len()
+                && (bytes[i].is_ascii_alphanumeric() || matches!(bytes[i], b'_' | b'.' | b'\''))
+            {
+                i += 1;
+            }
+        } else if bytes[i].is_ascii_alphabetic() || bytes[i] == b'_' {
+            i += 1;
+            while i < bytes.len() && (bytes[i].is_ascii_alphanumeric() || bytes[i] == b'_') {
+                i += 1;
+            }
+            let name = &source[start..i];
+            if name == "defined" {
+                while i < bytes.len() && bytes[i].is_ascii_whitespace() {
+                    i += 1;
+                }
+                let parentheses = bytes.get(i) == Some(&b'(');
+                if parentheses {
+                    i += 1;
+                }
+                while i < bytes.len() && bytes[i].is_ascii_whitespace() {
+                    i += 1;
+                }
+                let operand = i;
+                while i < bytes.len() && (bytes[i].is_ascii_alphanumeric() || bytes[i] == b'_') {
+                    i += 1;
+                }
+                let defined = definitions.contains_key(&source[operand..i]);
+                if parentheses {
+                    while i < bytes.len() && bytes[i].is_ascii_whitespace() {
+                        i += 1;
+                    }
+                    if bytes.get(i) == Some(&b')') {
+                        i += 1;
+                    }
+                }
+                out.push(if defined { '1' } else { '0' });
+                *budget -= 1;
+                continue;
+            }
+            if expanding.len() < 64 && !expanding.contains(name) {
+                if let Some(replacement) = definitions.get(name) {
+                    let replacement = if let Some(params) = macros
+                        .and_then(|m| m.get(name))
+                        .and_then(|m| m.params.as_ref())
+                    {
+                        let mut open = i;
+                        while bytes.get(open).is_some_and(u8::is_ascii_whitespace) {
+                            open += 1;
+                        }
+                        if let Some((args, end)) = macro_arguments(source, open) {
+                            i = end + 1;
+                            substitute(replacement, params, &args)
+                        } else {
+                            out.push_str(name);
+                            *budget = budget.saturating_sub(name.len());
+                            continue;
+                        }
+                    } else {
+                        replacement.clone()
+                    };
+                    *budget -= 1;
+                    expanding.insert(name.to_string());
+                    out.push_str(&expand_preproc_tokens(
+                        &replacement,
+                        definitions,
+                        macros,
+                        expanding,
+                        budget,
+                    ));
+                    expanding.remove(name);
+                    continue;
+                }
+            }
+        } else if bytes[i..].starts_with(b"//") {
+            break;
+        } else if bytes[i..].starts_with(b"/*") {
+            i += 2;
+            while i < bytes.len() && !bytes[i..].starts_with(b"*/") {
+                i += 1;
+            }
+            i = (i + 2).min(bytes.len());
+            out.push(' ');
+            *budget -= 1;
+            continue;
+        } else {
+            i += source[i..].chars().next().unwrap().len_utf8();
+        }
+        let token = &source[start..i];
+        if token.len() > *budget {
+            break;
+        }
+        out.push_str(token);
+        *budget -= token.len();
+    }
+    out
+}
+
+fn preproc_character(literal: &str) -> i64 {
+    let Some((_, contents)) = literal.split_once('\'') else {
+        return 0;
+    };
+    let contents = contents.strip_suffix('\'').unwrap_or(contents);
+    if let Some(escaped) = contents.strip_prefix('\\') {
+        if let Some(hex) = escaped.strip_prefix('x') {
+            return i64::from_str_radix(hex, 16).unwrap_or(0);
+        }
+        if escaped.starts_with(|c: char| matches!(c, '0'..='7')) {
+            return i64::from_str_radix(escaped, 8).unwrap_or(0);
+        }
+        return match escaped {
+            "n" => 10,
+            "r" => 13,
+            "t" => 9,
+            "v" => 11,
+            "a" => 7,
+            "b" => 8,
+            "f" => 12,
+            _ => escaped.bytes().next().unwrap_or(0) as i64,
+        };
+    }
+    contents
+        .bytes()
+        .fold(0i64, |value, byte| value.wrapping_shl(8) | byte as i64)
+}
+
+fn preproc_value(node: Node, b: &[u8], depth: usize) -> i64 {
+    if depth >= 256 {
+        return 0;
+    }
+    let value = |child| preproc_value(child, b, depth + 1);
+    match node.kind() {
+        "number_literal" => {
+            let literal = text(node, b).trim_end_matches(['u', 'U', 'l', 'L']);
+            let (digits, radix) = if let Some(digits) = literal
+                .strip_prefix("0x")
+                .or_else(|| literal.strip_prefix("0X"))
+            {
+                (digits, 16)
+            } else if let Some(digits) = literal
+                .strip_prefix("0b")
+                .or_else(|| literal.strip_prefix("0B"))
+            {
+                (digits, 2)
+            } else if literal.len() > 1 && literal.starts_with('0') {
+                (&literal[1..], 8)
+            } else {
+                (literal, 10)
+            };
+            u64::from_str_radix(digits, radix).unwrap_or(0) as i64
+        }
+        "parenthesized_expression" => node.named_child(0).map(value).unwrap_or(0),
+        "unary_expression" => {
+            let argument = node.child_by_field_name("argument").map(value).unwrap_or(0);
+            match node.child_by_field_name("operator").map(|op| text(op, b)) {
+                Some("!") => (argument == 0) as i64,
+                Some("~") => !argument,
+                Some("-") => argument.wrapping_neg(),
+                Some("+") => argument,
+                _ => 0,
+            }
+        }
+        "binary_expression" => {
+            let left = node.child_by_field_name("left").map(value).unwrap_or(0);
+            let right = node.child_by_field_name("right").map(value).unwrap_or(0);
+            match node.child_by_field_name("operator").map(|op| text(op, b)) {
+                Some("||") => (left != 0 || right != 0) as i64,
+                Some("&&") => (left != 0 && right != 0) as i64,
+                Some("|") => left | right,
+                Some("&") => left & right,
+                Some("^") => left ^ right,
+                Some("==") => (left == right) as i64,
+                Some("!=") => (left != right) as i64,
+                Some("<") => (left < right) as i64,
+                Some("<=") => (left <= right) as i64,
+                Some(">") => (left > right) as i64,
+                Some(">=") => (left >= right) as i64,
+                Some("<<") => left.checked_shl(right as u32).unwrap_or(0),
+                Some(">>") => left.checked_shr(right as u32).unwrap_or(0),
+                Some("+") => left.wrapping_add(right),
+                Some("-") => left.wrapping_sub(right),
+                Some("*") => left.wrapping_mul(right),
+                Some("/") => left.checked_div(right).unwrap_or(0),
+                Some("%") => left.checked_rem(right).unwrap_or(0),
+                _ => 0,
+            }
+        }
+        "conditional_expression" => {
+            let condition = node
+                .child_by_field_name("condition")
+                .map(value)
+                .unwrap_or(0);
+            let branch = if condition != 0 {
+                "consequence"
+            } else {
+                "alternative"
+            };
+            node.child_by_field_name(branch).map(value).unwrap_or(0)
+        }
+        "char_literal" => preproc_character(text(node, b)),
+        _ => 0,
+    }
+}
+
 fn named_children(n: Node) -> Vec<Node> {
     let mut cur = n.walk();
     n.named_children(&mut cur).collect()
 }
 fn text<'a>(n: Node, b: &'a [u8]) -> &'a str {
     n.utf8_text(b).unwrap_or("")
+}
+/// The pinned frontend emits STATIC only for a leading storage-class token.
+/// `inline static` and a definition inheriting an earlier static declaration
+/// receive no modifier. Prototype CODE may already contain escaped newlines.
+fn has_leading_static(code: &str) -> bool {
+    code.trim_start()
+        .strip_prefix("static")
+        .is_some_and(|mut rest| {
+            // A physical line continuation can separate this token from the
+            // next one. Prototype CODE has escaped the newline already.
+            while let Some(tail) = rest
+                .strip_prefix("\\\r\n")
+                .or_else(|| rest.strip_prefix("\\\n"))
+                .or_else(|| rest.strip_prefix("\\\r\\n"))
+                .or_else(|| rest.strip_prefix("\\\\n"))
+            {
+                rest = tail;
+            }
+            // `$` is an accepted identifier extension. A universal-character
+            // escape also continues an identifier; `\\n` here can instead be
+            // the prototype CODE transport's escaped newline.
+            rest.starts_with("\\n")
+                || rest.chars().next().is_some_and(|next| {
+                    !next.is_alphanumeric() && !matches!(next, '_' | '$' | '\\')
+                })
+        })
 }
 fn esc(s: &str) -> String {
     s.replace('\n', "\\n").trim().to_string()
@@ -4104,9 +9255,11 @@ struct DNode {
     name: String,
     code1: String,
     fullcode: String,
+    has_code: bool,
     full: String,
     has_arg: bool,
     arg_index: i64,
+    order: i64,
     inlined: bool,
     code2: String,
     children: Vec<usize>,
@@ -4138,6 +9291,27 @@ fn extract_code(rest: &str) -> String {
         i += 1;
     }
     tail[..i].to_string()
+}
+
+/// FULL_NAME may contain spaces in a filename or a macro return signature.
+/// Stop at a following property emitted by `Ctx::line`, rather than a word.
+fn extract_full_name(rest: &str) -> String {
+    // CODE precedes FULL_NAME and can itself contain property-like text.
+    let Some((_, tail)) = rest.rsplit_once(" FULL_NAME=") else {
+        return String::new();
+    };
+    let end = [
+        " METHOD_FULL_NAME=",
+        " SIGNATURE=",
+        " ORDER=",
+        " ARGUMENT_INDEX=",
+        " DISPATCH_TYPE=",
+    ]
+    .iter()
+    .filter_map(|key| tail.find(key))
+    .min()
+    .unwrap_or(tail.len());
+    tail[..end].to_string()
 }
 
 fn parse_dump_block(text: &str) -> Vec<DNode> {
@@ -4187,9 +9361,11 @@ fn parse_dump_block(text: &str) -> Vec<DNode> {
             name: grab(" NAME="),
             code1: grab(" CODE="),
             fullcode: extract_code(rest),
-            full: grab(" FULL_NAME="),
+            has_code: rest.contains(" CODE="),
+            full: extract_full_name(rest),
             has_arg: rest.contains(" ARGUMENT_INDEX="),
             arg_index,
+            order: grab(" ORDER=").parse().unwrap_or(0),
             inlined: rest.contains(" DISPATCH_TYPE=INLINED"),
             code2,
             children: Vec::new(),
@@ -4203,6 +9379,7 @@ fn parse_dump_block(text: &str) -> Vec<DNode> {
 
 struct CfgBuilder<'a> {
     arena: &'a [DNode],
+    expansion_control_kinds: &'a HashMap<String, String>,
     block: &'a str,
     mret: String,
     edges: Vec<(String, String)>,
@@ -4245,6 +9422,27 @@ impl CfgBuilder<'_> {
         (entry, pending)
     }
 
+    // A control construct must compose child edge lists in the pinned
+    // CfgCreator order. Detaching a child preserves that order independently
+    // of when the mutable AST builder visits it.
+    fn detached_build(
+        &mut self,
+        id: Option<usize>,
+    ) -> (Option<String>, Vec<String>, Vec<(String, String)>) {
+        let start = self.edges.len();
+        let (entry, fringe) = id.map(|id| self.build(id)).unwrap_or_default();
+        (entry, fringe, self.edges.split_off(start))
+    }
+
+    fn detached_seq(
+        &mut self,
+        ids: &[usize],
+    ) -> (Option<String>, Vec<String>, Vec<(String, String)>) {
+        let start = self.edges.len();
+        let (entry, fringe) = self.seq(ids);
+        (entry, fringe, self.edges.split_off(start))
+    }
+
     fn build(&mut self, id: usize) -> (Option<String>, Vec<String>) {
         let n = &self.arena[id];
         let me = self.addr(id);
@@ -4254,9 +9452,6 @@ impl CfgBuilder<'_> {
             | "UNKNOWN" | "JUMP_TARGET" => (Some(me.clone()), vec![me]),
             "CALL" => match self.arena[id].name.as_str() {
                 "<operator>.conditional" => {
-                    if kids.len() != 3 {
-                        return self.build_sequential_call(&kids, &me);
-                    }
                     let (e1, o1) = self.build(kids[0]);
                     let (e2, o2) = self.build(kids[1]);
                     let (e3, o3) = self.build(kids[2]);
@@ -4271,16 +9466,13 @@ impl CfgBuilder<'_> {
                     (e1, vec![me])
                 }
                 "<operator>.logicalAnd" | "<operator>.logicalOr" => {
-                    if kids.len() != 2 {
-                        return self.build_sequential_call(&kids, &me);
-                    }
-                    // Short-circuit: the lhs root branches to the rhs entry
-                    // and directly past it to the call node.
-                    let (e1, o1) = self.build(kids[0]);
-                    let (e2, o2) = self.build(kids[1]);
+                    let (e1, o1, left_edges) = self.detached_build(Some(kids[0]));
+                    let (e2, o2, right_edges) = self.detached_build(Some(kids[1]));
                     if let Some(e2) = &e2 {
                         self.connect(&o1, e2);
                     }
+                    self.edges.extend(left_edges);
+                    self.edges.extend(right_edges);
                     self.connect(&o1, &me);
                     self.connect(&o2, &me);
                     (e1, vec![me])
@@ -4303,15 +9495,22 @@ impl CfgBuilder<'_> {
                     }
                     (ae.or(Some(me)), outs)
                 }
-                _ => self.build_sequential_call(&kids, &me),
+                _ => {
+                    let (entry, outs) = self.seq(&kids);
+                    self.connect(&outs, &me);
+                    (entry.or(Some(me.clone())), vec![me])
+                }
             },
             "BLOCK" => {
-                // An expression block (comma operator) is a child of a CALL;
-                // statement blocks (incl. stub bodies, which carry a spurious
-                // ARGUMENT_INDEX) are transparent.
-                let is_expr = n.parent.is_some_and(|p| self.arena[p].label == "CALL");
+                // Expression blocks and standalone compound statements are
+                // CFG nodes after their children, including empty blocks.
+                // Method/control bodies remain transparent (stub bodies also
+                // carry a spurious ARGUMENT_INDEX, so that is not a predicate).
+                let is_cfg_block = n
+                    .parent
+                    .is_some_and(|p| matches!(self.arena[p].label.as_str(), "CALL" | "BLOCK"));
                 let (entry, outs) = self.seq(&kids);
-                if is_expr {
+                if is_cfg_block {
                     self.connect(&outs, &me);
                     (entry.or(Some(me.clone())), vec![me])
                 } else {
@@ -4320,27 +9519,14 @@ impl CfgBuilder<'_> {
             }
             "RETURN" => {
                 let (entry, outs) = self.seq(&kids);
-                self.connect(&outs, &me);
                 let mret = self.mret.clone();
                 self.edges.push((me.clone(), mret));
+                self.connect(&outs, &me);
                 (entry.or(Some(me)), vec![])
             }
             "CONTROL_STRUCTURE" => self.build_control(id, me, &kids),
             _ => (None, vec![]), // LOCAL, MODIFIER, METHOD, TYPE_DECL, params, ...
         }
-    }
-
-    fn build_sequential_call(
-        &mut self,
-        children: &[usize],
-        call: &str,
-    ) -> (Option<String>, Vec<String>) {
-        let (entry, outs) = self.seq(children);
-        self.connect(&outs, call);
-        (
-            entry.or_else(|| Some(call.to_string())),
-            vec![call.to_string()],
-        )
     }
 
     fn build_control(
@@ -4349,65 +9535,73 @@ impl CfgBuilder<'_> {
         me: String,
         kids: &[usize],
     ) -> (Option<String>, Vec<String>) {
-        let kind = self.arena[id]
-            .code1
-            .split(['(', ';', ' '])
-            .next()
-            .unwrap_or("")
-            .to_string();
+        let kind = self
+            .expansion_control_kinds
+            .get(&me)
+            .cloned()
+            .unwrap_or_else(|| {
+                self.arena[id]
+                    .code1
+                    .split(['(', ';', ' '])
+                    .next()
+                    .unwrap_or("")
+                    .to_string()
+            });
         let block_child = |b: &Self| kids.iter().copied().find(|&c| b.arena[c].label == "BLOCK");
         match kind.as_str() {
             "if" => {
-                let (ce, co) = self.build(kids[0]);
+                let (ce, co, condition_edges) = self.detached_build(kids.first().copied());
                 let then = block_child(self);
                 let els = kids.iter().copied().find(|&c| {
                     self.arena[c].label == "CONTROL_STRUCTURE" && self.arena[c].code1 == "else"
                 });
-                let mut outs = Vec::new();
-                if let Some(t) = then {
-                    let (te, to) = self.build(t);
-                    if let Some(te) = &te {
-                        self.connect(&co, te);
-                    }
-                    outs.extend(to);
-                }
-                if let Some(e) = els {
-                    let eb = self.arena[e]
+                let else_body = els.and_then(|e| {
+                    self.arena[e]
                         .children
                         .iter()
                         .copied()
-                        .find(|&c| self.arena[c].label == "BLOCK");
-                    if let Some(eb) = eb {
-                        let (ee, eo) = self.build(eb);
-                        if let Some(ee) = &ee {
-                            self.connect(&co, ee);
-                        }
-                        outs.extend(eo);
-                    }
-                } else {
-                    outs.extend(co);
+                        .find(|&c| self.arena[c].label == "BLOCK")
+                });
+                let (te, to, true_edges) = self.detached_build(then);
+                let (ee, eo, false_edges) = self.detached_build(else_body);
+                if let Some(target) = &te {
+                    self.connect(&co, target);
                 }
+                if let Some(target) = &ee {
+                    self.connect(&co, target);
+                }
+                self.edges.extend(condition_edges);
+                self.edges.extend(true_edges);
+                self.edges.extend(false_edges);
+                let outs = if te.is_none() && ee.is_none() {
+                    co
+                } else {
+                    let mut fringe = if te.is_some() { to } else { co.clone() };
+                    fringe.extend(if ee.is_some() { eo } else { co });
+                    fringe
+                };
                 (ce, outs)
             }
             "while" => {
                 self.breaks.push(Vec::new());
                 self.continues.push(Vec::new());
-                let (ce, co) = self.build(kids[0]);
-                let body = block_child(self);
-                if let Some(b) = body {
-                    let (be, bo) = self.build(b);
-                    if let Some(be) = &be {
-                        self.connect(&co, be);
-                    }
-                    if let Some(ce) = &ce {
-                        self.connect(&bo, ce);
-                    }
-                }
+                let (ce, co, condition_edges) = self.detached_build(kids.first().copied());
+                let body = kids
+                    .iter()
+                    .copied()
+                    .find(|&child| self.arena[child].order == 2);
+                let (be, bo, body_edges) = self.detached_build(body);
                 let brs = self.breaks.pop().unwrap();
                 let conts = self.continues.pop().unwrap();
-                if let Some(ce) = &ce {
-                    self.connect(&conts, ce);
+                if let Some(target) = &be {
+                    self.connect(&co, target);
                 }
+                if let Some(target) = &ce {
+                    self.connect(&bo, target);
+                    self.connect(&conts, target);
+                }
+                self.edges.extend(condition_edges);
+                self.edges.extend(body_edges);
                 let mut outs = co;
                 outs.extend(brs);
                 (ce, outs)
@@ -4415,24 +9609,20 @@ impl CfgBuilder<'_> {
             "do" => {
                 self.breaks.push(Vec::new());
                 self.continues.push(Vec::new());
-                let body = block_child(self);
-                let cond = kids
-                    .iter()
-                    .copied()
-                    .find(|&c| self.arena[c].label != "BLOCK");
-                let (be, bo) = body.map(|b| self.build(b)).unwrap_or((None, vec![]));
-                let (ce, co) = cond.map(|c| self.build(c)).unwrap_or((None, vec![]));
-                if let Some(ce) = &ce {
-                    self.connect(&bo, ce);
-                }
-                if let Some(be) = &be {
-                    self.connect(&co, be);
-                }
+                let body = (kids.len() > 1).then(|| kids[0]);
+                let (be, bo, body_edges) = self.detached_build(body);
+                let (ce, co, condition_edges) = self.detached_build(kids.last().copied());
                 let brs = self.breaks.pop().unwrap();
                 let conts = self.continues.pop().unwrap();
-                if let Some(ce) = &ce {
-                    self.connect(&conts, ce);
+                if let Some(target) = &ce {
+                    self.connect(&conts, target);
+                    self.connect(&bo, target);
                 }
+                if let Some(target) = be.as_ref().or(ce.as_ref()) {
+                    self.connect(&co, target);
+                }
+                self.edges.extend(body_edges);
+                self.edges.extend(condition_edges);
                 let mut outs = co;
                 outs.extend(brs);
                 (be.or(ce), outs)
@@ -4440,70 +9630,80 @@ impl CfgBuilder<'_> {
             "for" => {
                 self.breaks.push(Vec::new());
                 self.continues.push(Vec::new());
-                // Positional after skipping LOCALs: [init, cond, update,
-                // body?] — empty clauses are placeholder BLOCKs, and a comma
-                // update is itself a BLOCK, so positions are the only truth.
-                let rest: Vec<usize> = kids
+                // Missing clauses leave gaps in ORDER. Initializer declarations
+                // may contribute LOCALs plus assignments before those slots.
+                let leading_locals = kids
+                    .iter()
+                    .take_while(|&&child| self.arena[child].label == "LOCAL")
+                    .count();
+                let initializer_order = leading_locals as i64 + 1;
+                let init_children: Vec<_> = kids
                     .iter()
                     .copied()
-                    .filter(|&c| self.arena[c].label != "LOCAL")
+                    .filter(|&child| self.arena[child].order <= initializer_order)
                     .collect();
-                let init = rest.first().copied();
-                let cond = rest.get(1).copied();
-                let update = rest.get(2).copied();
-                let body = rest.get(3).copied();
-                let (ie, io) = init.map(|i| self.build(i)).unwrap_or((None, vec![]));
-                let (ce, co) = cond.map(|c| self.build(c)).unwrap_or((None, vec![]));
-                let (ue, uo) = update.map(|u| self.build(u)).unwrap_or((None, vec![]));
-                let (be, bo) = body.map(|b| self.build(b)).unwrap_or((None, vec![]));
-                if let Some(ce) = &ce {
-                    self.connect(&io, ce);
-                    self.connect(&uo, ce);
-                }
-                // True branch: body if present, else straight to the update
-                // (musl `for (...);` empty-body loops), else the cond itself.
-                if let Some(t) = be.as_ref().or(ue.as_ref()).or(ce.as_ref()) {
-                    let t = t.clone();
-                    self.connect(&co, &t);
-                }
-                if let Some(ue) = &ue {
-                    self.connect(&bo, ue);
-                }
+                let condition_order = initializer_order + 1;
+                let cond = kids
+                    .iter()
+                    .copied()
+                    .find(|&child| self.arena[child].order == condition_order);
+                let update = kids
+                    .iter()
+                    .copied()
+                    .find(|&child| self.arena[child].order == condition_order + 1);
+                let body = kids
+                    .iter()
+                    .copied()
+                    .find(|&child| self.arena[child].order == condition_order + 2);
+                let (ie, io, init_edges) = self.detached_seq(&init_children);
+                let (ce, co, condition_edges) = self.detached_build(cond);
+                let (ue, uo, update_edges) = self.detached_build(update);
+                let (be, bo, body_edges) = self.detached_build(body);
+                let inner_entry = be.as_ref().or(ue.as_ref());
+                let loop_entry = ce.as_ref().or(inner_entry).cloned();
+                let inner_fringe = if ue.is_some() { &uo } else { &bo };
                 let brs = self.breaks.pop().unwrap();
                 let conts = self.continues.pop().unwrap();
-                if let Some(ue) = &ue {
-                    self.connect(&conts, ue);
+                if let Some(target) = &loop_entry {
+                    self.connect(&io, target);
+                    self.connect(inner_fringe, target);
+                }
+                if let Some(target) = inner_entry.or(ce.as_ref()) {
+                    self.connect(&co, target);
+                }
+                if let Some(target) = ue.as_ref().or(loop_entry.as_ref()) {
+                    self.connect(&conts, target);
+                }
+                self.edges.extend(init_edges);
+                self.edges.extend(condition_edges);
+                self.edges.extend(body_edges);
+                self.edges.extend(update_edges);
+                if let Some(target) = &ue {
+                    self.connect(&bo, target);
                 }
                 let mut outs = co;
                 outs.extend(brs);
-                (ie.or(ce), outs)
+                (ie.or(loop_entry), outs)
             }
             "switch" => {
                 self.breaks.push(Vec::new());
-                let (ce, co) = self.build(kids[0]);
-                let body = block_child(self);
-                let mut outs = Vec::new();
+                let (ce, co, condition_edges) = self.detached_build(kids.first().copied());
+                let bkids = block_child(self)
+                    .map(|b| self.arena[b].children.clone())
+                    .unwrap_or_default();
+                let (_, bo, body_edges) = self.detached_seq(&bkids);
                 let mut has_default = false;
-                if let Some(b) = body {
-                    let bkids = self.arena[b].children.clone();
-                    for &c in &bkids {
-                        if self.arena[c].label == "JUMP_TARGET" {
-                            let jt = self.addr(c);
-                            self.connect(&co, &jt);
-                            if self.arena[c].name == "default" {
-                                has_default = true;
-                            }
-                        }
+                for &c in &bkids {
+                    if self.arena[c].label == "JUMP_TARGET" {
+                        self.connect(&co, &self.addr(c));
+                        has_default |= self.arena[c].name == "default";
                     }
-                    // Natural chaining inside the body = fallthrough; the
-                    // dispatch edges above are the only entries.
-                    let (_, bo) = self.seq(&bkids);
-                    outs.extend(bo);
                 }
-                if !has_default {
-                    outs.extend(co.clone());
-                }
+                self.edges.extend(condition_edges);
+                self.edges.extend(body_edges);
+                let mut outs = if has_default { Vec::new() } else { co };
                 outs.extend(self.breaks.pop().unwrap());
+                outs.extend(bo);
                 (ce, outs)
             }
             "goto" => {
@@ -4531,7 +9731,11 @@ impl CfgBuilder<'_> {
 }
 
 /// CFG edges for one dump block (a method subtree).
-fn cfg_edges_for_block(block: &str, text: &str) -> Vec<(String, String)> {
+fn cfg_edges_for_block(
+    block: &str,
+    text: &str,
+    expansion_control_kinds: &HashMap<String, String>,
+) -> Vec<(String, String)> {
     let arena = parse_dump_block(text);
     if arena.is_empty() || arena[0].label != "METHOD" {
         return Vec::new();
@@ -4554,6 +9758,7 @@ fn cfg_edges_for_block(block: &str, text: &str) -> Vec<(String, String)> {
     }
     let mut b = CfgBuilder {
         arena: &arena,
+        expansion_control_kinds,
         block,
         mret: format!("{block}#{}", arena[mret].idx),
         edges: Vec::new(),
@@ -4582,7 +9787,12 @@ fn cfg_edges_for_block(block: &str, text: &str) -> Vec<(String, String)> {
 
 /// Index-level CFG for a block, recovered from the address-level CFG (node 0
 /// is the METHOD, addressed M:full; others are `block#idx`).
-fn cfg_index_edges(block: &str, text: &str, n: usize) -> Vec<(usize, usize)> {
+fn cfg_index_edges(
+    block: &str,
+    text: &str,
+    n: usize,
+    expansion_control_kinds: &HashMap<String, String>,
+) -> Vec<(usize, usize)> {
     let prefix = format!("{block}#");
     let to_idx = |a: &str| -> Option<usize> {
         if a.starts_with("M:") {
@@ -4592,7 +9802,7 @@ fn cfg_index_edges(block: &str, text: &str, n: usize) -> Vec<(usize, usize)> {
                 .and_then(|s| s.parse::<usize>().ok())
         }
     };
-    cfg_edges_for_block(block, text)
+    cfg_edges_for_block(block, text, expansion_control_kinds)
         .iter()
         .filter_map(|(s, d)| Some((to_idx(s)?, to_idx(d)?)))
         .filter(|&(s, d)| s < n && d < n)
@@ -4729,13 +9939,76 @@ fn node_var(d: &DNode) -> String {
     }
 }
 
+/// Reaching-definition membership is dense within a method. Packed words
+/// avoid storing one hash-table entry per definition in every saved IN/OUT.
+/// Trailing zero words are removed so equality remains set equality.
+#[derive(Clone, Default, PartialEq, Eq, Debug)]
+struct DefinitionSet(Vec<u64>);
+
+impl DefinitionSet {
+    fn insert_all(&mut self, values: &[usize]) {
+        for &value in values {
+            let word = value / 64;
+            if word >= self.0.len() {
+                self.0.resize(word + 1, 0);
+            }
+            self.0[word] |= 1u64 << (value % 64);
+        }
+    }
+
+    fn union_with(&mut self, other: &Self) {
+        if other.0.len() > self.0.len() {
+            self.0.resize(other.0.len(), 0);
+        }
+        for (word, &other) in self.0.iter_mut().zip(&other.0) {
+            *word |= other;
+        }
+    }
+
+    fn remove_all(&mut self, values: &[usize]) {
+        for &value in values {
+            if let Some(word) = self.0.get_mut(value / 64) {
+                *word &= !(1u64 << (value % 64));
+            }
+        }
+        while self.0.last() == Some(&0) {
+            self.0.pop();
+        }
+    }
+
+    fn iter(&self) -> impl Iterator<Item = usize> + '_ {
+        self.0.iter().enumerate().flat_map(|(index, &word)| {
+            let mut remaining = word;
+            std::iter::from_fn(move || {
+                if remaining == 0 {
+                    None
+                } else {
+                    let bit = remaining.trailing_zeros() as usize;
+                    remaining &= remaining - 1;
+                    Some(index * 64 + bit)
+                }
+            })
+        })
+    }
+}
+
 /// REACHING_DEF flows for one method block: (variable, srcIdxAddr, dstIdxAddr)
 /// where addresses are `block#idx` or `M:full` for the method node.
-fn reaching_def_flows(block: &str, text: &str) -> Vec<(String, String, String)> {
+fn reaching_def_flows(
+    block: &str,
+    text: &str,
+    expansion_control_kinds: &HashMap<String, String>,
+    defined_functions: &[String],
+) -> Vec<(String, String, String)> {
     let arena = parse_dump_block(text);
     let n = arena.len();
     if n == 0 || arena[0].label != "METHOD" {
         return Vec::new();
+    }
+    let cfg = cfg_index_edges(block, text, n, expansion_control_kinds);
+    let mut successors = vec![Vec::new(); n];
+    for &(source, target) in &cfg {
+        successors[source].push(target);
     }
     let method_addr = format!("M:{}", arena[0].full);
     let addr = |i: usize| -> String {
@@ -4772,7 +10045,11 @@ fn reaching_def_flows(block: &str, text: &str) -> Vec<(String, String, String)> 
             .children
             .iter()
             .copied()
-            .filter(|&k| arena[k].has_arg && arena[k].label != "FIELD_IDENTIFIER")
+            .filter(|&k| {
+                arena[k].has_arg
+                    && arena[k].label != "FIELD_IDENTIFIER"
+                    && !(arena[c].inlined && arena[k].label == "BLOCK")
+            })
             .collect();
         v.sort_by_key(|&k| arena[k].arg_index);
         v
@@ -4788,8 +10065,17 @@ fn reaching_def_flows(block: &str, text: &str) -> Vec<(String, String, String)> 
     let is_gen_arg = |k: usize| matches!(arena[k].label.as_str(), "CALL" | "IDENTIFIER");
 
     // --- GEN / KILL ---
-    // def id == node index. Each def carries a variable.
-    let mut def_var: HashMap<usize, String> = HashMap::new();
+    // Definition identity is separate from the edge label: identifier and
+    // parameter definitions use NAME, while call definitions use CODE. A C
+    // function-pointer initializer has an empty-code LHS, so using node_var
+    // here would conflate different pointers and an unnamed void parameter.
+    // Keep calls in their own namespace, as ReachingDefTransferFunction's
+    // killsForGens looks them up in allCalls rather than allIdentifiers.
+    let definition_key = |i: usize| match arena[i].label.as_str() {
+        "METHOD_PARAMETER_IN" | "IDENTIFIER" => ("symbol", arena[i].name.as_str()),
+        _ => ("call", arena[i].fullcode.as_str()),
+    };
+    let mut def_var: HashMap<usize, (&str, &str)> = HashMap::new();
     let mut gen: HashMap<usize, Vec<usize>> = HashMap::new(); // node -> defs generated
                                                               // parameters
     let params: Vec<usize> = arena[0]
@@ -4798,17 +10084,13 @@ fn reaching_def_flows(block: &str, text: &str) -> Vec<(String, String, String)> 
         .copied()
         .filter(|&k| arena[k].label == "METHOD_PARAMETER_IN")
         .collect();
-    let mut entry_gen: Vec<usize> = Vec::new();
     for &p in &params {
-        def_var.insert(p, node_var(&arena[p]));
-        entry_gen.push(p);
+        def_var.insert(p, definition_key(p));
+        gen.insert(p, vec![p]);
     }
-    // calls
-    // All call nodes are processed by the call-site routines (Joern runs
-    // addEdgesToCallSite for every Call). But GEN excludes field-access calls
-    // (Joern's defsForCalls.filterNot(isFieldAccess)): such a call defines no
-    // value of its own — it only becomes a def when it is itself an argument
-    // of a non-field-access parent (handled by the parent's gen below).
+    // GEN/KILL include method-contained calls even when their CFG nodes are
+    // unreachable. Their initial OUT is GEN, so a raw predecessor can supply
+    // definitions without ever receiving IN or call-site DDG processing.
     let calls: Vec<usize> = (0..n)
         .filter(|&i| own.contains(&i) && arena[i].label == "CALL")
         .collect();
@@ -4823,10 +10105,10 @@ fn reaching_def_flows(block: &str, text: &str) -> Vec<(String, String, String)> 
         // arg exclusion; indirection etc. are already filtered out of gen_calls
         // by the broad isFieldAccess above.)
         let mut g = vec![c];
-        def_var.insert(c, node_var(&arena[c]));
+        def_var.insert(c, definition_key(c));
         for a in args_of(c) {
             if is_gen_arg(a) {
-                def_var.insert(a, node_var(&arena[a]));
+                def_var.insert(a, definition_key(a));
                 g.push(a);
             }
         }
@@ -4844,7 +10126,15 @@ fn reaching_def_flows(block: &str, text: &str) -> Vec<(String, String, String)> 
         // `i` is a node id, not just an arena index: it keys `own` too.
         #[allow(clippy::needless_range_loop)]
         for i in 0..n {
-            if own.contains(&i) && arena[i].label == "LOCAL" {
+            // Method.local traverses method-contained BLOCKs and their direct
+            // LOCAL children. A FOR initializer's LOCAL is attached to the
+            // CONTROL_STRUCTURE and is absent from this optimization's list.
+            if own.contains(&i)
+                && arena[i].label == "LOCAL"
+                && arena[i]
+                    .parent
+                    .is_some_and(|parent| arena[parent].label == "BLOCK")
+            {
                 name_excluded.insert(arena[i].name.clone());
             }
         }
@@ -4890,7 +10180,7 @@ fn reaching_def_flows(block: &str, text: &str) -> Vec<(String, String, String)> 
         if is_generic_member_access(&arena[c].name) {
             continue;
         }
-        let vars: HashSet<String> = gen[&c].iter().map(|&d| def_var[&d].clone()).collect();
+        let vars: HashSet<(&str, &str)> = gen[&c].iter().map(|d| def_var[d]).collect();
         let g: HashSet<usize> = gen[&c].iter().copied().collect();
         let k: Vec<usize> = def_var
             .iter()
@@ -4900,71 +10190,149 @@ fn reaching_def_flows(block: &str, text: &str) -> Vec<(String, String, String)> 
         kill.insert(c, k);
     }
 
-    // --- dataflow fixpoint over the CFG ---
-    let cfg = cfg_index_edges(block, text, n);
-    // Nodes that are part of this method's CFG (the reaching-def flow graph's
-    // node set). Used to tell an EXPRESSION block (comma operator — in the CFG)
-    // from a statement / INLINED-macro / stub body block (not in the CFG).
+    // --- ReachingDefFlowGraph and DataFlowSolver (Joern v4.0.555) ---
     let cfg_nodes: HashSet<usize> = cfg.iter().flat_map(|&(s, d)| [s, d]).collect();
-    let mut preds: Vec<Vec<usize>> = vec![Vec::new(); n];
-    for &(s, d) in &cfg {
-        preds[d].push(s);
+    let exit = arena[0]
+        .children
+        .iter()
+        .copied()
+        .find(|&i| arena[i].label == "METHOD_RETURN");
+    let output_params: Vec<usize> = arena[0]
+        .children
+        .iter()
+        .copied()
+        .filter(|&i| arena[i].label == "METHOD_PARAMETER_OUT")
+        .collect();
+    let first_body = successors[0].first().copied();
+    let mut preds = vec![Vec::new(); n];
+    for &(source, target) in &cfg {
+        preds[target].push(source);
     }
-    // ReachingDefFlowGraph quirk (decompiled initPred): the FIRST body node's
-    // predecessor is the param-chain entry (method), REPLACING its CFG preds.
-    // When the loop condition is the first body node (no statements precede the
-    // loop, e.g. bsearch), this drops the loop back-edges into it — so loop-body
-    // defs don't flow back to the condition. The method node (0) points to the
-    // first body node.
-    for &(s, d) in &cfg {
-        if s == 0 {
-            preds[d] = vec![0];
-        }
-    }
-    let mut out: Vec<HashSet<usize>> = vec![HashSet::new(); n];
-    out[0] = entry_gen.iter().copied().collect();
-    let empty: Vec<usize> = Vec::new();
-    let mut changed = true;
-    while changed {
-        changed = false;
-        for i in 0..n {
-            let mut in_set: HashSet<usize> = HashSet::new();
-            for &p in &preds[i] {
-                in_set.extend(&out[p]);
-            }
-            let g = gen.get(&i).unwrap_or(&empty);
-            let k = kill.get(&i).unwrap_or(&empty);
-            let mut new_out: HashSet<usize> =
-                in_set.iter().copied().filter(|d| !k.contains(d)).collect();
-            new_out.extend(g.iter().copied());
-            if i == 0 {
-                new_out.extend(entry_gen.iter().copied());
-            }
-            if new_out != out[i] {
-                out[i] = new_out;
-                changed = true;
-            }
-        }
-    }
-    let in_of = |i: usize| -> HashSet<usize> {
-        let mut s = HashSet::new();
-        for &p in &preds[i] {
-            s.extend(&out[p]);
-        }
-        s
-    };
+    // ReachingDefFlowGraph selects the first incoming CFG edge. This is the
+    // CfgCreator composition order, not AST order or a reachability filter.
+    let last_actual = exit.and_then(|e| preds[e].first().copied());
 
-    // Joern's reaching-def runs over ReachingDefFlowGraph, not the raw CFG: the
-    // exit and the METHOD_PARAMETER_OUTs are fed by a param-out chain whose
-    // source is the single `lastActualCfgNode` (the earliest cfg-predecessor of
-    // METHOD_RETURN) — NOT the union of all returns. So a post-loop `return`
-    // never contributes its (bypass) param defs to the exit. For a
-    // single-return method this is identical to the union.
-    let exit_in: HashSet<usize> = (0..n)
-        .find(|&i| own.contains(&i) && arena[i].label == "METHOD_RETURN")
-        .and_then(|e| preds[e].iter().copied().filter(|&p| p < n).min())
-        .map(|la| out[la].clone())
-        .unwrap_or_default();
+    // Method.reversePostOrder traverses raw cfgNext, which excludes the
+    // METHOD_RETURN. Parameters and the exit are added explicitly afterward.
+    // Use an iterative DFS with suspended successor positions, as Joern's
+    // NodeOrdering does, rather than an AST-order fixed-point sweep.
+    let mut postorder = Vec::new();
+    let mut visited = vec![false; n];
+    let mut stack = vec![(0usize, 0usize)];
+    visited[0] = true;
+    while let Some((node, next_index)) = stack.last_mut() {
+        if *next_index < successors[*node].len() {
+            let next = successors[*node][*next_index];
+            *next_index += 1;
+            if Some(next) != exit && !visited[next] {
+                visited[next] = true;
+                stack.push((next, 0));
+            }
+        } else {
+            postorder.push(*node);
+            stack.pop();
+        }
+    }
+    let mut worklist = vec![0];
+    worklist.extend(params.iter().copied());
+    worklist.extend(postorder.into_iter().rev().filter(|&i| i != 0));
+    worklist.extend(output_params.iter().copied());
+    worklist.extend(exit);
+
+    // initPred and initSucc are intentionally asymmetric. A node whose only
+    // CFG successor is exit schedules the first output parameter instead;
+    // a loop condition with both body and exit successors still schedules
+    // exit directly. Output-parameter IN can therefore retain an earlier
+    // round even when the loop condition's OUT later changes.
+    let mut flow_successors = successors.clone();
+    for &i in &worklist {
+        if i == 0 {
+            flow_successors[i] = params
+                .first()
+                .copied()
+                .map_or_else(|| successors[i].clone(), |first| vec![first]);
+        } else if let Some(position) = params.iter().position(|&p| p == i) {
+            preds[i] = vec![position.checked_sub(1).map_or(0, |p| params[p])];
+            flow_successors[i] = params
+                .get(position + 1)
+                .copied()
+                .map_or_else(|| successors[0].clone(), |next| vec![next]);
+        } else if let Some(position) = output_params.iter().position(|&p| p == i) {
+            preds[i] = position
+                .checked_sub(1)
+                .map(|p| output_params[p])
+                .or(last_actual)
+                .into_iter()
+                .collect();
+            flow_successors[i] = output_params
+                .get(position + 1)
+                .copied()
+                .or(exit)
+                .into_iter()
+                .collect();
+        } else {
+            if Some(i) == first_body {
+                // This case precedes exit handling in initPred, including an
+                // empty method whose first CFG node is METHOD_RETURN.
+                preds[i] = vec![params.last().copied().unwrap_or(0)];
+            } else if Some(i) == exit {
+                preds[i] = output_params
+                    .last()
+                    .copied()
+                    .or(last_actual)
+                    .into_iter()
+                    .collect();
+            }
+            if arena[i].label == "RETURN"
+                || (successors[i].len() == 1 && successors[i].first().copied() == exit)
+            {
+                flow_successors[i] = output_params
+                    .first()
+                    .copied()
+                    .or(exit)
+                    .into_iter()
+                    .collect();
+            }
+        }
+    }
+
+    let mut out = vec![DefinitionSet::default(); n];
+    for (&node, generated) in &gen {
+        out[node].insert_all(generated);
+    }
+    let mut incoming: Vec<Option<DefinitionSet>> = vec![None; n];
+    while !worklist.is_empty() {
+        let mut next_worklist = Vec::new();
+        let mut queued = vec![false; n];
+        for i in worklist {
+            let mut in_set = DefinitionSet::default();
+            for &previous in &preds[i] {
+                in_set.union_with(&out[previous]);
+            }
+            let mut next_out = in_set.clone();
+            if let Some(killed) = kill.get(&i) {
+                next_out.remove_all(killed);
+            }
+            if let Some(generated) = gen.get(&i) {
+                next_out.insert_all(generated);
+            }
+            incoming[i] = Some(in_set);
+            if next_out != out[i] {
+                out[i] = next_out;
+                for &next in &flow_successors[i] {
+                    if !queued[next] {
+                        queued[next] = true;
+                        next_worklist.push(next);
+                    }
+                }
+            }
+        }
+        worklist = next_worklist;
+    }
+    // DDG routines read the saved IN solution, not unions recomputed from
+    // final predecessor OUT. Unscheduled nodes have no entry in this map.
+    let empty_in = DefinitionSet::default();
+    let in_of = |i: usize| incoming[i].as_ref().unwrap_or(&empty_in);
 
     // isUsing(use, inElem) — faithful port of UsageAnalyzer.isUsing =
     // sameVariable || isContainer || isPart || isAlias. Joern compares
@@ -4976,19 +10344,21 @@ fn reaching_def_flows(block: &str, text: &str) -> Vec<(String, String, String)> 
     // Gate every candidate edge addEdge(from=s, to=d) through
     // isValidEdge(child=d, parent=s), exactly as DdgGenerator.addEdge does.
     let push = |var: String, s: usize, d: usize, flows: &mut Vec<(String, String, String)>| {
-        if rd_valid_edge(&arena, d, s) {
+        if own.contains(&s)
+            && own.contains(&d)
+            && arena[s].label != "UNKNOWN"
+            && arena[d].label != "UNKNOWN"
+            && rd_valid_edge(&arena, d, s)
+        {
             flows.push((var, addr(s), addr(d)));
         }
     };
 
-    // method-return (exit) index
-    let exit = (0..n).find(|&i| own.contains(&i) && arena[i].label == "METHOD_RETURN");
-
     // isDdgNode: everything EXCEPT Method, ControlStructure, FieldIdentifier,
     // JumpTarget, MethodReturn. A BLOCK is a ddg node only when it is itself a
-    // CFG node — i.e. an EXPRESSION block used as a call argument (the
-    // comma-operator `(b++, b+1)`); statement blocks (method/loop bodies) are
-    // not in the CFG and never get def-use edges.
+    // CFG node: an expression block used as a call argument (the comma
+    // operator `(b++, b+1)`) or a standalone compound statement. Method and
+    // control-body blocks are not CFG nodes and never get def-use edges.
     let is_ddg = |i: usize| match arena[i].label.as_str() {
         "CALL"
         | "IDENTIFIER"
@@ -5007,7 +10377,7 @@ fn reaching_def_flows(block: &str, text: &str) -> Vec<(String, String, String)> 
         uses_of(i)
             .into_iter()
             .map(|u| {
-                let ds: Vec<usize> = ins.iter().copied().filter(|&d| is_using(u, d)).collect();
+                let ds: Vec<usize> = ins.iter().filter(|&d| is_using(u, d)).collect();
                 (u, ds)
             })
             .collect()
@@ -5035,17 +10405,24 @@ fn reaching_def_flows(block: &str, text: &str) -> Vec<(String, String, String)> 
     // 1. addEdgesFromEntryNode: a ddg node whose usedIncomingDefs are all empty
     // (no reaching def is actually used) gets method -> node, var "". This
     // includes `return 0` (literal, no reaching def) but not `return SQR(n)`
-    // (the call is a reaching def). Non-INLINED calls (function calls,
-    // operators) never get an entry edge; INLINED macro calls do (when their
-    // args carry no reaching def). isValidEdge in push drops write-only targets.
+    // (the call is a reaching def). Calls with arguments have a nonempty
+    // UsageAnalyzer use map even when those arguments use no incoming defs.
+    // Zero-argument calls get an entry edge; an INLINED expansion BLOCK has
+    // no ARGUMENT edge and therefore does not count as an argument here.
+    // isValidEdge in push drops write-only targets.
     // `i` is a node id, not just an arena index: it keys `own`, `assign_lhs`,
     // `is_ddg` and `used_incoming` as well.
     #[allow(clippy::needless_range_loop)]
     for i in 0..n {
-        if i == 0 || !own.contains(&i) || !is_ddg(i) || assign_lhs.contains(&i) {
+        if i == 0
+            || incoming[i].is_none()
+            || !own.contains(&i)
+            || !is_ddg(i)
+            || assign_lhs.contains(&i)
+        {
             continue;
         }
-        if arena[i].label == "CALL" && !arena[i].inlined && !args_of(i).is_empty() {
+        if arena[i].label == "CALL" && !args_of(i).is_empty() {
             continue;
         }
         if used_incoming(i).iter().all(|(_, ds)| ds.is_empty()) {
@@ -5053,8 +10430,8 @@ fn reaching_def_flows(block: &str, text: &str) -> Vec<(String, String, String)> 
         }
     }
 
-    // 2. call sites
-    for &c in &calls {
+    // 2. call sites: only nodes with a computed IN solution.
+    for &c in calls.iter().filter(|&&c| incoming[c].is_some()) {
         let g_set: Vec<usize> = gen.get(&c).cloned().unwrap_or_default();
         let is_gen_arg_node = |x: usize| g_set.contains(&x) && x != c;
         // first loop: reaching defs into each arg use (the assignment LHS is a
@@ -5072,9 +10449,9 @@ fn reaching_def_flows(block: &str, text: &str) -> Vec<(String, String, String)> 
         // second loop: every arg use -> every gen member, then filtered by
         // the call's flow SEMANTICS (Joern's EdgeValidator.isValidEdge). For a
         // call with explicit semantics, an arg->arg edge is valid iff there is
-        // a flow mapping (srcArgIdx -> dstArgIdx). Operators with no explicit
-        // semantics are pass-through; named calls default to input -> return
-        // only, so their actual arguments do not become sibling definitions.
+        // a flow mapping (srcArgIdx -> dstArgIdx) and arg->return iff
+        // (srcArgIdx -> -1). Operators with no semantics are pass-through
+        // (all edges valid); `sizeOf` has empty semantics (no flows).
         let _ = is_gen_arg_node;
         let sem = operator_semantics(&arena[c].name);
         for u in args_of(c) {
@@ -5088,11 +10465,10 @@ fn reaching_def_flows(block: &str, text: &str) -> Vec<(String, String, String)> 
                 }
                 // An argument always taints its call's output node. An
                 // argument -> sibling-argument edge is gated by the call's
-                // flow semantics (pass-through only for operators with no
-                // explicit semantics).
+                // flow semantics (pass-through when the operator has none).
                 let valid = gnode == c
                     || match &sem {
-                        None => arena[c].name.starts_with("<operator"),
+                        None => !defined_functions.contains(&arena[c].name),
                         Some(maps) => maps.contains(&(u_idx, arena[gnode].arg_index)),
                     };
                 if valid {
@@ -5116,7 +10492,6 @@ fn reaching_def_flows(block: &str, text: &str) -> Vec<(String, String, String)> 
                     let ins = in_of(b);
                     let mut ds: Vec<usize> = ins
                         .iter()
-                        .copied()
                         .filter(|&d| is_using(last, d))
                         .filter(|&d| matches!(arena[d].label.as_str(), "IDENTIFIER" | "CALL"))
                         .collect();
@@ -5140,7 +10515,7 @@ fn reaching_def_flows(block: &str, text: &str) -> Vec<(String, String, String)> 
 
     // 3. returns
     for i in 0..n {
-        if arena[i].label != "RETURN" || !own.contains(&i) {
+        if arena[i].label != "RETURN" || !own.contains(&i) || incoming[i].is_none() {
             continue;
         }
         for (u, ins) in used_incoming(i) {
@@ -5161,20 +10536,36 @@ fn reaching_def_flows(block: &str, text: &str) -> Vec<(String, String, String)> 
         if arena[i].label != "METHOD_PARAMETER_OUT" || !own.contains(&i) {
             continue;
         }
-        // paramIn -> paramOut, name
-        if let Some(&pin) = params.iter().find(|&&p| arena[p].name == arena[i].name) {
+        // External declarations bind mirrored parameters positionally; two
+        // unnamed parameters are distinct even though both names are empty.
+        let declaration_only = arena[0].fullcode.trim_end().ends_with(';')
+            && arena[0]
+                .children
+                .iter()
+                .any(|&child| arena[child].label == "BLOCK" && arena[child].fullcode.is_empty());
+        let parameter_index = arena[0]
+            .children
+            .iter()
+            .copied()
+            .filter(|&child| arena[child].label == "METHOD_PARAMETER_OUT")
+            .position(|child| child == i);
+        let pin = if declaration_only {
+            parameter_index.and_then(|index| params.get(index))
+        } else {
+            params.iter().find(|&&p| arena[p].name == arena[i].name)
+        };
+        if let Some(&pin) = pin {
             push(arena[pin].name.clone(), pin, i, &mut flows);
+        }
+        if declaration_only {
+            continue;
         }
         // addEdgesToMethodParameterOut: usedIncomingDefs(paramOut) — the defs
         // live at method exit (param-out chain) that the paramOut isUsing. The
         // paramOut's own "use" is itself, so the match is isUsing(paramOut, d):
         // e.g. `*l` (indirection of l) is used by the paramOut of l, and `q.x`
         // (a write through q) by the paramOut of q.
-        let mut ds: Vec<usize> = exit_in
-            .iter()
-            .copied()
-            .filter(|&d| is_using(i, d))
-            .collect();
+        let mut ds: Vec<usize> = in_of(i).iter().filter(|&d| is_using(i, d)).collect();
         ds.sort();
         for d in ds {
             push(node_var(&arena[d]), d, i, &mut flows);
@@ -5183,7 +10574,7 @@ fn reaching_def_flows(block: &str, text: &str) -> Vec<(String, String, String)> 
 
     // 5. exit node: every def in in(exit) -> exit
     if let Some(e) = exit {
-        let mut v: Vec<usize> = exit_in.iter().copied().collect();
+        let mut v: Vec<usize> = in_of(e).iter().collect();
         v.sort();
         for d in v {
             push(node_var(&arena[d]), d, e, &mut flows);
@@ -5218,9 +10609,6 @@ fn captured_identifier_flows(dumps: &[(String, String)]) -> Vec<(String, String,
         if arena.is_empty() || arena[0].label != "METHOD" {
             continue;
         }
-        if !key.ends_with(":<global>") {
-            continue;
-        }
         // own nodes (do not descend into nested METHOD subtrees).
         let mut own: Vec<usize> = Vec::new();
         let mut stack = vec![0usize];
@@ -5237,6 +10625,15 @@ fn captured_identifier_flows(dumps: &[(String, String)]) -> Vec<(String, String,
             .iter()
             .filter(|&&i| arena[i].label == "METHOD_REF")
             .map(|&i| arena[i].fullcode.clone())
+            // Merely taking a function's address does not capture the
+            // caller's locals. The referenced method must be lexically nested
+            // in this AST (as definitions are in the file-global wrapper).
+            .filter(|full| {
+                arena
+                    .iter()
+                    .skip(1)
+                    .any(|node| node.label == "METHOD" && node.full == *full)
+            })
             .collect();
         if refs.is_empty() {
             continue;
@@ -5274,7 +10671,14 @@ fn rd_node_str(arena: &[DNode], i: usize) -> Option<String> {
             Some(arena[i].name.clone())
         }
         "METHOD" | "METHOD_RETURN" | "CONTROL_STRUCTURE" | "JUMP_TARGET" => None,
-        _ => Some(arena[i].fullcode.clone()),
+        // propertiesMap omits an unset CODE, but Joern's Expression.code
+        // getter returns PropertyDefaults.Code ("<empty>"). An explicitly
+        // empty CODE remains empty, as for function-pointer initializers.
+        _ => Some(if arena[i].has_code {
+            arena[i].fullcode.clone()
+        } else {
+            "<empty>".to_string()
+        }),
     }
 }
 // call.argument with a given ARGUMENT_INDEX (argumentOption(idx)).
@@ -5392,15 +10796,39 @@ fn rd_is_expr(arena: &[DNode], node: usize) -> bool {
             | "TYPE_REF"
     )
 }
+// DefaultSemantics.operatorFlows uses an explicit PassThroughMapping for
+// these operators. Unlike absent semantics, it forbids cross-argument flow.
+fn rd_passthrough_operator(name: &str) -> bool {
+    matches!(
+        name,
+        "<operator>.modulo"
+            | "<operator>.arrayInitializer"
+            | "<operator>.tupleLiteral"
+            | "<operator>.dictLiteral"
+            | "<operator>.setLiteral"
+            | "<operator>.listLiteral"
+    )
+}
 fn rd_sem(arena: &[DNode], c: usize) -> Option<Vec<(i64, i64)>> {
-    if arena[c].label == "CALL" {
-        operator_semantics(&arena[c].name)
-    } else {
-        None
+    if arena[c].label != "CALL" {
+        return None;
     }
+    if rd_passthrough_operator(&arena[c].name) {
+        // PTF supports unbounded arity and excludes the receiver at index 0.
+        return Some(
+            rd_args(arena, c)
+                .into_iter()
+                .map(|argument| arena[argument].arg_index)
+                .filter(|&index| index != 0)
+                .flat_map(|index| [(index, index), (index, -1)])
+                .collect(),
+        );
+    }
+    operator_semantics(&arena[c].name)
 }
 fn rd_is_call_retval(arena: &[DNode], node: usize) -> bool {
-    if arena[node].label != "CALL" {
+    if arena[node].label != "CALL" || rd_passthrough_operator(&arena[node].name) {
+        // PassThroughMapping explicitly permits return flow even at arity 0.
         return false;
     }
     match rd_sem(arena, node) {
@@ -5408,20 +10836,47 @@ fn rd_is_call_retval(arena: &[DNode], node: usize) -> bool {
         None => false,
     }
 }
+// PTF consumers ask only existential membership. Borrow its eligible indices
+// instead of allocating and sorting the full (i, i)/(i, -1) mapping per edge.
+// Keep negative indices and sibling index aliases; FIELD_IDENTIFIER and missing
+// ARGUMENT_INDEX children do not themselves contribute mappings.
+fn rd_passthrough_indices(arena: &[DNode], c: usize) -> impl Iterator<Item = i64> + '_ {
+    arena[c].children.iter().filter_map(|&child| {
+        let argument = &arena[child];
+        (argument.has_arg && argument.label != "FIELD_IDENTIFIER" && argument.arg_index != 0)
+            .then_some(argument.arg_index)
+    })
+}
 fn rd_is_used(arena: &[DNode], e: usize) -> bool {
-    match rd_in_call(arena, e).and_then(|c| rd_sem(arena, c)) {
+    let call = rd_in_call(arena, e);
+    if let Some(c) = call.filter(|&c| rd_passthrough_operator(&arena[c].name)) {
+        return rd_passthrough_indices(arena, c).any(|index| index == arena[e].arg_index);
+    }
+    match call.and_then(|c| rd_sem(arena, c)) {
         Some(m) => m.iter().any(|&(s, _)| s == arena[e].arg_index),
         None => true,
     }
 }
 fn rd_is_defined(arena: &[DNode], e: usize) -> bool {
-    match rd_in_call(arena, e).and_then(|c| rd_sem(arena, c)) {
+    let call = rd_in_call(arena, e);
+    if let Some(c) = call.filter(|&c| rd_passthrough_operator(&arena[c].name)) {
+        return rd_passthrough_indices(arena, c)
+            .any(|index| index == arena[e].arg_index || arena[e].arg_index == -1);
+    }
+    match call.and_then(|c| rd_sem(arena, c)) {
         Some(m) => m.iter().any(|&(_, d)| d == arena[e].arg_index),
         None => true,
     }
 }
 fn rd_has_flow(arena: &[DNode], parent: usize, child: usize) -> bool {
-    match rd_in_call(arena, parent).and_then(|c| rd_sem(arena, c)) {
+    let call = rd_in_call(arena, parent);
+    if let Some(c) = call.filter(|&c| rd_passthrough_operator(&arena[c].name)) {
+        let source = arena[parent].arg_index;
+        let target = arena[child].arg_index;
+        return (source == target || target == -1)
+            && rd_passthrough_indices(arena, c).any(|index| index == source);
+    }
+    match call.and_then(|c| rd_sem(arena, c)) {
         Some(m) => m.contains(&(arena[parent].arg_index, arena[child].arg_index)),
         None => true,
     }
@@ -5468,69 +10923,220 @@ fn rd_valid_edge(arena: &[DNode], child: usize, parent: usize) -> bool {
 }
 
 #[cfg(test)]
-mod macro_tests {
+mod preproc_tests {
     use super::*;
 
-    fn function_macro(params: &[&str], body: &str) -> MacroDef {
-        MacroDef {
-            params: Some(params.iter().map(|value| (*value).to_string()).collect()),
-            body: body.to_string(),
-            directive: String::new(),
-            origin: "test.c".to_string(),
+    #[test]
+    fn macro_expansion_bounds_empty_doubling_chains_and_cycles() {
+        let mut definitions = HashMap::from([("EMPTY0".to_string(), String::new())]);
+        for index in 1..40 {
+            definitions.insert(
+                format!("EMPTY{index}"),
+                format!("EMPTY{} EMPTY{}", index - 1, index - 1),
+            );
+        }
+        let mut budget = 128;
+        let expansion =
+            expand_preproc_objects("EMPTY39", &definitions, &mut HashSet::new(), &mut budget);
+        assert_eq!(budget, 0);
+        assert!(expansion.len() <= 128);
+
+        let cycle = HashMap::from([
+            ("A".to_string(), "B".to_string()),
+            ("B".to_string(), "A".to_string()),
+        ]);
+        let mut budget = 128;
+        assert_eq!(
+            expand_preproc_objects("A", &cycle, &mut HashSet::new(), &mut budget),
+            "A"
+        );
+        assert!(budget > 0);
+    }
+}
+
+#[cfg(test)]
+mod dump_property_tests {
+    use super::parse_dump_block;
+
+    #[test]
+    fn full_names_end_at_properties_or_end_of_line() {
+        for (line, expected) in [
+            (
+                "METHOD NAME=VALUE CODE=#define VALUE 2U FULL_NAME=a b.h:VALUE:unsigned int(0) SIGNATURE=unsigned int(0) ORDER=1",
+                "a b.h:VALUE:unsigned int(0)",
+            ),
+            (
+                "TYPE_DECL NAME=<global> FULL_NAME=a b.h:<global> ORDER=1",
+                "a b.h:<global>",
+            ),
+            (
+                "METHOD NAME=VALUE FULL_NAME=a X=b.h:VALUE:unsigned longint(1)",
+                "a X=b.h:VALUE:unsigned longint(1)",
+            ),
+            ("METHOD NAME=ordinary FULL_NAME=ordinary ORDER=1", "ordinary"),
+            (
+                "METHOD CODE=int invoke(int x){ /* FULL_NAME=invoke */ return x; } FULL_NAME=invoke SIGNATURE=int(int) ORDER=1",
+                "invoke",
+            ),
+            ("METHOD FULL_NAME= ORDER=1", ""),
+            ("CALL METHOD_FULL_NAME=other", ""),
+            ("BLOCK ORDER=1", ""),
+        ] {
+            assert_eq!(parse_dump_block(line)[0].full, expected, "{line}");
+        }
+        for property in [
+            "METHOD_FULL_NAME=next",
+            "SIGNATURE=unsigned int(1)",
+            "ORDER=1",
+            "ARGUMENT_INDEX=2",
+            "DISPATCH_TYPE=STATIC_DISPATCH",
+        ] {
+            let line = format!("METHOD FULL_NAME=é space x=value {property}");
+            assert_eq!(parse_dump_block(&line)[0].full, "é space x=value");
+        }
+    }
+}
+
+#[cfg(test)]
+mod rd_semantics_tests {
+    use super::*;
+
+    #[test]
+    fn pass_through_validation_uses_actual_arguments_without_sibling_flow() {
+        for operator in [
+            "<operator>.modulo",
+            "<operator>.arrayInitializer",
+            "<operator>.tupleLiteral",
+            "<operator>.dictLiteral",
+            "<operator>.setLiteral",
+            "<operator>.listLiteral",
+        ] {
+            let arena = parse_dump_block(&format!(
+                "CALL NAME={operator} CODE=initializer ORDER=1\n\
+                 \x20\x20LITERAL CODE=receiver ARGUMENT_INDEX=0 ORDER=0\n\
+                 \x20\x20LITERAL CODE=first ARGUMENT_INDEX=1 ORDER=1\n\
+                 \x20\x20LITERAL CODE=third ARGUMENT_INDEX=3 ORDER=3\n\
+                 \x20\x20LITERAL CODE=many ARGUMENT_INDEX=40 ORDER=40\n"
+            ));
+            assert!(!rd_is_used(&arena, 1), "{operator}: receiver is not input");
+            assert!(
+                !rd_is_defined(&arena, 1),
+                "{operator}: receiver is not output"
+            );
+            for argument in 2..arena.len() {
+                assert!(rd_is_used(&arena, argument), "{operator}: {argument}");
+                assert!(rd_is_defined(&arena, argument), "{operator}: {argument}");
+                assert!(rd_valid_edge(&arena, argument, argument));
+                assert!(rd_valid_edge(&arena, 0, argument));
+                for sibling in 2..arena.len() {
+                    if sibling != argument {
+                        assert!(!rd_valid_edge(&arena, sibling, argument));
+                    }
+                }
+            }
+            let empty = parse_dump_block(&format!("CALL NAME={operator} CODE={{}} ORDER=1"));
+            assert!(!rd_is_call_retval(&empty, 0), "{operator}: empty call");
         }
     }
 
     #[test]
-    fn substitutes_stringize_paste_and_variadics() {
-        assert_eq!(
-            substitute("#value", &["value".into()], &["hello   world".into()]),
-            "\"hello world\""
+    fn borrowed_pass_through_predicates_preserve_filtered_and_duplicate_indices() {
+        let mut arena = parse_dump_block(
+            "CALL NAME=<operator>.arrayInitializer CODE={}\n\
+             \x20\x20LITERAL CODE=first\n\
+             \x20\x20LITERAL CODE=second\n\
+             \x20\x20FIELD_IDENTIFIER CODE=query ARGUMENT_INDEX=-3\n\
+             \x20\x20FIELD_IDENTIFIER CODE=query ARGUMENT_INDEX=-2\n\
+             \x20\x20FIELD_IDENTIFIER CODE=query ARGUMENT_INDEX=-1\n\
+             \x20\x20FIELD_IDENTIFIER CODE=query ARGUMENT_INDEX=0\n\
+             \x20\x20FIELD_IDENTIFIER CODE=query ARGUMENT_INDEX=1\n\
+             \x20\x20FIELD_IDENTIFIER CODE=query ARGUMENT_INDEX=2\n\
+             \x20\x20FIELD_IDENTIFIER CODE=query ARGUMENT_INDEX=3\n",
         );
-        assert_eq!(
-            substitute(
-                "left ## right",
-                &["left".into(), "right".into()],
-                &["token_".into(), "value".into()]
-            ),
-            "token_value"
-        );
-        assert_eq!(
-            substitute(
-                "first",
-                &["first".into(), "__VA_ARGS__".into()],
-                &["input".into(), "11".into(), "12".into()]
-            ),
-            "input"
-        );
-        assert_eq!(
-            substitute(
-                "log(format, ## __VA_ARGS__)",
-                &["format".into(), "__VA_ARGS__".into()],
-                &["\"ok\"".into()]
-            ),
-            "log(\"ok\")"
-        );
+        for first in 0..20 {
+            for second in 0..20 {
+                for (node, option) in [(1, first), (2, second)] {
+                    arena[node].arg_index = option / 4 - 2;
+                    arena[node].has_arg = option % 4 >= 2;
+                    arena[node].label = if option % 2 == 0 {
+                        "LITERAL".to_string()
+                    } else {
+                        "FIELD_IDENTIFIER".to_string()
+                    };
+                }
+                // Retain the original vector construction as the specification.
+                let mapping = rd_sem(&arena, 0).expect("PTF has explicit semantics");
+                for source in 3..arena.len() {
+                    let index = arena[source].arg_index;
+                    assert_eq!(
+                        rd_is_used(&arena, source),
+                        mapping.iter().any(|&(s, _)| s == index)
+                    );
+                    assert_eq!(
+                        rd_is_defined(&arena, source),
+                        mapping.iter().any(|&(_, d)| d == index)
+                    );
+                    for target in 3..arena.len() {
+                        assert_eq!(
+                            rd_has_flow(&arena, source, target),
+                            mapping.contains(&(index, arena[target].arg_index))
+                        );
+                    }
+                }
+            }
+        }
     }
 
     #[test]
-    fn fully_expands_nested_macros_and_tracks_visible_arguments() {
-        let macros = HashMap::from([
-            ("INNER".to_string(), function_macro(&["x"], "((x) + 1)")),
-            ("OUTER".to_string(), function_macro(&["x"], "INNER(x)")),
-        ]);
-        let mut expanding = HashSet::from(["OUTER".to_string()]);
-        assert_eq!(
-            expand_macros_text("INNER(input)", &macros, 0, &mut expanding),
-            "((input) + 1)"
+    fn absent_expression_code_does_not_alias_explicit_empty_names() {
+        let arena = parse_dump_block(
+            "METHOD NAME=f FULL_NAME=f\n\
+             \x20\x20METHOD_PARAMETER_IN NAME= CODE=void ORDER=1\n\
+             \x20\x20BLOCK ORDER=2\n\
+             \x20\x20IDENTIFIER NAME= CODE= ARGUMENT_INDEX=1 ORDER=3\n\
+             \x20\x20BLOCK CODE= ORDER=4\n",
         );
-        assert_eq!(ordinary_macro_parameters("#x", &["x".into()]), vec![false]);
-        assert_eq!(
-            ordinary_macro_parameters("left ## right", &["left".into(), "right".into()]),
-            vec![false, false]
-        );
-        assert_eq!(
-            ordinary_macro_parameters("first", &["first".into(), "__VA_ARGS__".into()]),
-            vec![true, false]
-        );
+        assert_eq!(rd_node_str(&arena, 2).as_deref(), Some("<empty>"));
+        assert!(!rd_is_using(&arena, 2, 1));
+        assert_eq!(rd_node_str(&arena, 3).as_deref(), Some(""));
+        assert!(rd_is_using(&arena, 3, 1));
+        assert_eq!(rd_node_str(&arena, 4).as_deref(), Some(""));
+        assert!(rd_is_using(&arena, 4, 1));
+        assert_eq!(rd_node_str(&arena, 0), None);
+    }
+}
+
+#[cfg(test)]
+mod definition_set_tests {
+    use super::DefinitionSet;
+    use std::collections::BTreeSet;
+
+    #[test]
+    fn membership_and_equality_match_sets_through_union_kill_and_regeneration() {
+        let mut packed = DefinitionSet::default();
+        let mut reference = BTreeSet::new();
+        for round in 0..64 {
+            let generated: Vec<_> = (0..67).map(|i| (i * 127 + round * 19) % 4097).collect();
+            let killed: Vec<_> = (0..83).map(|i| (i * 63 + round * 131) % 4097).collect();
+            let mut predecessor = DefinitionSet::default();
+            predecessor.insert_all(&generated);
+            packed.union_with(&predecessor);
+            reference.extend(&generated);
+            packed.remove_all(&killed);
+            reference.retain(|value| !killed.contains(value));
+            let actual: Vec<_> = packed.iter().collect();
+            assert_eq!(actual, reference.iter().copied().collect::<Vec<_>>());
+            let mut rebuilt = DefinitionSet::default();
+            rebuilt.insert_all(&actual);
+            assert_eq!(packed, rebuilt);
+        }
+        let all: Vec<_> = reference.into_iter().collect();
+        packed.remove_all(&all);
+        assert_eq!(packed, DefinitionSet::default());
+        packed.insert_all(&[0, 63, 64, 65, 4096]);
+        packed.remove_all(&[4096, 65, 64]);
+        let mut compact = DefinitionSet::default();
+        compact.insert_all(&[63, 0, 63]);
+        assert_eq!(packed, compact);
     }
 }

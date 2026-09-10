@@ -1,0 +1,73 @@
+--- joern
++++ candidate
+@@ -37,7 +37,7 @@
+               IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=1
+     METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+   BLOCK TYPE_FULL_NAME=ANY ORDER=1
+-    UNKNOWN CODE=typedef signed UNKNOWN U; ORDER=1
++    TYPE_DECL NAME=U CODE=typedef signed UNKNOWN U; FULL_NAME=U ORDER=1
+     METHOD_REF CODE=check TYPE_FULL_NAME=check METHOD_FULL_NAME=check ORDER=2
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+ 
+@@ -58,13 +58,17 @@
+ NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+ NODES|NAMESPACE NAME=<global>
+ NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
++NODES|TYPE_DECL NAME=U FULL_NAME=U CODE=typedef signed UNKNOWN U; AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=main.c ORDER=1
+ NODES|TYPE_DECL NAME=check FULL_NAME=check CODE=check AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+ NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE_DECL NAME=<global> FULL_NAME=main.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
++NODES|TYPE_DECL NAME=signed UNKNOWN FULL_NAME=signed UNKNOWN CODE=signed UNKNOWN IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
++NODES|TYPE NAME=U FULL_NAME=U TYPE_DECL_FULL_NAME=U
+ NODES|TYPE NAME=check FULL_NAME=check TYPE_DECL_FULL_NAME=check
+ NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
++NODES|TYPE NAME=signed UNKNOWN FULL_NAME=signed UNKNOWN TYPE_DECL_FULL_NAME=signed UNKNOWN
+ NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+ EDGES|ARGUMENT check#5 -> check#6
+ EDGES|ARGUMENT check#6 -> check#7
+@@ -80,8 +84,7 @@
+ EDGES|CFG check#6 -> check#5
+ EDGES|CFG check#7 -> check#6
+ EDGES|CFG check#9 -> check#5
+-EDGES|CFG main.c:<global>#0 -> main.c:<global>#15
+-EDGES|CFG main.c:<global>#15 -> main.c:<global>#16
++EDGES|CFG main.c:<global>#0 -> main.c:<global>#16
+ EDGES|CFG main.c:<global>#16 -> main.c:<global>#17
+ EDGES|CFG main.c:CAST:ANY(2)#0 -> main.c:CAST:ANY(2)#6
+ EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+@@ -92,6 +95,7 @@
+ EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+ EDGES|CONTAINS F:<includes> -> D:ANY
+ EDGES|CONTAINS F:<includes> -> D:int
++EDGES|CONTAINS F:<includes> -> D:signed UNKNOWN
+ EDGES|CONTAINS F:<includes> -> D:void
+ EDGES|CONTAINS F:main.c -> D:main.c:<global>
+ EDGES|CONTAINS check#0 -> check#10
+@@ -141,8 +145,10 @@
+ EDGES|REF NB:<includes>:<global> -> NS:<global>
+ EDGES|REF NB:main.c:<global> -> NS:<global>
+ EDGES|REF T:ANY -> D:ANY
++EDGES|REF T:U -> main.c:<global>#15
+ EDGES|REF T:check -> D:check
+ EDGES|REF T:int -> D:int
++EDGES|REF T:signed UNKNOWN -> D:signed UNKNOWN
+ EDGES|REF T:void -> D:void
+ EDGES|REF check#10 -> check#4
+ EDGES|REF check#11 -> check#1
+@@ -152,12 +158,14 @@
+ EDGES|SOURCE_FILE D:check -> F:main.c
+ EDGES|SOURCE_FILE D:int -> F:<includes>
+ EDGES|SOURCE_FILE D:main.c:<global> -> F:main.c
++EDGES|SOURCE_FILE D:signed UNKNOWN -> F:<includes>
+ EDGES|SOURCE_FILE D:void -> F:<includes>
+ EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
+ EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>
+ EDGES|SOURCE_FILE NB:main.c:<global> -> F:main.c
+ EDGES|SOURCE_FILE check#0 -> F:main.c
+ EDGES|SOURCE_FILE main.c:<global>#0 -> F:main.c
++EDGES|SOURCE_FILE main.c:<global>#15 -> F:main.c
+ EDGES|SOURCE_FILE main.c:CAST:ANY(2)#0 -> F:main.c
+ FLOWS|REACHING_DEF[(U)(x)] check#9 -> check#12
+ FLOWS|REACHING_DEF[<RET>] check#5 -> check#12

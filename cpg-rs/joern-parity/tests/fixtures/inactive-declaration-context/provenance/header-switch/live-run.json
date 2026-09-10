@@ -1,0 +1,42 @@
+{
+  "command": [
+    "/Users/shayaunnejad/vibe-code/joern-oxidized/.local/astra-sprint/oracle/runtime/joern-cli/joern",
+    "--script",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-inactive-declarations/.local/inactive-declarations/header-switch/oracle.sc",
+    "--param",
+    "inputPath=/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-inactive-declarations/.local/inactive-declarations/header-switch/input"
+  ],
+  "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-inactive-declarations/.local/inactive-declarations/header-switch/oracle-workspace",
+  "exitCode": 0,
+  "wallSeconds": 5.280091832988546,
+  "inputHashes": {
+    "header_switch": {
+      "api.h": "9e7315737b80a3b9cb2a5a6f542fab26eb12a7462c36be4684de1e47a42b81dc",
+      "main.c": "412e845b0e3c82455e6b488e13b7ef6305f0fa7a89211ccf2b6283c19a4346cf"
+    },
+    "inactive_header_override": {
+      "api.h": "b12622fca8c8507b6ada5a00a129fb06cf0c5fcfbbc89b1e37c0874d6d04ff38",
+      "main.c": "412e845b0e3c82455e6b488e13b7ef6305f0fa7a89211ccf2b6283c19a4346cf"
+    }
+  },
+  "scriptSha256": "56431f14868678e64f9eb41026b44f1d3d7738404d28d2db62711b520c98c742",
+  "sharedOracleSha256": "bd2e18fab06ecd7897d796f5b31dac6669dc45ecf70c54fb1d5cc0fe29f3c1ab",
+  "joernVersion": "4.0.555",
+  "officialArchiveSha256": "12989883d6b5aeacc97b2dc0ecc4e2951bf50e48cb244f8c8f333d11a8be0c7e",
+  "projects": [
+    {
+      "case": "header_switch",
+      "canonicalLinesIncludingSeparators": 226,
+      "nonemptySelectedRecords": 219,
+      "expectedSha256": "cd5c99d927d7e291b4fe67da8eaba356a2247c4544d190223b75985804c11b39"
+    },
+    {
+      "case": "inactive_header_override",
+      "canonicalLinesIncludingSeparators": 226,
+      "nonemptySelectedRecords": 219,
+      "expectedSha256": "cd5c99d927d7e291b4fe67da8eaba356a2247c4544d190223b75985804c11b39"
+    }
+  ],
+  "rawStdoutSha256": "5bc2a1273ece65dccb5bf465b8dbdc7f1d3a658f988b3cf3ef1955984d355527",
+  "rawStderrSha256": "284a2e9e8bd77dd0c333a075e714b3d6b47d07fad1bcc74f94de03d575de2a5e"
+}

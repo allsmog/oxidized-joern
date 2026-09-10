@@ -1,0 +1,281 @@
+METHOD NAME=<global> CODE=<global> FULL_NAME=<includes>:<global> ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.addition FULL_NAME=<operator>.addition ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=entry CODE=int entry(int value) { return ordinary(value) + helper(value); } FULL_NAME=entry SIGNATURE=int(int) ORDER=1
+  METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+  BLOCK CODE={ return ordinary(value) + helper(value); } TYPE_FULL_NAME=void ORDER=2
+    RETURN CODE=return ordinary(value) + helper(value); ORDER=1
+      CALL NAME=<operator>.addition CODE=ordinary(value) + helper(value) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+        CALL NAME=ordinary CODE=ordinary(value) TYPE_FULL_NAME=int METHOD_FULL_NAME=ordinary ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+        CALL NAME=helper CODE=helper(value) TYPE_FULL_NAME=int METHOD_FULL_NAME=helper ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+
+METHOD NAME=helper CODE=static int helper(int value) { return value + 1; } FULL_NAME=helper SIGNATURE=int(int) ORDER=1
+  METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+  BLOCK CODE={ return value + 1; } TYPE_FULL_NAME=void ORDER=2
+    RETURN CODE=return value + 1; ORDER=1
+      CALL NAME=<operator>.addition CODE=value + 1 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+        LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+  MODIFIER ORDER=3
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=4
+
+METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1
+  METHOD NAME=ordinary CODE=int ordinary(int value) { return value; } FULL_NAME=ordinary SIGNATURE=int(int) ORDER=1
+    METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+    METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+    BLOCK CODE={ return value; } TYPE_FULL_NAME=void ORDER=2
+      RETURN CODE=return value; ORDER=1
+        IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+  METHOD NAME=helper CODE=static int helper(int value) { return value + 1; } FULL_NAME=helper SIGNATURE=int(int) ORDER=1
+    METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+    METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+    BLOCK CODE={ return value + 1; } TYPE_FULL_NAME=void ORDER=2
+      RETURN CODE=return value + 1; ORDER=1
+        CALL NAME=<operator>.addition CODE=value + 1 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+          LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+    MODIFIER ORDER=3
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=4
+  METHOD NAME=entry CODE=int entry(int value) { return ordinary(value) + helper(value); } FULL_NAME=entry SIGNATURE=int(int) ORDER=1
+    METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+    METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+    BLOCK CODE={ return ordinary(value) + helper(value); } TYPE_FULL_NAME=void ORDER=2
+      RETURN CODE=return ordinary(value) + helper(value); ORDER=1
+        CALL NAME=<operator>.addition CODE=ordinary(value) + helper(value) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+          CALL NAME=ordinary CODE=ordinary(value) TYPE_FULL_NAME=int METHOD_FULL_NAME=ordinary ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+            IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+          CALL NAME=helper CODE=helper(value) TYPE_FULL_NAME=int METHOD_FULL_NAME=helper ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+            IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+    METHOD_REF CODE=ordinary TYPE_FULL_NAME=ordinary METHOD_FULL_NAME=ordinary ORDER=1
+    METHOD_REF CODE=helper TYPE_FULL_NAME=helper METHOD_FULL_NAME=helper ORDER=2
+    METHOD_REF CODE=entry TYPE_FULL_NAME=entry METHOD_FULL_NAME=entry ORDER=3
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=ordinary CODE=int ordinary(int value) { return value; } FULL_NAME=ordinary SIGNATURE=int(int) ORDER=1
+  METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+  BLOCK CODE={ return value; } TYPE_FULL_NAME=void ORDER=2
+    RETURN CODE=return value; ORDER=1
+      IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+
+NODES|META_DATA LANGUAGE=NEWC
+NODES|FILE NAME=<includes> ORDER=1
+NODES|FILE NAME=<unknown> ORDER=0
+NODES|FILE NAME=main.c ORDER=0
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<global> FILENAME=<unknown> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<includes>:<global> FILENAME=<includes> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|NAMESPACE NAME=<global>
+NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=entry FULL_NAME=entry CODE=entry AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=helper FULL_NAME=helper CODE=helper AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=<global> FULL_NAME=main.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=ordinary FULL_NAME=ordinary CODE=ordinary AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+NODES|TYPE NAME=entry FULL_NAME=entry TYPE_DECL_FULL_NAME=entry
+NODES|TYPE NAME=helper FULL_NAME=helper TYPE_DECL_FULL_NAME=helper
+NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+NODES|TYPE NAME=ordinary FULL_NAME=ordinary TYPE_DECL_FULL_NAME=ordinary
+NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+EDGES|ARGUMENT entry#4 -> entry#5
+EDGES|ARGUMENT entry#5 -> entry#6
+EDGES|ARGUMENT entry#5 -> entry#8
+EDGES|ARGUMENT entry#6 -> entry#7
+EDGES|ARGUMENT entry#8 -> entry#9
+EDGES|ARGUMENT helper#4 -> helper#5
+EDGES|ARGUMENT helper#5 -> helper#6
+EDGES|ARGUMENT helper#5 -> helper#7
+EDGES|ARGUMENT ordinary#4 -> ordinary#5
+EDGES|CALL entry#5 -> <operator>.addition#0
+EDGES|CALL entry#6 -> main.c:<global>#1
+EDGES|CALL entry#8 -> helper#0
+EDGES|CALL helper#5 -> <operator>.addition#0
+EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+EDGES|CFG <operator>.addition#0 -> <operator>.addition#5
+EDGES|CFG entry#0 -> entry#7
+EDGES|CFG entry#4 -> entry#10
+EDGES|CFG entry#5 -> entry#4
+EDGES|CFG entry#6 -> entry#9
+EDGES|CFG entry#7 -> entry#6
+EDGES|CFG entry#8 -> entry#5
+EDGES|CFG entry#9 -> entry#8
+EDGES|CFG helper#0 -> helper#6
+EDGES|CFG helper#4 -> helper#9
+EDGES|CFG helper#5 -> helper#4
+EDGES|CFG helper#6 -> helper#7
+EDGES|CFG helper#7 -> helper#5
+EDGES|CFG main.c:<global>#0 -> main.c:<global>#30
+EDGES|CFG main.c:<global>#1 -> ordinary#5
+EDGES|CFG main.c:<global>#30 -> main.c:<global>#31
+EDGES|CFG main.c:<global>#31 -> main.c:<global>#32
+EDGES|CFG main.c:<global>#32 -> main.c:<global>#33
+EDGES|CFG ordinary#4 -> ordinary#6
+EDGES|CFG ordinary#5 -> ordinary#4
+EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+EDGES|CONTAINS <operator>.addition#0 -> <operator>.addition#2
+EDGES|CONTAINS D:main.c:<global> -> D:entry
+EDGES|CONTAINS D:main.c:<global> -> D:helper
+EDGES|CONTAINS D:main.c:<global> -> D:ordinary
+EDGES|CONTAINS D:main.c:<global> -> main.c:<global>#0
+EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+EDGES|CONTAINS F:<includes> -> D:ANY
+EDGES|CONTAINS F:<includes> -> D:int
+EDGES|CONTAINS F:<includes> -> D:void
+EDGES|CONTAINS F:main.c -> D:main.c:<global>
+EDGES|CONTAINS entry#0 -> entry#3
+EDGES|CONTAINS entry#0 -> entry#4
+EDGES|CONTAINS entry#0 -> entry#5
+EDGES|CONTAINS entry#0 -> entry#6
+EDGES|CONTAINS entry#0 -> entry#7
+EDGES|CONTAINS entry#0 -> entry#8
+EDGES|CONTAINS entry#0 -> entry#9
+EDGES|CONTAINS helper#0 -> helper#3
+EDGES|CONTAINS helper#0 -> helper#4
+EDGES|CONTAINS helper#0 -> helper#5
+EDGES|CONTAINS helper#0 -> helper#6
+EDGES|CONTAINS helper#0 -> helper#7
+EDGES|CONTAINS main.c:<global>#0 -> entry#0
+EDGES|CONTAINS main.c:<global>#0 -> helper#0
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#1
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#29
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#30
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#31
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#32
+EDGES|CONTAINS main.c:<global>#1 -> ordinary#3
+EDGES|CONTAINS main.c:<global>#1 -> ordinary#4
+EDGES|CONTAINS main.c:<global>#1 -> ordinary#5
+EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#6 -> T:ANY
+EDGES|EVAL_TYPE entry#1 -> T:int
+EDGES|EVAL_TYPE entry#10 -> T:int
+EDGES|EVAL_TYPE entry#2 -> T:int
+EDGES|EVAL_TYPE entry#3 -> T:void
+EDGES|EVAL_TYPE entry#5 -> T:ANY
+EDGES|EVAL_TYPE entry#6 -> T:int
+EDGES|EVAL_TYPE entry#7 -> T:int
+EDGES|EVAL_TYPE entry#8 -> T:int
+EDGES|EVAL_TYPE entry#9 -> T:int
+EDGES|EVAL_TYPE helper#1 -> T:int
+EDGES|EVAL_TYPE helper#2 -> T:int
+EDGES|EVAL_TYPE helper#3 -> T:void
+EDGES|EVAL_TYPE helper#5 -> T:ANY
+EDGES|EVAL_TYPE helper#6 -> T:int
+EDGES|EVAL_TYPE helper#7 -> T:int
+EDGES|EVAL_TYPE helper#9 -> T:int
+EDGES|EVAL_TYPE main.c:<global>#29 -> T:ANY
+EDGES|EVAL_TYPE main.c:<global>#30 -> T:ordinary
+EDGES|EVAL_TYPE main.c:<global>#31 -> T:helper
+EDGES|EVAL_TYPE main.c:<global>#32 -> T:entry
+EDGES|EVAL_TYPE main.c:<global>#33 -> T:ANY
+EDGES|EVAL_TYPE ordinary#1 -> T:int
+EDGES|EVAL_TYPE ordinary#2 -> T:int
+EDGES|EVAL_TYPE ordinary#3 -> T:void
+EDGES|EVAL_TYPE ordinary#5 -> T:int
+EDGES|EVAL_TYPE ordinary#6 -> T:int
+EDGES|PARAMETER_LINK <operator>.addition#1 -> <operator>.addition#3
+EDGES|PARAMETER_LINK <operator>.addition#4 -> <operator>.addition#6
+EDGES|PARAMETER_LINK entry#1 -> entry#2
+EDGES|PARAMETER_LINK helper#1 -> helper#2
+EDGES|PARAMETER_LINK ordinary#1 -> ordinary#2
+EDGES|REF NB:<global> -> NS:<global>
+EDGES|REF NB:<includes>:<global> -> NS:<global>
+EDGES|REF NB:main.c:<global> -> NS:<global>
+EDGES|REF T:ANY -> D:ANY
+EDGES|REF T:entry -> D:entry
+EDGES|REF T:helper -> D:helper
+EDGES|REF T:int -> D:int
+EDGES|REF T:ordinary -> D:ordinary
+EDGES|REF T:void -> D:void
+EDGES|REF entry#7 -> entry#1
+EDGES|REF entry#9 -> entry#1
+EDGES|REF helper#6 -> helper#1
+EDGES|REF main.c:<global>#30 -> main.c:<global>#1
+EDGES|REF main.c:<global>#31 -> helper#0
+EDGES|REF main.c:<global>#32 -> entry#0
+EDGES|REF ordinary#5 -> ordinary#1
+EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+EDGES|SOURCE_FILE D:ANY -> F:<includes>
+EDGES|SOURCE_FILE D:entry -> F:main.c
+EDGES|SOURCE_FILE D:helper -> F:main.c
+EDGES|SOURCE_FILE D:int -> F:<includes>
+EDGES|SOURCE_FILE D:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE D:ordinary -> F:main.c
+EDGES|SOURCE_FILE D:void -> F:<includes>
+EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
+EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>
+EDGES|SOURCE_FILE NB:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE entry#0 -> F:main.c
+EDGES|SOURCE_FILE helper#0 -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#0 -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#1 -> F:main.c
+FLOWS|REACHING_DEF[1] helper#7 -> helper#5
+FLOWS|REACHING_DEF[<RET>] entry#4 -> entry#10
+FLOWS|REACHING_DEF[<RET>] helper#4 -> helper#9
+FLOWS|REACHING_DEF[<RET>] ordinary#4 -> ordinary#6
+FLOWS|REACHING_DEF[] <operator>.addition#0 -> <operator>.addition#1
+FLOWS|REACHING_DEF[] <operator>.addition#0 -> <operator>.addition#4
+FLOWS|REACHING_DEF[] entry#0 -> entry#1
+FLOWS|REACHING_DEF[] entry#0 -> entry#7
+FLOWS|REACHING_DEF[] entry#0 -> entry#9
+FLOWS|REACHING_DEF[] helper#0 -> helper#1
+FLOWS|REACHING_DEF[] helper#0 -> helper#6
+FLOWS|REACHING_DEF[] helper#0 -> helper#7
+FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#30
+FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#31
+FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#32
+FLOWS|REACHING_DEF[] main.c:<global>#1 -> ordinary#1
+FLOWS|REACHING_DEF[] main.c:<global>#1 -> ordinary#5
+FLOWS|REACHING_DEF[helper(value)] entry#8 -> entry#10
+FLOWS|REACHING_DEF[helper(value)] entry#8 -> entry#5
+FLOWS|REACHING_DEF[ordinary(value) + helper(value)] entry#5 -> entry#10
+FLOWS|REACHING_DEF[ordinary(value) + helper(value)] entry#5 -> entry#4
+FLOWS|REACHING_DEF[ordinary(value)] entry#6 -> entry#10
+FLOWS|REACHING_DEF[ordinary(value)] entry#6 -> entry#5
+FLOWS|REACHING_DEF[p1] <operator>.addition#1 -> <operator>.addition#3
+FLOWS|REACHING_DEF[p1] <operator>.addition#1 -> <operator>.addition#5
+FLOWS|REACHING_DEF[p2] <operator>.addition#4 -> <operator>.addition#5
+FLOWS|REACHING_DEF[p2] <operator>.addition#4 -> <operator>.addition#6
+FLOWS|REACHING_DEF[value + 1] helper#5 -> helper#4
+FLOWS|REACHING_DEF[value + 1] helper#5 -> helper#9
+FLOWS|REACHING_DEF[value] entry#1 -> entry#2
+FLOWS|REACHING_DEF[value] entry#1 -> entry#7
+FLOWS|REACHING_DEF[value] entry#7 -> entry#6
+FLOWS|REACHING_DEF[value] entry#7 -> entry#9
+FLOWS|REACHING_DEF[value] entry#9 -> entry#10
+FLOWS|REACHING_DEF[value] entry#9 -> entry#2
+FLOWS|REACHING_DEF[value] entry#9 -> entry#8
+FLOWS|REACHING_DEF[value] helper#1 -> helper#2
+FLOWS|REACHING_DEF[value] helper#1 -> helper#6
+FLOWS|REACHING_DEF[value] helper#6 -> helper#2
+FLOWS|REACHING_DEF[value] helper#6 -> helper#5
+FLOWS|REACHING_DEF[value] helper#6 -> helper#9
+FLOWS|REACHING_DEF[value] ordinary#1 -> ordinary#2
+FLOWS|REACHING_DEF[value] ordinary#1 -> ordinary#5
+FLOWS|REACHING_DEF[value] ordinary#1 -> ordinary#6
+FLOWS|REACHING_DEF[value] ordinary#5 -> ordinary#4

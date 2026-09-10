@@ -11,12 +11,12 @@ distribution.
 
 ## Release status
 
-The current `0.1.x` line is production-ready for the documented C workflows.
-It is not a drop-in Joern replacement.
+The `0.1.x` line has a bounded production-preview contract for its documented
+C workflows. Full Joern compatibility remains incomplete.
 
 The CLI accepts C, C++, Go, Java, JavaScript, TypeScript, Python, Ruby, Rust,
-and Scala source. C's production graph path is guarded by 96/96 exact Joern
-v4.0.555 corpus blocks, including 1,458/1,458 ReachingDef facts, plus pinned
+and Scala source. C's production graph path is guarded by 334/334 exact Joern
+v4.0.555 corpus blocks, including 4,188/4,188 ReachingDef facts, plus pinned
 zlib and Lua workflow gates and labeled scanner outcomes. Other language
 frontends remain experimental and have their own shared acceptance gate, not a
 Joern-parity claim.

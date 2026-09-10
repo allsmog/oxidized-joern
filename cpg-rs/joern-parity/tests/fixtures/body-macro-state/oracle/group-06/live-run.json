@@ -1,0 +1,51 @@
+{
+  "command": [
+    "/Users/shayaunnejad/vibe-code/joern-oxidized/.local/astra-sprint/oracle/runtime/joern-cli/joern",
+    "--script",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/nested-events/oracle.sc",
+    "--param",
+    "inputPath=/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/nested-events/input"
+  ],
+  "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/nested-events/oracle-workspace",
+  "javaHome": "/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home",
+  "scriptSha256": "56431f14868678e64f9eb41026b44f1d3d7738404d28d2db62711b520c98c742",
+  "inputHashes": {
+    "outer_nested_body_argument": {
+      "main.c": "c4988e7d4685323b2ff3b6435cad1f1f70507358b4cc842f775130a1314f6d39"
+    },
+    "condition_function_and_defined": {
+      "main.c": "9827e85190391e9055b5eca6e355a04f49efb79161b1a712501fadcfa3ea0cdd"
+    },
+    "inactive_and_shortcircuit": {
+      "main.c": "2b39d8200bae3c4c6b56516868c5ce84576a203fc27da949fe2b42e4227e1df5"
+    }
+  },
+  "joernVersion": "4.0.555",
+  "archiveSha256": "12989883d6b5aeacc97b2dc0ecc4e2951bf50e48cb244f8c8f333d11a8be0c7e",
+  "timeoutSeconds": 180,
+  "pid": 99305,
+  "exitCode": 0,
+  "wallSeconds": 7.228224992752075,
+  "rawStdoutSha256": "7c912e0cf03701003de87d6359e3ffe0827d140914fa6bebfd44b05fb2ff7a13",
+  "rawStderrSha256": "ede5719045d6856c037ad7b1d1957175757112e824d26f51cd0bb248a68a0fd5",
+  "projects": [
+    {
+      "case": "condition_function_and_defined",
+      "canonicalLinesIncludingSeparators": 178,
+      "nonemptySelectedRecords": 173,
+      "expectedSha256": "61fc46aab4c42f9fd15bbecf15f1818cc9c9d5c06676182aa9dce2bcd8dbadc4"
+    },
+    {
+      "case": "inactive_and_shortcircuit",
+      "canonicalLinesIncludingSeparators": 122,
+      "nonemptySelectedRecords": 118,
+      "expectedSha256": "7d9827e44eba416ae6038388c7abc8b74720b33bd5c189578233eeb10762b0c0"
+    },
+    {
+      "case": "outer_nested_body_argument",
+      "canonicalLinesIncludingSeparators": 171,
+      "nonemptySelectedRecords": 166,
+      "expectedSha256": "361ada5d5c493cf3bd81d96541e693fedd249f641c162e6421265225b8a780cf"
+    }
+  ]
+}

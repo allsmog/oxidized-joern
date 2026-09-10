@@ -1,0 +1,113 @@
+--- joern
++++ actual
+@@ -6,8 +6,8 @@
+   METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+   METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+   BLOCK CODE={\n#ifdef ENABLE\nreturn x;\n#else\nreturn 0;\n#endif\n} TYPE_FULL_NAME=void ORDER=2
+-    RETURN CODE=return 0; ORDER=1
+-      LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=1
++    RETURN CODE=return x; ORDER=1
++      IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+ 
+ METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1
+@@ -15,11 +15,12 @@
+     METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+     METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+     BLOCK CODE={\n#ifdef ENABLE\nreturn x;\n#else\nreturn 0;\n#endif\n} TYPE_FULL_NAME=void ORDER=2
+-      RETURN CODE=return 0; ORDER=1
+-        LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=1
++      RETURN CODE=return x; ORDER=1
++        IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1
+     METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+   BLOCK TYPE_FULL_NAME=ANY ORDER=1
+-    METHOD_REF CODE=choose TYPE_FULL_NAME=choose METHOD_FULL_NAME=choose ORDER=1
++    LOCAL NAME=ENABLE CODE=undef ENABLE TYPE_FULL_NAME=undef ORDER=1
++    METHOD_REF CODE=choose TYPE_FULL_NAME=choose METHOD_FULL_NAME=choose ORDER=2
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+ 
+ NODES|META_DATA LANGUAGE=NEWC
+@@ -34,32 +35,35 @@
+ NODES|TYPE_DECL NAME=choose FULL_NAME=choose CODE=choose AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+ NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE_DECL NAME=<global> FULL_NAME=main.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
++NODES|TYPE_DECL NAME=undef FULL_NAME=undef CODE=undef IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+ NODES|TYPE NAME=choose FULL_NAME=choose TYPE_DECL_FULL_NAME=choose
+ NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
++NODES|TYPE NAME=undef FULL_NAME=undef TYPE_DECL_FULL_NAME=undef
+ NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+ EDGES|ARGUMENT choose#4 -> choose#5
+ EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+ EDGES|CFG choose#0 -> choose#5
+ EDGES|CFG choose#4 -> choose#6
+ EDGES|CFG choose#5 -> choose#4
+-EDGES|CFG main.c:<global>#0 -> main.c:<global>#9
+-EDGES|CFG main.c:<global>#9 -> main.c:<global>#10
++EDGES|CFG main.c:<global>#0 -> main.c:<global>#10
++EDGES|CFG main.c:<global>#10 -> main.c:<global>#11
+ EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+ EDGES|CONTAINS D:main.c:<global> -> D:choose
+ EDGES|CONTAINS D:main.c:<global> -> main.c:<global>#0
+ EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+ EDGES|CONTAINS F:<includes> -> D:ANY
+ EDGES|CONTAINS F:<includes> -> D:int
++EDGES|CONTAINS F:<includes> -> D:undef
+ EDGES|CONTAINS F:<includes> -> D:void
+ EDGES|CONTAINS F:main.c -> D:main.c:<global>
+ EDGES|CONTAINS choose#0 -> choose#3
+ EDGES|CONTAINS choose#0 -> choose#4
+ EDGES|CONTAINS choose#0 -> choose#5
+ EDGES|CONTAINS main.c:<global>#0 -> choose#0
++EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#10
+ EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#8
+-EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#9
+ EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+ EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+ EDGES|EVAL_TYPE choose#1 -> T:int
+@@ -67,9 +71,10 @@
+ EDGES|EVAL_TYPE choose#3 -> T:void
+ EDGES|EVAL_TYPE choose#5 -> T:int
+ EDGES|EVAL_TYPE choose#6 -> T:int
+-EDGES|EVAL_TYPE main.c:<global>#10 -> T:ANY
++EDGES|EVAL_TYPE main.c:<global>#10 -> T:choose
++EDGES|EVAL_TYPE main.c:<global>#11 -> T:ANY
+ EDGES|EVAL_TYPE main.c:<global>#8 -> T:ANY
+-EDGES|EVAL_TYPE main.c:<global>#9 -> T:choose
++EDGES|EVAL_TYPE main.c:<global>#9 -> T:undef
+ EDGES|PARAMETER_LINK choose#1 -> choose#2
+ EDGES|REF NB:<global> -> NS:<global>
+ EDGES|REF NB:<includes>:<global> -> NS:<global>
+@@ -77,24 +82,27 @@
+ EDGES|REF T:ANY -> D:ANY
+ EDGES|REF T:choose -> D:choose
+ EDGES|REF T:int -> D:int
++EDGES|REF T:undef -> D:undef
+ EDGES|REF T:void -> D:void
+-EDGES|REF main.c:<global>#9 -> choose#0
++EDGES|REF choose#5 -> choose#1
++EDGES|REF main.c:<global>#10 -> choose#0
+ EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+ EDGES|SOURCE_FILE D:ANY -> F:<includes>
+ EDGES|SOURCE_FILE D:choose -> F:main.c
+ EDGES|SOURCE_FILE D:int -> F:<includes>
+ EDGES|SOURCE_FILE D:main.c:<global> -> F:main.c
++EDGES|SOURCE_FILE D:undef -> F:<includes>
+ EDGES|SOURCE_FILE D:void -> F:<includes>
+ EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
+ EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>
+ EDGES|SOURCE_FILE NB:main.c:<global> -> F:main.c
+ EDGES|SOURCE_FILE choose#0 -> F:main.c
+ EDGES|SOURCE_FILE main.c:<global>#0 -> F:main.c
+-FLOWS|REACHING_DEF[0] choose#5 -> choose#4
+ FLOWS|REACHING_DEF[<RET>] choose#4 -> choose#6
+ FLOWS|REACHING_DEF[] choose#0 -> choose#1
+-FLOWS|REACHING_DEF[] choose#0 -> choose#4
+ FLOWS|REACHING_DEF[] choose#0 -> choose#5
+-FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#9
++FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#10
+ FLOWS|REACHING_DEF[x] choose#1 -> choose#2
++FLOWS|REACHING_DEF[x] choose#1 -> choose#5
+ FLOWS|REACHING_DEF[x] choose#1 -> choose#6
++FLOWS|REACHING_DEF[x] choose#5 -> choose#4

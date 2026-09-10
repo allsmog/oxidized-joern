@@ -94,6 +94,9 @@ jobs:
       - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
         with:
           workspaces: cpg-rs
+      - name: Test parity gate failure handling
+        run: python3 test_check.py
+        working-directory: cpg-rs/joern-parity
       - name: Check committed Joern parity
         run: ./check.sh --committed-only
         working-directory: cpg-rs/joern-parity
@@ -144,7 +147,7 @@ jobs:
       - name: Install Joern oracle
         run: ./cpg-rs/joern-parity/setup-oracle.sh
       - name: Run parity check
-        run: ./check.sh
+        run: ./check.sh --live
         working-directory: cpg-rs/joern-parity
       - name: Run native CPGQL differential
         run: ./acceptance/cpgql/check.sh

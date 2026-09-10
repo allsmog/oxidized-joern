@@ -1,0 +1,177 @@
+executing /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-sizeof-review/oracle.sc with params=Map(inputPath -> /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-sizeof-review/input)
+Using generator for language: NEWC: CCpgGenerator
+Creating project `call_operand` for code at `/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-sizeof-review/input/call_operand`
+moving cpg.bin.zip to cpg.bin because it is already a database file
+Creating working copy of CPG to be safe
+Loading base CPG from: /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-sizeof-review/oracle-workspace/workspace/call_operand/cpg.bin.tmp
+Code successfully imported. You can now query it using `cpg`.
+For an overview of all imported code, type `workspace`.
+Adding default overlays to base CPG
+The graph has been modified. You may want to use the `save` command to persist changes to disk.  All changes will also be saved collectively on exit
+The graph has been modified. You may want to use the `save` command to persist changes to disk.  All changes will also be saved collectively on exit
+Using generator for language: NEWC: CCpgGenerator
+Creating project `comma_operand` for code at `/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-sizeof-review/input/comma_operand`
+moving cpg.bin.zip to cpg.bin because it is already a database file
+Creating working copy of CPG to be safe
+Loading base CPG from: /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-sizeof-review/oracle-workspace/workspace/comma_operand/cpg.bin.tmp
+Code successfully imported. You can now query it using `cpg`.
+For an overview of all imported code, type `workspace`.
+Adding default overlays to base CPG
+The graph has been modified. You may want to use the `save` command to persist changes to disk.  All changes will also be saved collectively on exit
+The graph has been modified. You may want to use the `save` command to persist changes to disk.  All changes will also be saved collectively on exit
+Using generator for language: NEWC: CCpgGenerator
+Creating project `compound_literal` for code at `/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-sizeof-review/input/compound_literal`
+moving cpg.bin.zip to cpg.bin because it is already a database file
+Creating working copy of CPG to be safe
+Loading base CPG from: /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-sizeof-review/oracle-workspace/workspace/compound_literal/cpg.bin.tmp
+Code successfully imported. You can now query it using `cpg`.
+For an overview of all imported code, type `workspace`.
+Adding default overlays to base CPG
+The graph has been modified. You may want to use the `save` command to persist changes to disk.  All changes will also be saved collectively on exit
+The graph has been modified. You may want to use the `save` command to persist changes to disk.  All changes will also be saved collectively on exit
+Using generator for language: NEWC: CCpgGenerator
+Creating project `conditional_operand` for code at `/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-sizeof-review/input/conditional_operand`
+moving cpg.bin.zip to cpg.bin because it is already a database file
+Creating working copy of CPG to be safe
+Loading base CPG from: /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-sizeof-review/oracle-workspace/workspace/conditional_operand/cpg.bin.tmp
+Code successfully imported. You can now query it using `cpg`.
+For an overview of all imported code, type `workspace`.
+Adding default overlays to base CPG
+The graph has been modified. You may want to use the `save` command to persist changes to disk.  All changes will also be saved collectively on exit
+The graph has been modified. You may want to use the `save` command to persist changes to disk.  All changes will also be saved collectively on exit
+Using generator for language: NEWC: CCpgGenerator
+Creating project `deref_operand` for code at `/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-sizeof-review/input/deref_operand`
+moving cpg.bin.zip to cpg.bin because it is already a database file
+Creating working copy of CPG to be safe
+Loading base CPG from: /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-sizeof-review/oracle-workspace/workspace/deref_operand/cpg.bin.tmp
+Code successfully imported. You can now query it using `cpg`.
+For an overview of all imported code, type `workspace`.
+Adding default overlays to base CPG
+The graph has been modified. You may want to use the `save` command to persist changes to disk.  All changes will also be saved collectively on exit
+The graph has been modified. You may want to use the `save` command to persist changes to disk.  All changes will also be saved collectively on exit
+Using generator for language: NEWC: CCpgGenerator
+Creating project `empty_operand` for code at `/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-sizeof-review/input/empty_operand`
+moving cpg.bin.zip to cpg.bin because it is already a database file
+Creating working copy of CPG to be safe
+Loading base CPG from: /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-sizeof-review/oracle-workspace/workspace/empty_operand/cpg.bin.tmp
+Code successfully imported. You can now query it using `cpg`.
+For an overview of all imported code, type `workspace`.
+Adding default overlays to base CPG
+The graph has been modified. You may want to use the `save` command to persist changes to disk.  All changes will also be saved collectively on exit
+The graph has been modified. You may want to use the `save` command to persist changes to disk.  All changes will also be saved collectively on exit
+Using generator for language: NEWC: CCpgGenerator
+Creating project `nested_comments` for code at `/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-sizeof-review/input/nested_comments`
+moving cpg.bin.zip to cpg.bin because it is already a database file
+Creating working copy of CPG to be safe
+Loading base CPG from: /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-sizeof-review/oracle-workspace/workspace/nested_comments/cpg.bin.tmp
+Code successfully imported. You can now query it using `cpg`.
+For an overview of all imported code, type `workspace`.
+Adding default overlays to base CPG
+The graph has been modified. You may want to use the `save` command to persist changes to disk.  All changes will also be saved collectively on exit
+The graph has been modified. You may want to use the `save` command to persist changes to disk.  All changes will also be saved collectively on exit
+Using generator for language: NEWC: CCpgGenerator
+Creating project `nested_parenthesized_call` for code at `/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-sizeof-review/input/nested_parenthesized_call`
+moving cpg.bin.zip to cpg.bin because it is already a database file
+Creating working copy of CPG to be safe
+Loading base CPG from: /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-sizeof-review/oracle-workspace/workspace/nested_parenthesized_call/cpg.bin.tmp
+Code successfully imported. You can now query it using `cpg`.
+For an overview of all imported code, type `workspace`.
+Adding default overlays to base CPG
+The graph has been modified. You may want to use the `save` command to persist changes to disk.  All changes will also be saved collectively on exit
+The graph has been modified. You may want to use the `save` command to persist changes to disk.  All changes will also be saved collectively on exit
+Using generator for language: NEWC: CCpgGenerator
+Creating project `nested_sizeof` for code at `/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-sizeof-review/input/nested_sizeof`
+moving cpg.bin.zip to cpg.bin because it is already a database file
+Creating working copy of CPG to be safe
+Loading base CPG from: /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-sizeof-review/oracle-workspace/workspace/nested_sizeof/cpg.bin.tmp
+Code successfully imported. You can now query it using `cpg`.
+For an overview of all imported code, type `workspace`.
+Adding default overlays to base CPG
+The graph has been modified. You may want to use the `save` command to persist changes to disk.  All changes will also be saved collectively on exit
+The graph has been modified. You may want to use the `save` command to persist changes to disk.  All changes will also be saved collectively on exit
+Using generator for language: NEWC: CCpgGenerator
+Creating project `operator_comment` for code at `/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-sizeof-review/input/operator_comment`
+moving cpg.bin.zip to cpg.bin because it is already a database file
+Creating working copy of CPG to be safe
+Loading base CPG from: /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-sizeof-review/oracle-workspace/workspace/operator_comment/cpg.bin.tmp
+Code successfully imported. You can now query it using `cpg`.
+For an overview of all imported code, type `workspace`.
+Adding default overlays to base CPG
+The graph has been modified. You may want to use the `save` command to persist changes to disk.  All changes will also be saved collectively on exit
+The graph has been modified. You may want to use the `save` command to persist changes to disk.  All changes will also be saved collectively on exit
+Using generator for language: NEWC: CCpgGenerator
+Creating project `ordinary_control` for code at `/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-sizeof-review/input/ordinary_control`
+moving cpg.bin.zip to cpg.bin because it is already a database file
+Creating working copy of CPG to be safe
+Loading base CPG from: /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-sizeof-review/oracle-workspace/workspace/ordinary_control/cpg.bin.tmp
+Code successfully imported. You can now query it using `cpg`.
+For an overview of all imported code, type `workspace`.
+Adding default overlays to base CPG
+The graph has been modified. You may want to use the `save` command to persist changes to disk.  All changes will also be saved collectively on exit
+The graph has been modified. You may want to use the `save` command to persist changes to disk.  All changes will also be saved collectively on exit
+Using generator for language: NEWC: CCpgGenerator
+Creating project `postincrement` for code at `/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-sizeof-review/input/postincrement`
+moving cpg.bin.zip to cpg.bin because it is already a database file
+Creating working copy of CPG to be safe
+Loading base CPG from: /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-sizeof-review/oracle-workspace/workspace/postincrement/cpg.bin.tmp
+Code successfully imported. You can now query it using `cpg`.
+For an overview of all imported code, type `workspace`.
+Adding default overlays to base CPG
+The graph has been modified. You may want to use the `save` command to persist changes to disk.  All changes will also be saved collectively on exit
+The graph has been modified. You may want to use the `save` command to persist changes to disk.  All changes will also be saved collectively on exit
+Using generator for language: NEWC: CCpgGenerator
+Creating project `string_contents` for code at `/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-sizeof-review/input/string_contents`
+moving cpg.bin.zip to cpg.bin because it is already a database file
+Creating working copy of CPG to be safe
+Loading base CPG from: /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-sizeof-review/oracle-workspace/workspace/string_contents/cpg.bin.tmp
+Code successfully imported. You can now query it using `cpg`.
+For an overview of all imported code, type `workspace`.
+Adding default overlays to base CPG
+The graph has been modified. You may want to use the `save` command to persist changes to disk.  All changes will also be saved collectively on exit
+The graph has been modified. You may want to use the `save` command to persist changes to disk.  All changes will also be saved collectively on exit
+Using generator for language: NEWC: CCpgGenerator
+Creating project `subscript_operand` for code at `/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-sizeof-review/input/subscript_operand`
+moving cpg.bin.zip to cpg.bin because it is already a database file
+Creating working copy of CPG to be safe
+Loading base CPG from: /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-sizeof-review/oracle-workspace/workspace/subscript_operand/cpg.bin.tmp
+Code successfully imported. You can now query it using `cpg`.
+For an overview of all imported code, type `workspace`.
+Adding default overlays to base CPG
+The graph has been modified. You may want to use the `save` command to persist changes to disk.  All changes will also be saved collectively on exit
+The graph has been modified. You may want to use the `save` command to persist changes to disk.  All changes will also be saved collectively on exit
+Using generator for language: NEWC: CCpgGenerator
+Creating project `type_comments` for code at `/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-sizeof-review/input/type_comments`
+moving cpg.bin.zip to cpg.bin because it is already a database file
+Creating working copy of CPG to be safe
+Loading base CPG from: /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-sizeof-review/oracle-workspace/workspace/type_comments/cpg.bin.tmp
+Code successfully imported. You can now query it using `cpg`.
+For an overview of all imported code, type `workspace`.
+Adding default overlays to base CPG
+The graph has been modified. You may want to use the `save` command to persist changes to disk.  All changes will also be saved collectively on exit
+The graph has been modified. You may want to use the `save` command to persist changes to disk.  All changes will also be saved collectively on exit
+Using generator for language: NEWC: CCpgGenerator
+Creating project `vla_type` for code at `/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-sizeof-review/input/vla_type`
+moving cpg.bin.zip to cpg.bin because it is already a database file
+Creating working copy of CPG to be safe
+Loading base CPG from: /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-sizeof-review/oracle-workspace/workspace/vla_type/cpg.bin.tmp
+Code successfully imported. You can now query it using `cpg`.
+For an overview of all imported code, type `workspace`.
+Adding default overlays to base CPG
+The graph has been modified. You may want to use the `save` command to persist changes to disk.  All changes will also be saved collectively on exit
+The graph has been modified. You may want to use the `save` command to persist changes to disk.  All changes will also be saved collectively on exit
+closing/saving project `call_operand`
+closing/saving project `comma_operand`
+closing/saving project `compound_literal`
+closing/saving project `conditional_operand`
+closing/saving project `deref_operand`
+closing/saving project `empty_operand`
+closing/saving project `nested_comments`
+closing/saving project `nested_parenthesized_call`
+closing/saving project `nested_sizeof`
+closing/saving project `operator_comment`
+closing/saving project `ordinary_control`
+closing/saving project `postincrement`
+closing/saving project `string_contents`
+closing/saving project `subscript_operand`
+closing/saving project `type_comments`
+closing/saving project `vla_type`

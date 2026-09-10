@@ -1,0 +1,20 @@
+{
+  "exact.rs": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-macro-state/candidate-v6/exact.rs",
+    "sha256": "c6fbd18f35dc536fa8ba04ba15bea12fb185745fa6e72eb1025e178597383f62"
+  },
+  "joern-parity": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-macro-state/candidate-v6/joern-parity",
+    "sha256": "22d651f3daef5ce60908a34ec991d022dad009492c0c6e63e4cba1a23acd98e7"
+  },
+  "buildLog": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-macro-state/build-v6.log",
+    "sha256": "78a568e72108b61a6d34b7f39236482d0670ce2e40290b2ed15780d0d2b928a7"
+  },
+  "build": {
+    "exitCode": 0,
+    "command": "cargo build -p joern-parity",
+    "targetDir": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/target",
+    "sourceStableDuringBuild": true
+  }
+}

@@ -1,0 +1,94 @@
+--- fresh-live
++++ candidate
+@@ -21,7 +21,7 @@
+             CALL NAME=__STDC__ CODE=__STDC__ TYPE_FULL_NAME=int METHOD_FULL_NAME=main.c:__STDC__:int(0) SIGNATURE=int(0) ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=INLINED
+               BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+                 LITERAL CODE=2 TYPE_FULL_NAME=int ORDER=1
+-            CALL NAME=__STDC_VERSION__ CODE=__STDC_VERSION__ TYPE_FULL_NAME=longint METHOD_FULL_NAME=main.c:__STDC_VERSION__:longint(0) SIGNATURE=longint(0) ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=INLINED
++            CALL NAME=__STDC_VERSION__ CODE=__STDC_VERSION__ TYPE_FULL_NAME=int METHOD_FULL_NAME=main.c:__STDC_VERSION__:int(0) SIGNATURE=int(0) ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=INLINED
+               BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+                 LITERAL CODE=201112L TYPE_FULL_NAME=longint ORDER=1
+           CALL NAME=__STDC_HOSTED__ CODE=__STDC_HOSTED__ TYPE_FULL_NAME=int METHOD_FULL_NAME=main.c:__STDC_HOSTED__:int(0) SIGNATURE=int(0) ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=INLINED
+@@ -36,9 +36,9 @@
+   BLOCK TYPE_FULL_NAME=ANY ORDER=1
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=2
+ 
+-METHOD NAME=__STDC_VERSION__ CODE=#define __STDC_VERSION__ 201112L FULL_NAME=main.c:__STDC_VERSION__:longint(0) SIGNATURE=longint(0) ORDER=1
+-  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+-  METHOD_RETURN CODE=RET TYPE_FULL_NAME=longint ORDER=2
++METHOD NAME=__STDC_VERSION__ CODE=#define __STDC_VERSION__ 201112L FULL_NAME=main.c:__STDC_VERSION__:int(0) SIGNATURE=int(0) ORDER=1
++  BLOCK TYPE_FULL_NAME=ANY ORDER=1
++  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=2
+ 
+ METHOD NAME=__STDC__ CODE=#define __STDC__ 2 FULL_NAME=main.c:__STDC__:int(0) SIGNATURE=int(0) ORDER=1
+   BLOCK TYPE_FULL_NAME=ANY ORDER=1
+@@ -54,7 +54,7 @@
+           CALL NAME=__STDC__ CODE=__STDC__ TYPE_FULL_NAME=int METHOD_FULL_NAME=main.c:__STDC__:int(0) SIGNATURE=int(0) ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=INLINED
+             BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+               LITERAL CODE=2 TYPE_FULL_NAME=int ORDER=1
+-          CALL NAME=__STDC_VERSION__ CODE=__STDC_VERSION__ TYPE_FULL_NAME=longint METHOD_FULL_NAME=main.c:__STDC_VERSION__:longint(0) SIGNATURE=longint(0) ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=INLINED
++          CALL NAME=__STDC_VERSION__ CODE=__STDC_VERSION__ TYPE_FULL_NAME=int METHOD_FULL_NAME=main.c:__STDC_VERSION__:int(0) SIGNATURE=int(0) ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=INLINED
+             BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+               LITERAL CODE=201112L TYPE_FULL_NAME=longint ORDER=1
+         CALL NAME=__STDC_HOSTED__ CODE=__STDC_HOSTED__ TYPE_FULL_NAME=int METHOD_FULL_NAME=main.c:__STDC_HOSTED__:int(0) SIGNATURE=int(0) ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=INLINED
+@@ -88,7 +88,7 @@
+ EDGES|ARGUMENT value#5 -> value#6
+ EDGES|ARGUMENT value#6 -> value#10
+ EDGES|ARGUMENT value#6 -> value#7
+-EDGES|CALL value#10 -> main.c:__STDC_VERSION__:longint(0)#0
++EDGES|CALL value#10 -> main.c:__STDC_VERSION__:int(0)#0
+ EDGES|CALL value#13 -> main.c:__STDC_HOSTED__:int(0)#0
+ EDGES|CALL value#5 -> <operator>.addition#0
+ EDGES|CALL value#6 -> <operator>.addition#0
+@@ -99,7 +99,7 @@
+ EDGES|CFG main.c:<global>#1 -> value#7
+ EDGES|CFG main.c:<global>#19 -> main.c:<global>#20
+ EDGES|CFG main.c:__STDC_HOSTED__:int(0)#0 -> main.c:__STDC_HOSTED__:int(0)#2
+-EDGES|CFG main.c:__STDC_VERSION__:longint(0)#0 -> main.c:__STDC_VERSION__:longint(0)#2
++EDGES|CFG main.c:__STDC_VERSION__:int(0)#0 -> main.c:__STDC_VERSION__:int(0)#2
+ EDGES|CFG main.c:__STDC__:int(0)#0 -> main.c:__STDC__:int(0)#2
+ EDGES|CFG value#10 -> value#12
+ EDGES|CFG value#10 -> value#6
+@@ -118,7 +118,7 @@
+ EDGES|CONTAINS D:main.c:<global> -> D:value
+ EDGES|CONTAINS D:main.c:<global> -> main.c:<global>#0
+ EDGES|CONTAINS D:main.c:<global> -> main.c:__STDC_HOSTED__:int(0)#0
+-EDGES|CONTAINS D:main.c:<global> -> main.c:__STDC_VERSION__:longint(0)#0
++EDGES|CONTAINS D:main.c:<global> -> main.c:__STDC_VERSION__:int(0)#0
+ EDGES|CONTAINS D:main.c:<global> -> main.c:__STDC__:int(0)#0
+ EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+ EDGES|CONTAINS F:<includes> -> D:ANY
+@@ -144,7 +144,7 @@
+ EDGES|CONTAINS main.c:<global>#1 -> value#8
+ EDGES|CONTAINS main.c:<global>#1 -> value#9
+ EDGES|CONTAINS main.c:__STDC_HOSTED__:int(0)#0 -> main.c:__STDC_HOSTED__:int(0)#1
+-EDGES|CONTAINS main.c:__STDC_VERSION__:longint(0)#0 -> main.c:__STDC_VERSION__:longint(0)#1
++EDGES|CONTAINS main.c:__STDC_VERSION__:int(0)#0 -> main.c:__STDC_VERSION__:int(0)#1
+ EDGES|CONTAINS main.c:__STDC__:int(0)#0 -> main.c:__STDC__:int(0)#1
+ EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+ EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+@@ -159,12 +159,12 @@
+ EDGES|EVAL_TYPE main.c:<global>#20 -> T:ANY
+ EDGES|EVAL_TYPE main.c:__STDC_HOSTED__:int(0)#1 -> T:ANY
+ EDGES|EVAL_TYPE main.c:__STDC_HOSTED__:int(0)#2 -> T:int
+-EDGES|EVAL_TYPE main.c:__STDC_VERSION__:longint(0)#1 -> T:ANY
+-EDGES|EVAL_TYPE main.c:__STDC_VERSION__:longint(0)#2 -> T:longint
++EDGES|EVAL_TYPE main.c:__STDC_VERSION__:int(0)#1 -> T:ANY
++EDGES|EVAL_TYPE main.c:__STDC_VERSION__:int(0)#2 -> T:int
+ EDGES|EVAL_TYPE main.c:__STDC__:int(0)#1 -> T:ANY
+ EDGES|EVAL_TYPE main.c:__STDC__:int(0)#2 -> T:int
+ EDGES|EVAL_TYPE value#1 -> T:void
+-EDGES|EVAL_TYPE value#10 -> T:longint
++EDGES|EVAL_TYPE value#10 -> T:int
+ EDGES|EVAL_TYPE value#11 -> T:ANY
+ EDGES|EVAL_TYPE value#12 -> T:longint
+ EDGES|EVAL_TYPE value#13 -> T:int
+@@ -205,7 +205,7 @@
+ EDGES|SOURCE_FILE main.c:<global>#0 -> F:main.c
+ EDGES|SOURCE_FILE main.c:<global>#1 -> F:main.c
+ EDGES|SOURCE_FILE main.c:__STDC_HOSTED__:int(0)#0 -> F:main.c
+-EDGES|SOURCE_FILE main.c:__STDC_VERSION__:longint(0)#0 -> F:main.c
++EDGES|SOURCE_FILE main.c:__STDC_VERSION__:int(0)#0 -> F:main.c
+ EDGES|SOURCE_FILE main.c:__STDC__:int(0)#0 -> F:main.c
+ FLOWS|REACHING_DEF[<RET>] value#4 -> value#16
+ FLOWS|REACHING_DEF[] <operator>.addition#0 -> <operator>.addition#1

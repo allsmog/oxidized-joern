@@ -1,0 +1,13 @@
+{
+  "header_event_tie_after": {
+    "main.c": "#define MODE 1\nint before(void) { return MODE; }\nvoid prepare(void) {\n#undef MODE\n#define MODE 3\n}\n#include \"api.h\"\nint after(void) { return RESULT + MODE; }\n",
+    "api.h": "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n#if MODE == 3\n#define RESULT 9\n#else\n#define RESULT 1\n#endif\n#undef MODE\n#define MODE 8\n"
+  },
+  "header_event_tie_before": {
+    "main.c": "#define MODE 1\n#include \"api.h\"\nint after(void) { return MODE; }\n",
+    "api.h": "#undef MODE\n#define MODE 3\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n#if MODE == 3\n#define RESULT 9\n#endif\n#undef MODE\n#define MODE 8\n"
+  },
+  "mixed_global_method_order": {
+    "main.c": "#define PICK 1\nint first(void) { return PICK; }\n#undef PICK\n#define PICK 2L\nlong global = PICK;\n#undef PICK\n#define PICK 3LL\nlong long later(void) { return PICK; }\n"
+  }
+}

@@ -1,0 +1,212 @@
+--- joern
++++ before
+@@ -2,13 +2,17 @@
+   BLOCK TYPE_FULL_NAME=ANY ORDER=1
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+ 
+-METHOD NAME=<operator>.and FULL_NAME=<operator>.and ORDER=0
++METHOD NAME=<operator>.addressOf FULL_NAME=<operator>.addressOf ORDER=0
+   METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+   BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+   METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+-  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+-  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+-  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
++  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
++
++METHOD NAME=<operator>.pointerCall FULL_NAME=<operator>.pointerCall ORDER=0
++  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
++  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
++  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
++  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+ 
+ METHOD NAME=commented CODE=int commented(int a,int b) {return APPLY(/* left */ & /* right */, a, b); } FULL_NAME=commented SIGNATURE=int(int,int) ORDER=1
+   METHOD_PARAMETER_IN NAME=a CODE=int a TYPE_FULL_NAME=int ORDER=1
+@@ -18,12 +22,12 @@
+   BLOCK CODE={return APPLY(/* left */ & /* right */, a, b); } TYPE_FULL_NAME=void ORDER=3
+     RETURN CODE=return APPLY(/* left */ & /* right */, a, b); ORDER=1
+       CALL NAME=APPLY CODE=APPLY(/* left */ & /* right */, a, b) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=main.c:APPLY:ANY(3) SIGNATURE=ANY(3) ORDER=1 DISPATCH_TYPE=INLINED
+-        IDENTIFIER NAME=a CODE=a TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=2
+-        IDENTIFIER NAME=b CODE=b TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=3
+-        BLOCK TYPE_FULL_NAME=ANY ORDER=3 ARGUMENT_INDEX=3
+-          CALL NAME=<operator>.and CODE=(a) & (b) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.and ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+-            IDENTIFIER NAME=a CODE=a TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+-            IDENTIFIER NAME=b CODE=b TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
++        IDENTIFIER NAME=b CODE=b TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=3
++        BLOCK TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
++          CALL NAME=<operator>.pointerCall CODE=(& /* right */, a)(b) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.pointerCall ORDER=1 DISPATCH_TYPE=DYNAMIC_DISPATCH
++            CALL NAME=<operator>.addressOf CODE=& /* right */, a TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addressOf ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
++              IDENTIFIER NAME=a CODE=a TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
++            IDENTIFIER NAME=b CODE=b TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=1
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=4
+ 
+ METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1
+@@ -35,12 +39,12 @@
+     BLOCK CODE={return APPLY(/* left */ & /* right */, a, b); } TYPE_FULL_NAME=void ORDER=3
+       RETURN CODE=return APPLY(/* left */ & /* right */, a, b); ORDER=1
+         CALL NAME=APPLY CODE=APPLY(/* left */ & /* right */, a, b) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=main.c:APPLY:ANY(3) SIGNATURE=ANY(3) ORDER=1 DISPATCH_TYPE=INLINED
+-          IDENTIFIER NAME=a CODE=a TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=2
+-          IDENTIFIER NAME=b CODE=b TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=3
+-          BLOCK TYPE_FULL_NAME=ANY ORDER=3 ARGUMENT_INDEX=3
+-            CALL NAME=<operator>.and CODE=(a) & (b) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.and ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+-              IDENTIFIER NAME=a CODE=a TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+-              IDENTIFIER NAME=b CODE=b TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
++          IDENTIFIER NAME=b CODE=b TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=3
++          BLOCK TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
++            CALL NAME=<operator>.pointerCall CODE=(& /* right */, a)(b) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.pointerCall ORDER=1 DISPATCH_TYPE=DYNAMIC_DISPATCH
++              CALL NAME=<operator>.addressOf CODE=& /* right */, a TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addressOf ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
++                IDENTIFIER NAME=a CODE=a TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
++              IDENTIFIER NAME=b CODE=b TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=1
+     METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=4
+   BLOCK TYPE_FULL_NAME=ANY ORDER=1
+     METHOD_REF CODE=commented TYPE_FULL_NAME=commented METHOD_FULL_NAME=commented ORDER=1
+@@ -73,29 +77,30 @@
+ NODES|TYPE NAME=commented FULL_NAME=commented TYPE_DECL_FULL_NAME=commented
+ NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+ NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
++EDGES|ARGUMENT commented#10 -> commented#13
+ EDGES|ARGUMENT commented#11 -> commented#12
+-EDGES|ARGUMENT commented#11 -> commented#13
+ EDGES|ARGUMENT commented#6 -> commented#7
+ EDGES|ARGUMENT commented#7 -> commented#8
+-EDGES|ARGUMENT commented#7 -> commented#9
+-EDGES|CALL commented#11 -> <operator>.and#0
++EDGES|CALL commented#11 -> <operator>.addressOf#0
+ EDGES|CALL commented#7 -> main.c:APPLY:ANY(3)#0
+ EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+-EDGES|CFG <operator>.and#0 -> <operator>.and#5
++EDGES|CFG <operator>.addressOf#0 -> <operator>.addressOf#4
++EDGES|CFG <operator>.pointerCall#0 -> <operator>.pointerCall#4
+ EDGES|CFG commented#0 -> commented#8
+-EDGES|CFG commented#11 -> commented#6
+-EDGES|CFG commented#12 -> commented#13
+-EDGES|CFG commented#13 -> commented#11
++EDGES|CFG commented#10 -> commented#6
++EDGES|CFG commented#11 -> commented#13
++EDGES|CFG commented#12 -> commented#11
++EDGES|CFG commented#13 -> commented#10
+ EDGES|CFG commented#6 -> commented#14
+ EDGES|CFG commented#7 -> commented#12
+ EDGES|CFG commented#7 -> commented#6
+-EDGES|CFG commented#8 -> commented#9
+-EDGES|CFG commented#9 -> commented#7
++EDGES|CFG commented#8 -> commented#7
+ EDGES|CFG main.c:<global>#0 -> main.c:<global>#17
+ EDGES|CFG main.c:<global>#17 -> main.c:<global>#18
+ EDGES|CFG main.c:APPLY:ANY(3)#0 -> main.c:APPLY:ANY(3)#8
+ EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+-EDGES|CONTAINS <operator>.and#0 -> <operator>.and#2
++EDGES|CONTAINS <operator>.addressOf#0 -> <operator>.addressOf#2
++EDGES|CONTAINS <operator>.pointerCall#0 -> <operator>.pointerCall#2
+ EDGES|CONTAINS D:main.c:<global> -> D:commented
+ EDGES|CONTAINS D:main.c:<global> -> main.c:<global>#0
+ EDGES|CONTAINS D:main.c:<global> -> main.c:APPLY:ANY(3)#0
+@@ -119,12 +124,14 @@
+ EDGES|CONTAINS main.c:APPLY:ANY(3)#0 -> main.c:APPLY:ANY(3)#7
+ EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+ EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+-EDGES|EVAL_TYPE <operator>.and#1 -> T:ANY
+-EDGES|EVAL_TYPE <operator>.and#2 -> T:ANY
+-EDGES|EVAL_TYPE <operator>.and#3 -> T:ANY
+-EDGES|EVAL_TYPE <operator>.and#4 -> T:ANY
+-EDGES|EVAL_TYPE <operator>.and#5 -> T:ANY
+-EDGES|EVAL_TYPE <operator>.and#6 -> T:ANY
++EDGES|EVAL_TYPE <operator>.addressOf#1 -> T:ANY
++EDGES|EVAL_TYPE <operator>.addressOf#2 -> T:ANY
++EDGES|EVAL_TYPE <operator>.addressOf#3 -> T:ANY
++EDGES|EVAL_TYPE <operator>.addressOf#4 -> T:ANY
++EDGES|EVAL_TYPE <operator>.pointerCall#1 -> T:ANY
++EDGES|EVAL_TYPE <operator>.pointerCall#2 -> T:ANY
++EDGES|EVAL_TYPE <operator>.pointerCall#3 -> T:ANY
++EDGES|EVAL_TYPE <operator>.pointerCall#4 -> T:ANY
+ EDGES|EVAL_TYPE commented#1 -> T:int
+ EDGES|EVAL_TYPE commented#10 -> T:ANY
+ EDGES|EVAL_TYPE commented#11 -> T:ANY
+@@ -137,7 +144,7 @@
+ EDGES|EVAL_TYPE commented#5 -> T:void
+ EDGES|EVAL_TYPE commented#7 -> T:ANY
+ EDGES|EVAL_TYPE commented#8 -> T:int
+-EDGES|EVAL_TYPE commented#9 -> T:int
++EDGES|EVAL_TYPE commented#9 -> T:ANY
+ EDGES|EVAL_TYPE main.c:<global>#16 -> T:ANY
+ EDGES|EVAL_TYPE main.c:<global>#17 -> T:commented
+ EDGES|EVAL_TYPE main.c:<global>#18 -> T:ANY
+@@ -149,8 +156,8 @@
+ EDGES|EVAL_TYPE main.c:APPLY:ANY(3)#6 -> T:ANY
+ EDGES|EVAL_TYPE main.c:APPLY:ANY(3)#7 -> T:ANY
+ EDGES|EVAL_TYPE main.c:APPLY:ANY(3)#8 -> T:ANY
+-EDGES|PARAMETER_LINK <operator>.and#1 -> <operator>.and#3
+-EDGES|PARAMETER_LINK <operator>.and#4 -> <operator>.and#6
++EDGES|PARAMETER_LINK <operator>.addressOf#1 -> <operator>.addressOf#3
++EDGES|PARAMETER_LINK <operator>.pointerCall#1 -> <operator>.pointerCall#3
+ EDGES|PARAMETER_LINK commented#1 -> commented#2
+ EDGES|PARAMETER_LINK commented#3 -> commented#4
+ EDGES|PARAMETER_LINK main.c:APPLY:ANY(3)#1 -> main.c:APPLY:ANY(3)#2
+@@ -178,50 +185,44 @@
+ EDGES|SOURCE_FILE commented#0 -> F:main.c
+ EDGES|SOURCE_FILE main.c:<global>#0 -> F:main.c
+ EDGES|SOURCE_FILE main.c:APPLY:ANY(3)#0 -> F:main.c
+-FLOWS|REACHING_DEF[(a) & (b)] commented#11 -> commented#14
++FLOWS|REACHING_DEF[& /* right */, a] commented#11 -> commented#14
++FLOWS|REACHING_DEF[& /* right */, a] commented#11 -> commented#2
++FLOWS|REACHING_DEF[(& /* right */, a)(b)] commented#10 -> commented#14
+ FLOWS|REACHING_DEF[<RET>] commented#6 -> commented#14
+ FLOWS|REACHING_DEF[APPLY(/* left */ & /* right */, a, b)] commented#7 -> commented#14
+ FLOWS|REACHING_DEF[APPLY(/* left */ & /* right */, a, b)] commented#7 -> commented#6
+-FLOWS|REACHING_DEF[] <operator>.and#0 -> <operator>.and#1
+-FLOWS|REACHING_DEF[] <operator>.and#0 -> <operator>.and#4
++FLOWS|REACHING_DEF[] <operator>.addressOf#0 -> <operator>.addressOf#1
++FLOWS|REACHING_DEF[] <operator>.pointerCall#0 -> <operator>.pointerCall#1
+ FLOWS|REACHING_DEF[] commented#0 -> commented#1
+ FLOWS|REACHING_DEF[] commented#0 -> commented#12
+ FLOWS|REACHING_DEF[] commented#0 -> commented#13
+ FLOWS|REACHING_DEF[] commented#0 -> commented#3
+ FLOWS|REACHING_DEF[] commented#0 -> commented#8
+-FLOWS|REACHING_DEF[] commented#0 -> commented#9
+ FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#17
+ FLOWS|REACHING_DEF[] main.c:APPLY:ANY(3)#0 -> main.c:APPLY:ANY(3)#1
+ FLOWS|REACHING_DEF[] main.c:APPLY:ANY(3)#0 -> main.c:APPLY:ANY(3)#3
+ FLOWS|REACHING_DEF[] main.c:APPLY:ANY(3)#0 -> main.c:APPLY:ANY(3)#5
++FLOWS|REACHING_DEF[a] commented#1 -> commented#12
++FLOWS|REACHING_DEF[a] commented#1 -> commented#14
+ FLOWS|REACHING_DEF[a] commented#1 -> commented#2
+-FLOWS|REACHING_DEF[a] commented#1 -> commented#8
+ FLOWS|REACHING_DEF[a] commented#12 -> commented#11
+-FLOWS|REACHING_DEF[a] commented#12 -> commented#13
+ FLOWS|REACHING_DEF[a] commented#12 -> commented#14
+ FLOWS|REACHING_DEF[a] commented#12 -> commented#2
+-FLOWS|REACHING_DEF[a] commented#8 -> commented#12
+-FLOWS|REACHING_DEF[a] commented#8 -> commented#14
+-FLOWS|REACHING_DEF[a] commented#8 -> commented#2
+-FLOWS|REACHING_DEF[a] commented#8 -> commented#7
+-FLOWS|REACHING_DEF[a] commented#8 -> commented#9
+-FLOWS|REACHING_DEF[b] commented#13 -> commented#11
+-FLOWS|REACHING_DEF[b] commented#13 -> commented#12
++FLOWS|REACHING_DEF[b] commented#13 -> commented#10
+ FLOWS|REACHING_DEF[b] commented#13 -> commented#14
+ FLOWS|REACHING_DEF[b] commented#13 -> commented#4
+ FLOWS|REACHING_DEF[b] commented#3 -> commented#4
+-FLOWS|REACHING_DEF[b] commented#3 -> commented#9
+-FLOWS|REACHING_DEF[b] commented#9 -> commented#13
+-FLOWS|REACHING_DEF[b] commented#9 -> commented#14
+-FLOWS|REACHING_DEF[b] commented#9 -> commented#4
+-FLOWS|REACHING_DEF[b] commented#9 -> commented#7
+-FLOWS|REACHING_DEF[b] commented#9 -> commented#8
+-FLOWS|REACHING_DEF[p1] <operator>.and#1 -> <operator>.and#3
+-FLOWS|REACHING_DEF[p1] <operator>.and#1 -> <operator>.and#5
++FLOWS|REACHING_DEF[b] commented#3 -> commented#8
++FLOWS|REACHING_DEF[b] commented#8 -> commented#13
++FLOWS|REACHING_DEF[b] commented#8 -> commented#14
++FLOWS|REACHING_DEF[b] commented#8 -> commented#4
++FLOWS|REACHING_DEF[b] commented#8 -> commented#7
++FLOWS|REACHING_DEF[p1] <operator>.addressOf#1 -> <operator>.addressOf#3
++FLOWS|REACHING_DEF[p1] <operator>.addressOf#1 -> <operator>.addressOf#4
++FLOWS|REACHING_DEF[p1] <operator>.pointerCall#1 -> <operator>.pointerCall#3
++FLOWS|REACHING_DEF[p1] <operator>.pointerCall#1 -> <operator>.pointerCall#4
+ FLOWS|REACHING_DEF[p1] main.c:APPLY:ANY(3)#1 -> main.c:APPLY:ANY(3)#2
+ FLOWS|REACHING_DEF[p1] main.c:APPLY:ANY(3)#1 -> main.c:APPLY:ANY(3)#8
+-FLOWS|REACHING_DEF[p2] <operator>.and#4 -> <operator>.and#5
+-FLOWS|REACHING_DEF[p2] <operator>.and#4 -> <operator>.and#6
+ FLOWS|REACHING_DEF[p2] main.c:APPLY:ANY(3)#3 -> main.c:APPLY:ANY(3)#4
+ FLOWS|REACHING_DEF[p2] main.c:APPLY:ANY(3)#3 -> main.c:APPLY:ANY(3)#8
+ FLOWS|REACHING_DEF[p3] main.c:APPLY:ANY(3)#5 -> main.c:APPLY:ANY(3)#6

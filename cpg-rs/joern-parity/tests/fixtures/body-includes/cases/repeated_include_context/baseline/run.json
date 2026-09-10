@@ -1,0 +1,19 @@
+{
+  "case": "repeated_include_context",
+  "command": [
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/ninth-batch/reviewed-final-real-differential/bin/joern-parity",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/tenth-batch/frozen-baseline-v1/input/repeated_include_context/main.c",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/tenth-batch/frozen-baseline-v1/input/repeated_include_context/nested/table.h",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/tenth-batch/frozen-baseline-v1/input/repeated_include_context/repeat.h"
+  ],
+  "inputHashes": {
+    "main.c": "3978e883bd0aaf3d326144a6cd78a87a525f590207de23552f98049932b3e20f",
+    "nested/table.h": "3bb7ed86169716c309a9d27e0016132128da26348425a566436c287738a3c15a",
+    "repeat.h": "19dcabefdf697b3ed835d49328b7d35d218acf0dffa5f64c96235d93a9cafb84"
+  },
+  "error": null,
+  "exitCode": 0,
+  "seconds": 0.011389333987608552,
+  "actualSha256": "805fc908e10878d4feeb9fe59dc7dad936541d1c97da1ffb201cbc11ffaa8a23",
+  "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

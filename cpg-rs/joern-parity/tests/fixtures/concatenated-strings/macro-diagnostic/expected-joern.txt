@@ -1,0 +1,1730 @@
+METHOD NAME=<global> CODE=<global> FULL_NAME=<includes>:<global> ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.assignment FULL_NAME=<operator>.assignment ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.conditional FULL_NAME=<operator>.conditional ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_IN NAME=p3 CODE=p3 TYPE_FULL_NAME=ANY ORDER=3
+  METHOD_PARAMETER_OUT NAME=p3 CODE=p3 TYPE_FULL_NAME=ANY ORDER=3
+
+METHOD NAME=<operator>.equals FULL_NAME=<operator>.equals ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=argument CODE=void argument(void) { consume("first" "second"); } FULL_NAME=argument SIGNATURE=void(void) ORDER=1
+  METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  BLOCK CODE={ consume("first" "second"); } TYPE_FULL_NAME=void ORDER=2
+    CALL NAME=consume CODE=consume("first" "second") TYPE_FULL_NAME=void METHOD_FULL_NAME=consume ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+      LITERAL CODE="first" "second" TYPE_FULL_NAME=char* ORDER=1 ARGUMENT_INDEX=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+
+METHOD NAME=call_macro CODE=void call_macro(void) { CALL_JOIN; } FULL_NAME=call_macro SIGNATURE=void(void) ORDER=1
+  METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  BLOCK CODE={ CALL_JOIN; } TYPE_FULL_NAME=void ORDER=2
+    CALL NAME=CALL_JOIN CODE=CALL_JOIN TYPE_FULL_NAME=ANY METHOD_FULL_NAME=strings.c:CALL_JOIN:ANY(0) SIGNATURE=ANY(0) ORDER=1 DISPATCH_TYPE=INLINED
+      BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+        CALL NAME=consume CODE=consume("leftright") TYPE_FULL_NAME=void METHOD_FULL_NAME=consume ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+          LITERAL CODE="leftright" TYPE_FULL_NAME=char* ORDER=1 ARGUMENT_INDEX=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+
+METHOD NAME=comment_macro CODE=char *comment_macro(void) { return COMMENT_JOIN; } FULL_NAME=comment_macro SIGNATURE=char*(void) ORDER=1
+  METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  BLOCK CODE={ return COMMENT_JOIN; } TYPE_FULL_NAME=void ORDER=2
+    RETURN CODE=return COMMENT_JOIN; ORDER=1
+      CALL NAME=COMMENT_JOIN CODE=COMMENT_JOIN TYPE_FULL_NAME=char* METHOD_FULL_NAME=strings.c:COMMENT_JOIN:char*(0) SIGNATURE=char*(0) ORDER=1 DISPATCH_TYPE=INLINED
+        BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+          LITERAL CODE="leftright" TYPE_FULL_NAME=char* ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=char* ORDER=3
+
+METHOD NAME=commented CODE=char *commented(int condition) { return condition ? "first" /* join */ "second" : "safe"; } FULL_NAME=commented SIGNATURE=char*(int) ORDER=1
+  METHOD_PARAMETER_IN NAME=condition CODE=int condition TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=condition CODE=int condition TYPE_FULL_NAME=int ORDER=1
+  BLOCK CODE={ return condition ? "first" /* join */ "second" : "safe"; } TYPE_FULL_NAME=void ORDER=2
+    RETURN CODE=return condition ? "first" /* join */ "second" : "safe"; ORDER=1
+      CALL NAME=<operator>.conditional CODE=condition ? "first" /* join */ "second" : "safe" TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.conditional ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=condition CODE=condition TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+        LITERAL CODE="first" /* join */ "second" TYPE_FULL_NAME=char* ORDER=2 ARGUMENT_INDEX=2
+        LITERAL CODE="safe" TYPE_FULL_NAME=char* ORDER=3 ARGUMENT_INDEX=3
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=char* ORDER=3
+
+METHOD NAME=consume CODE=void consume(char *value); FULL_NAME=consume SIGNATURE=void(char*) ORDER=1
+  METHOD_PARAMETER_IN NAME=value CODE=char *value TYPE_FULL_NAME=char* ORDER=1
+  METHOD_PARAMETER_OUT NAME=value CODE=char *value TYPE_FULL_NAME=char* ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+
+METHOD NAME=escaped_macro CODE=char *escaped_macro(void) { return ESCAPED_JOIN; } FULL_NAME=escaped_macro SIGNATURE=char*(void) ORDER=1
+  METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  BLOCK CODE={ return ESCAPED_JOIN; } TYPE_FULL_NAME=void ORDER=2
+    RETURN CODE=return ESCAPED_JOIN; ORDER=1
+      CALL NAME=ESCAPED_JOIN CODE=ESCAPED_JOIN TYPE_FULL_NAME=char* METHOD_FULL_NAME=strings.c:ESCAPED_JOIN:char*(0) SIGNATURE=char*(0) ORDER=1 DISPATCH_TYPE=INLINED
+        BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+          LITERAL CODE="one\\two\"\nthree" TYPE_FULL_NAME=char* ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=char* ORDER=3
+
+METHOD NAME=function_replacement CODE=char *function_replacement(void) { return WRAPPED(); } FULL_NAME=function_replacement SIGNATURE=char*(void) ORDER=1
+  METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  BLOCK CODE={ return WRAPPED(); } TYPE_FULL_NAME=void ORDER=2
+    RETURN CODE=return WRAPPED(); ORDER=1
+      CALL NAME=WRAPPED CODE=WRAPPED() TYPE_FULL_NAME=char* METHOD_FULL_NAME=strings.c:WRAPPED:char*(0) SIGNATURE=char*(0) ORDER=1 DISPATCH_TYPE=INLINED
+        BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+          LITERAL CODE="functionreplacement" TYPE_FULL_NAME=char* ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=char* ORDER=3
+
+METHOD NAME=literal_return CODE=char *literal_return(void) { return "first" "second"; } FULL_NAME=literal_return SIGNATURE=char*(void) ORDER=1
+  METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  BLOCK CODE={ return "first" "second"; } TYPE_FULL_NAME=void ORDER=2
+    RETURN CODE=return "first" "second"; ORDER=1
+      LITERAL CODE="first" "second" TYPE_FULL_NAME=char* ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=char* ORDER=3
+
+METHOD NAME=lua_literal CODE=char *lua_literal(int n, int minimum) {\n    { const char *format = (n == minimum) /* corner case */\n        ? "0x%" WIDTH "x" /* hexadecimal */\n        : FORMAT;\n      consume(format);\n      return format;\n    }\n} FULL_NAME=lua_literal SIGNATURE=char*(int,int) ORDER=1
+  METHOD_PARAMETER_IN NAME=n CODE=int n TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=n CODE=int n TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_IN NAME=minimum CODE=int minimum TYPE_FULL_NAME=int ORDER=2
+  METHOD_PARAMETER_OUT NAME=minimum CODE=int minimum TYPE_FULL_NAME=int ORDER=2
+  BLOCK CODE={\n    { const char *format = (n == minimum) /* corner case */\n        ? "0x%" WIDTH "x" /* hexadecimal */\n        : FORMAT;\n      consume(format);\n      return format;\n    }\n} TYPE_FULL_NAME=void ORDER=3
+    BLOCK CODE={ const char *format = (n == minimum) /* corner case */\n        ? "0x%" WIDTH "x" /* hexadecimal */\n        : FORMAT;\n      consume(format);\n      return format;\n    } TYPE_FULL_NAME=void ORDER=1
+      LOCAL NAME=format CODE=const char *format TYPE_FULL_NAME=char* ORDER=1
+      CALL NAME=<operator>.assignment CODE=*format = (n == minimum) /* corner case */\n        ? "0x%" WIDTH "x" /* hexadecimal */\n        : FORMAT TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=format CODE=format TYPE_FULL_NAME=char* ORDER=1 ARGUMENT_INDEX=1
+        CALL NAME=<operator>.conditional CODE=(n == minimum) /* corner case */\n        ? "0x%" WIDTH "x" /* hexadecimal */\n        : FORMAT TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.conditional ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+          CALL NAME=<operator>.equals CODE=n == minimum TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.equals ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+            IDENTIFIER NAME=n CODE=n TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+            IDENTIFIER NAME=minimum CODE=minimum TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+          LITERAL CODE="0x%" WIDTH "x" TYPE_FULL_NAME=char* ORDER=2 ARGUMENT_INDEX=2
+          CALL NAME=FORMAT CODE=FORMAT TYPE_FULL_NAME=char* METHOD_FULL_NAME=strings.c:FORMAT:char*(0) SIGNATURE=char*(0) ORDER=3 ARGUMENT_INDEX=3 DISPATCH_TYPE=INLINED
+            BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+              LITERAL CODE="%lld" TYPE_FULL_NAME=char* ORDER=1
+      CALL NAME=consume CODE=consume(format) TYPE_FULL_NAME=void METHOD_FULL_NAME=consume ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=format CODE=format TYPE_FULL_NAME=char* ORDER=1 ARGUMENT_INDEX=1
+      RETURN CODE=return format; ORDER=4
+        IDENTIFIER NAME=format CODE=format TYPE_FULL_NAME=char* ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=char* ORDER=4
+
+METHOD NAME=macro_condition CODE=char *macro_condition(int condition) { return condition ? JOINED : WRAPPED(); } FULL_NAME=macro_condition SIGNATURE=char*(int) ORDER=1
+  METHOD_PARAMETER_IN NAME=condition CODE=int condition TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=condition CODE=int condition TYPE_FULL_NAME=int ORDER=1
+  BLOCK CODE={ return condition ? JOINED : WRAPPED(); } TYPE_FULL_NAME=void ORDER=2
+    RETURN CODE=return condition ? JOINED : WRAPPED(); ORDER=1
+      CALL NAME=<operator>.conditional CODE=condition ? JOINED : WRAPPED() TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.conditional ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=condition CODE=condition TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+        CALL NAME=JOINED CODE=JOINED TYPE_FULL_NAME=char* METHOD_FULL_NAME=strings.c:JOINED:char*(0) SIGNATURE=char*(0) ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=INLINED
+          BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+            LITERAL CODE="macroreplacement" TYPE_FULL_NAME=char* ORDER=1
+        CALL NAME=WRAPPED CODE=WRAPPED() TYPE_FULL_NAME=char* METHOD_FULL_NAME=strings.c:WRAPPED:char*(0) SIGNATURE=char*(0) ORDER=3 ARGUMENT_INDEX=3 DISPATCH_TYPE=INLINED
+          BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+            LITERAL CODE="functionreplacement" TYPE_FULL_NAME=char* ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=char* ORDER=3
+
+METHOD NAME=macro_replacement CODE=char *macro_replacement(void) { return JOINED; } FULL_NAME=macro_replacement SIGNATURE=char*(void) ORDER=1
+  METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  BLOCK CODE={ return JOINED; } TYPE_FULL_NAME=void ORDER=2
+    RETURN CODE=return JOINED; ORDER=1
+      CALL NAME=JOINED CODE=JOINED TYPE_FULL_NAME=char* METHOD_FULL_NAME=strings.c:JOINED:char*(0) SIGNATURE=char*(0) ORDER=1 DISPATCH_TYPE=INLINED
+        BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+          LITERAL CODE="macroreplacement" TYPE_FULL_NAME=char* ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=char* ORDER=3
+
+METHOD NAME=mixed_macro CODE=char *mixed_macro(void) { return MIXED_JOIN; } FULL_NAME=mixed_macro SIGNATURE=char*(void) ORDER=1
+  METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  BLOCK CODE={ return MIXED_JOIN; } TYPE_FULL_NAME=void ORDER=2
+    RETURN CODE=return MIXED_JOIN; ORDER=1
+      CALL NAME=MIXED_JOIN CODE=MIXED_JOIN TYPE_FULL_NAME=char* METHOD_FULL_NAME=strings.c:MIXED_JOIN:char*(0) SIGNATURE=char*(0) ORDER=1 DISPATCH_TYPE=INLINED
+        BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+          LITERAL CODE=L"narrowjoined" TYPE_FULL_NAME=char* ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=char* ORDER=3
+
+METHOD NAME=mixed_prefix CODE=char *mixed_prefix(int condition) { return condition ? "plain" L"wide" : L"safe"; } FULL_NAME=mixed_prefix SIGNATURE=char*(int) ORDER=1
+  METHOD_PARAMETER_IN NAME=condition CODE=int condition TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=condition CODE=int condition TYPE_FULL_NAME=int ORDER=1
+  BLOCK CODE={ return condition ? "plain" L"wide" : L"safe"; } TYPE_FULL_NAME=void ORDER=2
+    RETURN CODE=return condition ? "plain" L"wide" : L"safe"; ORDER=1
+      CALL NAME=<operator>.conditional CODE=condition ? "plain" L"wide" : L"safe" TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.conditional ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=condition CODE=condition TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+        LITERAL CODE="plain" L"wide" TYPE_FULL_NAME=char* ORDER=2 ARGUMENT_INDEX=2
+        LITERAL CODE=L"safe" TYPE_FULL_NAME=char* ORDER=3 ARGUMENT_INDEX=3
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=char* ORDER=3
+
+METHOD NAME=multiline CODE=void multiline(void) {\n    consume("first"\n            "second");\n    consume("following");\n} FULL_NAME=multiline SIGNATURE=void(void) ORDER=1
+  METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  BLOCK CODE={\n    consume("first"\n            "second");\n    consume("following");\n} TYPE_FULL_NAME=void ORDER=2
+    CALL NAME=consume CODE=consume("first"\n            "second") TYPE_FULL_NAME=void METHOD_FULL_NAME=consume ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+      LITERAL CODE="first"\n            "second" TYPE_FULL_NAME=char* ORDER=1 ARGUMENT_INDEX=1
+    CALL NAME=consume CODE=consume("following") TYPE_FULL_NAME=void METHOD_FULL_NAME=consume ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+      LITERAL CODE="following" TYPE_FULL_NAME=char* ORDER=1 ARGUMENT_INDEX=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+
+METHOD NAME=parenthesized CODE=void parenthesized(void) { consume(("first" "second")); } FULL_NAME=parenthesized SIGNATURE=void(void) ORDER=1
+  METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  BLOCK CODE={ consume(("first" "second")); } TYPE_FULL_NAME=void ORDER=2
+    CALL NAME=consume CODE=consume(("first" "second")) TYPE_FULL_NAME=void METHOD_FULL_NAME=consume ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+      LITERAL CODE="first" "second" TYPE_FULL_NAME=char* ORDER=1 ARGUMENT_INDEX=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+
+METHOD NAME=parenthesized_macro CODE=char *parenthesized_macro(void) { return PAREN_JOIN; } FULL_NAME=parenthesized_macro SIGNATURE=char*(void) ORDER=1
+  METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  BLOCK CODE={ return PAREN_JOIN; } TYPE_FULL_NAME=void ORDER=2
+    RETURN CODE=return PAREN_JOIN; ORDER=1
+      CALL NAME=PAREN_JOIN CODE=PAREN_JOIN TYPE_FULL_NAME=ANY METHOD_FULL_NAME=strings.c:PAREN_JOIN:ANY(0) SIGNATURE=ANY(0) ORDER=1 DISPATCH_TYPE=INLINED
+        BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+          LITERAL CODE="leftright" TYPE_FULL_NAME=char* ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=char* ORDER=3
+
+METHOD NAME=plain CODE=char *plain(int condition) { return condition ? "left" "right" : "fallback"; } FULL_NAME=plain SIGNATURE=char*(int) ORDER=1
+  METHOD_PARAMETER_IN NAME=condition CODE=int condition TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=condition CODE=int condition TYPE_FULL_NAME=int ORDER=1
+  BLOCK CODE={ return condition ? "left" "right" : "fallback"; } TYPE_FULL_NAME=void ORDER=2
+    RETURN CODE=return condition ? "left" "right" : "fallback"; ORDER=1
+      CALL NAME=<operator>.conditional CODE=condition ? "left" "right" : "fallback" TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.conditional ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=condition CODE=condition TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+        LITERAL CODE="left" "right" TYPE_FULL_NAME=char* ORDER=2 ARGUMENT_INDEX=2
+        LITERAL CODE="fallback" TYPE_FULL_NAME=char* ORDER=3 ARGUMENT_INDEX=3
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=char* ORDER=3
+
+METHOD NAME=<global> CODE=<global> FULL_NAME=strings.c:<global> ORDER=1
+  METHOD NAME=plain CODE=char *plain(int condition) { return condition ? "left" "right" : "fallback"; } FULL_NAME=plain SIGNATURE=char*(int) ORDER=1
+    METHOD_PARAMETER_IN NAME=condition CODE=int condition TYPE_FULL_NAME=int ORDER=1
+    METHOD_PARAMETER_OUT NAME=condition CODE=int condition TYPE_FULL_NAME=int ORDER=1
+    BLOCK CODE={ return condition ? "left" "right" : "fallback"; } TYPE_FULL_NAME=void ORDER=2
+      RETURN CODE=return condition ? "left" "right" : "fallback"; ORDER=1
+        CALL NAME=<operator>.conditional CODE=condition ? "left" "right" : "fallback" TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.conditional ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=condition CODE=condition TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+          LITERAL CODE="left" "right" TYPE_FULL_NAME=char* ORDER=2 ARGUMENT_INDEX=2
+          LITERAL CODE="fallback" TYPE_FULL_NAME=char* ORDER=3 ARGUMENT_INDEX=3
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=char* ORDER=3
+  METHOD NAME=lua_literal CODE=char *lua_literal(int n, int minimum) {\n    { const char *format = (n == minimum) /* corner case */\n        ? "0x%" WIDTH "x" /* hexadecimal */\n        : FORMAT;\n      consume(format);\n      return format;\n    }\n} FULL_NAME=lua_literal SIGNATURE=char*(int,int) ORDER=1
+    METHOD_PARAMETER_IN NAME=n CODE=int n TYPE_FULL_NAME=int ORDER=1
+    METHOD_PARAMETER_OUT NAME=n CODE=int n TYPE_FULL_NAME=int ORDER=1
+    METHOD_PARAMETER_IN NAME=minimum CODE=int minimum TYPE_FULL_NAME=int ORDER=2
+    METHOD_PARAMETER_OUT NAME=minimum CODE=int minimum TYPE_FULL_NAME=int ORDER=2
+    BLOCK CODE={\n    { const char *format = (n == minimum) /* corner case */\n        ? "0x%" WIDTH "x" /* hexadecimal */\n        : FORMAT;\n      consume(format);\n      return format;\n    }\n} TYPE_FULL_NAME=void ORDER=3
+      BLOCK CODE={ const char *format = (n == minimum) /* corner case */\n        ? "0x%" WIDTH "x" /* hexadecimal */\n        : FORMAT;\n      consume(format);\n      return format;\n    } TYPE_FULL_NAME=void ORDER=1
+        LOCAL NAME=format CODE=const char *format TYPE_FULL_NAME=char* ORDER=1
+        CALL NAME=<operator>.assignment CODE=*format = (n == minimum) /* corner case */\n        ? "0x%" WIDTH "x" /* hexadecimal */\n        : FORMAT TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=format CODE=format TYPE_FULL_NAME=char* ORDER=1 ARGUMENT_INDEX=1
+          CALL NAME=<operator>.conditional CODE=(n == minimum) /* corner case */\n        ? "0x%" WIDTH "x" /* hexadecimal */\n        : FORMAT TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.conditional ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+            CALL NAME=<operator>.equals CODE=n == minimum TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.equals ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+              IDENTIFIER NAME=n CODE=n TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+              IDENTIFIER NAME=minimum CODE=minimum TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+            LITERAL CODE="0x%" WIDTH "x" TYPE_FULL_NAME=char* ORDER=2 ARGUMENT_INDEX=2
+            CALL NAME=FORMAT CODE=FORMAT TYPE_FULL_NAME=char* METHOD_FULL_NAME=strings.c:FORMAT:char*(0) SIGNATURE=char*(0) ORDER=3 ARGUMENT_INDEX=3 DISPATCH_TYPE=INLINED
+              BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+                LITERAL CODE="%lld" TYPE_FULL_NAME=char* ORDER=1
+        CALL NAME=consume CODE=consume(format) TYPE_FULL_NAME=void METHOD_FULL_NAME=consume ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=format CODE=format TYPE_FULL_NAME=char* ORDER=1 ARGUMENT_INDEX=1
+        RETURN CODE=return format; ORDER=4
+          IDENTIFIER NAME=format CODE=format TYPE_FULL_NAME=char* ORDER=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=char* ORDER=4
+  METHOD NAME=literal_return CODE=char *literal_return(void) { return "first" "second"; } FULL_NAME=literal_return SIGNATURE=char*(void) ORDER=1
+    METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    BLOCK CODE={ return "first" "second"; } TYPE_FULL_NAME=void ORDER=2
+      RETURN CODE=return "first" "second"; ORDER=1
+        LITERAL CODE="first" "second" TYPE_FULL_NAME=char* ORDER=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=char* ORDER=3
+  METHOD NAME=commented CODE=char *commented(int condition) { return condition ? "first" /* join */ "second" : "safe"; } FULL_NAME=commented SIGNATURE=char*(int) ORDER=1
+    METHOD_PARAMETER_IN NAME=condition CODE=int condition TYPE_FULL_NAME=int ORDER=1
+    METHOD_PARAMETER_OUT NAME=condition CODE=int condition TYPE_FULL_NAME=int ORDER=1
+    BLOCK CODE={ return condition ? "first" /* join */ "second" : "safe"; } TYPE_FULL_NAME=void ORDER=2
+      RETURN CODE=return condition ? "first" /* join */ "second" : "safe"; ORDER=1
+        CALL NAME=<operator>.conditional CODE=condition ? "first" /* join */ "second" : "safe" TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.conditional ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=condition CODE=condition TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+          LITERAL CODE="first" /* join */ "second" TYPE_FULL_NAME=char* ORDER=2 ARGUMENT_INDEX=2
+          LITERAL CODE="safe" TYPE_FULL_NAME=char* ORDER=3 ARGUMENT_INDEX=3
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=char* ORDER=3
+  METHOD NAME=argument CODE=void argument(void) { consume("first" "second"); } FULL_NAME=argument SIGNATURE=void(void) ORDER=1
+    METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    BLOCK CODE={ consume("first" "second"); } TYPE_FULL_NAME=void ORDER=2
+      CALL NAME=consume CODE=consume("first" "second") TYPE_FULL_NAME=void METHOD_FULL_NAME=consume ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+        LITERAL CODE="first" "second" TYPE_FULL_NAME=char* ORDER=1 ARGUMENT_INDEX=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+  METHOD NAME=parenthesized CODE=void parenthesized(void) { consume(("first" "second")); } FULL_NAME=parenthesized SIGNATURE=void(void) ORDER=1
+    METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    BLOCK CODE={ consume(("first" "second")); } TYPE_FULL_NAME=void ORDER=2
+      CALL NAME=consume CODE=consume(("first" "second")) TYPE_FULL_NAME=void METHOD_FULL_NAME=consume ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+        LITERAL CODE="first" "second" TYPE_FULL_NAME=char* ORDER=1 ARGUMENT_INDEX=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+  METHOD NAME=wide CODE=char *wide(int condition) { return condition ? L"wide" L"strings" : L"safe"; } FULL_NAME=wide SIGNATURE=char*(int) ORDER=1
+    METHOD_PARAMETER_IN NAME=condition CODE=int condition TYPE_FULL_NAME=int ORDER=1
+    METHOD_PARAMETER_OUT NAME=condition CODE=int condition TYPE_FULL_NAME=int ORDER=1
+    BLOCK CODE={ return condition ? L"wide" L"strings" : L"safe"; } TYPE_FULL_NAME=void ORDER=2
+      RETURN CODE=return condition ? L"wide" L"strings" : L"safe"; ORDER=1
+        CALL NAME=<operator>.conditional CODE=condition ? L"wide" L"strings" : L"safe" TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.conditional ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=condition CODE=condition TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+          LITERAL CODE=L"wide" L"strings" TYPE_FULL_NAME=char* ORDER=2 ARGUMENT_INDEX=2
+          LITERAL CODE=L"safe" TYPE_FULL_NAME=char* ORDER=3 ARGUMENT_INDEX=3
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=char* ORDER=3
+  METHOD NAME=utf8 CODE=char *utf8(int condition) { return condition ? u8"utf8" u8"strings" : u8"safe"; } FULL_NAME=utf8 SIGNATURE=char*(int) ORDER=1
+    METHOD_PARAMETER_IN NAME=condition CODE=int condition TYPE_FULL_NAME=int ORDER=1
+    METHOD_PARAMETER_OUT NAME=condition CODE=int condition TYPE_FULL_NAME=int ORDER=1
+    BLOCK CODE={ return condition ? u8"utf8" u8"strings" : u8"safe"; } TYPE_FULL_NAME=void ORDER=2
+      RETURN CODE=return condition ? u8"utf8" u8"strings" : u8"safe"; ORDER=1
+        CALL NAME=<operator>.conditional CODE=condition ? u8"utf8" u8"strings" : u8"safe" TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.conditional ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=condition CODE=condition TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+          LITERAL CODE=u8"utf8" u8"strings" TYPE_FULL_NAME=char* ORDER=2 ARGUMENT_INDEX=2
+          LITERAL CODE=u8"safe" TYPE_FULL_NAME=char* ORDER=3 ARGUMENT_INDEX=3
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=char* ORDER=3
+  METHOD NAME=utf16 CODE=char *utf16(int condition) { return condition ? u"utf16" u"strings" : u"safe"; } FULL_NAME=utf16 SIGNATURE=char*(int) ORDER=1
+    METHOD_PARAMETER_IN NAME=condition CODE=int condition TYPE_FULL_NAME=int ORDER=1
+    METHOD_PARAMETER_OUT NAME=condition CODE=int condition TYPE_FULL_NAME=int ORDER=1
+    BLOCK CODE={ return condition ? u"utf16" u"strings" : u"safe"; } TYPE_FULL_NAME=void ORDER=2
+      RETURN CODE=return condition ? u"utf16" u"strings" : u"safe"; ORDER=1
+        CALL NAME=<operator>.conditional CODE=condition ? u"utf16" u"strings" : u"safe" TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.conditional ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=condition CODE=condition TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+          LITERAL CODE=u"utf16" u"strings" TYPE_FULL_NAME=char* ORDER=2 ARGUMENT_INDEX=2
+          LITERAL CODE=u"safe" TYPE_FULL_NAME=char* ORDER=3 ARGUMENT_INDEX=3
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=char* ORDER=3
+  METHOD NAME=utf32 CODE=char *utf32(int condition) { return condition ? U"utf32" U"strings" : U"safe"; } FULL_NAME=utf32 SIGNATURE=char*(int) ORDER=1
+    METHOD_PARAMETER_IN NAME=condition CODE=int condition TYPE_FULL_NAME=int ORDER=1
+    METHOD_PARAMETER_OUT NAME=condition CODE=int condition TYPE_FULL_NAME=int ORDER=1
+    BLOCK CODE={ return condition ? U"utf32" U"strings" : U"safe"; } TYPE_FULL_NAME=void ORDER=2
+      RETURN CODE=return condition ? U"utf32" U"strings" : U"safe"; ORDER=1
+        CALL NAME=<operator>.conditional CODE=condition ? U"utf32" U"strings" : U"safe" TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.conditional ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=condition CODE=condition TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+          LITERAL CODE=U"utf32" U"strings" TYPE_FULL_NAME=char* ORDER=2 ARGUMENT_INDEX=2
+          LITERAL CODE=U"safe" TYPE_FULL_NAME=char* ORDER=3 ARGUMENT_INDEX=3
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=char* ORDER=3
+  METHOD NAME=mixed_prefix CODE=char *mixed_prefix(int condition) { return condition ? "plain" L"wide" : L"safe"; } FULL_NAME=mixed_prefix SIGNATURE=char*(int) ORDER=1
+    METHOD_PARAMETER_IN NAME=condition CODE=int condition TYPE_FULL_NAME=int ORDER=1
+    METHOD_PARAMETER_OUT NAME=condition CODE=int condition TYPE_FULL_NAME=int ORDER=1
+    BLOCK CODE={ return condition ? "plain" L"wide" : L"safe"; } TYPE_FULL_NAME=void ORDER=2
+      RETURN CODE=return condition ? "plain" L"wide" : L"safe"; ORDER=1
+        CALL NAME=<operator>.conditional CODE=condition ? "plain" L"wide" : L"safe" TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.conditional ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=condition CODE=condition TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+          LITERAL CODE="plain" L"wide" TYPE_FULL_NAME=char* ORDER=2 ARGUMENT_INDEX=2
+          LITERAL CODE=L"safe" TYPE_FULL_NAME=char* ORDER=3 ARGUMENT_INDEX=3
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=char* ORDER=3
+  METHOD NAME=macro_replacement CODE=char *macro_replacement(void) { return JOINED; } FULL_NAME=macro_replacement SIGNATURE=char*(void) ORDER=1
+    METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    BLOCK CODE={ return JOINED; } TYPE_FULL_NAME=void ORDER=2
+      RETURN CODE=return JOINED; ORDER=1
+        CALL NAME=JOINED CODE=JOINED TYPE_FULL_NAME=char* METHOD_FULL_NAME=strings.c:JOINED:char*(0) SIGNATURE=char*(0) ORDER=1 DISPATCH_TYPE=INLINED
+          BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+            LITERAL CODE="macroreplacement" TYPE_FULL_NAME=char* ORDER=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=char* ORDER=3
+  METHOD NAME=function_replacement CODE=char *function_replacement(void) { return WRAPPED(); } FULL_NAME=function_replacement SIGNATURE=char*(void) ORDER=1
+    METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    BLOCK CODE={ return WRAPPED(); } TYPE_FULL_NAME=void ORDER=2
+      RETURN CODE=return WRAPPED(); ORDER=1
+        CALL NAME=WRAPPED CODE=WRAPPED() TYPE_FULL_NAME=char* METHOD_FULL_NAME=strings.c:WRAPPED:char*(0) SIGNATURE=char*(0) ORDER=1 DISPATCH_TYPE=INLINED
+          BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+            LITERAL CODE="functionreplacement" TYPE_FULL_NAME=char* ORDER=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=char* ORDER=3
+  METHOD NAME=macro_condition CODE=char *macro_condition(int condition) { return condition ? JOINED : WRAPPED(); } FULL_NAME=macro_condition SIGNATURE=char*(int) ORDER=1
+    METHOD_PARAMETER_IN NAME=condition CODE=int condition TYPE_FULL_NAME=int ORDER=1
+    METHOD_PARAMETER_OUT NAME=condition CODE=int condition TYPE_FULL_NAME=int ORDER=1
+    BLOCK CODE={ return condition ? JOINED : WRAPPED(); } TYPE_FULL_NAME=void ORDER=2
+      RETURN CODE=return condition ? JOINED : WRAPPED(); ORDER=1
+        CALL NAME=<operator>.conditional CODE=condition ? JOINED : WRAPPED() TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.conditional ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=condition CODE=condition TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+          CALL NAME=JOINED CODE=JOINED TYPE_FULL_NAME=char* METHOD_FULL_NAME=strings.c:JOINED:char*(0) SIGNATURE=char*(0) ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=INLINED
+            BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+              LITERAL CODE="macroreplacement" TYPE_FULL_NAME=char* ORDER=1
+          CALL NAME=WRAPPED CODE=WRAPPED() TYPE_FULL_NAME=char* METHOD_FULL_NAME=strings.c:WRAPPED:char*(0) SIGNATURE=char*(0) ORDER=3 ARGUMENT_INDEX=3 DISPATCH_TYPE=INLINED
+            BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+              LITERAL CODE="functionreplacement" TYPE_FULL_NAME=char* ORDER=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=char* ORDER=3
+  METHOD NAME=multiline CODE=void multiline(void) {\n    consume("first"\n            "second");\n    consume("following");\n} FULL_NAME=multiline SIGNATURE=void(void) ORDER=1
+    METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    BLOCK CODE={\n    consume("first"\n            "second");\n    consume("following");\n} TYPE_FULL_NAME=void ORDER=2
+      CALL NAME=consume CODE=consume("first"\n            "second") TYPE_FULL_NAME=void METHOD_FULL_NAME=consume ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+        LITERAL CODE="first"\n            "second" TYPE_FULL_NAME=char* ORDER=1 ARGUMENT_INDEX=1
+      CALL NAME=consume CODE=consume("following") TYPE_FULL_NAME=void METHOD_FULL_NAME=consume ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+        LITERAL CODE="following" TYPE_FULL_NAME=char* ORDER=1 ARGUMENT_INDEX=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+  METHOD NAME=wide_macro CODE=char *wide_macro(void) { return WIDE_JOIN; } FULL_NAME=wide_macro SIGNATURE=char*(void) ORDER=1
+    METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    BLOCK CODE={ return WIDE_JOIN; } TYPE_FULL_NAME=void ORDER=2
+      RETURN CODE=return WIDE_JOIN; ORDER=1
+        CALL NAME=WIDE_JOIN CODE=WIDE_JOIN TYPE_FULL_NAME=char* METHOD_FULL_NAME=strings.c:WIDE_JOIN:char*(0) SIGNATURE=char*(0) ORDER=1 DISPATCH_TYPE=INLINED
+          BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+            LITERAL CODE=L"widejoined" TYPE_FULL_NAME=char* ORDER=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=char* ORDER=3
+  METHOD NAME=mixed_macro CODE=char *mixed_macro(void) { return MIXED_JOIN; } FULL_NAME=mixed_macro SIGNATURE=char*(void) ORDER=1
+    METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    BLOCK CODE={ return MIXED_JOIN; } TYPE_FULL_NAME=void ORDER=2
+      RETURN CODE=return MIXED_JOIN; ORDER=1
+        CALL NAME=MIXED_JOIN CODE=MIXED_JOIN TYPE_FULL_NAME=char* METHOD_FULL_NAME=strings.c:MIXED_JOIN:char*(0) SIGNATURE=char*(0) ORDER=1 DISPATCH_TYPE=INLINED
+          BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+            LITERAL CODE=L"narrowjoined" TYPE_FULL_NAME=char* ORDER=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=char* ORDER=3
+  METHOD NAME=escaped_macro CODE=char *escaped_macro(void) { return ESCAPED_JOIN; } FULL_NAME=escaped_macro SIGNATURE=char*(void) ORDER=1
+    METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    BLOCK CODE={ return ESCAPED_JOIN; } TYPE_FULL_NAME=void ORDER=2
+      RETURN CODE=return ESCAPED_JOIN; ORDER=1
+        CALL NAME=ESCAPED_JOIN CODE=ESCAPED_JOIN TYPE_FULL_NAME=char* METHOD_FULL_NAME=strings.c:ESCAPED_JOIN:char*(0) SIGNATURE=char*(0) ORDER=1 DISPATCH_TYPE=INLINED
+          BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+            LITERAL CODE="one\\two\"\nthree" TYPE_FULL_NAME=char* ORDER=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=char* ORDER=3
+  METHOD NAME=comment_macro CODE=char *comment_macro(void) { return COMMENT_JOIN; } FULL_NAME=comment_macro SIGNATURE=char*(void) ORDER=1
+    METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    BLOCK CODE={ return COMMENT_JOIN; } TYPE_FULL_NAME=void ORDER=2
+      RETURN CODE=return COMMENT_JOIN; ORDER=1
+        CALL NAME=COMMENT_JOIN CODE=COMMENT_JOIN TYPE_FULL_NAME=char* METHOD_FULL_NAME=strings.c:COMMENT_JOIN:char*(0) SIGNATURE=char*(0) ORDER=1 DISPATCH_TYPE=INLINED
+          BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+            LITERAL CODE="leftright" TYPE_FULL_NAME=char* ORDER=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=char* ORDER=3
+  METHOD NAME=parenthesized_macro CODE=char *parenthesized_macro(void) { return PAREN_JOIN; } FULL_NAME=parenthesized_macro SIGNATURE=char*(void) ORDER=1
+    METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    BLOCK CODE={ return PAREN_JOIN; } TYPE_FULL_NAME=void ORDER=2
+      RETURN CODE=return PAREN_JOIN; ORDER=1
+        CALL NAME=PAREN_JOIN CODE=PAREN_JOIN TYPE_FULL_NAME=ANY METHOD_FULL_NAME=strings.c:PAREN_JOIN:ANY(0) SIGNATURE=ANY(0) ORDER=1 DISPATCH_TYPE=INLINED
+          BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+            LITERAL CODE="leftright" TYPE_FULL_NAME=char* ORDER=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=char* ORDER=3
+  METHOD NAME=call_macro CODE=void call_macro(void) { CALL_JOIN; } FULL_NAME=call_macro SIGNATURE=void(void) ORDER=1
+    METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    BLOCK CODE={ CALL_JOIN; } TYPE_FULL_NAME=void ORDER=2
+      CALL NAME=CALL_JOIN CODE=CALL_JOIN TYPE_FULL_NAME=ANY METHOD_FULL_NAME=strings.c:CALL_JOIN:ANY(0) SIGNATURE=ANY(0) ORDER=1 DISPATCH_TYPE=INLINED
+        BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+          CALL NAME=consume CODE=consume("leftright") TYPE_FULL_NAME=void METHOD_FULL_NAME=consume ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+            LITERAL CODE="leftright" TYPE_FULL_NAME=char* ORDER=1 ARGUMENT_INDEX=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+    METHOD_REF CODE=plain TYPE_FULL_NAME=plain METHOD_FULL_NAME=plain ORDER=1
+    METHOD_REF CODE=lua_literal TYPE_FULL_NAME=lua_literal METHOD_FULL_NAME=lua_literal ORDER=2
+    METHOD_REF CODE=literal_return TYPE_FULL_NAME=literal_return METHOD_FULL_NAME=literal_return ORDER=3
+    METHOD_REF CODE=commented TYPE_FULL_NAME=commented METHOD_FULL_NAME=commented ORDER=4
+    METHOD_REF CODE=argument TYPE_FULL_NAME=argument METHOD_FULL_NAME=argument ORDER=5
+    METHOD_REF CODE=parenthesized TYPE_FULL_NAME=parenthesized METHOD_FULL_NAME=parenthesized ORDER=6
+    METHOD_REF CODE=wide TYPE_FULL_NAME=wide METHOD_FULL_NAME=wide ORDER=7
+    METHOD_REF CODE=utf8 TYPE_FULL_NAME=utf8 METHOD_FULL_NAME=utf8 ORDER=8
+    METHOD_REF CODE=utf16 TYPE_FULL_NAME=utf16 METHOD_FULL_NAME=utf16 ORDER=9
+    METHOD_REF CODE=utf32 TYPE_FULL_NAME=utf32 METHOD_FULL_NAME=utf32 ORDER=10
+    METHOD_REF CODE=mixed_prefix TYPE_FULL_NAME=mixed_prefix METHOD_FULL_NAME=mixed_prefix ORDER=11
+    METHOD_REF CODE=macro_replacement TYPE_FULL_NAME=macro_replacement METHOD_FULL_NAME=macro_replacement ORDER=12
+    METHOD_REF CODE=function_replacement TYPE_FULL_NAME=function_replacement METHOD_FULL_NAME=function_replacement ORDER=13
+    METHOD_REF CODE=macro_condition TYPE_FULL_NAME=macro_condition METHOD_FULL_NAME=macro_condition ORDER=14
+    METHOD_REF CODE=multiline TYPE_FULL_NAME=multiline METHOD_FULL_NAME=multiline ORDER=15
+    METHOD_REF CODE=wide_macro TYPE_FULL_NAME=wide_macro METHOD_FULL_NAME=wide_macro ORDER=16
+    METHOD_REF CODE=mixed_macro TYPE_FULL_NAME=mixed_macro METHOD_FULL_NAME=mixed_macro ORDER=17
+    METHOD_REF CODE=escaped_macro TYPE_FULL_NAME=escaped_macro METHOD_FULL_NAME=escaped_macro ORDER=18
+    METHOD_REF CODE=comment_macro TYPE_FULL_NAME=comment_macro METHOD_FULL_NAME=comment_macro ORDER=19
+    METHOD_REF CODE=parenthesized_macro TYPE_FULL_NAME=parenthesized_macro METHOD_FULL_NAME=parenthesized_macro ORDER=20
+    METHOD_REF CODE=call_macro TYPE_FULL_NAME=call_macro METHOD_FULL_NAME=call_macro ORDER=21
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=CALL_JOIN CODE=#define CALL_JOIN consume("left" "right") FULL_NAME=strings.c:CALL_JOIN:ANY(0) SIGNATURE=ANY(0) ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=COMMENT_JOIN CODE=#define COMMENT_JOIN "left" /* separator */ "right" FULL_NAME=strings.c:COMMENT_JOIN:char*(0) SIGNATURE=char*(0) ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=char* ORDER=2
+
+METHOD NAME=ESCAPED_JOIN CODE=#define ESCAPED_JOIN "one\\" "two\"" "\nthree" FULL_NAME=strings.c:ESCAPED_JOIN:char*(0) SIGNATURE=char*(0) ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=char* ORDER=2
+
+METHOD NAME=FORMAT CODE=#define FORMAT "%lld" FULL_NAME=strings.c:FORMAT:char*(0) SIGNATURE=char*(0) ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=char* ORDER=2
+
+METHOD NAME=JOINED CODE=#define JOINED "macro" "replacement" FULL_NAME=strings.c:JOINED:char*(0) SIGNATURE=char*(0) ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=char* ORDER=2
+
+METHOD NAME=MIXED_JOIN CODE=#define MIXED_JOIN "narrow" L"joined" FULL_NAME=strings.c:MIXED_JOIN:char*(0) SIGNATURE=char*(0) ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=char* ORDER=2
+
+METHOD NAME=PAREN_JOIN CODE=#define PAREN_JOIN ("left" "right") FULL_NAME=strings.c:PAREN_JOIN:ANY(0) SIGNATURE=ANY(0) ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=WIDE_JOIN CODE=#define WIDE_JOIN L"wide" L"joined" FULL_NAME=strings.c:WIDE_JOIN:char*(0) SIGNATURE=char*(0) ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=char* ORDER=2
+
+METHOD NAME=WRAPPED CODE=#define WRAPPED() "function" "replacement" FULL_NAME=strings.c:WRAPPED:char*(0) SIGNATURE=char*(0) ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=char* ORDER=2
+
+METHOD NAME=utf16 CODE=char *utf16(int condition) { return condition ? u"utf16" u"strings" : u"safe"; } FULL_NAME=utf16 SIGNATURE=char*(int) ORDER=1
+  METHOD_PARAMETER_IN NAME=condition CODE=int condition TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=condition CODE=int condition TYPE_FULL_NAME=int ORDER=1
+  BLOCK CODE={ return condition ? u"utf16" u"strings" : u"safe"; } TYPE_FULL_NAME=void ORDER=2
+    RETURN CODE=return condition ? u"utf16" u"strings" : u"safe"; ORDER=1
+      CALL NAME=<operator>.conditional CODE=condition ? u"utf16" u"strings" : u"safe" TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.conditional ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=condition CODE=condition TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+        LITERAL CODE=u"utf16" u"strings" TYPE_FULL_NAME=char* ORDER=2 ARGUMENT_INDEX=2
+        LITERAL CODE=u"safe" TYPE_FULL_NAME=char* ORDER=3 ARGUMENT_INDEX=3
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=char* ORDER=3
+
+METHOD NAME=utf32 CODE=char *utf32(int condition) { return condition ? U"utf32" U"strings" : U"safe"; } FULL_NAME=utf32 SIGNATURE=char*(int) ORDER=1
+  METHOD_PARAMETER_IN NAME=condition CODE=int condition TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=condition CODE=int condition TYPE_FULL_NAME=int ORDER=1
+  BLOCK CODE={ return condition ? U"utf32" U"strings" : U"safe"; } TYPE_FULL_NAME=void ORDER=2
+    RETURN CODE=return condition ? U"utf32" U"strings" : U"safe"; ORDER=1
+      CALL NAME=<operator>.conditional CODE=condition ? U"utf32" U"strings" : U"safe" TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.conditional ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=condition CODE=condition TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+        LITERAL CODE=U"utf32" U"strings" TYPE_FULL_NAME=char* ORDER=2 ARGUMENT_INDEX=2
+        LITERAL CODE=U"safe" TYPE_FULL_NAME=char* ORDER=3 ARGUMENT_INDEX=3
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=char* ORDER=3
+
+METHOD NAME=utf8 CODE=char *utf8(int condition) { return condition ? u8"utf8" u8"strings" : u8"safe"; } FULL_NAME=utf8 SIGNATURE=char*(int) ORDER=1
+  METHOD_PARAMETER_IN NAME=condition CODE=int condition TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=condition CODE=int condition TYPE_FULL_NAME=int ORDER=1
+  BLOCK CODE={ return condition ? u8"utf8" u8"strings" : u8"safe"; } TYPE_FULL_NAME=void ORDER=2
+    RETURN CODE=return condition ? u8"utf8" u8"strings" : u8"safe"; ORDER=1
+      CALL NAME=<operator>.conditional CODE=condition ? u8"utf8" u8"strings" : u8"safe" TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.conditional ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=condition CODE=condition TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+        LITERAL CODE=u8"utf8" u8"strings" TYPE_FULL_NAME=char* ORDER=2 ARGUMENT_INDEX=2
+        LITERAL CODE=u8"safe" TYPE_FULL_NAME=char* ORDER=3 ARGUMENT_INDEX=3
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=char* ORDER=3
+
+METHOD NAME=wide CODE=char *wide(int condition) { return condition ? L"wide" L"strings" : L"safe"; } FULL_NAME=wide SIGNATURE=char*(int) ORDER=1
+  METHOD_PARAMETER_IN NAME=condition CODE=int condition TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=condition CODE=int condition TYPE_FULL_NAME=int ORDER=1
+  BLOCK CODE={ return condition ? L"wide" L"strings" : L"safe"; } TYPE_FULL_NAME=void ORDER=2
+    RETURN CODE=return condition ? L"wide" L"strings" : L"safe"; ORDER=1
+      CALL NAME=<operator>.conditional CODE=condition ? L"wide" L"strings" : L"safe" TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.conditional ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=condition CODE=condition TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+        LITERAL CODE=L"wide" L"strings" TYPE_FULL_NAME=char* ORDER=2 ARGUMENT_INDEX=2
+        LITERAL CODE=L"safe" TYPE_FULL_NAME=char* ORDER=3 ARGUMENT_INDEX=3
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=char* ORDER=3
+
+METHOD NAME=wide_macro CODE=char *wide_macro(void) { return WIDE_JOIN; } FULL_NAME=wide_macro SIGNATURE=char*(void) ORDER=1
+  METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  BLOCK CODE={ return WIDE_JOIN; } TYPE_FULL_NAME=void ORDER=2
+    RETURN CODE=return WIDE_JOIN; ORDER=1
+      CALL NAME=WIDE_JOIN CODE=WIDE_JOIN TYPE_FULL_NAME=char* METHOD_FULL_NAME=strings.c:WIDE_JOIN:char*(0) SIGNATURE=char*(0) ORDER=1 DISPATCH_TYPE=INLINED
+        BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+          LITERAL CODE=L"widejoined" TYPE_FULL_NAME=char* ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=char* ORDER=3
+
+NODES|META_DATA LANGUAGE=NEWC
+NODES|FILE NAME=<includes> ORDER=1
+NODES|FILE NAME=<unknown> ORDER=0
+NODES|FILE NAME=strings.c ORDER=0
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<global> FILENAME=<unknown> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<includes>:<global> FILENAME=<includes> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=strings.c:<global> FILENAME=strings.c ORDER=1
+NODES|NAMESPACE NAME=<global>
+NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=argument FULL_NAME=argument CODE=argument AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=strings.c:<global> FILENAME=strings.c ORDER=1
+NODES|TYPE_DECL NAME=call_macro FULL_NAME=call_macro CODE=call_macro AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=strings.c:<global> FILENAME=strings.c ORDER=1
+NODES|TYPE_DECL NAME=char FULL_NAME=char CODE=char IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=char* FULL_NAME=char* CODE=char* IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=comment_macro FULL_NAME=comment_macro CODE=comment_macro AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=strings.c:<global> FILENAME=strings.c ORDER=1
+NODES|TYPE_DECL NAME=commented FULL_NAME=commented CODE=commented AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=strings.c:<global> FILENAME=strings.c ORDER=1
+NODES|TYPE_DECL NAME=escaped_macro FULL_NAME=escaped_macro CODE=escaped_macro AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=strings.c:<global> FILENAME=strings.c ORDER=1
+NODES|TYPE_DECL NAME=function_replacement FULL_NAME=function_replacement CODE=function_replacement AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=strings.c:<global> FILENAME=strings.c ORDER=1
+NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=literal_return FULL_NAME=literal_return CODE=literal_return AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=strings.c:<global> FILENAME=strings.c ORDER=1
+NODES|TYPE_DECL NAME=lua_literal FULL_NAME=lua_literal CODE=lua_literal AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=strings.c:<global> FILENAME=strings.c ORDER=1
+NODES|TYPE_DECL NAME=macro_condition FULL_NAME=macro_condition CODE=macro_condition AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=strings.c:<global> FILENAME=strings.c ORDER=1
+NODES|TYPE_DECL NAME=macro_replacement FULL_NAME=macro_replacement CODE=macro_replacement AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=strings.c:<global> FILENAME=strings.c ORDER=1
+NODES|TYPE_DECL NAME=mixed_macro FULL_NAME=mixed_macro CODE=mixed_macro AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=strings.c:<global> FILENAME=strings.c ORDER=1
+NODES|TYPE_DECL NAME=mixed_prefix FULL_NAME=mixed_prefix CODE=mixed_prefix AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=strings.c:<global> FILENAME=strings.c ORDER=1
+NODES|TYPE_DECL NAME=multiline FULL_NAME=multiline CODE=multiline AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=strings.c:<global> FILENAME=strings.c ORDER=1
+NODES|TYPE_DECL NAME=parenthesized FULL_NAME=parenthesized CODE=parenthesized AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=strings.c:<global> FILENAME=strings.c ORDER=1
+NODES|TYPE_DECL NAME=parenthesized_macro FULL_NAME=parenthesized_macro CODE=parenthesized_macro AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=strings.c:<global> FILENAME=strings.c ORDER=1
+NODES|TYPE_DECL NAME=plain FULL_NAME=plain CODE=plain AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=strings.c:<global> FILENAME=strings.c ORDER=1
+NODES|TYPE_DECL NAME=<global> FULL_NAME=strings.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=strings.c:<global> FILENAME=strings.c ORDER=1
+NODES|TYPE_DECL NAME=utf16 FULL_NAME=utf16 CODE=utf16 AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=strings.c:<global> FILENAME=strings.c ORDER=1
+NODES|TYPE_DECL NAME=utf32 FULL_NAME=utf32 CODE=utf32 AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=strings.c:<global> FILENAME=strings.c ORDER=1
+NODES|TYPE_DECL NAME=utf8 FULL_NAME=utf8 CODE=utf8 AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=strings.c:<global> FILENAME=strings.c ORDER=1
+NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=wide FULL_NAME=wide CODE=wide AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=strings.c:<global> FILENAME=strings.c ORDER=1
+NODES|TYPE_DECL NAME=wide_macro FULL_NAME=wide_macro CODE=wide_macro AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=strings.c:<global> FILENAME=strings.c ORDER=1
+NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+NODES|TYPE NAME=argument FULL_NAME=argument TYPE_DECL_FULL_NAME=argument
+NODES|TYPE NAME=call_macro FULL_NAME=call_macro TYPE_DECL_FULL_NAME=call_macro
+NODES|TYPE NAME=char FULL_NAME=char TYPE_DECL_FULL_NAME=char
+NODES|TYPE NAME=char* FULL_NAME=char* TYPE_DECL_FULL_NAME=char*
+NODES|TYPE NAME=comment_macro FULL_NAME=comment_macro TYPE_DECL_FULL_NAME=comment_macro
+NODES|TYPE NAME=commented FULL_NAME=commented TYPE_DECL_FULL_NAME=commented
+NODES|TYPE NAME=escaped_macro FULL_NAME=escaped_macro TYPE_DECL_FULL_NAME=escaped_macro
+NODES|TYPE NAME=function_replacement FULL_NAME=function_replacement TYPE_DECL_FULL_NAME=function_replacement
+NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+NODES|TYPE NAME=literal_return FULL_NAME=literal_return TYPE_DECL_FULL_NAME=literal_return
+NODES|TYPE NAME=lua_literal FULL_NAME=lua_literal TYPE_DECL_FULL_NAME=lua_literal
+NODES|TYPE NAME=macro_condition FULL_NAME=macro_condition TYPE_DECL_FULL_NAME=macro_condition
+NODES|TYPE NAME=macro_replacement FULL_NAME=macro_replacement TYPE_DECL_FULL_NAME=macro_replacement
+NODES|TYPE NAME=mixed_macro FULL_NAME=mixed_macro TYPE_DECL_FULL_NAME=mixed_macro
+NODES|TYPE NAME=mixed_prefix FULL_NAME=mixed_prefix TYPE_DECL_FULL_NAME=mixed_prefix
+NODES|TYPE NAME=multiline FULL_NAME=multiline TYPE_DECL_FULL_NAME=multiline
+NODES|TYPE NAME=parenthesized FULL_NAME=parenthesized TYPE_DECL_FULL_NAME=parenthesized
+NODES|TYPE NAME=parenthesized_macro FULL_NAME=parenthesized_macro TYPE_DECL_FULL_NAME=parenthesized_macro
+NODES|TYPE NAME=plain FULL_NAME=plain TYPE_DECL_FULL_NAME=plain
+NODES|TYPE NAME=utf16 FULL_NAME=utf16 TYPE_DECL_FULL_NAME=utf16
+NODES|TYPE NAME=utf32 FULL_NAME=utf32 TYPE_DECL_FULL_NAME=utf32
+NODES|TYPE NAME=utf8 FULL_NAME=utf8 TYPE_DECL_FULL_NAME=utf8
+NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+NODES|TYPE NAME=wide FULL_NAME=wide TYPE_DECL_FULL_NAME=wide
+NODES|TYPE NAME=wide_macro FULL_NAME=wide_macro TYPE_DECL_FULL_NAME=wide_macro
+EDGES|ARGUMENT argument#4 -> argument#5
+EDGES|ARGUMENT call_macro#6 -> call_macro#7
+EDGES|ARGUMENT comment_macro#4 -> comment_macro#5
+EDGES|ARGUMENT commented#4 -> commented#5
+EDGES|ARGUMENT commented#5 -> commented#6
+EDGES|ARGUMENT commented#5 -> commented#7
+EDGES|ARGUMENT commented#5 -> commented#8
+EDGES|ARGUMENT escaped_macro#4 -> escaped_macro#5
+EDGES|ARGUMENT function_replacement#4 -> function_replacement#5
+EDGES|ARGUMENT literal_return#4 -> literal_return#5
+EDGES|ARGUMENT lua_literal#10 -> lua_literal#11
+EDGES|ARGUMENT lua_literal#10 -> lua_literal#14
+EDGES|ARGUMENT lua_literal#10 -> lua_literal#15
+EDGES|ARGUMENT lua_literal#11 -> lua_literal#12
+EDGES|ARGUMENT lua_literal#11 -> lua_literal#13
+EDGES|ARGUMENT lua_literal#18 -> lua_literal#19
+EDGES|ARGUMENT lua_literal#20 -> lua_literal#21
+EDGES|ARGUMENT lua_literal#8 -> lua_literal#10
+EDGES|ARGUMENT lua_literal#8 -> lua_literal#9
+EDGES|ARGUMENT macro_condition#4 -> macro_condition#5
+EDGES|ARGUMENT macro_condition#5 -> macro_condition#10
+EDGES|ARGUMENT macro_condition#5 -> macro_condition#6
+EDGES|ARGUMENT macro_condition#5 -> macro_condition#7
+EDGES|ARGUMENT macro_replacement#4 -> macro_replacement#5
+EDGES|ARGUMENT mixed_macro#4 -> mixed_macro#5
+EDGES|ARGUMENT mixed_prefix#4 -> mixed_prefix#5
+EDGES|ARGUMENT mixed_prefix#5 -> mixed_prefix#6
+EDGES|ARGUMENT mixed_prefix#5 -> mixed_prefix#7
+EDGES|ARGUMENT mixed_prefix#5 -> mixed_prefix#8
+EDGES|ARGUMENT multiline#4 -> multiline#5
+EDGES|ARGUMENT multiline#6 -> multiline#7
+EDGES|ARGUMENT parenthesized#4 -> parenthesized#5
+EDGES|ARGUMENT parenthesized_macro#4 -> parenthesized_macro#5
+EDGES|ARGUMENT plain#4 -> plain#5
+EDGES|ARGUMENT plain#5 -> plain#6
+EDGES|ARGUMENT plain#5 -> plain#7
+EDGES|ARGUMENT plain#5 -> plain#8
+EDGES|ARGUMENT utf16#4 -> utf16#5
+EDGES|ARGUMENT utf16#5 -> utf16#6
+EDGES|ARGUMENT utf16#5 -> utf16#7
+EDGES|ARGUMENT utf16#5 -> utf16#8
+EDGES|ARGUMENT utf32#4 -> utf32#5
+EDGES|ARGUMENT utf32#5 -> utf32#6
+EDGES|ARGUMENT utf32#5 -> utf32#7
+EDGES|ARGUMENT utf32#5 -> utf32#8
+EDGES|ARGUMENT utf8#4 -> utf8#5
+EDGES|ARGUMENT utf8#5 -> utf8#6
+EDGES|ARGUMENT utf8#5 -> utf8#7
+EDGES|ARGUMENT utf8#5 -> utf8#8
+EDGES|ARGUMENT wide#4 -> wide#5
+EDGES|ARGUMENT wide#5 -> wide#6
+EDGES|ARGUMENT wide#5 -> wide#7
+EDGES|ARGUMENT wide#5 -> wide#8
+EDGES|ARGUMENT wide_macro#4 -> wide_macro#5
+EDGES|CALL argument#4 -> consume#0
+EDGES|CALL call_macro#4 -> strings.c:CALL_JOIN:ANY(0)#0
+EDGES|CALL call_macro#6 -> consume#0
+EDGES|CALL comment_macro#5 -> strings.c:COMMENT_JOIN:char*(0)#0
+EDGES|CALL commented#5 -> <operator>.conditional#0
+EDGES|CALL escaped_macro#5 -> strings.c:ESCAPED_JOIN:char*(0)#0
+EDGES|CALL function_replacement#5 -> strings.c:WRAPPED:char*(0)#0
+EDGES|CALL lua_literal#10 -> <operator>.conditional#0
+EDGES|CALL lua_literal#11 -> <operator>.equals#0
+EDGES|CALL lua_literal#15 -> strings.c:FORMAT:char*(0)#0
+EDGES|CALL lua_literal#18 -> consume#0
+EDGES|CALL lua_literal#8 -> <operator>.assignment#0
+EDGES|CALL macro_condition#10 -> strings.c:WRAPPED:char*(0)#0
+EDGES|CALL macro_condition#5 -> <operator>.conditional#0
+EDGES|CALL macro_condition#7 -> strings.c:JOINED:char*(0)#0
+EDGES|CALL macro_replacement#5 -> strings.c:JOINED:char*(0)#0
+EDGES|CALL mixed_macro#5 -> strings.c:MIXED_JOIN:char*(0)#0
+EDGES|CALL mixed_prefix#5 -> <operator>.conditional#0
+EDGES|CALL multiline#4 -> consume#0
+EDGES|CALL multiline#6 -> consume#0
+EDGES|CALL parenthesized#4 -> consume#0
+EDGES|CALL parenthesized_macro#5 -> strings.c:PAREN_JOIN:ANY(0)#0
+EDGES|CALL plain#5 -> <operator>.conditional#0
+EDGES|CALL utf16#5 -> <operator>.conditional#0
+EDGES|CALL utf32#5 -> <operator>.conditional#0
+EDGES|CALL utf8#5 -> <operator>.conditional#0
+EDGES|CALL wide#5 -> <operator>.conditional#0
+EDGES|CALL wide_macro#5 -> strings.c:WIDE_JOIN:char*(0)#0
+EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+EDGES|CFG <operator>.assignment#0 -> <operator>.assignment#5
+EDGES|CFG <operator>.conditional#0 -> <operator>.conditional#5
+EDGES|CFG <operator>.equals#0 -> <operator>.equals#5
+EDGES|CFG argument#0 -> argument#5
+EDGES|CFG argument#4 -> argument#6
+EDGES|CFG argument#5 -> argument#4
+EDGES|CFG call_macro#0 -> call_macro#4
+EDGES|CFG call_macro#4 -> call_macro#7
+EDGES|CFG call_macro#4 -> call_macro#8
+EDGES|CFG call_macro#6 -> call_macro#8
+EDGES|CFG call_macro#7 -> call_macro#6
+EDGES|CFG comment_macro#0 -> comment_macro#5
+EDGES|CFG comment_macro#4 -> comment_macro#8
+EDGES|CFG comment_macro#5 -> comment_macro#4
+EDGES|CFG comment_macro#5 -> comment_macro#7
+EDGES|CFG comment_macro#7 -> comment_macro#4
+EDGES|CFG commented#0 -> commented#6
+EDGES|CFG commented#4 -> commented#9
+EDGES|CFG commented#5 -> commented#4
+EDGES|CFG commented#6 -> commented#7
+EDGES|CFG commented#6 -> commented#8
+EDGES|CFG commented#7 -> commented#5
+EDGES|CFG commented#8 -> commented#5
+EDGES|CFG consume#0 -> consume#4
+EDGES|CFG escaped_macro#0 -> escaped_macro#5
+EDGES|CFG escaped_macro#4 -> escaped_macro#8
+EDGES|CFG escaped_macro#5 -> escaped_macro#4
+EDGES|CFG escaped_macro#5 -> escaped_macro#7
+EDGES|CFG escaped_macro#7 -> escaped_macro#4
+EDGES|CFG function_replacement#0 -> function_replacement#5
+EDGES|CFG function_replacement#4 -> function_replacement#8
+EDGES|CFG function_replacement#5 -> function_replacement#4
+EDGES|CFG function_replacement#5 -> function_replacement#7
+EDGES|CFG function_replacement#7 -> function_replacement#4
+EDGES|CFG literal_return#0 -> literal_return#5
+EDGES|CFG literal_return#4 -> literal_return#6
+EDGES|CFG literal_return#5 -> literal_return#4
+EDGES|CFG lua_literal#0 -> lua_literal#9
+EDGES|CFG lua_literal#10 -> lua_literal#8
+EDGES|CFG lua_literal#11 -> lua_literal#14
+EDGES|CFG lua_literal#11 -> lua_literal#15
+EDGES|CFG lua_literal#12 -> lua_literal#13
+EDGES|CFG lua_literal#13 -> lua_literal#11
+EDGES|CFG lua_literal#14 -> lua_literal#10
+EDGES|CFG lua_literal#15 -> lua_literal#10
+EDGES|CFG lua_literal#15 -> lua_literal#17
+EDGES|CFG lua_literal#17 -> lua_literal#10
+EDGES|CFG lua_literal#18 -> lua_literal#21
+EDGES|CFG lua_literal#19 -> lua_literal#18
+EDGES|CFG lua_literal#20 -> lua_literal#22
+EDGES|CFG lua_literal#21 -> lua_literal#20
+EDGES|CFG lua_literal#6 -> lua_literal#22
+EDGES|CFG lua_literal#8 -> lua_literal#19
+EDGES|CFG lua_literal#9 -> lua_literal#12
+EDGES|CFG macro_condition#0 -> macro_condition#6
+EDGES|CFG macro_condition#10 -> macro_condition#12
+EDGES|CFG macro_condition#10 -> macro_condition#5
+EDGES|CFG macro_condition#12 -> macro_condition#5
+EDGES|CFG macro_condition#4 -> macro_condition#13
+EDGES|CFG macro_condition#5 -> macro_condition#4
+EDGES|CFG macro_condition#6 -> macro_condition#10
+EDGES|CFG macro_condition#6 -> macro_condition#7
+EDGES|CFG macro_condition#7 -> macro_condition#5
+EDGES|CFG macro_condition#7 -> macro_condition#9
+EDGES|CFG macro_condition#9 -> macro_condition#5
+EDGES|CFG macro_replacement#0 -> macro_replacement#5
+EDGES|CFG macro_replacement#4 -> macro_replacement#8
+EDGES|CFG macro_replacement#5 -> macro_replacement#4
+EDGES|CFG macro_replacement#5 -> macro_replacement#7
+EDGES|CFG macro_replacement#7 -> macro_replacement#4
+EDGES|CFG mixed_macro#0 -> mixed_macro#5
+EDGES|CFG mixed_macro#4 -> mixed_macro#8
+EDGES|CFG mixed_macro#5 -> mixed_macro#4
+EDGES|CFG mixed_macro#5 -> mixed_macro#7
+EDGES|CFG mixed_macro#7 -> mixed_macro#4
+EDGES|CFG mixed_prefix#0 -> mixed_prefix#6
+EDGES|CFG mixed_prefix#4 -> mixed_prefix#9
+EDGES|CFG mixed_prefix#5 -> mixed_prefix#4
+EDGES|CFG mixed_prefix#6 -> mixed_prefix#7
+EDGES|CFG mixed_prefix#6 -> mixed_prefix#8
+EDGES|CFG mixed_prefix#7 -> mixed_prefix#5
+EDGES|CFG mixed_prefix#8 -> mixed_prefix#5
+EDGES|CFG multiline#0 -> multiline#5
+EDGES|CFG multiline#4 -> multiline#7
+EDGES|CFG multiline#5 -> multiline#4
+EDGES|CFG multiline#6 -> multiline#8
+EDGES|CFG multiline#7 -> multiline#6
+EDGES|CFG parenthesized#0 -> parenthesized#5
+EDGES|CFG parenthesized#4 -> parenthesized#6
+EDGES|CFG parenthesized#5 -> parenthesized#4
+EDGES|CFG parenthesized_macro#0 -> parenthesized_macro#5
+EDGES|CFG parenthesized_macro#4 -> parenthesized_macro#8
+EDGES|CFG parenthesized_macro#5 -> parenthesized_macro#4
+EDGES|CFG parenthesized_macro#5 -> parenthesized_macro#7
+EDGES|CFG parenthesized_macro#7 -> parenthesized_macro#4
+EDGES|CFG plain#0 -> plain#6
+EDGES|CFG plain#4 -> plain#9
+EDGES|CFG plain#5 -> plain#4
+EDGES|CFG plain#6 -> plain#7
+EDGES|CFG plain#6 -> plain#8
+EDGES|CFG plain#7 -> plain#5
+EDGES|CFG plain#8 -> plain#5
+EDGES|CFG strings.c:<global>#0 -> strings.c:<global>#211
+EDGES|CFG strings.c:<global>#156 -> wide_macro#5
+EDGES|CFG strings.c:<global>#211 -> strings.c:<global>#212
+EDGES|CFG strings.c:<global>#212 -> strings.c:<global>#213
+EDGES|CFG strings.c:<global>#213 -> strings.c:<global>#214
+EDGES|CFG strings.c:<global>#214 -> strings.c:<global>#215
+EDGES|CFG strings.c:<global>#215 -> strings.c:<global>#216
+EDGES|CFG strings.c:<global>#216 -> strings.c:<global>#217
+EDGES|CFG strings.c:<global>#217 -> strings.c:<global>#218
+EDGES|CFG strings.c:<global>#218 -> strings.c:<global>#219
+EDGES|CFG strings.c:<global>#219 -> strings.c:<global>#220
+EDGES|CFG strings.c:<global>#220 -> strings.c:<global>#221
+EDGES|CFG strings.c:<global>#221 -> strings.c:<global>#222
+EDGES|CFG strings.c:<global>#222 -> strings.c:<global>#223
+EDGES|CFG strings.c:<global>#223 -> strings.c:<global>#224
+EDGES|CFG strings.c:<global>#224 -> strings.c:<global>#225
+EDGES|CFG strings.c:<global>#225 -> strings.c:<global>#226
+EDGES|CFG strings.c:<global>#226 -> strings.c:<global>#227
+EDGES|CFG strings.c:<global>#227 -> strings.c:<global>#228
+EDGES|CFG strings.c:<global>#228 -> strings.c:<global>#229
+EDGES|CFG strings.c:<global>#229 -> strings.c:<global>#230
+EDGES|CFG strings.c:<global>#230 -> strings.c:<global>#231
+EDGES|CFG strings.c:<global>#231 -> strings.c:<global>#232
+EDGES|CFG strings.c:<global>#65 -> wide#6
+EDGES|CFG strings.c:<global>#75 -> utf8#6
+EDGES|CFG strings.c:<global>#85 -> utf16#6
+EDGES|CFG strings.c:<global>#95 -> utf32#6
+EDGES|CFG strings.c:CALL_JOIN:ANY(0)#0 -> strings.c:CALL_JOIN:ANY(0)#2
+EDGES|CFG strings.c:COMMENT_JOIN:char*(0)#0 -> strings.c:COMMENT_JOIN:char*(0)#2
+EDGES|CFG strings.c:ESCAPED_JOIN:char*(0)#0 -> strings.c:ESCAPED_JOIN:char*(0)#2
+EDGES|CFG strings.c:FORMAT:char*(0)#0 -> strings.c:FORMAT:char*(0)#2
+EDGES|CFG strings.c:JOINED:char*(0)#0 -> strings.c:JOINED:char*(0)#2
+EDGES|CFG strings.c:MIXED_JOIN:char*(0)#0 -> strings.c:MIXED_JOIN:char*(0)#2
+EDGES|CFG strings.c:PAREN_JOIN:ANY(0)#0 -> strings.c:PAREN_JOIN:ANY(0)#2
+EDGES|CFG strings.c:WIDE_JOIN:char*(0)#0 -> strings.c:WIDE_JOIN:char*(0)#2
+EDGES|CFG strings.c:WRAPPED:char*(0)#0 -> strings.c:WRAPPED:char*(0)#2
+EDGES|CFG utf16#4 -> utf16#9
+EDGES|CFG utf16#5 -> utf16#4
+EDGES|CFG utf16#6 -> utf16#7
+EDGES|CFG utf16#6 -> utf16#8
+EDGES|CFG utf16#7 -> utf16#5
+EDGES|CFG utf16#8 -> utf16#5
+EDGES|CFG utf32#4 -> utf32#9
+EDGES|CFG utf32#5 -> utf32#4
+EDGES|CFG utf32#6 -> utf32#7
+EDGES|CFG utf32#6 -> utf32#8
+EDGES|CFG utf32#7 -> utf32#5
+EDGES|CFG utf32#8 -> utf32#5
+EDGES|CFG utf8#4 -> utf8#9
+EDGES|CFG utf8#5 -> utf8#4
+EDGES|CFG utf8#6 -> utf8#7
+EDGES|CFG utf8#6 -> utf8#8
+EDGES|CFG utf8#7 -> utf8#5
+EDGES|CFG utf8#8 -> utf8#5
+EDGES|CFG wide#4 -> wide#9
+EDGES|CFG wide#5 -> wide#4
+EDGES|CFG wide#6 -> wide#7
+EDGES|CFG wide#6 -> wide#8
+EDGES|CFG wide#7 -> wide#5
+EDGES|CFG wide#8 -> wide#5
+EDGES|CFG wide_macro#4 -> wide_macro#8
+EDGES|CFG wide_macro#5 -> wide_macro#4
+EDGES|CFG wide_macro#5 -> wide_macro#7
+EDGES|CFG wide_macro#7 -> wide_macro#4
+EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+EDGES|CONTAINS <operator>.assignment#0 -> <operator>.assignment#2
+EDGES|CONTAINS <operator>.conditional#0 -> <operator>.conditional#2
+EDGES|CONTAINS <operator>.equals#0 -> <operator>.equals#2
+EDGES|CONTAINS D:strings.c:<global> -> D:argument
+EDGES|CONTAINS D:strings.c:<global> -> D:call_macro
+EDGES|CONTAINS D:strings.c:<global> -> D:comment_macro
+EDGES|CONTAINS D:strings.c:<global> -> D:commented
+EDGES|CONTAINS D:strings.c:<global> -> D:escaped_macro
+EDGES|CONTAINS D:strings.c:<global> -> D:function_replacement
+EDGES|CONTAINS D:strings.c:<global> -> D:literal_return
+EDGES|CONTAINS D:strings.c:<global> -> D:lua_literal
+EDGES|CONTAINS D:strings.c:<global> -> D:macro_condition
+EDGES|CONTAINS D:strings.c:<global> -> D:macro_replacement
+EDGES|CONTAINS D:strings.c:<global> -> D:mixed_macro
+EDGES|CONTAINS D:strings.c:<global> -> D:mixed_prefix
+EDGES|CONTAINS D:strings.c:<global> -> D:multiline
+EDGES|CONTAINS D:strings.c:<global> -> D:parenthesized
+EDGES|CONTAINS D:strings.c:<global> -> D:parenthesized_macro
+EDGES|CONTAINS D:strings.c:<global> -> D:plain
+EDGES|CONTAINS D:strings.c:<global> -> D:utf16
+EDGES|CONTAINS D:strings.c:<global> -> D:utf32
+EDGES|CONTAINS D:strings.c:<global> -> D:utf8
+EDGES|CONTAINS D:strings.c:<global> -> D:wide
+EDGES|CONTAINS D:strings.c:<global> -> D:wide_macro
+EDGES|CONTAINS D:strings.c:<global> -> consume#0
+EDGES|CONTAINS D:strings.c:<global> -> strings.c:<global>#0
+EDGES|CONTAINS D:strings.c:<global> -> strings.c:CALL_JOIN:ANY(0)#0
+EDGES|CONTAINS D:strings.c:<global> -> strings.c:COMMENT_JOIN:char*(0)#0
+EDGES|CONTAINS D:strings.c:<global> -> strings.c:ESCAPED_JOIN:char*(0)#0
+EDGES|CONTAINS D:strings.c:<global> -> strings.c:FORMAT:char*(0)#0
+EDGES|CONTAINS D:strings.c:<global> -> strings.c:JOINED:char*(0)#0
+EDGES|CONTAINS D:strings.c:<global> -> strings.c:MIXED_JOIN:char*(0)#0
+EDGES|CONTAINS D:strings.c:<global> -> strings.c:PAREN_JOIN:ANY(0)#0
+EDGES|CONTAINS D:strings.c:<global> -> strings.c:WIDE_JOIN:char*(0)#0
+EDGES|CONTAINS D:strings.c:<global> -> strings.c:WRAPPED:char*(0)#0
+EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+EDGES|CONTAINS F:<includes> -> D:ANY
+EDGES|CONTAINS F:<includes> -> D:char
+EDGES|CONTAINS F:<includes> -> D:char*
+EDGES|CONTAINS F:<includes> -> D:int
+EDGES|CONTAINS F:<includes> -> D:void
+EDGES|CONTAINS F:strings.c -> D:strings.c:<global>
+EDGES|CONTAINS argument#0 -> argument#3
+EDGES|CONTAINS argument#0 -> argument#4
+EDGES|CONTAINS argument#0 -> argument#5
+EDGES|CONTAINS call_macro#0 -> call_macro#3
+EDGES|CONTAINS call_macro#0 -> call_macro#4
+EDGES|CONTAINS call_macro#0 -> call_macro#5
+EDGES|CONTAINS call_macro#0 -> call_macro#6
+EDGES|CONTAINS call_macro#0 -> call_macro#7
+EDGES|CONTAINS comment_macro#0 -> comment_macro#3
+EDGES|CONTAINS comment_macro#0 -> comment_macro#4
+EDGES|CONTAINS comment_macro#0 -> comment_macro#5
+EDGES|CONTAINS comment_macro#0 -> comment_macro#6
+EDGES|CONTAINS comment_macro#0 -> comment_macro#7
+EDGES|CONTAINS commented#0 -> commented#3
+EDGES|CONTAINS commented#0 -> commented#4
+EDGES|CONTAINS commented#0 -> commented#5
+EDGES|CONTAINS commented#0 -> commented#6
+EDGES|CONTAINS commented#0 -> commented#7
+EDGES|CONTAINS commented#0 -> commented#8
+EDGES|CONTAINS consume#0 -> consume#3
+EDGES|CONTAINS escaped_macro#0 -> escaped_macro#3
+EDGES|CONTAINS escaped_macro#0 -> escaped_macro#4
+EDGES|CONTAINS escaped_macro#0 -> escaped_macro#5
+EDGES|CONTAINS escaped_macro#0 -> escaped_macro#6
+EDGES|CONTAINS escaped_macro#0 -> escaped_macro#7
+EDGES|CONTAINS function_replacement#0 -> function_replacement#3
+EDGES|CONTAINS function_replacement#0 -> function_replacement#4
+EDGES|CONTAINS function_replacement#0 -> function_replacement#5
+EDGES|CONTAINS function_replacement#0 -> function_replacement#6
+EDGES|CONTAINS function_replacement#0 -> function_replacement#7
+EDGES|CONTAINS literal_return#0 -> literal_return#3
+EDGES|CONTAINS literal_return#0 -> literal_return#4
+EDGES|CONTAINS literal_return#0 -> literal_return#5
+EDGES|CONTAINS lua_literal#0 -> lua_literal#10
+EDGES|CONTAINS lua_literal#0 -> lua_literal#11
+EDGES|CONTAINS lua_literal#0 -> lua_literal#12
+EDGES|CONTAINS lua_literal#0 -> lua_literal#13
+EDGES|CONTAINS lua_literal#0 -> lua_literal#14
+EDGES|CONTAINS lua_literal#0 -> lua_literal#15
+EDGES|CONTAINS lua_literal#0 -> lua_literal#16
+EDGES|CONTAINS lua_literal#0 -> lua_literal#17
+EDGES|CONTAINS lua_literal#0 -> lua_literal#18
+EDGES|CONTAINS lua_literal#0 -> lua_literal#19
+EDGES|CONTAINS lua_literal#0 -> lua_literal#20
+EDGES|CONTAINS lua_literal#0 -> lua_literal#21
+EDGES|CONTAINS lua_literal#0 -> lua_literal#5
+EDGES|CONTAINS lua_literal#0 -> lua_literal#6
+EDGES|CONTAINS lua_literal#0 -> lua_literal#8
+EDGES|CONTAINS lua_literal#0 -> lua_literal#9
+EDGES|CONTAINS macro_condition#0 -> macro_condition#10
+EDGES|CONTAINS macro_condition#0 -> macro_condition#11
+EDGES|CONTAINS macro_condition#0 -> macro_condition#12
+EDGES|CONTAINS macro_condition#0 -> macro_condition#3
+EDGES|CONTAINS macro_condition#0 -> macro_condition#4
+EDGES|CONTAINS macro_condition#0 -> macro_condition#5
+EDGES|CONTAINS macro_condition#0 -> macro_condition#6
+EDGES|CONTAINS macro_condition#0 -> macro_condition#7
+EDGES|CONTAINS macro_condition#0 -> macro_condition#8
+EDGES|CONTAINS macro_condition#0 -> macro_condition#9
+EDGES|CONTAINS macro_replacement#0 -> macro_replacement#3
+EDGES|CONTAINS macro_replacement#0 -> macro_replacement#4
+EDGES|CONTAINS macro_replacement#0 -> macro_replacement#5
+EDGES|CONTAINS macro_replacement#0 -> macro_replacement#6
+EDGES|CONTAINS macro_replacement#0 -> macro_replacement#7
+EDGES|CONTAINS mixed_macro#0 -> mixed_macro#3
+EDGES|CONTAINS mixed_macro#0 -> mixed_macro#4
+EDGES|CONTAINS mixed_macro#0 -> mixed_macro#5
+EDGES|CONTAINS mixed_macro#0 -> mixed_macro#6
+EDGES|CONTAINS mixed_macro#0 -> mixed_macro#7
+EDGES|CONTAINS mixed_prefix#0 -> mixed_prefix#3
+EDGES|CONTAINS mixed_prefix#0 -> mixed_prefix#4
+EDGES|CONTAINS mixed_prefix#0 -> mixed_prefix#5
+EDGES|CONTAINS mixed_prefix#0 -> mixed_prefix#6
+EDGES|CONTAINS mixed_prefix#0 -> mixed_prefix#7
+EDGES|CONTAINS mixed_prefix#0 -> mixed_prefix#8
+EDGES|CONTAINS multiline#0 -> multiline#3
+EDGES|CONTAINS multiline#0 -> multiline#4
+EDGES|CONTAINS multiline#0 -> multiline#5
+EDGES|CONTAINS multiline#0 -> multiline#6
+EDGES|CONTAINS multiline#0 -> multiline#7
+EDGES|CONTAINS parenthesized#0 -> parenthesized#3
+EDGES|CONTAINS parenthesized#0 -> parenthesized#4
+EDGES|CONTAINS parenthesized#0 -> parenthesized#5
+EDGES|CONTAINS parenthesized_macro#0 -> parenthesized_macro#3
+EDGES|CONTAINS parenthesized_macro#0 -> parenthesized_macro#4
+EDGES|CONTAINS parenthesized_macro#0 -> parenthesized_macro#5
+EDGES|CONTAINS parenthesized_macro#0 -> parenthesized_macro#6
+EDGES|CONTAINS parenthesized_macro#0 -> parenthesized_macro#7
+EDGES|CONTAINS plain#0 -> plain#3
+EDGES|CONTAINS plain#0 -> plain#4
+EDGES|CONTAINS plain#0 -> plain#5
+EDGES|CONTAINS plain#0 -> plain#6
+EDGES|CONTAINS plain#0 -> plain#7
+EDGES|CONTAINS plain#0 -> plain#8
+EDGES|CONTAINS strings.c:<global>#0 -> argument#0
+EDGES|CONTAINS strings.c:<global>#0 -> call_macro#0
+EDGES|CONTAINS strings.c:<global>#0 -> comment_macro#0
+EDGES|CONTAINS strings.c:<global>#0 -> commented#0
+EDGES|CONTAINS strings.c:<global>#0 -> escaped_macro#0
+EDGES|CONTAINS strings.c:<global>#0 -> function_replacement#0
+EDGES|CONTAINS strings.c:<global>#0 -> literal_return#0
+EDGES|CONTAINS strings.c:<global>#0 -> lua_literal#0
+EDGES|CONTAINS strings.c:<global>#0 -> macro_condition#0
+EDGES|CONTAINS strings.c:<global>#0 -> macro_replacement#0
+EDGES|CONTAINS strings.c:<global>#0 -> mixed_macro#0
+EDGES|CONTAINS strings.c:<global>#0 -> mixed_prefix#0
+EDGES|CONTAINS strings.c:<global>#0 -> multiline#0
+EDGES|CONTAINS strings.c:<global>#0 -> parenthesized#0
+EDGES|CONTAINS strings.c:<global>#0 -> parenthesized_macro#0
+EDGES|CONTAINS strings.c:<global>#0 -> plain#0
+EDGES|CONTAINS strings.c:<global>#0 -> strings.c:<global>#156
+EDGES|CONTAINS strings.c:<global>#0 -> strings.c:<global>#210
+EDGES|CONTAINS strings.c:<global>#0 -> strings.c:<global>#211
+EDGES|CONTAINS strings.c:<global>#0 -> strings.c:<global>#212
+EDGES|CONTAINS strings.c:<global>#0 -> strings.c:<global>#213
+EDGES|CONTAINS strings.c:<global>#0 -> strings.c:<global>#214
+EDGES|CONTAINS strings.c:<global>#0 -> strings.c:<global>#215
+EDGES|CONTAINS strings.c:<global>#0 -> strings.c:<global>#216
+EDGES|CONTAINS strings.c:<global>#0 -> strings.c:<global>#217
+EDGES|CONTAINS strings.c:<global>#0 -> strings.c:<global>#218
+EDGES|CONTAINS strings.c:<global>#0 -> strings.c:<global>#219
+EDGES|CONTAINS strings.c:<global>#0 -> strings.c:<global>#220
+EDGES|CONTAINS strings.c:<global>#0 -> strings.c:<global>#221
+EDGES|CONTAINS strings.c:<global>#0 -> strings.c:<global>#222
+EDGES|CONTAINS strings.c:<global>#0 -> strings.c:<global>#223
+EDGES|CONTAINS strings.c:<global>#0 -> strings.c:<global>#224
+EDGES|CONTAINS strings.c:<global>#0 -> strings.c:<global>#225
+EDGES|CONTAINS strings.c:<global>#0 -> strings.c:<global>#226
+EDGES|CONTAINS strings.c:<global>#0 -> strings.c:<global>#227
+EDGES|CONTAINS strings.c:<global>#0 -> strings.c:<global>#228
+EDGES|CONTAINS strings.c:<global>#0 -> strings.c:<global>#229
+EDGES|CONTAINS strings.c:<global>#0 -> strings.c:<global>#230
+EDGES|CONTAINS strings.c:<global>#0 -> strings.c:<global>#231
+EDGES|CONTAINS strings.c:<global>#0 -> strings.c:<global>#65
+EDGES|CONTAINS strings.c:<global>#0 -> strings.c:<global>#75
+EDGES|CONTAINS strings.c:<global>#0 -> strings.c:<global>#85
+EDGES|CONTAINS strings.c:<global>#0 -> strings.c:<global>#95
+EDGES|CONTAINS strings.c:<global>#156 -> wide_macro#3
+EDGES|CONTAINS strings.c:<global>#156 -> wide_macro#4
+EDGES|CONTAINS strings.c:<global>#156 -> wide_macro#5
+EDGES|CONTAINS strings.c:<global>#156 -> wide_macro#6
+EDGES|CONTAINS strings.c:<global>#156 -> wide_macro#7
+EDGES|CONTAINS strings.c:<global>#65 -> wide#3
+EDGES|CONTAINS strings.c:<global>#65 -> wide#4
+EDGES|CONTAINS strings.c:<global>#65 -> wide#5
+EDGES|CONTAINS strings.c:<global>#65 -> wide#6
+EDGES|CONTAINS strings.c:<global>#65 -> wide#7
+EDGES|CONTAINS strings.c:<global>#65 -> wide#8
+EDGES|CONTAINS strings.c:<global>#75 -> utf8#3
+EDGES|CONTAINS strings.c:<global>#75 -> utf8#4
+EDGES|CONTAINS strings.c:<global>#75 -> utf8#5
+EDGES|CONTAINS strings.c:<global>#75 -> utf8#6
+EDGES|CONTAINS strings.c:<global>#75 -> utf8#7
+EDGES|CONTAINS strings.c:<global>#75 -> utf8#8
+EDGES|CONTAINS strings.c:<global>#85 -> utf16#3
+EDGES|CONTAINS strings.c:<global>#85 -> utf16#4
+EDGES|CONTAINS strings.c:<global>#85 -> utf16#5
+EDGES|CONTAINS strings.c:<global>#85 -> utf16#6
+EDGES|CONTAINS strings.c:<global>#85 -> utf16#7
+EDGES|CONTAINS strings.c:<global>#85 -> utf16#8
+EDGES|CONTAINS strings.c:<global>#95 -> utf32#3
+EDGES|CONTAINS strings.c:<global>#95 -> utf32#4
+EDGES|CONTAINS strings.c:<global>#95 -> utf32#5
+EDGES|CONTAINS strings.c:<global>#95 -> utf32#6
+EDGES|CONTAINS strings.c:<global>#95 -> utf32#7
+EDGES|CONTAINS strings.c:<global>#95 -> utf32#8
+EDGES|CONTAINS strings.c:CALL_JOIN:ANY(0)#0 -> strings.c:CALL_JOIN:ANY(0)#1
+EDGES|CONTAINS strings.c:COMMENT_JOIN:char*(0)#0 -> strings.c:COMMENT_JOIN:char*(0)#1
+EDGES|CONTAINS strings.c:ESCAPED_JOIN:char*(0)#0 -> strings.c:ESCAPED_JOIN:char*(0)#1
+EDGES|CONTAINS strings.c:FORMAT:char*(0)#0 -> strings.c:FORMAT:char*(0)#1
+EDGES|CONTAINS strings.c:JOINED:char*(0)#0 -> strings.c:JOINED:char*(0)#1
+EDGES|CONTAINS strings.c:MIXED_JOIN:char*(0)#0 -> strings.c:MIXED_JOIN:char*(0)#1
+EDGES|CONTAINS strings.c:PAREN_JOIN:ANY(0)#0 -> strings.c:PAREN_JOIN:ANY(0)#1
+EDGES|CONTAINS strings.c:WIDE_JOIN:char*(0)#0 -> strings.c:WIDE_JOIN:char*(0)#1
+EDGES|CONTAINS strings.c:WRAPPED:char*(0)#0 -> strings.c:WRAPPED:char*(0)#1
+EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#6 -> T:ANY
+EDGES|EVAL_TYPE <operator>.conditional#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.conditional#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.conditional#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.conditional#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.conditional#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.conditional#6 -> T:ANY
+EDGES|EVAL_TYPE <operator>.conditional#7 -> T:ANY
+EDGES|EVAL_TYPE <operator>.conditional#8 -> T:ANY
+EDGES|EVAL_TYPE <operator>.equals#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.equals#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.equals#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.equals#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.equals#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.equals#6 -> T:ANY
+EDGES|EVAL_TYPE argument#1 -> T:void
+EDGES|EVAL_TYPE argument#2 -> T:void
+EDGES|EVAL_TYPE argument#3 -> T:void
+EDGES|EVAL_TYPE argument#4 -> T:void
+EDGES|EVAL_TYPE argument#5 -> T:char*
+EDGES|EVAL_TYPE argument#6 -> T:void
+EDGES|EVAL_TYPE call_macro#1 -> T:void
+EDGES|EVAL_TYPE call_macro#2 -> T:void
+EDGES|EVAL_TYPE call_macro#3 -> T:void
+EDGES|EVAL_TYPE call_macro#4 -> T:ANY
+EDGES|EVAL_TYPE call_macro#5 -> T:ANY
+EDGES|EVAL_TYPE call_macro#6 -> T:void
+EDGES|EVAL_TYPE call_macro#7 -> T:char*
+EDGES|EVAL_TYPE call_macro#8 -> T:void
+EDGES|EVAL_TYPE comment_macro#1 -> T:void
+EDGES|EVAL_TYPE comment_macro#2 -> T:void
+EDGES|EVAL_TYPE comment_macro#3 -> T:void
+EDGES|EVAL_TYPE comment_macro#5 -> T:char*
+EDGES|EVAL_TYPE comment_macro#6 -> T:ANY
+EDGES|EVAL_TYPE comment_macro#7 -> T:char*
+EDGES|EVAL_TYPE comment_macro#8 -> T:char*
+EDGES|EVAL_TYPE commented#1 -> T:int
+EDGES|EVAL_TYPE commented#2 -> T:int
+EDGES|EVAL_TYPE commented#3 -> T:void
+EDGES|EVAL_TYPE commented#5 -> T:ANY
+EDGES|EVAL_TYPE commented#6 -> T:int
+EDGES|EVAL_TYPE commented#7 -> T:char*
+EDGES|EVAL_TYPE commented#8 -> T:char*
+EDGES|EVAL_TYPE commented#9 -> T:char*
+EDGES|EVAL_TYPE consume#1 -> T:char*
+EDGES|EVAL_TYPE consume#2 -> T:char*
+EDGES|EVAL_TYPE consume#3 -> T:ANY
+EDGES|EVAL_TYPE consume#4 -> T:void
+EDGES|EVAL_TYPE escaped_macro#1 -> T:void
+EDGES|EVAL_TYPE escaped_macro#2 -> T:void
+EDGES|EVAL_TYPE escaped_macro#3 -> T:void
+EDGES|EVAL_TYPE escaped_macro#5 -> T:char*
+EDGES|EVAL_TYPE escaped_macro#6 -> T:ANY
+EDGES|EVAL_TYPE escaped_macro#7 -> T:char*
+EDGES|EVAL_TYPE escaped_macro#8 -> T:char*
+EDGES|EVAL_TYPE function_replacement#1 -> T:void
+EDGES|EVAL_TYPE function_replacement#2 -> T:void
+EDGES|EVAL_TYPE function_replacement#3 -> T:void
+EDGES|EVAL_TYPE function_replacement#5 -> T:char*
+EDGES|EVAL_TYPE function_replacement#6 -> T:ANY
+EDGES|EVAL_TYPE function_replacement#7 -> T:char*
+EDGES|EVAL_TYPE function_replacement#8 -> T:char*
+EDGES|EVAL_TYPE literal_return#1 -> T:void
+EDGES|EVAL_TYPE literal_return#2 -> T:void
+EDGES|EVAL_TYPE literal_return#3 -> T:void
+EDGES|EVAL_TYPE literal_return#5 -> T:char*
+EDGES|EVAL_TYPE literal_return#6 -> T:char*
+EDGES|EVAL_TYPE lua_literal#1 -> T:int
+EDGES|EVAL_TYPE lua_literal#10 -> T:ANY
+EDGES|EVAL_TYPE lua_literal#11 -> T:ANY
+EDGES|EVAL_TYPE lua_literal#12 -> T:int
+EDGES|EVAL_TYPE lua_literal#13 -> T:int
+EDGES|EVAL_TYPE lua_literal#14 -> T:char*
+EDGES|EVAL_TYPE lua_literal#15 -> T:char*
+EDGES|EVAL_TYPE lua_literal#16 -> T:ANY
+EDGES|EVAL_TYPE lua_literal#17 -> T:char*
+EDGES|EVAL_TYPE lua_literal#18 -> T:void
+EDGES|EVAL_TYPE lua_literal#19 -> T:char*
+EDGES|EVAL_TYPE lua_literal#2 -> T:int
+EDGES|EVAL_TYPE lua_literal#21 -> T:char*
+EDGES|EVAL_TYPE lua_literal#22 -> T:char*
+EDGES|EVAL_TYPE lua_literal#3 -> T:int
+EDGES|EVAL_TYPE lua_literal#4 -> T:int
+EDGES|EVAL_TYPE lua_literal#5 -> T:void
+EDGES|EVAL_TYPE lua_literal#6 -> T:void
+EDGES|EVAL_TYPE lua_literal#7 -> T:char*
+EDGES|EVAL_TYPE lua_literal#8 -> T:void
+EDGES|EVAL_TYPE lua_literal#9 -> T:char*
+EDGES|EVAL_TYPE macro_condition#1 -> T:int
+EDGES|EVAL_TYPE macro_condition#10 -> T:char*
+EDGES|EVAL_TYPE macro_condition#11 -> T:ANY
+EDGES|EVAL_TYPE macro_condition#12 -> T:char*
+EDGES|EVAL_TYPE macro_condition#13 -> T:char*
+EDGES|EVAL_TYPE macro_condition#2 -> T:int
+EDGES|EVAL_TYPE macro_condition#3 -> T:void
+EDGES|EVAL_TYPE macro_condition#5 -> T:ANY
+EDGES|EVAL_TYPE macro_condition#6 -> T:int
+EDGES|EVAL_TYPE macro_condition#7 -> T:char*
+EDGES|EVAL_TYPE macro_condition#8 -> T:ANY
+EDGES|EVAL_TYPE macro_condition#9 -> T:char*
+EDGES|EVAL_TYPE macro_replacement#1 -> T:void
+EDGES|EVAL_TYPE macro_replacement#2 -> T:void
+EDGES|EVAL_TYPE macro_replacement#3 -> T:void
+EDGES|EVAL_TYPE macro_replacement#5 -> T:char*
+EDGES|EVAL_TYPE macro_replacement#6 -> T:ANY
+EDGES|EVAL_TYPE macro_replacement#7 -> T:char*
+EDGES|EVAL_TYPE macro_replacement#8 -> T:char*
+EDGES|EVAL_TYPE mixed_macro#1 -> T:void
+EDGES|EVAL_TYPE mixed_macro#2 -> T:void
+EDGES|EVAL_TYPE mixed_macro#3 -> T:void
+EDGES|EVAL_TYPE mixed_macro#5 -> T:char*
+EDGES|EVAL_TYPE mixed_macro#6 -> T:ANY
+EDGES|EVAL_TYPE mixed_macro#7 -> T:char*
+EDGES|EVAL_TYPE mixed_macro#8 -> T:char*
+EDGES|EVAL_TYPE mixed_prefix#1 -> T:int
+EDGES|EVAL_TYPE mixed_prefix#2 -> T:int
+EDGES|EVAL_TYPE mixed_prefix#3 -> T:void
+EDGES|EVAL_TYPE mixed_prefix#5 -> T:ANY
+EDGES|EVAL_TYPE mixed_prefix#6 -> T:int
+EDGES|EVAL_TYPE mixed_prefix#7 -> T:char*
+EDGES|EVAL_TYPE mixed_prefix#8 -> T:char*
+EDGES|EVAL_TYPE mixed_prefix#9 -> T:char*
+EDGES|EVAL_TYPE multiline#1 -> T:void
+EDGES|EVAL_TYPE multiline#2 -> T:void
+EDGES|EVAL_TYPE multiline#3 -> T:void
+EDGES|EVAL_TYPE multiline#4 -> T:void
+EDGES|EVAL_TYPE multiline#5 -> T:char*
+EDGES|EVAL_TYPE multiline#6 -> T:void
+EDGES|EVAL_TYPE multiline#7 -> T:char*
+EDGES|EVAL_TYPE multiline#8 -> T:void
+EDGES|EVAL_TYPE parenthesized#1 -> T:void
+EDGES|EVAL_TYPE parenthesized#2 -> T:void
+EDGES|EVAL_TYPE parenthesized#3 -> T:void
+EDGES|EVAL_TYPE parenthesized#4 -> T:void
+EDGES|EVAL_TYPE parenthesized#5 -> T:char*
+EDGES|EVAL_TYPE parenthesized#6 -> T:void
+EDGES|EVAL_TYPE parenthesized_macro#1 -> T:void
+EDGES|EVAL_TYPE parenthesized_macro#2 -> T:void
+EDGES|EVAL_TYPE parenthesized_macro#3 -> T:void
+EDGES|EVAL_TYPE parenthesized_macro#5 -> T:ANY
+EDGES|EVAL_TYPE parenthesized_macro#6 -> T:ANY
+EDGES|EVAL_TYPE parenthesized_macro#7 -> T:char*
+EDGES|EVAL_TYPE parenthesized_macro#8 -> T:char*
+EDGES|EVAL_TYPE plain#1 -> T:int
+EDGES|EVAL_TYPE plain#2 -> T:int
+EDGES|EVAL_TYPE plain#3 -> T:void
+EDGES|EVAL_TYPE plain#5 -> T:ANY
+EDGES|EVAL_TYPE plain#6 -> T:int
+EDGES|EVAL_TYPE plain#7 -> T:char*
+EDGES|EVAL_TYPE plain#8 -> T:char*
+EDGES|EVAL_TYPE plain#9 -> T:char*
+EDGES|EVAL_TYPE strings.c:<global>#210 -> T:ANY
+EDGES|EVAL_TYPE strings.c:<global>#211 -> T:plain
+EDGES|EVAL_TYPE strings.c:<global>#212 -> T:lua_literal
+EDGES|EVAL_TYPE strings.c:<global>#213 -> T:literal_return
+EDGES|EVAL_TYPE strings.c:<global>#214 -> T:commented
+EDGES|EVAL_TYPE strings.c:<global>#215 -> T:argument
+EDGES|EVAL_TYPE strings.c:<global>#216 -> T:parenthesized
+EDGES|EVAL_TYPE strings.c:<global>#217 -> T:wide
+EDGES|EVAL_TYPE strings.c:<global>#218 -> T:utf8
+EDGES|EVAL_TYPE strings.c:<global>#219 -> T:utf16
+EDGES|EVAL_TYPE strings.c:<global>#220 -> T:utf32
+EDGES|EVAL_TYPE strings.c:<global>#221 -> T:mixed_prefix
+EDGES|EVAL_TYPE strings.c:<global>#222 -> T:macro_replacement
+EDGES|EVAL_TYPE strings.c:<global>#223 -> T:function_replacement
+EDGES|EVAL_TYPE strings.c:<global>#224 -> T:macro_condition
+EDGES|EVAL_TYPE strings.c:<global>#225 -> T:multiline
+EDGES|EVAL_TYPE strings.c:<global>#226 -> T:wide_macro
+EDGES|EVAL_TYPE strings.c:<global>#227 -> T:mixed_macro
+EDGES|EVAL_TYPE strings.c:<global>#228 -> T:escaped_macro
+EDGES|EVAL_TYPE strings.c:<global>#229 -> T:comment_macro
+EDGES|EVAL_TYPE strings.c:<global>#230 -> T:parenthesized_macro
+EDGES|EVAL_TYPE strings.c:<global>#231 -> T:call_macro
+EDGES|EVAL_TYPE strings.c:<global>#232 -> T:ANY
+EDGES|EVAL_TYPE strings.c:CALL_JOIN:ANY(0)#1 -> T:ANY
+EDGES|EVAL_TYPE strings.c:CALL_JOIN:ANY(0)#2 -> T:ANY
+EDGES|EVAL_TYPE strings.c:COMMENT_JOIN:char*(0)#1 -> T:ANY
+EDGES|EVAL_TYPE strings.c:COMMENT_JOIN:char*(0)#2 -> T:char*
+EDGES|EVAL_TYPE strings.c:ESCAPED_JOIN:char*(0)#1 -> T:ANY
+EDGES|EVAL_TYPE strings.c:ESCAPED_JOIN:char*(0)#2 -> T:char*
+EDGES|EVAL_TYPE strings.c:FORMAT:char*(0)#1 -> T:ANY
+EDGES|EVAL_TYPE strings.c:FORMAT:char*(0)#2 -> T:char*
+EDGES|EVAL_TYPE strings.c:JOINED:char*(0)#1 -> T:ANY
+EDGES|EVAL_TYPE strings.c:JOINED:char*(0)#2 -> T:char*
+EDGES|EVAL_TYPE strings.c:MIXED_JOIN:char*(0)#1 -> T:ANY
+EDGES|EVAL_TYPE strings.c:MIXED_JOIN:char*(0)#2 -> T:char*
+EDGES|EVAL_TYPE strings.c:PAREN_JOIN:ANY(0)#1 -> T:ANY
+EDGES|EVAL_TYPE strings.c:PAREN_JOIN:ANY(0)#2 -> T:ANY
+EDGES|EVAL_TYPE strings.c:WIDE_JOIN:char*(0)#1 -> T:ANY
+EDGES|EVAL_TYPE strings.c:WIDE_JOIN:char*(0)#2 -> T:char*
+EDGES|EVAL_TYPE strings.c:WRAPPED:char*(0)#1 -> T:ANY
+EDGES|EVAL_TYPE strings.c:WRAPPED:char*(0)#2 -> T:char*
+EDGES|EVAL_TYPE utf16#1 -> T:int
+EDGES|EVAL_TYPE utf16#2 -> T:int
+EDGES|EVAL_TYPE utf16#3 -> T:void
+EDGES|EVAL_TYPE utf16#5 -> T:ANY
+EDGES|EVAL_TYPE utf16#6 -> T:int
+EDGES|EVAL_TYPE utf16#7 -> T:char*
+EDGES|EVAL_TYPE utf16#8 -> T:char*
+EDGES|EVAL_TYPE utf16#9 -> T:char*
+EDGES|EVAL_TYPE utf32#1 -> T:int
+EDGES|EVAL_TYPE utf32#2 -> T:int
+EDGES|EVAL_TYPE utf32#3 -> T:void
+EDGES|EVAL_TYPE utf32#5 -> T:ANY
+EDGES|EVAL_TYPE utf32#6 -> T:int
+EDGES|EVAL_TYPE utf32#7 -> T:char*
+EDGES|EVAL_TYPE utf32#8 -> T:char*
+EDGES|EVAL_TYPE utf32#9 -> T:char*
+EDGES|EVAL_TYPE utf8#1 -> T:int
+EDGES|EVAL_TYPE utf8#2 -> T:int
+EDGES|EVAL_TYPE utf8#3 -> T:void
+EDGES|EVAL_TYPE utf8#5 -> T:ANY
+EDGES|EVAL_TYPE utf8#6 -> T:int
+EDGES|EVAL_TYPE utf8#7 -> T:char*
+EDGES|EVAL_TYPE utf8#8 -> T:char*
+EDGES|EVAL_TYPE utf8#9 -> T:char*
+EDGES|EVAL_TYPE wide#1 -> T:int
+EDGES|EVAL_TYPE wide#2 -> T:int
+EDGES|EVAL_TYPE wide#3 -> T:void
+EDGES|EVAL_TYPE wide#5 -> T:ANY
+EDGES|EVAL_TYPE wide#6 -> T:int
+EDGES|EVAL_TYPE wide#7 -> T:char*
+EDGES|EVAL_TYPE wide#8 -> T:char*
+EDGES|EVAL_TYPE wide#9 -> T:char*
+EDGES|EVAL_TYPE wide_macro#1 -> T:void
+EDGES|EVAL_TYPE wide_macro#2 -> T:void
+EDGES|EVAL_TYPE wide_macro#3 -> T:void
+EDGES|EVAL_TYPE wide_macro#5 -> T:char*
+EDGES|EVAL_TYPE wide_macro#6 -> T:ANY
+EDGES|EVAL_TYPE wide_macro#7 -> T:char*
+EDGES|EVAL_TYPE wide_macro#8 -> T:char*
+EDGES|PARAMETER_LINK <operator>.assignment#1 -> <operator>.assignment#3
+EDGES|PARAMETER_LINK <operator>.assignment#4 -> <operator>.assignment#6
+EDGES|PARAMETER_LINK <operator>.conditional#1 -> <operator>.conditional#3
+EDGES|PARAMETER_LINK <operator>.conditional#4 -> <operator>.conditional#6
+EDGES|PARAMETER_LINK <operator>.conditional#7 -> <operator>.conditional#8
+EDGES|PARAMETER_LINK <operator>.equals#1 -> <operator>.equals#3
+EDGES|PARAMETER_LINK <operator>.equals#4 -> <operator>.equals#6
+EDGES|PARAMETER_LINK argument#1 -> argument#2
+EDGES|PARAMETER_LINK call_macro#1 -> call_macro#2
+EDGES|PARAMETER_LINK comment_macro#1 -> comment_macro#2
+EDGES|PARAMETER_LINK commented#1 -> commented#2
+EDGES|PARAMETER_LINK consume#1 -> consume#2
+EDGES|PARAMETER_LINK escaped_macro#1 -> escaped_macro#2
+EDGES|PARAMETER_LINK function_replacement#1 -> function_replacement#2
+EDGES|PARAMETER_LINK literal_return#1 -> literal_return#2
+EDGES|PARAMETER_LINK lua_literal#1 -> lua_literal#2
+EDGES|PARAMETER_LINK lua_literal#3 -> lua_literal#4
+EDGES|PARAMETER_LINK macro_condition#1 -> macro_condition#2
+EDGES|PARAMETER_LINK macro_replacement#1 -> macro_replacement#2
+EDGES|PARAMETER_LINK mixed_macro#1 -> mixed_macro#2
+EDGES|PARAMETER_LINK mixed_prefix#1 -> mixed_prefix#2
+EDGES|PARAMETER_LINK multiline#1 -> multiline#2
+EDGES|PARAMETER_LINK parenthesized#1 -> parenthesized#2
+EDGES|PARAMETER_LINK parenthesized_macro#1 -> parenthesized_macro#2
+EDGES|PARAMETER_LINK plain#1 -> plain#2
+EDGES|PARAMETER_LINK utf16#1 -> utf16#2
+EDGES|PARAMETER_LINK utf32#1 -> utf32#2
+EDGES|PARAMETER_LINK utf8#1 -> utf8#2
+EDGES|PARAMETER_LINK wide#1 -> wide#2
+EDGES|PARAMETER_LINK wide_macro#1 -> wide_macro#2
+EDGES|REF NB:<global> -> NS:<global>
+EDGES|REF NB:<includes>:<global> -> NS:<global>
+EDGES|REF NB:strings.c:<global> -> NS:<global>
+EDGES|REF T:ANY -> D:ANY
+EDGES|REF T:argument -> D:argument
+EDGES|REF T:call_macro -> D:call_macro
+EDGES|REF T:char -> D:char
+EDGES|REF T:char* -> D:char*
+EDGES|REF T:comment_macro -> D:comment_macro
+EDGES|REF T:commented -> D:commented
+EDGES|REF T:escaped_macro -> D:escaped_macro
+EDGES|REF T:function_replacement -> D:function_replacement
+EDGES|REF T:int -> D:int
+EDGES|REF T:literal_return -> D:literal_return
+EDGES|REF T:lua_literal -> D:lua_literal
+EDGES|REF T:macro_condition -> D:macro_condition
+EDGES|REF T:macro_replacement -> D:macro_replacement
+EDGES|REF T:mixed_macro -> D:mixed_macro
+EDGES|REF T:mixed_prefix -> D:mixed_prefix
+EDGES|REF T:multiline -> D:multiline
+EDGES|REF T:parenthesized -> D:parenthesized
+EDGES|REF T:parenthesized_macro -> D:parenthesized_macro
+EDGES|REF T:plain -> D:plain
+EDGES|REF T:utf16 -> D:utf16
+EDGES|REF T:utf32 -> D:utf32
+EDGES|REF T:utf8 -> D:utf8
+EDGES|REF T:void -> D:void
+EDGES|REF T:wide -> D:wide
+EDGES|REF T:wide_macro -> D:wide_macro
+EDGES|REF commented#6 -> commented#1
+EDGES|REF lua_literal#12 -> lua_literal#1
+EDGES|REF lua_literal#13 -> lua_literal#3
+EDGES|REF lua_literal#19 -> lua_literal#7
+EDGES|REF lua_literal#21 -> lua_literal#7
+EDGES|REF lua_literal#9 -> lua_literal#7
+EDGES|REF macro_condition#6 -> macro_condition#1
+EDGES|REF mixed_prefix#6 -> mixed_prefix#1
+EDGES|REF plain#6 -> plain#1
+EDGES|REF strings.c:<global>#211 -> plain#0
+EDGES|REF strings.c:<global>#212 -> lua_literal#0
+EDGES|REF strings.c:<global>#213 -> literal_return#0
+EDGES|REF strings.c:<global>#214 -> commented#0
+EDGES|REF strings.c:<global>#215 -> argument#0
+EDGES|REF strings.c:<global>#216 -> parenthesized#0
+EDGES|REF strings.c:<global>#217 -> strings.c:<global>#65
+EDGES|REF strings.c:<global>#218 -> strings.c:<global>#75
+EDGES|REF strings.c:<global>#219 -> strings.c:<global>#85
+EDGES|REF strings.c:<global>#220 -> strings.c:<global>#95
+EDGES|REF strings.c:<global>#221 -> mixed_prefix#0
+EDGES|REF strings.c:<global>#222 -> macro_replacement#0
+EDGES|REF strings.c:<global>#223 -> function_replacement#0
+EDGES|REF strings.c:<global>#224 -> macro_condition#0
+EDGES|REF strings.c:<global>#225 -> multiline#0
+EDGES|REF strings.c:<global>#226 -> strings.c:<global>#156
+EDGES|REF strings.c:<global>#227 -> mixed_macro#0
+EDGES|REF strings.c:<global>#228 -> escaped_macro#0
+EDGES|REF strings.c:<global>#229 -> comment_macro#0
+EDGES|REF strings.c:<global>#230 -> parenthesized_macro#0
+EDGES|REF strings.c:<global>#231 -> call_macro#0
+EDGES|REF utf16#6 -> utf16#1
+EDGES|REF utf32#6 -> utf32#1
+EDGES|REF utf8#6 -> utf8#1
+EDGES|REF wide#6 -> wide#1
+EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+EDGES|SOURCE_FILE D:ANY -> F:<includes>
+EDGES|SOURCE_FILE D:argument -> F:strings.c
+EDGES|SOURCE_FILE D:call_macro -> F:strings.c
+EDGES|SOURCE_FILE D:char -> F:<includes>
+EDGES|SOURCE_FILE D:char* -> F:<includes>
+EDGES|SOURCE_FILE D:comment_macro -> F:strings.c
+EDGES|SOURCE_FILE D:commented -> F:strings.c
+EDGES|SOURCE_FILE D:escaped_macro -> F:strings.c
+EDGES|SOURCE_FILE D:function_replacement -> F:strings.c
+EDGES|SOURCE_FILE D:int -> F:<includes>
+EDGES|SOURCE_FILE D:literal_return -> F:strings.c
+EDGES|SOURCE_FILE D:lua_literal -> F:strings.c
+EDGES|SOURCE_FILE D:macro_condition -> F:strings.c
+EDGES|SOURCE_FILE D:macro_replacement -> F:strings.c
+EDGES|SOURCE_FILE D:mixed_macro -> F:strings.c
+EDGES|SOURCE_FILE D:mixed_prefix -> F:strings.c
+EDGES|SOURCE_FILE D:multiline -> F:strings.c
+EDGES|SOURCE_FILE D:parenthesized -> F:strings.c
+EDGES|SOURCE_FILE D:parenthesized_macro -> F:strings.c
+EDGES|SOURCE_FILE D:plain -> F:strings.c
+EDGES|SOURCE_FILE D:strings.c:<global> -> F:strings.c
+EDGES|SOURCE_FILE D:utf16 -> F:strings.c
+EDGES|SOURCE_FILE D:utf32 -> F:strings.c
+EDGES|SOURCE_FILE D:utf8 -> F:strings.c
+EDGES|SOURCE_FILE D:void -> F:<includes>
+EDGES|SOURCE_FILE D:wide -> F:strings.c
+EDGES|SOURCE_FILE D:wide_macro -> F:strings.c
+EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
+EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>
+EDGES|SOURCE_FILE NB:strings.c:<global> -> F:strings.c
+EDGES|SOURCE_FILE argument#0 -> F:strings.c
+EDGES|SOURCE_FILE call_macro#0 -> F:strings.c
+EDGES|SOURCE_FILE comment_macro#0 -> F:strings.c
+EDGES|SOURCE_FILE commented#0 -> F:strings.c
+EDGES|SOURCE_FILE consume#0 -> F:strings.c
+EDGES|SOURCE_FILE escaped_macro#0 -> F:strings.c
+EDGES|SOURCE_FILE function_replacement#0 -> F:strings.c
+EDGES|SOURCE_FILE literal_return#0 -> F:strings.c
+EDGES|SOURCE_FILE lua_literal#0 -> F:strings.c
+EDGES|SOURCE_FILE macro_condition#0 -> F:strings.c
+EDGES|SOURCE_FILE macro_replacement#0 -> F:strings.c
+EDGES|SOURCE_FILE mixed_macro#0 -> F:strings.c
+EDGES|SOURCE_FILE mixed_prefix#0 -> F:strings.c
+EDGES|SOURCE_FILE multiline#0 -> F:strings.c
+EDGES|SOURCE_FILE parenthesized#0 -> F:strings.c
+EDGES|SOURCE_FILE parenthesized_macro#0 -> F:strings.c
+EDGES|SOURCE_FILE plain#0 -> F:strings.c
+EDGES|SOURCE_FILE strings.c:<global>#0 -> F:strings.c
+EDGES|SOURCE_FILE strings.c:<global>#156 -> F:strings.c
+EDGES|SOURCE_FILE strings.c:<global>#65 -> F:strings.c
+EDGES|SOURCE_FILE strings.c:<global>#75 -> F:strings.c
+EDGES|SOURCE_FILE strings.c:<global>#85 -> F:strings.c
+EDGES|SOURCE_FILE strings.c:<global>#95 -> F:strings.c
+EDGES|SOURCE_FILE strings.c:CALL_JOIN:ANY(0)#0 -> F:strings.c
+EDGES|SOURCE_FILE strings.c:COMMENT_JOIN:char*(0)#0 -> F:strings.c
+EDGES|SOURCE_FILE strings.c:ESCAPED_JOIN:char*(0)#0 -> F:strings.c
+EDGES|SOURCE_FILE strings.c:FORMAT:char*(0)#0 -> F:strings.c
+EDGES|SOURCE_FILE strings.c:JOINED:char*(0)#0 -> F:strings.c
+EDGES|SOURCE_FILE strings.c:MIXED_JOIN:char*(0)#0 -> F:strings.c
+EDGES|SOURCE_FILE strings.c:PAREN_JOIN:ANY(0)#0 -> F:strings.c
+EDGES|SOURCE_FILE strings.c:WIDE_JOIN:char*(0)#0 -> F:strings.c
+EDGES|SOURCE_FILE strings.c:WRAPPED:char*(0)#0 -> F:strings.c
+FLOWS|REACHING_DEF["0x%" WIDTH "x"] lua_literal#14 -> lua_literal#10
+FLOWS|REACHING_DEF["fallback"] plain#8 -> plain#5
+FLOWS|REACHING_DEF["first" "second"] argument#5 -> argument#4
+FLOWS|REACHING_DEF["first" "second"] literal_return#5 -> literal_return#4
+FLOWS|REACHING_DEF["first" "second"] parenthesized#5 -> parenthesized#4
+FLOWS|REACHING_DEF["first" /* join */ "second"] commented#7 -> commented#5
+FLOWS|REACHING_DEF["first"\n            "second"] multiline#5 -> multiline#4
+FLOWS|REACHING_DEF["following"] multiline#7 -> multiline#6
+FLOWS|REACHING_DEF["left" "right"] plain#7 -> plain#5
+FLOWS|REACHING_DEF["leftright"] call_macro#7 -> call_macro#6
+FLOWS|REACHING_DEF["plain" L"wide"] mixed_prefix#7 -> mixed_prefix#5
+FLOWS|REACHING_DEF["safe"] commented#8 -> commented#5
+FLOWS|REACHING_DEF[(n == minimum) /* corner case */\n        ? "0x%" WIDTH "x" /* hexadecimal */\n        : FORMAT] lua_literal#10 -> lua_literal#22
+FLOWS|REACHING_DEF[(n == minimum) /* corner case */\n        ? "0x%" WIDTH "x" /* hexadecimal */\n        : FORMAT] lua_literal#10 -> lua_literal#8
+FLOWS|REACHING_DEF[(n == minimum) /* corner case */\n        ? "0x%" WIDTH "x" /* hexadecimal */\n        : FORMAT] lua_literal#10 -> lua_literal#9
+FLOWS|REACHING_DEF[*format = (n == minimum) /* corner case */\n        ? "0x%" WIDTH "x" /* hexadecimal */\n        : FORMAT] lua_literal#8 -> lua_literal#22
+FLOWS|REACHING_DEF[<RET>] comment_macro#4 -> comment_macro#8
+FLOWS|REACHING_DEF[<RET>] commented#4 -> commented#9
+FLOWS|REACHING_DEF[<RET>] escaped_macro#4 -> escaped_macro#8
+FLOWS|REACHING_DEF[<RET>] function_replacement#4 -> function_replacement#8
+FLOWS|REACHING_DEF[<RET>] literal_return#4 -> literal_return#6
+FLOWS|REACHING_DEF[<RET>] lua_literal#20 -> lua_literal#22
+FLOWS|REACHING_DEF[<RET>] macro_condition#4 -> macro_condition#13
+FLOWS|REACHING_DEF[<RET>] macro_replacement#4 -> macro_replacement#8
+FLOWS|REACHING_DEF[<RET>] mixed_macro#4 -> mixed_macro#8
+FLOWS|REACHING_DEF[<RET>] mixed_prefix#4 -> mixed_prefix#9
+FLOWS|REACHING_DEF[<RET>] parenthesized_macro#4 -> parenthesized_macro#8
+FLOWS|REACHING_DEF[<RET>] plain#4 -> plain#9
+FLOWS|REACHING_DEF[<RET>] utf16#4 -> utf16#9
+FLOWS|REACHING_DEF[<RET>] utf32#4 -> utf32#9
+FLOWS|REACHING_DEF[<RET>] utf8#4 -> utf8#9
+FLOWS|REACHING_DEF[<RET>] wide#4 -> wide#9
+FLOWS|REACHING_DEF[<RET>] wide_macro#4 -> wide_macro#8
+FLOWS|REACHING_DEF[CALL_JOIN] call_macro#4 -> call_macro#8
+FLOWS|REACHING_DEF[COMMENT_JOIN] comment_macro#5 -> comment_macro#4
+FLOWS|REACHING_DEF[COMMENT_JOIN] comment_macro#5 -> comment_macro#8
+FLOWS|REACHING_DEF[ESCAPED_JOIN] escaped_macro#5 -> escaped_macro#4
+FLOWS|REACHING_DEF[ESCAPED_JOIN] escaped_macro#5 -> escaped_macro#8
+FLOWS|REACHING_DEF[FORMAT] lua_literal#15 -> lua_literal#10
+FLOWS|REACHING_DEF[FORMAT] lua_literal#15 -> lua_literal#22
+FLOWS|REACHING_DEF[JOINED] macro_condition#7 -> macro_condition#13
+FLOWS|REACHING_DEF[JOINED] macro_condition#7 -> macro_condition#5
+FLOWS|REACHING_DEF[JOINED] macro_replacement#5 -> macro_replacement#4
+FLOWS|REACHING_DEF[JOINED] macro_replacement#5 -> macro_replacement#8
+FLOWS|REACHING_DEF[L"safe"] mixed_prefix#8 -> mixed_prefix#5
+FLOWS|REACHING_DEF[L"safe"] wide#8 -> wide#5
+FLOWS|REACHING_DEF[L"wide" L"strings"] wide#7 -> wide#5
+FLOWS|REACHING_DEF[MIXED_JOIN] mixed_macro#5 -> mixed_macro#4
+FLOWS|REACHING_DEF[MIXED_JOIN] mixed_macro#5 -> mixed_macro#8
+FLOWS|REACHING_DEF[PAREN_JOIN] parenthesized_macro#5 -> parenthesized_macro#4
+FLOWS|REACHING_DEF[PAREN_JOIN] parenthesized_macro#5 -> parenthesized_macro#8
+FLOWS|REACHING_DEF[U"safe"] utf32#8 -> utf32#5
+FLOWS|REACHING_DEF[U"utf32" U"strings"] utf32#7 -> utf32#5
+FLOWS|REACHING_DEF[WIDE_JOIN] wide_macro#5 -> wide_macro#4
+FLOWS|REACHING_DEF[WIDE_JOIN] wide_macro#5 -> wide_macro#8
+FLOWS|REACHING_DEF[WRAPPED()] function_replacement#5 -> function_replacement#4
+FLOWS|REACHING_DEF[WRAPPED()] function_replacement#5 -> function_replacement#8
+FLOWS|REACHING_DEF[WRAPPED()] macro_condition#10 -> macro_condition#13
+FLOWS|REACHING_DEF[WRAPPED()] macro_condition#10 -> macro_condition#5
+FLOWS|REACHING_DEF[] <operator>.assignment#0 -> <operator>.assignment#1
+FLOWS|REACHING_DEF[] <operator>.assignment#0 -> <operator>.assignment#4
+FLOWS|REACHING_DEF[] <operator>.conditional#0 -> <operator>.conditional#1
+FLOWS|REACHING_DEF[] <operator>.conditional#0 -> <operator>.conditional#4
+FLOWS|REACHING_DEF[] <operator>.conditional#0 -> <operator>.conditional#7
+FLOWS|REACHING_DEF[] <operator>.equals#0 -> <operator>.equals#1
+FLOWS|REACHING_DEF[] <operator>.equals#0 -> <operator>.equals#4
+FLOWS|REACHING_DEF[] argument#0 -> argument#1
+FLOWS|REACHING_DEF[] argument#0 -> argument#5
+FLOWS|REACHING_DEF[] argument#1 -> argument#2
+FLOWS|REACHING_DEF[] argument#1 -> argument#6
+FLOWS|REACHING_DEF[] call_macro#0 -> call_macro#1
+FLOWS|REACHING_DEF[] call_macro#0 -> call_macro#4
+FLOWS|REACHING_DEF[] call_macro#0 -> call_macro#7
+FLOWS|REACHING_DEF[] call_macro#1 -> call_macro#2
+FLOWS|REACHING_DEF[] call_macro#1 -> call_macro#8
+FLOWS|REACHING_DEF[] comment_macro#0 -> comment_macro#1
+FLOWS|REACHING_DEF[] comment_macro#0 -> comment_macro#5
+FLOWS|REACHING_DEF[] comment_macro#0 -> comment_macro#7
+FLOWS|REACHING_DEF[] comment_macro#1 -> comment_macro#2
+FLOWS|REACHING_DEF[] comment_macro#1 -> comment_macro#8
+FLOWS|REACHING_DEF[] commented#0 -> commented#1
+FLOWS|REACHING_DEF[] commented#0 -> commented#7
+FLOWS|REACHING_DEF[] commented#0 -> commented#8
+FLOWS|REACHING_DEF[] consume#0 -> consume#1
+FLOWS|REACHING_DEF[] escaped_macro#0 -> escaped_macro#1
+FLOWS|REACHING_DEF[] escaped_macro#0 -> escaped_macro#5
+FLOWS|REACHING_DEF[] escaped_macro#0 -> escaped_macro#7
+FLOWS|REACHING_DEF[] escaped_macro#1 -> escaped_macro#2
+FLOWS|REACHING_DEF[] escaped_macro#1 -> escaped_macro#8
+FLOWS|REACHING_DEF[] function_replacement#0 -> function_replacement#1
+FLOWS|REACHING_DEF[] function_replacement#0 -> function_replacement#5
+FLOWS|REACHING_DEF[] function_replacement#0 -> function_replacement#7
+FLOWS|REACHING_DEF[] function_replacement#1 -> function_replacement#2
+FLOWS|REACHING_DEF[] function_replacement#1 -> function_replacement#8
+FLOWS|REACHING_DEF[] literal_return#0 -> literal_return#1
+FLOWS|REACHING_DEF[] literal_return#0 -> literal_return#4
+FLOWS|REACHING_DEF[] literal_return#0 -> literal_return#5
+FLOWS|REACHING_DEF[] literal_return#1 -> literal_return#2
+FLOWS|REACHING_DEF[] literal_return#1 -> literal_return#6
+FLOWS|REACHING_DEF[] lua_literal#0 -> lua_literal#1
+FLOWS|REACHING_DEF[] lua_literal#0 -> lua_literal#12
+FLOWS|REACHING_DEF[] lua_literal#0 -> lua_literal#13
+FLOWS|REACHING_DEF[] lua_literal#0 -> lua_literal#14
+FLOWS|REACHING_DEF[] lua_literal#0 -> lua_literal#15
+FLOWS|REACHING_DEF[] lua_literal#0 -> lua_literal#17
+FLOWS|REACHING_DEF[] lua_literal#0 -> lua_literal#19
+FLOWS|REACHING_DEF[] lua_literal#0 -> lua_literal#21
+FLOWS|REACHING_DEF[] lua_literal#0 -> lua_literal#3
+FLOWS|REACHING_DEF[] macro_condition#0 -> macro_condition#1
+FLOWS|REACHING_DEF[] macro_condition#0 -> macro_condition#10
+FLOWS|REACHING_DEF[] macro_condition#0 -> macro_condition#12
+FLOWS|REACHING_DEF[] macro_condition#0 -> macro_condition#7
+FLOWS|REACHING_DEF[] macro_condition#0 -> macro_condition#9
+FLOWS|REACHING_DEF[] macro_replacement#0 -> macro_replacement#1
+FLOWS|REACHING_DEF[] macro_replacement#0 -> macro_replacement#5
+FLOWS|REACHING_DEF[] macro_replacement#0 -> macro_replacement#7
+FLOWS|REACHING_DEF[] macro_replacement#1 -> macro_replacement#2
+FLOWS|REACHING_DEF[] macro_replacement#1 -> macro_replacement#8
+FLOWS|REACHING_DEF[] mixed_macro#0 -> mixed_macro#1
+FLOWS|REACHING_DEF[] mixed_macro#0 -> mixed_macro#5
+FLOWS|REACHING_DEF[] mixed_macro#0 -> mixed_macro#7
+FLOWS|REACHING_DEF[] mixed_macro#1 -> mixed_macro#2
+FLOWS|REACHING_DEF[] mixed_macro#1 -> mixed_macro#8
+FLOWS|REACHING_DEF[] mixed_prefix#0 -> mixed_prefix#1
+FLOWS|REACHING_DEF[] mixed_prefix#0 -> mixed_prefix#7
+FLOWS|REACHING_DEF[] mixed_prefix#0 -> mixed_prefix#8
+FLOWS|REACHING_DEF[] multiline#0 -> multiline#1
+FLOWS|REACHING_DEF[] multiline#0 -> multiline#5
+FLOWS|REACHING_DEF[] multiline#0 -> multiline#7
+FLOWS|REACHING_DEF[] multiline#1 -> multiline#2
+FLOWS|REACHING_DEF[] multiline#1 -> multiline#8
+FLOWS|REACHING_DEF[] parenthesized#0 -> parenthesized#1
+FLOWS|REACHING_DEF[] parenthesized#0 -> parenthesized#5
+FLOWS|REACHING_DEF[] parenthesized#1 -> parenthesized#2
+FLOWS|REACHING_DEF[] parenthesized#1 -> parenthesized#6
+FLOWS|REACHING_DEF[] parenthesized_macro#0 -> parenthesized_macro#1
+FLOWS|REACHING_DEF[] parenthesized_macro#0 -> parenthesized_macro#5
+FLOWS|REACHING_DEF[] parenthesized_macro#0 -> parenthesized_macro#7
+FLOWS|REACHING_DEF[] parenthesized_macro#1 -> parenthesized_macro#2
+FLOWS|REACHING_DEF[] parenthesized_macro#1 -> parenthesized_macro#8
+FLOWS|REACHING_DEF[] plain#0 -> plain#1
+FLOWS|REACHING_DEF[] plain#0 -> plain#7
+FLOWS|REACHING_DEF[] plain#0 -> plain#8
+FLOWS|REACHING_DEF[] strings.c:<global>#0 -> strings.c:<global>#211
+FLOWS|REACHING_DEF[] strings.c:<global>#0 -> strings.c:<global>#212
+FLOWS|REACHING_DEF[] strings.c:<global>#0 -> strings.c:<global>#213
+FLOWS|REACHING_DEF[] strings.c:<global>#0 -> strings.c:<global>#214
+FLOWS|REACHING_DEF[] strings.c:<global>#0 -> strings.c:<global>#215
+FLOWS|REACHING_DEF[] strings.c:<global>#0 -> strings.c:<global>#216
+FLOWS|REACHING_DEF[] strings.c:<global>#0 -> strings.c:<global>#217
+FLOWS|REACHING_DEF[] strings.c:<global>#0 -> strings.c:<global>#218
+FLOWS|REACHING_DEF[] strings.c:<global>#0 -> strings.c:<global>#219
+FLOWS|REACHING_DEF[] strings.c:<global>#0 -> strings.c:<global>#220
+FLOWS|REACHING_DEF[] strings.c:<global>#0 -> strings.c:<global>#221
+FLOWS|REACHING_DEF[] strings.c:<global>#0 -> strings.c:<global>#222
+FLOWS|REACHING_DEF[] strings.c:<global>#0 -> strings.c:<global>#223
+FLOWS|REACHING_DEF[] strings.c:<global>#0 -> strings.c:<global>#224
+FLOWS|REACHING_DEF[] strings.c:<global>#0 -> strings.c:<global>#225
+FLOWS|REACHING_DEF[] strings.c:<global>#0 -> strings.c:<global>#226
+FLOWS|REACHING_DEF[] strings.c:<global>#0 -> strings.c:<global>#227
+FLOWS|REACHING_DEF[] strings.c:<global>#0 -> strings.c:<global>#228
+FLOWS|REACHING_DEF[] strings.c:<global>#0 -> strings.c:<global>#229
+FLOWS|REACHING_DEF[] strings.c:<global>#0 -> strings.c:<global>#230
+FLOWS|REACHING_DEF[] strings.c:<global>#0 -> strings.c:<global>#231
+FLOWS|REACHING_DEF[] strings.c:<global>#156 -> wide_macro#1
+FLOWS|REACHING_DEF[] strings.c:<global>#156 -> wide_macro#5
+FLOWS|REACHING_DEF[] strings.c:<global>#156 -> wide_macro#7
+FLOWS|REACHING_DEF[] strings.c:<global>#65 -> wide#1
+FLOWS|REACHING_DEF[] strings.c:<global>#65 -> wide#7
+FLOWS|REACHING_DEF[] strings.c:<global>#65 -> wide#8
+FLOWS|REACHING_DEF[] strings.c:<global>#75 -> utf8#1
+FLOWS|REACHING_DEF[] strings.c:<global>#75 -> utf8#7
+FLOWS|REACHING_DEF[] strings.c:<global>#75 -> utf8#8
+FLOWS|REACHING_DEF[] strings.c:<global>#85 -> utf16#1
+FLOWS|REACHING_DEF[] strings.c:<global>#85 -> utf16#7
+FLOWS|REACHING_DEF[] strings.c:<global>#85 -> utf16#8
+FLOWS|REACHING_DEF[] strings.c:<global>#95 -> utf32#1
+FLOWS|REACHING_DEF[] strings.c:<global>#95 -> utf32#7
+FLOWS|REACHING_DEF[] strings.c:<global>#95 -> utf32#8
+FLOWS|REACHING_DEF[] wide_macro#1 -> wide_macro#2
+FLOWS|REACHING_DEF[] wide_macro#1 -> wide_macro#8
+FLOWS|REACHING_DEF[condition ? "first" /* join */ "second" : "safe"] commented#5 -> commented#4
+FLOWS|REACHING_DEF[condition ? "first" /* join */ "second" : "safe"] commented#5 -> commented#9
+FLOWS|REACHING_DEF[condition ? "left" "right" : "fallback"] plain#5 -> plain#4
+FLOWS|REACHING_DEF[condition ? "left" "right" : "fallback"] plain#5 -> plain#9
+FLOWS|REACHING_DEF[condition ? "plain" L"wide" : L"safe"] mixed_prefix#5 -> mixed_prefix#4
+FLOWS|REACHING_DEF[condition ? "plain" L"wide" : L"safe"] mixed_prefix#5 -> mixed_prefix#9
+FLOWS|REACHING_DEF[condition ? JOINED : WRAPPED()] macro_condition#5 -> macro_condition#13
+FLOWS|REACHING_DEF[condition ? JOINED : WRAPPED()] macro_condition#5 -> macro_condition#4
+FLOWS|REACHING_DEF[condition ? L"wide" L"strings" : L"safe"] wide#5 -> wide#4
+FLOWS|REACHING_DEF[condition ? L"wide" L"strings" : L"safe"] wide#5 -> wide#9
+FLOWS|REACHING_DEF[condition ? U"utf32" U"strings" : U"safe"] utf32#5 -> utf32#4
+FLOWS|REACHING_DEF[condition ? U"utf32" U"strings" : U"safe"] utf32#5 -> utf32#9
+FLOWS|REACHING_DEF[condition ? u"utf16" u"strings" : u"safe"] utf16#5 -> utf16#4
+FLOWS|REACHING_DEF[condition ? u"utf16" u"strings" : u"safe"] utf16#5 -> utf16#9
+FLOWS|REACHING_DEF[condition ? u8"utf8" u8"strings" : u8"safe"] utf8#5 -> utf8#4
+FLOWS|REACHING_DEF[condition ? u8"utf8" u8"strings" : u8"safe"] utf8#5 -> utf8#9
+FLOWS|REACHING_DEF[condition] commented#1 -> commented#2
+FLOWS|REACHING_DEF[condition] commented#6 -> commented#2
+FLOWS|REACHING_DEF[condition] commented#6 -> commented#5
+FLOWS|REACHING_DEF[condition] commented#6 -> commented#9
+FLOWS|REACHING_DEF[condition] macro_condition#1 -> macro_condition#2
+FLOWS|REACHING_DEF[condition] macro_condition#6 -> macro_condition#13
+FLOWS|REACHING_DEF[condition] macro_condition#6 -> macro_condition#2
+FLOWS|REACHING_DEF[condition] macro_condition#6 -> macro_condition#5
+FLOWS|REACHING_DEF[condition] mixed_prefix#1 -> mixed_prefix#2
+FLOWS|REACHING_DEF[condition] mixed_prefix#6 -> mixed_prefix#2
+FLOWS|REACHING_DEF[condition] mixed_prefix#6 -> mixed_prefix#5
+FLOWS|REACHING_DEF[condition] mixed_prefix#6 -> mixed_prefix#9
+FLOWS|REACHING_DEF[condition] plain#1 -> plain#2
+FLOWS|REACHING_DEF[condition] plain#6 -> plain#2
+FLOWS|REACHING_DEF[condition] plain#6 -> plain#5
+FLOWS|REACHING_DEF[condition] plain#6 -> plain#9
+FLOWS|REACHING_DEF[condition] utf16#1 -> utf16#2
+FLOWS|REACHING_DEF[condition] utf16#6 -> utf16#2
+FLOWS|REACHING_DEF[condition] utf16#6 -> utf16#5
+FLOWS|REACHING_DEF[condition] utf16#6 -> utf16#9
+FLOWS|REACHING_DEF[condition] utf32#1 -> utf32#2
+FLOWS|REACHING_DEF[condition] utf32#6 -> utf32#2
+FLOWS|REACHING_DEF[condition] utf32#6 -> utf32#5
+FLOWS|REACHING_DEF[condition] utf32#6 -> utf32#9
+FLOWS|REACHING_DEF[condition] utf8#1 -> utf8#2
+FLOWS|REACHING_DEF[condition] utf8#6 -> utf8#2
+FLOWS|REACHING_DEF[condition] utf8#6 -> utf8#5
+FLOWS|REACHING_DEF[condition] utf8#6 -> utf8#9
+FLOWS|REACHING_DEF[condition] wide#1 -> wide#2
+FLOWS|REACHING_DEF[condition] wide#6 -> wide#2
+FLOWS|REACHING_DEF[condition] wide#6 -> wide#5
+FLOWS|REACHING_DEF[condition] wide#6 -> wide#9
+FLOWS|REACHING_DEF[consume("first" "second")] argument#4 -> argument#6
+FLOWS|REACHING_DEF[consume("first"\n            "second")] multiline#4 -> multiline#8
+FLOWS|REACHING_DEF[consume("following")] multiline#6 -> multiline#8
+FLOWS|REACHING_DEF[consume(("first" "second"))] parenthesized#4 -> parenthesized#6
+FLOWS|REACHING_DEF[consume(format)] lua_literal#18 -> lua_literal#22
+FLOWS|REACHING_DEF[format] lua_literal#19 -> lua_literal#18
+FLOWS|REACHING_DEF[format] lua_literal#19 -> lua_literal#21
+FLOWS|REACHING_DEF[format] lua_literal#19 -> lua_literal#22
+FLOWS|REACHING_DEF[format] lua_literal#21 -> lua_literal#20
+FLOWS|REACHING_DEF[format] lua_literal#9 -> lua_literal#19
+FLOWS|REACHING_DEF[format] lua_literal#9 -> lua_literal#8
+FLOWS|REACHING_DEF[minimum] lua_literal#13 -> lua_literal#12
+FLOWS|REACHING_DEF[minimum] lua_literal#13 -> lua_literal#22
+FLOWS|REACHING_DEF[minimum] lua_literal#13 -> lua_literal#4
+FLOWS|REACHING_DEF[minimum] lua_literal#3 -> lua_literal#13
+FLOWS|REACHING_DEF[minimum] lua_literal#3 -> lua_literal#4
+FLOWS|REACHING_DEF[n == minimum] lua_literal#11 -> lua_literal#10
+FLOWS|REACHING_DEF[n == minimum] lua_literal#11 -> lua_literal#22
+FLOWS|REACHING_DEF[n] lua_literal#1 -> lua_literal#12
+FLOWS|REACHING_DEF[n] lua_literal#1 -> lua_literal#2
+FLOWS|REACHING_DEF[n] lua_literal#12 -> lua_literal#13
+FLOWS|REACHING_DEF[n] lua_literal#12 -> lua_literal#2
+FLOWS|REACHING_DEF[n] lua_literal#12 -> lua_literal#22
+FLOWS|REACHING_DEF[p1] <operator>.assignment#1 -> <operator>.assignment#3
+FLOWS|REACHING_DEF[p1] <operator>.assignment#1 -> <operator>.assignment#5
+FLOWS|REACHING_DEF[p1] <operator>.conditional#1 -> <operator>.conditional#3
+FLOWS|REACHING_DEF[p1] <operator>.conditional#1 -> <operator>.conditional#5
+FLOWS|REACHING_DEF[p1] <operator>.equals#1 -> <operator>.equals#3
+FLOWS|REACHING_DEF[p1] <operator>.equals#1 -> <operator>.equals#5
+FLOWS|REACHING_DEF[p2] <operator>.assignment#4 -> <operator>.assignment#5
+FLOWS|REACHING_DEF[p2] <operator>.assignment#4 -> <operator>.assignment#6
+FLOWS|REACHING_DEF[p2] <operator>.conditional#4 -> <operator>.conditional#5
+FLOWS|REACHING_DEF[p2] <operator>.conditional#4 -> <operator>.conditional#6
+FLOWS|REACHING_DEF[p2] <operator>.equals#4 -> <operator>.equals#5
+FLOWS|REACHING_DEF[p2] <operator>.equals#4 -> <operator>.equals#6
+FLOWS|REACHING_DEF[p3] <operator>.conditional#7 -> <operator>.conditional#5
+FLOWS|REACHING_DEF[p3] <operator>.conditional#7 -> <operator>.conditional#8
+FLOWS|REACHING_DEF[u"safe"] utf16#8 -> utf16#5
+FLOWS|REACHING_DEF[u"utf16" u"strings"] utf16#7 -> utf16#5
+FLOWS|REACHING_DEF[u8"safe"] utf8#8 -> utf8#5
+FLOWS|REACHING_DEF[u8"utf8" u8"strings"] utf8#7 -> utf8#5
+FLOWS|REACHING_DEF[value] consume#1 -> consume#2
+FLOWS|REACHING_DEF[value] consume#1 -> consume#4

@@ -1,0 +1,20 @@
+--- accepted-c79
++++ first-cc625
+@@ -43,7 +43,6 @@
+ NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+ EDGES|ARGUMENT invoke#4 -> invoke#5
+ EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+-EDGES|CFG invoke#0 -> invoke#5
+ EDGES|CFG invoke#4 -> invoke#6
+ EDGES|CFG invoke#5 -> invoke#4
+ EDGES|CFG main.c:<global>#0 -> main.c:<global>#9
+@@ -97,9 +96,6 @@
+ EDGES|SOURCE_FILE main.c:<global>#0 -> F:main.c
+ FLOWS|REACHING_DEF["] invoke#5 -> invoke#4
+ FLOWS|REACHING_DEF[<RET>] invoke#4 -> invoke#6
+-FLOWS|REACHING_DEF[] invoke#0 -> invoke#1
+-FLOWS|REACHING_DEF[] invoke#0 -> invoke#4
+-FLOWS|REACHING_DEF[] invoke#0 -> invoke#5
+ FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#9
+ FLOWS|REACHING_DEF[x] invoke#1 -> invoke#2
+ FLOWS|REACHING_DEF[x] invoke#1 -> invoke#6

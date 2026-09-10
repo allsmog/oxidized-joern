@@ -1,0 +1,81 @@
+{
+  "status": "HELD_V4_BOUNDARY_REVIEW_NOT_ACCEPTANCE",
+  "time": "2026-09-08T20:18:55.892628+00:00",
+  "source": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-macro-state/candidate-v4/exact.rs",
+    "sha256": "35dd9430be3309294dc84aa7e76796f9997c4ff0845a2f56013aa3e01513b096",
+    "bytes": 396405
+  },
+  "binary": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-macro-state/candidate-v4/joern-parity",
+    "sha256": "5584f11047e1358ef7645386cfe79244787cd5cd9e942645e38e2540f7304673",
+    "bytes": 11809216
+  },
+  "ownerReceipt": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-macro-state/candidate-v4/bindings.json",
+    "sha256": "cf8218ed2d295a85c65d013c8e4cb6825e7576f3d6efdc4eaf645f786f6079a8",
+    "bytes": 734
+  },
+  "buildLog": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-macro-state/build-v4.log",
+    "sha256": "0c3c0ea14ecbbb2ab53c121d641849442e7906d596584f5835c7cb790b79063a",
+    "bytes": 348
+  },
+  "baseline": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/eighth-batch/final-real-differential/bin/joern-parity",
+    "sha256": "81a9d4c8c078496c2dc57b863cea8fb2a9538d72882408df08ca217dd7af6d9b",
+    "bytes": 2440272
+  },
+  "inputs": {
+    "ordinary_control": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/input/ordinary_control/main.c",
+      "sha256": "d9692b3f307bc9aa63a0bae3f6054ddaf2ed123b2dd7db59df9c8c4e1cc2219d",
+      "bytes": 110
+    },
+    "object_call": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/input/object_call/main.c",
+      "sha256": "56681ad9656e7d98ba30cd0a671aaaaec4f7cefc9916bb30fe5e84861992df97",
+      "bytes": 98
+    },
+    "object_redefinition": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/input/object_redefinition/main.c",
+      "sha256": "f47a1b7cfa844c6ed1888cfb94c7f6d1a39b580cb61ff85430e0dfefcfda6f70",
+      "bytes": 128
+    },
+    "function_wrap_redefinition": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/input/function_wrap_redefinition/main.c",
+      "sha256": "571d0ea899f43c773bc2ae69b4b402fd87654b6453b293aca1a2da1ab731a02c",
+      "bytes": 134
+    },
+    "object_function_alias": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/input/object_function_alias/main.c",
+      "sha256": "40e2b559ee9bf13d4d4b029977696857be9969bb2f77a10f3c9d472bfcb3e1f8",
+      "bytes": 152
+    },
+    "object_nested_argument": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/input/object_nested_argument/main.c",
+      "sha256": "e10dd4c061f49251c7cf161bfd147696cf876cc14647c0b383cb00aa48d39896",
+      "bytes": 171
+    }
+  },
+  "script": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-object-callee-review/oracle.sc",
+    "sha256": "56431f14868678e64f9eb41026b44f1d3d7738404d28d2db62711b520c98c742",
+    "bytes": 4709
+  },
+  "traceSource": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/cdt-trace/CdtTrace.scala",
+    "sha256": "64883481790d4809e84969e96380dc5cf38c6bcae978ea796a1a1bce5ed3f11b",
+    "bytes": 1869
+  },
+  "traceRun": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/cdt-trace/run.json",
+    "sha256": "214308c30adb3aa912fe1af6bc652afd11b80ed7ff5950b31d7472213103a2f4",
+    "bytes": 25749
+  },
+  "upstream": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/upstream/MacroHandler.scala",
+    "sha256": "73cdeb7c41d9356cc6ba2fe2f276bb198a1a26b77d67e13fb1830491289f0ab6",
+    "bytes": 9211
+  }
+}

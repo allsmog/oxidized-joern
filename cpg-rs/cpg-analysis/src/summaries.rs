@@ -528,6 +528,12 @@ fn compute_method(
     method: NodeId,
     store: &SummaryStore,
 ) -> (FunctionSummary, HashSet<String>) {
+    if crate::return_flow::is_authoritative(cpg, method) {
+        let graph = crate::return_flow::ReturnFlowGraph::new(cpg, method, store);
+        let mut summary = graph.summary(cpg, method);
+        limit_call_returns(&mut summary.call_returns);
+        return (summary, graph.dependencies);
+    }
     let fqn = cpg.full_name_of(method).unwrap_or("<anon>").to_string();
 
     // Map parameter name -> 0-based index.
@@ -606,12 +612,7 @@ fn compute_method(
     // Bound the returns-tainted set: a method whose return derives from very
     // many distinct calls is an aggregator, not a source wrapper — keep the
     // lexicographically-first entries so the cap is deterministic.
-    if call_returns.len() > MAX_CALL_RETURNS {
-        let mut v: Vec<CallReturn> = call_returns.into_iter().collect();
-        v.sort();
-        v.truncate(MAX_CALL_RETURNS);
-        call_returns = v.into_iter().collect();
-    }
+    limit_call_returns(&mut call_returns);
 
     // models_receiver stays false for every computed summary: implicit-`this`
     // field access (bare `cmd` meaning `this.cmd` in JVM/C-family bodies) is
@@ -626,6 +627,15 @@ fn compute_method(
         },
         deps,
     )
+}
+
+fn limit_call_returns(call_returns: &mut HashSet<CallReturn>) {
+    if call_returns.len() > MAX_CALL_RETURNS {
+        let mut v: Vec<CallReturn> = call_returns.drain().collect();
+        v.sort();
+        v.truncate(MAX_CALL_RETURNS);
+        *call_returns = v.into_iter().collect();
+    }
 }
 
 /// Cap on distinct [`CallReturn`] entries per summary (see `compute_method`).

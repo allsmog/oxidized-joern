@@ -1,0 +1,129 @@
+{
+  "liveMethods": 410,
+  "baselineExact": 149,
+  "candidateExact": 160,
+  "gained": [
+    "braid",
+    "crc_word",
+    "crc_word_big",
+    "once",
+    "once<duplicate>0",
+    "send_bits",
+    "snprintf",
+    "test_and_set",
+    "write_table",
+    "write_table32hi",
+    "write_table64"
+  ],
+  "lost": [],
+  "targets": {
+    "braid": {
+      "completeMethodExact": true,
+      "snprintfCallsBefore": [],
+      "snprintfCallsCandidate": [],
+      "snprintfCallsJoern": []
+    },
+    "crc_word": {
+      "completeMethodExact": true,
+      "snprintfCallsBefore": [],
+      "snprintfCallsCandidate": [],
+      "snprintfCallsJoern": []
+    },
+    "crc_word_big": {
+      "completeMethodExact": true,
+      "snprintfCallsBefore": [],
+      "snprintfCallsCandidate": [],
+      "snprintfCallsJoern": []
+    },
+    "once": {
+      "completeMethodExact": true,
+      "snprintfCallsBefore": [],
+      "snprintfCallsCandidate": [],
+      "snprintfCallsJoern": []
+    },
+    "once<duplicate>0": {
+      "completeMethodExact": true,
+      "snprintfCallsBefore": [],
+      "snprintfCallsCandidate": [],
+      "snprintfCallsJoern": []
+    },
+    "send_bits": {
+      "completeMethodExact": true,
+      "snprintfCallsBefore": [],
+      "snprintfCallsCandidate": [],
+      "snprintfCallsJoern": []
+    },
+    "snprintf": {
+      "completeMethodExact": true,
+      "snprintfCallsBefore": [],
+      "snprintfCallsCandidate": [],
+      "snprintfCallsJoern": []
+    },
+    "test_and_set": {
+      "completeMethodExact": true,
+      "snprintfCallsBefore": [],
+      "snprintfCallsCandidate": [],
+      "snprintfCallsJoern": []
+    },
+    "write_table": {
+      "completeMethodExact": true,
+      "snprintfCallsBefore": [],
+      "snprintfCallsCandidate": [],
+      "snprintfCallsJoern": []
+    },
+    "write_table32hi": {
+      "completeMethodExact": true,
+      "snprintfCallsBefore": [],
+      "snprintfCallsCandidate": [],
+      "snprintfCallsJoern": []
+    },
+    "write_table64": {
+      "completeMethodExact": true,
+      "snprintfCallsBefore": [],
+      "snprintfCallsCandidate": [],
+      "snprintfCallsJoern": []
+    },
+    "gz_open": {
+      "completeMethodExact": false,
+      "snprintfCallsBefore": [],
+      "snprintfCallsCandidate": [
+        "      CALL NAME=snprintf CODE=snprintf(state->path, len + 1, \"%s\", (const char *)path) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=snprintf ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH"
+      ],
+      "snprintfCallsJoern": [
+        "      CALL NAME=snprintf CODE=snprintf(state->path, len + 1, \"%s\", (const char *)path) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=snprintf ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH"
+      ]
+    },
+    "gzdopen": {
+      "completeMethodExact": false,
+      "snprintfCallsBefore": [],
+      "snprintfCallsCandidate": [
+        "      CALL NAME=snprintf CODE=snprintf(path, 7 + 3 * sizeof(int), \"<fd:%d>\", fd) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=snprintf ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH"
+      ],
+      "snprintfCallsJoern": [
+        "      CALL NAME=snprintf CODE=snprintf(path, 7 + 3 * sizeof(int), \"<fd:%d>\", fd) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=snprintf ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH"
+      ]
+    },
+    "gz_error": {
+      "completeMethodExact": false,
+      "snprintfCallsBefore": [],
+      "snprintfCallsCandidate": [
+        "      CALL NAME=snprintf CODE=snprintf(state->msg, strlen(state->path) + strlen(msg) + 3,\\n                   \"%s%s%s\", state->path, \": \", msg) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=snprintf ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH"
+      ],
+      "snprintfCallsJoern": [
+        "      CALL NAME=snprintf CODE=snprintf(state->msg, strlen(state->path) + strlen(msg) + 3,\\n                   \"%s%s%s\", state->path, \": \", msg) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=snprintf ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH"
+      ]
+    },
+    "byte_swap": {
+      "completeMethodExact": true,
+      "snprintfCallsBefore": [],
+      "snprintfCallsCandidate": [],
+      "snprintfCallsJoern": []
+    }
+  },
+  "bindings": {
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/seventh-batch/final-real-differential/zlib-1.3.1-core-full/rust.stdout": "ae116ec6b6789475c17b0e94d9ff06135e9f7bf6af7f4546d7214aa37e16cb92",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/sixth-batch/fresh-real-oracles/zlib-1.3.1-core-full/joern.stdout": "2deeedc465c78e6e3ae0fde8ef7e54444e1d0f7f486a39d89f5c838eec816838",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/.local/body-preprocessor/whole-zlib-v4/actual.txt": "0f22c25de7b4c7ce2566d47adf200e06bbc86891530481a083966da6e959d6b6",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/.local/body-preprocessor/whole-zlib-v4/run.json": "ec3c55660bbb0fbf1b0162248de07f7c1ccbf88b0de823ee2ac6852831ded32d"
+  }
+}

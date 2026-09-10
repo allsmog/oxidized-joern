@@ -1,0 +1,69 @@
+METHOD NAME=luaT_callorderTM CODE=int luaT_callorderTM (lua_State *L, const TValue *p1, const TValue *p2,\n                      TMS event) {\n  if (callbinTM(L, p1, p2, L->top.p, event))  /* try original event */\n    return !l_isfalse(s2v(L->top.p));\n#if defined(LUA_COMPAT_LT_LE)\n  else if (event == TM_LE) {\n      /* try '!(p2 < p1)' for '(p1 <= p2)' */\n      L->ci->callstatus |= CIST_LEQ;  /* mark it is doing 'lt' for 'le' */\n      if (callbinTM(L, p2, p1, L->top.p, TM_LT)) {\n        L->ci->callstatus ^= CIST_LEQ;  /* clear mark */\n        return l_isfalse(s2v(L->top.p));\n      }\n      /* else error will remove this 'ci'; no need to clear mark */\n  }\n#endif\n  luaG_ordererror(L, p1, p2);  /* no metamethod found */\n  return 0;  /* to avoid warnings */\n} FULL_NAME=luaT_callorderTM SIGNATURE=int(lua_State*,TValue*,TValue*,TMS) ORDER=1
+  METHOD_PARAMETER_IN NAME=L CODE=lua_State *L TYPE_FULL_NAME=lua_State* ORDER=1
+  METHOD_PARAMETER_OUT NAME=L CODE=lua_State *L TYPE_FULL_NAME=lua_State* ORDER=1
+  METHOD_PARAMETER_IN NAME=p1 CODE=const TValue *p1 TYPE_FULL_NAME=TValue* ORDER=2
+  METHOD_PARAMETER_OUT NAME=p1 CODE=const TValue *p1 TYPE_FULL_NAME=TValue* ORDER=2
+  METHOD_PARAMETER_IN NAME=p2 CODE=const TValue *p2 TYPE_FULL_NAME=TValue* ORDER=3
+  METHOD_PARAMETER_OUT NAME=p2 CODE=const TValue *p2 TYPE_FULL_NAME=TValue* ORDER=3
+  METHOD_PARAMETER_IN NAME=event CODE=TMS event TYPE_FULL_NAME=TMS ORDER=4
+  METHOD_PARAMETER_OUT NAME=event CODE=TMS event TYPE_FULL_NAME=TMS ORDER=4
+  BLOCK CODE={\n  if (callbinTM(L, p1, p2, L->top.p, event))  /* try original event */\n    return !l_isfalse(s2v(L->top.p));\n#if defined(LUA_COMPAT_LT_LE)\n  else if (event == TM_LE) {\n      /* try '!(p2 < p1)' for '(p1 <= p2)' */\n      L->ci->callstatus |= CIST_LEQ;  /* mark it is doing 'lt' for 'le' */\n      if (callbinTM(L, p2, p1, L->top.p, TM_LT)) {\n        L->ci->callstatus ^= CIST_LEQ;  /* clear mark */\n        return l_isfalse(s2v(L->top.p));\n      }\n      /* else error will remove this 'ci'; no need to clear mark */\n  }\n#endif\n  luaG_ordererror(L, p1, p2);  /* no metamethod found */\n  return 0;  /* to avoid warnings */\n} TYPE_FULL_NAME=void ORDER=5
+    LOCAL NAME=CIST_LEQ CODE=<unknown> CIST_LEQ TYPE_FULL_NAME=ANY ORDER=0
+    LOCAL NAME=TM_LT CODE=<unknown> TM_LT TYPE_FULL_NAME=ANY ORDER=0
+    LOCAL NAME=TM_LE CODE=<unknown> TM_LE TYPE_FULL_NAME=ANY ORDER=0
+    LOCAL NAME=if CODE=<unknown> if TYPE_FULL_NAME=ANY ORDER=0
+    LOCAL NAME=LUA_COMPAT_LT_LE CODE=<unknown> LUA_COMPAT_LT_LE TYPE_FULL_NAME=ANY ORDER=0
+    CONTROL_STRUCTURE CODE=if (callbinTM(L, p1, p2, L->top.p, event))  /* try original event */\n    return !l_isfalse(s2v(L->top.p)); ORDER=1
+      CALL NAME=callbinTM CODE=callbinTM(L, p1, p2, L->top.p, event) TYPE_FULL_NAME=int METHOD_FULL_NAME=callbinTM ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=L CODE=L TYPE_FULL_NAME=lua_State* ORDER=1 ARGUMENT_INDEX=1
+        IDENTIFIER NAME=p1 CODE=p1 TYPE_FULL_NAME=TValue* ORDER=2 ARGUMENT_INDEX=2
+        IDENTIFIER NAME=p2 CODE=p2 TYPE_FULL_NAME=TValue* ORDER=3 ARGUMENT_INDEX=3
+        CALL NAME=<operator>.fieldAccess CODE=L->top.p TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.fieldAccess ORDER=4 ARGUMENT_INDEX=4 DISPATCH_TYPE=STATIC_DISPATCH
+          CALL NAME=<operator>.indirectFieldAccess CODE=L->top TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+            IDENTIFIER NAME=L CODE=L TYPE_FULL_NAME=lua_State* ORDER=1 ARGUMENT_INDEX=1
+            FIELD_IDENTIFIER CODE=top ORDER=2 ARGUMENT_INDEX=2
+          FIELD_IDENTIFIER CODE=p ORDER=2 ARGUMENT_INDEX=2
+        IDENTIFIER NAME=event CODE=event TYPE_FULL_NAME=TMS ORDER=5 ARGUMENT_INDEX=5
+      BLOCK TYPE_FULL_NAME=ANY ORDER=2
+        RETURN CODE=return !l_isfalse(s2v(L->top.p)); ORDER=1
+          CALL NAME=<operator>.logicalNot CODE=!l_isfalse(s2v(L->top.p)) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.logicalNot ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+            CALL NAME=l_isfalse CODE=l_isfalse(s2v(L->top.p)) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=lobject.h:l_isfalse:ANY(1) SIGNATURE=ANY(1) ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=INLINED
+              BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+                CALL NAME=<operator>.logicalOr CODE=(((((&(L->top.p)->val)))->tt_) == (((1) | ((0) << 4)))) || ((((((((&(L->top.p)->val)))->tt_)) & 0x0F)) == (0)) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.logicalOr ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+                  CALL NAME=<operator>.equals CODE=((((&(L->top.p)->val)))->tt_) == (((1) | ((0) << 4))) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.equals ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                    CALL NAME=<operator>.indirectFieldAccess CODE=(((&(L->top.p)->val)))->tt_ TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                      CALL NAME=<operator>.addressOf CODE=&(L->top.p)->val TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addressOf ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                        CALL NAME=<operator>.indirectFieldAccess CODE=(L->top.p)->val TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                          CALL NAME=<operator>.fieldAccess CODE=L->top.p TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.fieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                            CALL NAME=<operator>.indirectFieldAccess CODE=L->top TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                              IDENTIFIER NAME=L CODE=L TYPE_FULL_NAME=lua_State* ORDER=1 ARGUMENT_INDEX=1
+                              FIELD_IDENTIFIER CODE=top ORDER=2 ARGUMENT_INDEX=2
+                            FIELD_IDENTIFIER CODE=p ORDER=2 ARGUMENT_INDEX=2
+                          FIELD_IDENTIFIER CODE=val ORDER=2 ARGUMENT_INDEX=2
+                      FIELD_IDENTIFIER CODE=tt_ ORDER=2 ARGUMENT_INDEX=2
+                    CALL NAME=<operator>.or CODE=(1) | ((0) << 4) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.or ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+                      LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+                      CALL NAME=<operator>.shiftLeft CODE=(0) << 4 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.shiftLeft ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+                        LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+                        LITERAL CODE=4 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+                  CALL NAME=<operator>.equals CODE=(((((((&(L->top.p)->val)))->tt_)) & 0x0F)) == (0) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.equals ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+                    CALL NAME=<operator>.and CODE=(((((&(L->top.p)->val)))->tt_)) & 0x0F TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.and ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                      CALL NAME=<operator>.indirectFieldAccess CODE=(((&(L->top.p)->val)))->tt_ TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                        CALL NAME=<operator>.addressOf CODE=&(L->top.p)->val TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addressOf ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                          CALL NAME=<operator>.indirectFieldAccess CODE=(L->top.p)->val TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                            CALL NAME=<operator>.fieldAccess CODE=L->top.p TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.fieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                              CALL NAME=<operator>.indirectFieldAccess CODE=L->top TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                                IDENTIFIER NAME=L CODE=L TYPE_FULL_NAME=lua_State* ORDER=1 ARGUMENT_INDEX=1
+                                FIELD_IDENTIFIER CODE=top ORDER=2 ARGUMENT_INDEX=2
+                              FIELD_IDENTIFIER CODE=p ORDER=2 ARGUMENT_INDEX=2
+                            FIELD_IDENTIFIER CODE=val ORDER=2 ARGUMENT_INDEX=2
+                        FIELD_IDENTIFIER CODE=tt_ ORDER=2 ARGUMENT_INDEX=2
+                      LITERAL CODE=0x0F TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+                    LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+    CALL NAME=luaG_ordererror CODE=luaG_ordererror(L, p1, p2) TYPE_FULL_NAME=void METHOD_FULL_NAME=luaG_ordererror ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+      IDENTIFIER NAME=L CODE=L TYPE_FULL_NAME=lua_State* ORDER=1 ARGUMENT_INDEX=1
+      IDENTIFIER NAME=p1 CODE=p1 TYPE_FULL_NAME=TValue* ORDER=2 ARGUMENT_INDEX=2
+      IDENTIFIER NAME=p2 CODE=p2 TYPE_FULL_NAME=TValue* ORDER=3 ARGUMENT_INDEX=3
+    RETURN CODE=return 0; ORDER=3
+      LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=6

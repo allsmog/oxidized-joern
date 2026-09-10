@@ -1,0 +1,25 @@
+{
+  "command": [
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/twelfth-batch/lint-corrected/final-real-differential/bin/joern-parity",
+    "--production-supplemental",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/thirteenth-batch/accepted-capture-v1/tiny_fixedtables_include/input/fixed.h",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/thirteenth-batch/accepted-capture-v1/tiny_fixedtables_include/input/main.c"
+  ],
+  "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/thirteenth-batch/accepted-capture-v1/tiny_fixedtables_include",
+  "exitCode": 0,
+  "error": null,
+  "timedOut": false,
+  "seconds": 0.010155291005503386,
+  "stdout": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/thirteenth-batch/accepted-capture-v1/tiny_fixedtables_include/supplement.stdout",
+    "bytes": 137811,
+    "sha256": "4ee92b50ab79430ecbece8c2adcd3a4d6d064d8f7f5b1baf98f02c6ea0caa2bf",
+    "error": null
+  },
+  "stderr": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/thirteenth-batch/accepted-capture-v1/tiny_fixedtables_include/supplement.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "error": null
+  }
+}

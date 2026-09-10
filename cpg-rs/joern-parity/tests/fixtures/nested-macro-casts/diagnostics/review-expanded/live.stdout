@@ -1,0 +1,624 @@
+=======================================================================================================
+Invoking CPG generator in a separate process. Note that the new process will consume additional memory.
+If you are importing a large codebase (and/or running into memory issues), please try the following:
+1) exit joern
+2) invoke the frontend: /Users/shayaunnejad/vibe-code/joern-oxidized/.local/astra-sprint/oracle/runtime/joern-cli/c2cpg.sh -J-Xmx4096m /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/nested-casts/review-expanded --output /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/nested-casts/review-expanded-oracle/workspace/proj/cpg.bin.zip
+3) start joern, import the cpg: `importCpg("path/to/cpg")`
+=======================================================================================================
+
+[INFO ] initialising from existing storage (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/nested-casts/review-expanded-oracle/workspace/proj/cpg.bin.tmp)
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.FileCreationPass
+[INFO ] Pass io.joern.x2cpg.passes.base.FileCreationPass completed in 13 ms (69% on mutations). 25 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.NamespaceCreator
+[INFO ] Pass io.joern.x2cpg.passes.base.NamespaceCreator completed in 3 ms (48% on mutations). 4 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.TypeDeclStubCreator
+[INFO ] Pass io.joern.x2cpg.passes.base.TypeDeclStubCreator completed in 1 ms (63% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.MethodStubCreator
+[INFO ] Pass io.joern.x2cpg.passes.base.MethodStubCreator completed in 7 ms (18% on mutations). 9 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.ParameterIndexCompatPass
+[INFO ] Pass io.joern.x2cpg.passes.base.ParameterIndexCompatPass completed in 1 ms (33% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.MethodDecoratorPass
+[INFO ] Pass io.joern.x2cpg.passes.base.MethodDecoratorPass completed in 2 ms (30% on mutations). 30 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.AstLinkerPass
+[INFO ] Pass io.joern.x2cpg.passes.base.AstLinkerPass completed in 2 ms (17% on mutations). 14 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.ContainsEdgePass
+[INFO ] Pass io.joern.x2cpg.passes.base.ContainsEdgePass completed in 1 ms (36% on mutations). 66 + 0 changes committed from 25 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.TypeRefPass
+[INFO ] Pass io.joern.x2cpg.passes.base.TypeRefPass completed in 1 ms (30% on mutations). 10 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.base.TypeEvalPass
+[INFO ] Pass io.joern.x2cpg.passes.base.TypeEvalPass completed in 1 ms (35% on mutations). 72 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 2 ms (26% on mutations). 1 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.controlflow.CfgCreationPass
+[INFO ] Pass io.joern.x2cpg.passes.controlflow.CfgCreationPass completed in 12 ms (3% on mutations). 45 + 0 changes committed from 11 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.controlflow.cfgdominator.CfgDominatorPass
+[INFO ] Pass io.joern.x2cpg.passes.controlflow.cfgdominator.CfgDominatorPass completed in 3 ms (11% on mutations). 82 + 0 changes committed from 11 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.controlflow.codepencegraph.CdgPass
+[INFO ] Pass io.joern.x2cpg.passes.controlflow.codepencegraph.CdgPass completed in 2 ms (13% on mutations). 14 + 0 changes committed from 11 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 0 ms (74% on mutations). 1 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.typerelations.TypeHierarchyPass
+[INFO ] Pass io.joern.x2cpg.passes.typerelations.TypeHierarchyPass completed in 1 ms (25% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.typerelations.AliasLinkerPass
+[INFO ] Pass io.joern.x2cpg.passes.typerelations.AliasLinkerPass completed in 0 ms (41% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.typerelations.FieldAccessLinkerPass
+[INFO ] Pass io.joern.x2cpg.passes.typerelations.FieldAccessLinkerPass completed in 1 ms (25% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 0 ms (80% on mutations). 1 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.callgraph.MethodRefLinker
+[INFO ] Pass io.joern.x2cpg.passes.callgraph.MethodRefLinker completed in 0 ms (54% on mutations). 4 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.callgraph.StaticCallLinker
+[INFO ] Pass io.joern.x2cpg.passes.callgraph.StaticCallLinker completed in 1 ms (39% on mutations). 9 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.x2cpg.passes.callgraph.DynamicCallLinker
+[INFO ] Pass io.joern.x2cpg.passes.callgraph.DynamicCallLinker completed in 0 ms (55% on mutations). 0 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 0 ms (77% on mutations). 1 + 0 changes committed from 1 parts.
+[INFO ] Start of pass: io.joern.dataflowengineoss.passes.reachingdef.ReachingDefPass
+[INFO ] Calculating reaching definitions for: probe.c:VALUE:ANY(1) in probe.c
+[INFO ] Calculating reaching definitions for: probe.c:CAST:ANY(1) in probe.c
+[INFO ] Calculating reaching definitions for: <includes>:<global> in <includes>
+[INFO ] Calculating reaching definitions for: probe.c:<global> in probe.c
+[INFO ] Calculating reaching definitions for: probe.c:DOUBLE:ANY(1) in probe.c
+[INFO ] Calculating reaching definitions for: nested_value in probe.c
+[INFO ] Calculating reaching definitions for: probe.c:MATRIX:ANY(1) in probe.c
+[INFO ] Calculating reaching definitions for: double_pointer in probe.c
+[INFO ] Calculating reaching definitions for: matrix in probe.c
+[INFO ] Calculating reaching definitions for: composite in probe.c
+[INFO ] Number of definitions for probe.c:<global>: 0
+[INFO ] Number of definitions for <includes>:<global>: 0
+[INFO ] Number of definitions for probe.c:CAST:ANY(1): 1
+[INFO ] Number of definitions for probe.c:MATRIX:ANY(1): 1
+[INFO ] Number of definitions for probe.c:VALUE:ANY(1): 1
+[INFO ] Number of definitions for probe.c:DOUBLE:ANY(1): 1
+[INFO ] Number of definitions for matrix: 5
+[INFO ] Number of definitions for nested_value: 7
+[INFO ] Number of definitions for composite: 5
+[INFO ] Number of definitions for double_pointer: 5
+[INFO ] Calculating reaching definitions for: <operator>.cast in <empty>
+[INFO ] Number of definitions for <operator>.cast: 2
+[INFO ] Pass io.joern.dataflowengineoss.passes.reachingdef.ReachingDefPass completed in 22 ms (2% on mutations). 98 + 0 changes committed from 11 parts.
+[INFO ] Start of pass: io.shiftleft.semanticcpg.Overlays$$anon$1
+[INFO ] Pass io.shiftleft.semanticcpg.Overlays$$anon$1 completed in 0 ms (51% on mutations). 1 + 0 changes committed from 1 parts.
+AST|METHOD NAME=<global> CODE=<global> FULL_NAME=<includes>:<global> ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=<operator>.cast FULL_NAME=<operator>.cast ORDER=0
+AST|  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+AST|  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=composite CODE=void *composite(void *p) { return CAST(p); } FULL_NAME=composite SIGNATURE=void*(void*) ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=p CODE=void *p TYPE_FULL_NAME=void* ORDER=1
+AST|  METHOD_PARAMETER_OUT NAME=p CODE=void *p TYPE_FULL_NAME=void* ORDER=1
+AST|  BLOCK CODE={ return CAST(p); } TYPE_FULL_NAME=void ORDER=2
+AST|    RETURN CODE=return CAST(p); ORDER=1
+AST|      CALL NAME=CAST CODE=CAST(p) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=probe.c:CAST:ANY(1) SIGNATURE=ANY(1) ORDER=1 DISPATCH_TYPE=INLINED
+AST|        IDENTIFIER NAME=p CODE=p TYPE_FULL_NAME=void* ORDER=1 ARGUMENT_INDEX=1
+AST|        BLOCK TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+AST|          CALL NAME=<operator>.cast CODE=(int [] (*))p TYPE_FULL_NAME=int METHOD_FULL_NAME=<operator>.cast ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|            TYPE_REF CODE=int [] (*) TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|            IDENTIFIER NAME=p CODE=p TYPE_FULL_NAME=void* ORDER=2 ARGUMENT_INDEX=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=void* ORDER=3
+AST|
+AST|METHOD NAME=double_pointer CODE=void *double_pointer(void *p) { return DOUBLE(p); } FULL_NAME=double_pointer SIGNATURE=void*(void*) ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=p CODE=void *p TYPE_FULL_NAME=void* ORDER=1
+AST|  METHOD_PARAMETER_OUT NAME=p CODE=void *p TYPE_FULL_NAME=void* ORDER=1
+AST|  BLOCK CODE={ return DOUBLE(p); } TYPE_FULL_NAME=void ORDER=2
+AST|    RETURN CODE=return DOUBLE(p); ORDER=1
+AST|      CALL NAME=DOUBLE CODE=DOUBLE(p) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=probe.c:DOUBLE:ANY(1) SIGNATURE=ANY(1) ORDER=1 DISPATCH_TYPE=INLINED
+AST|        IDENTIFIER NAME=p CODE=p TYPE_FULL_NAME=void* ORDER=1 ARGUMENT_INDEX=1
+AST|        BLOCK TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+AST|          CALL NAME=<operator>.cast CODE=(int [] (* *))p TYPE_FULL_NAME=int METHOD_FULL_NAME=<operator>.cast ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|            TYPE_REF CODE=int [] (* *) TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|            IDENTIFIER NAME=p CODE=p TYPE_FULL_NAME=void* ORDER=2 ARGUMENT_INDEX=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=void* ORDER=3
+AST|
+AST|METHOD NAME=matrix CODE=void *matrix(void *p) { return MATRIX(p); } FULL_NAME=matrix SIGNATURE=void*(void*) ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=p CODE=void *p TYPE_FULL_NAME=void* ORDER=1
+AST|  METHOD_PARAMETER_OUT NAME=p CODE=void *p TYPE_FULL_NAME=void* ORDER=1
+AST|  BLOCK CODE={ return MATRIX(p); } TYPE_FULL_NAME=void ORDER=2
+AST|    RETURN CODE=return MATRIX(p); ORDER=1
+AST|      CALL NAME=MATRIX CODE=MATRIX(p) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=probe.c:MATRIX:ANY(1) SIGNATURE=ANY(1) ORDER=1 DISPATCH_TYPE=INLINED
+AST|        IDENTIFIER NAME=p CODE=p TYPE_FULL_NAME=void* ORDER=1 ARGUMENT_INDEX=1
+AST|        BLOCK TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+AST|          CALL NAME=<operator>.cast CODE=(int [][] (*))p TYPE_FULL_NAME=int METHOD_FULL_NAME=<operator>.cast ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|            TYPE_REF CODE=int [][] (*) TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|            IDENTIFIER NAME=p CODE=p TYPE_FULL_NAME=void* ORDER=2 ARGUMENT_INDEX=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=void* ORDER=3
+AST|
+AST|METHOD NAME=nested_value CODE=void *nested_value(void *p) { return VALUE(p); } FULL_NAME=nested_value SIGNATURE=void*(void*) ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=p CODE=void *p TYPE_FULL_NAME=void* ORDER=1
+AST|  METHOD_PARAMETER_OUT NAME=p CODE=void *p TYPE_FULL_NAME=void* ORDER=1
+AST|  BLOCK CODE={ return VALUE(p); } TYPE_FULL_NAME=void ORDER=2
+AST|    RETURN CODE=return VALUE(p); ORDER=1
+AST|      CALL NAME=VALUE CODE=VALUE(p) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=probe.c:VALUE:ANY(1) SIGNATURE=ANY(1) ORDER=1 DISPATCH_TYPE=INLINED
+AST|        IDENTIFIER NAME=p CODE=p TYPE_FULL_NAME=void* ORDER=1 ARGUMENT_INDEX=1
+AST|        BLOCK TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+AST|          CALL NAME=<operator>.cast CODE=(U *)(void *)p TYPE_FULL_NAME=unionU METHOD_FULL_NAME=<operator>.cast ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|            TYPE_REF CODE=U * TYPE_FULL_NAME=unionU ORDER=1 ARGUMENT_INDEX=1
+AST|            CALL NAME=<operator>.cast CODE=(void *)p TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.cast ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|              TYPE_REF CODE=void * TYPE_FULL_NAME=void ORDER=1 ARGUMENT_INDEX=1
+AST|              IDENTIFIER NAME=p CODE=p TYPE_FULL_NAME=void* ORDER=2 ARGUMENT_INDEX=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=void* ORDER=3
+AST|
+AST|METHOD NAME=<global> CODE=<global> FULL_NAME=probe.c:<global> ORDER=1
+AST|  METHOD NAME=composite CODE=void *composite(void *p) { return CAST(p); } FULL_NAME=composite SIGNATURE=void*(void*) ORDER=1
+AST|    METHOD_PARAMETER_IN NAME=p CODE=void *p TYPE_FULL_NAME=void* ORDER=1
+AST|    METHOD_PARAMETER_OUT NAME=p CODE=void *p TYPE_FULL_NAME=void* ORDER=1
+AST|    BLOCK CODE={ return CAST(p); } TYPE_FULL_NAME=void ORDER=2
+AST|      RETURN CODE=return CAST(p); ORDER=1
+AST|        CALL NAME=CAST CODE=CAST(p) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=probe.c:CAST:ANY(1) SIGNATURE=ANY(1) ORDER=1 DISPATCH_TYPE=INLINED
+AST|          IDENTIFIER NAME=p CODE=p TYPE_FULL_NAME=void* ORDER=1 ARGUMENT_INDEX=1
+AST|          BLOCK TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+AST|            CALL NAME=<operator>.cast CODE=(int [] (*))p TYPE_FULL_NAME=int METHOD_FULL_NAME=<operator>.cast ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|              TYPE_REF CODE=int [] (*) TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|              IDENTIFIER NAME=p CODE=p TYPE_FULL_NAME=void* ORDER=2 ARGUMENT_INDEX=2
+AST|    METHOD_RETURN CODE=RET TYPE_FULL_NAME=void* ORDER=3
+AST|  METHOD NAME=double_pointer CODE=void *double_pointer(void *p) { return DOUBLE(p); } FULL_NAME=double_pointer SIGNATURE=void*(void*) ORDER=1
+AST|    METHOD_PARAMETER_IN NAME=p CODE=void *p TYPE_FULL_NAME=void* ORDER=1
+AST|    METHOD_PARAMETER_OUT NAME=p CODE=void *p TYPE_FULL_NAME=void* ORDER=1
+AST|    BLOCK CODE={ return DOUBLE(p); } TYPE_FULL_NAME=void ORDER=2
+AST|      RETURN CODE=return DOUBLE(p); ORDER=1
+AST|        CALL NAME=DOUBLE CODE=DOUBLE(p) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=probe.c:DOUBLE:ANY(1) SIGNATURE=ANY(1) ORDER=1 DISPATCH_TYPE=INLINED
+AST|          IDENTIFIER NAME=p CODE=p TYPE_FULL_NAME=void* ORDER=1 ARGUMENT_INDEX=1
+AST|          BLOCK TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+AST|            CALL NAME=<operator>.cast CODE=(int [] (* *))p TYPE_FULL_NAME=int METHOD_FULL_NAME=<operator>.cast ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|              TYPE_REF CODE=int [] (* *) TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|              IDENTIFIER NAME=p CODE=p TYPE_FULL_NAME=void* ORDER=2 ARGUMENT_INDEX=2
+AST|    METHOD_RETURN CODE=RET TYPE_FULL_NAME=void* ORDER=3
+AST|  METHOD NAME=matrix CODE=void *matrix(void *p) { return MATRIX(p); } FULL_NAME=matrix SIGNATURE=void*(void*) ORDER=1
+AST|    METHOD_PARAMETER_IN NAME=p CODE=void *p TYPE_FULL_NAME=void* ORDER=1
+AST|    METHOD_PARAMETER_OUT NAME=p CODE=void *p TYPE_FULL_NAME=void* ORDER=1
+AST|    BLOCK CODE={ return MATRIX(p); } TYPE_FULL_NAME=void ORDER=2
+AST|      RETURN CODE=return MATRIX(p); ORDER=1
+AST|        CALL NAME=MATRIX CODE=MATRIX(p) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=probe.c:MATRIX:ANY(1) SIGNATURE=ANY(1) ORDER=1 DISPATCH_TYPE=INLINED
+AST|          IDENTIFIER NAME=p CODE=p TYPE_FULL_NAME=void* ORDER=1 ARGUMENT_INDEX=1
+AST|          BLOCK TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+AST|            CALL NAME=<operator>.cast CODE=(int [][] (*))p TYPE_FULL_NAME=int METHOD_FULL_NAME=<operator>.cast ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|              TYPE_REF CODE=int [][] (*) TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+AST|              IDENTIFIER NAME=p CODE=p TYPE_FULL_NAME=void* ORDER=2 ARGUMENT_INDEX=2
+AST|    METHOD_RETURN CODE=RET TYPE_FULL_NAME=void* ORDER=3
+AST|  METHOD NAME=nested_value CODE=void *nested_value(void *p) { return VALUE(p); } FULL_NAME=nested_value SIGNATURE=void*(void*) ORDER=1
+AST|    METHOD_PARAMETER_IN NAME=p CODE=void *p TYPE_FULL_NAME=void* ORDER=1
+AST|    METHOD_PARAMETER_OUT NAME=p CODE=void *p TYPE_FULL_NAME=void* ORDER=1
+AST|    BLOCK CODE={ return VALUE(p); } TYPE_FULL_NAME=void ORDER=2
+AST|      RETURN CODE=return VALUE(p); ORDER=1
+AST|        CALL NAME=VALUE CODE=VALUE(p) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=probe.c:VALUE:ANY(1) SIGNATURE=ANY(1) ORDER=1 DISPATCH_TYPE=INLINED
+AST|          IDENTIFIER NAME=p CODE=p TYPE_FULL_NAME=void* ORDER=1 ARGUMENT_INDEX=1
+AST|          BLOCK TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+AST|            CALL NAME=<operator>.cast CODE=(U *)(void *)p TYPE_FULL_NAME=unionU METHOD_FULL_NAME=<operator>.cast ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+AST|              TYPE_REF CODE=U * TYPE_FULL_NAME=unionU ORDER=1 ARGUMENT_INDEX=1
+AST|              CALL NAME=<operator>.cast CODE=(void *)p TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.cast ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+AST|                TYPE_REF CODE=void * TYPE_FULL_NAME=void ORDER=1 ARGUMENT_INDEX=1
+AST|                IDENTIFIER NAME=p CODE=p TYPE_FULL_NAME=void* ORDER=2 ARGUMENT_INDEX=2
+AST|    METHOD_RETURN CODE=RET TYPE_FULL_NAME=void* ORDER=3
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+AST|    TYPE_DECL NAME=U CODE=union U FULL_NAME=U ORDER=1
+AST|    METHOD_REF CODE=composite TYPE_FULL_NAME=composite METHOD_FULL_NAME=composite ORDER=2
+AST|    METHOD_REF CODE=double_pointer TYPE_FULL_NAME=double_pointer METHOD_FULL_NAME=double_pointer ORDER=3
+AST|    METHOD_REF CODE=matrix TYPE_FULL_NAME=matrix METHOD_FULL_NAME=matrix ORDER=4
+AST|    METHOD_REF CODE=nested_value TYPE_FULL_NAME=nested_value METHOD_FULL_NAME=nested_value ORDER=5
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+AST|
+AST|METHOD NAME=CAST CODE=#define CAST(p) ((int (*)[sizeof((union U*)p)])p) FULL_NAME=probe.c:CAST:ANY(1) SIGNATURE=ANY(1) ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=3
+AST|
+AST|METHOD NAME=DOUBLE CODE=#define DOUBLE(p) ((int (**)[sizeof((union U*)p)])p) FULL_NAME=probe.c:DOUBLE:ANY(1) SIGNATURE=ANY(1) ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=3
+AST|
+AST|METHOD NAME=MATRIX CODE=#define MATRIX(p) ((int (*)[2][sizeof((union U*)p)])p) FULL_NAME=probe.c:MATRIX:ANY(1) SIGNATURE=ANY(1) ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=3
+AST|
+AST|METHOD NAME=VALUE CODE=#define VALUE(p) ((union U *)(void *)p) FULL_NAME=probe.c:VALUE:ANY(1) SIGNATURE=ANY(1) ORDER=1
+AST|  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+AST|  BLOCK TYPE_FULL_NAME=ANY ORDER=2
+AST|  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=3
+AST|
+NODES|META_DATA LANGUAGE=NEWC
+NODES|FILE NAME=<includes> ORDER=1
+NODES|FILE NAME=<unknown> ORDER=0
+NODES|FILE NAME=probe.c ORDER=0
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<global> FILENAME=<unknown> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<includes>:<global> FILENAME=<includes> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=probe.c:<global> FILENAME=probe.c ORDER=1
+NODES|NAMESPACE NAME=<global>
+NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=U FULL_NAME=U CODE=union U AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=probe.c ORDER=1
+NODES|TYPE_DECL NAME=composite FULL_NAME=composite CODE=composite AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=probe.c:<global> FILENAME=probe.c ORDER=1
+NODES|TYPE_DECL NAME=double_pointer FULL_NAME=double_pointer CODE=double_pointer AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=probe.c:<global> FILENAME=probe.c ORDER=1
+NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=matrix FULL_NAME=matrix CODE=matrix AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=probe.c:<global> FILENAME=probe.c ORDER=1
+NODES|TYPE_DECL NAME=nested_value FULL_NAME=nested_value CODE=nested_value AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=probe.c:<global> FILENAME=probe.c ORDER=1
+NODES|TYPE_DECL NAME=<global> FULL_NAME=probe.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=probe.c:<global> FILENAME=probe.c ORDER=1
+NODES|TYPE_DECL NAME=unionU FULL_NAME=unionU CODE=unionU IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=void* FULL_NAME=void* CODE=void* IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+NODES|TYPE NAME=U FULL_NAME=U TYPE_DECL_FULL_NAME=U
+NODES|TYPE NAME=composite FULL_NAME=composite TYPE_DECL_FULL_NAME=composite
+NODES|TYPE NAME=double_pointer FULL_NAME=double_pointer TYPE_DECL_FULL_NAME=double_pointer
+NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+NODES|TYPE NAME=matrix FULL_NAME=matrix TYPE_DECL_FULL_NAME=matrix
+NODES|TYPE NAME=nested_value FULL_NAME=nested_value TYPE_DECL_FULL_NAME=nested_value
+NODES|TYPE NAME=unionU FULL_NAME=unionU TYPE_DECL_FULL_NAME=unionU
+NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+NODES|TYPE NAME=void* FULL_NAME=void* TYPE_DECL_FULL_NAME=void*
+EDGES|ARGUMENT composite#4 -> composite#5
+EDGES|ARGUMENT composite#5 -> composite#6
+EDGES|ARGUMENT composite#8 -> composite#10
+EDGES|ARGUMENT composite#8 -> composite#9
+EDGES|ARGUMENT double_pointer#4 -> double_pointer#5
+EDGES|ARGUMENT double_pointer#5 -> double_pointer#6
+EDGES|ARGUMENT double_pointer#8 -> double_pointer#10
+EDGES|ARGUMENT double_pointer#8 -> double_pointer#9
+EDGES|ARGUMENT matrix#4 -> matrix#5
+EDGES|ARGUMENT matrix#5 -> matrix#6
+EDGES|ARGUMENT matrix#8 -> matrix#10
+EDGES|ARGUMENT matrix#8 -> matrix#9
+EDGES|ARGUMENT nested_value#10 -> nested_value#11
+EDGES|ARGUMENT nested_value#10 -> nested_value#12
+EDGES|ARGUMENT nested_value#4 -> nested_value#5
+EDGES|ARGUMENT nested_value#5 -> nested_value#6
+EDGES|ARGUMENT nested_value#8 -> nested_value#10
+EDGES|ARGUMENT nested_value#8 -> nested_value#9
+EDGES|CALL composite#5 -> probe.c:CAST:ANY(1)#0
+EDGES|CALL composite#8 -> <operator>.cast#0
+EDGES|CALL double_pointer#5 -> probe.c:DOUBLE:ANY(1)#0
+EDGES|CALL double_pointer#8 -> <operator>.cast#0
+EDGES|CALL matrix#5 -> probe.c:MATRIX:ANY(1)#0
+EDGES|CALL matrix#8 -> <operator>.cast#0
+EDGES|CALL nested_value#10 -> <operator>.cast#0
+EDGES|CALL nested_value#5 -> probe.c:VALUE:ANY(1)#0
+EDGES|CALL nested_value#8 -> <operator>.cast#0
+EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+EDGES|CFG <operator>.cast#0 -> <operator>.cast#5
+EDGES|CFG composite#0 -> composite#6
+EDGES|CFG composite#10 -> composite#8
+EDGES|CFG composite#4 -> composite#11
+EDGES|CFG composite#5 -> composite#4
+EDGES|CFG composite#5 -> composite#9
+EDGES|CFG composite#6 -> composite#5
+EDGES|CFG composite#8 -> composite#4
+EDGES|CFG composite#9 -> composite#10
+EDGES|CFG double_pointer#0 -> double_pointer#6
+EDGES|CFG double_pointer#10 -> double_pointer#8
+EDGES|CFG double_pointer#4 -> double_pointer#11
+EDGES|CFG double_pointer#5 -> double_pointer#4
+EDGES|CFG double_pointer#5 -> double_pointer#9
+EDGES|CFG double_pointer#6 -> double_pointer#5
+EDGES|CFG double_pointer#8 -> double_pointer#4
+EDGES|CFG double_pointer#9 -> double_pointer#10
+EDGES|CFG matrix#0 -> matrix#6
+EDGES|CFG matrix#10 -> matrix#8
+EDGES|CFG matrix#4 -> matrix#11
+EDGES|CFG matrix#5 -> matrix#4
+EDGES|CFG matrix#5 -> matrix#9
+EDGES|CFG matrix#6 -> matrix#5
+EDGES|CFG matrix#8 -> matrix#4
+EDGES|CFG matrix#9 -> matrix#10
+EDGES|CFG nested_value#0 -> nested_value#6
+EDGES|CFG nested_value#10 -> nested_value#8
+EDGES|CFG nested_value#11 -> nested_value#12
+EDGES|CFG nested_value#12 -> nested_value#10
+EDGES|CFG nested_value#4 -> nested_value#13
+EDGES|CFG nested_value#5 -> nested_value#4
+EDGES|CFG nested_value#5 -> nested_value#9
+EDGES|CFG nested_value#6 -> nested_value#5
+EDGES|CFG nested_value#8 -> nested_value#4
+EDGES|CFG nested_value#9 -> nested_value#11
+EDGES|CFG probe.c:<global>#0 -> probe.c:<global>#53
+EDGES|CFG probe.c:<global>#53 -> probe.c:<global>#54
+EDGES|CFG probe.c:<global>#54 -> probe.c:<global>#55
+EDGES|CFG probe.c:<global>#55 -> probe.c:<global>#56
+EDGES|CFG probe.c:<global>#56 -> probe.c:<global>#57
+EDGES|CFG probe.c:CAST:ANY(1)#0 -> probe.c:CAST:ANY(1)#4
+EDGES|CFG probe.c:DOUBLE:ANY(1)#0 -> probe.c:DOUBLE:ANY(1)#4
+EDGES|CFG probe.c:MATRIX:ANY(1)#0 -> probe.c:MATRIX:ANY(1)#4
+EDGES|CFG probe.c:VALUE:ANY(1)#0 -> probe.c:VALUE:ANY(1)#4
+EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+EDGES|CONTAINS <operator>.cast#0 -> <operator>.cast#2
+EDGES|CONTAINS D:probe.c:<global> -> D:composite
+EDGES|CONTAINS D:probe.c:<global> -> D:double_pointer
+EDGES|CONTAINS D:probe.c:<global> -> D:matrix
+EDGES|CONTAINS D:probe.c:<global> -> D:nested_value
+EDGES|CONTAINS D:probe.c:<global> -> probe.c:<global>#0
+EDGES|CONTAINS D:probe.c:<global> -> probe.c:CAST:ANY(1)#0
+EDGES|CONTAINS D:probe.c:<global> -> probe.c:DOUBLE:ANY(1)#0
+EDGES|CONTAINS D:probe.c:<global> -> probe.c:MATRIX:ANY(1)#0
+EDGES|CONTAINS D:probe.c:<global> -> probe.c:VALUE:ANY(1)#0
+EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+EDGES|CONTAINS F:<includes> -> D:ANY
+EDGES|CONTAINS F:<includes> -> D:int
+EDGES|CONTAINS F:<includes> -> D:unionU
+EDGES|CONTAINS F:<includes> -> D:void
+EDGES|CONTAINS F:<includes> -> D:void*
+EDGES|CONTAINS F:probe.c -> D:probe.c:<global>
+EDGES|CONTAINS composite#0 -> composite#10
+EDGES|CONTAINS composite#0 -> composite#3
+EDGES|CONTAINS composite#0 -> composite#4
+EDGES|CONTAINS composite#0 -> composite#5
+EDGES|CONTAINS composite#0 -> composite#6
+EDGES|CONTAINS composite#0 -> composite#7
+EDGES|CONTAINS composite#0 -> composite#8
+EDGES|CONTAINS composite#0 -> composite#9
+EDGES|CONTAINS double_pointer#0 -> double_pointer#10
+EDGES|CONTAINS double_pointer#0 -> double_pointer#3
+EDGES|CONTAINS double_pointer#0 -> double_pointer#4
+EDGES|CONTAINS double_pointer#0 -> double_pointer#5
+EDGES|CONTAINS double_pointer#0 -> double_pointer#6
+EDGES|CONTAINS double_pointer#0 -> double_pointer#7
+EDGES|CONTAINS double_pointer#0 -> double_pointer#8
+EDGES|CONTAINS double_pointer#0 -> double_pointer#9
+EDGES|CONTAINS matrix#0 -> matrix#10
+EDGES|CONTAINS matrix#0 -> matrix#3
+EDGES|CONTAINS matrix#0 -> matrix#4
+EDGES|CONTAINS matrix#0 -> matrix#5
+EDGES|CONTAINS matrix#0 -> matrix#6
+EDGES|CONTAINS matrix#0 -> matrix#7
+EDGES|CONTAINS matrix#0 -> matrix#8
+EDGES|CONTAINS matrix#0 -> matrix#9
+EDGES|CONTAINS nested_value#0 -> nested_value#10
+EDGES|CONTAINS nested_value#0 -> nested_value#11
+EDGES|CONTAINS nested_value#0 -> nested_value#12
+EDGES|CONTAINS nested_value#0 -> nested_value#3
+EDGES|CONTAINS nested_value#0 -> nested_value#4
+EDGES|CONTAINS nested_value#0 -> nested_value#5
+EDGES|CONTAINS nested_value#0 -> nested_value#6
+EDGES|CONTAINS nested_value#0 -> nested_value#7
+EDGES|CONTAINS nested_value#0 -> nested_value#8
+EDGES|CONTAINS nested_value#0 -> nested_value#9
+EDGES|CONTAINS probe.c:<global>#0 -> composite#0
+EDGES|CONTAINS probe.c:<global>#0 -> double_pointer#0
+EDGES|CONTAINS probe.c:<global>#0 -> matrix#0
+EDGES|CONTAINS probe.c:<global>#0 -> nested_value#0
+EDGES|CONTAINS probe.c:<global>#0 -> probe.c:<global>#51
+EDGES|CONTAINS probe.c:<global>#0 -> probe.c:<global>#52
+EDGES|CONTAINS probe.c:<global>#0 -> probe.c:<global>#53
+EDGES|CONTAINS probe.c:<global>#0 -> probe.c:<global>#54
+EDGES|CONTAINS probe.c:<global>#0 -> probe.c:<global>#55
+EDGES|CONTAINS probe.c:<global>#0 -> probe.c:<global>#56
+EDGES|CONTAINS probe.c:CAST:ANY(1)#0 -> probe.c:CAST:ANY(1)#3
+EDGES|CONTAINS probe.c:DOUBLE:ANY(1)#0 -> probe.c:DOUBLE:ANY(1)#3
+EDGES|CONTAINS probe.c:MATRIX:ANY(1)#0 -> probe.c:MATRIX:ANY(1)#3
+EDGES|CONTAINS probe.c:VALUE:ANY(1)#0 -> probe.c:VALUE:ANY(1)#3
+EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.cast#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.cast#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.cast#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.cast#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.cast#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.cast#6 -> T:ANY
+EDGES|EVAL_TYPE composite#1 -> T:void*
+EDGES|EVAL_TYPE composite#10 -> T:void*
+EDGES|EVAL_TYPE composite#11 -> T:void*
+EDGES|EVAL_TYPE composite#2 -> T:void*
+EDGES|EVAL_TYPE composite#3 -> T:void
+EDGES|EVAL_TYPE composite#5 -> T:ANY
+EDGES|EVAL_TYPE composite#6 -> T:void*
+EDGES|EVAL_TYPE composite#7 -> T:ANY
+EDGES|EVAL_TYPE composite#8 -> T:int
+EDGES|EVAL_TYPE composite#9 -> T:int
+EDGES|EVAL_TYPE double_pointer#1 -> T:void*
+EDGES|EVAL_TYPE double_pointer#10 -> T:void*
+EDGES|EVAL_TYPE double_pointer#11 -> T:void*
+EDGES|EVAL_TYPE double_pointer#2 -> T:void*
+EDGES|EVAL_TYPE double_pointer#3 -> T:void
+EDGES|EVAL_TYPE double_pointer#5 -> T:ANY
+EDGES|EVAL_TYPE double_pointer#6 -> T:void*
+EDGES|EVAL_TYPE double_pointer#7 -> T:ANY
+EDGES|EVAL_TYPE double_pointer#8 -> T:int
+EDGES|EVAL_TYPE double_pointer#9 -> T:int
+EDGES|EVAL_TYPE matrix#1 -> T:void*
+EDGES|EVAL_TYPE matrix#10 -> T:void*
+EDGES|EVAL_TYPE matrix#11 -> T:void*
+EDGES|EVAL_TYPE matrix#2 -> T:void*
+EDGES|EVAL_TYPE matrix#3 -> T:void
+EDGES|EVAL_TYPE matrix#5 -> T:ANY
+EDGES|EVAL_TYPE matrix#6 -> T:void*
+EDGES|EVAL_TYPE matrix#7 -> T:ANY
+EDGES|EVAL_TYPE matrix#8 -> T:int
+EDGES|EVAL_TYPE matrix#9 -> T:int
+EDGES|EVAL_TYPE nested_value#1 -> T:void*
+EDGES|EVAL_TYPE nested_value#10 -> T:void
+EDGES|EVAL_TYPE nested_value#11 -> T:void
+EDGES|EVAL_TYPE nested_value#12 -> T:void*
+EDGES|EVAL_TYPE nested_value#13 -> T:void*
+EDGES|EVAL_TYPE nested_value#2 -> T:void*
+EDGES|EVAL_TYPE nested_value#3 -> T:void
+EDGES|EVAL_TYPE nested_value#5 -> T:ANY
+EDGES|EVAL_TYPE nested_value#6 -> T:void*
+EDGES|EVAL_TYPE nested_value#7 -> T:ANY
+EDGES|EVAL_TYPE nested_value#8 -> T:unionU
+EDGES|EVAL_TYPE nested_value#9 -> T:unionU
+EDGES|EVAL_TYPE probe.c:<global>#51 -> T:ANY
+EDGES|EVAL_TYPE probe.c:<global>#53 -> T:composite
+EDGES|EVAL_TYPE probe.c:<global>#54 -> T:double_pointer
+EDGES|EVAL_TYPE probe.c:<global>#55 -> T:matrix
+EDGES|EVAL_TYPE probe.c:<global>#56 -> T:nested_value
+EDGES|EVAL_TYPE probe.c:<global>#57 -> T:ANY
+EDGES|EVAL_TYPE probe.c:CAST:ANY(1)#1 -> T:ANY
+EDGES|EVAL_TYPE probe.c:CAST:ANY(1)#2 -> T:ANY
+EDGES|EVAL_TYPE probe.c:CAST:ANY(1)#3 -> T:ANY
+EDGES|EVAL_TYPE probe.c:CAST:ANY(1)#4 -> T:ANY
+EDGES|EVAL_TYPE probe.c:DOUBLE:ANY(1)#1 -> T:ANY
+EDGES|EVAL_TYPE probe.c:DOUBLE:ANY(1)#2 -> T:ANY
+EDGES|EVAL_TYPE probe.c:DOUBLE:ANY(1)#3 -> T:ANY
+EDGES|EVAL_TYPE probe.c:DOUBLE:ANY(1)#4 -> T:ANY
+EDGES|EVAL_TYPE probe.c:MATRIX:ANY(1)#1 -> T:ANY
+EDGES|EVAL_TYPE probe.c:MATRIX:ANY(1)#2 -> T:ANY
+EDGES|EVAL_TYPE probe.c:MATRIX:ANY(1)#3 -> T:ANY
+EDGES|EVAL_TYPE probe.c:MATRIX:ANY(1)#4 -> T:ANY
+EDGES|EVAL_TYPE probe.c:VALUE:ANY(1)#1 -> T:ANY
+EDGES|EVAL_TYPE probe.c:VALUE:ANY(1)#2 -> T:ANY
+EDGES|EVAL_TYPE probe.c:VALUE:ANY(1)#3 -> T:ANY
+EDGES|EVAL_TYPE probe.c:VALUE:ANY(1)#4 -> T:ANY
+EDGES|PARAMETER_LINK <operator>.cast#1 -> <operator>.cast#3
+EDGES|PARAMETER_LINK <operator>.cast#4 -> <operator>.cast#6
+EDGES|PARAMETER_LINK composite#1 -> composite#2
+EDGES|PARAMETER_LINK double_pointer#1 -> double_pointer#2
+EDGES|PARAMETER_LINK matrix#1 -> matrix#2
+EDGES|PARAMETER_LINK nested_value#1 -> nested_value#2
+EDGES|PARAMETER_LINK probe.c:CAST:ANY(1)#1 -> probe.c:CAST:ANY(1)#2
+EDGES|PARAMETER_LINK probe.c:DOUBLE:ANY(1)#1 -> probe.c:DOUBLE:ANY(1)#2
+EDGES|PARAMETER_LINK probe.c:MATRIX:ANY(1)#1 -> probe.c:MATRIX:ANY(1)#2
+EDGES|PARAMETER_LINK probe.c:VALUE:ANY(1)#1 -> probe.c:VALUE:ANY(1)#2
+EDGES|REF NB:<global> -> NS:<global>
+EDGES|REF NB:<includes>:<global> -> NS:<global>
+EDGES|REF NB:probe.c:<global> -> NS:<global>
+EDGES|REF T:ANY -> D:ANY
+EDGES|REF T:U -> probe.c:<global>#52
+EDGES|REF T:composite -> D:composite
+EDGES|REF T:double_pointer -> D:double_pointer
+EDGES|REF T:int -> D:int
+EDGES|REF T:matrix -> D:matrix
+EDGES|REF T:nested_value -> D:nested_value
+EDGES|REF T:unionU -> D:unionU
+EDGES|REF T:void -> D:void
+EDGES|REF T:void* -> D:void*
+EDGES|REF composite#10 -> composite#1
+EDGES|REF double_pointer#10 -> double_pointer#1
+EDGES|REF matrix#10 -> matrix#1
+EDGES|REF nested_value#12 -> nested_value#1
+EDGES|REF probe.c:<global>#53 -> composite#0
+EDGES|REF probe.c:<global>#54 -> double_pointer#0
+EDGES|REF probe.c:<global>#55 -> matrix#0
+EDGES|REF probe.c:<global>#56 -> nested_value#0
+EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+EDGES|SOURCE_FILE D:ANY -> F:<includes>
+EDGES|SOURCE_FILE D:composite -> F:probe.c
+EDGES|SOURCE_FILE D:double_pointer -> F:probe.c
+EDGES|SOURCE_FILE D:int -> F:<includes>
+EDGES|SOURCE_FILE D:matrix -> F:probe.c
+EDGES|SOURCE_FILE D:nested_value -> F:probe.c
+EDGES|SOURCE_FILE D:probe.c:<global> -> F:probe.c
+EDGES|SOURCE_FILE D:unionU -> F:<includes>
+EDGES|SOURCE_FILE D:void -> F:<includes>
+EDGES|SOURCE_FILE D:void* -> F:<includes>
+EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
+EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>
+EDGES|SOURCE_FILE NB:probe.c:<global> -> F:probe.c
+EDGES|SOURCE_FILE composite#0 -> F:probe.c
+EDGES|SOURCE_FILE double_pointer#0 -> F:probe.c
+EDGES|SOURCE_FILE matrix#0 -> F:probe.c
+EDGES|SOURCE_FILE nested_value#0 -> F:probe.c
+EDGES|SOURCE_FILE probe.c:<global>#0 -> F:probe.c
+EDGES|SOURCE_FILE probe.c:<global>#52 -> F:probe.c
+EDGES|SOURCE_FILE probe.c:CAST:ANY(1)#0 -> F:probe.c
+EDGES|SOURCE_FILE probe.c:DOUBLE:ANY(1)#0 -> F:probe.c
+EDGES|SOURCE_FILE probe.c:MATRIX:ANY(1)#0 -> F:probe.c
+EDGES|SOURCE_FILE probe.c:VALUE:ANY(1)#0 -> F:probe.c
+FLOWS|REACHING_DEF[(U *)(void *)p] nested_value#8 -> nested_value#13
+FLOWS|REACHING_DEF[(int [] (* *))p] double_pointer#8 -> double_pointer#11
+FLOWS|REACHING_DEF[(int [] (*))p] composite#8 -> composite#11
+FLOWS|REACHING_DEF[(int [][] (*))p] matrix#8 -> matrix#11
+FLOWS|REACHING_DEF[(void *)p] nested_value#10 -> nested_value#13
+FLOWS|REACHING_DEF[(void *)p] nested_value#10 -> nested_value#8
+FLOWS|REACHING_DEF[<RET>] composite#4 -> composite#11
+FLOWS|REACHING_DEF[<RET>] double_pointer#4 -> double_pointer#11
+FLOWS|REACHING_DEF[<RET>] matrix#4 -> matrix#11
+FLOWS|REACHING_DEF[<RET>] nested_value#4 -> nested_value#13
+FLOWS|REACHING_DEF[CAST(p)] composite#5 -> composite#11
+FLOWS|REACHING_DEF[CAST(p)] composite#5 -> composite#4
+FLOWS|REACHING_DEF[DOUBLE(p)] double_pointer#5 -> double_pointer#11
+FLOWS|REACHING_DEF[DOUBLE(p)] double_pointer#5 -> double_pointer#4
+FLOWS|REACHING_DEF[MATRIX(p)] matrix#5 -> matrix#11
+FLOWS|REACHING_DEF[MATRIX(p)] matrix#5 -> matrix#4
+FLOWS|REACHING_DEF[U *] nested_value#9 -> nested_value#8
+FLOWS|REACHING_DEF[VALUE(p)] nested_value#5 -> nested_value#13
+FLOWS|REACHING_DEF[VALUE(p)] nested_value#5 -> nested_value#4
+FLOWS|REACHING_DEF[] <operator>.cast#0 -> <operator>.cast#1
+FLOWS|REACHING_DEF[] <operator>.cast#0 -> <operator>.cast#4
+FLOWS|REACHING_DEF[] composite#0 -> composite#1
+FLOWS|REACHING_DEF[] composite#0 -> composite#10
+FLOWS|REACHING_DEF[] composite#0 -> composite#6
+FLOWS|REACHING_DEF[] composite#0 -> composite#9
+FLOWS|REACHING_DEF[] double_pointer#0 -> double_pointer#1
+FLOWS|REACHING_DEF[] double_pointer#0 -> double_pointer#10
+FLOWS|REACHING_DEF[] double_pointer#0 -> double_pointer#6
+FLOWS|REACHING_DEF[] double_pointer#0 -> double_pointer#9
+FLOWS|REACHING_DEF[] matrix#0 -> matrix#1
+FLOWS|REACHING_DEF[] matrix#0 -> matrix#10
+FLOWS|REACHING_DEF[] matrix#0 -> matrix#6
+FLOWS|REACHING_DEF[] matrix#0 -> matrix#9
+FLOWS|REACHING_DEF[] nested_value#0 -> nested_value#1
+FLOWS|REACHING_DEF[] nested_value#0 -> nested_value#11
+FLOWS|REACHING_DEF[] nested_value#0 -> nested_value#12
+FLOWS|REACHING_DEF[] nested_value#0 -> nested_value#6
+FLOWS|REACHING_DEF[] nested_value#0 -> nested_value#9
+FLOWS|REACHING_DEF[] probe.c:<global>#0 -> probe.c:<global>#53
+FLOWS|REACHING_DEF[] probe.c:<global>#0 -> probe.c:<global>#54
+FLOWS|REACHING_DEF[] probe.c:<global>#0 -> probe.c:<global>#55
+FLOWS|REACHING_DEF[] probe.c:<global>#0 -> probe.c:<global>#56
+FLOWS|REACHING_DEF[] probe.c:CAST:ANY(1)#0 -> probe.c:CAST:ANY(1)#1
+FLOWS|REACHING_DEF[] probe.c:DOUBLE:ANY(1)#0 -> probe.c:DOUBLE:ANY(1)#1
+FLOWS|REACHING_DEF[] probe.c:MATRIX:ANY(1)#0 -> probe.c:MATRIX:ANY(1)#1
+FLOWS|REACHING_DEF[] probe.c:VALUE:ANY(1)#0 -> probe.c:VALUE:ANY(1)#1
+FLOWS|REACHING_DEF[int [] (* *)] double_pointer#9 -> double_pointer#8
+FLOWS|REACHING_DEF[int [] (*)] composite#9 -> composite#8
+FLOWS|REACHING_DEF[int [][] (*)] matrix#9 -> matrix#8
+FLOWS|REACHING_DEF[p1] <operator>.cast#1 -> <operator>.cast#3
+FLOWS|REACHING_DEF[p1] <operator>.cast#1 -> <operator>.cast#5
+FLOWS|REACHING_DEF[p1] probe.c:CAST:ANY(1)#1 -> probe.c:CAST:ANY(1)#2
+FLOWS|REACHING_DEF[p1] probe.c:CAST:ANY(1)#1 -> probe.c:CAST:ANY(1)#4
+FLOWS|REACHING_DEF[p1] probe.c:DOUBLE:ANY(1)#1 -> probe.c:DOUBLE:ANY(1)#2
+FLOWS|REACHING_DEF[p1] probe.c:DOUBLE:ANY(1)#1 -> probe.c:DOUBLE:ANY(1)#4
+FLOWS|REACHING_DEF[p1] probe.c:MATRIX:ANY(1)#1 -> probe.c:MATRIX:ANY(1)#2
+FLOWS|REACHING_DEF[p1] probe.c:MATRIX:ANY(1)#1 -> probe.c:MATRIX:ANY(1)#4
+FLOWS|REACHING_DEF[p1] probe.c:VALUE:ANY(1)#1 -> probe.c:VALUE:ANY(1)#2
+FLOWS|REACHING_DEF[p1] probe.c:VALUE:ANY(1)#1 -> probe.c:VALUE:ANY(1)#4
+FLOWS|REACHING_DEF[p2] <operator>.cast#4 -> <operator>.cast#5
+FLOWS|REACHING_DEF[p2] <operator>.cast#4 -> <operator>.cast#6
+FLOWS|REACHING_DEF[p] composite#1 -> composite#2
+FLOWS|REACHING_DEF[p] composite#1 -> composite#6
+FLOWS|REACHING_DEF[p] composite#10 -> composite#11
+FLOWS|REACHING_DEF[p] composite#10 -> composite#2
+FLOWS|REACHING_DEF[p] composite#10 -> composite#8
+FLOWS|REACHING_DEF[p] composite#6 -> composite#10
+FLOWS|REACHING_DEF[p] composite#6 -> composite#11
+FLOWS|REACHING_DEF[p] composite#6 -> composite#2
+FLOWS|REACHING_DEF[p] composite#6 -> composite#5
+FLOWS|REACHING_DEF[p] double_pointer#1 -> double_pointer#2
+FLOWS|REACHING_DEF[p] double_pointer#1 -> double_pointer#6
+FLOWS|REACHING_DEF[p] double_pointer#10 -> double_pointer#11
+FLOWS|REACHING_DEF[p] double_pointer#10 -> double_pointer#2
+FLOWS|REACHING_DEF[p] double_pointer#10 -> double_pointer#8
+FLOWS|REACHING_DEF[p] double_pointer#6 -> double_pointer#10
+FLOWS|REACHING_DEF[p] double_pointer#6 -> double_pointer#11
+FLOWS|REACHING_DEF[p] double_pointer#6 -> double_pointer#2
+FLOWS|REACHING_DEF[p] double_pointer#6 -> double_pointer#5
+FLOWS|REACHING_DEF[p] matrix#1 -> matrix#2
+FLOWS|REACHING_DEF[p] matrix#1 -> matrix#6
+FLOWS|REACHING_DEF[p] matrix#10 -> matrix#11
+FLOWS|REACHING_DEF[p] matrix#10 -> matrix#2
+FLOWS|REACHING_DEF[p] matrix#10 -> matrix#8
+FLOWS|REACHING_DEF[p] matrix#6 -> matrix#10
+FLOWS|REACHING_DEF[p] matrix#6 -> matrix#11
+FLOWS|REACHING_DEF[p] matrix#6 -> matrix#2
+FLOWS|REACHING_DEF[p] matrix#6 -> matrix#5
+FLOWS|REACHING_DEF[p] nested_value#1 -> nested_value#2
+FLOWS|REACHING_DEF[p] nested_value#1 -> nested_value#6
+FLOWS|REACHING_DEF[p] nested_value#12 -> nested_value#10
+FLOWS|REACHING_DEF[p] nested_value#12 -> nested_value#13
+FLOWS|REACHING_DEF[p] nested_value#12 -> nested_value#2
+FLOWS|REACHING_DEF[p] nested_value#6 -> nested_value#12
+FLOWS|REACHING_DEF[p] nested_value#6 -> nested_value#13
+FLOWS|REACHING_DEF[p] nested_value#6 -> nested_value#2
+FLOWS|REACHING_DEF[p] nested_value#6 -> nested_value#5
+FLOWS|REACHING_DEF[void *] nested_value#11 -> nested_value#10
+[INFO ] writing to storage at `/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/nested-casts/review-expanded-oracle/workspace/proj/cpg.bin.tmp`
+[INFO ] closed graph at /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/nested-casts/review-expanded-oracle/workspace/proj/cpg.bin.tmp

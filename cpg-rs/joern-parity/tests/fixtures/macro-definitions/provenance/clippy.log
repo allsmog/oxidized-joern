@@ -1,0 +1,37 @@
+    Checking memchr v2.8.1
+    Checking cfg-if v1.0.4
+    Checking bitflags v2.13.1
+    Checking libc v0.2.189
+    Checking crossbeam-utils v0.8.21
+    Checking fastrand v2.5.0
+    Checking once_cell v1.21.4
+   Compiling zmij v1.0.21
+   Compiling itoa v1.0.18
+    Checking crc32fast v1.5.0
+    Checking serde_core v1.0.229
+    Checking regex-syntax v0.8.11
+    Checking tree-sitter-language v0.1.7
+    Checking either v1.16.0
+    Checking streaming-iterator v0.1.9
+    Checking tree-sitter-c v0.24.2
+    Checking aho-corasick v1.1.4
+    Checking crossbeam-epoch v0.9.20
+   Compiling serde_json v1.0.151
+    Checking crossbeam-deque v0.8.6
+    Checking errno v0.3.14
+    Checking getrandom v0.4.3
+    Checking rayon-core v1.13.0
+    Checking rustix v1.1.4
+    Checking rayon v1.12.0
+    Checking tempfile v3.27.0
+   Compiling tree-sitter v0.26.12
+    Checking cpg-core v0.1.1 (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-tests/.local/macro-tests/candidate-workspace/cpg-core)
+    Checking regex-automata v0.4.14
+    Checking serde v1.0.229
+    Checking cpg-frontend v0.1.1 (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-tests/.local/macro-tests/candidate-workspace/cpg-frontend)
+    Checking cpg-analysis v0.1.1 (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-tests/.local/macro-tests/candidate-workspace/cpg-analysis)
+    Checking regex v1.12.4
+    Checking cpg-lang-c v0.1.1 (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-tests/.local/macro-tests/candidate-workspace/cpg-lang-c)
+    Checking cpg-incremental v0.1.1 (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-tests/.local/macro-tests/candidate-workspace/cpg-incremental)
+    Checking joern-parity v0.1.1 (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-tests/.local/macro-tests/candidate-workspace/joern-parity)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 3.13s

@@ -1,0 +1,158 @@
+{
+  "date": "2026-09-08",
+  "baselineCommit": "5ccc4b0fa",
+  "joernVersion": "v4.0.555",
+  "jdkVersion": "21.0.12",
+  "joernArchiveSha256": "12989883d6b5aeacc97b2dc0ecc4e2951bf50e48cb244f8c8f333d11a8be0c7e",
+  "source": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-conditionals/cpg-rs/cpg-lang-c/src/exact.rs",
+    "sha256": "c65fa1b2390807731b57bd708e5ce4e2e839e14ecf5477b58b1ae177579b2521"
+  },
+  "oracleScript": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-conditionals/cpg-rs/joern-parity/oracle.sc",
+    "sha256": "bd2e18fab06ecd7897d796f5b31dac6669dc45ecf70c54fb1d5cc0fe29f3c1ab"
+  },
+  "fixturesSha256": {
+    ".gitattributes": "f457dbe54527dd805d5993a96fa3d976926232d891cf7fe463cf7a83fa8299ea",
+    "README.md": "e1e5eb678a2f09790793daff75134e4cbcf93fc5740b17d4970429681b3831a6",
+    "crlf-diagnostic/actual-rust.txt": "a8716c160ff7dd294f00a34d53a6cab43c32041e04888359fc4756e1518cac34",
+    "crlf-diagnostic/baseline-rust.txt": "dbd6d82b0fc06401c4ceb8ae1582bc0742632032e70e21a302a95db97f45da86",
+    "crlf-diagnostic/complete.diff": "0d700e06553b6ad27c7e9b0f93b9ef9f983722bbd1103bfe6dfbd98de9477e7f",
+    "crlf-diagnostic/expected-joern.txt": "6a99b59cc6d1ac044cd29338d83febd188edccab190bb609af295dcdf85571e1",
+    "crlf-diagnostic/strings.c": "2ae4ab926536f3160071d812853d3f1dd291c2e0754d15f0c3784e687754dd26",
+    "crlf-diagnostic/transport-proof.json": "8b00442d2db2d1c9cfc03c9333a9fbdd7306b9f4e6be22f91171677859a07bbd",
+    "expected.txt": "9c372f3a62e423d74fb59d308bd0c9c874f62b724adf1887c29c9a238a7852c3",
+    "macro-diagnostic/actual-rust.txt": "308fde9221119804539f0c82f51400eed8027719f61d617826f8140dad3ee3f6",
+    "macro-diagnostic/complete.diff": "236ca7ed26b88033763293a8c2a987db9136d308bd1bda5cfefb8b5007a6e031",
+    "macro-diagnostic/expected-joern.txt": "f446b39d832f9eb60d157cc9e9ca7ff09fcdbcadca85dd64155e07b64eb289d7",
+    "macro-diagnostic/strings.c": "7f254d630a60d9f8db86750025129d5cd789544fc1f0ed335dac1c578191c658",
+    "strings.c": "5fbf6fceb550b4c7d7f1829e0b277e5f904c61cae2f3b89309c98ece89bb7261",
+    "unresolved-diagnostic/actual-rust.txt": "04a9409d18943a8260540ea5d226829e910b3e19c6d97b63baa24aa92bcb42c3",
+    "unresolved-diagnostic/complete.diff": "002b6b2b135047fa5fbc9e76af4116c391888459e7e2ba991401958195398258",
+    "unresolved-diagnostic/expected-joern.txt": "0cede7f4554b308e432783cfee982e7b3535f82c7ed16f84ca773c6b72eba94b",
+    "unresolved-diagnostic/strings.c": "4b5a59cf1f18a48edafae4f7bc26754f9d93640b388574a0cfd3439145a00917"
+  },
+  "baseline": {
+    "exitCode": -6,
+    "elapsedSeconds": 0.019491333994665183,
+    "binarySha256": "8d4f6cd651fa956e2005e5c6fe83c52c5a666af4eaa3affb74d43d816de731f6",
+    "fixtureSha256": "5fbf6fceb550b4c7d7f1829e0b277e5f904c61cae2f3b89309c98ece89bb7261"
+  },
+  "exactFixture": {
+    "lines": 1589,
+    "nonemptyRecords": 1557,
+    "reachingDefinitionFacts": 255,
+    "differenceLines": 0,
+    "rawOracle": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-conditionals/.local/astra-conditionals/final-replay/live.log",
+      "sha256": "3388d2a1a21d1ef6c64e99566c1afeb36fd360bf80dcc66bc1450361011badbe"
+    },
+    "releaseOutput": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-conditionals/.local/astra-conditionals/final-release.txt",
+      "sha256": "9c372f3a62e423d74fb59d308bd0c9c874f62b724adf1887c29c9a238a7852c3"
+    }
+  },
+  "gates": {
+    "workspaceTests": 377,
+    "committedComparisonBlocks": 308,
+    "liveComparisonBlocks": 308,
+    "checkerTests": 17,
+    "clippy": "workspace/all-targets -D warnings PASS",
+    "fmt": "all --check PASS"
+  },
+  "luaReplay": {
+    "files": 61,
+    "nodes": 82939,
+    "bytes": 8521942,
+    "buildSeconds": 2.976096167,
+    "wallSeconds": 3.43,
+    "maxResidentBytes": 387170304,
+    "graph": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-conditionals/.local/astra-conditionals/lua-final.cpg",
+      "sha256": "2d4d5e8358c83816ca3a88b91771dd49077f91a4aaece7e9635e9952d238659b"
+    },
+    "cpgBinary": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-conditionals/.local/target/release/cpg",
+      "sha256": "a94a17d1208e5420ad35b59a66eeec850180ebb80745c762140b0c6e049d68e6"
+    },
+    "parityBinary": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-conditionals/.local/target/release/joern-parity",
+      "sha256": "9f9263016731ba03e8357c77374a9143161678536658b4d0fa3ffd6913c66ca9"
+    },
+    "log": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-conditionals/.local/astra-conditionals/lua-build-final.log",
+      "sha256": "1f6eb6aad8aed9d751e78791e448cc90076a33e0185e43d36cd598ab3372357c"
+    },
+    "scope": "Build/persist succeeds; full Lua graph parity and integrated export/scan/RSS acceptance are not established here."
+  },
+  "receipts": {
+    "workspace": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-conditionals/.local/astra-conditionals/workspace-tests-final.log",
+      "sha256": "02161d1969f6b5767eb1d88aecdc99bfce3f4d0efa5c78da760fa93b81511875"
+    },
+    "committed": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-conditionals/.local/astra-conditionals/committed.log",
+      "sha256": "c105179d62065e9cbf9f398ff94754c29ec03add1206db7dff281cb4c07b6be6"
+    },
+    "live": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-conditionals/.local/astra-conditionals/live-gate.log",
+      "sha256": "715e0c188ca0e7a744ace60c9fa451649f34143022f2a1a163bd46303772dd68"
+    },
+    "checker": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-conditionals/.local/astra-conditionals/checker-tests.log",
+      "sha256": "ea6679d0d04f7a10747c59f42c02d211995e7714da0dc5036d123c772a86cd22"
+    },
+    "clippy": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-conditionals/.local/astra-conditionals/clippy.log",
+      "sha256": "c1ac159e795e5f50f9b488935dc1e88aae88e9d723d42d569d2bb765be8c225d"
+    },
+    "fmt": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-conditionals/.local/astra-conditionals/fmt.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "before": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-conditionals/.local/astra-conditionals/final-before.log",
+      "sha256": "cbae0b07f44346c1a2a391a2a0274d8c48248cf283f8e0938d5868dfeeb7aefc"
+    },
+    "macroDiagnostic": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-conditionals/.local/astra-conditionals/macro-diagnostic/live.log",
+      "sha256": "2541d5ea522077f91be356417e3f181b7cf6a1c867faf857178314a9a7b7c08c"
+    },
+    "unresolvedDiagnostic": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-conditionals/.local/astra-conditionals/oracle/live.log",
+      "sha256": "dfe35f2c3e12f227ecf93e53b5aac31ea4d1d620f73e3ba6387111ba9f70fc11"
+    }
+  },
+  "independentReview": {
+    "review.json": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-types/.local/string-review/review.json",
+      "sha256": "b2b688c816feeea859b60b75cbe2861e28cbbe4d994b49cc2000e86909d2d26e"
+    },
+    "transport-proof.json": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-types/.local/string-review/transport-proof.json",
+      "sha256": "c00d7638307c1ce0908c957e4f804549469b782851043a327efde36eabaa79ec"
+    },
+    "isolated-review.json": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-types/.local/string-review/isolated-review.json",
+      "sha256": "a140cf2f75d461416dd327408916cfab5d2da9a7067987f1dba9e10568e262cd"
+    },
+    "isolated-live.stdout": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-types/.local/string-review/isolated-live.stdout",
+      "sha256": "7ea342f1ecdb329e4f9fc95e017e421b8d99092befd4c27138255efe2378f627"
+    },
+    "live.stdout": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-types/.local/string-review/live.stdout",
+      "sha256": "cd7f8baee11b04edd4f24f99897d9c3f1a00bb198c8dd5fffa0e0c22d5fdd1e3"
+    },
+    "oracle.sc": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-types/.local/string-review/oracle.sc",
+      "sha256": "f77ef15eec7acbd4b9c5b76255781eec2c85bb217cedc26de8c12362c5d282db"
+    },
+    "input/boundaries.c": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-types/.local/string-review/input/boundaries.c",
+      "sha256": "4870b387927bef7b896d7a5a1ab5c9b03ec59df8464cce5366d317566dc9c076"
+    }
+  },
+  "transport": "Only LF escaping changes in shared oracle; existing encoding is noninjective and retains CR. Extract bytes split on LF. Complete selected output, not whole Joern schema.",
+  "committedOracleAllSha256": "0cd3403a367ae297f2ddf60b70684f0b84cd81c9e2ca0c149f6663749df70abf"
+}

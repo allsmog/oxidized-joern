@@ -1,0 +1,190 @@
+--- baseline
++++ joern
+@@ -23,15 +23,15 @@
+     METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+     METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+     BLOCK CODE={ return value + 1; } TYPE_FULL_NAME=void ORDER=2
+-      RETURN CODE=return value + 1; ORDER=1
+-        CALL NAME=<operator>.addition CODE=value + 1 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+-          IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+-          LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+     METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+   METHOD NAME=fallback_disabled CODE=int fallback_disabled(int value) { return value + 2; } FULL_NAME=fallback_disabled SIGNATURE=int(int) ORDER=1
+     METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+     METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+     BLOCK CODE={ return value + 2; } TYPE_FULL_NAME=void ORDER=2
++      RETURN CODE=return value + 2; ORDER=1
++        CALL NAME=<operator>.addition CODE=value + 2 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
++          IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
++          LITERAL CODE=2 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+     METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+   BLOCK TYPE_FULL_NAME=ANY ORDER=1
+     METHOD_REF CODE=fallback_enabled TYPE_FULL_NAME=fallback_enabled METHOD_FULL_NAME=fallback_enabled ORDER=1
+@@ -46,16 +46,16 @@
+   METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+   METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+   BLOCK CODE={ return value + 2; } TYPE_FULL_NAME=void ORDER=2
++    RETURN CODE=return value + 2; ORDER=1
++      CALL NAME=<operator>.addition CODE=value + 2 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
++        IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
++        LITERAL CODE=2 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+ 
+ METHOD NAME=fallback_enabled CODE=int fallback_enabled(int value) { return value + 1; } FULL_NAME=fallback_enabled SIGNATURE=int(int) ORDER=1
+   METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+   METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+   BLOCK CODE={ return value + 1; } TYPE_FULL_NAME=void ORDER=2
+-    RETURN CODE=return value + 1; ORDER=1
+-      CALL NAME=<operator>.addition CODE=value + 1 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+-        IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+-        LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+ 
+ METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1
+@@ -131,14 +131,14 @@
+ NODES|TYPE NAME=use FULL_NAME=use TYPE_DECL_FULL_NAME=use
+ NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+ NODES|TYPE NAME=void* FULL_NAME=void* TYPE_DECL_FULL_NAME=void*
+-EDGES|ARGUMENT fallback_enabled#4 -> fallback_enabled#5
+-EDGES|ARGUMENT fallback_enabled#5 -> fallback_enabled#6
+-EDGES|ARGUMENT fallback_enabled#5 -> fallback_enabled#7
++EDGES|ARGUMENT fallback_disabled#4 -> fallback_disabled#5
++EDGES|ARGUMENT fallback_disabled#5 -> fallback_disabled#6
++EDGES|ARGUMENT fallback_disabled#5 -> fallback_disabled#7
+ EDGES|ARGUMENT use#5 -> use#6
+ EDGES|ARGUMENT use#5 -> use#7
+ EDGES|ARGUMENT use#7 -> use#8
+ EDGES|ARGUMENT use#9 -> use#10
+-EDGES|CALL fallback_enabled#5 -> <operator>.addition#0
++EDGES|CALL fallback_disabled#5 -> <operator>.addition#0
+ EDGES|CALL use#5 -> <operator>.assignment#0
+ EDGES|CALL use#7 -> reserve#0
+ EDGES|CALL use#9 -> release#0
+@@ -146,15 +146,15 @@
+ EDGES|CFG <operator>.addition#0 -> <operator>.addition#5
+ EDGES|CFG <operator>.assignment#0 -> <operator>.assignment#5
+ EDGES|CFG api.h:<global>#0 -> api.h:<global>#16
+-EDGES|CFG api.h:<global>#1 -> fallback_enabled#6
+-EDGES|CFG api.h:<global>#10 -> fallback_disabled#4
++EDGES|CFG api.h:<global>#1 -> fallback_enabled#4
+ EDGES|CFG api.h:<global>#16 -> api.h:<global>#17
+ EDGES|CFG api.h:<global>#17 -> api.h:<global>#18
++EDGES|CFG api.h:<global>#6 -> fallback_disabled#6
+ EDGES|CFG config.h:<global>#0 -> config.h:<global>#2
+-EDGES|CFG fallback_enabled#4 -> fallback_enabled#8
+-EDGES|CFG fallback_enabled#5 -> fallback_enabled#4
+-EDGES|CFG fallback_enabled#6 -> fallback_enabled#7
+-EDGES|CFG fallback_enabled#7 -> fallback_enabled#5
++EDGES|CFG fallback_disabled#4 -> fallback_disabled#8
++EDGES|CFG fallback_disabled#5 -> fallback_disabled#4
++EDGES|CFG fallback_disabled#6 -> fallback_disabled#7
++EDGES|CFG fallback_disabled#7 -> fallback_disabled#5
+ EDGES|CFG main.c:<global>#0 -> main.c:<global>#14
+ EDGES|CFG main.c:<global>#1 -> use#6
+ EDGES|CFG main.c:<global>#14 -> main.c:<global>#15
+@@ -187,16 +187,16 @@
+ EDGES|CONTAINS F:config.h -> D:config.h:<global>
+ EDGES|CONTAINS F:main.c -> D:main.c:<global>
+ EDGES|CONTAINS api.h:<global>#0 -> api.h:<global>#1
+-EDGES|CONTAINS api.h:<global>#0 -> api.h:<global>#10
+ EDGES|CONTAINS api.h:<global>#0 -> api.h:<global>#15
+ EDGES|CONTAINS api.h:<global>#0 -> api.h:<global>#16
+ EDGES|CONTAINS api.h:<global>#0 -> api.h:<global>#17
++EDGES|CONTAINS api.h:<global>#0 -> api.h:<global>#6
+ EDGES|CONTAINS api.h:<global>#1 -> fallback_enabled#3
+-EDGES|CONTAINS api.h:<global>#1 -> fallback_enabled#4
+-EDGES|CONTAINS api.h:<global>#1 -> fallback_enabled#5
+-EDGES|CONTAINS api.h:<global>#1 -> fallback_enabled#6
+-EDGES|CONTAINS api.h:<global>#1 -> fallback_enabled#7
+-EDGES|CONTAINS api.h:<global>#10 -> fallback_disabled#3
++EDGES|CONTAINS api.h:<global>#6 -> fallback_disabled#3
++EDGES|CONTAINS api.h:<global>#6 -> fallback_disabled#4
++EDGES|CONTAINS api.h:<global>#6 -> fallback_disabled#5
++EDGES|CONTAINS api.h:<global>#6 -> fallback_disabled#6
++EDGES|CONTAINS api.h:<global>#6 -> fallback_disabled#7
+ EDGES|CONTAINS config.h:<global>#0 -> config.h:<global>#1
+ EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#1
+ EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#13
+@@ -233,14 +233,14 @@
+ EDGES|EVAL_TYPE fallback_disabled#1 -> T:int
+ EDGES|EVAL_TYPE fallback_disabled#2 -> T:int
+ EDGES|EVAL_TYPE fallback_disabled#3 -> T:void
+-EDGES|EVAL_TYPE fallback_disabled#4 -> T:int
++EDGES|EVAL_TYPE fallback_disabled#5 -> T:ANY
++EDGES|EVAL_TYPE fallback_disabled#6 -> T:int
++EDGES|EVAL_TYPE fallback_disabled#7 -> T:int
++EDGES|EVAL_TYPE fallback_disabled#8 -> T:int
+ EDGES|EVAL_TYPE fallback_enabled#1 -> T:int
+ EDGES|EVAL_TYPE fallback_enabled#2 -> T:int
+ EDGES|EVAL_TYPE fallback_enabled#3 -> T:void
+-EDGES|EVAL_TYPE fallback_enabled#5 -> T:ANY
+-EDGES|EVAL_TYPE fallback_enabled#6 -> T:int
+-EDGES|EVAL_TYPE fallback_enabled#7 -> T:int
+-EDGES|EVAL_TYPE fallback_enabled#8 -> T:int
++EDGES|EVAL_TYPE fallback_enabled#4 -> T:int
+ EDGES|EVAL_TYPE main.c:<global>#13 -> T:ANY
+ EDGES|EVAL_TYPE main.c:<global>#14 -> T:use
+ EDGES|EVAL_TYPE main.c:<global>#15 -> T:ANY
+@@ -286,8 +286,8 @@
+ EDGES|REF T:void -> D:void
+ EDGES|REF T:void* -> D:void*
+ EDGES|REF api.h:<global>#16 -> api.h:<global>#1
+-EDGES|REF api.h:<global>#17 -> api.h:<global>#10
+-EDGES|REF fallback_enabled#6 -> fallback_enabled#1
++EDGES|REF api.h:<global>#17 -> api.h:<global>#6
++EDGES|REF fallback_disabled#6 -> fallback_disabled#1
+ EDGES|REF main.c:<global>#14 -> main.c:<global>#1
+ EDGES|REF use#10 -> use#4
+ EDGES|REF use#6 -> use#4
+@@ -311,15 +311,15 @@
+ EDGES|SOURCE_FILE NB:main.c:<global> -> F:main.c
+ EDGES|SOURCE_FILE api.h:<global>#0 -> F:api.h
+ EDGES|SOURCE_FILE api.h:<global>#1 -> F:api.h
+-EDGES|SOURCE_FILE api.h:<global>#10 -> F:api.h
++EDGES|SOURCE_FILE api.h:<global>#6 -> F:api.h
+ EDGES|SOURCE_FILE config.h:<global>#0 -> F:config.h
+ EDGES|SOURCE_FILE main.c:<global>#0 -> F:main.c
+ EDGES|SOURCE_FILE main.c:<global>#1 -> F:main.c
+ EDGES|SOURCE_FILE release#0 -> F:api.h
+ EDGES|SOURCE_FILE reserve#0 -> F:api.h
+ FLOWS|REACHING_DEF[*pointer = reserve(amount)] use#5 -> use#11
+-FLOWS|REACHING_DEF[1] fallback_enabled#7 -> fallback_enabled#5
+-FLOWS|REACHING_DEF[<RET>] fallback_enabled#4 -> fallback_enabled#8
++FLOWS|REACHING_DEF[2] fallback_disabled#7 -> fallback_disabled#5
++FLOWS|REACHING_DEF[<RET>] fallback_disabled#4 -> fallback_disabled#8
+ FLOWS|REACHING_DEF[] <operator>.addition#0 -> <operator>.addition#1
+ FLOWS|REACHING_DEF[] <operator>.addition#0 -> <operator>.addition#4
+ FLOWS|REACHING_DEF[] <operator>.assignment#0 -> <operator>.assignment#1
+@@ -327,9 +327,9 @@
+ FLOWS|REACHING_DEF[] api.h:<global>#0 -> api.h:<global>#16
+ FLOWS|REACHING_DEF[] api.h:<global>#0 -> api.h:<global>#17
+ FLOWS|REACHING_DEF[] api.h:<global>#1 -> fallback_enabled#1
+-FLOWS|REACHING_DEF[] api.h:<global>#1 -> fallback_enabled#6
+-FLOWS|REACHING_DEF[] api.h:<global>#1 -> fallback_enabled#7
+-FLOWS|REACHING_DEF[] api.h:<global>#10 -> fallback_disabled#1
++FLOWS|REACHING_DEF[] api.h:<global>#6 -> fallback_disabled#1
++FLOWS|REACHING_DEF[] api.h:<global>#6 -> fallback_disabled#6
++FLOWS|REACHING_DEF[] api.h:<global>#6 -> fallback_disabled#7
+ FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#14
+ FLOWS|REACHING_DEF[] main.c:<global>#1 -> use#1
+ FLOWS|REACHING_DEF[] main.c:<global>#1 -> use#10
+@@ -361,12 +361,12 @@
+ FLOWS|REACHING_DEF[reserve(amount)] use#7 -> use#11
+ FLOWS|REACHING_DEF[reserve(amount)] use#7 -> use#5
+ FLOWS|REACHING_DEF[reserve(amount)] use#7 -> use#6
+-FLOWS|REACHING_DEF[value + 1] fallback_enabled#5 -> fallback_enabled#4
+-FLOWS|REACHING_DEF[value + 1] fallback_enabled#5 -> fallback_enabled#8
++FLOWS|REACHING_DEF[value + 2] fallback_disabled#5 -> fallback_disabled#4
++FLOWS|REACHING_DEF[value + 2] fallback_disabled#5 -> fallback_disabled#8
+ FLOWS|REACHING_DEF[value] fallback_disabled#1 -> fallback_disabled#2
+-FLOWS|REACHING_DEF[value] fallback_disabled#1 -> fallback_disabled#4
++FLOWS|REACHING_DEF[value] fallback_disabled#1 -> fallback_disabled#6
++FLOWS|REACHING_DEF[value] fallback_disabled#6 -> fallback_disabled#2
++FLOWS|REACHING_DEF[value] fallback_disabled#6 -> fallback_disabled#5
++FLOWS|REACHING_DEF[value] fallback_disabled#6 -> fallback_disabled#8
+ FLOWS|REACHING_DEF[value] fallback_enabled#1 -> fallback_enabled#2
+-FLOWS|REACHING_DEF[value] fallback_enabled#1 -> fallback_enabled#6
+-FLOWS|REACHING_DEF[value] fallback_enabled#6 -> fallback_enabled#2
+-FLOWS|REACHING_DEF[value] fallback_enabled#6 -> fallback_enabled#5
+-FLOWS|REACHING_DEF[value] fallback_enabled#6 -> fallback_enabled#8
++FLOWS|REACHING_DEF[value] fallback_enabled#1 -> fallback_enabled#4

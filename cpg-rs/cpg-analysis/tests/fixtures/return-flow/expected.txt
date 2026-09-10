@@ -1,0 +1,5 @@
+RESULT|alternative_entry|true
+RESULT|both_entry|false
+RESULT|definite_entry|false
+RESULT|loop_entry|true
+RESULT|optional_entry|true

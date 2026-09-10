@@ -1,0 +1,81 @@
+{
+  "status": "PASS_BOUNDED_TYPEDEF_CAST_CONTEXT",
+  "source": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-cast-context/.local/macro-cast-context/frozen-guard/exact.rs",
+    "sha256": "37e394fe9fe3f0afa11652368f26245fd8247bec78c534148d851d0475b3387a"
+  },
+  "binary": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-cast-context/.local/macro-cast-context/frozen-guard/joern-parity",
+    "sha256": "f06b47ac9de0552cf22ef66c22bdc4302a5f1cd0f6b7b0cde96ca08670a7721b"
+  },
+  "sourcePatch": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-cast-context/.local/macro-cast-context/source-guard.patch",
+    "sha256": "f820beba32df93e4815d5c2149e4dada04760325b3950952096c2bdd4a2409db"
+  },
+  "candidateBindings": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-cast-context/.local/macro-cast-context/frozen-guard/bindings.json",
+    "sha256": "f501a6b1e6bf8145f0083f1c928de8fb21653ba844c5fdc15e2ace836c7d071c"
+  },
+  "independentReplay": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-cast-review/provided-review.json",
+    "sha256": "b2a3942ee375c12b053d8823735026cae6a58c61d1ab2438b7233970ba425713"
+  },
+  "independentFreshProbes": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-cast-review/review-probes.json",
+    "sha256": "6f1e54084e11f6995220142dd41e0d8e5babaf5eb92ca51b0346b23e9508a882"
+  },
+  "freshLiveRun": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-cast-review/live-run.json",
+    "sha256": "5400d4f5ab6e0588b1b6e702c17dd8c262e50b36dbdf1570c013aaa37c85b0c2"
+  },
+  "mainReplay": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-cast-review/main-review.json",
+    "sha256": "6bbeb866587dac59ad441d1f0aa1f9e43b0ae42b98d2c6a8db36c30e3289311b"
+  },
+  "providedCases": {
+    "projects": 46,
+    "allReferencesEqualCompleteRawExtraction": true,
+    "baselineExact": 6,
+    "candidateExact": 32,
+    "formerlyExactLost": []
+  },
+  "freshIndependentCases": {
+    "projects": 8,
+    "baselineExact": 0,
+    "candidateExact": 4,
+    "formerlyExactLost": []
+  },
+  "staticReview": [
+    {
+      "lines": "1026-1036,1196-1228",
+      "finding": "Shared classifier requires one non-comment child, no recovered errors, a known typedef, and a nonempty argument list; copied TYPE_REF path uses same guard."
+    },
+    {
+      "lines": "1038-1170",
+      "finding": "Snapshots distinguish source order, local/parameter/enumerator shadowing and nested block/for scope. Fresh adjacent-method and before/after typedef graphs are exact."
+    },
+    {
+      "lines": "1179-1194,2308-2423,2456-2468,2723-2725,3898-3904",
+      "finding": "Temporary parse-tree type maps and defaults are restored after argument discovery, expansion emission, expanded fields and phantom discovery. No new early-return leak found."
+    }
+  ],
+  "residualDiagnostics": [
+    {
+      "case": "comment_type_argument",
+      "classification": "Existing expansion-whitespace discrepancy survives. Cast identity, both TYPE_REF records, and copied argument positions are corrected; full29-line diff retained."
+    },
+    {
+      "case": "block_restoration",
+      "classification": "Outer cast restoration repaired. Remaining method/BLOCK CODE truncation and inner pointerCall result type were already present before this candidate; full59-line diff retained."
+    },
+    {
+      "case": "declaration_macro_later_cast",
+      "classification": "Byte-identical to baseline: object macro typedef does not establish binding for a later original-source expression; full269-line diff retained."
+    },
+    {
+      "case": "argument_typedef_scope",
+      "classification": "Byte-identical to baseline. Local name shadowing produces pointerCall as live; existing CODE transport/result-type differences retained."
+    }
+  ],
+  "claimsBoundary": "No introduced blocker found in the reviewed source and54 isolated complete project outputs.36/54 exact here is not full Joern parity. Production tests are inspected and agent-run logs retained; this independent review uses the frozen executable and does not rebuild. Main canonical output is byte-identical across291 method blocks and all scaffold/edge/flow records; harness calls these308 comparison blocks."
+}

@@ -1,0 +1,2708 @@
+{
+  "function_like_repeated_use": {
+    "allObservedBindingComponents": [
+      {
+        "binding": {
+          "id": "21474836480",
+          "label": "BINDING",
+          "properties": {
+            "METHOD_FULL_NAME": {
+              "kind": "string",
+              "value": "entry"
+            },
+            "NAME": {
+              "kind": "string",
+              "value": "entry"
+            },
+            "SIGNATURE": {
+              "kind": "string",
+              "value": "int(void)"
+            }
+          }
+        },
+        "allIncidentEdgesWithMultiplicity": [
+          {
+            "source": "21474836480",
+            "destination": "107374182400",
+            "label": "REF",
+            "property": {
+              "kind": "null"
+            }
+          },
+          {
+            "source": "167503724544",
+            "destination": "21474836480",
+            "label": "BINDS",
+            "property": {
+              "kind": "null"
+            }
+          }
+        ],
+        "incidentEndpoints": {
+          "107374182400": {
+            "id": "107374182400",
+            "label": "METHOD",
+            "properties": {
+              "AST_PARENT_FULL_NAME": {
+                "kind": "string",
+                "value": "main.c:<global>"
+              },
+              "AST_PARENT_TYPE": {
+                "kind": "string",
+                "value": "TYPE_DECL"
+              },
+              "CODE": {
+                "kind": "string",
+                "value": "int entry(void) { return ADD(1, 2) + ADD(3, 4); }"
+              },
+              "COLUMN_NUMBER": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "1"
+              },
+              "COLUMN_NUMBER_END": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "25"
+              },
+              "FILENAME": {
+                "kind": "string",
+                "value": "main.c"
+              },
+              "FULL_NAME": {
+                "kind": "string",
+                "value": "entry"
+              },
+              "LINE_NUMBER": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "2"
+              },
+              "LINE_NUMBER_END": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "2"
+              },
+              "NAME": {
+                "kind": "string",
+                "value": "entry"
+              },
+              "ORDER": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "1"
+              },
+              "SIGNATURE": {
+                "kind": "string",
+                "value": "int(void)"
+              }
+            }
+          },
+          "167503724544": {
+            "id": "167503724544",
+            "label": "TYPE_DECL",
+            "properties": {
+              "AST_PARENT_FULL_NAME": {
+                "kind": "string",
+                "value": "main.c:<global>"
+              },
+              "AST_PARENT_TYPE": {
+                "kind": "string",
+                "value": "TYPE_DECL"
+              },
+              "CODE": {
+                "kind": "string",
+                "value": "entry"
+              },
+              "COLUMN_NUMBER": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "1"
+              },
+              "FILENAME": {
+                "kind": "string",
+                "value": "main.c"
+              },
+              "FULL_NAME": {
+                "kind": "string",
+                "value": "entry"
+              },
+              "LINE_NUMBER": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "2"
+              },
+              "NAME": {
+                "kind": "string",
+                "value": "entry"
+              },
+              "ORDER": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "1"
+              }
+            }
+          },
+          "21474836480": {
+            "id": "21474836480",
+            "label": "BINDING",
+            "properties": {
+              "METHOD_FULL_NAME": {
+                "kind": "string",
+                "value": "entry"
+              },
+              "NAME": {
+                "kind": "string",
+                "value": "entry"
+              },
+              "SIGNATURE": {
+                "kind": "string",
+                "value": "int(void)"
+              }
+            }
+          }
+        }
+      },
+      {
+        "binding": {
+          "id": "21474836481",
+          "label": "BINDING",
+          "properties": {
+            "METHOD_FULL_NAME": {
+              "kind": "string",
+              "value": "main.c:ADD:ANY(2)"
+            },
+            "NAME": {
+              "kind": "string",
+              "value": "ADD"
+            },
+            "SIGNATURE": {
+              "kind": "string",
+              "value": "ANY(2)"
+            }
+          }
+        },
+        "allIncidentEdgesWithMultiplicity": [
+          {
+            "source": "21474836481",
+            "destination": "107374182403",
+            "label": "REF",
+            "property": {
+              "kind": "null"
+            }
+          },
+          {
+            "source": "167503724545",
+            "destination": "21474836481",
+            "label": "BINDS",
+            "property": {
+              "kind": "null"
+            }
+          }
+        ],
+        "incidentEndpoints": {
+          "107374182403": {
+            "id": "107374182403",
+            "label": "METHOD",
+            "properties": {
+              "AST_PARENT_FULL_NAME": {
+                "kind": "string",
+                "value": "main.c:<global>"
+              },
+              "AST_PARENT_TYPE": {
+                "kind": "string",
+                "value": "TYPE_DECL"
+              },
+              "CODE": {
+                "kind": "string",
+                "value": "#define ADD(x, y) ((x) + (y))"
+              },
+              "COLUMN_NUMBER": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "1"
+              },
+              "COLUMN_NUMBER_END": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "29"
+              },
+              "FILENAME": {
+                "kind": "string",
+                "value": "main.c"
+              },
+              "FULL_NAME": {
+                "kind": "string",
+                "value": "main.c:ADD:ANY(2)"
+              },
+              "IS_EXTERNAL": {
+                "kind": "boolean",
+                "value": true
+              },
+              "LINE_NUMBER": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "1"
+              },
+              "LINE_NUMBER_END": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "1"
+              },
+              "NAME": {
+                "kind": "string",
+                "value": "ADD"
+              },
+              "ORDER": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "1"
+              },
+              "SIGNATURE": {
+                "kind": "string",
+                "value": "ANY(2)"
+              }
+            }
+          },
+          "167503724545": {
+            "id": "167503724545",
+            "label": "TYPE_DECL",
+            "properties": {
+              "AST_PARENT_FULL_NAME": {
+                "kind": "string",
+                "value": "main.c:<global>"
+              },
+              "AST_PARENT_TYPE": {
+                "kind": "string",
+                "value": "NAMESPACE_BLOCK"
+              },
+              "CODE": {
+                "kind": "string",
+                "value": "<global>"
+              },
+              "COLUMN_NUMBER": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "1"
+              },
+              "FILENAME": {
+                "kind": "string",
+                "value": "main.c"
+              },
+              "FULL_NAME": {
+                "kind": "string",
+                "value": "main.c:<global>"
+              },
+              "LINE_NUMBER": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "1"
+              },
+              "NAME": {
+                "kind": "string",
+                "value": "<global>"
+              },
+              "ORDER": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "1"
+              }
+            }
+          },
+          "21474836481": {
+            "id": "21474836481",
+            "label": "BINDING",
+            "properties": {
+              "METHOD_FULL_NAME": {
+                "kind": "string",
+                "value": "main.c:ADD:ANY(2)"
+              },
+              "NAME": {
+                "kind": "string",
+                "value": "ADD"
+              },
+              "SIGNATURE": {
+                "kind": "string",
+                "value": "ANY(2)"
+              }
+            }
+          }
+        }
+      }
+    ],
+    "selectedMacroComponent": {
+      "binding": {
+        "id": "21474836481",
+        "label": "BINDING",
+        "properties": {
+          "METHOD_FULL_NAME": {
+            "kind": "string",
+            "value": "main.c:ADD:ANY(2)"
+          },
+          "NAME": {
+            "kind": "string",
+            "value": "ADD"
+          },
+          "SIGNATURE": {
+            "kind": "string",
+            "value": "ANY(2)"
+          }
+        }
+      },
+      "allIncidentEdgesWithMultiplicity": [
+        {
+          "source": "21474836481",
+          "destination": "107374182403",
+          "label": "REF",
+          "property": {
+            "kind": "null"
+          }
+        },
+        {
+          "source": "167503724545",
+          "destination": "21474836481",
+          "label": "BINDS",
+          "property": {
+            "kind": "null"
+          }
+        }
+      ],
+      "incidentEndpoints": {
+        "107374182403": {
+          "id": "107374182403",
+          "label": "METHOD",
+          "properties": {
+            "AST_PARENT_FULL_NAME": {
+              "kind": "string",
+              "value": "main.c:<global>"
+            },
+            "AST_PARENT_TYPE": {
+              "kind": "string",
+              "value": "TYPE_DECL"
+            },
+            "CODE": {
+              "kind": "string",
+              "value": "#define ADD(x, y) ((x) + (y))"
+            },
+            "COLUMN_NUMBER": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "1"
+            },
+            "COLUMN_NUMBER_END": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "29"
+            },
+            "FILENAME": {
+              "kind": "string",
+              "value": "main.c"
+            },
+            "FULL_NAME": {
+              "kind": "string",
+              "value": "main.c:ADD:ANY(2)"
+            },
+            "IS_EXTERNAL": {
+              "kind": "boolean",
+              "value": true
+            },
+            "LINE_NUMBER": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "1"
+            },
+            "LINE_NUMBER_END": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "1"
+            },
+            "NAME": {
+              "kind": "string",
+              "value": "ADD"
+            },
+            "ORDER": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "1"
+            },
+            "SIGNATURE": {
+              "kind": "string",
+              "value": "ANY(2)"
+            }
+          }
+        },
+        "167503724545": {
+          "id": "167503724545",
+          "label": "TYPE_DECL",
+          "properties": {
+            "AST_PARENT_FULL_NAME": {
+              "kind": "string",
+              "value": "main.c:<global>"
+            },
+            "AST_PARENT_TYPE": {
+              "kind": "string",
+              "value": "NAMESPACE_BLOCK"
+            },
+            "CODE": {
+              "kind": "string",
+              "value": "<global>"
+            },
+            "COLUMN_NUMBER": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "1"
+            },
+            "FILENAME": {
+              "kind": "string",
+              "value": "main.c"
+            },
+            "FULL_NAME": {
+              "kind": "string",
+              "value": "main.c:<global>"
+            },
+            "LINE_NUMBER": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "1"
+            },
+            "NAME": {
+              "kind": "string",
+              "value": "<global>"
+            },
+            "ORDER": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "1"
+            }
+          }
+        },
+        "21474836481": {
+          "id": "21474836481",
+          "label": "BINDING",
+          "properties": {
+            "METHOD_FULL_NAME": {
+              "kind": "string",
+              "value": "main.c:ADD:ANY(2)"
+            },
+            "NAME": {
+              "kind": "string",
+              "value": "ADD"
+            },
+            "SIGNATURE": {
+              "kind": "string",
+              "value": "ANY(2)"
+            }
+          }
+        }
+      }
+    },
+    "observedCalls": [
+      {
+        "id": "30064771073",
+        "label": "CALL",
+        "properties": {
+          "ARGUMENT_INDEX": {
+            "kind": "number",
+            "class": "java.lang.Integer",
+            "value": "1"
+          },
+          "CODE": {
+            "kind": "string",
+            "value": "ADD(1, 2)"
+          },
+          "COLUMN_NUMBER": {
+            "kind": "number",
+            "class": "java.lang.Integer",
+            "value": "26"
+          },
+          "DISPATCH_TYPE": {
+            "kind": "string",
+            "value": "INLINED"
+          },
+          "LINE_NUMBER": {
+            "kind": "number",
+            "class": "java.lang.Integer",
+            "value": "2"
+          },
+          "METHOD_FULL_NAME": {
+            "kind": "string",
+            "value": "main.c:ADD:ANY(2)"
+          },
+          "NAME": {
+            "kind": "string",
+            "value": "ADD"
+          },
+          "ORDER": {
+            "kind": "number",
+            "class": "java.lang.Integer",
+            "value": "1"
+          },
+          "SIGNATURE": {
+            "kind": "string",
+            "value": "ANY(2)"
+          },
+          "TYPE_FULL_NAME": {
+            "kind": "string",
+            "value": "ANY"
+          }
+        }
+      },
+      {
+        "id": "30064771075",
+        "label": "CALL",
+        "properties": {
+          "ARGUMENT_INDEX": {
+            "kind": "number",
+            "class": "java.lang.Integer",
+            "value": "2"
+          },
+          "CODE": {
+            "kind": "string",
+            "value": "ADD(3, 4)"
+          },
+          "COLUMN_NUMBER": {
+            "kind": "number",
+            "class": "java.lang.Integer",
+            "value": "38"
+          },
+          "DISPATCH_TYPE": {
+            "kind": "string",
+            "value": "INLINED"
+          },
+          "LINE_NUMBER": {
+            "kind": "number",
+            "class": "java.lang.Integer",
+            "value": "2"
+          },
+          "METHOD_FULL_NAME": {
+            "kind": "string",
+            "value": "main.c:ADD:ANY(2)"
+          },
+          "NAME": {
+            "kind": "string",
+            "value": "ADD"
+          },
+          "ORDER": {
+            "kind": "number",
+            "class": "java.lang.Integer",
+            "value": "2"
+          },
+          "SIGNATURE": {
+            "kind": "string",
+            "value": "ANY(2)"
+          },
+          "TYPE_FULL_NAME": {
+            "kind": "string",
+            "value": "ANY"
+          }
+        }
+      }
+    ],
+    "observedMacroMethod": {
+      "id": "107374182403",
+      "label": "METHOD",
+      "properties": {
+        "AST_PARENT_FULL_NAME": {
+          "kind": "string",
+          "value": "main.c:<global>"
+        },
+        "AST_PARENT_TYPE": {
+          "kind": "string",
+          "value": "TYPE_DECL"
+        },
+        "CODE": {
+          "kind": "string",
+          "value": "#define ADD(x, y) ((x) + (y))"
+        },
+        "COLUMN_NUMBER": {
+          "kind": "number",
+          "class": "java.lang.Integer",
+          "value": "1"
+        },
+        "COLUMN_NUMBER_END": {
+          "kind": "number",
+          "class": "java.lang.Integer",
+          "value": "29"
+        },
+        "FILENAME": {
+          "kind": "string",
+          "value": "main.c"
+        },
+        "FULL_NAME": {
+          "kind": "string",
+          "value": "main.c:ADD:ANY(2)"
+        },
+        "IS_EXTERNAL": {
+          "kind": "boolean",
+          "value": true
+        },
+        "LINE_NUMBER": {
+          "kind": "number",
+          "class": "java.lang.Integer",
+          "value": "1"
+        },
+        "LINE_NUMBER_END": {
+          "kind": "number",
+          "class": "java.lang.Integer",
+          "value": "1"
+        },
+        "NAME": {
+          "kind": "string",
+          "value": "ADD"
+        },
+        "ORDER": {
+          "kind": "number",
+          "class": "java.lang.Integer",
+          "value": "1"
+        },
+        "SIGNATURE": {
+          "kind": "string",
+          "value": "ANY(2)"
+        }
+      }
+    },
+    "ownerFullName": "main.c:<global>",
+    "macroBindingMissingFromAcceptedRust": true,
+    "canonicalByteExact": true
+  },
+  "local_object_used_unused": {
+    "allObservedBindingComponents": [
+      {
+        "binding": {
+          "id": "21474836480",
+          "label": "BINDING",
+          "properties": {
+            "METHOD_FULL_NAME": {
+              "kind": "string",
+              "value": "entry"
+            },
+            "NAME": {
+              "kind": "string",
+              "value": "entry"
+            },
+            "SIGNATURE": {
+              "kind": "string",
+              "value": "int(void)"
+            }
+          }
+        },
+        "allIncidentEdgesWithMultiplicity": [
+          {
+            "source": "21474836480",
+            "destination": "107374182400",
+            "label": "REF",
+            "property": {
+              "kind": "null"
+            }
+          },
+          {
+            "source": "167503724544",
+            "destination": "21474836480",
+            "label": "BINDS",
+            "property": {
+              "kind": "null"
+            }
+          }
+        ],
+        "incidentEndpoints": {
+          "107374182400": {
+            "id": "107374182400",
+            "label": "METHOD",
+            "properties": {
+              "AST_PARENT_FULL_NAME": {
+                "kind": "string",
+                "value": "main.c:<global>"
+              },
+              "AST_PARENT_TYPE": {
+                "kind": "string",
+                "value": "TYPE_DECL"
+              },
+              "CODE": {
+                "kind": "string",
+                "value": "int entry(void) { return USED; }"
+              },
+              "COLUMN_NUMBER": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "1"
+              },
+              "COLUMN_NUMBER_END": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "25"
+              },
+              "FILENAME": {
+                "kind": "string",
+                "value": "main.c"
+              },
+              "FULL_NAME": {
+                "kind": "string",
+                "value": "entry"
+              },
+              "LINE_NUMBER": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "3"
+              },
+              "LINE_NUMBER_END": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "3"
+              },
+              "NAME": {
+                "kind": "string",
+                "value": "entry"
+              },
+              "ORDER": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "1"
+              },
+              "SIGNATURE": {
+                "kind": "string",
+                "value": "int(void)"
+              }
+            }
+          },
+          "167503724544": {
+            "id": "167503724544",
+            "label": "TYPE_DECL",
+            "properties": {
+              "AST_PARENT_FULL_NAME": {
+                "kind": "string",
+                "value": "main.c:<global>"
+              },
+              "AST_PARENT_TYPE": {
+                "kind": "string",
+                "value": "TYPE_DECL"
+              },
+              "CODE": {
+                "kind": "string",
+                "value": "entry"
+              },
+              "COLUMN_NUMBER": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "1"
+              },
+              "FILENAME": {
+                "kind": "string",
+                "value": "main.c"
+              },
+              "FULL_NAME": {
+                "kind": "string",
+                "value": "entry"
+              },
+              "LINE_NUMBER": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "3"
+              },
+              "NAME": {
+                "kind": "string",
+                "value": "entry"
+              },
+              "ORDER": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "1"
+              }
+            }
+          },
+          "21474836480": {
+            "id": "21474836480",
+            "label": "BINDING",
+            "properties": {
+              "METHOD_FULL_NAME": {
+                "kind": "string",
+                "value": "entry"
+              },
+              "NAME": {
+                "kind": "string",
+                "value": "entry"
+              },
+              "SIGNATURE": {
+                "kind": "string",
+                "value": "int(void)"
+              }
+            }
+          }
+        }
+      },
+      {
+        "binding": {
+          "id": "21474836481",
+          "label": "BINDING",
+          "properties": {
+            "METHOD_FULL_NAME": {
+              "kind": "string",
+              "value": "main.c:USED:int(0)"
+            },
+            "NAME": {
+              "kind": "string",
+              "value": "USED"
+            },
+            "SIGNATURE": {
+              "kind": "string",
+              "value": "int(0)"
+            }
+          }
+        },
+        "allIncidentEdgesWithMultiplicity": [
+          {
+            "source": "21474836481",
+            "destination": "107374182403",
+            "label": "REF",
+            "property": {
+              "kind": "null"
+            }
+          },
+          {
+            "source": "167503724545",
+            "destination": "21474836481",
+            "label": "BINDS",
+            "property": {
+              "kind": "null"
+            }
+          }
+        ],
+        "incidentEndpoints": {
+          "107374182403": {
+            "id": "107374182403",
+            "label": "METHOD",
+            "properties": {
+              "AST_PARENT_FULL_NAME": {
+                "kind": "string",
+                "value": "main.c:<global>"
+              },
+              "AST_PARENT_TYPE": {
+                "kind": "string",
+                "value": "TYPE_DECL"
+              },
+              "CODE": {
+                "kind": "string",
+                "value": "#define USED 7"
+              },
+              "COLUMN_NUMBER": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "1"
+              },
+              "COLUMN_NUMBER_END": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "14"
+              },
+              "FILENAME": {
+                "kind": "string",
+                "value": "main.c"
+              },
+              "FULL_NAME": {
+                "kind": "string",
+                "value": "main.c:USED:int(0)"
+              },
+              "IS_EXTERNAL": {
+                "kind": "boolean",
+                "value": true
+              },
+              "LINE_NUMBER": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "1"
+              },
+              "LINE_NUMBER_END": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "1"
+              },
+              "NAME": {
+                "kind": "string",
+                "value": "USED"
+              },
+              "ORDER": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "1"
+              },
+              "SIGNATURE": {
+                "kind": "string",
+                "value": "int(0)"
+              }
+            }
+          },
+          "167503724545": {
+            "id": "167503724545",
+            "label": "TYPE_DECL",
+            "properties": {
+              "AST_PARENT_FULL_NAME": {
+                "kind": "string",
+                "value": "main.c:<global>"
+              },
+              "AST_PARENT_TYPE": {
+                "kind": "string",
+                "value": "NAMESPACE_BLOCK"
+              },
+              "CODE": {
+                "kind": "string",
+                "value": "<global>"
+              },
+              "COLUMN_NUMBER": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "1"
+              },
+              "FILENAME": {
+                "kind": "string",
+                "value": "main.c"
+              },
+              "FULL_NAME": {
+                "kind": "string",
+                "value": "main.c:<global>"
+              },
+              "LINE_NUMBER": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "1"
+              },
+              "NAME": {
+                "kind": "string",
+                "value": "<global>"
+              },
+              "ORDER": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "1"
+              }
+            }
+          },
+          "21474836481": {
+            "id": "21474836481",
+            "label": "BINDING",
+            "properties": {
+              "METHOD_FULL_NAME": {
+                "kind": "string",
+                "value": "main.c:USED:int(0)"
+              },
+              "NAME": {
+                "kind": "string",
+                "value": "USED"
+              },
+              "SIGNATURE": {
+                "kind": "string",
+                "value": "int(0)"
+              }
+            }
+          }
+        }
+      }
+    ],
+    "selectedMacroComponent": {
+      "binding": {
+        "id": "21474836481",
+        "label": "BINDING",
+        "properties": {
+          "METHOD_FULL_NAME": {
+            "kind": "string",
+            "value": "main.c:USED:int(0)"
+          },
+          "NAME": {
+            "kind": "string",
+            "value": "USED"
+          },
+          "SIGNATURE": {
+            "kind": "string",
+            "value": "int(0)"
+          }
+        }
+      },
+      "allIncidentEdgesWithMultiplicity": [
+        {
+          "source": "21474836481",
+          "destination": "107374182403",
+          "label": "REF",
+          "property": {
+            "kind": "null"
+          }
+        },
+        {
+          "source": "167503724545",
+          "destination": "21474836481",
+          "label": "BINDS",
+          "property": {
+            "kind": "null"
+          }
+        }
+      ],
+      "incidentEndpoints": {
+        "107374182403": {
+          "id": "107374182403",
+          "label": "METHOD",
+          "properties": {
+            "AST_PARENT_FULL_NAME": {
+              "kind": "string",
+              "value": "main.c:<global>"
+            },
+            "AST_PARENT_TYPE": {
+              "kind": "string",
+              "value": "TYPE_DECL"
+            },
+            "CODE": {
+              "kind": "string",
+              "value": "#define USED 7"
+            },
+            "COLUMN_NUMBER": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "1"
+            },
+            "COLUMN_NUMBER_END": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "14"
+            },
+            "FILENAME": {
+              "kind": "string",
+              "value": "main.c"
+            },
+            "FULL_NAME": {
+              "kind": "string",
+              "value": "main.c:USED:int(0)"
+            },
+            "IS_EXTERNAL": {
+              "kind": "boolean",
+              "value": true
+            },
+            "LINE_NUMBER": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "1"
+            },
+            "LINE_NUMBER_END": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "1"
+            },
+            "NAME": {
+              "kind": "string",
+              "value": "USED"
+            },
+            "ORDER": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "1"
+            },
+            "SIGNATURE": {
+              "kind": "string",
+              "value": "int(0)"
+            }
+          }
+        },
+        "167503724545": {
+          "id": "167503724545",
+          "label": "TYPE_DECL",
+          "properties": {
+            "AST_PARENT_FULL_NAME": {
+              "kind": "string",
+              "value": "main.c:<global>"
+            },
+            "AST_PARENT_TYPE": {
+              "kind": "string",
+              "value": "NAMESPACE_BLOCK"
+            },
+            "CODE": {
+              "kind": "string",
+              "value": "<global>"
+            },
+            "COLUMN_NUMBER": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "1"
+            },
+            "FILENAME": {
+              "kind": "string",
+              "value": "main.c"
+            },
+            "FULL_NAME": {
+              "kind": "string",
+              "value": "main.c:<global>"
+            },
+            "LINE_NUMBER": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "1"
+            },
+            "NAME": {
+              "kind": "string",
+              "value": "<global>"
+            },
+            "ORDER": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "1"
+            }
+          }
+        },
+        "21474836481": {
+          "id": "21474836481",
+          "label": "BINDING",
+          "properties": {
+            "METHOD_FULL_NAME": {
+              "kind": "string",
+              "value": "main.c:USED:int(0)"
+            },
+            "NAME": {
+              "kind": "string",
+              "value": "USED"
+            },
+            "SIGNATURE": {
+              "kind": "string",
+              "value": "int(0)"
+            }
+          }
+        }
+      }
+    },
+    "observedCalls": [
+      {
+        "id": "30064771072",
+        "label": "CALL",
+        "properties": {
+          "CODE": {
+            "kind": "string",
+            "value": "USED"
+          },
+          "COLUMN_NUMBER": {
+            "kind": "number",
+            "class": "java.lang.Integer",
+            "value": "26"
+          },
+          "DISPATCH_TYPE": {
+            "kind": "string",
+            "value": "INLINED"
+          },
+          "LINE_NUMBER": {
+            "kind": "number",
+            "class": "java.lang.Integer",
+            "value": "3"
+          },
+          "METHOD_FULL_NAME": {
+            "kind": "string",
+            "value": "main.c:USED:int(0)"
+          },
+          "NAME": {
+            "kind": "string",
+            "value": "USED"
+          },
+          "ORDER": {
+            "kind": "number",
+            "class": "java.lang.Integer",
+            "value": "1"
+          },
+          "SIGNATURE": {
+            "kind": "string",
+            "value": "int(0)"
+          },
+          "TYPE_FULL_NAME": {
+            "kind": "string",
+            "value": "int"
+          }
+        }
+      }
+    ],
+    "observedMacroMethod": {
+      "id": "107374182403",
+      "label": "METHOD",
+      "properties": {
+        "AST_PARENT_FULL_NAME": {
+          "kind": "string",
+          "value": "main.c:<global>"
+        },
+        "AST_PARENT_TYPE": {
+          "kind": "string",
+          "value": "TYPE_DECL"
+        },
+        "CODE": {
+          "kind": "string",
+          "value": "#define USED 7"
+        },
+        "COLUMN_NUMBER": {
+          "kind": "number",
+          "class": "java.lang.Integer",
+          "value": "1"
+        },
+        "COLUMN_NUMBER_END": {
+          "kind": "number",
+          "class": "java.lang.Integer",
+          "value": "14"
+        },
+        "FILENAME": {
+          "kind": "string",
+          "value": "main.c"
+        },
+        "FULL_NAME": {
+          "kind": "string",
+          "value": "main.c:USED:int(0)"
+        },
+        "IS_EXTERNAL": {
+          "kind": "boolean",
+          "value": true
+        },
+        "LINE_NUMBER": {
+          "kind": "number",
+          "class": "java.lang.Integer",
+          "value": "1"
+        },
+        "LINE_NUMBER_END": {
+          "kind": "number",
+          "class": "java.lang.Integer",
+          "value": "1"
+        },
+        "NAME": {
+          "kind": "string",
+          "value": "USED"
+        },
+        "ORDER": {
+          "kind": "number",
+          "class": "java.lang.Integer",
+          "value": "1"
+        },
+        "SIGNATURE": {
+          "kind": "string",
+          "value": "int(0)"
+        }
+      }
+    },
+    "ownerFullName": "main.c:<global>",
+    "macroBindingMissingFromAcceptedRust": true,
+    "canonicalByteExact": true
+  },
+  "repeated_direct_include": {
+    "allObservedBindingComponents": [
+      {
+        "binding": {
+          "id": "21474836480",
+          "label": "BINDING",
+          "properties": {
+            "METHOD_FULL_NAME": {
+              "kind": "string",
+              "value": "entry"
+            },
+            "NAME": {
+              "kind": "string",
+              "value": "entry"
+            },
+            "SIGNATURE": {
+              "kind": "string",
+              "value": "int(void)"
+            }
+          }
+        },
+        "allIncidentEdgesWithMultiplicity": [
+          {
+            "source": "21474836480",
+            "destination": "107374182400",
+            "label": "REF",
+            "property": {
+              "kind": "null"
+            }
+          },
+          {
+            "source": "167503724544",
+            "destination": "21474836480",
+            "label": "BINDS",
+            "property": {
+              "kind": "null"
+            }
+          }
+        ],
+        "incidentEndpoints": {
+          "107374182400": {
+            "id": "107374182400",
+            "label": "METHOD",
+            "properties": {
+              "AST_PARENT_FULL_NAME": {
+                "kind": "string",
+                "value": "main.c:<global>"
+              },
+              "AST_PARENT_TYPE": {
+                "kind": "string",
+                "value": "TYPE_DECL"
+              },
+              "CODE": {
+                "kind": "string",
+                "value": "int entry(void) { return INCLUDED_VALUE; }"
+              },
+              "COLUMN_NUMBER": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "1"
+              },
+              "COLUMN_NUMBER_END": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "25"
+              },
+              "FILENAME": {
+                "kind": "string",
+                "value": "main.c"
+              },
+              "FULL_NAME": {
+                "kind": "string",
+                "value": "entry"
+              },
+              "LINE_NUMBER": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "3"
+              },
+              "LINE_NUMBER_END": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "3"
+              },
+              "NAME": {
+                "kind": "string",
+                "value": "entry"
+              },
+              "ORDER": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "1"
+              },
+              "SIGNATURE": {
+                "kind": "string",
+                "value": "int(void)"
+              }
+            }
+          },
+          "167503724544": {
+            "id": "167503724544",
+            "label": "TYPE_DECL",
+            "properties": {
+              "AST_PARENT_FULL_NAME": {
+                "kind": "string",
+                "value": "main.c:<global>"
+              },
+              "AST_PARENT_TYPE": {
+                "kind": "string",
+                "value": "TYPE_DECL"
+              },
+              "CODE": {
+                "kind": "string",
+                "value": "entry"
+              },
+              "COLUMN_NUMBER": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "1"
+              },
+              "FILENAME": {
+                "kind": "string",
+                "value": "main.c"
+              },
+              "FULL_NAME": {
+                "kind": "string",
+                "value": "entry"
+              },
+              "LINE_NUMBER": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "3"
+              },
+              "NAME": {
+                "kind": "string",
+                "value": "entry"
+              },
+              "ORDER": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "1"
+              }
+            }
+          },
+          "21474836480": {
+            "id": "21474836480",
+            "label": "BINDING",
+            "properties": {
+              "METHOD_FULL_NAME": {
+                "kind": "string",
+                "value": "entry"
+              },
+              "NAME": {
+                "kind": "string",
+                "value": "entry"
+              },
+              "SIGNATURE": {
+                "kind": "string",
+                "value": "int(void)"
+              }
+            }
+          }
+        }
+      },
+      {
+        "binding": {
+          "id": "21474836481",
+          "label": "BINDING",
+          "properties": {
+            "METHOD_FULL_NAME": {
+              "kind": "string",
+              "value": "repeat.h:INCLUDED_VALUE:int(0)"
+            },
+            "NAME": {
+              "kind": "string",
+              "value": "INCLUDED_VALUE"
+            },
+            "SIGNATURE": {
+              "kind": "string",
+              "value": "int(0)"
+            }
+          }
+        },
+        "allIncidentEdgesWithMultiplicity": [
+          {
+            "source": "21474836481",
+            "destination": "107374182404",
+            "label": "REF",
+            "property": {
+              "kind": "null"
+            }
+          },
+          {
+            "source": "167503724545",
+            "destination": "21474836481",
+            "label": "BINDS",
+            "property": {
+              "kind": "null"
+            }
+          }
+        ],
+        "incidentEndpoints": {
+          "107374182404": {
+            "id": "107374182404",
+            "label": "METHOD",
+            "properties": {
+              "AST_PARENT_FULL_NAME": {
+                "kind": "string",
+                "value": "main.c:<global>"
+              },
+              "AST_PARENT_TYPE": {
+                "kind": "string",
+                "value": "TYPE_DECL"
+              },
+              "CODE": {
+                "kind": "string",
+                "value": "#define INCLUDED_VALUE 7"
+              },
+              "COLUMN_NUMBER": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "15"
+              },
+              "COLUMN_NUMBER_END": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "18"
+              },
+              "FILENAME": {
+                "kind": "string",
+                "value": "main.c"
+              },
+              "FULL_NAME": {
+                "kind": "string",
+                "value": "repeat.h:INCLUDED_VALUE:int(0)"
+              },
+              "IS_EXTERNAL": {
+                "kind": "boolean",
+                "value": true
+              },
+              "LINE_NUMBER": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "3"
+              },
+              "LINE_NUMBER_END": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "3"
+              },
+              "NAME": {
+                "kind": "string",
+                "value": "INCLUDED_VALUE"
+              },
+              "ORDER": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "1"
+              },
+              "SIGNATURE": {
+                "kind": "string",
+                "value": "int(0)"
+              }
+            }
+          },
+          "167503724545": {
+            "id": "167503724545",
+            "label": "TYPE_DECL",
+            "properties": {
+              "AST_PARENT_FULL_NAME": {
+                "kind": "string",
+                "value": "main.c:<global>"
+              },
+              "AST_PARENT_TYPE": {
+                "kind": "string",
+                "value": "NAMESPACE_BLOCK"
+              },
+              "CODE": {
+                "kind": "string",
+                "value": "<global>"
+              },
+              "COLUMN_NUMBER": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "1"
+              },
+              "FILENAME": {
+                "kind": "string",
+                "value": "main.c"
+              },
+              "FULL_NAME": {
+                "kind": "string",
+                "value": "main.c:<global>"
+              },
+              "LINE_NUMBER": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "1"
+              },
+              "NAME": {
+                "kind": "string",
+                "value": "<global>"
+              },
+              "ORDER": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "3"
+              }
+            }
+          },
+          "21474836481": {
+            "id": "21474836481",
+            "label": "BINDING",
+            "properties": {
+              "METHOD_FULL_NAME": {
+                "kind": "string",
+                "value": "repeat.h:INCLUDED_VALUE:int(0)"
+              },
+              "NAME": {
+                "kind": "string",
+                "value": "INCLUDED_VALUE"
+              },
+              "SIGNATURE": {
+                "kind": "string",
+                "value": "int(0)"
+              }
+            }
+          }
+        }
+      }
+    ],
+    "selectedMacroComponent": {
+      "binding": {
+        "id": "21474836481",
+        "label": "BINDING",
+        "properties": {
+          "METHOD_FULL_NAME": {
+            "kind": "string",
+            "value": "repeat.h:INCLUDED_VALUE:int(0)"
+          },
+          "NAME": {
+            "kind": "string",
+            "value": "INCLUDED_VALUE"
+          },
+          "SIGNATURE": {
+            "kind": "string",
+            "value": "int(0)"
+          }
+        }
+      },
+      "allIncidentEdgesWithMultiplicity": [
+        {
+          "source": "21474836481",
+          "destination": "107374182404",
+          "label": "REF",
+          "property": {
+            "kind": "null"
+          }
+        },
+        {
+          "source": "167503724545",
+          "destination": "21474836481",
+          "label": "BINDS",
+          "property": {
+            "kind": "null"
+          }
+        }
+      ],
+      "incidentEndpoints": {
+        "107374182404": {
+          "id": "107374182404",
+          "label": "METHOD",
+          "properties": {
+            "AST_PARENT_FULL_NAME": {
+              "kind": "string",
+              "value": "main.c:<global>"
+            },
+            "AST_PARENT_TYPE": {
+              "kind": "string",
+              "value": "TYPE_DECL"
+            },
+            "CODE": {
+              "kind": "string",
+              "value": "#define INCLUDED_VALUE 7"
+            },
+            "COLUMN_NUMBER": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "15"
+            },
+            "COLUMN_NUMBER_END": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "18"
+            },
+            "FILENAME": {
+              "kind": "string",
+              "value": "main.c"
+            },
+            "FULL_NAME": {
+              "kind": "string",
+              "value": "repeat.h:INCLUDED_VALUE:int(0)"
+            },
+            "IS_EXTERNAL": {
+              "kind": "boolean",
+              "value": true
+            },
+            "LINE_NUMBER": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "3"
+            },
+            "LINE_NUMBER_END": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "3"
+            },
+            "NAME": {
+              "kind": "string",
+              "value": "INCLUDED_VALUE"
+            },
+            "ORDER": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "1"
+            },
+            "SIGNATURE": {
+              "kind": "string",
+              "value": "int(0)"
+            }
+          }
+        },
+        "167503724545": {
+          "id": "167503724545",
+          "label": "TYPE_DECL",
+          "properties": {
+            "AST_PARENT_FULL_NAME": {
+              "kind": "string",
+              "value": "main.c:<global>"
+            },
+            "AST_PARENT_TYPE": {
+              "kind": "string",
+              "value": "NAMESPACE_BLOCK"
+            },
+            "CODE": {
+              "kind": "string",
+              "value": "<global>"
+            },
+            "COLUMN_NUMBER": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "1"
+            },
+            "FILENAME": {
+              "kind": "string",
+              "value": "main.c"
+            },
+            "FULL_NAME": {
+              "kind": "string",
+              "value": "main.c:<global>"
+            },
+            "LINE_NUMBER": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "1"
+            },
+            "NAME": {
+              "kind": "string",
+              "value": "<global>"
+            },
+            "ORDER": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "3"
+            }
+          }
+        },
+        "21474836481": {
+          "id": "21474836481",
+          "label": "BINDING",
+          "properties": {
+            "METHOD_FULL_NAME": {
+              "kind": "string",
+              "value": "repeat.h:INCLUDED_VALUE:int(0)"
+            },
+            "NAME": {
+              "kind": "string",
+              "value": "INCLUDED_VALUE"
+            },
+            "SIGNATURE": {
+              "kind": "string",
+              "value": "int(0)"
+            }
+          }
+        }
+      }
+    },
+    "observedCalls": [
+      {
+        "id": "30064771072",
+        "label": "CALL",
+        "properties": {
+          "CODE": {
+            "kind": "string",
+            "value": "INCLUDED_VALUE"
+          },
+          "COLUMN_NUMBER": {
+            "kind": "number",
+            "class": "java.lang.Integer",
+            "value": "26"
+          },
+          "DISPATCH_TYPE": {
+            "kind": "string",
+            "value": "INLINED"
+          },
+          "LINE_NUMBER": {
+            "kind": "number",
+            "class": "java.lang.Integer",
+            "value": "3"
+          },
+          "METHOD_FULL_NAME": {
+            "kind": "string",
+            "value": "repeat.h:INCLUDED_VALUE:int(0)"
+          },
+          "NAME": {
+            "kind": "string",
+            "value": "INCLUDED_VALUE"
+          },
+          "ORDER": {
+            "kind": "number",
+            "class": "java.lang.Integer",
+            "value": "1"
+          },
+          "SIGNATURE": {
+            "kind": "string",
+            "value": "int(0)"
+          },
+          "TYPE_FULL_NAME": {
+            "kind": "string",
+            "value": "int"
+          }
+        }
+      }
+    ],
+    "observedMacroMethod": {
+      "id": "107374182404",
+      "label": "METHOD",
+      "properties": {
+        "AST_PARENT_FULL_NAME": {
+          "kind": "string",
+          "value": "main.c:<global>"
+        },
+        "AST_PARENT_TYPE": {
+          "kind": "string",
+          "value": "TYPE_DECL"
+        },
+        "CODE": {
+          "kind": "string",
+          "value": "#define INCLUDED_VALUE 7"
+        },
+        "COLUMN_NUMBER": {
+          "kind": "number",
+          "class": "java.lang.Integer",
+          "value": "15"
+        },
+        "COLUMN_NUMBER_END": {
+          "kind": "number",
+          "class": "java.lang.Integer",
+          "value": "18"
+        },
+        "FILENAME": {
+          "kind": "string",
+          "value": "main.c"
+        },
+        "FULL_NAME": {
+          "kind": "string",
+          "value": "repeat.h:INCLUDED_VALUE:int(0)"
+        },
+        "IS_EXTERNAL": {
+          "kind": "boolean",
+          "value": true
+        },
+        "LINE_NUMBER": {
+          "kind": "number",
+          "class": "java.lang.Integer",
+          "value": "3"
+        },
+        "LINE_NUMBER_END": {
+          "kind": "number",
+          "class": "java.lang.Integer",
+          "value": "3"
+        },
+        "NAME": {
+          "kind": "string",
+          "value": "INCLUDED_VALUE"
+        },
+        "ORDER": {
+          "kind": "number",
+          "class": "java.lang.Integer",
+          "value": "1"
+        },
+        "SIGNATURE": {
+          "kind": "string",
+          "value": "int(0)"
+        }
+      }
+    },
+    "ownerFullName": "main.c:<global>",
+    "macroBindingMissingFromAcceptedRust": true,
+    "canonicalByteExact": true
+  },
+  "shared_header_two_callers": {
+    "allObservedBindingComponents": [
+      {
+        "binding": {
+          "id": "21474836480",
+          "label": "BINDING",
+          "properties": {
+            "METHOD_FULL_NAME": {
+              "kind": "string",
+              "value": "first"
+            },
+            "NAME": {
+              "kind": "string",
+              "value": "first"
+            },
+            "SIGNATURE": {
+              "kind": "string",
+              "value": "int(void)"
+            }
+          }
+        },
+        "allIncidentEdgesWithMultiplicity": [
+          {
+            "source": "21474836480",
+            "destination": "107374182400",
+            "label": "REF",
+            "property": {
+              "kind": "null"
+            }
+          },
+          {
+            "source": "167503724544",
+            "destination": "21474836480",
+            "label": "BINDS",
+            "property": {
+              "kind": "null"
+            }
+          }
+        ],
+        "incidentEndpoints": {
+          "107374182400": {
+            "id": "107374182400",
+            "label": "METHOD",
+            "properties": {
+              "AST_PARENT_FULL_NAME": {
+                "kind": "string",
+                "value": "a.c:<global>"
+              },
+              "AST_PARENT_TYPE": {
+                "kind": "string",
+                "value": "TYPE_DECL"
+              },
+              "CODE": {
+                "kind": "string",
+                "value": "int first(void) { return VALUE; }"
+              },
+              "COLUMN_NUMBER": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "1"
+              },
+              "COLUMN_NUMBER_END": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "25"
+              },
+              "FILENAME": {
+                "kind": "string",
+                "value": "a.c"
+              },
+              "FULL_NAME": {
+                "kind": "string",
+                "value": "first"
+              },
+              "LINE_NUMBER": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "2"
+              },
+              "LINE_NUMBER_END": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "2"
+              },
+              "NAME": {
+                "kind": "string",
+                "value": "first"
+              },
+              "ORDER": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "1"
+              },
+              "SIGNATURE": {
+                "kind": "string",
+                "value": "int(void)"
+              }
+            }
+          },
+          "167503724544": {
+            "id": "167503724544",
+            "label": "TYPE_DECL",
+            "properties": {
+              "AST_PARENT_FULL_NAME": {
+                "kind": "string",
+                "value": "a.c:<global>"
+              },
+              "AST_PARENT_TYPE": {
+                "kind": "string",
+                "value": "TYPE_DECL"
+              },
+              "CODE": {
+                "kind": "string",
+                "value": "first"
+              },
+              "COLUMN_NUMBER": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "1"
+              },
+              "FILENAME": {
+                "kind": "string",
+                "value": "a.c"
+              },
+              "FULL_NAME": {
+                "kind": "string",
+                "value": "first"
+              },
+              "LINE_NUMBER": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "2"
+              },
+              "NAME": {
+                "kind": "string",
+                "value": "first"
+              },
+              "ORDER": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "1"
+              }
+            }
+          },
+          "21474836480": {
+            "id": "21474836480",
+            "label": "BINDING",
+            "properties": {
+              "METHOD_FULL_NAME": {
+                "kind": "string",
+                "value": "first"
+              },
+              "NAME": {
+                "kind": "string",
+                "value": "first"
+              },
+              "SIGNATURE": {
+                "kind": "string",
+                "value": "int(void)"
+              }
+            }
+          }
+        }
+      },
+      {
+        "binding": {
+          "id": "21474836481",
+          "label": "BINDING",
+          "properties": {
+            "METHOD_FULL_NAME": {
+              "kind": "string",
+              "value": "second"
+            },
+            "NAME": {
+              "kind": "string",
+              "value": "second"
+            },
+            "SIGNATURE": {
+              "kind": "string",
+              "value": "int(void)"
+            }
+          }
+        },
+        "allIncidentEdgesWithMultiplicity": [
+          {
+            "source": "21474836481",
+            "destination": "107374182402",
+            "label": "REF",
+            "property": {
+              "kind": "null"
+            }
+          },
+          {
+            "source": "167503724546",
+            "destination": "21474836481",
+            "label": "BINDS",
+            "property": {
+              "kind": "null"
+            }
+          }
+        ],
+        "incidentEndpoints": {
+          "107374182402": {
+            "id": "107374182402",
+            "label": "METHOD",
+            "properties": {
+              "AST_PARENT_FULL_NAME": {
+                "kind": "string",
+                "value": "z.c:<global>"
+              },
+              "AST_PARENT_TYPE": {
+                "kind": "string",
+                "value": "TYPE_DECL"
+              },
+              "CODE": {
+                "kind": "string",
+                "value": "int second(void) { return VALUE; }"
+              },
+              "COLUMN_NUMBER": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "1"
+              },
+              "COLUMN_NUMBER_END": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "26"
+              },
+              "FILENAME": {
+                "kind": "string",
+                "value": "z.c"
+              },
+              "FULL_NAME": {
+                "kind": "string",
+                "value": "second"
+              },
+              "LINE_NUMBER": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "2"
+              },
+              "LINE_NUMBER_END": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "2"
+              },
+              "NAME": {
+                "kind": "string",
+                "value": "second"
+              },
+              "ORDER": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "1"
+              },
+              "SIGNATURE": {
+                "kind": "string",
+                "value": "int(void)"
+              }
+            }
+          },
+          "167503724546": {
+            "id": "167503724546",
+            "label": "TYPE_DECL",
+            "properties": {
+              "AST_PARENT_FULL_NAME": {
+                "kind": "string",
+                "value": "z.c:<global>"
+              },
+              "AST_PARENT_TYPE": {
+                "kind": "string",
+                "value": "TYPE_DECL"
+              },
+              "CODE": {
+                "kind": "string",
+                "value": "second"
+              },
+              "COLUMN_NUMBER": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "1"
+              },
+              "FILENAME": {
+                "kind": "string",
+                "value": "z.c"
+              },
+              "FULL_NAME": {
+                "kind": "string",
+                "value": "second"
+              },
+              "LINE_NUMBER": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "2"
+              },
+              "NAME": {
+                "kind": "string",
+                "value": "second"
+              },
+              "ORDER": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "1"
+              }
+            }
+          },
+          "21474836481": {
+            "id": "21474836481",
+            "label": "BINDING",
+            "properties": {
+              "METHOD_FULL_NAME": {
+                "kind": "string",
+                "value": "second"
+              },
+              "NAME": {
+                "kind": "string",
+                "value": "second"
+              },
+              "SIGNATURE": {
+                "kind": "string",
+                "value": "int(void)"
+              }
+            }
+          }
+        }
+      },
+      {
+        "binding": {
+          "id": "21474836482",
+          "label": "BINDING",
+          "properties": {
+            "METHOD_FULL_NAME": {
+              "kind": "string",
+              "value": "shared.h:VALUE:int(0)"
+            },
+            "NAME": {
+              "kind": "string",
+              "value": "VALUE"
+            },
+            "SIGNATURE": {
+              "kind": "string",
+              "value": "int(0)"
+            }
+          }
+        },
+        "allIncidentEdgesWithMultiplicity": [
+          {
+            "source": "21474836482",
+            "destination": "107374182406",
+            "label": "REF",
+            "property": {
+              "kind": "null"
+            }
+          },
+          {
+            "source": "167503724545",
+            "destination": "21474836482",
+            "label": "BINDS",
+            "property": {
+              "kind": "null"
+            }
+          }
+        ],
+        "incidentEndpoints": {
+          "107374182406": {
+            "id": "107374182406",
+            "label": "METHOD",
+            "properties": {
+              "AST_PARENT_FULL_NAME": {
+                "kind": "string",
+                "value": "a.c:<global>"
+              },
+              "AST_PARENT_TYPE": {
+                "kind": "string",
+                "value": "TYPE_DECL"
+              },
+              "CODE": {
+                "kind": "string",
+                "value": "#define VALUE 7"
+              },
+              "COLUMN_NUMBER": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "1"
+              },
+              "COLUMN_NUMBER_END": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "15"
+              },
+              "FILENAME": {
+                "kind": "string",
+                "value": "a.c"
+              },
+              "FULL_NAME": {
+                "kind": "string",
+                "value": "shared.h:VALUE:int(0)"
+              },
+              "IS_EXTERNAL": {
+                "kind": "boolean",
+                "value": true
+              },
+              "LINE_NUMBER": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "1"
+              },
+              "LINE_NUMBER_END": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "1"
+              },
+              "NAME": {
+                "kind": "string",
+                "value": "VALUE"
+              },
+              "ORDER": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "1"
+              },
+              "SIGNATURE": {
+                "kind": "string",
+                "value": "int(0)"
+              }
+            }
+          },
+          "167503724545": {
+            "id": "167503724545",
+            "label": "TYPE_DECL",
+            "properties": {
+              "AST_PARENT_FULL_NAME": {
+                "kind": "string",
+                "value": "a.c:<global>"
+              },
+              "AST_PARENT_TYPE": {
+                "kind": "string",
+                "value": "NAMESPACE_BLOCK"
+              },
+              "CODE": {
+                "kind": "string",
+                "value": "<global>"
+              },
+              "COLUMN_NUMBER": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "1"
+              },
+              "FILENAME": {
+                "kind": "string",
+                "value": "a.c"
+              },
+              "FULL_NAME": {
+                "kind": "string",
+                "value": "a.c:<global>"
+              },
+              "LINE_NUMBER": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "1"
+              },
+              "NAME": {
+                "kind": "string",
+                "value": "<global>"
+              },
+              "ORDER": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "2"
+              }
+            }
+          },
+          "21474836482": {
+            "id": "21474836482",
+            "label": "BINDING",
+            "properties": {
+              "METHOD_FULL_NAME": {
+                "kind": "string",
+                "value": "shared.h:VALUE:int(0)"
+              },
+              "NAME": {
+                "kind": "string",
+                "value": "VALUE"
+              },
+              "SIGNATURE": {
+                "kind": "string",
+                "value": "int(0)"
+              }
+            }
+          }
+        }
+      }
+    ],
+    "selectedMacroComponent": {
+      "binding": {
+        "id": "21474836482",
+        "label": "BINDING",
+        "properties": {
+          "METHOD_FULL_NAME": {
+            "kind": "string",
+            "value": "shared.h:VALUE:int(0)"
+          },
+          "NAME": {
+            "kind": "string",
+            "value": "VALUE"
+          },
+          "SIGNATURE": {
+            "kind": "string",
+            "value": "int(0)"
+          }
+        }
+      },
+      "allIncidentEdgesWithMultiplicity": [
+        {
+          "source": "21474836482",
+          "destination": "107374182406",
+          "label": "REF",
+          "property": {
+            "kind": "null"
+          }
+        },
+        {
+          "source": "167503724545",
+          "destination": "21474836482",
+          "label": "BINDS",
+          "property": {
+            "kind": "null"
+          }
+        }
+      ],
+      "incidentEndpoints": {
+        "107374182406": {
+          "id": "107374182406",
+          "label": "METHOD",
+          "properties": {
+            "AST_PARENT_FULL_NAME": {
+              "kind": "string",
+              "value": "a.c:<global>"
+            },
+            "AST_PARENT_TYPE": {
+              "kind": "string",
+              "value": "TYPE_DECL"
+            },
+            "CODE": {
+              "kind": "string",
+              "value": "#define VALUE 7"
+            },
+            "COLUMN_NUMBER": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "1"
+            },
+            "COLUMN_NUMBER_END": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "15"
+            },
+            "FILENAME": {
+              "kind": "string",
+              "value": "a.c"
+            },
+            "FULL_NAME": {
+              "kind": "string",
+              "value": "shared.h:VALUE:int(0)"
+            },
+            "IS_EXTERNAL": {
+              "kind": "boolean",
+              "value": true
+            },
+            "LINE_NUMBER": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "1"
+            },
+            "LINE_NUMBER_END": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "1"
+            },
+            "NAME": {
+              "kind": "string",
+              "value": "VALUE"
+            },
+            "ORDER": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "1"
+            },
+            "SIGNATURE": {
+              "kind": "string",
+              "value": "int(0)"
+            }
+          }
+        },
+        "167503724545": {
+          "id": "167503724545",
+          "label": "TYPE_DECL",
+          "properties": {
+            "AST_PARENT_FULL_NAME": {
+              "kind": "string",
+              "value": "a.c:<global>"
+            },
+            "AST_PARENT_TYPE": {
+              "kind": "string",
+              "value": "NAMESPACE_BLOCK"
+            },
+            "CODE": {
+              "kind": "string",
+              "value": "<global>"
+            },
+            "COLUMN_NUMBER": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "1"
+            },
+            "FILENAME": {
+              "kind": "string",
+              "value": "a.c"
+            },
+            "FULL_NAME": {
+              "kind": "string",
+              "value": "a.c:<global>"
+            },
+            "LINE_NUMBER": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "1"
+            },
+            "NAME": {
+              "kind": "string",
+              "value": "<global>"
+            },
+            "ORDER": {
+              "kind": "number",
+              "class": "java.lang.Integer",
+              "value": "2"
+            }
+          }
+        },
+        "21474836482": {
+          "id": "21474836482",
+          "label": "BINDING",
+          "properties": {
+            "METHOD_FULL_NAME": {
+              "kind": "string",
+              "value": "shared.h:VALUE:int(0)"
+            },
+            "NAME": {
+              "kind": "string",
+              "value": "VALUE"
+            },
+            "SIGNATURE": {
+              "kind": "string",
+              "value": "int(0)"
+            }
+          }
+        }
+      }
+    },
+    "observedCalls": [
+      {
+        "id": "30064771072",
+        "label": "CALL",
+        "properties": {
+          "CODE": {
+            "kind": "string",
+            "value": "VALUE"
+          },
+          "COLUMN_NUMBER": {
+            "kind": "number",
+            "class": "java.lang.Integer",
+            "value": "26"
+          },
+          "DISPATCH_TYPE": {
+            "kind": "string",
+            "value": "INLINED"
+          },
+          "LINE_NUMBER": {
+            "kind": "number",
+            "class": "java.lang.Integer",
+            "value": "2"
+          },
+          "METHOD_FULL_NAME": {
+            "kind": "string",
+            "value": "shared.h:VALUE:int(0)"
+          },
+          "NAME": {
+            "kind": "string",
+            "value": "VALUE"
+          },
+          "ORDER": {
+            "kind": "number",
+            "class": "java.lang.Integer",
+            "value": "1"
+          },
+          "SIGNATURE": {
+            "kind": "string",
+            "value": "int(0)"
+          },
+          "TYPE_FULL_NAME": {
+            "kind": "string",
+            "value": "int"
+          }
+        }
+      },
+      {
+        "id": "30064771073",
+        "label": "CALL",
+        "properties": {
+          "CODE": {
+            "kind": "string",
+            "value": "VALUE"
+          },
+          "COLUMN_NUMBER": {
+            "kind": "number",
+            "class": "java.lang.Integer",
+            "value": "27"
+          },
+          "DISPATCH_TYPE": {
+            "kind": "string",
+            "value": "INLINED"
+          },
+          "LINE_NUMBER": {
+            "kind": "number",
+            "class": "java.lang.Integer",
+            "value": "2"
+          },
+          "METHOD_FULL_NAME": {
+            "kind": "string",
+            "value": "shared.h:VALUE:int(0)"
+          },
+          "NAME": {
+            "kind": "string",
+            "value": "VALUE"
+          },
+          "ORDER": {
+            "kind": "number",
+            "class": "java.lang.Integer",
+            "value": "1"
+          },
+          "SIGNATURE": {
+            "kind": "string",
+            "value": "int(0)"
+          },
+          "TYPE_FULL_NAME": {
+            "kind": "string",
+            "value": "int"
+          }
+        }
+      }
+    ],
+    "observedMacroMethod": {
+      "id": "107374182406",
+      "label": "METHOD",
+      "properties": {
+        "AST_PARENT_FULL_NAME": {
+          "kind": "string",
+          "value": "a.c:<global>"
+        },
+        "AST_PARENT_TYPE": {
+          "kind": "string",
+          "value": "TYPE_DECL"
+        },
+        "CODE": {
+          "kind": "string",
+          "value": "#define VALUE 7"
+        },
+        "COLUMN_NUMBER": {
+          "kind": "number",
+          "class": "java.lang.Integer",
+          "value": "1"
+        },
+        "COLUMN_NUMBER_END": {
+          "kind": "number",
+          "class": "java.lang.Integer",
+          "value": "15"
+        },
+        "FILENAME": {
+          "kind": "string",
+          "value": "a.c"
+        },
+        "FULL_NAME": {
+          "kind": "string",
+          "value": "shared.h:VALUE:int(0)"
+        },
+        "IS_EXTERNAL": {
+          "kind": "boolean",
+          "value": true
+        },
+        "LINE_NUMBER": {
+          "kind": "number",
+          "class": "java.lang.Integer",
+          "value": "1"
+        },
+        "LINE_NUMBER_END": {
+          "kind": "number",
+          "class": "java.lang.Integer",
+          "value": "1"
+        },
+        "NAME": {
+          "kind": "string",
+          "value": "VALUE"
+        },
+        "ORDER": {
+          "kind": "number",
+          "class": "java.lang.Integer",
+          "value": "1"
+        },
+        "SIGNATURE": {
+          "kind": "string",
+          "value": "int(0)"
+        }
+      }
+    },
+    "ownerFullName": "a.c:<global>",
+    "macroBindingMissingFromAcceptedRust": true,
+    "canonicalByteExact": true
+  }
+}

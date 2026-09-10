@@ -1,0 +1,15 @@
+--- accepted/lib.rs
++++ frozen-v2/lib.rs
+@@ -66,8 +66,10 @@
+             .iter()
+             .map(|(path, source)| ((*path).to_string(), (*source).to_string()))
+             .collect();
+-        let dump = exact::canonical_dump_sources(&sources);
+-        Some(import::graph_from_canonical_dump(&dump, &sources))
++        let (dump, origins) = exact::canonical_dump_sources_with_origins(&sources);
++        Some(import::graph_from_canonical_dump_with_origins(
++            &dump, &sources, &origins,
++        ))
+     }
+ 
+     fn build_file(&mut self, cpg: &mut Cpg, path: &str, source: &str) -> BuildResult {

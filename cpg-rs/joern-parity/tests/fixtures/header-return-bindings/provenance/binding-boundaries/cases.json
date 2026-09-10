@@ -1,0 +1,22 @@
+{
+  "callback_alias": {
+    "api.h": "typedef int (*Callback)(int);\nCallback f(int x);\n",
+    "main.c": "#include \"api.h\"\nint g(int x){return f(x);}\n"
+  },
+  "caller_alias": {
+    "api.h": "I f(int x);\n",
+    "main.c": "typedef long I;\n#include \"api.h\"\nlong g(int x){return f(x);}\n"
+  },
+  "late_alias": {
+    "api.h": "I f(int x);\ntypedef long I;\n",
+    "main.c": "#include \"api.h\"\nlong g(int x){return f(x);}\n"
+  },
+  "pointer_alias": {
+    "api.h": "typedef long *P;\nP f(int x);\n",
+    "main.c": "#include \"api.h\"\nlong *g(int x){return f(x);}\n"
+  },
+  "cycle_alias": {
+    "api.h": "typedef B A;\ntypedef A B;\nA f(int x);\n",
+    "main.c": "#include \"api.h\"\nlong g(int x){return f(x);}\n"
+  }
+}

@@ -1,0 +1,175 @@
+METHOD NAME=<global> CODE=<global> FULL_NAME=<includes>:<global> ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.arrayInitializer FULL_NAME=<operator>.arrayInitializer ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<clinit> CODE=<clinit> FULL_NAME=Active.<clinit>:Active() ORDER=2
+  BLOCK ORDER=1
+    CALL NAME=<operator>.arrayInitializer CODE=a[2] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.arrayInitializer ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+      LITERAL CODE=2 TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+  MODIFIER ORDER=2
+  MODIFIER ORDER=3
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=Active ORDER=4
+
+METHOD NAME=<clinit> CODE=<clinit> FULL_NAME=Inactive.<clinit>:Inactive() ORDER=2
+  BLOCK ORDER=1
+    CALL NAME=<operator>.arrayInitializer CODE=b[3] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.arrayInitializer ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+      LITERAL CODE=3 TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+  MODIFIER ORDER=2
+  MODIFIER ORDER=3
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=Inactive ORDER=4
+
+METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1
+  TYPE_DECL NAME=Active CODE=typedef struct { char a[2]; } FULL_NAME=Active ORDER=1
+    MEMBER NAME=a CODE=a[2] TYPE_FULL_NAME=char[2] ORDER=1
+    METHOD NAME=<clinit> CODE=<clinit> FULL_NAME=Active.<clinit>:Active() ORDER=2
+      BLOCK ORDER=1
+        CALL NAME=<operator>.arrayInitializer CODE=a[2] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.arrayInitializer ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+          LITERAL CODE=2 TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+      MODIFIER ORDER=2
+      MODIFIER ORDER=3
+      METHOD_RETURN CODE=RET TYPE_FULL_NAME=Active ORDER=4
+  LOCAL NAME=Active CODE=typedef struct { char a[2]; } Active TYPE_FULL_NAME=struct ORDER=1
+  TYPE_DECL NAME=Inactive CODE=typedef union { char b[3]; } FULL_NAME=Inactive ORDER=1
+    MEMBER NAME=b CODE=b[3] TYPE_FULL_NAME=char[3] ORDER=1
+    METHOD NAME=<clinit> CODE=<clinit> FULL_NAME=Inactive.<clinit>:Inactive() ORDER=2
+      BLOCK ORDER=1
+        CALL NAME=<operator>.arrayInitializer CODE=b[3] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.arrayInitializer ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+          LITERAL CODE=3 TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+      MODIFIER ORDER=2
+      MODIFIER ORDER=3
+      METHOD_RETURN CODE=RET TYPE_FULL_NAME=Inactive ORDER=4
+  LOCAL NAME=Inactive CODE=typedef union { char b[3]; } Inactive TYPE_FULL_NAME=union ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+    TYPE_REF CODE=typedef struct { char a[2]; } TYPE_FULL_NAME=Active ORDER=1
+    TYPE_REF CODE=typedef union { char b[3]; } TYPE_FULL_NAME=Inactive ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+NODES|META_DATA LANGUAGE=NEWC
+NODES|FILE NAME=<includes> ORDER=1
+NODES|FILE NAME=<unknown> ORDER=0
+NODES|FILE NAME=main.c ORDER=0
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<global> FILENAME=<unknown> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<includes>:<global> FILENAME=<includes> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|NAMESPACE NAME=<global>
+NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=Active FULL_NAME=Active CODE=typedef struct { char a[2]; } AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=Inactive FULL_NAME=Inactive CODE=typedef union { char b[3]; } AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=char[2] FULL_NAME=char[2] CODE=char[2] IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=char[3] FULL_NAME=char[3] CODE=char[3] IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=<global> FULL_NAME=main.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=struct FULL_NAME=struct CODE=struct IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=union FULL_NAME=union CODE=union IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+NODES|TYPE NAME=Active FULL_NAME=Active TYPE_DECL_FULL_NAME=Active
+NODES|TYPE NAME=Inactive FULL_NAME=Inactive TYPE_DECL_FULL_NAME=Inactive
+NODES|TYPE NAME=char[2] FULL_NAME=char[2] TYPE_DECL_FULL_NAME=char[2]
+NODES|TYPE NAME=char[3] FULL_NAME=char[3] TYPE_DECL_FULL_NAME=char[3]
+NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+NODES|TYPE NAME=struct FULL_NAME=struct TYPE_DECL_FULL_NAME=struct
+NODES|TYPE NAME=union FULL_NAME=union TYPE_DECL_FULL_NAME=union
+EDGES|ARGUMENT Active.<clinit>:Active()#2 -> Active.<clinit>:Active()#3
+EDGES|ARGUMENT Inactive.<clinit>:Inactive()#2 -> Inactive.<clinit>:Inactive()#3
+EDGES|CALL Active.<clinit>:Active()#2 -> <operator>.arrayInitializer#0
+EDGES|CALL Inactive.<clinit>:Inactive()#2 -> <operator>.arrayInitializer#0
+EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+EDGES|CFG <operator>.arrayInitializer#0 -> <operator>.arrayInitializer#4
+EDGES|CFG Active.<clinit>:Active()#0 -> Active.<clinit>:Active()#3
+EDGES|CFG Active.<clinit>:Active()#2 -> Active.<clinit>:Active()#6
+EDGES|CFG Active.<clinit>:Active()#3 -> Active.<clinit>:Active()#2
+EDGES|CFG Inactive.<clinit>:Inactive()#0 -> Inactive.<clinit>:Inactive()#3
+EDGES|CFG Inactive.<clinit>:Inactive()#2 -> Inactive.<clinit>:Inactive()#6
+EDGES|CFG Inactive.<clinit>:Inactive()#3 -> Inactive.<clinit>:Inactive()#2
+EDGES|CFG main.c:<global>#0 -> main.c:<global>#22
+EDGES|CFG main.c:<global>#22 -> main.c:<global>#23
+EDGES|CFG main.c:<global>#23 -> main.c:<global>#24
+EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+EDGES|CONTAINS <operator>.arrayInitializer#0 -> <operator>.arrayInitializer#2
+EDGES|CONTAINS Active.<clinit>:Active()#0 -> Active.<clinit>:Active()#1
+EDGES|CONTAINS Active.<clinit>:Active()#0 -> Active.<clinit>:Active()#2
+EDGES|CONTAINS Active.<clinit>:Active()#0 -> Active.<clinit>:Active()#3
+EDGES|CONTAINS D:main.c:<global> -> main.c:<global>#0
+EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+EDGES|CONTAINS F:<includes> -> D:ANY
+EDGES|CONTAINS F:<includes> -> D:char[2]
+EDGES|CONTAINS F:<includes> -> D:char[3]
+EDGES|CONTAINS F:<includes> -> D:int
+EDGES|CONTAINS F:<includes> -> D:struct
+EDGES|CONTAINS F:<includes> -> D:union
+EDGES|CONTAINS F:main.c -> D:main.c:<global>
+EDGES|CONTAINS Inactive.<clinit>:Inactive()#0 -> Inactive.<clinit>:Inactive()#1
+EDGES|CONTAINS Inactive.<clinit>:Inactive()#0 -> Inactive.<clinit>:Inactive()#2
+EDGES|CONTAINS Inactive.<clinit>:Inactive()#0 -> Inactive.<clinit>:Inactive()#3
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#1
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#11
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#21
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#22
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#23
+EDGES|CONTAINS main.c:<global>#1 -> Active.<clinit>:Active()#0
+EDGES|CONTAINS main.c:<global>#11 -> Inactive.<clinit>:Inactive()#0
+EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.arrayInitializer#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.arrayInitializer#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.arrayInitializer#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.arrayInitializer#4 -> T:ANY
+EDGES|EVAL_TYPE Active.<clinit>:Active()#2 -> T:ANY
+EDGES|EVAL_TYPE Active.<clinit>:Active()#3 -> T:int
+EDGES|EVAL_TYPE Active.<clinit>:Active()#6 -> T:Active
+EDGES|EVAL_TYPE Inactive.<clinit>:Inactive()#2 -> T:ANY
+EDGES|EVAL_TYPE Inactive.<clinit>:Inactive()#3 -> T:int
+EDGES|EVAL_TYPE Inactive.<clinit>:Inactive()#6 -> T:Inactive
+EDGES|EVAL_TYPE main.c:<global>#10 -> T:struct
+EDGES|EVAL_TYPE main.c:<global>#12 -> T:char[3]
+EDGES|EVAL_TYPE main.c:<global>#2 -> T:char[2]
+EDGES|EVAL_TYPE main.c:<global>#20 -> T:union
+EDGES|EVAL_TYPE main.c:<global>#21 -> T:ANY
+EDGES|EVAL_TYPE main.c:<global>#22 -> T:Active
+EDGES|EVAL_TYPE main.c:<global>#23 -> T:Inactive
+EDGES|EVAL_TYPE main.c:<global>#24 -> T:ANY
+EDGES|PARAMETER_LINK <operator>.arrayInitializer#1 -> <operator>.arrayInitializer#3
+EDGES|REF NB:<global> -> NS:<global>
+EDGES|REF NB:<includes>:<global> -> NS:<global>
+EDGES|REF NB:main.c:<global> -> NS:<global>
+EDGES|REF T:ANY -> D:ANY
+EDGES|REF T:Active -> main.c:<global>#1
+EDGES|REF T:Inactive -> main.c:<global>#11
+EDGES|REF T:char[2] -> D:char[2]
+EDGES|REF T:char[3] -> D:char[3]
+EDGES|REF T:int -> D:int
+EDGES|REF T:struct -> D:struct
+EDGES|REF T:union -> D:union
+EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+EDGES|SOURCE_FILE Active.<clinit>:Active()#0 -> F:main.c
+EDGES|SOURCE_FILE D:ANY -> F:<includes>
+EDGES|SOURCE_FILE D:char[2] -> F:<includes>
+EDGES|SOURCE_FILE D:char[3] -> F:<includes>
+EDGES|SOURCE_FILE D:int -> F:<includes>
+EDGES|SOURCE_FILE D:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE D:struct -> F:<includes>
+EDGES|SOURCE_FILE D:union -> F:<includes>
+EDGES|SOURCE_FILE Inactive.<clinit>:Inactive()#0 -> F:main.c
+EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
+EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>
+EDGES|SOURCE_FILE NB:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#0 -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#1 -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#11 -> F:main.c
+FLOWS|REACHING_DEF[2] Active.<clinit>:Active()#3 -> Active.<clinit>:Active()#2
+FLOWS|REACHING_DEF[3] Inactive.<clinit>:Inactive()#3 -> Inactive.<clinit>:Inactive()#2
+FLOWS|REACHING_DEF[] <operator>.arrayInitializer#0 -> <operator>.arrayInitializer#1
+FLOWS|REACHING_DEF[] Active.<clinit>:Active()#0 -> Active.<clinit>:Active()#3
+FLOWS|REACHING_DEF[] Inactive.<clinit>:Inactive()#0 -> Inactive.<clinit>:Inactive()#3
+FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#22
+FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#23
+FLOWS|REACHING_DEF[a[2]] Active.<clinit>:Active()#2 -> Active.<clinit>:Active()#6
+FLOWS|REACHING_DEF[b[3]] Inactive.<clinit>:Inactive()#2 -> Inactive.<clinit>:Inactive()#6
+FLOWS|REACHING_DEF[p1] <operator>.arrayInitializer#1 -> <operator>.arrayInitializer#3
+FLOWS|REACHING_DEF[p1] <operator>.arrayInitializer#1 -> <operator>.arrayInitializer#4

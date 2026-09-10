@@ -1,0 +1,42 @@
+[
+  {
+    "case": "comment_between",
+    "baselineEqualsCandidate": true,
+    "matchingRecordsLost": [],
+    "matchingRecordsGained": 0,
+    "baselineExact": false,
+    "candidateExact": false
+  },
+  {
+    "case": "formfeed_space",
+    "baselineEqualsCandidate": true,
+    "matchingRecordsLost": [],
+    "matchingRecordsGained": 0,
+    "baselineExact": false,
+    "candidateExact": false
+  },
+  {
+    "case": "spliced_keyword",
+    "baselineEqualsCandidate": true,
+    "matchingRecordsLost": [],
+    "matchingRecordsGained": 0,
+    "baselineExact": false,
+    "candidateExact": false
+  },
+  {
+    "case": "trailing_comment",
+    "baselineEqualsCandidate": false,
+    "matchingRecordsLost": [],
+    "matchingRecordsGained": 6,
+    "baselineExact": false,
+    "candidateExact": true
+  },
+  {
+    "case": "unknown_directive",
+    "baselineEqualsCandidate": true,
+    "matchingRecordsLost": [],
+    "matchingRecordsGained": 0,
+    "baselineExact": true,
+    "candidateExact": true
+  }
+]

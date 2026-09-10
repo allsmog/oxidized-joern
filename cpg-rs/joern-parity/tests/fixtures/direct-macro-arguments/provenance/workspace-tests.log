@@ -1,0 +1,769 @@
+   Compiling libc v0.2.189
+   Compiling tree-sitter-python v0.25.0
+   Compiling tree-sitter-ruby v0.23.1
+   Compiling tree-sitter-javascript v0.25.0
+   Compiling tree-sitter-rust v0.24.2
+   Compiling tree-sitter-typescript v0.23.2
+   Compiling tree-sitter-java v0.23.5
+   Compiling tree-sitter-cpp v0.23.4
+   Compiling tree-sitter-scala v0.26.2
+   Compiling tree-sitter-go v0.25.0
+   Compiling blake3 v1.8.6
+   Compiling arrayvec v0.7.8
+   Compiling arrayref v0.3.9
+   Compiling constant_time_eq v0.4.2
+   Compiling errno v0.3.14
+   Compiling getrandom v0.4.3
+   Compiling fs2 v0.4.3
+   Compiling rustix v1.1.4
+   Compiling tempfile v3.27.0
+   Compiling cpg-core v0.1.1 (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-arguments/cpg-rs/cpg-core)
+   Compiling cpg-frontend v0.1.1 (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-arguments/cpg-rs/cpg-frontend)
+   Compiling cpg-analysis v0.1.1 (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-arguments/cpg-rs/cpg-analysis)
+   Compiling cpg-lang-c v0.1.1 (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-arguments/cpg-rs/cpg-lang-c)
+   Compiling cpg-lang-ts v0.1.1 (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-arguments/cpg-rs/cpg-lang-ts)
+   Compiling cpg-lang-python v0.1.1 (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-arguments/cpg-rs/cpg-lang-python)
+   Compiling cpg-incremental v0.1.1 (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-arguments/cpg-rs/cpg-incremental)
+   Compiling conformance v0.1.1 (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-arguments/cpg-rs/conformance)
+   Compiling cpg-cli v0.1.1 (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-arguments/cpg-rs/cpg-cli)
+   Compiling joern-parity v0.1.1 (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-arguments/cpg-rs/joern-parity)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 9.44s
+     Running unittests src/lib.rs (.local/target/debug/deps/conformance-35a2c7d43f14fdc7)
+
+running 3 tests
+test tests::python_conforms_to_standard_cases ... ok
+test tests::c_conforms_to_standard_cases ... ok
+test tests::all_languages_conform ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running unittests src/lib.rs (.local/target/debug/deps/cpg_analysis-401583da0852d06c)
+
+running 167 tests
+test authz::tests::invocation_requires_name_adjacent_parens ... ok
+test callgraph::tests::test_path_conventions ... ok
+test callgraph::tests::out_of_graph_interface_hint_stays_unresolved ... ok
+test callgraph::tests::hint_with_no_match_in_hierarchy_stays_unresolved ... ok
+test callgraph::tests::inherited_method_resolves_through_base ... ok
+test callgraph::tests::production_call_with_only_test_candidates_stays_unresolved ... ok
+test callgraph::tests::interface_hint_fans_out_to_implementors ... ok
+test callgraph::tests::member_hint_resolves_and_is_persisted ... ok
+test callgraph::tests::production_calls_skip_test_file_candidates ... ok
+test authz::tests::authz_name_heuristic_matches_words_not_substrings ... ok
+test cfg::tests::cfg_arguments_chain_before_call ... ok
+test cfg::tests::cfg_break_and_continue ... ok
+test cfg::tests::cfg_return_flows_to_method_return_only ... ok
+test cfg::tests::cfg_if_else_branches_from_condition ... ok
+test cfg::tests::cfg_for_loop_shape ... ok
+test cfg::tests::cfg_if_without_else_falls_through ... ok
+test cfg::tests::cfg_do_while_executes_body_first ... ok
+test middleware::tests::binary_root_layouts ... ok
+test cfg::tests::cfg_while_loop_has_back_edge ... ok
+test cfg::tests::cfg_switch_dispatch_and_fallthrough ... ok
+test middleware::tests::census_framework_server_calls_are_configurable_and_disableable ... ok
+test middleware::tests::census_default_marker_accepts_concatenated_spelling ... ok
+test middleware::tests::census_default_marker_preserves_caller_claims_compatibility ... ok
+test middleware::tests::census_caller_context_gated_and_field_read_shapes ... ok
+test middleware::tests::census_qualified_spelling_marks_enforcing ... ok
+test middleware::tests::census_marker_does_not_join_separate_expression_tokens ... ok
+test middleware::tests::census_gate_body_evidence_requires_dominance_over_continuation ... ok
+test middleware::tests::census_chain_variable_append_framework_shape ... ok
+test middleware::tests::census_caller_context_markers_are_configurable_and_disableable ... ok
+test reaching_def::tests::assignment_semantics_gate_sibling_edges ... ok
+test reaching_def::tests::branch_defs_both_reach_join_use ... ok
+test reaching_def::tests::def_flows_into_call_argument ... ok
+test reaching_def::tests::def_reaches_use ... ok
+test reaching_def::tests::def_survives_branch_join ... ok
+test reaching_def::tests::reassignment_kills_earlier_def ... ok
+test reaching_def::tests::return_use_and_exit_edges ... ok
+test reaching_def::tests::rerun_is_idempotent ... ok
+test middleware::tests::census_route_wrapper_beats_module_middleware ... ok
+test middleware::tests::census_inline_partial_and_none ... ok
+test middleware::tests::census_server_scope_interceptor_gates_remaining_entries ... ok
+test structural::tests::lhs_bindings_parses_binding_shapes ... ok
+test structural::tests::clear_key_comparison_is_case_insensitive ... ok
+test structural::tests::literal_string_strips_quotes_only ... ok
+test structural::tests::pat_match_star_semantics ... ok
+test middleware::tests::census_factory_closure_body_evidence_marks_enforcing ... ok
+test middleware::tests::census_switch_before_check_still_dominates ... ok
+test middleware::tests::census_mount_facade_gate_forwards_to_generated_registrations ... ok
+test summaries::tests::computed_summaries_never_claim_receiver_modeling ... ok
+test structural::tests::append_without_delete_flags_undeleted_trust_header ... ok
+test summaries::tests::external_json_accepts_label_or_sanitizer_spelling ... ok
+test summaries::tests::external_json_flow_with_via_is_sanitized ... ok
+test middleware::tests::census_global_middleware_before_gate_binds_router_scope ... ok
+test structural::tests::test_files_are_excluded ... ok
+test middleware::tests::census_route_group_gate_binds_registrations ... ok
+test summaries::tests::recv_point_parsing_and_pass_through_truth_table ... ok
+test summaries::tests::non_sanitized_flow_still_raw ... ok
+test summaries::tests::sanitizer_call_marks_summary_flow_sanitized ... ok
+test summaries::tests::call_returns_record_source_wrappers_raw_and_sanitized ... ok
+test summaries::tests::sanitized_flow_propagates_transitively ... ok
+test taint::tests::alias_after_member_store_carries_object_taint ... ok
+test structural::tests::statement_position_call_is_a_total_discard ... ok
+test structural::tests::scala_tuple_blank_binding_is_flagged_via_statement_text ... ok
+test taint::tests::alias_member_store_taints_aliasee ... ok
+test taint::tests::alias_field_store_lands_on_partner_field ... ok
+test taint::tests::assign_sink_fires_from_entry_param_walk ... ok
+test taint::tests::alias_out_param_write_taints_aliasee ... ok
+test structural::tests::discarded_return_flags_blank_bound_auth_call ... ok
+test taint::tests::alias_transitive_chain_taints_root ... ok
+test taint::tests::alias_member_store_taints_aliasee_inside_callee ... ok
+test taint::tests::assign_sink_fires_on_member_store_not_local_rebind ... ok
+test taint::tests::assign_sink_fires_on_setter_form ... ok
+test taint::tests::assign_sink_fires_on_scala_named_argument ... ok
+test taint::tests::alias_rebind_dissolves_the_link ... ok
+test taint::tests::assign_sink_matches_go_if_init_tenant_overwrite ... ok
+test taint::tests::authz_dominating_check_annotates_finding ... ok
+test summaries::tests::fixpoint_memoises_repeat_computations ... ok
+test taint::tests::confiner_matches_whole_call_names_not_substrings ... ok
+test structural::tests::append_flags_struct_transport_header_key ... ok
+test taint::tests::branch_only_authz_check_is_partial ... ok
+test taint::tests::confiner_member_store_on_path_annotates_confined ... ok
+test taint::tests::confiner_call_on_path_annotates_confined ... ok
+test taint::tests::declared_recv_flow_keeps_pass_through_sanitized_does_not ... ok
+test taint::tests::census_mines_framework_server_constructor_as_gate ... ok
+test taint::tests::c_copy_family_propagates_inside_callee_summary ... ok
+test taint::tests::external_summary_call_return_originates_taint ... ok
+test taint::tests::c_copy_family_propagates_through_strcpy ... ok
+test taint::tests::destructure_from_call_binds_every_name ... ok
+test taint::tests::census_idl_entries_respect_handler_shape_gate ... ok
+test taint::tests::external_summary_hop_is_marked_summary_only ... ok
+test taint::tests::entry_method_gate_dominates_interprocedural_sink ... ok
+test taint::tests::clean_field_store_does_not_launder_object ... ok
+test taint::tests::field_read_accessor_summary_carries_param_flow ... ok
+test taint::tests::downrank_guarded_orders_unguarded_first ... ok
+test taint::tests::format_verb_filter_blocks_int_verbs_and_passes_string_verbs ... ok
+test taint::tests::format_verb_filter_traces_two_hop_local_chain ... ok
+test taint::tests::go_range_binding_carries_element_taint ... ok
+test taint::tests::go_struct_literal_propagates_taint ... ok
+test taint::tests::intraproc_steps_carry_intraproc_provenance ... ok
+test taint::tests::grow_guard_ignores_unrelated_grow ... ok
+test taint::tests::field_read_call_does_not_hand_off_to_same_named_function ... ok
+test taint::tests::len_sanitizer_kills_length_only_taint ... ok
+test taint::tests::go_return_flow_through_local_helper ... ok
+test taint::tests::format_verb_filter_traces_literal_through_local ... ok
+test taint::tests::entry_param_field_store_is_field_sensitive_too ... ok
+test taint::tests::mines_decorator_registration ... ok
+test taint::tests::miner_skips_ambiguous_names_and_test_files ... ok
+test taint::tests::no_authz_check_leaves_annotation_empty ... ok
+test taint::tests::guard_annotation_classifies_pre_and_post_checks ... ok
+test taint::tests::grow_guard_recognizes_grow_before_copy ... ok
+test taint::tests::persist_variants_symmetric_across_casings ... ok
+test taint::tests::mines_router_registration_and_flows ... ok
+test taint::tests::out_all_args_variant_taints_every_argument ... ok
+test taint::tests::nested_lift_splices_two_levels ... ok
+test taint::tests::field_store_taints_only_its_path ... ok
+test taint::tests::mines_inline_closure_registration_and_flows ... ok
+test taint::tests::mines_method_value_and_middleware_wrap ... ok
+test taint::tests::out_param_source_taints_buffer_not_return ... ok
+test taint::tests::out_param_source_reaches_sink_through_callee ... ok
+test taint::tests::nested_field_store_selects_and_contains ... ok
+test taint::tests::persisted_read_in_test_file_is_demoted ... ok
+test taint::tests::persistence_stitch_connects_setter_to_getter_across_methods ... ok
+test taint::tests::persistence_stitch_go_struct_literal_store_to_field_read ... ok
+test taint::tests::persistence_stitch_initialism_cross_casing ... ok
+test taint::tests::position_qualified_sink_rejects_field_reads ... ok
+test taint::tests::post_sink_authz_check_is_partial ... ok
+test taint::tests::provenance_serializes ... ok
+test taint::tests::persistence_harvest_through_return_and_splice ... ok
+test taint::tests::persistence_stitch_member_store_to_field_read ... ok
+test taint::tests::python_call_nested_in_keyword_argument_exists ... ok
+test taint::tests::persistence_sink_relevance_rescues_over_threshold_key ... ok
+test taint::tests::persistence_rescue_does_not_bypass_read_side_filter ... ok
+test taint::tests::python_fstring_carries_source_ident_taint ... ok
+test taint::tests::python_keyword_argument_carries_value_taint ... ok
+test taint::tests::python_dict_comprehension_binds_loop_vars ... ok
+test taint::tests::persistence_stitch_named_arg_store_to_getter ... ok
+test taint::tests::python_list_argument_carries_element_taint ... ok
+test taint::tests::persistence_stitch_read_nested_in_member_chain_still_originates ... ok
+test taint::tests::python_parallel_assignment_binds_pairwise ... ok
+test taint::tests::python_kwarg_maps_to_named_parameter ... ok
+test taint::tests::recv_qualified_sink_parses_into_simple_name_plus_qualification ... ok
+test taint::tests::python_kwarg_maps_by_name_through_summary_splice ... ok
+test taint::tests::python_tuple_for_binding_carries_element_taint ... ok
+test taint::tests::query_time_sanitizer_kills_wrapper_source_return ... ok
+test taint::tests::recv_modeled_summary_suppresses_receiver_pass_through ... ok
+test taint::tests::persistence_stitch_scala_job_config_shape ... ok
+test taint::tests::query_call_does_not_transfer_object_state ... ok
+test taint::tests::sanitized_callee_summary_does_not_propagate ... ok
+test taint::tests::registered_entry_bypasses_handler_shape_gate ... ok
+test taint::tests::sink_arg_position_restricts_findings ... ok
+test taint::tests::persistence_ubiquity_counts_methods_not_store_sites ... ok
+test taint::tests::recv_qualified_sink_fires_only_through_declared_receiver ... ok
+test taint::tests::spec_authz_names_extend_the_heuristic ... ok
+test taint::tests::persistence_ubiquity_filter_drops_widely_stored_keys ... ok
+test taint::tests::serve_http_struct_handler_is_mined_as_entry ... ok
+test taint::tests::shellform_assembly_in_slice_literal_flags ... ok
+test taint::tests::shell_dash_c_payload_flags_despite_position_qualifier ... ok
+test taint::tests::untyped_receiver_ignores_recv_model ... ok
+test taint::tests::spec_only_sanitizer_inside_callee_kills_via_chain_recheck ... ok
+test taint::tests::sanitizer_kills_finding_but_raw_path_still_reports ... ok
+test taint::tests::stores_after_the_first_sink_hit_are_still_harvested ... ok
+test taint::tests::verb_registration_requires_route_literal ... ok
+test taint::tests::tsx_jsx_attribute_sink_fires_from_hook_source ... ok
+test taint::tests::witness_includes_callee_internal_steps_with_provenance ... ok
+test taint::tests::tainted_argument_reaches_sink_inside_callee ... ok
+test taint::tests::wrapper_source_return_lifts_transitively ... ok
+test taint::tests::wrapper_returning_source_result_originates_taint_at_call_site ... ok
+test taint::tests::witness_choice_among_tainted_args_is_deterministic ... ok
+
+test result: ok. 167 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running tests/canonical_c_array_initializers.rs (.local/target/debug/deps/canonical_c_array_initializers-f25c61b4594022e9)
+
+running 1 test
+test array_initializer_findings_match_live_joern_outcomes ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests/canonical_c_braceless_if.rs (.local/target/debug/deps/canonical_c_braceless_if-bef48e122e2c5294)
+
+running 1 test
+test canonical_c_braceless_if_preserves_findings_and_sanitizers ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/canonical_c_braceless_loops.rs (.local/target/debug/deps/canonical_c_braceless_loops-7fb2ed8cf08e9343)
+
+running 1 test
+test braceless_loops_preserve_findings_sanitizers_and_call_locations ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests/canonical_c_flow.rs (.local/target/debug/deps/canonical_c_flow-8217b8d5e5423bf1)
+
+running 10 tests
+test duplicate_translation_unit_helpers_keep_distinct_call_targets ... ok
+test merging_c_preserves_generic_accessor_summaries ... ok
+test canonical_flow_survives_save_and_load_with_authoritative_identity ... ok
+test canonical_c_summary_preserves_parameter_on_optional_overwrite ... ok
+test canonical_c_return_dependencies_preserve_optional_source_results ... ok
+test canonical_c_findings_cross_calls_and_recursive_summaries ... ok
+test canonical_c_return_dependencies_keep_sanitizer_and_external_summary_policy ... ok
+test canonical_c_findings_cover_control_flow_kills_members_and_returns ... ok
+test canonical_c_matches_live_joern_return_flow_outcomes ... ok
+test canonical_c_return_dependencies_distinguish_may_flow_from_definite_kills ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s
+
+     Running tests/canonical_c_preprocessor.rs (.local/target/debug/deps/canonical_c_preprocessor-78d5355ad6b8ae3c)
+
+running 1 test
+test conditional_methods_keep_source_locations_and_active_scanner_findings ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/canonical_c_standalone_blocks.rs (.local/target/debug/deps/canonical_c_standalone_blocks-8a40cdd91b8b1ef9)
+
+running 2 tests
+test standalone_blocks_keep_definite_kills_and_sanitizer_cuts ... ok
+test standalone_block_findings_match_live_joern_outcomes ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s
+
+     Running tests/direct_c_flow.rs (.local/target/debug/deps/direct_c_flow-a4ebc291f326681d)
+
+running 9 tests
+test merging_c_keeps_generic_finding_generation_unchanged ... ok
+test repeated_queries_do_not_reuse_sanitizer_cuts ... ok
+test direct_c_witness_uses_live_definition_and_splices_summary_hops ... ok
+test direct_c_does_not_cross_method_or_translation_unit_names ... ok
+test recursive_entry_queries_keep_distinct_ancestor_contexts ... ok
+test parameter_path_keeps_priority_over_unrelated_policy_source ... ok
+test repeated_handoffs_keep_witnesses_and_definite_kills ... ok
+test direct_c_keeps_query_and_summary_sanitizer_cuts ... ok
+test direct_c_matches_live_joern_outcomes ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.10s
+
+     Running tests/taint_sanitizers.rs (.local/target/debug/deps/taint_sanitizers-7f184dbe8ad57671)
+
+running 1 test
+test explicit_sanitizer_blocks_source_to_sink ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (.local/target/debug/deps/cpg_cli-c0e0d6c936afa841)
+
+running 49 tests
+test export::tests::repr_and_format_parse_case_insensitively ... ok
+test coverage::tests::normalizes_every_spec_spelling ... ok
+test export::tests::sanitize_remaps_absolute_and_hostile_names ... ok
+test apis::tests::qualified_spelling_extraction ... ok
+test export::tests::json_empty_graph_keeps_exact_layout_without_a_trailing_newline ... ok
+test glob_tests::generated_route_registration_files_kept ... ok
+test export::tests::json_propagates_partial_write_failures_with_the_original_error_kind ... ok
+test glob_tests::go_generated_header_detection ... ok
+test export::tests::json_preserves_property_order_nulls_escaping_and_graph_order ... ok
+test export::tests::export_reports_a_failure_that_occurs_only_when_its_buffer_is_flushed ... ok
+test glob_tests::language_parser_rejects_unknown_spellings ... ok
+test glob_tests::glob_match_star_semantics ... ok
+test glob_tests::entries_from_glob_filters_by_name_and_file ... ok
+test glob_tests::language_parser_accepts_every_alias_and_canonicalizes ... ok
+test coverage::tests::reports_unmatched_entries_and_dead_spec_names ... ok
+test glob_tests::source_collection_rejects_missing_and_empty_roots ... ok
+test glob_tests::json_summary_exposes_labels_and_provenance ... ok
+test play::tests::parse_routes_handles_play_syntax ... ok
+test glob_tests::source_collection_rejects_unreadable_matching_file_when_enforced ... ok
+test play::tests::play_entries_resolve_against_graph_full_names ... ok
+test glob_tests::source_collection_applies_excludes_to_symlink_targets ... ok
+test rules::tests::parses_authorization_census_conventions ... ok
+test glob_tests::source_collection_is_deterministic_and_rejects_invalid_utf8 ... ok
+test rules::tests::parses_minimal_rule ... ok
+test rules::tests::parses_pack_entry_globs ... ok
+test rules::tests::rejects_missing_id ... ok
+test rules::tests::tolerates_unknown_keys_and_sanitizers ... ok
+test rules::tests::resolve_dispatches_iris_prefix_and_paths ... ok
+test rules::tests::builtin_packs_parse_and_are_complete ... ok
+test rules::tests::iris_packs_parse_and_carry_sinks ... ok
+test vectors::tests::feature_hash_is_deterministic_and_distinct ... ok
+test vectors::tests::vectors_document_is_valid_json_with_aligned_arrays ... ok
+test glob_tests::source_collection_handles_symlinks_without_escape_or_cycles ... ok
+test glob_tests::json_taint_request_honours_sanitizers ... ok
+test workspace::tests::manifest_atomic_writer_enforces_bound_and_cleans_failed_publish ... ok
+test workspace::tests::manifest_cache_key_hashes_canonical_path_lang_and_shape_version ... ok
+test workspace::tests::idl_discovery_finds_proto_and_thrift_dirs ... ok
+test workspace::tests::detect_lang_counts_dominant_extension ... ok
+test glob_tests::external_summaries_are_equivalent_after_save_and_load ... ok
+test workspace::tests::manifest_is_order_independent_and_covers_all_identity_inputs ... ok
+test glob_tests::generic_graph_load_requires_explicit_language ... ok
+test workspace::tests::workspace_merge_output_rejects_symlink_target ... ok
+test workspace::tests::workspace_merge_output_accepts_only_safe_regular_targets ... ok
+test workspace::tests::workspace_module_paths_are_normal_and_root_confined ... ok
+test workspace::tests::workspace_module_paths_reject_outward_symlinks ... ok
+test workspace::tests::manifest_language_is_validated_and_conflicts_fail ... ok
+test workspace::tests::manifest_cache_serializes_concurrent_builders ... ok
+test workspace::tests::manifest_cache_reuses_then_rebuilds_for_content_deletion_and_rename ... ok
+test workspace::tests::manifest_cache_rebuilds_for_policy_and_broken_pairs ... ok
+
+test result: ok. 49 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.23s
+
+     Running unittests src/main.rs (.local/target/debug/deps/cpg-c7cdfb86e171fa9d)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/c_format_positions.rs (.local/target/debug/deps/c_format_positions-eeb41462f69e79f0)
+
+running 2 tests
+test c_sink_selectors_use_zero_based_argument_positions ... ok
+test builtin_c_format_rule_excludes_data_and_stream_arguments ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s
+
+     Running tests/cli_metadata.rs (.local/target/debug/deps/cli_metadata-0cd0803b360898bd)
+
+running 4 tests
+test help_is_successful_and_lists_public_commands ... ok
+test version_matches_the_cargo_package ... ok
+test build_rejects_invalid_language_without_creating_output ... ok
+test build_rejects_missing_or_empty_root_without_creating_output ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.52s
+
+     Running tests/mcp_stdio.rs (.local/target/debug/deps/mcp_stdio-719ec75e783305aa)
+
+running 3 tests
+test mcp_rejects_outward_module_and_output_symlinks ... ok
+test mcp_rejects_path_and_merge_output_escape_attempts ... ok
+test mcp_session_covers_the_iris_loop ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s
+
+     Running tests/scan_sarif.rs (.local/target/debug/deps/scan_sarif-b486d0cdd7ef6daf)
+
+running 3 tests
+test rule_sanitizer_suppresses_finding ... ok
+test server_scan_command_groups_findings_by_rule_id ... ok
+test scan_emits_valid_sarif_with_codeflows ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/source_idents.rs (.local/target/debug/deps/source_idents-99e0486da37422e3)
+
+running 2 tests
+test no_idents_no_findings ... ok
+test request_reaches_system_through_format_and_helper ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/thrift_stitch.rs (.local/target/debug/deps/thrift_stitch-015d74bfc3f62043)
+
+running 7 tests
+test strips_comments_including_hash_and_block ... ok
+test slice_walks_all_fanout_targets ... ok
+test parses_services_methods_and_oneway ... ok
+test entries_are_qualified_handler_methods ... ok
+test extends_on_following_line_and_chain ... ok
+test stitch_is_idempotent_on_existing_edges ... ok
+test stitches_only_hinted_calls_to_real_handlers ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/tools_parity.rs (.local/target/debug/deps/tools_parity-0794fd66a8aa8ee6)
+
+running 4 tests
+test glob_flow_query_finds_interprocedural_flow ... ok
+test vectors_document_covers_every_node ... ok
+test export_splits_by_method_and_writes_dot ... ok
+test export_all_is_one_valid_json_graph ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running unittests src/lib.rs (.local/target/debug/deps/cpg_core-8d08540eef31f876)
+
+running 11 tests
+test graph::persistence_tests::persistence_load_reader_rejects_growth_beyond_size_cap ... ok
+test intern::tests::dedups_equal_strings ... ok
+test tests::build_and_remove_file_is_incremental ... ok
+test graph::persistence_tests::persistence_envelope_rejects_incompatible_or_corrupt_files ... ok
+test graph::persistence_tests::persistence_envelope_accepts_cpg2_and_validated_cpg1 ... ok
+test graph::persistence_tests::persistence_malformed_fields_are_rejected_before_graph_construction ... ok
+test tests::persistence_round_trips ... ok
+test graph::persistence_tests::persistence_malformed_bytes_never_panic ... ok
+test graph::persistence_tests::persistence_load_rejects_oversized_file_before_allocating ... ok
+test graph::persistence_tests::persistence_atomic_concurrent_writers_never_mix_graphs ... ok
+test graph::persistence_tests::persistence_atomic_overwrite_and_failed_publication_are_complete ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s
+
+     Running unittests src/lib.rs (.local/target/debug/deps/cpg_frontend-82709f48330e80a7)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (.local/target/debug/deps/cpg_incremental-f04dfbbf2abd7e44)
+
+running 11 tests
+test tests::python_summaries_through_shared_engine ... ok
+test tests::external_json_summary_drives_taint ... ok
+test tests::interprocedural_summary_via_callee ... ok
+test tests::unchanged_edit_is_a_noop ... ok
+test tests::interprocedural_taint_source_to_sink ... ok
+test tests::cross_file_incremental_taint_generic_languages ... ok
+test tests::project_wide_c_edit_rebuilds_the_retained_source_set ... ok
+test tests::reaching_def_edges_via_pipeline_and_stable_across_edits ... ok
+test tests::taint_finding_clears_after_fix ... ok
+test tests::cross_file_interprocedural_taint ... ok
+test tests::taint_through_summary_in_every_language ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running unittests src/lib.rs (.local/target/debug/deps/cpg_lang_c-4abea8247626e683)
+
+running 16 tests
+test exact::macro_token_tests::argument_slots_follow_preprocessing_tokens ... ok
+test exact::macro_token_tests::argument_splices_precede_comment_recognition ... ok
+test exact::rd_semantics_tests::absent_expression_code_does_not_alias_explicit_empty_names ... ok
+test exact::preproc_tests::macro_expansion_bounds_empty_doubling_chains_and_cycles ... ok
+test exact::macro_token_tests::function_macro_names_inside_preprocessing_numbers_remain_opaque ... ok
+test exact::rd_semantics_tests::pass_through_validation_uses_actual_arguments_without_sibling_flow ... ok
+test tests::parses_function_with_params_and_call ... ok
+test import::tests::source_lines_keep_global_declarations_outside_function_bodies ... ok
+test tests::tolerates_incomplete_code ... ok
+test import::tests::source_lines_anchor_conditional_and_identical_duplicate_definitions ... ok
+test import::tests::imports_every_exact_schema_kind_and_edge_without_loss ... ok
+test import::tests::source_lines_preserve_overlapping_parameters_declarations_and_children ... ok
+test import::tests::source_lines_unmatched_nodes_inherit_without_consuming_siblings ... ok
+test import::tests::source_lines_match_tokens_and_repeated_statements_monotonically ... ok
+test import::tests::source_lines_keep_lua_sweep2old_in_its_own_method ... ok
+test exact::definition_set_tests::membership_and_equality_match_sets_through_union_kill_and_regeneration ... ok
+
+test result: ok. 16 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s
+
+     Running tests/control_truth.rs (.local/target/debug/deps/control_truth-f93642f0a9d64747)
+
+running 5 tests
+test identifier_truth_tests_use_the_oracle_integer_and_pointer_zero ... ok
+test multiple_for_declarators_share_one_initializer_slot ... ok
+test unconditional_do_return_keeps_unreachable_tail_out_of_reaching_defs ... ok
+test explicit_and_non_identifier_conditions_keep_their_expression ... ok
+test braceless_loop_bodies_keep_direct_statements_and_cfg_edges ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.10s
+
+     Running tests/declaration_shapes.rs (.local/target/debug/deps/declaration_shapes-6a8fc97c48b53160)
+
+running 6 tests
+test function_typedefs_do_not_erase_neighboring_ordinary_aliases ... ok
+test headers_apply_undef_and_redefinitions_in_order_without_basename_fallback ... ok
+test parenthesized_definition_keeps_its_body_and_separate_call_identity ... ok
+test quoted_header_macros_resolve_relative_to_each_supplied_source ... ok
+test mixed_prototypes_keep_individual_identities_and_shared_return_type ... ok
+test duplicate_parenthesized_definitions_keep_calls_to_the_shared_plain_stub ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/method_address_definitions.rs (.local/target/debug/deps/method_address_definitions-b8df46a9d5888ca3)
+
+running 3 tests
+test distinct_empty_code_targets_and_unnamed_parameter_reach_exit ... ok
+test explicit_function_address_does_not_kill_the_unnamed_parameter ... ok
+test reassignment_kills_the_prior_empty_code_definition_by_name ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running unittests src/lib.rs (.local/target/debug/deps/cpg_lang_python-33edb38b1b66880d)
+
+running 2 tests
+test tests::tolerates_broken_code ... ok
+test tests::parses_function_with_params_and_call ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (.local/target/debug/deps/cpg_lang_ts-875ddcc00b2e5831)
+
+running 10 tests
+test tests::go_basics ... ok
+test tests::template_string_substitution_is_concat_shaped ... ok
+test tests::javascript_basics ... ok
+test tests::java_basics ... ok
+test tests::rust_basics ... ok
+test tests::tsx_dialect_parses_jsx_and_lowers_markup ... ok
+test tests::ruby_basics ... ok
+test tests::cpp_basics ... ok
+test tests::plain_ts_keeps_the_base_grammar ... ok
+test tests::cpp_qualified_and_class_methods ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/robustness.rs (.local/target/debug/deps/robustness-59f8acdb054dedd5)
+
+running 16 tests
+test go_type_assertion_keeps_assignment_value ... ok
+test go_field_read_lowering ... ok
+test go_rich ... ok
+test java_rich ... ok
+test python_rich ... ok
+test javascript_rich ... ok
+test ruby_rich ... ok
+test ruby_value_shapes ... ok
+test scala_field_reads_and_named_args ... ok
+test member_chain_receiver_is_built ... ok
+test cpp_typedecl_members ... ok
+test scala_error_recovery_keeps_enclosing_class ... ok
+test cpp_ctor_factories_and_direct_init ... ok
+test rust_rich ... ok
+test typescript_rich ... ok
+test scala_value_shapes_keep_assignments ... ok
+
+test result: ok. 16 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running unittests src/main.rs (.local/target/debug/deps/joern_parity-f3e34444c3e84436)
+
+running 13 tests
+test production::tests::migration_report_is_stable_and_sectioned ... ok
+test production::tests::production_counts_imports_in_all_conditional_branches ... ok
+test production::tests::production_respects_macro_replacement_precedence_and_condition_expressions ... ok
+test production::tests::production_preserves_macro_expansion_before_a_later_undef ... ok
+test production::tests::production_keeps_same_name_conditional_methods_distinct ... ok
+test production::tests::production_removes_comments_before_interpreting_directives ... ok
+test production::tests::production_preserves_braceless_if_call ... ok
+test production::tests::production_dump_is_deterministic_and_uses_standard_layers ... ok
+test production::tests::production_preserves_braceless_if_else_calls ... ok
+test production::tests::production_preserves_braceless_if_return ... ok
+test production::tests::production_update_matches_a_clean_rebuild ... ok
+test production::tests::production_retains_all_conditional_declarations_and_only_active_bodies ... ok
+test production::tests::production_selects_conditions_in_source_order_without_losing_inactive_methods ... ok
+
+test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests/array_declarations.rs (.local/target/debug/deps/array_declarations-9423974756019915)
+
+running 2 tests
+test global_dimensions_do_not_expand_local_allocation_parameters ... ok
+test array_declarations_match_complete_live_graph ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/array_initializers.rs (.local/target/debug/deps/array_initializers-45a4e72ed419ccbf)
+
+running 5 tests
+test ordinary_assignments_do_not_borrow_nested_declaration_locations ... ok
+test all_local_allocations_precede_explicit_initializers ... ok
+test array_initializers_preserve_source_lines_across_repeated_methods ... ok
+test allocation_views_do_not_consume_declaration_or_following_statement_locations ... ok
+test array_initializers_match_complete_isolated_live_graphs ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.19s
+
+     Running tests/combined_c_types.rs (.local/target/debug/deps/combined_c_types-33d9e1c15d501a24)
+
+running 2 tests
+test static_parenthesized_definitions_keep_translation_unit_identities ... ok
+test static_modifiers_primitive_roles_and_numeric_literals_compose ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/concatenated_strings.rs (.local/target/debug/deps/concatenated_strings-437d3eff94f4fd07)
+
+running 3 tests
+test lua_ternary_keeps_all_operands_and_cfg_branches ... ok
+test source_literals_and_following_calls_keep_their_lines ... ok
+test concatenated_strings_match_complete_live_graph ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running tests/declaration_registration.rs (.local/target/debug/deps/declaration_registration-53ee53d5d77f94ac)
+
+running 4 tests
+test tags_keep_their_independent_base_type_registration ... ok
+test uninitialized_objects_keep_their_full_types_and_source_locations ... ok
+test only_an_ordinary_objects_own_initializer_adds_the_prefix_type ... ok
+test registration_matches_each_complete_isolated_live_graph ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s
+
+     Running tests/external_functions.rs (.local/target/debug/deps/external_functions-e2f50f4add483c36)
+
+running 10 tests
+test direct_callees_have_no_phantom_locals_and_keep_declared_return_types ... ok
+test inactive_function_bodies_do_not_register_block_prototypes ... ok
+test leaving_a_block_restores_the_shadowed_parameter_ref_binding ... ok
+test block_prototype_shadows_a_pointer_parameter_only_within_that_block ... ok
+test unused_multiple_void_unnamed_and_variadic_prototypes_keep_typed_structure ... ok
+test block_pointer_shadow_does_not_change_later_direct_function_call ... ok
+test late_prototypes_preserve_duplicate_static_definition_identity ... ok
+test initialized_and_uninitialized_local_and_global_function_pointers_dispatch_dynamically ... ok
+test synthetic_for_condition_does_not_shift_real_call_locations ... ok
+test for_initializer_scope_restores_function_dispatch_and_parameter_binding ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/header_macro_locations.rs (.local/target/debug/deps/header_macro_locations-81c92a9d855f001e)
+
+running 2 tests
+test macro_descendants_and_following_statements_match_live_lines ... ok
+test header_macro_location_fixtures_match_complete_live_graphs ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests/header_macros.rs (.local/target/debug/deps/header_macros-fb2e76f55ee96e15)
+
+running 2 tests
+test supplied_header_macros_match_complete_isolated_live_graphs ... ok
+test parity_cli_preserves_relative_header_paths ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.31s
+
+     Running tests/macro_definitions.rs (.local/target/debug/deps/macro_definitions-64c42d7ace22eaae)
+
+running 2 tests
+test logical_macro_definitions_match_complete_isolated_live_graphs ... ok
+test macro_wrapper_types_match_complete_live_graph ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests/numeric_literals.rs (.local/target/debug/deps/numeric_literals-f2446731262a34f0)
+
+running 2 tests
+test signed_children_keep_suffix_types_and_hex_digits_are_not_float_suffixes ... ok
+test numeric_literals_match_complete_live_graph ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s
+
+     Running tests/primitive_roles.rs (.local/target/debug/deps/primitive_roles-9983ab78422e0688)
+
+running 3 tests
+test definition_prototype_and_call_result_types_stay_distinct ... ok
+test function_pointer_parameters_keep_declaration_types_and_resolve_call_results ... ok
+test primitive_roles_match_each_complete_isolated_live_graph ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.19s
+
+     Running tests/rd_scheduling.rs (.local/target/debug/deps/rd_scheduling-97cbeb80766e858d)
+
+running 6 tests
+test loop_tail_without_standalone_blocks_is_also_exact ... ok
+test ordered_control_composition_matches_the_complete_live_graph ... ok
+test former_standalone_block_loop_tail_differences_are_exact ... ok
+test an_unscheduled_call_can_define_exit_without_receiving_call_site_edges ... ok
+test scheduling_matches_all_sections_of_the_live_graph ... ok
+test broader_macro_ordering_diagnostic_is_now_exact ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s
+
+     Running tests/standalone_blocks.rs (.local/target/debug/deps/standalone_blocks-e07cb1e2de5340cd)
+
+running 3 tests
+test standalone_scope_restores_parameter_references_and_pointer_dispatch ... ok
+test standalone_block_is_a_cfg_node_after_its_statements ... ok
+test standalone_blocks_match_complete_live_graph ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests/statement_macros.rs (.local/target/debug/deps/statement_macros-9fafd1d0ad6675ee)
+
+running 4 tests
+test macro_comments_do_not_create_file_scope_declarations ... ok
+test generated_statement_nodes_remain_at_their_own_invocation ... ok
+test statement_macro_findings_match_all_live_positive_and_negative_outcomes ... ok
+test statement_macros_match_complete_isolated_live_graphs ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.16s
+
+     Running tests/static_modifiers.rs (.local/target/debug/deps/static_modifiers-e239699070b60d71)
+
+running 2 tests
+test only_a_leading_static_token_adds_a_modifier_and_shifts_the_return ... ok
+test static_modifiers_match_the_complete_live_graph ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+   Doc-tests conformance
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests cpg_analysis
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests cpg_cli
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests cpg_core
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests cpg_frontend
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests cpg_incremental
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests cpg_lang_c
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests cpg_lang_python
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests cpg_lang_ts
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

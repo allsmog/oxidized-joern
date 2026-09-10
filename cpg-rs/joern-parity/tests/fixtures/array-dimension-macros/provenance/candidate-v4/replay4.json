@@ -1,0 +1,71 @@
+{
+  "status": "PASS_FOUR_COMPLETE_REPAIRED_ARRAY_DIMENSION_PROJECTS",
+  "candidateBindingSha256": "4d014b9736c04734b11e2614ca1d93fc26a0434830e276d34217205f3ec0f46d",
+  "clarifiedBindingSha256": "6901653063cf488a3247fe483ed776bffb36eb27788740d8fb969b665af9076a",
+  "sourceUnchanged": true,
+  "scriptSha256": "6d4b607024808ad5f840cd74f7bca6d9bbcc9774228b37d43618870b94de0d36",
+  "rows": [
+    {
+      "case": "bare_macro",
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/frozen-v4-dimensions/joern-parity",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/array-v4-replay/bare_macro/input/main.c"
+      ],
+      "exitCode": 0,
+      "seconds": 0.018985292001161724,
+      "inputSha256": "8afa523c658dcca3169bdde8ffd77954c6553e84f0a7cbdb5448868892318077",
+      "expectedSha256": "d746557ebaab9b82965a2a20b8f25fd4fc2e5ba67895adcc280cce1cec439260",
+      "actualSha256": "d746557ebaab9b82965a2a20b8f25fd4fc2e5ba67895adcc280cce1cec439260",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "diffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "exact": true
+    },
+    {
+      "case": "binary_macro",
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/frozen-v4-dimensions/joern-parity",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/array-v4-replay/binary_macro/input/main.c"
+      ],
+      "exitCode": 0,
+      "seconds": 0.012510959000792354,
+      "inputSha256": "8da3a68392558d8838fa8074c58022b9df57a98f2bf2ad32803e18b1c2931c74",
+      "expectedSha256": "c561375e48835ef513e37e298c29e2067737854163f26512ab704f53eae6d224",
+      "actualSha256": "c561375e48835ef513e37e298c29e2067737854163f26512ab704f53eae6d224",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "diffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "exact": true
+    },
+    {
+      "case": "parenthesized_macro",
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/frozen-v4-dimensions/joern-parity",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/array-v4-replay/parenthesized_macro/input/main.c"
+      ],
+      "exitCode": 0,
+      "seconds": 0.01142900000559166,
+      "inputSha256": "7c3989e3ecc0f82ecc24e215daa162b45afe4f88971aac27240f357abaad1c45",
+      "expectedSha256": "08130cca1e81cd61ac03c9a5c988bd7e108b4368b74ce598ca0fe1041152ae46",
+      "actualSha256": "08130cca1e81cd61ac03c9a5c988bd7e108b4368b74ce598ca0fe1041152ae46",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "diffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "exact": true
+    },
+    {
+      "case": "unary_macro",
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/frozen-v4-dimensions/joern-parity",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/array-v4-replay/unary_macro/input/main.c"
+      ],
+      "exitCode": 0,
+      "seconds": 0.011907167005119845,
+      "inputSha256": "a70cfaa22d1ca206e7ac909f1d4916f6db91985e813446b54e34c6abd6545db6",
+      "expectedSha256": "3968d5812b22f0b914b5e242870383827592ec8ae04772a0efd6a0643e899f26",
+      "actualSha256": "3968d5812b22f0b914b5e242870383827592ec8ae04772a0efd6a0643e899f26",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "diffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "exact": true
+    }
+  ],
+  "projects": 4,
+  "exact": 4
+}

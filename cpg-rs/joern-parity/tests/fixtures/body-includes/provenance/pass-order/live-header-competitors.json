@@ -1,0 +1,75 @@
+{
+  "repeated_include_context": {
+    "headerGlobals": {
+      "nested/table.h:<global>": [
+        "METHOD NAME=<global> CODE=<global> FULL_NAME=nested/table.h:<global> ORDER=1",
+        "  BLOCK TYPE_FULL_NAME=ANY ORDER=1",
+        "    LOCAL NAME=N CODE=<unknown> N TYPE_FULL_NAME=ANY ORDER=0",
+        "    LOCAL NAME=first_table CODE=static int first_table[N] TYPE_FULL_NAME=int[N] ORDER=1",
+        "    CALL NAME=<operator>.assignment CODE=first_table[N] = {N} TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH",
+        "      IDENTIFIER NAME=first_table CODE=first_table TYPE_FULL_NAME=int[N] ORDER=1 ARGUMENT_INDEX=1",
+        "      CALL NAME=<operator>.arrayInitializer CODE={N} TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.arrayInitializer ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH",
+        "        IDENTIFIER NAME=N CODE=<unknown> N TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1",
+        "    LOCAL NAME=last_table CODE=static int last_table[N] TYPE_FULL_NAME=int[4] ORDER=3",
+        "    CALL NAME=<operator>.assignment CODE=last_table[N] = {N} TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=4 DISPATCH_TYPE=STATIC_DISPATCH",
+        "      IDENTIFIER NAME=last_table CODE=last_table TYPE_FULL_NAME=int[4] ORDER=1 ARGUMENT_INDEX=1",
+        "      CALL NAME=<operator>.arrayInitializer CODE={N} TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.arrayInitializer ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH",
+        "        CALL NAME=N CODE=N TYPE_FULL_NAME=int METHOD_FULL_NAME=nested/table.h:N:int(0) SIGNATURE=int(0) ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=INLINED",
+        "          BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1",
+        "            LITERAL CODE=4 TYPE_FULL_NAME=int ORDER=1",
+        "  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2"
+      ],
+      "repeat.h:<global>": [
+        "METHOD NAME=<global> CODE=<global> FULL_NAME=repeat.h:<global> ORDER=1",
+        "  BLOCK TYPE_FULL_NAME=ANY ORDER=1",
+        "  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2"
+      ]
+    },
+    "macroOwnerEdges": [
+      "EDGES|CONTAINS D:main.c:<global> -> main.c:N:int(0)#0",
+      "EDGES|CONTAINS D:nested/table.h:<global> -> nested/table.h:N:int(0)#0",
+      "EDGES|SOURCE_FILE main.c:N:int(0)#0 -> F:main.c",
+      "EDGES|SOURCE_FILE nested/table.h:N:int(0)#0 -> F:nested/table.h"
+    ]
+  },
+  "guarded_nested_relative_include": {
+    "headerGlobals": {
+      "headers/api.h:<global>": [
+        "METHOD NAME=<global> CODE=<global> FULL_NAME=headers/api.h:<global> ORDER=1",
+        "  BLOCK TYPE_FULL_NAME=ANY ORDER=1",
+        "  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2"
+      ],
+      "headers/leaf values.h:<global>": [
+        "METHOD NAME=<global> CODE=<global> FULL_NAME=headers/leaf values.h:<global> ORDER=1",
+        "  BLOCK TYPE_FULL_NAME=ANY ORDER=1",
+        "    LOCAL NAME=guarded CODE=int guarded TYPE_FULL_NAME=int ORDER=1",
+        "    CALL NAME=<operator>.assignment CODE=guarded = 3 TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH",
+        "      IDENTIFIER NAME=guarded CODE=guarded TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1",
+        "      LITERAL CODE=3 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2",
+        "  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2"
+      ]
+    },
+    "macroOwnerEdges": [
+      "EDGES|CONTAINS D:main.c:<global> -> headers/leaf values.h:LEAF:int(0)#0",
+      "EDGES|SOURCE_FILE headers/leaf values.h:LEAF:int(0)#0 -> F:main.c"
+    ]
+  },
+  "nested_scope_typedef_macro": {
+    "headerGlobals": {
+      "scope.h:<global>": [
+        "METHOD NAME=<global> CODE=<global> FULL_NAME=scope.h:<global> ORDER=1",
+        "  BLOCK TYPE_FULL_NAME=ANY ORDER=1",
+        "    TYPE_DECL NAME=Local CODE=typedef int Local; FULL_NAME=Local<duplicate>0 ORDER=1",
+        "    LOCAL NAME=inside CODE=int inside TYPE_FULL_NAME=int ORDER=2",
+        "    CALL NAME=<operator>.assignment CODE=inside = 1 TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH",
+        "      IDENTIFIER NAME=inside CODE=inside TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1",
+        "      LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2",
+        "  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2"
+      ]
+    },
+    "macroOwnerEdges": [
+      "EDGES|CONTAINS D:main.c:<global> -> scope.h:ESCAPED:int(0)#0",
+      "EDGES|SOURCE_FILE scope.h:ESCAPED:int(0)#0 -> F:main.c"
+    ]
+  }
+}

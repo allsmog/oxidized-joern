@@ -1,0 +1,5 @@
+# Preserve raw producer output and unified diff context records verbatim.
+oracle/*/oracle.stdout -whitespace
+oracle/*/oracle.stderr -whitespace
+diagnostics/*/*.diff -whitespace
+diagnostics/*/*.stderr -whitespace

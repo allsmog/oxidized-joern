@@ -1,1 +1,55 @@
 * text=auto eol=lf
+
+# Preserve byte-bound oracle diffs and command logs as captured evidence.
+cpg-rs/joern-parity/tests/fixtures/macro-definitions/**/*.diff -whitespace
+cpg-rs/joern-parity/tests/fixtures/rd-scheduling/macro-diagnostic/complete.diff -whitespace
+cpg-rs/joern-parity/tests/fixtures/statement-macros/diagnostics/**/*.diff -whitespace
+cpg-rs/joern-parity/tests/fixtures/macro-definitions/provenance/tests.log whitespace=-blank-at-eof
+cpg-rs/cpg-cli/tests/fixtures/c-format-positions/evidence/after-tests.log whitespace=-blank-at-eof
+cpg-rs/cpg-cli/tests/fixtures/c-format-positions/evidence/cli-tests.log whitespace=-blank-at-eof
+
+# Fifth-batch raw differential evidence retains original context whitespace.
+cpg-rs/joern-parity/tests/fixtures/field-macros/**/*.diff -whitespace
+cpg-rs/joern-parity/tests/fixtures/direct-field-macros/**/*.diff -whitespace
+cpg-rs/joern-parity/tests/fixtures/macro-recovery/**/*.diff -whitespace
+cpg-rs/joern-parity/tests/fixtures/nested-macro-casts/**/*.diff -whitespace
+cpg-rs/joern-parity/tests/fixtures/typedef-aggregates/**/*.diff -whitespace
+cpg-rs/joern-parity/tests/fixtures/field-cast-interactions/**/*.diff -whitespace
+cpg-rs/joern-parity/tests/fixtures/direct-field-macros/validation/focused-tests.log whitespace=-blank-at-eof
+cpg-rs/joern-parity/tests/fixtures/direct-field-macros/validation/relevant-tests.log whitespace=-blank-at-eof
+cpg-rs/joern-parity/tests/fixtures/direct-field-macros/validation/review-expanded-tests.log whitespace=-blank-at-eof
+cpg-rs/joern-parity/tests/fixtures/direct-macro-arguments/**/*.diff -whitespace
+cpg-rs/joern-parity/tests/fixtures/direct-macro-arguments/provenance/*.log whitespace=-blank-at-eof
+cpg-rs/joern-parity/tests/fixtures/field-macros/evidence/focused-tests.log whitespace=-blank-at-eof
+cpg-rs/joern-parity/tests/fixtures/field-macros/evidence/relevant-tests.log whitespace=-blank-at-eof
+
+# Sixth-batch raw differential evidence retains original context whitespace.
+cpg-rs/joern-parity/tests/fixtures/sizeof-expansion/**/*.diff -whitespace
+cpg-rs/joern-parity/tests/fixtures/sizeof-expansion/provenance/*.log whitespace=-blank-at-eof
+cpg-rs/joern-parity/tests/fixtures/macro-cast-context/**/*.diff -whitespace
+cpg-rs/joern-parity/tests/fixtures/macro-cast-context/provenance/*.log whitespace=-blank-at-eof
+cpg-rs/joern-parity/tests/fixtures/macro-cast-context/provenance/source-only.patch -whitespace
+cpg-rs/joern-parity/tests/fixtures/declaration-macros/**/*.diff -whitespace
+cpg-rs/joern-parity/tests/fixtures/declaration-macros/provenance/*.log whitespace=-blank-at-eof
+cpg-rs/joern-parity/tests/fixtures/sixth-context-interactions/**/*.diff -whitespace
+cpg-rs/joern-parity/tests/fixtures/typedef-existence/**/*.diff -whitespace
+cpg-rs/joern-parity/tests/fixtures/typedef-existence/validation/source.patch -whitespace
+cpg-rs/joern-parity/tests/fixtures/typedef-existence/validation/*.log whitespace=-blank-at-eof
+cpg-rs/joern-parity/tests/fixtures/typedef-existence/diagnostics/lua_all_headers/*.h whitespace=-blank-at-eof
+cpg-rs/joern-parity/tests/fixtures/typedef-existence/diagnostics/lua_type_headers/*.h whitespace=-blank-at-eof
+cpg-rs/joern-parity/tests/fixtures/predefined-c-macros/**/*.diff -whitespace
+cpg-rs/joern-parity/tests/fixtures/predefined-c-macros/raw/**/live.stdout whitespace=-blank-at-eol
+cpg-rs/joern-parity/tests/fixtures/numeric-macro-roots/**/*.diff -whitespace
+cpg-rs/joern-parity/tests/fixtures/numeric-macro-roots/raw/live.stdout whitespace=-blank-at-eol
+
+# Tenth-batch raw differential evidence retains original context whitespace.
+cpg-rs/joern-parity/tests/fixtures/body-includes/**/*.diff -whitespace
+cpg-rs/joern-parity/tests/fixtures/array-dimension-macros/**/*.diff -whitespace
+cpg-rs/joern-parity/tests/fixtures/array-dimension-macros/provenance/candidate-v4/array-test.log whitespace=-blank-at-eof
+cpg-rs/joern-parity/tests/fixtures/array-dimension-macros/provenance/candidate-v4/unit-tests.log whitespace=-blank-at-eof
+cpg-rs/joern-parity/tests/fixtures/array-dimension-macros/provenance/performance-v3/source.patch -whitespace
+cpg-rs/joern-parity/tests/fixtures/array-dimension-macros/provenance/performance-v3/unit-tests.log whitespace=-blank-at-eof
+cpg-rs/joern-parity/tests/fixtures/body-includes/held/v1/ninth-gates.log whitespace=-blank-at-eof
+cpg-rs/joern-parity/tests/fixtures/body-includes/provenance/candidate/new-package-tests-v2-final.log whitespace=-blank-at-eof
+cpg-rs/joern-parity/tests/fixtures/body-includes/provenance/candidate/ninth-gates.log whitespace=-blank-at-eof
+cpg-rs/joern-parity/tests/fixtures/body-includes/provenance/candidate/origin-lines.log whitespace=-blank-at-eof

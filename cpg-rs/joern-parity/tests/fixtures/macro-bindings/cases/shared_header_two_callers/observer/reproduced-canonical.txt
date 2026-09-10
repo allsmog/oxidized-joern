@@ -1,0 +1,216 @@
+METHOD NAME=<global> CODE=<global> FULL_NAME=<includes>:<global> ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<global> CODE=<global> FULL_NAME=a.c:<global> ORDER=1
+  METHOD NAME=first CODE=int first(void) { return VALUE; } FULL_NAME=first SIGNATURE=int(void) ORDER=1
+    METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    BLOCK CODE={ return VALUE; } TYPE_FULL_NAME=void ORDER=2
+      RETURN CODE=return VALUE; ORDER=1
+        CALL NAME=VALUE CODE=VALUE TYPE_FULL_NAME=int METHOD_FULL_NAME=shared.h:VALUE:int(0) SIGNATURE=int(0) ORDER=1 DISPATCH_TYPE=INLINED
+          BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+            LITERAL CODE=7 TYPE_FULL_NAME=int ORDER=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+    METHOD_REF CODE=first TYPE_FULL_NAME=first METHOD_FULL_NAME=first ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=first CODE=int first(void) { return VALUE; } FULL_NAME=first SIGNATURE=int(void) ORDER=1
+  METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  BLOCK CODE={ return VALUE; } TYPE_FULL_NAME=void ORDER=2
+    RETURN CODE=return VALUE; ORDER=1
+      CALL NAME=VALUE CODE=VALUE TYPE_FULL_NAME=int METHOD_FULL_NAME=shared.h:VALUE:int(0) SIGNATURE=int(0) ORDER=1 DISPATCH_TYPE=INLINED
+        BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+          LITERAL CODE=7 TYPE_FULL_NAME=int ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+
+METHOD NAME=second CODE=int second(void) { return VALUE; } FULL_NAME=second SIGNATURE=int(void) ORDER=1
+  METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  BLOCK CODE={ return VALUE; } TYPE_FULL_NAME=void ORDER=2
+    RETURN CODE=return VALUE; ORDER=1
+      CALL NAME=VALUE CODE=VALUE TYPE_FULL_NAME=int METHOD_FULL_NAME=shared.h:VALUE:int(0) SIGNATURE=int(0) ORDER=1 DISPATCH_TYPE=INLINED
+        BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+          LITERAL CODE=7 TYPE_FULL_NAME=int ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+
+METHOD NAME=<global> CODE=<global> FULL_NAME=shared.h:<global> ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=VALUE CODE=#define VALUE 7 FULL_NAME=shared.h:VALUE:int(0) SIGNATURE=int(0) ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=2
+
+METHOD NAME=<global> CODE=<global> FULL_NAME=z.c:<global> ORDER=1
+  METHOD NAME=second CODE=int second(void) { return VALUE; } FULL_NAME=second SIGNATURE=int(void) ORDER=1
+    METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    BLOCK CODE={ return VALUE; } TYPE_FULL_NAME=void ORDER=2
+      RETURN CODE=return VALUE; ORDER=1
+        CALL NAME=VALUE CODE=VALUE TYPE_FULL_NAME=int METHOD_FULL_NAME=shared.h:VALUE:int(0) SIGNATURE=int(0) ORDER=1 DISPATCH_TYPE=INLINED
+          BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+            LITERAL CODE=7 TYPE_FULL_NAME=int ORDER=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+    METHOD_REF CODE=second TYPE_FULL_NAME=second METHOD_FULL_NAME=second ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+NODES|META_DATA LANGUAGE=NEWC
+NODES|FILE NAME=<includes> ORDER=1
+NODES|FILE NAME=<unknown> ORDER=0
+NODES|FILE NAME=a.c ORDER=0
+NODES|FILE NAME=shared.h ORDER=0
+NODES|FILE NAME=z.c ORDER=0
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<global> FILENAME=<unknown> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<includes>:<global> FILENAME=<includes> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=a.c:<global> FILENAME=a.c ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=shared.h:<global> FILENAME=shared.h ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=z.c:<global> FILENAME=z.c ORDER=1
+NODES|NAMESPACE NAME=<global>
+NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=<global> FULL_NAME=a.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=a.c:<global> FILENAME=a.c ORDER=2
+NODES|TYPE_DECL NAME=first FULL_NAME=first CODE=first AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=a.c:<global> FILENAME=a.c ORDER=1
+NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=second FULL_NAME=second CODE=second AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=z.c:<global> FILENAME=z.c ORDER=1
+NODES|TYPE_DECL NAME=<global> FULL_NAME=shared.h:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=shared.h:<global> FILENAME=shared.h ORDER=1
+NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=<global> FULL_NAME=z.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=z.c:<global> FILENAME=z.c ORDER=2
+NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+NODES|TYPE NAME=first FULL_NAME=first TYPE_DECL_FULL_NAME=first
+NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+NODES|TYPE NAME=second FULL_NAME=second TYPE_DECL_FULL_NAME=second
+NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+EDGES|ARGUMENT first#4 -> first#5
+EDGES|ARGUMENT second#4 -> second#5
+EDGES|CALL first#5 -> shared.h:VALUE:int(0)#0
+EDGES|CALL second#5 -> shared.h:VALUE:int(0)#0
+EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+EDGES|CFG a.c:<global>#0 -> a.c:<global>#11
+EDGES|CFG a.c:<global>#1 -> first#5
+EDGES|CFG a.c:<global>#11 -> a.c:<global>#12
+EDGES|CFG first#4 -> first#8
+EDGES|CFG first#5 -> first#4
+EDGES|CFG first#5 -> first#7
+EDGES|CFG first#7 -> first#4
+EDGES|CFG second#0 -> second#5
+EDGES|CFG second#4 -> second#8
+EDGES|CFG second#5 -> second#4
+EDGES|CFG second#5 -> second#7
+EDGES|CFG second#7 -> second#4
+EDGES|CFG shared.h:<global>#0 -> shared.h:<global>#2
+EDGES|CFG shared.h:VALUE:int(0)#0 -> shared.h:VALUE:int(0)#2
+EDGES|CFG z.c:<global>#0 -> z.c:<global>#11
+EDGES|CFG z.c:<global>#11 -> z.c:<global>#12
+EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+EDGES|CONTAINS D:a.c:<global> -> D:first
+EDGES|CONTAINS D:a.c:<global> -> a.c:<global>#0
+EDGES|CONTAINS D:a.c:<global> -> shared.h:VALUE:int(0)#0
+EDGES|CONTAINS D:shared.h:<global> -> shared.h:<global>#0
+EDGES|CONTAINS D:z.c:<global> -> D:second
+EDGES|CONTAINS D:z.c:<global> -> z.c:<global>#0
+EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+EDGES|CONTAINS F:<includes> -> D:ANY
+EDGES|CONTAINS F:<includes> -> D:int
+EDGES|CONTAINS F:<includes> -> D:void
+EDGES|CONTAINS F:a.c -> D:a.c:<global>
+EDGES|CONTAINS F:shared.h -> D:shared.h:<global>
+EDGES|CONTAINS F:z.c -> D:z.c:<global>
+EDGES|CONTAINS a.c:<global>#0 -> a.c:<global>#1
+EDGES|CONTAINS a.c:<global>#0 -> a.c:<global>#10
+EDGES|CONTAINS a.c:<global>#0 -> a.c:<global>#11
+EDGES|CONTAINS a.c:<global>#1 -> first#3
+EDGES|CONTAINS a.c:<global>#1 -> first#4
+EDGES|CONTAINS a.c:<global>#1 -> first#5
+EDGES|CONTAINS a.c:<global>#1 -> first#6
+EDGES|CONTAINS a.c:<global>#1 -> first#7
+EDGES|CONTAINS second#0 -> second#3
+EDGES|CONTAINS second#0 -> second#4
+EDGES|CONTAINS second#0 -> second#5
+EDGES|CONTAINS second#0 -> second#6
+EDGES|CONTAINS second#0 -> second#7
+EDGES|CONTAINS shared.h:<global>#0 -> shared.h:<global>#1
+EDGES|CONTAINS shared.h:VALUE:int(0)#0 -> shared.h:VALUE:int(0)#1
+EDGES|CONTAINS z.c:<global>#0 -> second#0
+EDGES|CONTAINS z.c:<global>#0 -> z.c:<global>#10
+EDGES|CONTAINS z.c:<global>#0 -> z.c:<global>#11
+EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+EDGES|EVAL_TYPE a.c:<global>#10 -> T:ANY
+EDGES|EVAL_TYPE a.c:<global>#11 -> T:first
+EDGES|EVAL_TYPE a.c:<global>#12 -> T:ANY
+EDGES|EVAL_TYPE first#1 -> T:void
+EDGES|EVAL_TYPE first#2 -> T:void
+EDGES|EVAL_TYPE first#3 -> T:void
+EDGES|EVAL_TYPE first#5 -> T:int
+EDGES|EVAL_TYPE first#6 -> T:ANY
+EDGES|EVAL_TYPE first#7 -> T:int
+EDGES|EVAL_TYPE first#8 -> T:int
+EDGES|EVAL_TYPE second#1 -> T:void
+EDGES|EVAL_TYPE second#2 -> T:void
+EDGES|EVAL_TYPE second#3 -> T:void
+EDGES|EVAL_TYPE second#5 -> T:int
+EDGES|EVAL_TYPE second#6 -> T:ANY
+EDGES|EVAL_TYPE second#7 -> T:int
+EDGES|EVAL_TYPE second#8 -> T:int
+EDGES|EVAL_TYPE shared.h:<global>#1 -> T:ANY
+EDGES|EVAL_TYPE shared.h:<global>#2 -> T:ANY
+EDGES|EVAL_TYPE shared.h:VALUE:int(0)#1 -> T:ANY
+EDGES|EVAL_TYPE shared.h:VALUE:int(0)#2 -> T:int
+EDGES|EVAL_TYPE z.c:<global>#10 -> T:ANY
+EDGES|EVAL_TYPE z.c:<global>#11 -> T:second
+EDGES|EVAL_TYPE z.c:<global>#12 -> T:ANY
+EDGES|PARAMETER_LINK first#1 -> first#2
+EDGES|PARAMETER_LINK second#1 -> second#2
+EDGES|REF NB:<global> -> NS:<global>
+EDGES|REF NB:<includes>:<global> -> NS:<global>
+EDGES|REF NB:a.c:<global> -> NS:<global>
+EDGES|REF NB:shared.h:<global> -> NS:<global>
+EDGES|REF NB:z.c:<global> -> NS:<global>
+EDGES|REF T:ANY -> D:ANY
+EDGES|REF T:first -> D:first
+EDGES|REF T:int -> D:int
+EDGES|REF T:second -> D:second
+EDGES|REF T:void -> D:void
+EDGES|REF a.c:<global>#11 -> a.c:<global>#1
+EDGES|REF z.c:<global>#11 -> second#0
+EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+EDGES|SOURCE_FILE D:ANY -> F:<includes>
+EDGES|SOURCE_FILE D:a.c:<global> -> F:a.c
+EDGES|SOURCE_FILE D:first -> F:a.c
+EDGES|SOURCE_FILE D:int -> F:<includes>
+EDGES|SOURCE_FILE D:second -> F:z.c
+EDGES|SOURCE_FILE D:shared.h:<global> -> F:shared.h
+EDGES|SOURCE_FILE D:void -> F:<includes>
+EDGES|SOURCE_FILE D:z.c:<global> -> F:z.c
+EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
+EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>
+EDGES|SOURCE_FILE NB:a.c:<global> -> F:a.c
+EDGES|SOURCE_FILE NB:shared.h:<global> -> F:shared.h
+EDGES|SOURCE_FILE NB:z.c:<global> -> F:z.c
+EDGES|SOURCE_FILE a.c:<global>#0 -> F:a.c
+EDGES|SOURCE_FILE a.c:<global>#1 -> F:a.c
+EDGES|SOURCE_FILE second#0 -> F:z.c
+EDGES|SOURCE_FILE shared.h:<global>#0 -> F:shared.h
+EDGES|SOURCE_FILE shared.h:VALUE:int(0)#0 -> F:a.c
+EDGES|SOURCE_FILE z.c:<global>#0 -> F:z.c
+FLOWS|REACHING_DEF[<RET>] first#4 -> first#8
+FLOWS|REACHING_DEF[<RET>] second#4 -> second#8
+FLOWS|REACHING_DEF[VALUE] first#5 -> first#4
+FLOWS|REACHING_DEF[VALUE] first#5 -> first#8
+FLOWS|REACHING_DEF[VALUE] second#5 -> second#4
+FLOWS|REACHING_DEF[VALUE] second#5 -> second#8
+FLOWS|REACHING_DEF[] a.c:<global>#0 -> a.c:<global>#11
+FLOWS|REACHING_DEF[] a.c:<global>#1 -> first#1
+FLOWS|REACHING_DEF[] a.c:<global>#1 -> first#5
+FLOWS|REACHING_DEF[] a.c:<global>#1 -> first#7
+FLOWS|REACHING_DEF[] first#1 -> first#2
+FLOWS|REACHING_DEF[] first#1 -> first#8
+FLOWS|REACHING_DEF[] second#0 -> second#1
+FLOWS|REACHING_DEF[] second#0 -> second#5
+FLOWS|REACHING_DEF[] second#0 -> second#7
+FLOWS|REACHING_DEF[] second#1 -> second#2
+FLOWS|REACHING_DEF[] second#1 -> second#8
+FLOWS|REACHING_DEF[] z.c:<global>#0 -> z.c:<global>#11

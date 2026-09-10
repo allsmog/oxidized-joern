@@ -1,0 +1,32 @@
+{
+  "status": "PASS",
+  "sourceUnchanged": true,
+  "sourceInputCount": 195,
+  "candidateBindingSha256": "5365334c3027cb874a36a647722587f3f7a3a3fe50ee989997df765ef869e958",
+  "replay14Sha256": "59b5703df6ff388de073e646db40a38ea4a98911802dbac7da1a3fc42cf34500",
+  "main308": {
+    "exit": 0,
+    "logSha256": "c105179d62065e9cbf9f398ff94754c29ec03add1206db7dff281cb4c07b6be6",
+    "actualSha256": "73cbd12e77aa52f120c3ebfa56feeca8bf9b737c22cf45a9519cdac7550190c4",
+    "checkerAndReference": {
+      "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/cpg-rs/joern-parity/check.sh": "4e70680cda0c2191c2356398df7b2ea30f7180c6e54666fa0a37276b59bf36aa",
+      "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/cpg-rs/joern-parity/oracle_all.txt": "0cd3403a367ae297f2ddf60b70684f0b84cd81c9e2ca0c149f6663749df70abf"
+    },
+    "frozenProducerShimSha256": "d9da2db3928ce8e9d0ac0b4910a8ca63cf4c024d3a51fb858c278af16af9007a"
+  },
+  "unitTests": {
+    "command": [
+      "cargo",
+      "test",
+      "--locked",
+      "--manifest-path",
+      "cpg-rs/Cargo.toml",
+      "-p",
+      "cpg-lang-c",
+      "--lib",
+      "exact::rd_semantics_tests"
+    ],
+    "exit": 0,
+    "logSha256": "58ed1728b00dd23000fb86b3c85b9e7916bab3de03c05af058d79c08fc35f04d"
+  }
+}

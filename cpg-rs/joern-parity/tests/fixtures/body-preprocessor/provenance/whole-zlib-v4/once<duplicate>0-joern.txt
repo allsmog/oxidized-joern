@@ -1,0 +1,7 @@
+METHOD NAME=once CODE=local void once(once_t *state, void (*init)(void)) {\n    if (!state->done) {\n        if (test_and_set(&state->begun))\n            while (!state->done)\n                ;\n        else {\n            init();\n            state->done = 1;\n        }\n    }\n} FULL_NAME=once<duplicate>0 SIGNATURE=void(once_t*,void) ORDER=1
+  METHOD_PARAMETER_IN NAME=state CODE=once_t *state TYPE_FULL_NAME=once_t* ORDER=1
+  METHOD_PARAMETER_OUT NAME=state CODE=once_t *state TYPE_FULL_NAME=once_t* ORDER=1
+  METHOD_PARAMETER_IN NAME=init CODE=void (*init)(void) TYPE_FULL_NAME=void ORDER=2
+  METHOD_PARAMETER_OUT NAME=init CODE=void (*init)(void) TYPE_FULL_NAME=void ORDER=2
+  BLOCK CODE={\n    if (!state->done) {\n        if (test_and_set(&state->begun))\n            while (!state->done)\n                ;\n        else {\n            init();\n            state->done = 1;\n        }\n    }\n} TYPE_FULL_NAME=void ORDER=3
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=4

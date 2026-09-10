@@ -1,0 +1,229 @@
+{
+  "status": "PASS_DIAGNOSTIC_EVIDENCE_ONLY_NOT_A_COMPLETE_SUPPORT_GATE",
+  "package": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/guarded-else-chain-diagnostic",
+  "measurement": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/guarded-else-chain-diagnostic/measurement.json",
+    "sha256": "08a793e0941b7def4697f1b3a07077df9fc73c868aa5940e65105454045a5ad5"
+  },
+  "readme": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/cpg-rs/joern-parity/tests/fixtures/guarded-else-chain-diagnostic/README.md",
+    "sha256": "2cc9fd25347013b949595d408c770776fea37109aad23e168cf6cfa6acccf3ef"
+  },
+  "scratchFreeze": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/.local/guarded-else-chain-diagnosis/diagnosis-freeze.json",
+    "sha256": "a369c7db539d87ec86858b8c84abd26b80f24255cf008fd20daebe0bd87bddfb"
+  },
+  "independentClassifierReplay": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/eighth-whole-review/guarded-else-independent-replay.json",
+    "sha256": "1816d222f5206680d9b229086276c1b6fd05d9af9c6334fa509ac122a33289bd"
+  },
+  "sourceReview": "The producer classifier was read before independent saved-data recomputation. Used endpoint keys are unique; each retains complete properties except ORDER and uses its CALL/RETURN owner for repeated leaves. Full ancestors and every scoped CFG/RD row are preserved. This reduction is simple enough that unique expression-role keys distinguish all actual source occurrences.",
+  "projects": 2,
+  "completeReferencesRawExtractionVerified": true,
+  "canonicalLinesIncludingSeparators": 668,
+  "nonemptySelectedRecords": 658,
+  "oldCompleteExact": 1,
+  "currentCompleteExact": 1,
+  "guardedChainMatchingSourceFactsLost": 0,
+  "guardedChainMatchingSourceFactsGained": 23,
+  "guardedChainCurrentMissingLiveFacts": 5,
+  "rawMatchingOrdinalLosses": [
+    {
+      "record": "EDGES|CFG choose#19 -> choose#20",
+      "multiplicity": 1,
+      "baselineSource": {
+        "index": 19,
+        "address": "choose#19",
+        "depth": 6,
+        "record": "IDENTIFIER NAME=result CODE=result TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1",
+        "parent": 18,
+        "ancestors": [
+          0,
+          5,
+          8,
+          16,
+          17,
+          18
+        ],
+        "key": "[\"IDENTIFIER NAME=result CODE=result TYPE_FULL_NAME=int ARGUMENT_INDEX=1\", \"CALL NAME=<operator>.assignment CODE=result = 0 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment DISPATCH_TYPE=STATIC_DISPATCH\"]"
+      },
+      "baselineTarget": {
+        "index": 20,
+        "address": "choose#20",
+        "depth": 6,
+        "record": "LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2",
+        "parent": 18,
+        "ancestors": [
+          0,
+          5,
+          8,
+          16,
+          17,
+          18
+        ],
+        "key": "[\"LITERAL CODE=0 TYPE_FULL_NAME=int ARGUMENT_INDEX=2\", \"CALL NAME=<operator>.assignment CODE=result = 0 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment DISPATCH_TYPE=STATIC_DISPATCH\"]"
+      },
+      "liveSource": {
+        "index": 19,
+        "address": "choose#19",
+        "depth": 7,
+        "record": "IDENTIFIER NAME=base CODE=base TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1",
+        "parent": 18,
+        "ancestors": [
+          0,
+          5,
+          7,
+          15,
+          16,
+          17,
+          18
+        ],
+        "key": "[\"IDENTIFIER NAME=base CODE=base TYPE_FULL_NAME=int ARGUMENT_INDEX=1\", \"CALL NAME=<operator>.equals CODE=base == 10 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.equals DISPATCH_TYPE=STATIC_DISPATCH\"]"
+      },
+      "liveTarget": {
+        "index": 20,
+        "address": "choose#20",
+        "depth": 7,
+        "record": "LITERAL CODE=10 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2",
+        "parent": 18,
+        "ancestors": [
+          0,
+          5,
+          7,
+          15,
+          16,
+          17,
+          18
+        ],
+        "key": "[\"LITERAL CODE=10 TYPE_FULL_NAME=int ARGUMENT_INDEX=2\", \"CALL NAME=<operator>.equals CODE=base == 10 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.equals DISPATCH_TYPE=STATIC_DISPATCH\"]"
+      }
+    },
+    {
+      "record": "EDGES|CFG choose#20 -> choose#18",
+      "multiplicity": 1,
+      "baselineSource": {
+        "index": 20,
+        "address": "choose#20",
+        "depth": 6,
+        "record": "LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2",
+        "parent": 18,
+        "ancestors": [
+          0,
+          5,
+          8,
+          16,
+          17,
+          18
+        ],
+        "key": "[\"LITERAL CODE=0 TYPE_FULL_NAME=int ARGUMENT_INDEX=2\", \"CALL NAME=<operator>.assignment CODE=result = 0 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment DISPATCH_TYPE=STATIC_DISPATCH\"]"
+      },
+      "baselineTarget": {
+        "index": 18,
+        "address": "choose#18",
+        "depth": 5,
+        "record": "CALL NAME=<operator>.assignment CODE=result = 0 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH",
+        "parent": 17,
+        "ancestors": [
+          0,
+          5,
+          8,
+          16,
+          17
+        ],
+        "key": "CALL NAME=<operator>.assignment CODE=result = 0 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment DISPATCH_TYPE=STATIC_DISPATCH"
+      },
+      "liveSource": {
+        "index": 20,
+        "address": "choose#20",
+        "depth": 7,
+        "record": "LITERAL CODE=10 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2",
+        "parent": 18,
+        "ancestors": [
+          0,
+          5,
+          7,
+          15,
+          16,
+          17,
+          18
+        ],
+        "key": "[\"LITERAL CODE=10 TYPE_FULL_NAME=int ARGUMENT_INDEX=2\", \"CALL NAME=<operator>.equals CODE=base == 10 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.equals DISPATCH_TYPE=STATIC_DISPATCH\"]"
+      },
+      "liveTarget": {
+        "index": 18,
+        "address": "choose#18",
+        "depth": 6,
+        "record": "CALL NAME=<operator>.equals CODE=base == 10 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.equals ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH",
+        "parent": 17,
+        "ancestors": [
+          0,
+          5,
+          7,
+          15,
+          16,
+          17
+        ],
+        "key": "CALL NAME=<operator>.equals CODE=base == 10 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.equals DISPATCH_TYPE=STATIC_DISPATCH"
+      }
+    },
+    {
+      "record": "FLOWS|REACHING_DEF[] choose#0 -> choose#20",
+      "multiplicity": 1,
+      "baselineSource": {
+        "index": 0,
+        "address": "choose#0",
+        "depth": 0,
+        "record": "METHOD NAME=choose CODE=int choose(int base, int x) {\\n int result;\\n#if !defined(USE_OLD)\\n if (base == 2)\\n  result = x;\\n else\\n#endif\\n if (base == 10)\\n  result = 10;\\n else\\n  result = 0;\\n return result;\\n} FULL_NAME=choose SIGNATURE=int(int,int) ORDER=1",
+        "parent": null,
+        "ancestors": [],
+        "key": "METHOD NAME=choose CODE=int choose(int base, int x) {\\n int result;\\n#if !defined(USE_OLD)\\n if (base == 2)\\n  result = x;\\n else\\n#endif\\n if (base == 10)\\n  result = 10;\\n else\\n  result = 0;\\n return result;\\n} FULL_NAME=choose SIGNATURE=int(int,int)"
+      },
+      "baselineTarget": {
+        "index": 20,
+        "address": "choose#20",
+        "depth": 6,
+        "record": "LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2",
+        "parent": 18,
+        "ancestors": [
+          0,
+          5,
+          8,
+          16,
+          17,
+          18
+        ],
+        "key": "[\"LITERAL CODE=0 TYPE_FULL_NAME=int ARGUMENT_INDEX=2\", \"CALL NAME=<operator>.assignment CODE=result = 0 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment DISPATCH_TYPE=STATIC_DISPATCH\"]"
+      },
+      "liveSource": {
+        "index": 0,
+        "address": "choose#0",
+        "depth": 0,
+        "record": "METHOD NAME=choose CODE=int choose(int base, int x) {\\n int result;\\n#if !defined(USE_OLD)\\n if (base == 2)\\n  result = x;\\n else\\n#endif\\n if (base == 10)\\n  result = 10;\\n else\\n  result = 0;\\n return result;\\n} FULL_NAME=choose SIGNATURE=int(int,int) ORDER=1",
+        "parent": null,
+        "ancestors": [],
+        "key": "METHOD NAME=choose CODE=int choose(int base, int x) {\\n int result;\\n#if !defined(USE_OLD)\\n if (base == 2)\\n  result = x;\\n else\\n#endif\\n if (base == 10)\\n  result = 10;\\n else\\n  result = 0;\\n return result;\\n} FULL_NAME=choose SIGNATURE=int(int,int)"
+      },
+      "liveTarget": {
+        "index": 20,
+        "address": "choose#20",
+        "depth": 7,
+        "record": "LITERAL CODE=10 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2",
+        "parent": 18,
+        "ancestors": [
+          0,
+          5,
+          7,
+          15,
+          16,
+          17,
+          18
+        ],
+        "key": "[\"LITERAL CODE=10 TYPE_FULL_NAME=int ARGUMENT_INDEX=2\", \"CALL NAME=<operator>.equals CODE=base == 10 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.equals DISPATCH_TYPE=STATIC_DISPATCH\"]"
+      }
+    }
+  ],
+  "hashesVerified": 31,
+  "newProductionGates": 0,
+  "sourceOrTestChangesByReviewer": false,
+  "limits": "Ordinary exact control does not substitute for guarded nonexact graph. First branch is added but runtime else does not join across #endif; current wrong CFG and five missing first-branch CFG/RD facts remain. No proof of full preprocessor support; no prior matching source-occurrence loss in this reduction."
+}

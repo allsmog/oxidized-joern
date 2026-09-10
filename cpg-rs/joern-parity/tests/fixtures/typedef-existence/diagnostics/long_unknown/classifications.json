@@ -1,0 +1,8 @@
+{
+  "check": [
+    [
+      "<operator>.pointerCall",
+      "(U)(x)"
+    ]
+  ]
+}

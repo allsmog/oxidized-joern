@@ -1,59 +1,82 @@
-# joern-parity — driving a pure-Rust C frontend to byte-for-byte parity with Joern
+# C differential parity
 
-This is the first milestone of a 1:1 Joern port (frontend strategy: pure Rust),
-done the only way a port like this can be verified — **differential testing
-against a real Joern install as the oracle**, not by eyeballing.
+This harness compares the shipped Rust C graph with Joern **v4.0.555** on the
+committed C corpus. The default `joern-parity` executable constructs the same
+`CFrontend`, `Project`, and standard analysis pipeline as `cpg build --lang c`.
+There is no separate production implementation waiting to replace the oracle
+path.
 
-## Method
+## Checks
 
-1. `oracle.sc` runs inside Joern (`importCode` → c2cpg) and dumps each
-   user-defined method's AST in a canonical text format (label + a fixed set of
-   properties, children ordered by `ORDER`).
-2. `src/main.rs` is a pure-Rust C frontend (tree-sitter) that reproduces Joern's
-   `c2cpg`/`x2cpg` lowering conventions and emits the **same** canonical format.
-3. `check.sh` runs both over `corpus/*.c` and diffs per method. Exit 0 ⇔ every
-   method is byte-identical to Joern.
-
-The released-engine migration is observable separately while convergence is in
-progress:
+From this directory:
 
 ```bash
-cargo run -p joern-parity -- --production corpus/*.c
-cargo run -p joern-parity -- --migration-report corpus/*.c
+# Compare Rust output with the committed reference; no JVM is needed.
+./check.sh --committed-only
+
+# Require a fresh Joern run and compare Rust with its output.
+JAVA_HOME=/path/to/jdk21 JOERN=/path/to/joern-cli ./check.sh --live
+
+# Exercise gate failure handling without a Rust build or JVM.
+python3 test_check.py
 ```
 
-Both commands construct `cpg-lang-c` through the same incremental project and
-standard analysis pipeline used by `cpg build --lang c`. The historical
-standalone path remains the required oracle until that production report is
-exact; differences are not normalised away.
+`--live` fails if Joern is missing, exits unsuccessfully, or omits a required
+output section. It never falls back to the committed reference and never
+rewrites it. Joern runs in a temporary working directory, leaving existing
+workspaces intact. Both modes fail when the Rust producer fails, a method is
+missing or unexpected, or a compared block differs.
+
+For an intentional corpus extension, the legacy command without a mode can
+regenerate `oracle_all.txt` from an available Joern installation:
 
 ```bash
-JOERN=/path/to/joern-cli ./check.sh   # regenerate oracle from Joern, then diff
+JAVA_HOME=/path/to/jdk21 JOERN=/path/to/joern-cli ./check.sh
 ```
 
-## Conventions reproduced (verified byte-identical)
+That convenience mode can fall back to the committed reference after failed
+regeneration. It is **not evidence of a live comparison**. Verify an updated
+reference with `--live`, inspect its diff, and commit the corpus and generated
+reference together. Never edit oracle values by hand.
 
-- Operators lowered to `<operator>.*` CALL nodes (`addition`, `subtraction`,
-  `multiplication`, `lessThan`, `greaterThan`, `assignment`, …) with
-  `DISPATCH_TYPE=STATIC_DISPATCH` and `METHOD_FULL_NAME`.
-- A declaration `T x = e;` split into a `LOCAL` plus an `<operator>.assignment`
-  CALL; the init-assignment is typed `void`, a *bare* assignment statement `ANY`.
-- Synthetic `METHOD_RETURN` (CODE `RET`) and mirrored `METHOD_PARAMETER_OUT`
-  nodes; `ORDER` sequencing across params → block → return; per-call
-  `ARGUMENT_INDEX`.
-- `if`/`else` and `while` as `CONTROL_STRUCTURE` nodes — including the c2cpg
-  quirks that an `if`'s CODE is the whole statement while a `while`'s CODE is
-  only its header, and that `else` is itself a nested `CONTROL_STRUCTURE`.
-- Type resolution for this corpus (`int`/`void`/`ANY`, call-return types,
-  identifier types from a per-method symbol table).
+## What parity establishes
 
-## Status & honest scope
+`oracle.sc` emits method ASTs (including global and operator methods), selected
+scaffolding nodes, fifteen structural edge kinds, and reaching-definition
+facts. The AST projection compares nine named properties. `check.sh` compares
+the complete selected output in blocks: one per method, one per structural
+edge kind, one scaffolding block, and one reaching-definition block. The
+reported count is **comparison blocks**, not languages, programs, or a feature
+completion percentage.
 
-The committed corpus is byte-identical to Joern v4.0.555 across 122 graph
-blocks and 1,961 ReachingDef facts. It covers methods and global scaffolding,
+The committed corpus is byte-identical to Joern v4.0.555 across 334 graph
+blocks and 4,188 ReachingDef facts. It covers methods and global scaffolding,
 preprocessing, compiler inputs, CFG/REF/CALL and schema edges, structs, arrays,
 heap objects, indirect fields, local and aliased function pointers,
 pointer-to-pointer writes, returned aliases, pointer fields, rebind/kill
 behavior, out-parameter calls, and deallocation semantics. Pinned zlib and Lua
 projects provide the real-code acceptance layer. New C constructs extend the
 same corpus and must drive the exact node/edge/flow diff back to zero.
+
+Each selected record occupies one physical output line. Embedded LF in
+AST/CODE values and reaching-definition VARIABLE labels is represented by
+literal `\n`, matching the Rust text projection. This is an encoding boundary,
+not a lossless or injective serialization of source properties: a physical LF
+and a literal backslash followed by `n` can share the same spelling, and CR is
+not escaped. Preserve bytes when extracting outputs; newline-normalizing text
+readers can conceal CRLF differences. The FLOW-label transport correction
+leaves the committed `oracle_all.txt` unchanged. See the
+[concatenated-string fixture](tests/fixtures/concatenated-strings/README.md)
+for complete live comparisons and retained encoding diagnostics.
+
+This is a bounded C graph comparison. It does not establish equivalence of all
+Joern schema properties, arbitrary C programs, final `reachableBy` results,
+scanner rules, other frontends, CPGQL, plugins, or binary graph formats.
+Production scanner outcomes have separate tests under
+`cpg-analysis/tests`. The zlib/Lua acceptance script checks deterministic
+workflows and resource budgets; it does not compare those whole projects with
+Joern. See [COMPATIBILITY.md](../COMPATIBILITY.md) for the product boundary.
+
+`--lowering` dumps the exact C lowering before graph import, and
+`--migration-report` compares that dump with the shared graph projection.
+These diagnostic modes are not substitutes for the default production gate.

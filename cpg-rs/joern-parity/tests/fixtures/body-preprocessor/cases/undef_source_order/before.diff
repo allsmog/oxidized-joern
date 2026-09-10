@@ -1,0 +1,105 @@
+--- joern
++++ before
+@@ -12,8 +12,6 @@
+   METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+   METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+   BLOCK CODE={\n#if 1\n return x;\n#else\n return 0;\n#endif\n} TYPE_FULL_NAME=void ORDER=2
+-    RETURN CODE=return x; ORDER=1
+-      IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+ 
+ METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1
+@@ -21,8 +19,6 @@
+     METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+     METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+     BLOCK CODE={\n#if 1\n return x;\n#else\n return 0;\n#endif\n} TYPE_FULL_NAME=void ORDER=2
+-      RETURN CODE=return x; ORDER=1
+-        IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1
+     METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+   METHOD NAME=after CODE=int after(int x) {\n#if 1\n return x;\n#else\n return 0;\n#endif\n} FULL_NAME=after SIGNATURE=int(int) ORDER=1
+     METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+@@ -53,15 +49,12 @@
+ NODES|TYPE NAME=before FULL_NAME=before TYPE_DECL_FULL_NAME=before
+ NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+ NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+-EDGES|ARGUMENT before#4 -> before#5
+ EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+ EDGES|CFG after#0 -> after#4
+-EDGES|CFG before#0 -> before#5
+-EDGES|CFG before#4 -> before#6
+-EDGES|CFG before#5 -> before#4
+-EDGES|CFG main.c:<global>#0 -> main.c:<global>#14
+-EDGES|CFG main.c:<global>#14 -> main.c:<global>#15
+-EDGES|CFG main.c:<global>#15 -> main.c:<global>#16
++EDGES|CFG before#0 -> before#4
++EDGES|CFG main.c:<global>#0 -> main.c:<global>#12
++EDGES|CFG main.c:<global>#12 -> main.c:<global>#13
++EDGES|CFG main.c:<global>#13 -> main.c:<global>#14
+ EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+ EDGES|CONTAINS D:main.c:<global> -> D:after
+ EDGES|CONTAINS D:main.c:<global> -> D:before
+@@ -73,13 +66,11 @@
+ EDGES|CONTAINS F:main.c -> D:main.c:<global>
+ EDGES|CONTAINS after#0 -> after#3
+ EDGES|CONTAINS before#0 -> before#3
+-EDGES|CONTAINS before#0 -> before#4
+-EDGES|CONTAINS before#0 -> before#5
+ EDGES|CONTAINS main.c:<global>#0 -> after#0
+ EDGES|CONTAINS main.c:<global>#0 -> before#0
++EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#11
++EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#12
+ EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#13
+-EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#14
+-EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#15
+ EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+ EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+ EDGES|EVAL_TYPE after#1 -> T:int
+@@ -89,12 +80,11 @@
+ EDGES|EVAL_TYPE before#1 -> T:int
+ EDGES|EVAL_TYPE before#2 -> T:int
+ EDGES|EVAL_TYPE before#3 -> T:void
+-EDGES|EVAL_TYPE before#5 -> T:int
+-EDGES|EVAL_TYPE before#6 -> T:int
+-EDGES|EVAL_TYPE main.c:<global>#13 -> T:ANY
+-EDGES|EVAL_TYPE main.c:<global>#14 -> T:before
+-EDGES|EVAL_TYPE main.c:<global>#15 -> T:after
+-EDGES|EVAL_TYPE main.c:<global>#16 -> T:ANY
++EDGES|EVAL_TYPE before#4 -> T:int
++EDGES|EVAL_TYPE main.c:<global>#11 -> T:ANY
++EDGES|EVAL_TYPE main.c:<global>#12 -> T:before
++EDGES|EVAL_TYPE main.c:<global>#13 -> T:after
++EDGES|EVAL_TYPE main.c:<global>#14 -> T:ANY
+ EDGES|PARAMETER_LINK after#1 -> after#2
+ EDGES|PARAMETER_LINK before#1 -> before#2
+ EDGES|REF NB:<global> -> NS:<global>
+@@ -105,9 +95,8 @@
+ EDGES|REF T:before -> D:before
+ EDGES|REF T:int -> D:int
+ EDGES|REF T:void -> D:void
+-EDGES|REF before#5 -> before#1
+-EDGES|REF main.c:<global>#14 -> before#0
+-EDGES|REF main.c:<global>#15 -> after#0
++EDGES|REF main.c:<global>#12 -> before#0
++EDGES|REF main.c:<global>#13 -> after#0
+ EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+ EDGES|SOURCE_FILE D:ANY -> F:<includes>
+ EDGES|SOURCE_FILE D:after -> F:main.c
+@@ -121,15 +110,11 @@
+ EDGES|SOURCE_FILE after#0 -> F:main.c
+ EDGES|SOURCE_FILE before#0 -> F:main.c
+ EDGES|SOURCE_FILE main.c:<global>#0 -> F:main.c
+-FLOWS|REACHING_DEF[<RET>] before#4 -> before#6
+ FLOWS|REACHING_DEF[] after#0 -> after#1
+ FLOWS|REACHING_DEF[] before#0 -> before#1
+-FLOWS|REACHING_DEF[] before#0 -> before#5
+-FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#14
+-FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#15
++FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#12
++FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#13
+ FLOWS|REACHING_DEF[x] after#1 -> after#2
+ FLOWS|REACHING_DEF[x] after#1 -> after#4
+ FLOWS|REACHING_DEF[x] before#1 -> before#2
+-FLOWS|REACHING_DEF[x] before#1 -> before#5
+-FLOWS|REACHING_DEF[x] before#1 -> before#6
+-FLOWS|REACHING_DEF[x] before#5 -> before#4
++FLOWS|REACHING_DEF[x] before#1 -> before#4

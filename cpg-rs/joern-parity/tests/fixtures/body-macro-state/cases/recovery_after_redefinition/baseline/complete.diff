@@ -1,0 +1,433 @@
+--- Joern4.0.555
++++ /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/eighth-batch/final-real-differential/bin/joern-parity
+@@ -22,32 +22,34 @@
+   METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+   METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+   BLOCK CODE={\n#undef BAD\n#define BAD "a" unresolved "b"\n#undef VALUE\n#define VALUE 4\n int first = consume(BAD, VALUE);\n#undef BAD\n#define BAD "fine"\n int second = consume(BAD, VALUE);\n return first + second + VALUE;\n} TYPE_FULL_NAME=void ORDER=2
+-    LOCAL NAME=VALUE CODE=<unknown> VALUE TYPE_FULL_NAME=ANY ORDER=0
+-    LOCAL NAME=BAD CODE=<unknown> BAD TYPE_FULL_NAME=ANY ORDER=0
+     LOCAL NAME=first CODE=int first TYPE_FULL_NAME=int ORDER=1
+     CALL NAME=<operator>.assignment CODE=first = consume(BAD, VALUE) TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+       IDENTIFIER NAME=first CODE=first TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+-      CALL NAME=consume CODE=consume(BAD, VALUE) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=consume ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+-        IDENTIFIER NAME=BAD CODE=<unknown> BAD TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+-        IDENTIFIER NAME=VALUE CODE=<unknown> VALUE TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
++      CALL NAME=consume CODE=consume(BAD, VALUE) TYPE_FULL_NAME=int METHOD_FULL_NAME=consume ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
++        CALL NAME=BAD CODE=BAD TYPE_FULL_NAME=char* METHOD_FULL_NAME=main.c:BAD:char*(0) SIGNATURE=char*(0) ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=INLINED
++          BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
++            LITERAL CODE="ok" TYPE_FULL_NAME=char* ORDER=1
++        CALL NAME=VALUE CODE=VALUE TYPE_FULL_NAME=int METHOD_FULL_NAME=main.c:VALUE:int(0) SIGNATURE=int(0) ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=INLINED
++          BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
++            LITERAL CODE=2 TYPE_FULL_NAME=int ORDER=1
+     LOCAL NAME=second CODE=int second TYPE_FULL_NAME=int ORDER=3
+     CALL NAME=<operator>.assignment CODE=second = consume(BAD, VALUE) TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=4 DISPATCH_TYPE=STATIC_DISPATCH
+       IDENTIFIER NAME=second CODE=second TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+       CALL NAME=consume CODE=consume(BAD, VALUE) TYPE_FULL_NAME=int METHOD_FULL_NAME=consume ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+         CALL NAME=BAD CODE=BAD TYPE_FULL_NAME=char* METHOD_FULL_NAME=main.c:BAD:char*(0) SIGNATURE=char*(0) ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=INLINED
+           BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+-            LITERAL CODE="fine" TYPE_FULL_NAME=char* ORDER=1
++            LITERAL CODE="ok" TYPE_FULL_NAME=char* ORDER=1
+         CALL NAME=VALUE CODE=VALUE TYPE_FULL_NAME=int METHOD_FULL_NAME=main.c:VALUE:int(0) SIGNATURE=int(0) ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=INLINED
+           BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+-            LITERAL CODE=4 TYPE_FULL_NAME=int ORDER=1
++            LITERAL CODE=2 TYPE_FULL_NAME=int ORDER=1
+     RETURN CODE=return first + second + VALUE; ORDER=5
+       CALL NAME=<operator>.addition CODE=first + second + VALUE TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+         CALL NAME=<operator>.addition CODE=first + second TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+-          IDENTIFIER NAME=first CODE=<unknown> first TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
++          IDENTIFIER NAME=first CODE=first TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+           IDENTIFIER NAME=second CODE=second TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+         CALL NAME=VALUE CODE=VALUE TYPE_FULL_NAME=int METHOD_FULL_NAME=main.c:VALUE:int(0) SIGNATURE=int(0) ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=INLINED
+           BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+-            LITERAL CODE=4 TYPE_FULL_NAME=int ORDER=1
++            LITERAL CODE=2 TYPE_FULL_NAME=int ORDER=1
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+ 
+ METHOD NAME=consume CODE=int consume(const char *, int); FULL_NAME=consume SIGNATURE=int(char*,int) ORDER=1
+@@ -63,42 +65,44 @@
+     METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+     METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+     BLOCK CODE={\n#undef BAD\n#define BAD "a" unresolved "b"\n#undef VALUE\n#define VALUE 4\n int first = consume(BAD, VALUE);\n#undef BAD\n#define BAD "fine"\n int second = consume(BAD, VALUE);\n return first + second + VALUE;\n} TYPE_FULL_NAME=void ORDER=2
+-      LOCAL NAME=VALUE CODE=<unknown> VALUE TYPE_FULL_NAME=ANY ORDER=0
+-      LOCAL NAME=BAD CODE=<unknown> BAD TYPE_FULL_NAME=ANY ORDER=0
+       LOCAL NAME=first CODE=int first TYPE_FULL_NAME=int ORDER=1
+       CALL NAME=<operator>.assignment CODE=first = consume(BAD, VALUE) TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+         IDENTIFIER NAME=first CODE=first TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+-        CALL NAME=consume CODE=consume(BAD, VALUE) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=consume ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+-          IDENTIFIER NAME=BAD CODE=<unknown> BAD TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+-          IDENTIFIER NAME=VALUE CODE=<unknown> VALUE TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
++        CALL NAME=consume CODE=consume(BAD, VALUE) TYPE_FULL_NAME=int METHOD_FULL_NAME=consume ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
++          CALL NAME=BAD CODE=BAD TYPE_FULL_NAME=char* METHOD_FULL_NAME=main.c:BAD:char*(0) SIGNATURE=char*(0) ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=INLINED
++            BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
++              LITERAL CODE="ok" TYPE_FULL_NAME=char* ORDER=1
++          CALL NAME=VALUE CODE=VALUE TYPE_FULL_NAME=int METHOD_FULL_NAME=main.c:VALUE:int(0) SIGNATURE=int(0) ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=INLINED
++            BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
++              LITERAL CODE=2 TYPE_FULL_NAME=int ORDER=1
+       LOCAL NAME=second CODE=int second TYPE_FULL_NAME=int ORDER=3
+       CALL NAME=<operator>.assignment CODE=second = consume(BAD, VALUE) TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=4 DISPATCH_TYPE=STATIC_DISPATCH
+         IDENTIFIER NAME=second CODE=second TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+         CALL NAME=consume CODE=consume(BAD, VALUE) TYPE_FULL_NAME=int METHOD_FULL_NAME=consume ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+           CALL NAME=BAD CODE=BAD TYPE_FULL_NAME=char* METHOD_FULL_NAME=main.c:BAD:char*(0) SIGNATURE=char*(0) ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=INLINED
+             BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+-              LITERAL CODE="fine" TYPE_FULL_NAME=char* ORDER=1
++              LITERAL CODE="ok" TYPE_FULL_NAME=char* ORDER=1
+           CALL NAME=VALUE CODE=VALUE TYPE_FULL_NAME=int METHOD_FULL_NAME=main.c:VALUE:int(0) SIGNATURE=int(0) ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=INLINED
+             BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+-              LITERAL CODE=4 TYPE_FULL_NAME=int ORDER=1
++              LITERAL CODE=2 TYPE_FULL_NAME=int ORDER=1
+       RETURN CODE=return first + second + VALUE; ORDER=5
+         CALL NAME=<operator>.addition CODE=first + second + VALUE TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+           CALL NAME=<operator>.addition CODE=first + second TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+-            IDENTIFIER NAME=first CODE=<unknown> first TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
++            IDENTIFIER NAME=first CODE=first TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+             IDENTIFIER NAME=second CODE=second TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+           CALL NAME=VALUE CODE=VALUE TYPE_FULL_NAME=int METHOD_FULL_NAME=main.c:VALUE:int(0) SIGNATURE=int(0) ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=INLINED
+             BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+-              LITERAL CODE=4 TYPE_FULL_NAME=int ORDER=1
++              LITERAL CODE=2 TYPE_FULL_NAME=int ORDER=1
+     METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+   BLOCK TYPE_FULL_NAME=ANY ORDER=1
+     METHOD_REF CODE=choose TYPE_FULL_NAME=choose METHOD_FULL_NAME=choose ORDER=1
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+ 
+-METHOD NAME=BAD CODE=#define BAD "a" unresolved "b" FULL_NAME=main.c:BAD:char*(0) SIGNATURE=char*(0) ORDER=1
++METHOD NAME=BAD CODE=#define BAD "ok" FULL_NAME=main.c:BAD:char*(0) SIGNATURE=char*(0) ORDER=1
+   BLOCK TYPE_FULL_NAME=ANY ORDER=1
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=char* ORDER=2
+ 
+-METHOD NAME=VALUE CODE=#define VALUE 4 FULL_NAME=main.c:VALUE:int(0) SIGNATURE=int(0) ORDER=1
++METHOD NAME=VALUE CODE=#define VALUE 2 FULL_NAME=main.c:VALUE:int(0) SIGNATURE=int(0) ORDER=1
+   BLOCK TYPE_FULL_NAME=ANY ORDER=1
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=2
+ 
+@@ -121,57 +125,63 @@
+ NODES|TYPE NAME=choose FULL_NAME=choose TYPE_DECL_FULL_NAME=choose
+ NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+ NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+-EDGES|ARGUMENT choose#13 -> choose#14
+-EDGES|ARGUMENT choose#13 -> choose#15
+ EDGES|ARGUMENT choose#15 -> choose#16
+-EDGES|ARGUMENT choose#15 -> choose#19
+-EDGES|ARGUMENT choose#22 -> choose#23
+-EDGES|ARGUMENT choose#23 -> choose#24
+-EDGES|ARGUMENT choose#23 -> choose#27
++EDGES|ARGUMENT choose#15 -> choose#17
++EDGES|ARGUMENT choose#17 -> choose#18
++EDGES|ARGUMENT choose#17 -> choose#21
+ EDGES|ARGUMENT choose#24 -> choose#25
+-EDGES|ARGUMENT choose#24 -> choose#26
++EDGES|ARGUMENT choose#25 -> choose#26
++EDGES|ARGUMENT choose#25 -> choose#29
++EDGES|ARGUMENT choose#26 -> choose#27
++EDGES|ARGUMENT choose#26 -> choose#28
++EDGES|ARGUMENT choose#5 -> choose#6
++EDGES|ARGUMENT choose#5 -> choose#7
++EDGES|ARGUMENT choose#7 -> choose#11
+ EDGES|ARGUMENT choose#7 -> choose#8
+-EDGES|ARGUMENT choose#7 -> choose#9
+-EDGES|ARGUMENT choose#9 -> choose#10
+-EDGES|ARGUMENT choose#9 -> choose#11
+-EDGES|CALL choose#13 -> <operator>.assignment#0
+-EDGES|CALL choose#15 -> consume#0
+-EDGES|CALL choose#16 -> main.c:BAD:char*(0)#0
+-EDGES|CALL choose#19 -> main.c:VALUE:int(0)#0
+-EDGES|CALL choose#23 -> <operator>.addition#0
+-EDGES|CALL choose#24 -> <operator>.addition#0
+-EDGES|CALL choose#27 -> main.c:VALUE:int(0)#0
+-EDGES|CALL choose#7 -> <operator>.assignment#0
+-EDGES|CALL choose#9 -> consume#0
++EDGES|CALL choose#11 -> main.c:VALUE:int(0)#0
++EDGES|CALL choose#15 -> <operator>.assignment#0
++EDGES|CALL choose#17 -> consume#0
++EDGES|CALL choose#18 -> main.c:BAD:char*(0)#0
++EDGES|CALL choose#21 -> main.c:VALUE:int(0)#0
++EDGES|CALL choose#25 -> <operator>.addition#0
++EDGES|CALL choose#26 -> <operator>.addition#0
++EDGES|CALL choose#29 -> main.c:VALUE:int(0)#0
++EDGES|CALL choose#5 -> <operator>.assignment#0
++EDGES|CALL choose#7 -> consume#0
++EDGES|CALL choose#8 -> main.c:BAD:char*(0)#0
+ EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+ EDGES|CFG <operator>.addition#0 -> <operator>.addition#5
+ EDGES|CFG <operator>.assignment#0 -> <operator>.assignment#5
+-EDGES|CFG choose#0 -> choose#8
++EDGES|CFG choose#0 -> choose#6
+ EDGES|CFG choose#10 -> choose#11
+-EDGES|CFG choose#11 -> choose#9
+-EDGES|CFG choose#13 -> choose#25
+-EDGES|CFG choose#14 -> choose#16
+-EDGES|CFG choose#15 -> choose#13
++EDGES|CFG choose#11 -> choose#13
++EDGES|CFG choose#11 -> choose#7
++EDGES|CFG choose#13 -> choose#7
++EDGES|CFG choose#15 -> choose#27
+ EDGES|CFG choose#16 -> choose#18
+-EDGES|CFG choose#16 -> choose#19
+-EDGES|CFG choose#18 -> choose#19
+-EDGES|CFG choose#19 -> choose#15
+-EDGES|CFG choose#19 -> choose#21
+-EDGES|CFG choose#21 -> choose#15
+-EDGES|CFG choose#22 -> choose#30
+-EDGES|CFG choose#23 -> choose#22
+-EDGES|CFG choose#24 -> choose#27
+-EDGES|CFG choose#25 -> choose#26
+-EDGES|CFG choose#26 -> choose#24
+-EDGES|CFG choose#27 -> choose#23
+-EDGES|CFG choose#27 -> choose#29
+-EDGES|CFG choose#29 -> choose#23
+-EDGES|CFG choose#7 -> choose#14
++EDGES|CFG choose#17 -> choose#15
++EDGES|CFG choose#18 -> choose#20
++EDGES|CFG choose#18 -> choose#21
++EDGES|CFG choose#20 -> choose#21
++EDGES|CFG choose#21 -> choose#17
++EDGES|CFG choose#21 -> choose#23
++EDGES|CFG choose#23 -> choose#17
++EDGES|CFG choose#24 -> choose#32
++EDGES|CFG choose#25 -> choose#24
++EDGES|CFG choose#26 -> choose#29
++EDGES|CFG choose#27 -> choose#28
++EDGES|CFG choose#28 -> choose#26
++EDGES|CFG choose#29 -> choose#25
++EDGES|CFG choose#29 -> choose#31
++EDGES|CFG choose#31 -> choose#25
++EDGES|CFG choose#5 -> choose#16
++EDGES|CFG choose#6 -> choose#8
++EDGES|CFG choose#7 -> choose#5
+ EDGES|CFG choose#8 -> choose#10
+-EDGES|CFG choose#9 -> choose#7
++EDGES|CFG choose#8 -> choose#11
+ EDGES|CFG consume#0 -> consume#6
+-EDGES|CFG main.c:<global>#0 -> main.c:<global>#33
+-EDGES|CFG main.c:<global>#33 -> main.c:<global>#34
++EDGES|CFG main.c:<global>#0 -> main.c:<global>#35
++EDGES|CFG main.c:<global>#35 -> main.c:<global>#36
+ EDGES|CFG main.c:BAD:char*(0)#0 -> main.c:BAD:char*(0)#2
+ EDGES|CFG main.c:VALUE:int(0)#0 -> main.c:VALUE:int(0)#2
+ EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+@@ -190,8 +200,8 @@
+ EDGES|CONTAINS F:main.c -> D:main.c:<global>
+ EDGES|CONTAINS choose#0 -> choose#10
+ EDGES|CONTAINS choose#0 -> choose#11
++EDGES|CONTAINS choose#0 -> choose#12
+ EDGES|CONTAINS choose#0 -> choose#13
+-EDGES|CONTAINS choose#0 -> choose#14
+ EDGES|CONTAINS choose#0 -> choose#15
+ EDGES|CONTAINS choose#0 -> choose#16
+ EDGES|CONTAINS choose#0 -> choose#17
+@@ -208,13 +218,17 @@
+ EDGES|CONTAINS choose#0 -> choose#28
+ EDGES|CONTAINS choose#0 -> choose#29
+ EDGES|CONTAINS choose#0 -> choose#3
++EDGES|CONTAINS choose#0 -> choose#30
++EDGES|CONTAINS choose#0 -> choose#31
++EDGES|CONTAINS choose#0 -> choose#5
++EDGES|CONTAINS choose#0 -> choose#6
+ EDGES|CONTAINS choose#0 -> choose#7
+ EDGES|CONTAINS choose#0 -> choose#8
+ EDGES|CONTAINS choose#0 -> choose#9
+ EDGES|CONTAINS consume#0 -> consume#5
+ EDGES|CONTAINS main.c:<global>#0 -> choose#0
+-EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#32
+-EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#33
++EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#34
++EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#35
+ EDGES|CONTAINS main.c:BAD:char*(0)#0 -> main.c:BAD:char*(0)#1
+ EDGES|CONTAINS main.c:VALUE:int(0)#0 -> main.c:VALUE:int(0)#1
+ EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+@@ -232,33 +246,35 @@
+ EDGES|EVAL_TYPE <operator>.assignment#5 -> T:ANY
+ EDGES|EVAL_TYPE <operator>.assignment#6 -> T:ANY
+ EDGES|EVAL_TYPE choose#1 -> T:void
+-EDGES|EVAL_TYPE choose#10 -> T:ANY
+-EDGES|EVAL_TYPE choose#11 -> T:ANY
+-EDGES|EVAL_TYPE choose#12 -> T:int
+-EDGES|EVAL_TYPE choose#13 -> T:void
++EDGES|EVAL_TYPE choose#10 -> T:char*
++EDGES|EVAL_TYPE choose#11 -> T:int
++EDGES|EVAL_TYPE choose#12 -> T:ANY
++EDGES|EVAL_TYPE choose#13 -> T:int
+ EDGES|EVAL_TYPE choose#14 -> T:int
+-EDGES|EVAL_TYPE choose#15 -> T:int
+-EDGES|EVAL_TYPE choose#16 -> T:char*
+-EDGES|EVAL_TYPE choose#17 -> T:ANY
++EDGES|EVAL_TYPE choose#15 -> T:void
++EDGES|EVAL_TYPE choose#16 -> T:int
++EDGES|EVAL_TYPE choose#17 -> T:int
+ EDGES|EVAL_TYPE choose#18 -> T:char*
+-EDGES|EVAL_TYPE choose#19 -> T:int
++EDGES|EVAL_TYPE choose#19 -> T:ANY
+ EDGES|EVAL_TYPE choose#2 -> T:void
+-EDGES|EVAL_TYPE choose#20 -> T:ANY
++EDGES|EVAL_TYPE choose#20 -> T:char*
+ EDGES|EVAL_TYPE choose#21 -> T:int
+-EDGES|EVAL_TYPE choose#23 -> T:ANY
+-EDGES|EVAL_TYPE choose#24 -> T:ANY
+-EDGES|EVAL_TYPE choose#25 -> T:int
+-EDGES|EVAL_TYPE choose#26 -> T:int
++EDGES|EVAL_TYPE choose#22 -> T:ANY
++EDGES|EVAL_TYPE choose#23 -> T:int
++EDGES|EVAL_TYPE choose#25 -> T:ANY
++EDGES|EVAL_TYPE choose#26 -> T:ANY
+ EDGES|EVAL_TYPE choose#27 -> T:int
+-EDGES|EVAL_TYPE choose#28 -> T:ANY
++EDGES|EVAL_TYPE choose#28 -> T:int
+ EDGES|EVAL_TYPE choose#29 -> T:int
+ EDGES|EVAL_TYPE choose#3 -> T:void
+-EDGES|EVAL_TYPE choose#30 -> T:int
+-EDGES|EVAL_TYPE choose#4 -> T:ANY
+-EDGES|EVAL_TYPE choose#5 -> T:ANY
++EDGES|EVAL_TYPE choose#30 -> T:ANY
++EDGES|EVAL_TYPE choose#31 -> T:int
++EDGES|EVAL_TYPE choose#32 -> T:int
++EDGES|EVAL_TYPE choose#4 -> T:int
++EDGES|EVAL_TYPE choose#5 -> T:void
+ EDGES|EVAL_TYPE choose#6 -> T:int
+-EDGES|EVAL_TYPE choose#7 -> T:void
+-EDGES|EVAL_TYPE choose#8 -> T:int
++EDGES|EVAL_TYPE choose#7 -> T:int
++EDGES|EVAL_TYPE choose#8 -> T:char*
+ EDGES|EVAL_TYPE choose#9 -> T:ANY
+ EDGES|EVAL_TYPE consume#1 -> T:char*
+ EDGES|EVAL_TYPE consume#2 -> T:char*
+@@ -266,9 +282,9 @@
+ EDGES|EVAL_TYPE consume#4 -> T:int
+ EDGES|EVAL_TYPE consume#5 -> T:ANY
+ EDGES|EVAL_TYPE consume#6 -> T:int
+-EDGES|EVAL_TYPE main.c:<global>#32 -> T:ANY
+-EDGES|EVAL_TYPE main.c:<global>#33 -> T:choose
+ EDGES|EVAL_TYPE main.c:<global>#34 -> T:ANY
++EDGES|EVAL_TYPE main.c:<global>#35 -> T:choose
++EDGES|EVAL_TYPE main.c:<global>#36 -> T:ANY
+ EDGES|EVAL_TYPE main.c:BAD:char*(0)#1 -> T:ANY
+ EDGES|EVAL_TYPE main.c:BAD:char*(0)#2 -> T:char*
+ EDGES|EVAL_TYPE main.c:VALUE:int(0)#1 -> T:ANY
+@@ -288,13 +304,11 @@
+ EDGES|REF T:choose -> D:choose
+ EDGES|REF T:int -> D:int
+ EDGES|REF T:void -> D:void
+-EDGES|REF choose#10 -> choose#5
+-EDGES|REF choose#11 -> choose#4
+-EDGES|REF choose#14 -> choose#12
+-EDGES|REF choose#25 -> choose#6
+-EDGES|REF choose#26 -> choose#12
+-EDGES|REF choose#8 -> choose#6
+-EDGES|REF main.c:<global>#33 -> choose#0
++EDGES|REF choose#16 -> choose#14
++EDGES|REF choose#27 -> choose#4
++EDGES|REF choose#28 -> choose#14
++EDGES|REF choose#6 -> choose#4
++EDGES|REF main.c:<global>#35 -> choose#0
+ EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+ EDGES|SOURCE_FILE D:ANY -> F:<includes>
+ EDGES|SOURCE_FILE D:char* -> F:<includes>
+@@ -310,25 +324,18 @@
+ EDGES|SOURCE_FILE main.c:<global>#0 -> F:main.c
+ EDGES|SOURCE_FILE main.c:BAD:char*(0)#0 -> F:main.c
+ EDGES|SOURCE_FILE main.c:VALUE:int(0)#0 -> F:main.c
+-FLOWS|REACHING_DEF[<RET>] choose#22 -> choose#30
+-FLOWS|REACHING_DEF[<unknown> BAD] choose#10 -> choose#11
+-FLOWS|REACHING_DEF[<unknown> BAD] choose#10 -> choose#16
+-FLOWS|REACHING_DEF[<unknown> BAD] choose#10 -> choose#30
+-FLOWS|REACHING_DEF[<unknown> BAD] choose#10 -> choose#9
+-FLOWS|REACHING_DEF[<unknown> VALUE] choose#11 -> choose#10
+-FLOWS|REACHING_DEF[<unknown> VALUE] choose#11 -> choose#19
+-FLOWS|REACHING_DEF[<unknown> VALUE] choose#11 -> choose#27
+-FLOWS|REACHING_DEF[<unknown> VALUE] choose#11 -> choose#30
+-FLOWS|REACHING_DEF[<unknown> VALUE] choose#11 -> choose#9
+-FLOWS|REACHING_DEF[<unknown> first] choose#25 -> choose#24
+-FLOWS|REACHING_DEF[<unknown> first] choose#25 -> choose#30
+-FLOWS|REACHING_DEF[BAD] choose#16 -> choose#15
+-FLOWS|REACHING_DEF[BAD] choose#16 -> choose#19
+-FLOWS|REACHING_DEF[BAD] choose#16 -> choose#30
+-FLOWS|REACHING_DEF[VALUE] choose#19 -> choose#15
+-FLOWS|REACHING_DEF[VALUE] choose#19 -> choose#16
+-FLOWS|REACHING_DEF[VALUE] choose#27 -> choose#23
+-FLOWS|REACHING_DEF[VALUE] choose#27 -> choose#30
++FLOWS|REACHING_DEF[<RET>] choose#24 -> choose#32
++FLOWS|REACHING_DEF[BAD] choose#18 -> choose#17
++FLOWS|REACHING_DEF[BAD] choose#18 -> choose#21
++FLOWS|REACHING_DEF[BAD] choose#18 -> choose#32
++FLOWS|REACHING_DEF[BAD] choose#8 -> choose#11
++FLOWS|REACHING_DEF[BAD] choose#8 -> choose#7
++FLOWS|REACHING_DEF[VALUE] choose#11 -> choose#7
++FLOWS|REACHING_DEF[VALUE] choose#11 -> choose#8
++FLOWS|REACHING_DEF[VALUE] choose#21 -> choose#17
++FLOWS|REACHING_DEF[VALUE] choose#21 -> choose#18
++FLOWS|REACHING_DEF[VALUE] choose#29 -> choose#25
++FLOWS|REACHING_DEF[VALUE] choose#29 -> choose#32
+ FLOWS|REACHING_DEF[] <operator>.addition#0 -> <operator>.addition#1
+ FLOWS|REACHING_DEF[] <operator>.addition#0 -> <operator>.addition#4
+ FLOWS|REACHING_DEF[] <operator>.assignment#0 -> <operator>.assignment#1
+@@ -336,35 +343,39 @@
+ FLOWS|REACHING_DEF[] choose#0 -> choose#1
+ FLOWS|REACHING_DEF[] choose#0 -> choose#10
+ FLOWS|REACHING_DEF[] choose#0 -> choose#11
+-FLOWS|REACHING_DEF[] choose#0 -> choose#16
++FLOWS|REACHING_DEF[] choose#0 -> choose#13
+ FLOWS|REACHING_DEF[] choose#0 -> choose#18
+-FLOWS|REACHING_DEF[] choose#0 -> choose#19
++FLOWS|REACHING_DEF[] choose#0 -> choose#20
+ FLOWS|REACHING_DEF[] choose#0 -> choose#21
+-FLOWS|REACHING_DEF[] choose#0 -> choose#25
+-FLOWS|REACHING_DEF[] choose#0 -> choose#26
++FLOWS|REACHING_DEF[] choose#0 -> choose#23
+ FLOWS|REACHING_DEF[] choose#0 -> choose#27
++FLOWS|REACHING_DEF[] choose#0 -> choose#28
+ FLOWS|REACHING_DEF[] choose#0 -> choose#29
++FLOWS|REACHING_DEF[] choose#0 -> choose#31
++FLOWS|REACHING_DEF[] choose#0 -> choose#8
+ FLOWS|REACHING_DEF[] choose#1 -> choose#2
+-FLOWS|REACHING_DEF[] choose#1 -> choose#30
++FLOWS|REACHING_DEF[] choose#1 -> choose#32
+ FLOWS|REACHING_DEF[] consume#0 -> consume#1
+ FLOWS|REACHING_DEF[] consume#0 -> consume#3
+ FLOWS|REACHING_DEF[] consume#1 -> consume#2
+ FLOWS|REACHING_DEF[] consume#1 -> consume#6
+ FLOWS|REACHING_DEF[] consume#3 -> consume#4
+ FLOWS|REACHING_DEF[] consume#3 -> consume#6
+-FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#33
+-FLOWS|REACHING_DEF[consume(BAD, VALUE)] choose#15 -> choose#13
+-FLOWS|REACHING_DEF[consume(BAD, VALUE)] choose#15 -> choose#14
+-FLOWS|REACHING_DEF[consume(BAD, VALUE)] choose#15 -> choose#30
+-FLOWS|REACHING_DEF[consume(BAD, VALUE)] choose#9 -> choose#7
+-FLOWS|REACHING_DEF[consume(BAD, VALUE)] choose#9 -> choose#8
+-FLOWS|REACHING_DEF[first + second + VALUE] choose#23 -> choose#22
+-FLOWS|REACHING_DEF[first + second + VALUE] choose#23 -> choose#30
+-FLOWS|REACHING_DEF[first + second] choose#24 -> choose#23
+-FLOWS|REACHING_DEF[first + second] choose#24 -> choose#30
+-FLOWS|REACHING_DEF[first = consume(BAD, VALUE)] choose#7 -> choose#30
+-FLOWS|REACHING_DEF[first] choose#8 -> choose#25
+-FLOWS|REACHING_DEF[first] choose#8 -> choose#7
++FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#35
++FLOWS|REACHING_DEF[consume(BAD, VALUE)] choose#17 -> choose#15
++FLOWS|REACHING_DEF[consume(BAD, VALUE)] choose#17 -> choose#16
++FLOWS|REACHING_DEF[consume(BAD, VALUE)] choose#17 -> choose#32
++FLOWS|REACHING_DEF[consume(BAD, VALUE)] choose#7 -> choose#5
++FLOWS|REACHING_DEF[consume(BAD, VALUE)] choose#7 -> choose#6
++FLOWS|REACHING_DEF[first + second + VALUE] choose#25 -> choose#24
++FLOWS|REACHING_DEF[first + second + VALUE] choose#25 -> choose#32
++FLOWS|REACHING_DEF[first + second] choose#26 -> choose#25
++FLOWS|REACHING_DEF[first + second] choose#26 -> choose#32
++FLOWS|REACHING_DEF[first = consume(BAD, VALUE)] choose#5 -> choose#32
++FLOWS|REACHING_DEF[first] choose#27 -> choose#26
++FLOWS|REACHING_DEF[first] choose#27 -> choose#32
++FLOWS|REACHING_DEF[first] choose#6 -> choose#27
++FLOWS|REACHING_DEF[first] choose#6 -> choose#5
+ FLOWS|REACHING_DEF[p1] <operator>.addition#1 -> <operator>.addition#3
+ FLOWS|REACHING_DEF[p1] <operator>.addition#1 -> <operator>.addition#5
+ FLOWS|REACHING_DEF[p1] <operator>.assignment#1 -> <operator>.assignment#3
+@@ -373,8 +384,8 @@
+ FLOWS|REACHING_DEF[p2] <operator>.addition#4 -> <operator>.addition#6
+ FLOWS|REACHING_DEF[p2] <operator>.assignment#4 -> <operator>.assignment#5
+ FLOWS|REACHING_DEF[p2] <operator>.assignment#4 -> <operator>.assignment#6
+-FLOWS|REACHING_DEF[second = consume(BAD, VALUE)] choose#13 -> choose#30
+-FLOWS|REACHING_DEF[second] choose#14 -> choose#13
+-FLOWS|REACHING_DEF[second] choose#14 -> choose#26
+-FLOWS|REACHING_DEF[second] choose#26 -> choose#24
+-FLOWS|REACHING_DEF[second] choose#26 -> choose#30
++FLOWS|REACHING_DEF[second = consume(BAD, VALUE)] choose#15 -> choose#32
++FLOWS|REACHING_DEF[second] choose#16 -> choose#15
++FLOWS|REACHING_DEF[second] choose#16 -> choose#28
++FLOWS|REACHING_DEF[second] choose#28 -> choose#26
++FLOWS|REACHING_DEF[second] choose#28 -> choose#32

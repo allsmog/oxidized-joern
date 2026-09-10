@@ -1,0 +1,284 @@
+METHOD NAME=<global> CODE=<global> FULL_NAME=<includes>:<global> ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=character CODE=int character(void) { return ID(' '); } FULL_NAME=character SIGNATURE=int(void) ORDER=1
+  METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  BLOCK CODE={ return ID(' '); } TYPE_FULL_NAME=void ORDER=2
+    RETURN CODE=return ID(' '); ORDER=1
+      CALL NAME=ID CODE=ID(' ') TYPE_FULL_NAME=ANY METHOD_FULL_NAME=defs.h:ID:ANY(1) SIGNATURE=ANY(1) ORDER=1 DISPATCH_TYPE=INLINED
+        BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+          LITERAL CODE=' ' TYPE_FULL_NAME=char ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+
+METHOD NAME=<global> CODE=<global> FULL_NAME=defs.h:<global> ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=ID CODE=#define ID(x) (x) FULL_NAME=defs.h:ID:ANY(1) SIGNATURE=ANY(1) ORDER=1
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=3
+
+METHOD NAME=escaped CODE=char *escaped(void) { return ID("a\tb"); } FULL_NAME=escaped SIGNATURE=char*(void) ORDER=1
+  METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  BLOCK CODE={ return ID("a\tb"); } TYPE_FULL_NAME=void ORDER=2
+    RETURN CODE=return ID("a\tb"); ORDER=1
+      CALL NAME=ID CODE=ID("a\tb") TYPE_FULL_NAME=ANY METHOD_FULL_NAME=defs.h:ID:ANY(1) SIGNATURE=ANY(1) ORDER=1 DISPATCH_TYPE=INLINED
+        LITERAL CODE="a\tb" TYPE_FULL_NAME=char* ORDER=1 ARGUMENT_INDEX=1
+        BLOCK TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+          LITERAL CODE="a\tb" TYPE_FULL_NAME=char* ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=char* ORDER=3
+
+METHOD NAME=<global> CODE=<global> FULL_NAME=locations.c:<global> ORDER=1
+  METHOD NAME=probe CODE=char *probe(void) { return ID("a b"); } FULL_NAME=probe SIGNATURE=char*(void) ORDER=1
+    METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    BLOCK CODE={ return ID("a b"); } TYPE_FULL_NAME=void ORDER=2
+      RETURN CODE=return ID("a b"); ORDER=1
+        CALL NAME=ID CODE=ID("a b") TYPE_FULL_NAME=ANY METHOD_FULL_NAME=defs.h:ID:ANY(1) SIGNATURE=ANY(1) ORDER=1 DISPATCH_TYPE=INLINED
+          BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+            LITERAL CODE="a b" TYPE_FULL_NAME=char* ORDER=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=char* ORDER=3
+  METHOD NAME=escaped CODE=char *escaped(void) { return ID("a\tb"); } FULL_NAME=escaped SIGNATURE=char*(void) ORDER=1
+    METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    BLOCK CODE={ return ID("a\tb"); } TYPE_FULL_NAME=void ORDER=2
+      RETURN CODE=return ID("a\tb"); ORDER=1
+        CALL NAME=ID CODE=ID("a\tb") TYPE_FULL_NAME=ANY METHOD_FULL_NAME=defs.h:ID:ANY(1) SIGNATURE=ANY(1) ORDER=1 DISPATCH_TYPE=INLINED
+          LITERAL CODE="a\tb" TYPE_FULL_NAME=char* ORDER=1 ARGUMENT_INDEX=1
+          BLOCK TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+            LITERAL CODE="a\tb" TYPE_FULL_NAME=char* ORDER=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=char* ORDER=3
+  METHOD NAME=character CODE=int character(void) { return ID(' '); } FULL_NAME=character SIGNATURE=int(void) ORDER=1
+    METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    BLOCK CODE={ return ID(' '); } TYPE_FULL_NAME=void ORDER=2
+      RETURN CODE=return ID(' '); ORDER=1
+        CALL NAME=ID CODE=ID(' ') TYPE_FULL_NAME=ANY METHOD_FULL_NAME=defs.h:ID:ANY(1) SIGNATURE=ANY(1) ORDER=1 DISPATCH_TYPE=INLINED
+          BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+            LITERAL CODE=' ' TYPE_FULL_NAME=char ORDER=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+    METHOD_REF CODE=probe TYPE_FULL_NAME=probe METHOD_FULL_NAME=probe ORDER=1
+    METHOD_REF CODE=escaped TYPE_FULL_NAME=escaped METHOD_FULL_NAME=escaped ORDER=2
+    METHOD_REF CODE=character TYPE_FULL_NAME=character METHOD_FULL_NAME=character ORDER=3
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=probe CODE=char *probe(void) { return ID("a b"); } FULL_NAME=probe SIGNATURE=char*(void) ORDER=1
+  METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  BLOCK CODE={ return ID("a b"); } TYPE_FULL_NAME=void ORDER=2
+    RETURN CODE=return ID("a b"); ORDER=1
+      CALL NAME=ID CODE=ID("a b") TYPE_FULL_NAME=ANY METHOD_FULL_NAME=defs.h:ID:ANY(1) SIGNATURE=ANY(1) ORDER=1 DISPATCH_TYPE=INLINED
+        BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+          LITERAL CODE="a b" TYPE_FULL_NAME=char* ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=char* ORDER=3
+
+NODES|META_DATA LANGUAGE=NEWC
+NODES|FILE NAME=<includes> ORDER=1
+NODES|FILE NAME=<unknown> ORDER=0
+NODES|FILE NAME=defs.h ORDER=0
+NODES|FILE NAME=locations.c ORDER=0
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<global> FILENAME=<unknown> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<includes>:<global> FILENAME=<includes> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=defs.h:<global> FILENAME=defs.h ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=locations.c:<global> FILENAME=locations.c ORDER=1
+NODES|NAMESPACE NAME=<global>
+NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=char FULL_NAME=char CODE=char IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=char* FULL_NAME=char* CODE=char* IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=character FULL_NAME=character CODE=character AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=locations.c:<global> FILENAME=locations.c ORDER=1
+NODES|TYPE_DECL NAME=<global> FULL_NAME=defs.h:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=defs.h:<global> FILENAME=defs.h ORDER=1
+NODES|TYPE_DECL NAME=escaped FULL_NAME=escaped CODE=escaped AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=locations.c:<global> FILENAME=locations.c ORDER=1
+NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=<global> FULL_NAME=locations.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=locations.c:<global> FILENAME=locations.c ORDER=2
+NODES|TYPE_DECL NAME=probe FULL_NAME=probe CODE=probe AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=locations.c:<global> FILENAME=locations.c ORDER=1
+NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+NODES|TYPE NAME=char FULL_NAME=char TYPE_DECL_FULL_NAME=char
+NODES|TYPE NAME=char* FULL_NAME=char* TYPE_DECL_FULL_NAME=char*
+NODES|TYPE NAME=character FULL_NAME=character TYPE_DECL_FULL_NAME=character
+NODES|TYPE NAME=escaped FULL_NAME=escaped TYPE_DECL_FULL_NAME=escaped
+NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+NODES|TYPE NAME=probe FULL_NAME=probe TYPE_DECL_FULL_NAME=probe
+NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+EDGES|ARGUMENT character#4 -> character#5
+EDGES|ARGUMENT escaped#4 -> escaped#5
+EDGES|ARGUMENT escaped#5 -> escaped#6
+EDGES|ARGUMENT probe#4 -> probe#5
+EDGES|CALL character#5 -> defs.h:ID:ANY(1)#0
+EDGES|CALL escaped#5 -> defs.h:ID:ANY(1)#0
+EDGES|CALL probe#5 -> defs.h:ID:ANY(1)#0
+EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+EDGES|CFG character#0 -> character#5
+EDGES|CFG character#4 -> character#8
+EDGES|CFG character#5 -> character#4
+EDGES|CFG character#5 -> character#7
+EDGES|CFG character#7 -> character#4
+EDGES|CFG defs.h:<global>#0 -> defs.h:<global>#2
+EDGES|CFG defs.h:ID:ANY(1)#0 -> defs.h:ID:ANY(1)#4
+EDGES|CFG escaped#0 -> escaped#6
+EDGES|CFG escaped#4 -> escaped#9
+EDGES|CFG escaped#5 -> escaped#4
+EDGES|CFG escaped#5 -> escaped#8
+EDGES|CFG escaped#6 -> escaped#5
+EDGES|CFG escaped#8 -> escaped#4
+EDGES|CFG locations.c:<global>#0 -> locations.c:<global>#30
+EDGES|CFG locations.c:<global>#1 -> probe#5
+EDGES|CFG locations.c:<global>#30 -> locations.c:<global>#31
+EDGES|CFG locations.c:<global>#31 -> locations.c:<global>#32
+EDGES|CFG locations.c:<global>#32 -> locations.c:<global>#33
+EDGES|CFG probe#4 -> probe#8
+EDGES|CFG probe#5 -> probe#4
+EDGES|CFG probe#5 -> probe#7
+EDGES|CFG probe#7 -> probe#4
+EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+EDGES|CONTAINS D:defs.h:<global> -> defs.h:<global>#0
+EDGES|CONTAINS D:locations.c:<global> -> D:character
+EDGES|CONTAINS D:locations.c:<global> -> D:escaped
+EDGES|CONTAINS D:locations.c:<global> -> D:probe
+EDGES|CONTAINS D:locations.c:<global> -> defs.h:ID:ANY(1)#0
+EDGES|CONTAINS D:locations.c:<global> -> locations.c:<global>#0
+EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+EDGES|CONTAINS F:<includes> -> D:ANY
+EDGES|CONTAINS F:<includes> -> D:char
+EDGES|CONTAINS F:<includes> -> D:char*
+EDGES|CONTAINS F:<includes> -> D:int
+EDGES|CONTAINS F:<includes> -> D:void
+EDGES|CONTAINS F:defs.h -> D:defs.h:<global>
+EDGES|CONTAINS F:locations.c -> D:locations.c:<global>
+EDGES|CONTAINS character#0 -> character#3
+EDGES|CONTAINS character#0 -> character#4
+EDGES|CONTAINS character#0 -> character#5
+EDGES|CONTAINS character#0 -> character#6
+EDGES|CONTAINS character#0 -> character#7
+EDGES|CONTAINS defs.h:<global>#0 -> defs.h:<global>#1
+EDGES|CONTAINS defs.h:ID:ANY(1)#0 -> defs.h:ID:ANY(1)#3
+EDGES|CONTAINS escaped#0 -> escaped#3
+EDGES|CONTAINS escaped#0 -> escaped#4
+EDGES|CONTAINS escaped#0 -> escaped#5
+EDGES|CONTAINS escaped#0 -> escaped#6
+EDGES|CONTAINS escaped#0 -> escaped#7
+EDGES|CONTAINS escaped#0 -> escaped#8
+EDGES|CONTAINS locations.c:<global>#0 -> character#0
+EDGES|CONTAINS locations.c:<global>#0 -> escaped#0
+EDGES|CONTAINS locations.c:<global>#0 -> locations.c:<global>#1
+EDGES|CONTAINS locations.c:<global>#0 -> locations.c:<global>#29
+EDGES|CONTAINS locations.c:<global>#0 -> locations.c:<global>#30
+EDGES|CONTAINS locations.c:<global>#0 -> locations.c:<global>#31
+EDGES|CONTAINS locations.c:<global>#0 -> locations.c:<global>#32
+EDGES|CONTAINS locations.c:<global>#1 -> probe#3
+EDGES|CONTAINS locations.c:<global>#1 -> probe#4
+EDGES|CONTAINS locations.c:<global>#1 -> probe#5
+EDGES|CONTAINS locations.c:<global>#1 -> probe#6
+EDGES|CONTAINS locations.c:<global>#1 -> probe#7
+EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+EDGES|EVAL_TYPE character#1 -> T:void
+EDGES|EVAL_TYPE character#2 -> T:void
+EDGES|EVAL_TYPE character#3 -> T:void
+EDGES|EVAL_TYPE character#5 -> T:ANY
+EDGES|EVAL_TYPE character#6 -> T:ANY
+EDGES|EVAL_TYPE character#7 -> T:char
+EDGES|EVAL_TYPE character#8 -> T:int
+EDGES|EVAL_TYPE defs.h:<global>#1 -> T:ANY
+EDGES|EVAL_TYPE defs.h:<global>#2 -> T:ANY
+EDGES|EVAL_TYPE defs.h:ID:ANY(1)#1 -> T:ANY
+EDGES|EVAL_TYPE defs.h:ID:ANY(1)#2 -> T:ANY
+EDGES|EVAL_TYPE defs.h:ID:ANY(1)#3 -> T:ANY
+EDGES|EVAL_TYPE defs.h:ID:ANY(1)#4 -> T:ANY
+EDGES|EVAL_TYPE escaped#1 -> T:void
+EDGES|EVAL_TYPE escaped#2 -> T:void
+EDGES|EVAL_TYPE escaped#3 -> T:void
+EDGES|EVAL_TYPE escaped#5 -> T:ANY
+EDGES|EVAL_TYPE escaped#6 -> T:char*
+EDGES|EVAL_TYPE escaped#7 -> T:ANY
+EDGES|EVAL_TYPE escaped#8 -> T:char*
+EDGES|EVAL_TYPE escaped#9 -> T:char*
+EDGES|EVAL_TYPE locations.c:<global>#29 -> T:ANY
+EDGES|EVAL_TYPE locations.c:<global>#30 -> T:probe
+EDGES|EVAL_TYPE locations.c:<global>#31 -> T:escaped
+EDGES|EVAL_TYPE locations.c:<global>#32 -> T:character
+EDGES|EVAL_TYPE locations.c:<global>#33 -> T:ANY
+EDGES|EVAL_TYPE probe#1 -> T:void
+EDGES|EVAL_TYPE probe#2 -> T:void
+EDGES|EVAL_TYPE probe#3 -> T:void
+EDGES|EVAL_TYPE probe#5 -> T:ANY
+EDGES|EVAL_TYPE probe#6 -> T:ANY
+EDGES|EVAL_TYPE probe#7 -> T:char*
+EDGES|EVAL_TYPE probe#8 -> T:char*
+EDGES|PARAMETER_LINK character#1 -> character#2
+EDGES|PARAMETER_LINK defs.h:ID:ANY(1)#1 -> defs.h:ID:ANY(1)#2
+EDGES|PARAMETER_LINK escaped#1 -> escaped#2
+EDGES|PARAMETER_LINK probe#1 -> probe#2
+EDGES|REF NB:<global> -> NS:<global>
+EDGES|REF NB:<includes>:<global> -> NS:<global>
+EDGES|REF NB:defs.h:<global> -> NS:<global>
+EDGES|REF NB:locations.c:<global> -> NS:<global>
+EDGES|REF T:ANY -> D:ANY
+EDGES|REF T:char -> D:char
+EDGES|REF T:char* -> D:char*
+EDGES|REF T:character -> D:character
+EDGES|REF T:escaped -> D:escaped
+EDGES|REF T:int -> D:int
+EDGES|REF T:probe -> D:probe
+EDGES|REF T:void -> D:void
+EDGES|REF locations.c:<global>#30 -> locations.c:<global>#1
+EDGES|REF locations.c:<global>#31 -> escaped#0
+EDGES|REF locations.c:<global>#32 -> character#0
+EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+EDGES|SOURCE_FILE D:ANY -> F:<includes>
+EDGES|SOURCE_FILE D:char -> F:<includes>
+EDGES|SOURCE_FILE D:char* -> F:<includes>
+EDGES|SOURCE_FILE D:character -> F:locations.c
+EDGES|SOURCE_FILE D:defs.h:<global> -> F:defs.h
+EDGES|SOURCE_FILE D:escaped -> F:locations.c
+EDGES|SOURCE_FILE D:int -> F:<includes>
+EDGES|SOURCE_FILE D:locations.c:<global> -> F:locations.c
+EDGES|SOURCE_FILE D:probe -> F:locations.c
+EDGES|SOURCE_FILE D:void -> F:<includes>
+EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
+EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>
+EDGES|SOURCE_FILE NB:defs.h:<global> -> F:defs.h
+EDGES|SOURCE_FILE NB:locations.c:<global> -> F:locations.c
+EDGES|SOURCE_FILE character#0 -> F:locations.c
+EDGES|SOURCE_FILE defs.h:<global>#0 -> F:defs.h
+EDGES|SOURCE_FILE defs.h:ID:ANY(1)#0 -> F:locations.c
+EDGES|SOURCE_FILE escaped#0 -> F:locations.c
+EDGES|SOURCE_FILE locations.c:<global>#0 -> F:locations.c
+EDGES|SOURCE_FILE locations.c:<global>#1 -> F:locations.c
+FLOWS|REACHING_DEF["a\tb"] escaped#6 -> escaped#5
+FLOWS|REACHING_DEF[<RET>] character#4 -> character#8
+FLOWS|REACHING_DEF[<RET>] escaped#4 -> escaped#9
+FLOWS|REACHING_DEF[<RET>] probe#4 -> probe#8
+FLOWS|REACHING_DEF[ID("a b")] probe#5 -> probe#4
+FLOWS|REACHING_DEF[ID("a b")] probe#5 -> probe#8
+FLOWS|REACHING_DEF[ID("a\tb")] escaped#5 -> escaped#4
+FLOWS|REACHING_DEF[ID("a\tb")] escaped#5 -> escaped#9
+FLOWS|REACHING_DEF[ID(' ')] character#5 -> character#4
+FLOWS|REACHING_DEF[ID(' ')] character#5 -> character#8
+FLOWS|REACHING_DEF[] character#0 -> character#1
+FLOWS|REACHING_DEF[] character#0 -> character#5
+FLOWS|REACHING_DEF[] character#0 -> character#7
+FLOWS|REACHING_DEF[] character#1 -> character#2
+FLOWS|REACHING_DEF[] character#1 -> character#8
+FLOWS|REACHING_DEF[] defs.h:ID:ANY(1)#0 -> defs.h:ID:ANY(1)#1
+FLOWS|REACHING_DEF[] escaped#0 -> escaped#1
+FLOWS|REACHING_DEF[] escaped#0 -> escaped#6
+FLOWS|REACHING_DEF[] escaped#0 -> escaped#8
+FLOWS|REACHING_DEF[] escaped#1 -> escaped#2
+FLOWS|REACHING_DEF[] escaped#1 -> escaped#9
+FLOWS|REACHING_DEF[] locations.c:<global>#0 -> locations.c:<global>#30
+FLOWS|REACHING_DEF[] locations.c:<global>#0 -> locations.c:<global>#31
+FLOWS|REACHING_DEF[] locations.c:<global>#0 -> locations.c:<global>#32
+FLOWS|REACHING_DEF[] locations.c:<global>#1 -> probe#1
+FLOWS|REACHING_DEF[] locations.c:<global>#1 -> probe#5
+FLOWS|REACHING_DEF[] locations.c:<global>#1 -> probe#7
+FLOWS|REACHING_DEF[] probe#1 -> probe#2
+FLOWS|REACHING_DEF[] probe#1 -> probe#8
+FLOWS|REACHING_DEF[p1] defs.h:ID:ANY(1)#1 -> defs.h:ID:ANY(1)#2
+FLOWS|REACHING_DEF[p1] defs.h:ID:ANY(1)#1 -> defs.h:ID:ANY(1)#4

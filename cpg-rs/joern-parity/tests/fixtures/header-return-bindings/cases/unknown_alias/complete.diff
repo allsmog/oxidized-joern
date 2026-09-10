@@ -1,0 +1,42 @@
+--- joern
++++ final-after-v3
+@@ -47,6 +47,7 @@
+ NODES|NAMESPACE NAME=<global>
+ NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE_DECL NAME=I FULL_NAME=I CODE=typedef Missing I; AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=api.h ORDER=1
++NODES|TYPE_DECL NAME=Missing FULL_NAME=Missing CODE=Missing IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE_DECL NAME=<global> FULL_NAME=api.h:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=api.h:<global> FILENAME=api.h ORDER=1
+ NODES|TYPE_DECL NAME=g FULL_NAME=g CODE=g AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+ NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+@@ -55,6 +56,7 @@
+ NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+ NODES|TYPE NAME=I FULL_NAME=I TYPE_DECL_FULL_NAME=I
++NODES|TYPE NAME=Missing FULL_NAME=Missing TYPE_DECL_FULL_NAME=Missing
+ NODES|TYPE NAME=g FULL_NAME=g TYPE_DECL_FULL_NAME=g
+ NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+ NODES|TYPE NAME=long FULL_NAME=long TYPE_DECL_FULL_NAME=long
+@@ -78,6 +80,7 @@
+ EDGES|CONTAINS D:main.c:<global> -> main.c:<global>#0
+ EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+ EDGES|CONTAINS F:<includes> -> D:ANY
++EDGES|CONTAINS F:<includes> -> D:Missing
+ EDGES|CONTAINS F:<includes> -> D:int
+ EDGES|CONTAINS F:<includes> -> D:long
+ EDGES|CONTAINS F:<includes> -> D:void
+@@ -118,6 +121,7 @@
+ EDGES|REF NB:main.c:<global> -> NS:<global>
+ EDGES|REF T:ANY -> D:ANY
+ EDGES|REF T:I -> api.h:<global>#2
++EDGES|REF T:Missing -> D:Missing
+ EDGES|REF T:g -> D:g
+ EDGES|REF T:int -> D:int
+ EDGES|REF T:long -> D:long
+@@ -126,6 +130,7 @@
+ EDGES|REF main.c:<global>#10 -> g#0
+ EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+ EDGES|SOURCE_FILE D:ANY -> F:<includes>
++EDGES|SOURCE_FILE D:Missing -> F:<includes>
+ EDGES|SOURCE_FILE D:api.h:<global> -> F:api.h
+ EDGES|SOURCE_FILE D:g -> F:main.c
+ EDGES|SOURCE_FILE D:int -> F:<includes>

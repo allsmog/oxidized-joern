@@ -1,0 +1,156 @@
+METHOD NAME=<global> CODE=<global> FULL_NAME=<includes>:<global> ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.assignment FULL_NAME=<operator>.assignment ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=f CODE=WORD f(WORD x) { WORD y=x; return y; } FULL_NAME=f SIGNATURE=WORD(WORD) ORDER=1
+  METHOD_PARAMETER_IN NAME=x CODE=WORD x TYPE_FULL_NAME=WORD ORDER=1
+  METHOD_PARAMETER_OUT NAME=x CODE=WORD x TYPE_FULL_NAME=WORD ORDER=1
+  BLOCK CODE={ WORD y=x; return y; } TYPE_FULL_NAME=void ORDER=2
+    LOCAL NAME=y CODE=WORD y TYPE_FULL_NAME=WORD ORDER=1
+    CALL NAME=<operator>.assignment CODE=y=x TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+      IDENTIFIER NAME=y CODE=y TYPE_FULL_NAME=WORD ORDER=1 ARGUMENT_INDEX=1
+      IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=WORD ORDER=2 ARGUMENT_INDEX=2
+    RETURN CODE=return y; ORDER=3
+      IDENTIFIER NAME=y CODE=y TYPE_FULL_NAME=WORD ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=WORD ORDER=3
+
+METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1
+  METHOD NAME=f CODE=WORD f(WORD x) { WORD y=x; return y; } FULL_NAME=f SIGNATURE=WORD(WORD) ORDER=1
+    METHOD_PARAMETER_IN NAME=x CODE=WORD x TYPE_FULL_NAME=WORD ORDER=1
+    METHOD_PARAMETER_OUT NAME=x CODE=WORD x TYPE_FULL_NAME=WORD ORDER=1
+    BLOCK CODE={ WORD y=x; return y; } TYPE_FULL_NAME=void ORDER=2
+      LOCAL NAME=y CODE=WORD y TYPE_FULL_NAME=WORD ORDER=1
+      CALL NAME=<operator>.assignment CODE=y=x TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=y CODE=y TYPE_FULL_NAME=WORD ORDER=1 ARGUMENT_INDEX=1
+        IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=WORD ORDER=2 ARGUMENT_INDEX=2
+      RETURN CODE=return y; ORDER=3
+        IDENTIFIER NAME=y CODE=y TYPE_FULL_NAME=WORD ORDER=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=WORD ORDER=3
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+    METHOD_REF CODE=f TYPE_FULL_NAME=f METHOD_FULL_NAME=f ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+NODES|META_DATA LANGUAGE=NEWC
+NODES|FILE NAME=<includes> ORDER=1
+NODES|FILE NAME=<unknown> ORDER=0
+NODES|FILE NAME=main.c ORDER=0
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<global> FILENAME=<unknown> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<includes>:<global> FILENAME=<includes> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|NAMESPACE NAME=<global>
+NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=WORD FULL_NAME=WORD CODE=WORD IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=f FULL_NAME=f CODE=f AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=<global> FULL_NAME=main.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+NODES|TYPE NAME=WORD FULL_NAME=WORD TYPE_DECL_FULL_NAME=WORD
+NODES|TYPE NAME=f FULL_NAME=f TYPE_DECL_FULL_NAME=f
+NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+EDGES|ARGUMENT f#5 -> f#6
+EDGES|ARGUMENT f#5 -> f#7
+EDGES|ARGUMENT f#8 -> f#9
+EDGES|CALL f#5 -> <operator>.assignment#0
+EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+EDGES|CFG <operator>.assignment#0 -> <operator>.assignment#5
+EDGES|CFG f#0 -> f#6
+EDGES|CFG f#5 -> f#9
+EDGES|CFG f#6 -> f#7
+EDGES|CFG f#7 -> f#5
+EDGES|CFG f#8 -> f#10
+EDGES|CFG f#9 -> f#8
+EDGES|CFG main.c:<global>#0 -> main.c:<global>#13
+EDGES|CFG main.c:<global>#13 -> main.c:<global>#14
+EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+EDGES|CONTAINS <operator>.assignment#0 -> <operator>.assignment#2
+EDGES|CONTAINS D:main.c:<global> -> D:f
+EDGES|CONTAINS D:main.c:<global> -> main.c:<global>#0
+EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+EDGES|CONTAINS F:<includes> -> D:ANY
+EDGES|CONTAINS F:<includes> -> D:WORD
+EDGES|CONTAINS F:<includes> -> D:void
+EDGES|CONTAINS F:main.c -> D:main.c:<global>
+EDGES|CONTAINS f#0 -> f#3
+EDGES|CONTAINS f#0 -> f#5
+EDGES|CONTAINS f#0 -> f#6
+EDGES|CONTAINS f#0 -> f#7
+EDGES|CONTAINS f#0 -> f#8
+EDGES|CONTAINS f#0 -> f#9
+EDGES|CONTAINS main.c:<global>#0 -> f#0
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#12
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#13
+EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#6 -> T:ANY
+EDGES|EVAL_TYPE f#1 -> T:WORD
+EDGES|EVAL_TYPE f#10 -> T:WORD
+EDGES|EVAL_TYPE f#2 -> T:WORD
+EDGES|EVAL_TYPE f#3 -> T:void
+EDGES|EVAL_TYPE f#4 -> T:WORD
+EDGES|EVAL_TYPE f#5 -> T:void
+EDGES|EVAL_TYPE f#6 -> T:WORD
+EDGES|EVAL_TYPE f#7 -> T:WORD
+EDGES|EVAL_TYPE f#9 -> T:WORD
+EDGES|EVAL_TYPE main.c:<global>#12 -> T:ANY
+EDGES|EVAL_TYPE main.c:<global>#13 -> T:f
+EDGES|EVAL_TYPE main.c:<global>#14 -> T:ANY
+EDGES|PARAMETER_LINK <operator>.assignment#1 -> <operator>.assignment#3
+EDGES|PARAMETER_LINK <operator>.assignment#4 -> <operator>.assignment#6
+EDGES|PARAMETER_LINK f#1 -> f#2
+EDGES|REF NB:<global> -> NS:<global>
+EDGES|REF NB:<includes>:<global> -> NS:<global>
+EDGES|REF NB:main.c:<global> -> NS:<global>
+EDGES|REF T:ANY -> D:ANY
+EDGES|REF T:WORD -> D:WORD
+EDGES|REF T:f -> D:f
+EDGES|REF T:void -> D:void
+EDGES|REF f#6 -> f#4
+EDGES|REF f#7 -> f#1
+EDGES|REF f#9 -> f#4
+EDGES|REF main.c:<global>#13 -> f#0
+EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+EDGES|SOURCE_FILE D:ANY -> F:<includes>
+EDGES|SOURCE_FILE D:WORD -> F:<includes>
+EDGES|SOURCE_FILE D:f -> F:main.c
+EDGES|SOURCE_FILE D:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE D:void -> F:<includes>
+EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
+EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>
+EDGES|SOURCE_FILE NB:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE f#0 -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#0 -> F:main.c
+FLOWS|REACHING_DEF[<RET>] f#8 -> f#10
+FLOWS|REACHING_DEF[] <operator>.assignment#0 -> <operator>.assignment#1
+FLOWS|REACHING_DEF[] <operator>.assignment#0 -> <operator>.assignment#4
+FLOWS|REACHING_DEF[] f#0 -> f#1
+FLOWS|REACHING_DEF[] f#0 -> f#7
+FLOWS|REACHING_DEF[] f#0 -> f#9
+FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#13
+FLOWS|REACHING_DEF[p1] <operator>.assignment#1 -> <operator>.assignment#3
+FLOWS|REACHING_DEF[p1] <operator>.assignment#1 -> <operator>.assignment#5
+FLOWS|REACHING_DEF[p2] <operator>.assignment#4 -> <operator>.assignment#5
+FLOWS|REACHING_DEF[p2] <operator>.assignment#4 -> <operator>.assignment#6
+FLOWS|REACHING_DEF[x] f#1 -> f#2
+FLOWS|REACHING_DEF[x] f#1 -> f#7
+FLOWS|REACHING_DEF[x] f#7 -> f#10
+FLOWS|REACHING_DEF[x] f#7 -> f#2
+FLOWS|REACHING_DEF[x] f#7 -> f#5
+FLOWS|REACHING_DEF[x] f#7 -> f#6
+FLOWS|REACHING_DEF[y=x] f#5 -> f#10
+FLOWS|REACHING_DEF[y] f#6 -> f#10
+FLOWS|REACHING_DEF[y] f#6 -> f#5
+FLOWS|REACHING_DEF[y] f#6 -> f#9
+FLOWS|REACHING_DEF[y] f#9 -> f#8

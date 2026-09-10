@@ -15,6 +15,7 @@ pub mod provenance;
 pub mod query;
 pub mod reaching_def;
 pub mod relations;
+mod return_flow;
 pub mod scan;
 pub mod structural;
 pub mod summaries;

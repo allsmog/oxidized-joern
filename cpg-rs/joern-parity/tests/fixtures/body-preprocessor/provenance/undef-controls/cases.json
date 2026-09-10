@@ -1,0 +1,14 @@
+{
+  "unknown_undef": {
+    "main.c": "#define FLAG 1\n#  undef OTHER\n#ifdef FLAG\nint kept(int x) {\n#if 1\n return x;\n#else\n return 0;\n#endif\n}\n#endif\n"
+  },
+  "inactive_undef": {
+    "main.c": "#define FLAG 1\n#if 0\n#  undef FLAG\n#endif\n#ifdef FLAG\nint kept(int x) {\n#if 1\n return x;\n#else\n return 0;\n#endif\n}\n#endif\n"
+  },
+  "define_after_undef": {
+    "main.c": "#  undef FLAG\n#define FLAG 1\n#ifdef FLAG\nint kept(int x) {\n#if 1\n return x;\n#else\n return 0;\n#endif\n}\n#endif\n"
+  },
+  "undef_source_order": {
+    "main.c": "#define FLAG 1\n#ifdef FLAG\nint before(int x) {\n#if 1\n return x;\n#else\n return 0;\n#endif\n}\n#endif\n#  undef FLAG\n#ifdef FLAG\nint after(int x) {\n#if 1\n return x;\n#else\n return 0;\n#endif\n}\n#endif\n"
+  }
+}

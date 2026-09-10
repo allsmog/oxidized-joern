@@ -1,0 +1,231 @@
+{
+  "status": "PASS_BOUNDED_RESOURCE_AND_EXPECTED_ONLY_MANIFEST_PROPOSAL",
+  "checkCount": 39604,
+  "baselineCommit": "c3a8c67e01354872b767b857c98252169bd5cca0",
+  "resourceRun": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/twelfth-batch/lint-corrected/final/resource-measurement-run.json",
+    "sha256": "491ae2aa7c7dc5abb6452da775ce692573e60178f210935831244b94b9daf00f",
+    "bytes": 39085076,
+    "mode": 420,
+    "symlink": null,
+    "resolvedPath": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/twelfth-batch/lint-corrected/final/resource-measurement-run.json"
+  },
+  "measurement": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/real-project-review/twelfth-final-measurements.json",
+    "sha256": "62f950ae7dcdcc58709ca9cbfc31d5c230f30a4a032caee925a042bc8ba7441a",
+    "bytes": 4004,
+    "mode": 420,
+    "symlink": null,
+    "resolvedPath": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/real-project-review/twelfth-final-measurements.json"
+  },
+  "proposal": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/twelfth-resource-review-v1/manifest-proposal.json",
+    "sha256": "2e87e3321b89605bcaf2e34bd15df351cd2b4f262ecccef142d3a79de8959af7",
+    "bytes": 2405,
+    "mode": 420,
+    "symlink": null,
+    "resolvedPath": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/twelfth-resource-review-v1/manifest-proposal.json"
+  },
+  "proposedManifest": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/twelfth-resource-review-v1/manifest-proposed.json",
+    "sha256": "0d5eb8bd2ea2a0cc7cde1c56c885d10eaf9bddfaed79189f308d11b8acd05d11",
+    "bytes": 2191,
+    "mode": 420,
+    "symlink": null,
+    "resolvedPath": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/twelfth-resource-review-v1/manifest-proposed.json"
+  },
+  "unchangedCurrentManifest": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/acceptance/real-projects/manifest.json",
+    "sha256": "418aad7bcc9d83fee976a4044488fc8a34e1951f503d3148b5115c097c099ea1",
+    "bytes": 2191,
+    "mode": 420,
+    "symlink": null,
+    "resolvedPath": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/acceptance/real-projects/manifest.json"
+  },
+  "frozenBuild": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/twelfth-batch/lint-corrected/final-real-differential/bin/source-bindings.json",
+    "sha256": "33f4740b78f60a142a615b1a07b2a2ea448ed7955e9464395e72fe6a8af91dda",
+    "bytes": 2121168,
+    "mode": 420,
+    "symlink": null,
+    "resolvedPath": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/twelfth-batch/lint-corrected/final-real-differential/bin/source-bindings.json"
+  },
+  "sourceInputCount": 149,
+  "binaries": {
+    "cpg": "4567fa27bfdf676995826fb739b3383662bdd1f9154578dea89620261aa40f47",
+    "joern-parity": "8c451b35775018728f71274f2cff1fc665ec35997a00b05760a66769cddc0d10"
+  },
+  "projects": [
+    {
+      "id": "zlib-1.3.1-core",
+      "sources": 26,
+      "nodes": 70390,
+      "trials": [
+        {
+          "sourceFiles": 26,
+          "nodes": 70390,
+          "findings": 0,
+          "graphSha256": "7d459cf9f4eee96dacfe870f76865f4ce1ea22a0d54057ba2f72cb3a9ea55ec9",
+          "edgesSha256": "fead4bd37486f4c91598561348b97b0b237270b77dc0719d2684e32a462ac119",
+          "exportSha256": "6eb133f818215b87853a7a4028bb821e92b4343b5eea4f146d6f92d710ce257a",
+          "sarifSha256": "0becad10ba8527f8055f00b8752fa550f27725d671483aa6f0171d81c335aeec",
+          "buildSeconds": 3.1100890829984564,
+          "buildRssMiB": 410.046875,
+          "exportSeconds": 0.17860987500171177,
+          "exportRssMiB": 56.828125,
+          "scanSeconds": 1.0421257919806521,
+          "scanRssMiB": 71.34375
+        },
+        {
+          "sourceFiles": 26,
+          "nodes": 70390,
+          "findings": 0,
+          "graphSha256": "7d459cf9f4eee96dacfe870f76865f4ce1ea22a0d54057ba2f72cb3a9ea55ec9",
+          "edgesSha256": "fead4bd37486f4c91598561348b97b0b237270b77dc0719d2684e32a462ac119",
+          "exportSha256": "6eb133f818215b87853a7a4028bb821e92b4343b5eea4f146d6f92d710ce257a",
+          "sarifSha256": "0becad10ba8527f8055f00b8752fa550f27725d671483aa6f0171d81c335aeec",
+          "buildSeconds": 3.1177201249811333,
+          "buildRssMiB": 348.140625,
+          "exportSeconds": 0.19233758401242085,
+          "exportRssMiB": 55.875,
+          "scanSeconds": 1.0269475830136798,
+          "scanRssMiB": 71.390625
+        }
+      ],
+      "budgets": {
+        "buildSeconds": 20,
+        "peakRssMiB": 512
+      },
+      "update": {
+        "seconds": 11.229528750001919,
+        "rssMiB": 549.125,
+        "output": "update-equivalent 26 files"
+      }
+    },
+    {
+      "id": "lua-5.4.7",
+      "sources": 61,
+      "nodes": 120226,
+      "trials": [
+        {
+          "sourceFiles": 61,
+          "nodes": 120226,
+          "findings": 0,
+          "graphSha256": "73c14a15cc01215e021f07af164296f6900e66788f510e07a23989c6667db0e4",
+          "edgesSha256": "f998c13156b6c84fa6a0862105a7cbc5c34ae26f60a6b0289f299e7b174985af",
+          "exportSha256": "011bfdbf81bbd37d27ed3604fc7c70cc3c5be1ab179d67e8f065ce9b5dccc611",
+          "sarifSha256": "0becad10ba8527f8055f00b8752fa550f27725d671483aa6f0171d81c335aeec",
+          "buildSeconds": 10.630263708997518,
+          "buildRssMiB": 405.640625,
+          "exportSeconds": 0.4302187080029398,
+          "exportRssMiB": 78.0,
+          "scanSeconds": 2.5116082500026096,
+          "scanRssMiB": 109.125
+        },
+        {
+          "sourceFiles": 61,
+          "nodes": 120226,
+          "findings": 0,
+          "graphSha256": "73c14a15cc01215e021f07af164296f6900e66788f510e07a23989c6667db0e4",
+          "edgesSha256": "f998c13156b6c84fa6a0862105a7cbc5c34ae26f60a6b0289f299e7b174985af",
+          "exportSha256": "011bfdbf81bbd37d27ed3604fc7c70cc3c5be1ab179d67e8f065ce9b5dccc611",
+          "sarifSha256": "0becad10ba8527f8055f00b8752fa550f27725d671483aa6f0171d81c335aeec",
+          "buildSeconds": 8.300196333002532,
+          "buildRssMiB": 461.59375,
+          "exportSeconds": 7.195786832977319,
+          "exportRssMiB": 77.5625,
+          "scanSeconds": 1.5199046669877134,
+          "scanRssMiB": 111.234375
+        }
+      ],
+      "budgets": {
+        "buildSeconds": 20,
+        "peakRssMiB": 1024
+      },
+      "update": {
+        "seconds": 18.40521150000859,
+        "rssMiB": 723.21875,
+        "output": "update-equivalent 61 files"
+      }
+    }
+  ],
+  "changes": [
+    {
+      "project": "zlib-1.3.1-core",
+      "field": "nodes",
+      "before": 70248,
+      "after": 70390
+    },
+    {
+      "project": "zlib-1.3.1-core",
+      "field": "graphSha256",
+      "before": "04d2c1f3f4c4e6a0e774328ab883ff145916935cf0fb7674dbc4507b92d49a8a",
+      "after": "7d459cf9f4eee96dacfe870f76865f4ce1ea22a0d54057ba2f72cb3a9ea55ec9"
+    },
+    {
+      "project": "zlib-1.3.1-core",
+      "field": "edgesSha256",
+      "before": "206e34559b359876c6c8e1c63b98b68bff99164d94f049d5065f2264cd61ddb5",
+      "after": "fead4bd37486f4c91598561348b97b0b237270b77dc0719d2684e32a462ac119"
+    },
+    {
+      "project": "zlib-1.3.1-core",
+      "field": "exportSha256",
+      "before": "33fc488943d0b9b4c3a25d6096c43888b017dbd0a0d1c5ebab66d2e7ac258df3",
+      "after": "6eb133f818215b87853a7a4028bb821e92b4343b5eea4f146d6f92d710ce257a"
+    },
+    {
+      "project": "lua-5.4.7",
+      "field": "nodes",
+      "before": 119088,
+      "after": 120226
+    },
+    {
+      "project": "lua-5.4.7",
+      "field": "graphSha256",
+      "before": "eb522b7ac0a7e7ec01406acb4916522245bc940c25654c06ff0a3f95dc90c3a9",
+      "after": "73c14a15cc01215e021f07af164296f6900e66788f510e07a23989c6667db0e4"
+    },
+    {
+      "project": "lua-5.4.7",
+      "field": "edgesSha256",
+      "before": "6b3bb6405518c4142b9f3e7137a13480958ff3689433477e4185d4faf3fbe26e",
+      "after": "f998c13156b6c84fa6a0862105a7cbc5c34ae26f60a6b0289f299e7b174985af"
+    },
+    {
+      "project": "lua-5.4.7",
+      "field": "exportSha256",
+      "before": "5d66b711e5ddd55ca2b341162df759fbe7f4f1027c2cd32959222cdbabd44f3b",
+      "after": "011bfdbf81bbd37d27ed3604fc7c70cc3c5be1ab179d67e8f065ce9b5dccc611"
+    }
+  ],
+  "actualBoundFilesVerified": 12303,
+  "findings": [
+    "Both repeated graph/edge/export/SARIF results are byte-deterministic and actual exported node/FILE counts match.",
+    "Archive, complete extracted trees, selected26/61 sources, licenses, exclusions,20s build limits and512/1024MiB build RSS limits are unchanged from accepted c3a8c67.",
+    "Both clean-update equivalence outputs match26/61 sources. Update RSS/timing are separate measurements and are not judged against the build-only ceilings.",
+    "Exactly eight expected values change: nodes70248 to70390 for zlib and119088 to120226 for Lua, plus graph/edge/export hashes for both projects. All remaining manifest fields including source counts and zero-finding SARIF stay unchanged.",
+    "This is a resource/proposal approval. Whole semantic review and applied-manifest official acceptance are separate; no proposed manifest is required to be applied for this review.",
+    "Inherited inner measurement timeout child-output limitation remains as disclosed by the bound wrapper; this completed attempt has all raw trial outputs."
+  ],
+  "blockers": [],
+  "producerRuns": 0,
+  "rootWrites": false,
+  "rssBoundary": "Build RSS is per-command /usr/bin/time -l bytes divided by1024^2, compared with512/1024MiB. Export and scan RSS are recorded only. Clean-update has a separate120second timeout; its RSS is not subject to the build-only ceilings. Official acceptance uses its separately documented cumulative RUSAGE_CHILDREN convention.",
+  "reviewScript": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/twelfth-resource-review-v1/review.py",
+    "sha256": "032e163e7a08547d1c1e6be754d93784449866a9a825a714735ab4e04133a723",
+    "bytes": 13512,
+    "mode": 420,
+    "symlink": null,
+    "resolvedPath": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/twelfth-resource-review-v1/review.py"
+  },
+  "fullReview": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/twelfth-resource-review-v1/full-review.json",
+    "sha256": "55bd39f32b7aadfd67fb0ddacd0c7e42eec27c472c78159490b151e665786757",
+    "bytes": 9757734,
+    "mode": 420,
+    "symlink": null,
+    "resolvedPath": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/twelfth-resource-review-v1/full-review.json"
+  }
+}

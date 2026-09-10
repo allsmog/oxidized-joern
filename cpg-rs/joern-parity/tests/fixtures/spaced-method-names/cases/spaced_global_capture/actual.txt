@@ -1,0 +1,153 @@
+METHOD NAME=<global> CODE=<global> FULL_NAME=<includes>:<global> ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.assignment FULL_NAME=<operator>.assignment ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<global> CODE=<global> FULL_NAME=capture space.c:<global> ORDER=1
+  METHOD NAME=read_global CODE=int read_global(void){return global;} FULL_NAME=read_global SIGNATURE=int(void) ORDER=1
+    METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    BLOCK CODE={return global;} TYPE_FULL_NAME=void ORDER=2
+      LOCAL NAME=global CODE=<global> global TYPE_FULL_NAME=int ORDER=0
+      RETURN CODE=return global; ORDER=1
+        IDENTIFIER NAME=global CODE=<global> global TYPE_FULL_NAME=int ORDER=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+    LOCAL NAME=global CODE=int global TYPE_FULL_NAME=int ORDER=1
+    CALL NAME=<operator>.assignment CODE=global=5 TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+      IDENTIFIER NAME=global CODE=global TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+      LITERAL CODE=5 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+    METHOD_REF CODE=read_global TYPE_FULL_NAME=read_global METHOD_FULL_NAME=read_global ORDER=3
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=read_global CODE=int read_global(void){return global;} FULL_NAME=read_global SIGNATURE=int(void) ORDER=1
+  METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  BLOCK CODE={return global;} TYPE_FULL_NAME=void ORDER=2
+    LOCAL NAME=global CODE=<global> global TYPE_FULL_NAME=int ORDER=0
+    RETURN CODE=return global; ORDER=1
+      IDENTIFIER NAME=global CODE=<global> global TYPE_FULL_NAME=int ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+
+NODES|META_DATA LANGUAGE=NEWC
+NODES|FILE NAME=<includes> ORDER=1
+NODES|FILE NAME=<unknown> ORDER=0
+NODES|FILE NAME=capture space.c ORDER=0
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<global> FILENAME=<unknown> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<includes>:<global> FILENAME=<includes> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=capture space.c:<global> FILENAME=capture space.c ORDER=1
+NODES|NAMESPACE NAME=<global>
+NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=<global> FULL_NAME=capture space.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=capture space.c:<global> FILENAME=capture space.c ORDER=1
+NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=read_global FULL_NAME=read_global CODE=read_global AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=capture space.c:<global> FILENAME=capture space.c ORDER=1
+NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+NODES|TYPE NAME=read_global FULL_NAME=read_global TYPE_DECL_FULL_NAME=read_global
+NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+EDGES|ARGUMENT capture space.c:<global>#11 -> capture space.c:<global>#12
+EDGES|ARGUMENT capture space.c:<global>#11 -> capture space.c:<global>#13
+EDGES|ARGUMENT read_global#5 -> read_global#6
+EDGES|CALL capture space.c:<global>#11 -> <operator>.assignment#0
+EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+EDGES|CFG <operator>.assignment#0 -> <operator>.assignment#5
+EDGES|CFG capture space.c:<global>#0 -> capture space.c:<global>#12
+EDGES|CFG capture space.c:<global>#1 -> read_global#6
+EDGES|CFG capture space.c:<global>#11 -> capture space.c:<global>#14
+EDGES|CFG capture space.c:<global>#12 -> capture space.c:<global>#13
+EDGES|CFG capture space.c:<global>#13 -> capture space.c:<global>#11
+EDGES|CFG capture space.c:<global>#14 -> capture space.c:<global>#15
+EDGES|CFG read_global#5 -> read_global#7
+EDGES|CFG read_global#6 -> read_global#5
+EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+EDGES|CONTAINS <operator>.assignment#0 -> <operator>.assignment#2
+EDGES|CONTAINS D:capture space.c:<global> -> D:read_global
+EDGES|CONTAINS D:capture space.c:<global> -> capture space.c:<global>#0
+EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+EDGES|CONTAINS F:<includes> -> D:ANY
+EDGES|CONTAINS F:<includes> -> D:int
+EDGES|CONTAINS F:<includes> -> D:void
+EDGES|CONTAINS F:capture space.c -> D:capture space.c:<global>
+EDGES|CONTAINS capture space.c:<global>#0 -> capture space.c:<global>#1
+EDGES|CONTAINS capture space.c:<global>#0 -> capture space.c:<global>#11
+EDGES|CONTAINS capture space.c:<global>#0 -> capture space.c:<global>#12
+EDGES|CONTAINS capture space.c:<global>#0 -> capture space.c:<global>#13
+EDGES|CONTAINS capture space.c:<global>#0 -> capture space.c:<global>#14
+EDGES|CONTAINS capture space.c:<global>#0 -> capture space.c:<global>#9
+EDGES|CONTAINS capture space.c:<global>#1 -> read_global#3
+EDGES|CONTAINS capture space.c:<global>#1 -> read_global#5
+EDGES|CONTAINS capture space.c:<global>#1 -> read_global#6
+EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#6 -> T:ANY
+EDGES|EVAL_TYPE capture space.c:<global>#10 -> T:int
+EDGES|EVAL_TYPE capture space.c:<global>#11 -> T:void
+EDGES|EVAL_TYPE capture space.c:<global>#12 -> T:int
+EDGES|EVAL_TYPE capture space.c:<global>#13 -> T:int
+EDGES|EVAL_TYPE capture space.c:<global>#14 -> T:read_global
+EDGES|EVAL_TYPE capture space.c:<global>#15 -> T:ANY
+EDGES|EVAL_TYPE capture space.c:<global>#9 -> T:ANY
+EDGES|EVAL_TYPE read_global#1 -> T:void
+EDGES|EVAL_TYPE read_global#2 -> T:void
+EDGES|EVAL_TYPE read_global#3 -> T:void
+EDGES|EVAL_TYPE read_global#4 -> T:int
+EDGES|EVAL_TYPE read_global#6 -> T:int
+EDGES|EVAL_TYPE read_global#7 -> T:int
+EDGES|PARAMETER_LINK <operator>.assignment#1 -> <operator>.assignment#3
+EDGES|PARAMETER_LINK <operator>.assignment#4 -> <operator>.assignment#6
+EDGES|PARAMETER_LINK read_global#1 -> read_global#2
+EDGES|REF NB:<global> -> NS:<global>
+EDGES|REF NB:<includes>:<global> -> NS:<global>
+EDGES|REF NB:capture space.c:<global> -> NS:<global>
+EDGES|REF T:ANY -> D:ANY
+EDGES|REF T:int -> D:int
+EDGES|REF T:read_global -> D:read_global
+EDGES|REF T:void -> D:void
+EDGES|REF capture space.c:<global>#12 -> capture space.c:<global>#10
+EDGES|REF capture space.c:<global>#14 -> capture space.c:<global>#1
+EDGES|REF read_global#6 -> read_global#4
+EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+EDGES|SOURCE_FILE D:ANY -> F:<includes>
+EDGES|SOURCE_FILE D:capture space.c:<global> -> F:capture space.c
+EDGES|SOURCE_FILE D:int -> F:<includes>
+EDGES|SOURCE_FILE D:read_global -> F:capture space.c
+EDGES|SOURCE_FILE D:void -> F:<includes>
+EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
+EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>
+EDGES|SOURCE_FILE NB:capture space.c:<global> -> F:capture space.c
+EDGES|SOURCE_FILE capture space.c:<global>#0 -> F:capture space.c
+EDGES|SOURCE_FILE capture space.c:<global>#1 -> F:capture space.c
+FLOWS|REACHING_DEF[5] capture space.c:<global>#13 -> capture space.c:<global>#11
+FLOWS|REACHING_DEF[5] capture space.c:<global>#13 -> capture space.c:<global>#12
+FLOWS|REACHING_DEF[<RET>] read_global#5 -> read_global#7
+FLOWS|REACHING_DEF[<global> global] read_global#6 -> read_global#5
+FLOWS|REACHING_DEF[] <operator>.assignment#0 -> <operator>.assignment#1
+FLOWS|REACHING_DEF[] <operator>.assignment#0 -> <operator>.assignment#4
+FLOWS|REACHING_DEF[] capture space.c:<global>#0 -> capture space.c:<global>#13
+FLOWS|REACHING_DEF[] capture space.c:<global>#0 -> capture space.c:<global>#14
+FLOWS|REACHING_DEF[] capture space.c:<global>#1 -> read_global#1
+FLOWS|REACHING_DEF[] capture space.c:<global>#1 -> read_global#5
+FLOWS|REACHING_DEF[] capture space.c:<global>#1 -> read_global#6
+FLOWS|REACHING_DEF[] read_global#1 -> read_global#2
+FLOWS|REACHING_DEF[] read_global#1 -> read_global#7
+FLOWS|REACHING_DEF[global=5] capture space.c:<global>#11 -> capture space.c:<global>#15
+FLOWS|REACHING_DEF[global] capture space.c:<global>#12 -> capture space.c:<global>#11
+FLOWS|REACHING_DEF[global] capture space.c:<global>#12 -> capture space.c:<global>#15
+FLOWS|REACHING_DEF[global] capture space.c:<global>#12 -> read_global#6
+FLOWS|REACHING_DEF[p1] <operator>.assignment#1 -> <operator>.assignment#3
+FLOWS|REACHING_DEF[p1] <operator>.assignment#1 -> <operator>.assignment#5
+FLOWS|REACHING_DEF[p2] <operator>.assignment#4 -> <operator>.assignment#5
+FLOWS|REACHING_DEF[p2] <operator>.assignment#4 -> <operator>.assignment#6

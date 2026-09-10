@@ -65,6 +65,9 @@ jobs:
         with:
           workspaces: cpg-rs
           key: linux-release-parity
+      - name: Test parity gate failure handling
+        working-directory: cpg-rs/joern-parity
+        run: python3 test_check.py
       - name: Check the committed Joern parity contract
         working-directory: cpg-rs/joern-parity
         run: ./check.sh --committed-only
@@ -113,7 +116,7 @@ jobs:
         run: ./cpg-rs/joern-parity/setup-oracle.sh
       - name: Run exact C graph and flow differential
         working-directory: cpg-rs/joern-parity
-        run: ./check.sh
+        run: ./check.sh --live
       - name: Run cross-language frontend differential
         working-directory: cpg-rs
         run: ./acceptance/languages/check.sh

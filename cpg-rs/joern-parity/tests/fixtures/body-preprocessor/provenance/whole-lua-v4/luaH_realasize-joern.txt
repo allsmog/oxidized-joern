@@ -1,0 +1,71 @@
+METHOD NAME=luaH_realasize CODE=LUAI_FUNC unsigned int luaH_realasize (const Table *t) {\n  if (limitequalsasize(t))\n    return t->alimit;  /* this is the size */\n  else {\n    unsigned int size = t->alimit;\n    /* compute the smallest power of 2 not smaller than 'size' */\n    size |= (size >> 1);\n    size |= (size >> 2);\n    size |= (size >> 4);\n    size |= (size >> 8);\n#if (UINT_MAX >> 14) > 3  /* unsigned int has more than 16 bits */\n    size |= (size >> 16);\n#if (UINT_MAX >> 30) > 3\n    size |= (size >> 32);  /* unsigned int has more than 32 bits */\n#endif\n#endif\n    size++;\n    lua_assert(ispow2(size) && size/2 < t->alimit && t->alimit < size);\n    return size;\n  }\n} FULL_NAME=luaH_realasize SIGNATURE=unsigned int(Table*) ORDER=1
+  METHOD_PARAMETER_IN NAME=t CODE=const Table *t TYPE_FULL_NAME=Table* ORDER=1
+  METHOD_PARAMETER_OUT NAME=t CODE=const Table *t TYPE_FULL_NAME=Table* ORDER=1
+  BLOCK CODE={\n  if (limitequalsasize(t))\n    return t->alimit;  /* this is the size */\n  else {\n    unsigned int size = t->alimit;\n    /* compute the smallest power of 2 not smaller than 'size' */\n    size |= (size >> 1);\n    size |= (size >> 2);\n    size |= (size >> 4);\n    size |= (size >> 8);\n#if (UINT_MAX >> 14) > 3  /* unsigned int has more than 16 bits */\n    size |= (size >> 16);\n#if (UINT_MAX >> 30) > 3\n    size |= (size >> 32);  /* unsigned int has more than 32 bits */\n#endif\n#endif\n    size++;\n    lua_assert(ispow2(size) && size/2 < t->alimit && t->alimit < size);\n    return size;\n  }\n} TYPE_FULL_NAME=void ORDER=2
+    CONTROL_STRUCTURE CODE=if (limitequalsasize(t))\n    return t->alimit;  /* this is the size */\n  else {\n    unsigned int size = t->alimit;\n    /* compute the smallest power of 2 not smaller than 'size' */\n    size |= (size >> 1);\n    size |= (size >> 2);\n    size |= (size >> 4);\n    size |= (size >> 8);\n#if (UINT_MAX >> 14) > 3  /* unsigned int has more than 16 bits */\n    size |= (size >> 16);\n#if (UINT_MAX >> 30) > 3\n    size |= (size >> 32);  /* unsigned int has more than 32 bits */\n#endif\n#endif\n    size++;\n    lua_assert(ispow2(size) && size/2 < t->alimit && t->alimit < size);\n    return size;\n  } ORDER=1
+      CALL NAME=limitequalsasize CODE=limitequalsasize(t) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=ltable.c:limitequalsasize:ANY(1) SIGNATURE=ANY(1) ORDER=1 DISPATCH_TYPE=INLINED
+        IDENTIFIER NAME=t CODE=t TYPE_FULL_NAME=Table* ORDER=1 ARGUMENT_INDEX=1
+        BLOCK TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+          CALL NAME=<operator>.logicalOr CODE=(!((t)->flags & (1 << 7))) || ((((t)->alimit) & (((t)->alimit) - 1)) == 0) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.logicalOr ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+            CALL NAME=<operator>.logicalNot CODE=!((t)->flags & (1 << 7)) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.logicalNot ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+              CALL NAME=<operator>.and CODE=(t)->flags & (1 << 7) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.and ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                CALL NAME=<operator>.indirectFieldAccess CODE=(t)->flags TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                  IDENTIFIER NAME=t CODE=t TYPE_FULL_NAME=Table* ORDER=1 ARGUMENT_INDEX=1
+                  FIELD_IDENTIFIER CODE=flags ORDER=2 ARGUMENT_INDEX=2
+                CALL NAME=<operator>.shiftLeft CODE=1 << 7 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.shiftLeft ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+                  LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+                  LITERAL CODE=7 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+            CALL NAME=<operator>.equals CODE=(((t)->alimit) & (((t)->alimit) - 1)) == 0 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.equals ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+              CALL NAME=<operator>.and CODE=((t)->alimit) & (((t)->alimit) - 1) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.and ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                CALL NAME=<operator>.indirectFieldAccess CODE=(t)->alimit TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                  IDENTIFIER NAME=t CODE=t TYPE_FULL_NAME=Table* ORDER=1 ARGUMENT_INDEX=1
+                  FIELD_IDENTIFIER CODE=alimit ORDER=2 ARGUMENT_INDEX=2
+                CALL NAME=<operator>.subtraction CODE=((t)->alimit) - 1 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.subtraction ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+                  CALL NAME=<operator>.indirectFieldAccess CODE=(t)->alimit TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                    IDENTIFIER NAME=t CODE=t TYPE_FULL_NAME=Table* ORDER=1 ARGUMENT_INDEX=1
+                    FIELD_IDENTIFIER CODE=alimit ORDER=2 ARGUMENT_INDEX=2
+                  LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+              LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+      BLOCK TYPE_FULL_NAME=ANY ORDER=2
+        RETURN CODE=return t->alimit; ORDER=1
+          CALL NAME=<operator>.indirectFieldAccess CODE=t->alimit TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+            IDENTIFIER NAME=t CODE=t TYPE_FULL_NAME=Table* ORDER=1 ARGUMENT_INDEX=1
+            FIELD_IDENTIFIER CODE=alimit ORDER=2 ARGUMENT_INDEX=2
+      CONTROL_STRUCTURE CODE=else ORDER=3
+        BLOCK CODE={\n    unsigned int size = t->alimit;\n    /* compute the smallest power of 2 not smaller than 'size' */\n    size |= (size >> 1);\n    size |= (size >> 2);\n    size |= (size >> 4);\n    size |= (size >> 8);\n#if (UINT_MAX >> 14) > 3  /* unsigned int has more than 16 bits */\n    size |= (size >> 16);\n#if (UINT_MAX >> 30) > 3\n    size |= (size >> 32);  /* unsigned int has more than 32 bits */\n#endif\n#endif\n    size++;\n    lua_assert(ispow2(size) && size/2 < t->alimit && t->alimit < size);\n    return size;\n  } TYPE_FULL_NAME=void ORDER=1
+          LOCAL NAME=size CODE=unsigned int size TYPE_FULL_NAME=unsigned int ORDER=1
+          CALL NAME=<operator>.assignment CODE=size = t->alimit TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+            IDENTIFIER NAME=size CODE=size TYPE_FULL_NAME=unsigned int ORDER=1 ARGUMENT_INDEX=1
+            CALL NAME=<operator>.indirectFieldAccess CODE=t->alimit TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+              IDENTIFIER NAME=t CODE=t TYPE_FULL_NAME=Table* ORDER=1 ARGUMENT_INDEX=1
+              FIELD_IDENTIFIER CODE=alimit ORDER=2 ARGUMENT_INDEX=2
+          CALL NAME=<operators>.assignmentOr CODE=size |= (size >> 1) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operators>.assignmentOr ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH
+            IDENTIFIER NAME=size CODE=size TYPE_FULL_NAME=unsigned int ORDER=1 ARGUMENT_INDEX=1
+            CALL NAME=<operator>.arithmeticShiftRight CODE=size >> 1 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.arithmeticShiftRight ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+              IDENTIFIER NAME=size CODE=size TYPE_FULL_NAME=unsigned int ORDER=1 ARGUMENT_INDEX=1
+              LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+          CALL NAME=<operators>.assignmentOr CODE=size |= (size >> 2) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operators>.assignmentOr ORDER=4 DISPATCH_TYPE=STATIC_DISPATCH
+            IDENTIFIER NAME=size CODE=size TYPE_FULL_NAME=unsigned int ORDER=1 ARGUMENT_INDEX=1
+            CALL NAME=<operator>.arithmeticShiftRight CODE=size >> 2 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.arithmeticShiftRight ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+              IDENTIFIER NAME=size CODE=size TYPE_FULL_NAME=unsigned int ORDER=1 ARGUMENT_INDEX=1
+              LITERAL CODE=2 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+          CALL NAME=<operators>.assignmentOr CODE=size |= (size >> 4) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operators>.assignmentOr ORDER=5 DISPATCH_TYPE=STATIC_DISPATCH
+            IDENTIFIER NAME=size CODE=size TYPE_FULL_NAME=unsigned int ORDER=1 ARGUMENT_INDEX=1
+            CALL NAME=<operator>.arithmeticShiftRight CODE=size >> 4 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.arithmeticShiftRight ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+              IDENTIFIER NAME=size CODE=size TYPE_FULL_NAME=unsigned int ORDER=1 ARGUMENT_INDEX=1
+              LITERAL CODE=4 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+          CALL NAME=<operators>.assignmentOr CODE=size |= (size >> 8) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operators>.assignmentOr ORDER=6 DISPATCH_TYPE=STATIC_DISPATCH
+            IDENTIFIER NAME=size CODE=size TYPE_FULL_NAME=unsigned int ORDER=1 ARGUMENT_INDEX=1
+            CALL NAME=<operator>.arithmeticShiftRight CODE=size >> 8 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.arithmeticShiftRight ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+              IDENTIFIER NAME=size CODE=size TYPE_FULL_NAME=unsigned int ORDER=1 ARGUMENT_INDEX=1
+              LITERAL CODE=8 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+          CALL NAME=<operator>.postIncrement CODE=size++ TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.postIncrement ORDER=7 DISPATCH_TYPE=STATIC_DISPATCH
+            IDENTIFIER NAME=size CODE=size TYPE_FULL_NAME=unsigned int ORDER=1 ARGUMENT_INDEX=1
+          CALL NAME=lua_assert CODE=lua_assert(ispow2(size) && size/2 < t->alimit && t->alimit < size) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=llimits.h:lua_assert:ANY(1) SIGNATURE=ANY(1) ORDER=8 DISPATCH_TYPE=INLINED
+            BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+              CALL NAME=<operator>.cast CODE=(void)0 TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.cast ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+                TYPE_REF CODE=void TYPE_FULL_NAME=void ORDER=1 ARGUMENT_INDEX=1
+                LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+          RETURN CODE=return size; ORDER=9
+            IDENTIFIER NAME=size CODE=size TYPE_FULL_NAME=unsigned int ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=unsigned int ORDER=3

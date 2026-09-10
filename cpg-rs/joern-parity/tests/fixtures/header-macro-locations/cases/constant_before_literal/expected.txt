@@ -1,0 +1,252 @@
+METHOD NAME=<global> CODE=<global> FULL_NAME=<includes>:<global> ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.assignment FULL_NAME=<operator>.assignment ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<global> CODE=<global> FULL_NAME=defs.h:<global> ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=SEVENTEEN CODE=#define SEVENTEEN 17 FULL_NAME=defs.h:SEVENTEEN:int(0) SIGNATURE=int(0) ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=2
+
+METHOD NAME=<global> CODE=<global> FULL_NAME=locations.c:<global> ORDER=1
+  METHOD NAME=probe CODE=void probe(void) {\n  int value = SEVENTEEN;\n  sink(\n      17\n  );\n  value = 17;\n  sink(value);\n} FULL_NAME=probe SIGNATURE=void(void) ORDER=1
+    METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    BLOCK CODE={\n  int value = SEVENTEEN;\n  sink(\n      17\n  );\n  value = 17;\n  sink(value);\n} TYPE_FULL_NAME=void ORDER=2
+      LOCAL NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+      CALL NAME=<operator>.assignment CODE=value = SEVENTEEN TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+        CALL NAME=SEVENTEEN CODE=SEVENTEEN TYPE_FULL_NAME=int METHOD_FULL_NAME=defs.h:SEVENTEEN:int(0) SIGNATURE=int(0) ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=INLINED
+          BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+            LITERAL CODE=17 TYPE_FULL_NAME=int ORDER=1
+      CALL NAME=sink CODE=sink(\n      17\n  ) TYPE_FULL_NAME=void METHOD_FULL_NAME=sink ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH
+        LITERAL CODE=17 TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+      CALL NAME=<operator>.assignment CODE=value = 17 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=4 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+        LITERAL CODE=17 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+      CALL NAME=sink CODE=sink(value) TYPE_FULL_NAME=void METHOD_FULL_NAME=sink ORDER=5 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+    METHOD_REF CODE=probe TYPE_FULL_NAME=probe METHOD_FULL_NAME=probe ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=probe CODE=void probe(void) {\n  int value = SEVENTEEN;\n  sink(\n      17\n  );\n  value = 17;\n  sink(value);\n} FULL_NAME=probe SIGNATURE=void(void) ORDER=1
+  METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  BLOCK CODE={\n  int value = SEVENTEEN;\n  sink(\n      17\n  );\n  value = 17;\n  sink(value);\n} TYPE_FULL_NAME=void ORDER=2
+    LOCAL NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+    CALL NAME=<operator>.assignment CODE=value = SEVENTEEN TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+      IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+      CALL NAME=SEVENTEEN CODE=SEVENTEEN TYPE_FULL_NAME=int METHOD_FULL_NAME=defs.h:SEVENTEEN:int(0) SIGNATURE=int(0) ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=INLINED
+        BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+          LITERAL CODE=17 TYPE_FULL_NAME=int ORDER=1
+    CALL NAME=sink CODE=sink(\n      17\n  ) TYPE_FULL_NAME=void METHOD_FULL_NAME=sink ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH
+      LITERAL CODE=17 TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+    CALL NAME=<operator>.assignment CODE=value = 17 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=4 DISPATCH_TYPE=STATIC_DISPATCH
+      IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+      LITERAL CODE=17 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+    CALL NAME=sink CODE=sink(value) TYPE_FULL_NAME=void METHOD_FULL_NAME=sink ORDER=5 DISPATCH_TYPE=STATIC_DISPATCH
+      IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+
+METHOD NAME=sink CODE=void sink(int value); FULL_NAME=sink SIGNATURE=void(int) ORDER=1
+  METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+
+NODES|META_DATA LANGUAGE=NEWC
+NODES|FILE NAME=<includes> ORDER=1
+NODES|FILE NAME=<unknown> ORDER=0
+NODES|FILE NAME=defs.h ORDER=0
+NODES|FILE NAME=locations.c ORDER=0
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<global> FILENAME=<unknown> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<includes>:<global> FILENAME=<includes> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=defs.h:<global> FILENAME=defs.h ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=locations.c:<global> FILENAME=locations.c ORDER=1
+NODES|NAMESPACE NAME=<global>
+NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=<global> FULL_NAME=defs.h:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=defs.h:<global> FILENAME=defs.h ORDER=1
+NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=<global> FULL_NAME=locations.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=locations.c:<global> FILENAME=locations.c ORDER=2
+NODES|TYPE_DECL NAME=probe FULL_NAME=probe CODE=probe AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=locations.c:<global> FILENAME=locations.c ORDER=1
+NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+NODES|TYPE NAME=probe FULL_NAME=probe TYPE_DECL_FULL_NAME=probe
+NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+EDGES|ARGUMENT probe#10 -> probe#11
+EDGES|ARGUMENT probe#12 -> probe#13
+EDGES|ARGUMENT probe#12 -> probe#14
+EDGES|ARGUMENT probe#15 -> probe#16
+EDGES|ARGUMENT probe#5 -> probe#6
+EDGES|ARGUMENT probe#5 -> probe#7
+EDGES|CALL probe#10 -> sink#0
+EDGES|CALL probe#12 -> <operator>.assignment#0
+EDGES|CALL probe#15 -> sink#0
+EDGES|CALL probe#5 -> <operator>.assignment#0
+EDGES|CALL probe#7 -> defs.h:SEVENTEEN:int(0)#0
+EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+EDGES|CFG <operator>.assignment#0 -> <operator>.assignment#5
+EDGES|CFG defs.h:<global>#0 -> defs.h:<global>#2
+EDGES|CFG defs.h:SEVENTEEN:int(0)#0 -> defs.h:SEVENTEEN:int(0)#2
+EDGES|CFG locations.c:<global>#0 -> locations.c:<global>#20
+EDGES|CFG locations.c:<global>#1 -> probe#6
+EDGES|CFG locations.c:<global>#20 -> locations.c:<global>#21
+EDGES|CFG probe#10 -> probe#13
+EDGES|CFG probe#11 -> probe#10
+EDGES|CFG probe#12 -> probe#16
+EDGES|CFG probe#13 -> probe#14
+EDGES|CFG probe#14 -> probe#12
+EDGES|CFG probe#15 -> probe#17
+EDGES|CFG probe#16 -> probe#15
+EDGES|CFG probe#5 -> probe#11
+EDGES|CFG probe#6 -> probe#7
+EDGES|CFG probe#7 -> probe#5
+EDGES|CFG probe#7 -> probe#9
+EDGES|CFG probe#9 -> probe#5
+EDGES|CFG sink#0 -> sink#4
+EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+EDGES|CONTAINS <operator>.assignment#0 -> <operator>.assignment#2
+EDGES|CONTAINS D:defs.h:<global> -> defs.h:<global>#0
+EDGES|CONTAINS D:locations.c:<global> -> D:probe
+EDGES|CONTAINS D:locations.c:<global> -> defs.h:SEVENTEEN:int(0)#0
+EDGES|CONTAINS D:locations.c:<global> -> locations.c:<global>#0
+EDGES|CONTAINS D:locations.c:<global> -> sink#0
+EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+EDGES|CONTAINS F:<includes> -> D:ANY
+EDGES|CONTAINS F:<includes> -> D:int
+EDGES|CONTAINS F:<includes> -> D:void
+EDGES|CONTAINS F:defs.h -> D:defs.h:<global>
+EDGES|CONTAINS F:locations.c -> D:locations.c:<global>
+EDGES|CONTAINS defs.h:<global>#0 -> defs.h:<global>#1
+EDGES|CONTAINS defs.h:SEVENTEEN:int(0)#0 -> defs.h:SEVENTEEN:int(0)#1
+EDGES|CONTAINS locations.c:<global>#0 -> locations.c:<global>#1
+EDGES|CONTAINS locations.c:<global>#0 -> locations.c:<global>#19
+EDGES|CONTAINS locations.c:<global>#0 -> locations.c:<global>#20
+EDGES|CONTAINS locations.c:<global>#1 -> probe#10
+EDGES|CONTAINS locations.c:<global>#1 -> probe#11
+EDGES|CONTAINS locations.c:<global>#1 -> probe#12
+EDGES|CONTAINS locations.c:<global>#1 -> probe#13
+EDGES|CONTAINS locations.c:<global>#1 -> probe#14
+EDGES|CONTAINS locations.c:<global>#1 -> probe#15
+EDGES|CONTAINS locations.c:<global>#1 -> probe#16
+EDGES|CONTAINS locations.c:<global>#1 -> probe#3
+EDGES|CONTAINS locations.c:<global>#1 -> probe#5
+EDGES|CONTAINS locations.c:<global>#1 -> probe#6
+EDGES|CONTAINS locations.c:<global>#1 -> probe#7
+EDGES|CONTAINS locations.c:<global>#1 -> probe#8
+EDGES|CONTAINS locations.c:<global>#1 -> probe#9
+EDGES|CONTAINS sink#0 -> sink#3
+EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#6 -> T:ANY
+EDGES|EVAL_TYPE defs.h:<global>#1 -> T:ANY
+EDGES|EVAL_TYPE defs.h:<global>#2 -> T:ANY
+EDGES|EVAL_TYPE defs.h:SEVENTEEN:int(0)#1 -> T:ANY
+EDGES|EVAL_TYPE defs.h:SEVENTEEN:int(0)#2 -> T:int
+EDGES|EVAL_TYPE locations.c:<global>#19 -> T:ANY
+EDGES|EVAL_TYPE locations.c:<global>#20 -> T:probe
+EDGES|EVAL_TYPE locations.c:<global>#21 -> T:ANY
+EDGES|EVAL_TYPE probe#1 -> T:void
+EDGES|EVAL_TYPE probe#10 -> T:void
+EDGES|EVAL_TYPE probe#11 -> T:int
+EDGES|EVAL_TYPE probe#12 -> T:ANY
+EDGES|EVAL_TYPE probe#13 -> T:int
+EDGES|EVAL_TYPE probe#14 -> T:int
+EDGES|EVAL_TYPE probe#15 -> T:void
+EDGES|EVAL_TYPE probe#16 -> T:int
+EDGES|EVAL_TYPE probe#17 -> T:void
+EDGES|EVAL_TYPE probe#2 -> T:void
+EDGES|EVAL_TYPE probe#3 -> T:void
+EDGES|EVAL_TYPE probe#4 -> T:int
+EDGES|EVAL_TYPE probe#5 -> T:void
+EDGES|EVAL_TYPE probe#6 -> T:int
+EDGES|EVAL_TYPE probe#7 -> T:int
+EDGES|EVAL_TYPE probe#8 -> T:ANY
+EDGES|EVAL_TYPE probe#9 -> T:int
+EDGES|EVAL_TYPE sink#1 -> T:int
+EDGES|EVAL_TYPE sink#2 -> T:int
+EDGES|EVAL_TYPE sink#3 -> T:ANY
+EDGES|EVAL_TYPE sink#4 -> T:void
+EDGES|PARAMETER_LINK <operator>.assignment#1 -> <operator>.assignment#3
+EDGES|PARAMETER_LINK <operator>.assignment#4 -> <operator>.assignment#6
+EDGES|PARAMETER_LINK probe#1 -> probe#2
+EDGES|PARAMETER_LINK sink#1 -> sink#2
+EDGES|REF NB:<global> -> NS:<global>
+EDGES|REF NB:<includes>:<global> -> NS:<global>
+EDGES|REF NB:defs.h:<global> -> NS:<global>
+EDGES|REF NB:locations.c:<global> -> NS:<global>
+EDGES|REF T:ANY -> D:ANY
+EDGES|REF T:int -> D:int
+EDGES|REF T:probe -> D:probe
+EDGES|REF T:void -> D:void
+EDGES|REF locations.c:<global>#20 -> locations.c:<global>#1
+EDGES|REF probe#13 -> probe#4
+EDGES|REF probe#16 -> probe#4
+EDGES|REF probe#6 -> probe#4
+EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+EDGES|SOURCE_FILE D:ANY -> F:<includes>
+EDGES|SOURCE_FILE D:defs.h:<global> -> F:defs.h
+EDGES|SOURCE_FILE D:int -> F:<includes>
+EDGES|SOURCE_FILE D:locations.c:<global> -> F:locations.c
+EDGES|SOURCE_FILE D:probe -> F:locations.c
+EDGES|SOURCE_FILE D:void -> F:<includes>
+EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
+EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>
+EDGES|SOURCE_FILE NB:defs.h:<global> -> F:defs.h
+EDGES|SOURCE_FILE NB:locations.c:<global> -> F:locations.c
+EDGES|SOURCE_FILE defs.h:<global>#0 -> F:defs.h
+EDGES|SOURCE_FILE defs.h:SEVENTEEN:int(0)#0 -> F:locations.c
+EDGES|SOURCE_FILE locations.c:<global>#0 -> F:locations.c
+EDGES|SOURCE_FILE locations.c:<global>#1 -> F:locations.c
+EDGES|SOURCE_FILE sink#0 -> F:locations.c
+FLOWS|REACHING_DEF[17] probe#11 -> probe#10
+FLOWS|REACHING_DEF[17] probe#14 -> probe#12
+FLOWS|REACHING_DEF[17] probe#14 -> probe#13
+FLOWS|REACHING_DEF[SEVENTEEN] probe#7 -> probe#17
+FLOWS|REACHING_DEF[SEVENTEEN] probe#7 -> probe#5
+FLOWS|REACHING_DEF[SEVENTEEN] probe#7 -> probe#6
+FLOWS|REACHING_DEF[] <operator>.assignment#0 -> <operator>.assignment#1
+FLOWS|REACHING_DEF[] <operator>.assignment#0 -> <operator>.assignment#4
+FLOWS|REACHING_DEF[] locations.c:<global>#0 -> locations.c:<global>#20
+FLOWS|REACHING_DEF[] locations.c:<global>#1 -> probe#1
+FLOWS|REACHING_DEF[] locations.c:<global>#1 -> probe#11
+FLOWS|REACHING_DEF[] locations.c:<global>#1 -> probe#14
+FLOWS|REACHING_DEF[] locations.c:<global>#1 -> probe#16
+FLOWS|REACHING_DEF[] locations.c:<global>#1 -> probe#7
+FLOWS|REACHING_DEF[] locations.c:<global>#1 -> probe#9
+FLOWS|REACHING_DEF[] probe#1 -> probe#17
+FLOWS|REACHING_DEF[] probe#1 -> probe#2
+FLOWS|REACHING_DEF[] sink#0 -> sink#1
+FLOWS|REACHING_DEF[p1] <operator>.assignment#1 -> <operator>.assignment#3
+FLOWS|REACHING_DEF[p1] <operator>.assignment#1 -> <operator>.assignment#5
+FLOWS|REACHING_DEF[p2] <operator>.assignment#4 -> <operator>.assignment#5
+FLOWS|REACHING_DEF[p2] <operator>.assignment#4 -> <operator>.assignment#6
+FLOWS|REACHING_DEF[sink(\n      17\n  )] probe#10 -> probe#17
+FLOWS|REACHING_DEF[sink(value)] probe#15 -> probe#17
+FLOWS|REACHING_DEF[value = 17] probe#12 -> probe#17
+FLOWS|REACHING_DEF[value = SEVENTEEN] probe#5 -> probe#17
+FLOWS|REACHING_DEF[value] probe#13 -> probe#12
+FLOWS|REACHING_DEF[value] probe#13 -> probe#16
+FLOWS|REACHING_DEF[value] probe#16 -> probe#15
+FLOWS|REACHING_DEF[value] probe#16 -> probe#17
+FLOWS|REACHING_DEF[value] probe#6 -> probe#5
+FLOWS|REACHING_DEF[value] sink#1 -> sink#2
+FLOWS|REACHING_DEF[value] sink#1 -> sink#4

@@ -1,0 +1,499 @@
+METHOD NAME=<global> CODE=<global> FULL_NAME=<includes>:<global> ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.alloc FULL_NAME=<operator>.alloc ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.arrayInitializer FULL_NAME=<operator>.arrayInitializer ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.assignment FULL_NAME=<operator>.assignment ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.indirectIndexAccess FULL_NAME=<operator>.indirectIndexAccess ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=a_second CODE=void a_second(void) {\n    int values[2] = {\n        produce(),\n        2\n    };\n    consume(values[0]);\n} FULL_NAME=a_second SIGNATURE=void(void) ORDER=1
+  METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  BLOCK CODE={\n    int values[2] = {\n        produce(),\n        2\n    };\n    consume(values[0]);\n} TYPE_FULL_NAME=void ORDER=2
+    LOCAL NAME=values CODE=int values[2] TYPE_FULL_NAME=int[2] ORDER=1
+    CALL NAME=<operator>.assignment CODE=values[2] = {\n        produce(),\n        2\n    } TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+      IDENTIFIER NAME=values CODE=values TYPE_FULL_NAME=int[2] ORDER=1 ARGUMENT_INDEX=1
+      CALL NAME=<operator>.alloc CODE=values[2] = {\n        produce(),\n        2\n    } TYPE_FULL_NAME=int[2] METHOD_FULL_NAME=<operator>.alloc ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=int[2] CODE=int[2] TYPE_FULL_NAME=int[2] ORDER=1 ARGUMENT_INDEX=1
+        LITERAL CODE=2 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+    CALL NAME=<operator>.assignment CODE=values[2] = {\n        produce(),\n        2\n    } TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH
+      IDENTIFIER NAME=values CODE=values TYPE_FULL_NAME=int[2] ORDER=1 ARGUMENT_INDEX=1
+      CALL NAME=<operator>.arrayInitializer CODE={\n        produce(),\n        2\n    } TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.arrayInitializer ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+        CALL NAME=produce CODE=produce() TYPE_FULL_NAME=int METHOD_FULL_NAME=produce ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+        LITERAL CODE=2 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+    CALL NAME=consume CODE=consume(values[0]) TYPE_FULL_NAME=void METHOD_FULL_NAME=consume ORDER=4 DISPATCH_TYPE=STATIC_DISPATCH
+      CALL NAME=<operator>.indirectIndexAccess CODE=values[0] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectIndexAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=values CODE=values TYPE_FULL_NAME=int[2] ORDER=1 ARGUMENT_INDEX=1
+        LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+
+METHOD NAME=<global> CODE=<global> FULL_NAME=arrays.c:<global> ORDER=1
+  METHOD NAME=z_first CODE=void z_first(void) {\n    int values[2] = {\n        produce(),\n        2\n    };\n    consume(values[0]);\n} FULL_NAME=z_first SIGNATURE=void(void) ORDER=1
+    METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    BLOCK CODE={\n    int values[2] = {\n        produce(),\n        2\n    };\n    consume(values[0]);\n} TYPE_FULL_NAME=void ORDER=2
+      LOCAL NAME=values CODE=int values[2] TYPE_FULL_NAME=int[2] ORDER=1
+      CALL NAME=<operator>.assignment CODE=values[2] = {\n        produce(),\n        2\n    } TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=values CODE=values TYPE_FULL_NAME=int[2] ORDER=1 ARGUMENT_INDEX=1
+        CALL NAME=<operator>.alloc CODE=values[2] = {\n        produce(),\n        2\n    } TYPE_FULL_NAME=int[2] METHOD_FULL_NAME=<operator>.alloc ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=int[2] CODE=int[2] TYPE_FULL_NAME=int[2] ORDER=1 ARGUMENT_INDEX=1
+          LITERAL CODE=2 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+      CALL NAME=<operator>.assignment CODE=values[2] = {\n        produce(),\n        2\n    } TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=values CODE=values TYPE_FULL_NAME=int[2] ORDER=1 ARGUMENT_INDEX=1
+        CALL NAME=<operator>.arrayInitializer CODE={\n        produce(),\n        2\n    } TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.arrayInitializer ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+          CALL NAME=produce CODE=produce() TYPE_FULL_NAME=int METHOD_FULL_NAME=produce ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+          LITERAL CODE=2 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+      CALL NAME=consume CODE=consume(values[0]) TYPE_FULL_NAME=void METHOD_FULL_NAME=consume ORDER=4 DISPATCH_TYPE=STATIC_DISPATCH
+        CALL NAME=<operator>.indirectIndexAccess CODE=values[0] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectIndexAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=values CODE=values TYPE_FULL_NAME=int[2] ORDER=1 ARGUMENT_INDEX=1
+          LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+  METHOD NAME=a_second CODE=void a_second(void) {\n    int values[2] = {\n        produce(),\n        2\n    };\n    consume(values[0]);\n} FULL_NAME=a_second SIGNATURE=void(void) ORDER=1
+    METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    BLOCK CODE={\n    int values[2] = {\n        produce(),\n        2\n    };\n    consume(values[0]);\n} TYPE_FULL_NAME=void ORDER=2
+      LOCAL NAME=values CODE=int values[2] TYPE_FULL_NAME=int[2] ORDER=1
+      CALL NAME=<operator>.assignment CODE=values[2] = {\n        produce(),\n        2\n    } TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=values CODE=values TYPE_FULL_NAME=int[2] ORDER=1 ARGUMENT_INDEX=1
+        CALL NAME=<operator>.alloc CODE=values[2] = {\n        produce(),\n        2\n    } TYPE_FULL_NAME=int[2] METHOD_FULL_NAME=<operator>.alloc ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=int[2] CODE=int[2] TYPE_FULL_NAME=int[2] ORDER=1 ARGUMENT_INDEX=1
+          LITERAL CODE=2 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+      CALL NAME=<operator>.assignment CODE=values[2] = {\n        produce(),\n        2\n    } TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=values CODE=values TYPE_FULL_NAME=int[2] ORDER=1 ARGUMENT_INDEX=1
+        CALL NAME=<operator>.arrayInitializer CODE={\n        produce(),\n        2\n    } TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.arrayInitializer ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+          CALL NAME=produce CODE=produce() TYPE_FULL_NAME=int METHOD_FULL_NAME=produce ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+          LITERAL CODE=2 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+      CALL NAME=consume CODE=consume(values[0]) TYPE_FULL_NAME=void METHOD_FULL_NAME=consume ORDER=4 DISPATCH_TYPE=STATIC_DISPATCH
+        CALL NAME=<operator>.indirectIndexAccess CODE=values[0] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectIndexAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=values CODE=values TYPE_FULL_NAME=int[2] ORDER=1 ARGUMENT_INDEX=1
+          LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+    METHOD_REF CODE=z_first TYPE_FULL_NAME=z_first METHOD_FULL_NAME=z_first ORDER=1
+    METHOD_REF CODE=a_second TYPE_FULL_NAME=a_second METHOD_FULL_NAME=a_second ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=consume CODE=void consume(int value); FULL_NAME=consume SIGNATURE=void(int) ORDER=1
+  METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+
+METHOD NAME=produce CODE=int produce(void); FULL_NAME=produce SIGNATURE=int(void) ORDER=1
+  METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+
+METHOD NAME=z_first CODE=void z_first(void) {\n    int values[2] = {\n        produce(),\n        2\n    };\n    consume(values[0]);\n} FULL_NAME=z_first SIGNATURE=void(void) ORDER=1
+  METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  BLOCK CODE={\n    int values[2] = {\n        produce(),\n        2\n    };\n    consume(values[0]);\n} TYPE_FULL_NAME=void ORDER=2
+    LOCAL NAME=values CODE=int values[2] TYPE_FULL_NAME=int[2] ORDER=1
+    CALL NAME=<operator>.assignment CODE=values[2] = {\n        produce(),\n        2\n    } TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+      IDENTIFIER NAME=values CODE=values TYPE_FULL_NAME=int[2] ORDER=1 ARGUMENT_INDEX=1
+      CALL NAME=<operator>.alloc CODE=values[2] = {\n        produce(),\n        2\n    } TYPE_FULL_NAME=int[2] METHOD_FULL_NAME=<operator>.alloc ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=int[2] CODE=int[2] TYPE_FULL_NAME=int[2] ORDER=1 ARGUMENT_INDEX=1
+        LITERAL CODE=2 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+    CALL NAME=<operator>.assignment CODE=values[2] = {\n        produce(),\n        2\n    } TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH
+      IDENTIFIER NAME=values CODE=values TYPE_FULL_NAME=int[2] ORDER=1 ARGUMENT_INDEX=1
+      CALL NAME=<operator>.arrayInitializer CODE={\n        produce(),\n        2\n    } TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.arrayInitializer ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+        CALL NAME=produce CODE=produce() TYPE_FULL_NAME=int METHOD_FULL_NAME=produce ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+        LITERAL CODE=2 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+    CALL NAME=consume CODE=consume(values[0]) TYPE_FULL_NAME=void METHOD_FULL_NAME=consume ORDER=4 DISPATCH_TYPE=STATIC_DISPATCH
+      CALL NAME=<operator>.indirectIndexAccess CODE=values[0] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectIndexAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=values CODE=values TYPE_FULL_NAME=int[2] ORDER=1 ARGUMENT_INDEX=1
+        LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+
+NODES|META_DATA LANGUAGE=NEWC
+NODES|FILE NAME=<includes> ORDER=1
+NODES|FILE NAME=<unknown> ORDER=0
+NODES|FILE NAME=arrays.c ORDER=0
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<global> FILENAME=<unknown> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<includes>:<global> FILENAME=<includes> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=arrays.c:<global> FILENAME=arrays.c ORDER=1
+NODES|NAMESPACE NAME=<global>
+NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=a_second FULL_NAME=a_second CODE=a_second AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=arrays.c:<global> FILENAME=arrays.c ORDER=1
+NODES|TYPE_DECL NAME=<global> FULL_NAME=arrays.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=arrays.c:<global> FILENAME=arrays.c ORDER=1
+NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=int[2] FULL_NAME=int[2] CODE=int[2] IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=z_first FULL_NAME=z_first CODE=z_first AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=arrays.c:<global> FILENAME=arrays.c ORDER=1
+NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+NODES|TYPE NAME=a_second FULL_NAME=a_second TYPE_DECL_FULL_NAME=a_second
+NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+NODES|TYPE NAME=int[2] FULL_NAME=int[2] TYPE_DECL_FULL_NAME=int[2]
+NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+NODES|TYPE NAME=z_first FULL_NAME=z_first TYPE_DECL_FULL_NAME=z_first
+EDGES|ARGUMENT a_second#10 -> a_second#11
+EDGES|ARGUMENT a_second#10 -> a_second#12
+EDGES|ARGUMENT a_second#12 -> a_second#13
+EDGES|ARGUMENT a_second#12 -> a_second#14
+EDGES|ARGUMENT a_second#15 -> a_second#16
+EDGES|ARGUMENT a_second#16 -> a_second#17
+EDGES|ARGUMENT a_second#16 -> a_second#18
+EDGES|ARGUMENT a_second#5 -> a_second#6
+EDGES|ARGUMENT a_second#5 -> a_second#7
+EDGES|ARGUMENT a_second#7 -> a_second#8
+EDGES|ARGUMENT a_second#7 -> a_second#9
+EDGES|ARGUMENT z_first#10 -> z_first#11
+EDGES|ARGUMENT z_first#10 -> z_first#12
+EDGES|ARGUMENT z_first#12 -> z_first#13
+EDGES|ARGUMENT z_first#12 -> z_first#14
+EDGES|ARGUMENT z_first#15 -> z_first#16
+EDGES|ARGUMENT z_first#16 -> z_first#17
+EDGES|ARGUMENT z_first#16 -> z_first#18
+EDGES|ARGUMENT z_first#5 -> z_first#6
+EDGES|ARGUMENT z_first#5 -> z_first#7
+EDGES|ARGUMENT z_first#7 -> z_first#8
+EDGES|ARGUMENT z_first#7 -> z_first#9
+EDGES|CALL a_second#10 -> <operator>.assignment#0
+EDGES|CALL a_second#12 -> <operator>.arrayInitializer#0
+EDGES|CALL a_second#13 -> produce#0
+EDGES|CALL a_second#15 -> consume#0
+EDGES|CALL a_second#16 -> <operator>.indirectIndexAccess#0
+EDGES|CALL a_second#5 -> <operator>.assignment#0
+EDGES|CALL a_second#7 -> <operator>.alloc#0
+EDGES|CALL z_first#10 -> <operator>.assignment#0
+EDGES|CALL z_first#12 -> <operator>.arrayInitializer#0
+EDGES|CALL z_first#13 -> produce#0
+EDGES|CALL z_first#15 -> consume#0
+EDGES|CALL z_first#16 -> <operator>.indirectIndexAccess#0
+EDGES|CALL z_first#5 -> <operator>.assignment#0
+EDGES|CALL z_first#7 -> <operator>.alloc#0
+EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+EDGES|CFG <operator>.alloc#0 -> <operator>.alloc#5
+EDGES|CFG <operator>.arrayInitializer#0 -> <operator>.arrayInitializer#5
+EDGES|CFG <operator>.assignment#0 -> <operator>.assignment#5
+EDGES|CFG <operator>.indirectIndexAccess#0 -> <operator>.indirectIndexAccess#5
+EDGES|CFG a_second#0 -> a_second#6
+EDGES|CFG a_second#10 -> a_second#17
+EDGES|CFG a_second#11 -> a_second#13
+EDGES|CFG a_second#12 -> a_second#10
+EDGES|CFG a_second#13 -> a_second#14
+EDGES|CFG a_second#14 -> a_second#12
+EDGES|CFG a_second#15 -> a_second#19
+EDGES|CFG a_second#16 -> a_second#15
+EDGES|CFG a_second#17 -> a_second#18
+EDGES|CFG a_second#18 -> a_second#16
+EDGES|CFG a_second#5 -> a_second#11
+EDGES|CFG a_second#6 -> a_second#8
+EDGES|CFG a_second#7 -> a_second#5
+EDGES|CFG a_second#8 -> a_second#9
+EDGES|CFG a_second#9 -> a_second#7
+EDGES|CFG arrays.c:<global>#0 -> arrays.c:<global>#42
+EDGES|CFG arrays.c:<global>#1 -> z_first#6
+EDGES|CFG arrays.c:<global>#42 -> arrays.c:<global>#43
+EDGES|CFG arrays.c:<global>#43 -> arrays.c:<global>#44
+EDGES|CFG consume#0 -> consume#4
+EDGES|CFG produce#0 -> produce#4
+EDGES|CFG z_first#10 -> z_first#17
+EDGES|CFG z_first#11 -> z_first#13
+EDGES|CFG z_first#12 -> z_first#10
+EDGES|CFG z_first#13 -> z_first#14
+EDGES|CFG z_first#14 -> z_first#12
+EDGES|CFG z_first#15 -> z_first#19
+EDGES|CFG z_first#16 -> z_first#15
+EDGES|CFG z_first#17 -> z_first#18
+EDGES|CFG z_first#18 -> z_first#16
+EDGES|CFG z_first#5 -> z_first#11
+EDGES|CFG z_first#6 -> z_first#8
+EDGES|CFG z_first#7 -> z_first#5
+EDGES|CFG z_first#8 -> z_first#9
+EDGES|CFG z_first#9 -> z_first#7
+EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+EDGES|CONTAINS <operator>.alloc#0 -> <operator>.alloc#2
+EDGES|CONTAINS <operator>.arrayInitializer#0 -> <operator>.arrayInitializer#2
+EDGES|CONTAINS <operator>.assignment#0 -> <operator>.assignment#2
+EDGES|CONTAINS <operator>.indirectIndexAccess#0 -> <operator>.indirectIndexAccess#2
+EDGES|CONTAINS D:arrays.c:<global> -> D:a_second
+EDGES|CONTAINS D:arrays.c:<global> -> D:z_first
+EDGES|CONTAINS D:arrays.c:<global> -> arrays.c:<global>#0
+EDGES|CONTAINS D:arrays.c:<global> -> consume#0
+EDGES|CONTAINS D:arrays.c:<global> -> produce#0
+EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+EDGES|CONTAINS F:<includes> -> D:ANY
+EDGES|CONTAINS F:<includes> -> D:int
+EDGES|CONTAINS F:<includes> -> D:int[2]
+EDGES|CONTAINS F:<includes> -> D:void
+EDGES|CONTAINS F:arrays.c -> D:arrays.c:<global>
+EDGES|CONTAINS a_second#0 -> a_second#10
+EDGES|CONTAINS a_second#0 -> a_second#11
+EDGES|CONTAINS a_second#0 -> a_second#12
+EDGES|CONTAINS a_second#0 -> a_second#13
+EDGES|CONTAINS a_second#0 -> a_second#14
+EDGES|CONTAINS a_second#0 -> a_second#15
+EDGES|CONTAINS a_second#0 -> a_second#16
+EDGES|CONTAINS a_second#0 -> a_second#17
+EDGES|CONTAINS a_second#0 -> a_second#18
+EDGES|CONTAINS a_second#0 -> a_second#3
+EDGES|CONTAINS a_second#0 -> a_second#5
+EDGES|CONTAINS a_second#0 -> a_second#6
+EDGES|CONTAINS a_second#0 -> a_second#7
+EDGES|CONTAINS a_second#0 -> a_second#8
+EDGES|CONTAINS a_second#0 -> a_second#9
+EDGES|CONTAINS arrays.c:<global>#0 -> a_second#0
+EDGES|CONTAINS arrays.c:<global>#0 -> arrays.c:<global>#1
+EDGES|CONTAINS arrays.c:<global>#0 -> arrays.c:<global>#41
+EDGES|CONTAINS arrays.c:<global>#0 -> arrays.c:<global>#42
+EDGES|CONTAINS arrays.c:<global>#0 -> arrays.c:<global>#43
+EDGES|CONTAINS arrays.c:<global>#1 -> z_first#10
+EDGES|CONTAINS arrays.c:<global>#1 -> z_first#11
+EDGES|CONTAINS arrays.c:<global>#1 -> z_first#12
+EDGES|CONTAINS arrays.c:<global>#1 -> z_first#13
+EDGES|CONTAINS arrays.c:<global>#1 -> z_first#14
+EDGES|CONTAINS arrays.c:<global>#1 -> z_first#15
+EDGES|CONTAINS arrays.c:<global>#1 -> z_first#16
+EDGES|CONTAINS arrays.c:<global>#1 -> z_first#17
+EDGES|CONTAINS arrays.c:<global>#1 -> z_first#18
+EDGES|CONTAINS arrays.c:<global>#1 -> z_first#3
+EDGES|CONTAINS arrays.c:<global>#1 -> z_first#5
+EDGES|CONTAINS arrays.c:<global>#1 -> z_first#6
+EDGES|CONTAINS arrays.c:<global>#1 -> z_first#7
+EDGES|CONTAINS arrays.c:<global>#1 -> z_first#8
+EDGES|CONTAINS arrays.c:<global>#1 -> z_first#9
+EDGES|CONTAINS consume#0 -> consume#3
+EDGES|CONTAINS produce#0 -> produce#3
+EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.alloc#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.alloc#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.alloc#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.alloc#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.alloc#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.alloc#6 -> T:ANY
+EDGES|EVAL_TYPE <operator>.arrayInitializer#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.arrayInitializer#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.arrayInitializer#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.arrayInitializer#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.arrayInitializer#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.arrayInitializer#6 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#6 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectIndexAccess#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectIndexAccess#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectIndexAccess#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectIndexAccess#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectIndexAccess#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.indirectIndexAccess#6 -> T:ANY
+EDGES|EVAL_TYPE a_second#1 -> T:void
+EDGES|EVAL_TYPE a_second#10 -> T:void
+EDGES|EVAL_TYPE a_second#11 -> T:int[2]
+EDGES|EVAL_TYPE a_second#12 -> T:ANY
+EDGES|EVAL_TYPE a_second#13 -> T:int
+EDGES|EVAL_TYPE a_second#14 -> T:int
+EDGES|EVAL_TYPE a_second#15 -> T:void
+EDGES|EVAL_TYPE a_second#16 -> T:ANY
+EDGES|EVAL_TYPE a_second#17 -> T:int[2]
+EDGES|EVAL_TYPE a_second#18 -> T:int
+EDGES|EVAL_TYPE a_second#19 -> T:void
+EDGES|EVAL_TYPE a_second#2 -> T:void
+EDGES|EVAL_TYPE a_second#3 -> T:void
+EDGES|EVAL_TYPE a_second#4 -> T:int[2]
+EDGES|EVAL_TYPE a_second#5 -> T:void
+EDGES|EVAL_TYPE a_second#6 -> T:int[2]
+EDGES|EVAL_TYPE a_second#7 -> T:int[2]
+EDGES|EVAL_TYPE a_second#8 -> T:int[2]
+EDGES|EVAL_TYPE a_second#9 -> T:int
+EDGES|EVAL_TYPE arrays.c:<global>#41 -> T:ANY
+EDGES|EVAL_TYPE arrays.c:<global>#42 -> T:z_first
+EDGES|EVAL_TYPE arrays.c:<global>#43 -> T:a_second
+EDGES|EVAL_TYPE arrays.c:<global>#44 -> T:ANY
+EDGES|EVAL_TYPE consume#1 -> T:int
+EDGES|EVAL_TYPE consume#2 -> T:int
+EDGES|EVAL_TYPE consume#3 -> T:ANY
+EDGES|EVAL_TYPE consume#4 -> T:void
+EDGES|EVAL_TYPE produce#1 -> T:void
+EDGES|EVAL_TYPE produce#2 -> T:void
+EDGES|EVAL_TYPE produce#3 -> T:ANY
+EDGES|EVAL_TYPE produce#4 -> T:int
+EDGES|EVAL_TYPE z_first#1 -> T:void
+EDGES|EVAL_TYPE z_first#10 -> T:void
+EDGES|EVAL_TYPE z_first#11 -> T:int[2]
+EDGES|EVAL_TYPE z_first#12 -> T:ANY
+EDGES|EVAL_TYPE z_first#13 -> T:int
+EDGES|EVAL_TYPE z_first#14 -> T:int
+EDGES|EVAL_TYPE z_first#15 -> T:void
+EDGES|EVAL_TYPE z_first#16 -> T:ANY
+EDGES|EVAL_TYPE z_first#17 -> T:int[2]
+EDGES|EVAL_TYPE z_first#18 -> T:int
+EDGES|EVAL_TYPE z_first#19 -> T:void
+EDGES|EVAL_TYPE z_first#2 -> T:void
+EDGES|EVAL_TYPE z_first#3 -> T:void
+EDGES|EVAL_TYPE z_first#4 -> T:int[2]
+EDGES|EVAL_TYPE z_first#5 -> T:void
+EDGES|EVAL_TYPE z_first#6 -> T:int[2]
+EDGES|EVAL_TYPE z_first#7 -> T:int[2]
+EDGES|EVAL_TYPE z_first#8 -> T:int[2]
+EDGES|EVAL_TYPE z_first#9 -> T:int
+EDGES|PARAMETER_LINK <operator>.alloc#1 -> <operator>.alloc#3
+EDGES|PARAMETER_LINK <operator>.alloc#4 -> <operator>.alloc#6
+EDGES|PARAMETER_LINK <operator>.arrayInitializer#1 -> <operator>.arrayInitializer#3
+EDGES|PARAMETER_LINK <operator>.arrayInitializer#4 -> <operator>.arrayInitializer#6
+EDGES|PARAMETER_LINK <operator>.assignment#1 -> <operator>.assignment#3
+EDGES|PARAMETER_LINK <operator>.assignment#4 -> <operator>.assignment#6
+EDGES|PARAMETER_LINK <operator>.indirectIndexAccess#1 -> <operator>.indirectIndexAccess#3
+EDGES|PARAMETER_LINK <operator>.indirectIndexAccess#4 -> <operator>.indirectIndexAccess#6
+EDGES|PARAMETER_LINK a_second#1 -> a_second#2
+EDGES|PARAMETER_LINK consume#1 -> consume#2
+EDGES|PARAMETER_LINK produce#1 -> produce#2
+EDGES|PARAMETER_LINK z_first#1 -> z_first#2
+EDGES|REF NB:<global> -> NS:<global>
+EDGES|REF NB:<includes>:<global> -> NS:<global>
+EDGES|REF NB:arrays.c:<global> -> NS:<global>
+EDGES|REF T:ANY -> D:ANY
+EDGES|REF T:a_second -> D:a_second
+EDGES|REF T:int -> D:int
+EDGES|REF T:int[2] -> D:int[2]
+EDGES|REF T:void -> D:void
+EDGES|REF T:z_first -> D:z_first
+EDGES|REF a_second#11 -> a_second#4
+EDGES|REF a_second#17 -> a_second#4
+EDGES|REF a_second#6 -> a_second#4
+EDGES|REF arrays.c:<global>#42 -> arrays.c:<global>#1
+EDGES|REF arrays.c:<global>#43 -> a_second#0
+EDGES|REF z_first#11 -> z_first#4
+EDGES|REF z_first#17 -> z_first#4
+EDGES|REF z_first#6 -> z_first#4
+EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+EDGES|SOURCE_FILE D:ANY -> F:<includes>
+EDGES|SOURCE_FILE D:a_second -> F:arrays.c
+EDGES|SOURCE_FILE D:arrays.c:<global> -> F:arrays.c
+EDGES|SOURCE_FILE D:int -> F:<includes>
+EDGES|SOURCE_FILE D:int[2] -> F:<includes>
+EDGES|SOURCE_FILE D:void -> F:<includes>
+EDGES|SOURCE_FILE D:z_first -> F:arrays.c
+EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
+EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>
+EDGES|SOURCE_FILE NB:arrays.c:<global> -> F:arrays.c
+EDGES|SOURCE_FILE a_second#0 -> F:arrays.c
+EDGES|SOURCE_FILE arrays.c:<global>#0 -> F:arrays.c
+EDGES|SOURCE_FILE arrays.c:<global>#1 -> F:arrays.c
+EDGES|SOURCE_FILE consume#0 -> F:arrays.c
+EDGES|SOURCE_FILE produce#0 -> F:arrays.c
+FLOWS|REACHING_DEF[2] a_second#14 -> a_second#12
+FLOWS|REACHING_DEF[2] a_second#14 -> a_second#13
+FLOWS|REACHING_DEF[2] a_second#9 -> a_second#7
+FLOWS|REACHING_DEF[2] z_first#14 -> z_first#12
+FLOWS|REACHING_DEF[2] z_first#14 -> z_first#13
+FLOWS|REACHING_DEF[2] z_first#9 -> z_first#7
+FLOWS|REACHING_DEF[] <operator>.alloc#0 -> <operator>.alloc#1
+FLOWS|REACHING_DEF[] <operator>.alloc#0 -> <operator>.alloc#4
+FLOWS|REACHING_DEF[] <operator>.arrayInitializer#0 -> <operator>.arrayInitializer#1
+FLOWS|REACHING_DEF[] <operator>.arrayInitializer#0 -> <operator>.arrayInitializer#4
+FLOWS|REACHING_DEF[] <operator>.assignment#0 -> <operator>.assignment#1
+FLOWS|REACHING_DEF[] <operator>.assignment#0 -> <operator>.assignment#4
+FLOWS|REACHING_DEF[] <operator>.indirectIndexAccess#0 -> <operator>.indirectIndexAccess#1
+FLOWS|REACHING_DEF[] <operator>.indirectIndexAccess#0 -> <operator>.indirectIndexAccess#4
+FLOWS|REACHING_DEF[] a_second#0 -> a_second#1
+FLOWS|REACHING_DEF[] a_second#0 -> a_second#13
+FLOWS|REACHING_DEF[] a_second#0 -> a_second#14
+FLOWS|REACHING_DEF[] a_second#0 -> a_second#17
+FLOWS|REACHING_DEF[] a_second#0 -> a_second#18
+FLOWS|REACHING_DEF[] a_second#0 -> a_second#8
+FLOWS|REACHING_DEF[] a_second#0 -> a_second#9
+FLOWS|REACHING_DEF[] a_second#1 -> a_second#19
+FLOWS|REACHING_DEF[] a_second#1 -> a_second#2
+FLOWS|REACHING_DEF[] arrays.c:<global>#0 -> arrays.c:<global>#42
+FLOWS|REACHING_DEF[] arrays.c:<global>#0 -> arrays.c:<global>#43
+FLOWS|REACHING_DEF[] arrays.c:<global>#1 -> z_first#1
+FLOWS|REACHING_DEF[] arrays.c:<global>#1 -> z_first#13
+FLOWS|REACHING_DEF[] arrays.c:<global>#1 -> z_first#14
+FLOWS|REACHING_DEF[] arrays.c:<global>#1 -> z_first#17
+FLOWS|REACHING_DEF[] arrays.c:<global>#1 -> z_first#18
+FLOWS|REACHING_DEF[] arrays.c:<global>#1 -> z_first#8
+FLOWS|REACHING_DEF[] arrays.c:<global>#1 -> z_first#9
+FLOWS|REACHING_DEF[] consume#0 -> consume#1
+FLOWS|REACHING_DEF[] produce#0 -> produce#1
+FLOWS|REACHING_DEF[] produce#1 -> produce#2
+FLOWS|REACHING_DEF[] produce#1 -> produce#4
+FLOWS|REACHING_DEF[] z_first#1 -> z_first#19
+FLOWS|REACHING_DEF[] z_first#1 -> z_first#2
+FLOWS|REACHING_DEF[consume(values[0])] a_second#15 -> a_second#19
+FLOWS|REACHING_DEF[consume(values[0])] z_first#15 -> z_first#19
+FLOWS|REACHING_DEF[int[2]] a_second#8 -> a_second#19
+FLOWS|REACHING_DEF[int[2]] a_second#8 -> a_second#7
+FLOWS|REACHING_DEF[int[2]] z_first#8 -> z_first#19
+FLOWS|REACHING_DEF[int[2]] z_first#8 -> z_first#7
+FLOWS|REACHING_DEF[p1] <operator>.alloc#1 -> <operator>.alloc#3
+FLOWS|REACHING_DEF[p1] <operator>.alloc#1 -> <operator>.alloc#5
+FLOWS|REACHING_DEF[p1] <operator>.arrayInitializer#1 -> <operator>.arrayInitializer#3
+FLOWS|REACHING_DEF[p1] <operator>.arrayInitializer#1 -> <operator>.arrayInitializer#5
+FLOWS|REACHING_DEF[p1] <operator>.assignment#1 -> <operator>.assignment#3
+FLOWS|REACHING_DEF[p1] <operator>.assignment#1 -> <operator>.assignment#5
+FLOWS|REACHING_DEF[p1] <operator>.indirectIndexAccess#1 -> <operator>.indirectIndexAccess#3
+FLOWS|REACHING_DEF[p1] <operator>.indirectIndexAccess#1 -> <operator>.indirectIndexAccess#5
+FLOWS|REACHING_DEF[p2] <operator>.alloc#4 -> <operator>.alloc#5
+FLOWS|REACHING_DEF[p2] <operator>.alloc#4 -> <operator>.alloc#6
+FLOWS|REACHING_DEF[p2] <operator>.arrayInitializer#4 -> <operator>.arrayInitializer#5
+FLOWS|REACHING_DEF[p2] <operator>.arrayInitializer#4 -> <operator>.arrayInitializer#6
+FLOWS|REACHING_DEF[p2] <operator>.assignment#4 -> <operator>.assignment#5
+FLOWS|REACHING_DEF[p2] <operator>.assignment#4 -> <operator>.assignment#6
+FLOWS|REACHING_DEF[p2] <operator>.indirectIndexAccess#4 -> <operator>.indirectIndexAccess#5
+FLOWS|REACHING_DEF[p2] <operator>.indirectIndexAccess#4 -> <operator>.indirectIndexAccess#6
+FLOWS|REACHING_DEF[produce()] a_second#13 -> a_second#12
+FLOWS|REACHING_DEF[produce()] a_second#13 -> a_second#19
+FLOWS|REACHING_DEF[produce()] z_first#13 -> z_first#12
+FLOWS|REACHING_DEF[produce()] z_first#13 -> z_first#19
+FLOWS|REACHING_DEF[value] consume#1 -> consume#2
+FLOWS|REACHING_DEF[value] consume#1 -> consume#4
+FLOWS|REACHING_DEF[values[0]] a_second#16 -> a_second#15
+FLOWS|REACHING_DEF[values[0]] a_second#16 -> a_second#19
+FLOWS|REACHING_DEF[values[0]] z_first#16 -> z_first#15
+FLOWS|REACHING_DEF[values[0]] z_first#16 -> z_first#19
+FLOWS|REACHING_DEF[values[2] = {\n        produce(),\n        2\n    }] a_second#10 -> a_second#19
+FLOWS|REACHING_DEF[values[2] = {\n        produce(),\n        2\n    }] a_second#7 -> a_second#5
+FLOWS|REACHING_DEF[values[2] = {\n        produce(),\n        2\n    }] a_second#7 -> a_second#6
+FLOWS|REACHING_DEF[values[2] = {\n        produce(),\n        2\n    }] z_first#10 -> z_first#19
+FLOWS|REACHING_DEF[values[2] = {\n        produce(),\n        2\n    }] z_first#7 -> z_first#5
+FLOWS|REACHING_DEF[values[2] = {\n        produce(),\n        2\n    }] z_first#7 -> z_first#6
+FLOWS|REACHING_DEF[values] a_second#11 -> a_second#10
+FLOWS|REACHING_DEF[values] a_second#11 -> a_second#16
+FLOWS|REACHING_DEF[values] a_second#11 -> a_second#17
+FLOWS|REACHING_DEF[values] a_second#11 -> a_second#19
+FLOWS|REACHING_DEF[values] a_second#6 -> a_second#5
+FLOWS|REACHING_DEF[values] z_first#11 -> z_first#10
+FLOWS|REACHING_DEF[values] z_first#11 -> z_first#16
+FLOWS|REACHING_DEF[values] z_first#11 -> z_first#17
+FLOWS|REACHING_DEF[values] z_first#11 -> z_first#19
+FLOWS|REACHING_DEF[values] z_first#6 -> z_first#5
+FLOWS|REACHING_DEF[{\n        produce(),\n        2\n    }] a_second#12 -> a_second#10
+FLOWS|REACHING_DEF[{\n        produce(),\n        2\n    }] a_second#12 -> a_second#11
+FLOWS|REACHING_DEF[{\n        produce(),\n        2\n    }] a_second#12 -> a_second#19
+FLOWS|REACHING_DEF[{\n        produce(),\n        2\n    }] z_first#12 -> z_first#10
+FLOWS|REACHING_DEF[{\n        produce(),\n        2\n    }] z_first#12 -> z_first#11
+FLOWS|REACHING_DEF[{\n        produce(),\n        2\n    }] z_first#12 -> z_first#19

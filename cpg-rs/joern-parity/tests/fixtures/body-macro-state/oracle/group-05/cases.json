@@ -1,0 +1,12 @@
+{
+  "file_level_condition": {
+    "main.c": "#define PICK 1\n#if PICK == 1\n#undef PICK\n#define PICK 2\n#endif\nint choose(void) { return PICK; }\n"
+  },
+  "header_redefined": {
+    "main.c": "#define PICK 1\n#if PICK == 1\n#include \"api.h\"\n#endif\nint choose(void) { return PICK; }\n",
+    "api.h": "#undef PICK\n#define PICK 2\n"
+  },
+  "formal_list_redefined": {
+    "main.c": "#define PICK(x) (x)\n#if PICK(1)\n#undef PICK\n#define PICK(x,y) ((x)+(y))\n#endif\nint choose(int value) { return PICK(value,2); }\n"
+  }
+}

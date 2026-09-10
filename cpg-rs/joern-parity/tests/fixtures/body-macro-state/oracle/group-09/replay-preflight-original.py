@@ -1,0 +1,6 @@
+from pathlib import Path
+import subprocess,json,hashlib,difflib,sys,time
+p=Path(__file__).resolve().parent;binary=Path(sys.argv[1]).resolve();variant=sys.argv[2];sha=lambda q:hashlib.sha256(q.read_bytes()).hexdigest();out=p/variant;out.mkdir();rows=[]
+for d in sorted((p/'input').iterdir()):
+ cmd=[str(binary),*[str(f) for f in sorted(d.rglob('*')) if f.suffix in ['.c','.h']]];t=time.monotonic();r=subprocess.run(cmd,capture_output=True,timeout=30);expected=(d/'expected.txt').read_bytes();q=out/d.name;q.mkdir(exist_ok=True);(q/'actual.txt').write_bytes(r.stdout);(q/'stderr.txt').write_bytes(r.stderr);diff='\n'.join(difflib.unified_diff(expected.decode().split('\n'),r.stdout.decode().split('\n'),fromfile='joern',tofile=variant));(q/'complete.diff').write_text(diff);row={'case':d.name,'command':cmd,'exitCode':r.returncode,'wallSeconds':time.monotonic()-t,'exact':r.stdout==expected,'completeDiffLines':len(diff.splitlines()),'inputHashes':{str(f.relative_to(d)):sha(f) for f in sorted(d.rglob('*')) if f.suffix in ['.c','.h']},'expectedSha256':sha(d/'expected.txt'),'actualSha256':sha(q/'actual.txt')};rows.append(row);print(row,flush=True)
+receipt={'binary':{'path':str(binary),'sha256':sha(binary)},'liveReceipt':{'path':str(p/'live-run.json'),'sha256':sha(p/'live-run.json')},'results':rows};(out/'replay.json').write_text(json.dumps(receipt,indent=2)+'\n')

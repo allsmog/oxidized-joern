@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "status": "PARENT_APPROVED_MACRO_BINDING_OBSERVER_RELEASE",
+  "observationHoldReleased": true,
+  "preparedManifestSha256": "10fb42a19a4f4b310765dee02c5572eb0889ce56fc284ddfabf88b8839a63d4d",
+  "sourceCommit": "a806866acc83ce9b40b69259fe9e430a3e818dd0",
+  "documentationCommit": "a806866acc83ce9b40b69259fe9e430a3e818dd0",
+  "frozenBuild": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/thirteenth-batch/final-release-v2/bin/source-bindings.json",
+    "sha256": "d339e070ad6dc154a344b8d1c07953fb6fd85e21c3cb79381286fc08847691e5",
+    "bytes": 2153885
+  },
+  "canonicalRun": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/macro-binding-canonical-runner-v1/runs/first-complete-four-macro-binding-reference-batch/run.json",
+    "sha256": "edcd92e30072936242b5f73db09c9bb2974998d27597e3e6e766bdd4a9119d72",
+    "bytes": 1442635
+  },
+  "canonicalRelease": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/fourteenth-batch/canonical-producer-release-v1.json",
+    "sha256": "0b588ee60ee5885c0bd11cd87a8a8efe5991cda00b35a9c2c4b247da61f793b0",
+    "bytes": 3012
+  },
+  "historicalObservation": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/thirteenth-include-observer-v1/runs/first-complete-six-include-saved-cpg-observation/run.json",
+    "sha256": "a202d40d8f7f9bf363365fd0857c589c0a031c3a6340f17f7b08b63974c7ed06",
+    "bytes": 1177575
+  },
+  "note": "Root authorizes one observation of the four verified copied saved-store pairs using the unchanged Scala observer. No reparse or default passes. All full typed output and failure evidence retained.",
+  "runName": "first-complete-four-macro-binding-saved-cpg-observation",
+  "reviewBindings": {
+    "root": "6643b93dcd7f36cdfe1eedb01744687557c3c8901b4bb9abc5f1e691557c2898",
+    "independent": "3af88efede32704c646efdc6056e0ce0fbd070e0242a6f44d6a78ac5ca69eee5",
+    "canonicalActual": "1ee41bc55cb6855c74e35f636c70fc8f09778b7d88f6f4dae38b8bbee40e401d"
+  }
+}

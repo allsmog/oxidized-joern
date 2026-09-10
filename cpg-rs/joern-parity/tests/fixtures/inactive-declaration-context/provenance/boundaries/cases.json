@@ -1,0 +1,21 @@
+{
+  "initialized_scalar": {
+    "main.c": "#define N 3\n#if 0\nint value = N;\n#endif\n"
+  },
+  "active_then_inactive": {
+    "main.c": "#define N 3\n#if 1\n#undef N\n#define N 4\nint active = N;\n#else\nint inactive = N;\n#endif\nint after = N;\n"
+  },
+  "nested_inactive": {
+    "main.c": "#define N 3\n#if 0\n#define N 4\n#if 1\nint a = N;\n#else\nint b = N;\n#endif\n#endif\nint after = N;\n"
+  },
+  "elif_context": {
+    "main.c": "#define N 3\n#if 0\nint a = N;\n#elif 1\n#undef N\n#define N 4\nint b = N;\n#else\nint c = N;\n#endif\n"
+  },
+  "inactive_header_prototype": {
+    "api.h": "#define TYPE long\n#if 0\nTYPE f(int x);\n#endif\n",
+    "main.c": "#include \"api.h\"\nint g(int x) { return f(x); }\n"
+  },
+  "late_type_macro": {
+    "main.c": "#if 0\nTYPE f(int x);\n#endif\n#define TYPE long\nTYPE g(int x) { return x; }\n"
+  }
+}

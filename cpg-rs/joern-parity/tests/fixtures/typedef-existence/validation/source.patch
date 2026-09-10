@@ -1,0 +1,101 @@
+--- a/cpg-rs/cpg-lang-c/src/exact.rs
++++ b/cpg-rs/cpg-lang-c/src/exact.rs
+@@ -1027,14 +1027,72 @@
+     dispatch: Option<String>,
+ }
+ 
+-/// Type names belong to the ordinary identifier namespace. Record the state
+-/// at each expression before lowering loses its original lexical ancestors.
+-fn type_definition_names(node: Node, bytes: &[u8]) -> Vec<String> {
+-    let mut cursor = node.walk();
+-    node.children_by_field_name("declarator", &mut cursor)
+-        .map(|decl| type_binding_name(decl, bytes))
+-        .filter(|name| !name.is_empty())
+-        .collect()
++/// A typedef name exists only when its declaration remains valid after the
++/// macros visible at that definition have expanded. An unresolved plain type
++/// name is accepted by CDT, but a primitive modifier followed by a type name
++/// (`unsigned UNKNOWN`) is not. Tree-sitter accepts that latter shape without
++/// an ERROR node, so it needs a separate check before populating cast context.
++fn valid_type_definition_names(
++    node: Node,
++    bytes: &[u8],
++    macros: &HashMap<String, MacroDef>,
++) -> Vec<String> {
++    fn names(node: Node, bytes: &[u8]) -> Vec<String> {
++        if node.kind() != "type_definition" || node.has_error() {
++            return Vec::new();
++        }
++        let Some(specifier) = node.child_by_field_name("type") else {
++            return Vec::new();
++        };
++        if specifier.kind() == "sized_type_specifier"
++            && named_children(specifier)
++                .iter()
++                .any(|child| child.kind() == "type_identifier")
++        {
++            return Vec::new();
++        }
++        let mut cursor = node.walk();
++        let bindings: Vec<_> = node
++            .children_by_field_name("declarator", &mut cursor)
++            .map(|decl| type_binding_name(decl, bytes))
++            .collect();
++        if bindings.iter().any(String::is_empty) {
++            Vec::new()
++        } else {
++            bindings
++        }
++    }
++
++    let raw = text(node, bytes);
++    let Some(expanded) = expand_declaration_tokens(raw, macros, &mut HashSet::new(), &mut 65_536)
++    else {
++        return Vec::new();
++    };
++    if expanded == raw {
++        return names(node, bytes);
++    }
++    let mut parser = Parser::new();
++    parser
++        .set_language(&tree_sitter_c::LANGUAGE.into())
++        .unwrap();
++    let Some(tree) = parser.parse(&expanded, None) else {
++        return Vec::new();
++    };
++    let root = tree.root_node();
++    if root.has_error() {
++        return Vec::new();
++    }
++    let mut cursor = root.walk();
++    let mut declarations = root
++        .named_children(&mut cursor)
++        .filter(|child| child.kind() != "comment");
++    let Some(declaration) = declarations.next() else {
++        return Vec::new();
++    };
++    if declarations.next().is_some() {
++        return Vec::new();
++    }
++    names(declaration, expanded.as_bytes())
+ }
+ 
+ fn type_binding_name(node: Node, bytes: &[u8]) -> String {
+@@ -1165,7 +1223,7 @@
+                 for child in named_children(node) {
+                     visit(child, bytes, types, sites, macros);
+                 }
+-                for name in type_definition_names(node, bytes) {
++                for name in valid_type_definition_names(node, bytes, macros) {
+                     Arc::make_mut(types).insert(name);
+                 }
+             }
+@@ -4978,7 +5036,7 @@
+                     }
+                 }
+                 if node.kind() == "type_definition" {
+-                    for name in type_definition_names(node, bytes) {
++                    for name in valid_type_definition_names(node, bytes, macros) {
+                         Arc::make_mut(typedefs).insert(name);
+                     }
+                 }

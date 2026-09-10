@@ -1,0 +1,17 @@
+diff --git a/cpg-rs/cpg-lang-c/src/exact.rs b/cpg-rs/cpg-lang-c/src/exact.rs
+index e44b393a4..d7d85a93d 100644
+--- a/cpg-rs/cpg-lang-c/src/exact.rs
++++ b/cpg-rs/cpg-lang-c/src/exact.rs
+@@ -2651,11 +2651,7 @@ impl Ctx<'_> {
+             if f.kind() != "field_declaration" {
+                 continue;
+             }
+-            let ty = normalize_type(
+-                &f.child_by_field_name("type")
+-                    .map(|t| text(t, b).to_string())
+-                    .unwrap_or("ANY".into()),
+-            );
++            let ty = declaration_type(f, b, TypeRole::Declaration);
+             for d in named_children(f) {
+                 if matches!(
+                     d.kind(),

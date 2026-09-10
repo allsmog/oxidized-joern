@@ -1,0 +1,134 @@
+--- /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-macro-state/candidate-v7/exact.rs	2026-09-08 13:31:42
++++ /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-macro-state/candidate-v8/exact.rs	2026-09-08 13:34:01
+@@ -977,67 +977,16 @@
+     if definition.params.is_some() {
+         return true;
+     }
+-    let Some(expanded) = expand_declaration_tokens(
+-        &definition.body,
++    let mut tail_function = false;
++    expand_declaration_tokens_with_tail(
++        &macro_argument_text(&definition.body),
+         macros,
+         &mut HashSet::from([name.to_string()]),
+         &mut 65_536,
+-    ) else {
+-        return false;
+-    };
+-    let source = macro_argument_text(&expanded);
+-    let bytes = source.as_bytes();
+-    let mut last_name = None;
+-    let mut i = 0;
+-    while i < bytes.len() {
+-        if bytes[i].is_ascii_whitespace() {
+-            i += 1;
+-            continue;
+-        }
+-        last_name = None;
+-        if let Some(end) = macro_opaque_end(bytes, i) {
+-            i = end;
+-            continue;
+-        }
+-        if bytes[i].is_ascii_digit()
+-            || (bytes[i] == b'.' && bytes.get(i + 1).is_some_and(u8::is_ascii_digit))
+-        {
+-            i += 1;
+-            while i < bytes.len() {
+-                if bytes[i] == b'.'
+-                    || (matches!(bytes[i], b'+' | b'-')
+-                        && matches!(bytes[i - 1], b'e' | b'E' | b'p' | b'P'))
+-                {
+-                    i += 1;
+-                } else {
+-                    let next = macro_identifier_unit(bytes, i, false);
+-                    if next == 0 {
+-                        break;
+-                    }
+-                    i += next;
+-                }
+-            }
+-            continue;
+-        }
+-        let first = macro_identifier_unit(bytes, i, true);
+-        if first == 0 {
+-            i += 1;
+-            continue;
+-        }
+-        let start = i;
+-        i += first;
+-        while i < bytes.len() {
+-            let next = macro_identifier_unit(bytes, i, false);
+-            if next == 0 {
+-                break;
+-            }
+-            i += next;
+-        }
+-        last_name = Some(&source[start..i]);
+-    }
+-    last_name
+-        .and_then(|name| macros.get(name))
+-        .is_some_and(|definition| definition.params.is_some())
++        &mut tail_function,
++    )
++    .is_some()
++        && tail_function
+ }
+ 
+ fn collect_macro_expansions(
+@@ -6071,10 +6020,23 @@
+ /// Expand declaration tokens without expression rendering. In particular a
+ /// type-valued replacement must not first be interpreted as a C call/cast.
+ fn expand_declaration_tokens(
++    source: &str,
++    macros: &HashMap<String, MacroDef>,
++    disabled: &mut HashSet<String>,
++    budget: &mut usize,
++) -> Option<String> {
++    expand_declaration_tokens_with_tail(source, macros, disabled, budget, &mut false)
++}
++
++// Preserve eligibility while the originating expansion is still disabled.
++// A final F emitted by F(x) -> F cannot consume following source parentheses.
++// Ordinary declaration callers retain exactly the same rendered token stream.
++fn expand_declaration_tokens_with_tail(
+     source: &str,
+     macros: &HashMap<String, MacroDef>,
+     disabled: &mut HashSet<String>,
+     budget: &mut usize,
++    tail_function: &mut bool,
+ ) -> Option<String> {
+     let bytes = source.as_bytes();
+     let mut out = String::new();
+@@ -6143,8 +6105,13 @@
+                     if let Some(replacement) = replacement {
+                         *budget -= 1;
+                         disabled.insert(name.to_string());
+-                        let replacement =
+-                            expand_declaration_tokens(&replacement, macros, disabled, budget);
++                        let replacement = expand_declaration_tokens_with_tail(
++                            &replacement,
++                            macros,
++                            disabled,
++                            budget,
++                            tail_function,
++                        );
+                         disabled.remove(name);
+                         out.push_str(&replacement?);
+                         continue;
+@@ -6156,6 +6123,16 @@
+         }
+         let token = &source[start..i];
+         *budget = budget.checked_sub(token.len())?;
++        if !token.bytes().all(|byte| byte.is_ascii_whitespace())
++            && !token.starts_with("/*")
++            && !token.starts_with("//")
++        {
++            *tail_function = disabled.len() < 64
++                && !disabled.contains(token)
++                && macros
++                    .get(token)
++                    .is_some_and(|definition| definition.params.is_some());
++        }
+         out.push_str(token);
+     }
+     Some(out)

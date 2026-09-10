@@ -1,0 +1,12 @@
+{
+  "base": "4b6a7ebb6531bd4371112efc27f8993d33f92670",
+  "source": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-cast-context/cpg-rs/cpg-lang-c/src/exact.rs",
+    "sha256": "37e394fe9fe3f0afa11652368f26245fd8247bec78c534148d851d0475b3387a"
+  },
+  "binary": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-arguments/.local/target/debug/joern-parity",
+    "sha256": "f06b47ac9de0552cf22ef66c22bdc4302a5f1cd0f6b7b0cde96ca08670a7721b"
+  },
+  "buildLogSha256": "1b8f40c40cd93304f632bc3e218aad1419ffe3dca0dd23a02ae9ac1e545d7254"
+}

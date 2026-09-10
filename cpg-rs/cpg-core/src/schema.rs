@@ -189,6 +189,8 @@ pub enum EdgeKind {
     InheritsFrom,
     /// Closure/method reference capture relation.
     Capture,
+    /// Import occurrence -> its dependency.
+    Imports,
 }
 
 impl EdgeKind {
@@ -199,7 +201,7 @@ impl EdgeKind {
         EdgeKind::ALL.get(b as usize).copied()
     }
 
-    pub const ALL: [EdgeKind; 24] = [
+    pub const ALL: [EdgeKind; 25] = [
         EdgeKind::Ast,
         EdgeKind::Cfg,
         EdgeKind::Call,
@@ -224,6 +226,7 @@ impl EdgeKind {
         EdgeKind::PostDominate,
         EdgeKind::InheritsFrom,
         EdgeKind::Capture,
+        EdgeKind::Imports,
     ];
 }
 
@@ -245,4 +248,81 @@ pub enum Layer {
     Ddg,
     /// Per-method dataflow summaries.
     Summaries,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn binding_schema_appends_without_reassigning_persisted_tags() {
+        let original_nodes = [
+            NodeKind::File,
+            NodeKind::Namespace,
+            NodeKind::TypeDecl,
+            NodeKind::Member,
+            NodeKind::Method,
+            NodeKind::MethodParameterIn,
+            NodeKind::MethodReturn,
+            NodeKind::Block,
+            NodeKind::Call,
+            NodeKind::Identifier,
+            NodeKind::Literal,
+            NodeKind::Local,
+            NodeKind::FieldIdentifier,
+            NodeKind::ControlStructure,
+            NodeKind::Return,
+            NodeKind::MethodRef,
+            NodeKind::Unknown,
+            NodeKind::MethodParameterOut,
+            NodeKind::TypeRef,
+            NodeKind::JumpTarget,
+            NodeKind::Modifier,
+            NodeKind::NamespaceBlock,
+            NodeKind::Type,
+            NodeKind::MetaData,
+        ];
+        for (index, kind) in original_nodes.into_iter().enumerate() {
+            assert_eq!(kind.to_u8(), index as u8);
+            assert_eq!(NodeKind::from_u8(index as u8), Some(kind));
+        }
+        assert_eq!(NodeKind::Binding.to_u8(), 24);
+        assert_eq!(NodeKind::from_u8(24), Some(NodeKind::Binding));
+        assert_eq!(NodeKind::Import.to_u8(), 35);
+        assert_eq!(NodeKind::from_u8(35), Some(NodeKind::Import));
+        assert_eq!(NodeKind::Dependency.to_u8(), 33);
+        assert_eq!(NodeKind::from_u8(33), Some(NodeKind::Dependency));
+        assert_eq!(NodeKind::from_u8(42), None);
+        let original_edges = [
+            EdgeKind::Ast,
+            EdgeKind::Cfg,
+            EdgeKind::Call,
+            EdgeKind::Ref,
+            EdgeKind::Ddg,
+            EdgeKind::Argument,
+            EdgeKind::Receiver,
+            EdgeKind::Contains,
+            EdgeKind::ReachingDef,
+            EdgeKind::Condition,
+            EdgeKind::TrueBody,
+            EdgeKind::FalseBody,
+            EdgeKind::ForInit,
+            EdgeKind::ForUpdate,
+            EdgeKind::ForBody,
+            EdgeKind::DoBody,
+            EdgeKind::EvalType,
+            EdgeKind::SourceFile,
+            EdgeKind::ParameterLink,
+        ];
+        for (index, kind) in original_edges.into_iter().enumerate() {
+            assert_eq!(kind.to_u8(), index as u8);
+            assert_eq!(EdgeKind::from_u8(index as u8), Some(kind));
+        }
+        assert_eq!(EdgeKind::Binds.to_u8(), 19);
+        assert_eq!(EdgeKind::from_u8(19), Some(EdgeKind::Binds));
+        assert_eq!(EdgeKind::Imports.to_u8(), 24);
+        assert_eq!(EdgeKind::from_u8(24), Some(EdgeKind::Imports));
+        assert_eq!(EdgeKind::from_u8(25), None);
+        assert_eq!(EdgeKind::ALL.len(), 25);
+    }
 }

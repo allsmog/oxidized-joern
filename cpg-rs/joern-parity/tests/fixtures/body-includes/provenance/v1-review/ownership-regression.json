@@ -1,0 +1,216 @@
+{
+  "case": "repeated_include_context",
+  "completeMacroMethod": [
+    "METHOD NAME=N CODE=#define N 4 FULL_NAME=nested/table.h:N:int(0) SIGNATURE=int(0) ORDER=1",
+    "  BLOCK TYPE_FULL_NAME=ANY ORDER=1",
+    "  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=2"
+  ],
+  "macroMethodIdenticalAllThree": true,
+  "genuineSemanticLosses": [
+    "EDGES|CONTAINS D:nested/table.h:<global> -> nested/table.h:N:int(0)#0",
+    "EDGES|SOURCE_FILE nested/table.h:N:int(0)#0 -> F:nested/table.h"
+  ],
+  "candidateWrongOwners": [
+    "EDGES|CONTAINS D:main.c:<global> -> nested/table.h:N:int(0)#0",
+    "EDGES|SOURCE_FILE nested/table.h:N:int(0)#0 -> F:main.c"
+  ],
+  "allMacroOwnershipEdges": {
+    "live": [
+      "EDGES|CONTAINS D:main.c:<global> -> main.c:N:int(0)#0",
+      "EDGES|CONTAINS D:nested/table.h:<global> -> nested/table.h:N:int(0)#0",
+      "EDGES|SOURCE_FILE main.c:N:int(0)#0 -> F:main.c",
+      "EDGES|SOURCE_FILE nested/table.h:N:int(0)#0 -> F:nested/table.h"
+    ],
+    "baseline": [
+      "EDGES|CONTAINS D:nested/table.h:<global> -> nested/table.h:N:int(0)#0",
+      "EDGES|SOURCE_FILE nested/table.h:N:int(0)#0 -> F:nested/table.h"
+    ],
+    "candidate": [
+      "EDGES|CONTAINS D:main.c:<global> -> main.c:N:int(0)#0",
+      "EDGES|CONTAINS D:main.c:<global> -> nested/table.h:N:int(0)#0",
+      "EDGES|SOURCE_FILE main.c:N:int(0)#0 -> F:main.c",
+      "EDGES|SOURCE_FILE nested/table.h:N:int(0)#0 -> F:main.c"
+    ]
+  },
+  "rawOrdinalCollisionContexts": {
+    "12": {
+      "live": [
+        {
+          "ordinal": 0,
+          "record": "METHOD NAME=second CODE=int second(void) {\\n#include \"repeat.h\"\\n return first_table[2] + last_table[3];\\n} FULL_NAME=second SIGNATURE=int(void) ORDER=1"
+        },
+        {
+          "ordinal": 3,
+          "record": "  BLOCK CODE={\\n#include \"repeat.h\"\\n return first_table[2] + last_table[3];\\n} TYPE_FULL_NAME=void ORDER=2"
+        },
+        {
+          "ordinal": 10,
+          "record": "    CALL NAME=<operator>.assignment CODE=first_table[N] = {N} TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH"
+        },
+        {
+          "ordinal": 12,
+          "record": "      CALL NAME=<operator>.arrayInitializer CODE={N} TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.arrayInitializer ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH"
+        }
+      ],
+      "baseline": [
+        {
+          "ordinal": 0,
+          "record": "METHOD NAME=second CODE=int second(void) {\\n#include \"repeat.h\"\\n return first_table[2] + last_table[3];\\n} FULL_NAME=second SIGNATURE=int(void) ORDER=1"
+        },
+        {
+          "ordinal": 3,
+          "record": "  BLOCK CODE={\\n#include \"repeat.h\"\\n return first_table[2] + last_table[3];\\n} TYPE_FULL_NAME=void ORDER=2"
+        },
+        {
+          "ordinal": 6,
+          "record": "    RETURN CODE=return first_table[2] + last_table[3]; ORDER=1"
+        },
+        {
+          "ordinal": 7,
+          "record": "      CALL NAME=<operator>.addition CODE=first_table[2] + last_table[3] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH"
+        },
+        {
+          "ordinal": 11,
+          "record": "        CALL NAME=<operator>.indirectIndexAccess CODE=last_table[3] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectIndexAccess ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH"
+        },
+        {
+          "ordinal": 12,
+          "record": "          IDENTIFIER NAME=last_table CODE=<unknown> last_table TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1"
+        }
+      ],
+      "candidate": [
+        {
+          "ordinal": 0,
+          "record": "METHOD NAME=second CODE=int second(void) {\\n#include \"repeat.h\"\\n return first_table[2] + last_table[3];\\n} FULL_NAME=second SIGNATURE=int(void) ORDER=1"
+        },
+        {
+          "ordinal": 3,
+          "record": "  BLOCK CODE={\\n#include \"repeat.h\"\\n return first_table[2] + last_table[3];\\n} TYPE_FULL_NAME=void ORDER=2"
+        },
+        {
+          "ordinal": 12,
+          "record": "    CALL NAME=<operator>.assignment CODE=first_table[N] = {N} TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH"
+        }
+      ]
+    },
+    "13": {
+      "live": [
+        {
+          "ordinal": 0,
+          "record": "METHOD NAME=second CODE=int second(void) {\\n#include \"repeat.h\"\\n return first_table[2] + last_table[3];\\n} FULL_NAME=second SIGNATURE=int(void) ORDER=1"
+        },
+        {
+          "ordinal": 3,
+          "record": "  BLOCK CODE={\\n#include \"repeat.h\"\\n return first_table[2] + last_table[3];\\n} TYPE_FULL_NAME=void ORDER=2"
+        },
+        {
+          "ordinal": 10,
+          "record": "    CALL NAME=<operator>.assignment CODE=first_table[N] = {N} TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH"
+        },
+        {
+          "ordinal": 12,
+          "record": "      CALL NAME=<operator>.arrayInitializer CODE={N} TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.arrayInitializer ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH"
+        },
+        {
+          "ordinal": 13,
+          "record": "        LITERAL CODE=3 TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1"
+        }
+      ],
+      "baseline": [
+        {
+          "ordinal": 0,
+          "record": "METHOD NAME=second CODE=int second(void) {\\n#include \"repeat.h\"\\n return first_table[2] + last_table[3];\\n} FULL_NAME=second SIGNATURE=int(void) ORDER=1"
+        },
+        {
+          "ordinal": 3,
+          "record": "  BLOCK CODE={\\n#include \"repeat.h\"\\n return first_table[2] + last_table[3];\\n} TYPE_FULL_NAME=void ORDER=2"
+        },
+        {
+          "ordinal": 6,
+          "record": "    RETURN CODE=return first_table[2] + last_table[3]; ORDER=1"
+        },
+        {
+          "ordinal": 7,
+          "record": "      CALL NAME=<operator>.addition CODE=first_table[2] + last_table[3] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH"
+        },
+        {
+          "ordinal": 11,
+          "record": "        CALL NAME=<operator>.indirectIndexAccess CODE=last_table[3] TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectIndexAccess ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH"
+        },
+        {
+          "ordinal": 13,
+          "record": "          LITERAL CODE=3 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2"
+        }
+      ],
+      "candidate": [
+        {
+          "ordinal": 0,
+          "record": "METHOD NAME=second CODE=int second(void) {\\n#include \"repeat.h\"\\n return first_table[2] + last_table[3];\\n} FULL_NAME=second SIGNATURE=int(void) ORDER=1"
+        },
+        {
+          "ordinal": 3,
+          "record": "  BLOCK CODE={\\n#include \"repeat.h\"\\n return first_table[2] + last_table[3];\\n} TYPE_FULL_NAME=void ORDER=2"
+        },
+        {
+          "ordinal": 12,
+          "record": "    CALL NAME=<operator>.assignment CODE=first_table[N] = {N} TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH"
+        },
+        {
+          "ordinal": 13,
+          "record": "      IDENTIFIER NAME=first_table CODE=first_table TYPE_FULL_NAME=int[N] ORDER=1 ARGUMENT_INDEX=1"
+        }
+      ]
+    }
+  },
+  "retainedFullInputs": {
+    "repeat.h": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-include-diagnosis-v4/runs/first-complete-reference-batch/snapshot/input/repeated_include_context/repeat.h",
+      "sha256": "19dcabefdf697b3ed835d49328b7d35d218acf0dffa5f64c96235d93a9cafb84",
+      "bytes": 26
+    },
+    "main.c": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-include-diagnosis-v4/runs/first-complete-reference-batch/snapshot/input/repeated_include_context/main.c",
+      "sha256": "3978e883bd0aaf3d326144a6cd78a87a525f590207de23552f98049932b3e20f",
+      "bytes": 194
+    },
+    "nested/table.h": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-include-diagnosis-v4/runs/first-complete-reference-batch/snapshot/input/repeated_include_context/nested/table.h",
+      "sha256": "3bb7ed86169716c309a9d27e0016132128da26348425a566436c287738a3c15a",
+      "bytes": 86
+    }
+  },
+  "fullGraphs": {
+    "case": "repeated_include_context",
+    "baselineExact": false,
+    "candidateExact": false,
+    "matchingGained": 333,
+    "matchingLost": 4,
+    "allAdded": 572,
+    "allRemoved": 130,
+    "live": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-include-diagnosis-v4/runs/first-complete-reference-batch/expected/repeated_include_context/expected.txt",
+      "sha256": "febd4ffe0c249f8dbd0f4fac596f35b065914292f1d1e886f1d691a1c87ffaba",
+      "bytes": 55359
+    },
+    "baseline": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/tenth-batch/frozen-baseline-v1/repeated_include_context/actual.txt",
+      "sha256": "805fc908e10878d4feeb9fe59dc7dad936541d1c97da1ffb201cbc11ffaa8a23",
+      "bytes": 29655
+    },
+    "candidate": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/replay-v1/repeated_include_context/actual.txt",
+      "sha256": "6547ee1fd2afd7a40ad7b7b3cc5feec71d68ad7f41929362511d19ac198ad74b",
+      "bytes": 55708
+    },
+    "fullCandidateDiff": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/replay-v1/repeated_include_context/complete.diff",
+      "sha256": "224f1bc06c42653b306a08507a9d3928e7be327b0d821015b72ab9444da81ebd",
+      "bytes": 59941
+    },
+    "independentRecordDelta": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/tenth-body-include-v1-review/repeated_include_context.record-delta.json",
+      "sha256": "dfe06957edd1fe7f3b0e7d7afe9a6c87ba7d1e8f8ff574e3364e9bcd0e66e112",
+      "bytes": 65613
+    }
+  }
+}

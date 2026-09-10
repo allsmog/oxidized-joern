@@ -1,0 +1,8 @@
+{
+  "check": [
+    [
+      "<operator>.cast",
+      "(U)(x)"
+    ]
+  ]
+}

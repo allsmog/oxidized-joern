@@ -328,6 +328,7 @@ dependencies = [
  "cpg-core",
  "cpg-incremental",
  "cpg-lang-c",
+ "serde_json",
  "tempfile",
 ]
 

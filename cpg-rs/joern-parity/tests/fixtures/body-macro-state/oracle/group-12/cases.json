@@ -1,0 +1,6 @@
+{
+  "duplicate_clinit_tag": {
+    "a.c": "#define N 2\nstruct Pair { int a[N]; };\nint first(void) { return 0; }\n",
+    "b.c": "#define N 3\nstruct Pair { int a[N]; };\nint second(void) { return 1; }\n"
+  }
+}

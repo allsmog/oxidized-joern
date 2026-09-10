@@ -1,0 +1,43 @@
+{
+  "command": [
+    "/Users/shayaunnejad/vibe-code/joern-oxidized/.local/astra-sprint/oracle/runtime/joern-cli/joern",
+    "--script",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/direct-macro-argument-boundaries/oracle.sc",
+    "--param",
+    "inputPath=/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/direct-macro-argument-boundaries/input"
+  ],
+  "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/direct-macro-argument-boundaries/oracle-workspace-retry",
+  "exitCode": 0,
+  "wallSeconds": 5.430945458007045,
+  "inputHashes": {
+    "continued_comment": "a149a86af08b9b1fd9c78afe6c02e2d3d3aebab9988011d46ec7a5c3660e26e0",
+    "spliced_block_comment": "d236382ed583126ed80f77f687949fc4a563fd786be2ca893805308545766db0",
+    "quoted_whitespace": "41a36fe4fe1a51cff8db5cc94f2303dd584af6eec6cfe9ab350b196f90a40242"
+  },
+  "scriptSha256": "56431f14868678e64f9eb41026b44f1d3d7738404d28d2db62711b520c98c742",
+  "sharedOracleSha256": "bd2e18fab06ecd7897d796f5b31dac6669dc45ecf70c54fb1d5cc0fe29f3c1ab",
+  "joernVersion": "4.0.555",
+  "officialArchiveSha256": "12989883d6b5aeacc97b2dc0ecc4e2951bf50e48cb244f8c8f333d11a8be0c7e",
+  "projects": [
+    {
+      "case": "continued_comment",
+      "canonicalLinesIncludingSeparators": 158,
+      "nonemptySelectedRecords": 154,
+      "expectedSha256": "c3a4328e60d97b633181e4524e9605424528fc4b7a75a17007e9069dc8eb36a1"
+    },
+    {
+      "case": "quoted_whitespace",
+      "canonicalLinesIncludingSeparators": 240,
+      "nonemptySelectedRecords": 234,
+      "expectedSha256": "07419b4bfabbe21bda5475997bcb7f5ed3e10378fdad726096122d5fedd5c544"
+    },
+    {
+      "case": "spliced_block_comment",
+      "canonicalLinesIncludingSeparators": 158,
+      "nonemptySelectedRecords": 154,
+      "expectedSha256": "61c69eebd57921d0995d45914983519d0cbb0d9862148430e90a739e5f236693"
+    }
+  ],
+  "rawStdoutSha256": "4749e3c0bc8331e40665e6977c646821015224cd18ded6ab40e87b0413f06807",
+  "rawStderrSha256": "acc8df752dd97da11330e62f1d1bbb9b02bf5438fd147d45c7ea8fc2cf567ef8"
+}

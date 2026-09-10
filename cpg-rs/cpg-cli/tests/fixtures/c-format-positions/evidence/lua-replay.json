@@ -1,0 +1,18 @@
+{
+  "command": [
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-format-rules/.local/format-positions/target/debug/cpg",
+    "scan",
+    "--load",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/real-project-review/lua-5.4.7/fourth-preview-a14-1/graph.cpg",
+    "--lang",
+    "c",
+    "-o",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-format-rules/.local/format-positions/lua-after.sarif"
+  ],
+  "exitCode": 0,
+  "seconds": 7.6211857500020415,
+  "binarySha256": "e297b1af0c84bfe4209064293f54c98aeb9e97fbaf8a72604ccb60e7edfa9800",
+  "graphSha256": "6af4314a293e02a5953cfd2619a039f15322c505e5e4212b7b460fc7b1e72b92",
+  "sarifSha256": "0becad10ba8527f8055f00b8752fa550f27725d671483aa6f0171d81c335aeec",
+  "findings": 0
+}

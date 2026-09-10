@@ -1,0 +1,10 @@
+   Compiling joern-parity v0.1.1 (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/cpg-rs/joern-parity)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.70s
+     Running tests/typedef_existence.rs (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-arguments/.local/target/debug/deps/typedef_existence-da6de949790efb00)
+
+running 2 tests
+test typedef_existence_preserves_complete_exact_controls ... ok
+test expanded_typedef_validity_preserves_cast_and_pointer_call_context ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.25s
+

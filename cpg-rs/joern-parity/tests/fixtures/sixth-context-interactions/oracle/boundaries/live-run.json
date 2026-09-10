@@ -1,0 +1,31 @@
+{
+  "command": [
+    "/Users/shayaunnejad/vibe-code/joern-oxidized/.local/astra-sprint/oracle/runtime/joern-cli/joern",
+    "--script",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-cast-context/.local/macro-cast-context/boundaries/oracle.sc",
+    "--param",
+    "inputPath=/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-cast-context/.local/macro-cast-context/boundaries/input"
+  ],
+  "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-cast-context/.local/macro-cast-context/boundaries/oracle-workspace",
+  "exitCode": 0,
+  "wallSeconds": 15.866857083005016,
+  "scriptSha256": "56431f14868678e64f9eb41026b44f1d3d7738404d28d2db62711b520c98c742",
+  "stdoutSha256": "b6ee6d9c3a9a261f3e184eda9b8166b82e46185b41678c293b329343451ed6e5",
+  "inputs": {
+    "direct_type_argument/main.c": "b7f446f081a3179d8a5658eedce4c0b135df8d6f1eb646115e3a2b38826ce1a5",
+    "cast_chain/main.c": "f14e706632996831ac7ad817284f293e9be984948e111195afbc6236341c3649",
+    "for_shadow/main.c": "568c0a4573cd9338823f485b34283c2b1a2cfcbac284643e3f237d15b5ecf04f",
+    "local_preprocessor/main.c": "fd0fb20781020dc1aef1ec5a59e06cc52b1edd0a1bd1e760285cfac9a6cb5482",
+    "pointer_typedefs/main.c": "e3b798e5b4e9e66ec719b90afaa084a2619d8f92523f7f002122d32a5a1d9339",
+    "local_preprocessor_else/main.c": "137c5c67849e4a7419919c715f81940694a67fda9fb2be130290097131eebbd1",
+    "enum_shadow/main.c": "3b64462b523f529066078836ede4e72c1a27f429896446b32d4bc0a6279e6f39",
+    "prototype_shadow/main.c": "c5eeefde3cacc4fdcf5c2d2f9949803b314fbe31f82128744763b6623d8e4585",
+    "compound_typedef/main.c": "7b781c2cee6806480e55f820b0d111c03bedc9cb47c2c6e8b505bbee0f1885f9",
+    "local_same_global/main.c": "7a0ab83164dca33d201f1c530a3f4ab3a09fcf7f027050d6b527bc9d68619838",
+    "unary_casts/main.c": "608fd8acb28e0b34b823d90a8de94d114cf43fa1d90e6c0875ca849ca33e583d",
+    "primitive_typedefs/main.c": "51c3dbe6af67ea7315457522b216dc545d9af181102d93da407b977235a670e2",
+    "qualified_typedef/main.c": "ab0b345534bb4450eafad3c84f3d18d4a4c4cc490d8b78ab18d460484fcf7b1e",
+    "repeated_local/main.c": "dbb345826d8495068a285bbfa42bf2a914112c3904e2af9eb67c6fcc0eca7839",
+    "sizeof_grouping/main.c": "81d247d1e91933041fcb46621dd48a93315a453dfdfb8f9d3f58a18922a231f7"
+  }
+}

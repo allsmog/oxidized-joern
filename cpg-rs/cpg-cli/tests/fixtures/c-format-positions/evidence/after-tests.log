@@ -1,0 +1,10 @@
+   Compiling cpg-cli v0.1.1 (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-format-rules/.local/format-positions/candidate-workspace/cpg-cli)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.51s
+     Running tests/c_format_positions.rs (.local/format-positions/target/debug/deps/c_format_positions-eeb41462f69e79f0)
+
+running 2 tests
+test c_sink_selectors_use_zero_based_argument_positions ... ok
+test builtin_c_format_rule_excludes_data_and_stream_arguments ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s
+

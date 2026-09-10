@@ -1,0 +1,122 @@
+{
+  "command": [
+    "/Users/shayaunnejad/vibe-code/joern-oxidized/.local/astra-sprint/oracle/runtime/joern-cli/joern",
+    "--script",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-declaration-macros/.local/header-return-regression/aliases/oracle.sc",
+    "--param",
+    "inputPath=/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-declaration-macros/.local/header-return-regression/aliases/input"
+  ],
+  "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-declaration-macros/.local/header-return-regression/aliases/oracle-workspace",
+  "exitCode": 0,
+  "wallSeconds": 11.872364541995921,
+  "inputHashes": {
+    "unknown_alias": {
+      "api.h": "c7a44a2d2f2cc890ff7a0f9abf28fb180e3244261db770ccbb00062162b5af8b",
+      "main.c": "d064cf1e1c689b2530bff927a1fe024ee1463291b847324a8a5be0de79115848"
+    },
+    "unknown_return": {
+      "api.h": "9d148e4f22072aa650e2d6d0ed3bae0cc28fc02c5f73518fcc91f729f44ab2c8",
+      "main.c": "d064cf1e1c689b2530bff927a1fe024ee1463291b847324a8a5be0de79115848"
+    },
+    "primitive_alias": {
+      "api.h": "28a6b5998fff1748abba255660a2f35fd72326161de4660940560ed16d99f538",
+      "main.c": "d064cf1e1c689b2530bff927a1fe024ee1463291b847324a8a5be0de79115848"
+    },
+    "alias_chain": {
+      "api.h": "67bb5d5a778fbb63f7baa58d44a1b89245a398dbd1b7ca7315f852d5ba7dd046",
+      "main.c": "d064cf1e1c689b2530bff927a1fe024ee1463291b847324a8a5be0de79115848"
+    },
+    "struct_alias": {
+      "api.h": "b29fc65b3f2d6a642e207aa5d3f4b822f56a554a5445e2d174b0f1f7e1f1e793",
+      "main.c": "d064cf1e1c689b2530bff927a1fe024ee1463291b847324a8a5be0de79115848"
+    },
+    "struct_same": {
+      "api.h": "c363ff50bf57d0b90a6a4d506e369fabfb3f3f17d1590ff4ec9311a95753cf9b",
+      "main.c": "d064cf1e1c689b2530bff927a1fe024ee1463291b847324a8a5be0de79115848"
+    },
+    "unknown_pointer_alias": {
+      "api.h": "6b937b81c772537867b5442f129164cc2f1ec542c36f4371d994c3927a669e79",
+      "main.c": "d064cf1e1c689b2530bff927a1fe024ee1463291b847324a8a5be0de79115848"
+    },
+    "macro_alias": {
+      "api.h": "e5ce40371c70e6952ece696054cc87d50d67b6bae72a9f34dbe7e87cec150c8c",
+      "main.c": "d064cf1e1c689b2530bff927a1fe024ee1463291b847324a8a5be0de79115848"
+    },
+    "unknown_macro_alias": {
+      "api.h": "e6d1cf53b31bf9e0b7796f2923d037b2c1d72a71224671213fc2767d520e1cfc",
+      "main.c": "d064cf1e1c689b2530bff927a1fe024ee1463291b847324a8a5be0de79115848"
+    },
+    "forward_tag": {
+      "api.h": "c0a634aa8c47c57bc321f77372e6ae657ad681860ab97a632ac64306fb1fb9a5",
+      "main.c": "d064cf1e1c689b2530bff927a1fe024ee1463291b847324a8a5be0de79115848"
+    }
+  },
+  "scriptSha256": "56431f14868678e64f9eb41026b44f1d3d7738404d28d2db62711b520c98c742",
+  "sharedOracleSha256": "bd2e18fab06ecd7897d796f5b31dac6669dc45ecf70c54fb1d5cc0fe29f3c1ab",
+  "joernVersion": "4.0.555",
+  "officialArchiveSha256": "12989883d6b5aeacc97b2dc0ecc4e2951bf50e48cb244f8c8f333d11a8be0c7e",
+  "projects": [
+    {
+      "case": "alias_chain",
+      "canonicalLinesIncludingSeparators": 168,
+      "nonemptySelectedRecords": 163,
+      "expectedSha256": "1631c85e74eb7085127b8cc7e26764af1710285c1c0fe5fb9ef820478e495450"
+    },
+    {
+      "case": "forward_tag",
+      "canonicalLinesIncludingSeparators": 166,
+      "nonemptySelectedRecords": 161,
+      "expectedSha256": "632b8e2d63819d86a91e7d0734472cb5a5ec5719ad51b29effcab1e6cc3d2c43"
+    },
+    {
+      "case": "macro_alias",
+      "canonicalLinesIncludingSeparators": 162,
+      "nonemptySelectedRecords": 157,
+      "expectedSha256": "c940dde5d880c618e225c049ba17ec31c85f3b3decae207f69ca6d72ec058276"
+    },
+    {
+      "case": "primitive_alias",
+      "canonicalLinesIncludingSeparators": 162,
+      "nonemptySelectedRecords": 157,
+      "expectedSha256": "cb790bd0484393a99179a26be31b1048d7648881f02c709f33cee6e381223a2c"
+    },
+    {
+      "case": "struct_alias",
+      "canonicalLinesIncludingSeparators": 172,
+      "nonemptySelectedRecords": 167,
+      "expectedSha256": "b7d00553b2ab7c8b823790c32a2fc0cbd7debd87134c615a98beaad26b75d448"
+    },
+    {
+      "case": "struct_same",
+      "canonicalLinesIncludingSeparators": 166,
+      "nonemptySelectedRecords": 161,
+      "expectedSha256": "88c362baf577c4360605189d492a7ee5e5bf856e931a4f776d8ff01a45287573"
+    },
+    {
+      "case": "unknown_alias",
+      "canonicalLinesIncludingSeparators": 157,
+      "nonemptySelectedRecords": 152,
+      "expectedSha256": "a52496f7e6a58920eac209d78662b8252aef8bdf054e77a3766ed9d331f4a9bb"
+    },
+    {
+      "case": "unknown_macro_alias",
+      "canonicalLinesIncludingSeparators": 157,
+      "nonemptySelectedRecords": 152,
+      "expectedSha256": "6775536731d80f228801f25ae958d8e5bc14671289a8f47f7df59fa1539e5a2b"
+    },
+    {
+      "case": "unknown_pointer_alias",
+      "canonicalLinesIncludingSeparators": 162,
+      "nonemptySelectedRecords": 157,
+      "expectedSha256": "fd8b1ee145a875b9991da598529eaf7cf909a9be400d883d10638abd1ad3f2b3"
+    },
+    {
+      "case": "unknown_return",
+      "canonicalLinesIncludingSeparators": 156,
+      "nonemptySelectedRecords": 151,
+      "expectedSha256": "3249dd09fe123f23d53494bcc331514a726d383a12e08dfc35a2f2006b3b85d9"
+    }
+  ],
+  "rawStdoutSha256": "4ebe447c6906a0e371d79e858e6c6df037d549741811a55b34cef41f3b94d3ac",
+  "rawStderrSha256": "6bb48ebe8f0388639fe271e74c8d175feb02cfa9f89c78e1dd9d9416c2fa7c30"
+}

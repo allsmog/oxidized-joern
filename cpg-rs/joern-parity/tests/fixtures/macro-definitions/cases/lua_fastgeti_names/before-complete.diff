@@ -1,0 +1,120 @@
+--- live-joern
++++ frozen-e001
+@@ -6,12 +6,17 @@
+   BLOCK TYPE_FULL_NAME=ANY ORDER=1
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+ 
++METHOD NAME=slot CODE=#define luaV_fastgeti(L,t,k,slot) \\n  (!ttistable(t)  \\n   ? (slot = NULL, 0)  /* not a table; 'slot' is NULL and result is 0 */  \\n   : (slot = (l_castS2U(k) - 1u < hvalue(t)->alimit) \\n              ? &hvalue(t)->array[k - 1] : luaH_getint(hvalue(t), k), \\n      !isempty(slot)))  /* result not empty? */ FULL_NAME=defs.h:slot:ANY(0) SIGNATURE=ANY(0) ORDER=1
++  BLOCK TYPE_FULL_NAME=ANY ORDER=1
++  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
++
+ METHOD NAME=probe CODE=int probe(int slot) { return slot; } FULL_NAME=probe SIGNATURE=int(int) ORDER=1
+   METHOD_PARAMETER_IN NAME=slot CODE=int slot TYPE_FULL_NAME=int ORDER=1
+   METHOD_PARAMETER_OUT NAME=slot CODE=int slot TYPE_FULL_NAME=int ORDER=1
+   BLOCK CODE={ return slot; } TYPE_FULL_NAME=void ORDER=2
+     RETURN CODE=return slot; ORDER=1
+-      IDENTIFIER NAME=slot CODE=slot TYPE_FULL_NAME=int ORDER=1
++      CALL NAME=slot CODE=slot TYPE_FULL_NAME=ANY METHOD_FULL_NAME=defs.h:slot:ANY(0) SIGNATURE=ANY(0) ORDER=1 DISPATCH_TYPE=INLINED
++        BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+ 
+ METHOD NAME=<global> CODE=<global> FULL_NAME=probe.c:<global> ORDER=1
+@@ -20,7 +25,8 @@
+     METHOD_PARAMETER_OUT NAME=slot CODE=int slot TYPE_FULL_NAME=int ORDER=1
+     BLOCK CODE={ return slot; } TYPE_FULL_NAME=void ORDER=2
+       RETURN CODE=return slot; ORDER=1
+-        IDENTIFIER NAME=slot CODE=slot TYPE_FULL_NAME=int ORDER=1
++        CALL NAME=slot CODE=slot TYPE_FULL_NAME=ANY METHOD_FULL_NAME=defs.h:slot:ANY(0) SIGNATURE=ANY(0) ORDER=1 DISPATCH_TYPE=INLINED
++          BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+     METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+   BLOCK TYPE_FULL_NAME=ANY ORDER=1
+     METHOD_REF CODE=probe TYPE_FULL_NAME=probe METHOD_FULL_NAME=probe ORDER=1
+@@ -47,16 +53,19 @@
+ NODES|TYPE NAME=probe FULL_NAME=probe TYPE_DECL_FULL_NAME=probe
+ NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+ EDGES|ARGUMENT probe#4 -> probe#5
++EDGES|CALL probe#5 -> defs.h:slot:ANY(0)#0
+ EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+ EDGES|CFG defs.h:<global>#0 -> defs.h:<global>#2
++EDGES|CFG defs.h:slot:ANY(0)#0 -> defs.h:slot:ANY(0)#2
+ EDGES|CFG probe#0 -> probe#5
+-EDGES|CFG probe#4 -> probe#6
++EDGES|CFG probe#4 -> probe#7
+ EDGES|CFG probe#5 -> probe#4
+-EDGES|CFG probe.c:<global>#0 -> probe.c:<global>#9
+-EDGES|CFG probe.c:<global>#9 -> probe.c:<global>#10
++EDGES|CFG probe.c:<global>#0 -> probe.c:<global>#10
++EDGES|CFG probe.c:<global>#10 -> probe.c:<global>#11
+ EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+ EDGES|CONTAINS D:defs.h:<global> -> defs.h:<global>#0
+ EDGES|CONTAINS D:probe.c:<global> -> D:probe
++EDGES|CONTAINS D:probe.c:<global> -> defs.h:slot:ANY(0)#0
+ EDGES|CONTAINS D:probe.c:<global> -> probe.c:<global>#0
+ EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+ EDGES|CONTAINS F:<includes> -> D:ANY
+@@ -65,24 +74,29 @@
+ EDGES|CONTAINS F:defs.h -> D:defs.h:<global>
+ EDGES|CONTAINS F:probe.c -> D:probe.c:<global>
+ EDGES|CONTAINS defs.h:<global>#0 -> defs.h:<global>#1
++EDGES|CONTAINS defs.h:slot:ANY(0)#0 -> defs.h:slot:ANY(0)#1
+ EDGES|CONTAINS probe#0 -> probe#3
+ EDGES|CONTAINS probe#0 -> probe#4
+ EDGES|CONTAINS probe#0 -> probe#5
++EDGES|CONTAINS probe#0 -> probe#6
+ EDGES|CONTAINS probe.c:<global>#0 -> probe#0
+-EDGES|CONTAINS probe.c:<global>#0 -> probe.c:<global>#8
++EDGES|CONTAINS probe.c:<global>#0 -> probe.c:<global>#10
+ EDGES|CONTAINS probe.c:<global>#0 -> probe.c:<global>#9
+ EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+ EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+ EDGES|EVAL_TYPE defs.h:<global>#1 -> T:ANY
+ EDGES|EVAL_TYPE defs.h:<global>#2 -> T:ANY
++EDGES|EVAL_TYPE defs.h:slot:ANY(0)#1 -> T:ANY
++EDGES|EVAL_TYPE defs.h:slot:ANY(0)#2 -> T:ANY
+ EDGES|EVAL_TYPE probe#1 -> T:int
+ EDGES|EVAL_TYPE probe#2 -> T:int
+ EDGES|EVAL_TYPE probe#3 -> T:void
+-EDGES|EVAL_TYPE probe#5 -> T:int
+-EDGES|EVAL_TYPE probe#6 -> T:int
+-EDGES|EVAL_TYPE probe.c:<global>#10 -> T:ANY
+-EDGES|EVAL_TYPE probe.c:<global>#8 -> T:ANY
+-EDGES|EVAL_TYPE probe.c:<global>#9 -> T:probe
++EDGES|EVAL_TYPE probe#5 -> T:ANY
++EDGES|EVAL_TYPE probe#6 -> T:ANY
++EDGES|EVAL_TYPE probe#7 -> T:int
++EDGES|EVAL_TYPE probe.c:<global>#10 -> T:probe
++EDGES|EVAL_TYPE probe.c:<global>#11 -> T:ANY
++EDGES|EVAL_TYPE probe.c:<global>#9 -> T:ANY
+ EDGES|PARAMETER_LINK probe#1 -> probe#2
+ EDGES|REF NB:<global> -> NS:<global>
+ EDGES|REF NB:<includes>:<global> -> NS:<global>
+@@ -92,8 +106,7 @@
+ EDGES|REF T:int -> D:int
+ EDGES|REF T:probe -> D:probe
+ EDGES|REF T:void -> D:void
+-EDGES|REF probe#5 -> probe#1
+-EDGES|REF probe.c:<global>#9 -> probe#0
++EDGES|REF probe.c:<global>#10 -> probe#0
+ EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+ EDGES|SOURCE_FILE D:ANY -> F:<includes>
+ EDGES|SOURCE_FILE D:defs.h:<global> -> F:defs.h
+@@ -106,13 +119,16 @@
+ EDGES|SOURCE_FILE NB:defs.h:<global> -> F:defs.h
+ EDGES|SOURCE_FILE NB:probe.c:<global> -> F:probe.c
+ EDGES|SOURCE_FILE defs.h:<global>#0 -> F:defs.h
++EDGES|SOURCE_FILE defs.h:slot:ANY(0)#0 -> F:probe.c
+ EDGES|SOURCE_FILE probe#0 -> F:probe.c
+ EDGES|SOURCE_FILE probe.c:<global>#0 -> F:probe.c
+-FLOWS|REACHING_DEF[<RET>] probe#4 -> probe#6
++FLOWS|REACHING_DEF[<RET>] probe#4 -> probe#7
+ FLOWS|REACHING_DEF[] probe#0 -> probe#1
+ FLOWS|REACHING_DEF[] probe#0 -> probe#5
+-FLOWS|REACHING_DEF[] probe.c:<global>#0 -> probe.c:<global>#9
++FLOWS|REACHING_DEF[] probe.c:<global>#0 -> probe.c:<global>#10
+ FLOWS|REACHING_DEF[slot] probe#1 -> probe#2
+ FLOWS|REACHING_DEF[slot] probe#1 -> probe#5
+-FLOWS|REACHING_DEF[slot] probe#1 -> probe#6
++FLOWS|REACHING_DEF[slot] probe#1 -> probe#7
++FLOWS|REACHING_DEF[slot] probe#5 -> probe#2
+ FLOWS|REACHING_DEF[slot] probe#5 -> probe#4
++FLOWS|REACHING_DEF[slot] probe#5 -> probe#7

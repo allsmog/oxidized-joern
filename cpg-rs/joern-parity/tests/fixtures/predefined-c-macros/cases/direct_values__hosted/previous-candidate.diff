@@ -1,0 +1,170 @@
+--- fresh-live
++++ candidate
+@@ -15,30 +15,24 @@
+     METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+     METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+     BLOCK CODE={ return __STDC_HOSTED__ + value; } TYPE_FULL_NAME=void ORDER=2
++      LOCAL NAME=__STDC_HOSTED__ CODE=<unknown> __STDC_HOSTED__ TYPE_FULL_NAME=ANY ORDER=0
+       RETURN CODE=return __STDC_HOSTED__ + value; ORDER=1
+         CALL NAME=<operator>.addition CODE=__STDC_HOSTED__ + value TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+-          CALL NAME=__STDC_HOSTED__ CODE=__STDC_HOSTED__ TYPE_FULL_NAME=int METHOD_FULL_NAME=main.c:__STDC_HOSTED__:int(0) SIGNATURE=int(0) ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=INLINED
+-            BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+-              LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=1
++          IDENTIFIER NAME=__STDC_HOSTED__ CODE=<unknown> __STDC_HOSTED__ TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+           IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+     METHOD_RETURN CODE=RET TYPE_FULL_NAME=long ORDER=3
+   BLOCK TYPE_FULL_NAME=ANY ORDER=1
+     METHOD_REF CODE=read_value TYPE_FULL_NAME=read_value METHOD_FULL_NAME=read_value ORDER=1
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+ 
+-METHOD NAME=__STDC_HOSTED__ CODE= FULL_NAME=main.c:__STDC_HOSTED__:int(0) SIGNATURE=int(0) ORDER=1
+-  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+-  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=2
+-
+ METHOD NAME=read_value CODE=long read_value(int value) { return __STDC_HOSTED__ + value; } FULL_NAME=read_value SIGNATURE=long(int) ORDER=1
+   METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+   METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+   BLOCK CODE={ return __STDC_HOSTED__ + value; } TYPE_FULL_NAME=void ORDER=2
++    LOCAL NAME=__STDC_HOSTED__ CODE=<unknown> __STDC_HOSTED__ TYPE_FULL_NAME=ANY ORDER=0
+     RETURN CODE=return __STDC_HOSTED__ + value; ORDER=1
+       CALL NAME=<operator>.addition CODE=__STDC_HOSTED__ + value TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+-        CALL NAME=__STDC_HOSTED__ CODE=__STDC_HOSTED__ TYPE_FULL_NAME=int METHOD_FULL_NAME=main.c:__STDC_HOSTED__:int(0) SIGNATURE=int(0) ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=INLINED
+-          BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+-            LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=1
++        IDENTIFIER NAME=__STDC_HOSTED__ CODE=<unknown> __STDC_HOSTED__ TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+         IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=long ORDER=3
+ 
+@@ -61,28 +55,23 @@
+ NODES|TYPE NAME=long FULL_NAME=long TYPE_DECL_FULL_NAME=long
+ NODES|TYPE NAME=read_value FULL_NAME=read_value TYPE_DECL_FULL_NAME=read_value
+ NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+-EDGES|ARGUMENT read_value#4 -> read_value#5
+ EDGES|ARGUMENT read_value#5 -> read_value#6
+-EDGES|ARGUMENT read_value#5 -> read_value#9
+-EDGES|CALL read_value#5 -> <operator>.addition#0
+-EDGES|CALL read_value#6 -> main.c:__STDC_HOSTED__:int(0)#0
++EDGES|ARGUMENT read_value#6 -> read_value#7
++EDGES|ARGUMENT read_value#6 -> read_value#8
++EDGES|CALL read_value#6 -> <operator>.addition#0
+ EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+ EDGES|CFG <operator>.addition#0 -> <operator>.addition#5
+-EDGES|CFG main.c:<global>#0 -> main.c:<global>#13
+-EDGES|CFG main.c:<global>#1 -> read_value#6
+-EDGES|CFG main.c:<global>#13 -> main.c:<global>#14
+-EDGES|CFG main.c:__STDC_HOSTED__:int(0)#0 -> main.c:__STDC_HOSTED__:int(0)#2
+-EDGES|CFG read_value#4 -> read_value#10
+-EDGES|CFG read_value#5 -> read_value#4
+-EDGES|CFG read_value#6 -> read_value#8
+-EDGES|CFG read_value#6 -> read_value#9
+-EDGES|CFG read_value#8 -> read_value#9
+-EDGES|CFG read_value#9 -> read_value#5
++EDGES|CFG main.c:<global>#0 -> main.c:<global>#12
++EDGES|CFG main.c:<global>#1 -> read_value#7
++EDGES|CFG main.c:<global>#12 -> main.c:<global>#13
++EDGES|CFG read_value#5 -> read_value#9
++EDGES|CFG read_value#6 -> read_value#5
++EDGES|CFG read_value#7 -> read_value#8
++EDGES|CFG read_value#8 -> read_value#6
+ EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+ EDGES|CONTAINS <operator>.addition#0 -> <operator>.addition#2
+ EDGES|CONTAINS D:main.c:<global> -> D:read_value
+ EDGES|CONTAINS D:main.c:<global> -> main.c:<global>#0
+-EDGES|CONTAINS D:main.c:<global> -> main.c:__STDC_HOSTED__:int(0)#0
+ EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+ EDGES|CONTAINS F:<includes> -> D:ANY
+ EDGES|CONTAINS F:<includes> -> D:int
+@@ -90,16 +79,13 @@
+ EDGES|CONTAINS F:<includes> -> D:void
+ EDGES|CONTAINS F:main.c -> D:main.c:<global>
+ EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#1
++EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#11
+ EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#12
+-EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#13
+ EDGES|CONTAINS main.c:<global>#1 -> read_value#3
+-EDGES|CONTAINS main.c:<global>#1 -> read_value#4
+ EDGES|CONTAINS main.c:<global>#1 -> read_value#5
+ EDGES|CONTAINS main.c:<global>#1 -> read_value#6
+ EDGES|CONTAINS main.c:<global>#1 -> read_value#7
+ EDGES|CONTAINS main.c:<global>#1 -> read_value#8
+-EDGES|CONTAINS main.c:<global>#1 -> read_value#9
+-EDGES|CONTAINS main.c:__STDC_HOSTED__:int(0)#0 -> main.c:__STDC_HOSTED__:int(0)#1
+ EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+ EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+ EDGES|EVAL_TYPE <operator>.addition#1 -> T:ANY
+@@ -108,20 +94,17 @@
+ EDGES|EVAL_TYPE <operator>.addition#4 -> T:ANY
+ EDGES|EVAL_TYPE <operator>.addition#5 -> T:ANY
+ EDGES|EVAL_TYPE <operator>.addition#6 -> T:ANY
+-EDGES|EVAL_TYPE main.c:<global>#12 -> T:ANY
+-EDGES|EVAL_TYPE main.c:<global>#13 -> T:read_value
+-EDGES|EVAL_TYPE main.c:<global>#14 -> T:ANY
+-EDGES|EVAL_TYPE main.c:__STDC_HOSTED__:int(0)#1 -> T:ANY
+-EDGES|EVAL_TYPE main.c:__STDC_HOSTED__:int(0)#2 -> T:int
++EDGES|EVAL_TYPE main.c:<global>#11 -> T:ANY
++EDGES|EVAL_TYPE main.c:<global>#12 -> T:read_value
++EDGES|EVAL_TYPE main.c:<global>#13 -> T:ANY
+ EDGES|EVAL_TYPE read_value#1 -> T:int
+-EDGES|EVAL_TYPE read_value#10 -> T:long
+ EDGES|EVAL_TYPE read_value#2 -> T:int
+ EDGES|EVAL_TYPE read_value#3 -> T:void
+-EDGES|EVAL_TYPE read_value#5 -> T:ANY
+-EDGES|EVAL_TYPE read_value#6 -> T:int
++EDGES|EVAL_TYPE read_value#4 -> T:ANY
++EDGES|EVAL_TYPE read_value#6 -> T:ANY
+ EDGES|EVAL_TYPE read_value#7 -> T:ANY
+ EDGES|EVAL_TYPE read_value#8 -> T:int
+-EDGES|EVAL_TYPE read_value#9 -> T:int
++EDGES|EVAL_TYPE read_value#9 -> T:long
+ EDGES|PARAMETER_LINK <operator>.addition#1 -> <operator>.addition#3
+ EDGES|PARAMETER_LINK <operator>.addition#4 -> <operator>.addition#6
+ EDGES|PARAMETER_LINK read_value#1 -> read_value#2
+@@ -133,8 +116,9 @@
+ EDGES|REF T:long -> D:long
+ EDGES|REF T:read_value -> D:read_value
+ EDGES|REF T:void -> D:void
+-EDGES|REF main.c:<global>#13 -> main.c:<global>#1
+-EDGES|REF read_value#9 -> read_value#1
++EDGES|REF main.c:<global>#12 -> main.c:<global>#1
++EDGES|REF read_value#7 -> read_value#4
++EDGES|REF read_value#8 -> read_value#1
+ EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+ EDGES|SOURCE_FILE D:ANY -> F:<includes>
+ EDGES|SOURCE_FILE D:int -> F:<includes>
+@@ -147,25 +131,23 @@
+ EDGES|SOURCE_FILE NB:main.c:<global> -> F:main.c
+ EDGES|SOURCE_FILE main.c:<global>#0 -> F:main.c
+ EDGES|SOURCE_FILE main.c:<global>#1 -> F:main.c
+-EDGES|SOURCE_FILE main.c:__STDC_HOSTED__:int(0)#0 -> F:main.c
+-FLOWS|REACHING_DEF[<RET>] read_value#4 -> read_value#10
++FLOWS|REACHING_DEF[<RET>] read_value#5 -> read_value#9
++FLOWS|REACHING_DEF[<unknown> __STDC_HOSTED__] read_value#7 -> read_value#6
++FLOWS|REACHING_DEF[<unknown> __STDC_HOSTED__] read_value#7 -> read_value#9
+ FLOWS|REACHING_DEF[] <operator>.addition#0 -> <operator>.addition#1
+ FLOWS|REACHING_DEF[] <operator>.addition#0 -> <operator>.addition#4
+-FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#13
++FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#12
+ FLOWS|REACHING_DEF[] main.c:<global>#1 -> read_value#1
+-FLOWS|REACHING_DEF[] main.c:<global>#1 -> read_value#6
++FLOWS|REACHING_DEF[] main.c:<global>#1 -> read_value#7
+ FLOWS|REACHING_DEF[] main.c:<global>#1 -> read_value#8
+-FLOWS|REACHING_DEF[] main.c:<global>#1 -> read_value#9
+-FLOWS|REACHING_DEF[__STDC_HOSTED__ + value] read_value#5 -> read_value#10
+-FLOWS|REACHING_DEF[__STDC_HOSTED__ + value] read_value#5 -> read_value#4
+-FLOWS|REACHING_DEF[__STDC_HOSTED__] read_value#6 -> read_value#10
+-FLOWS|REACHING_DEF[__STDC_HOSTED__] read_value#6 -> read_value#5
++FLOWS|REACHING_DEF[__STDC_HOSTED__ + value] read_value#6 -> read_value#5
++FLOWS|REACHING_DEF[__STDC_HOSTED__ + value] read_value#6 -> read_value#9
+ FLOWS|REACHING_DEF[p1] <operator>.addition#1 -> <operator>.addition#3
+ FLOWS|REACHING_DEF[p1] <operator>.addition#1 -> <operator>.addition#5
+ FLOWS|REACHING_DEF[p2] <operator>.addition#4 -> <operator>.addition#5
+ FLOWS|REACHING_DEF[p2] <operator>.addition#4 -> <operator>.addition#6
+ FLOWS|REACHING_DEF[value] read_value#1 -> read_value#2
+-FLOWS|REACHING_DEF[value] read_value#1 -> read_value#9
+-FLOWS|REACHING_DEF[value] read_value#9 -> read_value#10
+-FLOWS|REACHING_DEF[value] read_value#9 -> read_value#2
+-FLOWS|REACHING_DEF[value] read_value#9 -> read_value#5
++FLOWS|REACHING_DEF[value] read_value#1 -> read_value#8
++FLOWS|REACHING_DEF[value] read_value#8 -> read_value#2
++FLOWS|REACHING_DEF[value] read_value#8 -> read_value#6
++FLOWS|REACHING_DEF[value] read_value#8 -> read_value#9

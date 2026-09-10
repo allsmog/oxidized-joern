@@ -1,0 +1,270 @@
+--- held-v2 complete records with multiplicity
++++ V4 complete records with multiplicity
+-AST|                    IDENTIFIER NAME=buff CODE=buff TYPE_FULL_NAME=char[200 + 1] ORDER=2 ARGUMENT_INDEX=2
+-AST|                  IDENTIFIER NAME=buff CODE=buff TYPE_FULL_NAME=char[200 + 1] ORDER=2 ARGUMENT_INDEX=2
+-AST|                  IDENTIFIER NAME=buff CODE=buff TYPE_FULL_NAME=char[sizeof("\x1bLua") + sizeof("\x19\x93\r\n\x1a\n")] ORDER=1 ARGUMENT_INDEX=1
+-AST|                  IDENTIFIER NAME=buff CODE=buff TYPE_FULL_NAME=unsigned int[(sizeof(c) / sizeof(unsigned int)) + (sizeof(t) / sizeof(unsigned int))] ORDER=1 ARGUMENT_INDEX=1
+-AST|                IDENTIFIER NAME=buff CODE=buff TYPE_FULL_NAME=char[sizeof("\x1bLua") + sizeof("\x19\x93\r\n\x1a\n")] ORDER=1 ARGUMENT_INDEX=1
+-AST|                IDENTIFIER NAME=buff CODE=buff TYPE_FULL_NAME=unsigned int[(sizeof(c) / sizeof(unsigned int)) + (sizeof(t) / sizeof(unsigned int))] ORDER=1 ARGUMENT_INDEX=1
+-AST|              IDENTIFIER NAME=buff CODE=buff TYPE_FULL_NAME=char[200 + 1] ORDER=1 ARGUMENT_INDEX=1
+-AST|              IDENTIFIER NAME=buff CODE=buff TYPE_FULL_NAME=char[200 + 1] ORDER=1 ARGUMENT_INDEX=1
+-AST|              IDENTIFIER NAME=char[200 + 1] CODE=char[200 + 1] TYPE_FULL_NAME=char[200 + 1] ORDER=1 ARGUMENT_INDEX=1
+-AST|              IDENTIFIER NAME=nums CODE=nums TYPE_FULL_NAME=unsigned int[((int)((sizeof(int) * CHAR_BIT - 1))) + 1] ORDER=2 ARGUMENT_INDEX=2
+-AST|            CALL NAME=<operator>.alloc CODE=buff[L_MAXLENNUM + 1] TYPE_FULL_NAME=char[200 + 1] METHOD_FULL_NAME=<operator>.alloc ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+-AST|            IDENTIFIER NAME=buff CODE=buff TYPE_FULL_NAME=char[200 + 1] ORDER=1 ARGUMENT_INDEX=1
+-AST|            IDENTIFIER NAME=buff CODE=buff TYPE_FULL_NAME=char[200 + 1] ORDER=1 ARGUMENT_INDEX=1
+-AST|            IDENTIFIER NAME=buff CODE=buff TYPE_FULL_NAME=char[200 + 1] ORDER=1 ARGUMENT_INDEX=1
+-AST|            IDENTIFIER NAME=buff CODE=buff TYPE_FULL_NAME=char[200 + 1] ORDER=1 ARGUMENT_INDEX=1
+-AST|            IDENTIFIER NAME=buff CODE=buff TYPE_FULL_NAME=char[sizeof("\x1bLua") + sizeof("\x19\x93\r\n\x1a\n")] ORDER=2 ARGUMENT_INDEX=2
+-AST|            IDENTIFIER NAME=buff CODE=buff TYPE_FULL_NAME=char[sizeof("\x1bLua") + sizeof("\x19\x93\r\n\x1a\n")] ORDER=2 ARGUMENT_INDEX=2
+-AST|            IDENTIFIER NAME=buff CODE=buff TYPE_FULL_NAME=unsigned int[(sizeof(c) / sizeof(unsigned int)) + (sizeof(t) / sizeof(unsigned int))] ORDER=1 ARGUMENT_INDEX=1
+-AST|            IDENTIFIER NAME=buff CODE=buff TYPE_FULL_NAME=unsigned int[(sizeof(c) / sizeof(unsigned int)) + (sizeof(t) / sizeof(unsigned int))] ORDER=1 ARGUMENT_INDEX=1
+-AST|            IDENTIFIER NAME=char[200 + 1] CODE=char[200 + 1] TYPE_FULL_NAME=char[200 + 1] ORDER=1 ARGUMENT_INDEX=1
+-AST|            IDENTIFIER NAME=nums CODE=nums TYPE_FULL_NAME=unsigned int[((int)((sizeof(int) * CHAR_BIT - 1))) + 1] ORDER=1 ARGUMENT_INDEX=1
+-AST|            IDENTIFIER NAME=nums CODE=nums TYPE_FULL_NAME=unsigned int[((int)((sizeof(int) * CHAR_BIT - 1))) + 1] ORDER=2 ARGUMENT_INDEX=2
+-AST|          CALL NAME=<operator>.alloc CODE=buff[L_MAXLENNUM + 1] TYPE_FULL_NAME=char[200 + 1] METHOD_FULL_NAME=<operator>.alloc ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+-AST|          IDENTIFIER NAME=buff CODE=buff TYPE_FULL_NAME=char[200 + 1] ORDER=1 ARGUMENT_INDEX=1
+-AST|          IDENTIFIER NAME=buff CODE=buff TYPE_FULL_NAME=char[200 + 1] ORDER=1 ARGUMENT_INDEX=1
+-AST|          IDENTIFIER NAME=buff CODE=buff TYPE_FULL_NAME=char[sizeof("\x1bLua") + sizeof("\x19\x93\r\n\x1a\n")] ORDER=2 ARGUMENT_INDEX=2
+-AST|          IDENTIFIER NAME=buff CODE=buff TYPE_FULL_NAME=char[sizeof("\x1bLua") + sizeof("\x19\x93\r\n\x1a\n")] ORDER=2 ARGUMENT_INDEX=2
+-AST|          IDENTIFIER NAME=buff CODE=buff TYPE_FULL_NAME=unsigned int[(sizeof(c) / sizeof(unsigned int)) + (sizeof(t) / sizeof(unsigned int))] ORDER=1 ARGUMENT_INDEX=1
+-AST|          IDENTIFIER NAME=buff CODE=buff TYPE_FULL_NAME=unsigned int[(sizeof(c) / sizeof(unsigned int)) + (sizeof(t) / sizeof(unsigned int))] ORDER=1 ARGUMENT_INDEX=1
+-AST|          IDENTIFIER NAME=buff CODE=buff TYPE_FULL_NAME=unsigned int[(sizeof(c) / sizeof(unsigned int)) + (sizeof(t) / sizeof(unsigned int))] ORDER=1 ARGUMENT_INDEX=1
+-AST|          IDENTIFIER NAME=char[sizeof("\x1bLua") + sizeof("\x19\x93\r\n\x1a\n")] CODE=char[sizeof("\x1bLua") + sizeof("\x19\x93\r\n\x1a\n")] TYPE_FULL_NAME=char[sizeof("\x1bLua") + sizeof("\x19\x93\r\n\x1a\n")] ORDER=1 ARGUMENT_INDEX=1
+-AST|          IDENTIFIER NAME=nums CODE=nums TYPE_FULL_NAME=unsigned int[((int)((sizeof(int) * CHAR_BIT - 1))) + 1] ORDER=1 ARGUMENT_INDEX=1
+-AST|          IDENTIFIER NAME=nums CODE=nums TYPE_FULL_NAME=unsigned int[((int)((sizeof(int) * CHAR_BIT - 1))) + 1] ORDER=1 ARGUMENT_INDEX=1
+-AST|          IDENTIFIER NAME=nums CODE=nums TYPE_FULL_NAME=unsigned int[((int)((sizeof(int) * CHAR_BIT - 1))) + 1] ORDER=2 ARGUMENT_INDEX=2
+-AST|          IDENTIFIER NAME=nums CODE=nums TYPE_FULL_NAME=unsigned int[((int)((sizeof(int) * CHAR_BIT - 1))) + 1] ORDER=2 ARGUMENT_INDEX=2
+-AST|          IDENTIFIER NAME=unsigned int[((int)((sizeof(int) * CHAR_BIT - 1))) + 1] CODE=unsigned int[((int)((sizeof(int) * CHAR_BIT - 1))) + 1] TYPE_FULL_NAME=unsigned int[((int)((sizeof(int) * CHAR_BIT - 1))) + 1] ORDER=1 ARGUMENT_INDEX=1
+-AST|          IDENTIFIER NAME=unsigned int[(sizeof(c) / sizeof(unsigned int)) + (sizeof(t) / sizeof(unsigned int))] CODE=unsigned int[(sizeof(c) / sizeof(unsigned int)) + (sizeof(t) / sizeof(unsigned int))] TYPE_FULL_NAME=unsigned int[(sizeof(c) / sizeof(unsigned int)) + (sizeof(t) / sizeof(unsigned int))] ORDER=1 ARGUMENT_INDEX=1
+-AST|          LOCAL NAME=buff CODE=char buff[L_MAXLENNUM + 1] TYPE_FULL_NAME=char[200 + 1] ORDER=1
+-AST|        CALL NAME=<operator>.alloc CODE=buff[sizeof(LUA_SIGNATURE) + sizeof(LUAC_DATA)] TYPE_FULL_NAME=char[sizeof("\x1bLua") + sizeof("\x19\x93\r\n\x1a\n")] METHOD_FULL_NAME=<operator>.alloc ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+-AST|        CALL NAME=<operator>.alloc CODE=buff[sof(c) + sof(t)] TYPE_FULL_NAME=unsigned int[(sizeof(c) / sizeof(unsigned int)) + (sizeof(t) / sizeof(unsigned int))] METHOD_FULL_NAME=<operator>.alloc ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+-AST|        CALL NAME=<operator>.alloc CODE=nums[MAXABITS + 1] TYPE_FULL_NAME=unsigned int[((int)((sizeof(int) * CHAR_BIT - 1))) + 1] METHOD_FULL_NAME=<operator>.alloc ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+-AST|        IDENTIFIER NAME=buff CODE=buff TYPE_FULL_NAME=char[sizeof("\x1bLua") + sizeof("\x19\x93\r\n\x1a\n")] ORDER=1 ARGUMENT_INDEX=1
+-AST|        IDENTIFIER NAME=buff CODE=buff TYPE_FULL_NAME=char[sizeof("\x1bLua") + sizeof("\x19\x93\r\n\x1a\n")] ORDER=2 ARGUMENT_INDEX=2
+-AST|        IDENTIFIER NAME=buff CODE=buff TYPE_FULL_NAME=unsigned int[(sizeof(c) / sizeof(unsigned int)) + (sizeof(t) / sizeof(unsigned int))] ORDER=1 ARGUMENT_INDEX=1
+-AST|        IDENTIFIER NAME=buff CODE=buff TYPE_FULL_NAME=unsigned int[(sizeof(c) / sizeof(unsigned int)) + (sizeof(t) / sizeof(unsigned int))] ORDER=1 ARGUMENT_INDEX=1
+-AST|        IDENTIFIER NAME=buff CODE=buff TYPE_FULL_NAME=unsigned int[(sizeof(c) / sizeof(unsigned int)) + (sizeof(t) / sizeof(unsigned int))] ORDER=1 ARGUMENT_INDEX=1
+-AST|        IDENTIFIER NAME=char[sizeof("\x1bLua") + sizeof("\x19\x93\r\n\x1a\n")] CODE=char[sizeof("\x1bLua") + sizeof("\x19\x93\r\n\x1a\n")] TYPE_FULL_NAME=char[sizeof("\x1bLua") + sizeof("\x19\x93\r\n\x1a\n")] ORDER=1 ARGUMENT_INDEX=1
+-AST|        IDENTIFIER NAME=nums CODE=nums TYPE_FULL_NAME=unsigned int[((int)((sizeof(int) * CHAR_BIT - 1))) + 1] ORDER=1 ARGUMENT_INDEX=1
+-AST|        IDENTIFIER NAME=nums CODE=nums TYPE_FULL_NAME=unsigned int[((int)((sizeof(int) * CHAR_BIT - 1))) + 1] ORDER=1 ARGUMENT_INDEX=1
+-AST|        IDENTIFIER NAME=nums CODE=nums TYPE_FULL_NAME=unsigned int[((int)((sizeof(int) * CHAR_BIT - 1))) + 1] ORDER=2 ARGUMENT_INDEX=2
+-AST|        IDENTIFIER NAME=nums CODE=nums TYPE_FULL_NAME=unsigned int[((int)((sizeof(int) * CHAR_BIT - 1))) + 1] ORDER=2 ARGUMENT_INDEX=2
+-AST|        IDENTIFIER NAME=unsigned int[((int)((sizeof(int) * CHAR_BIT - 1))) + 1] CODE=unsigned int[((int)((sizeof(int) * CHAR_BIT - 1))) + 1] TYPE_FULL_NAME=unsigned int[((int)((sizeof(int) * CHAR_BIT - 1))) + 1] ORDER=1 ARGUMENT_INDEX=1
+-AST|        IDENTIFIER NAME=unsigned int[(sizeof(c) / sizeof(unsigned int)) + (sizeof(t) / sizeof(unsigned int))] CODE=unsigned int[(sizeof(c) / sizeof(unsigned int)) + (sizeof(t) / sizeof(unsigned int))] TYPE_FULL_NAME=unsigned int[(sizeof(c) / sizeof(unsigned int)) + (sizeof(t) / sizeof(unsigned int))] ORDER=1 ARGUMENT_INDEX=1
+-AST|        LOCAL NAME=buff CODE=char buff[L_MAXLENNUM + 1] TYPE_FULL_NAME=char[200 + 1] ORDER=1
+-AST|      CALL NAME=<operator>.alloc CODE=buff[sizeof(LUA_SIGNATURE) + sizeof(LUAC_DATA)] TYPE_FULL_NAME=char[sizeof("\x1bLua") + sizeof("\x19\x93\r\n\x1a\n")] METHOD_FULL_NAME=<operator>.alloc ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+-AST|      CALL NAME=<operator>.alloc CODE=buff[sof(c) + sof(t)] TYPE_FULL_NAME=unsigned int[(sizeof(c) / sizeof(unsigned int)) + (sizeof(t) / sizeof(unsigned int))] METHOD_FULL_NAME=<operator>.alloc ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+-AST|      CALL NAME=<operator>.alloc CODE=nums[MAXABITS + 1] TYPE_FULL_NAME=unsigned int[((int)((sizeof(int) * CHAR_BIT - 1))) + 1] METHOD_FULL_NAME=<operator>.alloc ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+-AST|      IDENTIFIER NAME=buff CODE=buff TYPE_FULL_NAME=char[sizeof("\x1bLua") + sizeof("\x19\x93\r\n\x1a\n")] ORDER=1 ARGUMENT_INDEX=1
+-AST|      IDENTIFIER NAME=buff CODE=buff TYPE_FULL_NAME=char[sizeof("\x1bLua") + sizeof("\x19\x93\r\n\x1a\n")] ORDER=2 ARGUMENT_INDEX=2
+-AST|      IDENTIFIER NAME=buff CODE=buff TYPE_FULL_NAME=unsigned int[(sizeof(c) / sizeof(unsigned int)) + (sizeof(t) / sizeof(unsigned int))] ORDER=1 ARGUMENT_INDEX=1
+-AST|      IDENTIFIER NAME=buff CODE=buff TYPE_FULL_NAME=unsigned int[(sizeof(c) / sizeof(unsigned int)) + (sizeof(t) / sizeof(unsigned int))] ORDER=1 ARGUMENT_INDEX=1
+-AST|      IDENTIFIER NAME=nums CODE=nums TYPE_FULL_NAME=unsigned int[((int)((sizeof(int) * CHAR_BIT - 1))) + 1] ORDER=1 ARGUMENT_INDEX=1
+-AST|      LOCAL NAME=buff CODE=char buff[sizeof(LUA_SIGNATURE) + sizeof(LUAC_DATA)] TYPE_FULL_NAME=char[sizeof("\x1bLua") + sizeof("\x19\x93\r\n\x1a\n")] ORDER=1
+-AST|      LOCAL NAME=buff CODE=unsigned int buff[sof(c) + sof(t)] TYPE_FULL_NAME=unsigned int[(sizeof(c) / sizeof(unsigned int)) + (sizeof(t) / sizeof(unsigned int))] ORDER=5
+-AST|      LOCAL NAME=nums CODE=unsigned int nums[MAXABITS + 1] TYPE_FULL_NAME=unsigned int[((int)((sizeof(int) * CHAR_BIT - 1))) + 1] ORDER=3
+-AST|    LOCAL NAME=buff CODE=char buff[sizeof(LUA_SIGNATURE) + sizeof(LUAC_DATA)] TYPE_FULL_NAME=char[sizeof("\x1bLua") + sizeof("\x19\x93\r\n\x1a\n")] ORDER=1
+-AST|    LOCAL NAME=buff CODE=unsigned int buff[sof(c) + sof(t)] TYPE_FULL_NAME=unsigned int[(sizeof(c) / sizeof(unsigned int)) + (sizeof(t) / sizeof(unsigned int))] ORDER=5
+-AST|    LOCAL NAME=nums CODE=unsigned int nums[MAXABITS + 1] TYPE_FULL_NAME=unsigned int[((int)((sizeof(int) * CHAR_BIT - 1))) + 1] ORDER=3
+-EDGES|CONTAINS F:<includes> -> D:char[200 + 1]
+-EDGES|CONTAINS F:<includes> -> D:char[sizeof("\x1bLua") + sizeof("\x19\x93\r\n\x1a\n")]
+-EDGES|CONTAINS F:<includes> -> D:unsigned int[((int)((sizeof(int) * CHAR_BIT - 1))) + 1]
+-EDGES|CONTAINS F:<includes> -> D:unsigned int[(sizeof(c) / sizeof(unsigned int)) + (sizeof(t) / sizeof(unsigned int))]
+-EDGES|EVAL_TYPE checkliteral#10 -> T:char[sizeof("\x1bLua") + sizeof("\x19\x93\r\n\x1a\n")]
+-EDGES|EVAL_TYPE checkliteral#11 -> T:char[sizeof("\x1bLua") + sizeof("\x19\x93\r\n\x1a\n")]
+-EDGES|EVAL_TYPE checkliteral#12 -> T:char[sizeof("\x1bLua") + sizeof("\x19\x93\r\n\x1a\n")]
+-EDGES|EVAL_TYPE checkliteral#29 -> T:char[sizeof("\x1bLua") + sizeof("\x19\x93\r\n\x1a\n")]
+-EDGES|EVAL_TYPE checkliteral#34 -> T:char[sizeof("\x1bLua") + sizeof("\x19\x93\r\n\x1a\n")]
+-EDGES|EVAL_TYPE checkliteral#39 -> T:char[sizeof("\x1bLua") + sizeof("\x19\x93\r\n\x1a\n")]
+-EDGES|EVAL_TYPE checkliteral#45 -> T:char[sizeof("\x1bLua") + sizeof("\x19\x93\r\n\x1a\n")]
+-EDGES|EVAL_TYPE checkliteral#8 -> T:char[sizeof("\x1bLua") + sizeof("\x19\x93\r\n\x1a\n")]
+-EDGES|EVAL_TYPE l_randomizePivot#100 -> T:unsigned int[(sizeof(c) / sizeof(unsigned int)) + (sizeof(t) / sizeof(unsigned int))]
+-EDGES|EVAL_TYPE l_randomizePivot#15 -> T:unsigned int[(sizeof(c) / sizeof(unsigned int)) + (sizeof(t) / sizeof(unsigned int))]
+-EDGES|EVAL_TYPE l_randomizePivot#17 -> T:unsigned int[(sizeof(c) / sizeof(unsigned int)) + (sizeof(t) / sizeof(unsigned int))]
+-EDGES|EVAL_TYPE l_randomizePivot#18 -> T:unsigned int[(sizeof(c) / sizeof(unsigned int)) + (sizeof(t) / sizeof(unsigned int))]
+-EDGES|EVAL_TYPE l_randomizePivot#19 -> T:unsigned int[(sizeof(c) / sizeof(unsigned int)) + (sizeof(t) / sizeof(unsigned int))]
+-EDGES|EVAL_TYPE l_randomizePivot#43 -> T:unsigned int[(sizeof(c) / sizeof(unsigned int)) + (sizeof(t) / sizeof(unsigned int))]
+-EDGES|EVAL_TYPE l_randomizePivot#59 -> T:unsigned int[(sizeof(c) / sizeof(unsigned int)) + (sizeof(t) / sizeof(unsigned int))]
+-EDGES|EVAL_TYPE l_randomizePivot#88 -> T:unsigned int[(sizeof(c) / sizeof(unsigned int)) + (sizeof(t) / sizeof(unsigned int))]
+-EDGES|EVAL_TYPE l_randomizePivot#92 -> T:unsigned int[(sizeof(c) / sizeof(unsigned int)) + (sizeof(t) / sizeof(unsigned int))]
+-EDGES|EVAL_TYPE l_str2d#111 -> T:char[200 + 1]
+-EDGES|EVAL_TYPE l_str2d#48 -> T:char[200 + 1]
+-EDGES|EVAL_TYPE l_str2d#50 -> T:char[200 + 1]
+-EDGES|EVAL_TYPE l_str2d#51 -> T:char[200 + 1]
+-EDGES|EVAL_TYPE l_str2d#52 -> T:char[200 + 1]
+-EDGES|EVAL_TYPE l_str2d#79 -> T:char[200 + 1]
+-EDGES|EVAL_TYPE l_str2d#83 -> T:char[200 + 1]
+-EDGES|EVAL_TYPE l_str2d#97 -> T:char[200 + 1]
+-EDGES|EVAL_TYPE rehash#102 -> T:unsigned int[((int)((sizeof(int) * CHAR_BIT - 1))) + 1]
+-EDGES|EVAL_TYPE rehash#12 -> T:unsigned int[((int)((sizeof(int) * CHAR_BIT - 1))) + 1]
+-EDGES|EVAL_TYPE rehash#14 -> T:unsigned int[((int)((sizeof(int) * CHAR_BIT - 1))) + 1]
+-EDGES|EVAL_TYPE rehash#15 -> T:unsigned int[((int)((sizeof(int) * CHAR_BIT - 1))) + 1]
+-EDGES|EVAL_TYPE rehash#16 -> T:unsigned int[((int)((sizeof(int) * CHAR_BIT - 1))) + 1]
+-EDGES|EVAL_TYPE rehash#51 -> T:unsigned int[((int)((sizeof(int) * CHAR_BIT - 1))) + 1]
+-EDGES|EVAL_TYPE rehash#60 -> T:unsigned int[((int)((sizeof(int) * CHAR_BIT - 1))) + 1]
+-EDGES|EVAL_TYPE rehash#68 -> T:unsigned int[((int)((sizeof(int) * CHAR_BIT - 1))) + 1]
+-EDGES|EVAL_TYPE rehash#96 -> T:unsigned int[((int)((sizeof(int) * CHAR_BIT - 1))) + 1]
+-EDGES|REF T:char[200 + 1] -> D:char[200 + 1]
+-EDGES|REF T:char[sizeof("\x1bLua") + sizeof("\x19\x93\r\n\x1a\n")] -> D:char[sizeof("\x1bLua") + sizeof("\x19\x93\r\n\x1a\n")]
+-EDGES|REF T:unsigned int[((int)((sizeof(int) * CHAR_BIT - 1))) + 1] -> D:unsigned int[((int)((sizeof(int) * CHAR_BIT - 1))) + 1]
+-EDGES|REF T:unsigned int[(sizeof(c) / sizeof(unsigned int)) + (sizeof(t) / sizeof(unsigned int))] -> D:unsigned int[(sizeof(c) / sizeof(unsigned int)) + (sizeof(t) / sizeof(unsigned int))]
+-EDGES|SOURCE_FILE D:char[200 + 1] -> F:<includes>
+-EDGES|SOURCE_FILE D:char[sizeof("\x1bLua") + sizeof("\x19\x93\r\n\x1a\n")] -> F:<includes>
+-EDGES|SOURCE_FILE D:unsigned int[((int)((sizeof(int) * CHAR_BIT - 1))) + 1] -> F:<includes>
+-EDGES|SOURCE_FILE D:unsigned int[(sizeof(c) / sizeof(unsigned int)) + (sizeof(t) / sizeof(unsigned int))] -> F:<includes>
+-FLOWS|REACHING_DEF[char[200 + 1]] l_str2d#52 -> l_str2d#115
+-FLOWS|REACHING_DEF[char[200 + 1]] l_str2d#52 -> l_str2d#51
+-FLOWS|REACHING_DEF[char[200 + 1]] l_str2d#52 -> l_str2d#53
+-FLOWS|REACHING_DEF[char[sizeof("\x1bLua") + sizeof("\x19\x93\r\n\x1a\n")]] checkliteral#12 -> checkliteral#11
+-FLOWS|REACHING_DEF[char[sizeof("\x1bLua") + sizeof("\x19\x93\r\n\x1a\n")]] checkliteral#12 -> checkliteral#13
+-FLOWS|REACHING_DEF[char[sizeof("\x1bLua") + sizeof("\x19\x93\r\n\x1a\n")]] checkliteral#12 -> checkliteral#53
+-FLOWS|REACHING_DEF[unsigned int[((int)((sizeof(int) * CHAR_BIT - 1))) + 1]] rehash#16 -> rehash#113
+-FLOWS|REACHING_DEF[unsigned int[((int)((sizeof(int) * CHAR_BIT - 1))) + 1]] rehash#16 -> rehash#15
+-FLOWS|REACHING_DEF[unsigned int[((int)((sizeof(int) * CHAR_BIT - 1))) + 1]] rehash#16 -> rehash#17
+-FLOWS|REACHING_DEF[unsigned int[(sizeof(c) / sizeof(unsigned int)) + (sizeof(t) / sizeof(unsigned int))]] l_randomizePivot#19 -> l_randomizePivot#105
+-FLOWS|REACHING_DEF[unsigned int[(sizeof(c) / sizeof(unsigned int)) + (sizeof(t) / sizeof(unsigned int))]] l_randomizePivot#19 -> l_randomizePivot#18
+-FLOWS|REACHING_DEF[unsigned int[(sizeof(c) / sizeof(unsigned int)) + (sizeof(t) / sizeof(unsigned int))]] l_randomizePivot#19 -> l_randomizePivot#20
+-NODES|TYPE NAME=char[200 + 1] FULL_NAME=char[200 + 1] TYPE_DECL_FULL_NAME=char[200 + 1]
+-NODES|TYPE NAME=char[sizeof("\x1bLua") + sizeof("\x19\x93\r\n\x1a\n")] FULL_NAME=char[sizeof("\x1bLua") + sizeof("\x19\x93\r\n\x1a\n")] TYPE_DECL_FULL_NAME=char[sizeof("\x1bLua") + sizeof("\x19\x93\r\n\x1a\n")]
+-NODES|TYPE NAME=unsigned int[((int)((sizeof(int) * CHAR_BIT - 1))) + 1] FULL_NAME=unsigned int[((int)((sizeof(int) * CHAR_BIT - 1))) + 1] TYPE_DECL_FULL_NAME=unsigned int[((int)((sizeof(int) * CHAR_BIT - 1))) + 1]
+-NODES|TYPE NAME=unsigned int[(sizeof(c) / sizeof(unsigned int)) + (sizeof(t) / sizeof(unsigned int))] FULL_NAME=unsigned int[(sizeof(c) / sizeof(unsigned int)) + (sizeof(t) / sizeof(unsigned int))] TYPE_DECL_FULL_NAME=unsigned int[(sizeof(c) / sizeof(unsigned int)) + (sizeof(t) / sizeof(unsigned int))]
+-NODES|TYPE_DECL NAME=char[200 + 1] FULL_NAME=char[200 + 1] CODE=char[200 + 1] IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+-NODES|TYPE_DECL NAME=char[sizeof("\x1bLua") + sizeof("\x19\x93\r\n\x1a\n")] FULL_NAME=char[sizeof("\x1bLua") + sizeof("\x19\x93\r\n\x1a\n")] CODE=char[sizeof("\x1bLua") + sizeof("\x19\x93\r\n\x1a\n")] IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+-NODES|TYPE_DECL NAME=unsigned int[((int)((sizeof(int) * CHAR_BIT - 1))) + 1] FULL_NAME=unsigned int[((int)((sizeof(int) * CHAR_BIT - 1))) + 1] CODE=unsigned int[((int)((sizeof(int) * CHAR_BIT - 1))) + 1] IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+-NODES|TYPE_DECL NAME=unsigned int[(sizeof(c) / sizeof(unsigned int)) + (sizeof(t) / sizeof(unsigned int))] FULL_NAME=unsigned int[(sizeof(c) / sizeof(unsigned int)) + (sizeof(t) / sizeof(unsigned int))] CODE=unsigned int[(sizeof(c) / sizeof(unsigned int)) + (sizeof(t) / sizeof(unsigned int))] IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
++AST|                    IDENTIFIER NAME=buff CODE=buff TYPE_FULL_NAME=char[L_MAXLENNUM + 1] ORDER=2 ARGUMENT_INDEX=2
++AST|                  IDENTIFIER NAME=buff CODE=buff TYPE_FULL_NAME=char[L_MAXLENNUM + 1] ORDER=2 ARGUMENT_INDEX=2
++AST|                  IDENTIFIER NAME=buff CODE=buff TYPE_FULL_NAME=char[sizeof(LUA_SIGNATURE) + sizeof(LUAC_DATA)] ORDER=1 ARGUMENT_INDEX=1
++AST|                  IDENTIFIER NAME=buff CODE=buff TYPE_FULL_NAME=unsigned int[sof(c) + sof(t)] ORDER=1 ARGUMENT_INDEX=1
++AST|                IDENTIFIER NAME=buff CODE=buff TYPE_FULL_NAME=char[sizeof(LUA_SIGNATURE) + sizeof(LUAC_DATA)] ORDER=1 ARGUMENT_INDEX=1
++AST|                IDENTIFIER NAME=buff CODE=buff TYPE_FULL_NAME=unsigned int[sof(c) + sof(t)] ORDER=1 ARGUMENT_INDEX=1
++AST|              IDENTIFIER NAME=buff CODE=buff TYPE_FULL_NAME=char[L_MAXLENNUM + 1] ORDER=1 ARGUMENT_INDEX=1
++AST|              IDENTIFIER NAME=buff CODE=buff TYPE_FULL_NAME=char[L_MAXLENNUM + 1] ORDER=1 ARGUMENT_INDEX=1
++AST|              IDENTIFIER NAME=char[L_MAXLENNUM + 1] CODE=char[L_MAXLENNUM + 1] TYPE_FULL_NAME=char[L_MAXLENNUM + 1] ORDER=1 ARGUMENT_INDEX=1
++AST|              IDENTIFIER NAME=nums CODE=nums TYPE_FULL_NAME=unsigned int[MAXABITS + 1] ORDER=2 ARGUMENT_INDEX=2
++AST|            CALL NAME=<operator>.alloc CODE=buff[L_MAXLENNUM + 1] TYPE_FULL_NAME=char[L_MAXLENNUM + 1] METHOD_FULL_NAME=<operator>.alloc ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
++AST|            IDENTIFIER NAME=buff CODE=buff TYPE_FULL_NAME=char[L_MAXLENNUM + 1] ORDER=1 ARGUMENT_INDEX=1
++AST|            IDENTIFIER NAME=buff CODE=buff TYPE_FULL_NAME=char[L_MAXLENNUM + 1] ORDER=1 ARGUMENT_INDEX=1
++AST|            IDENTIFIER NAME=buff CODE=buff TYPE_FULL_NAME=char[L_MAXLENNUM + 1] ORDER=1 ARGUMENT_INDEX=1
++AST|            IDENTIFIER NAME=buff CODE=buff TYPE_FULL_NAME=char[L_MAXLENNUM + 1] ORDER=1 ARGUMENT_INDEX=1
++AST|            IDENTIFIER NAME=buff CODE=buff TYPE_FULL_NAME=char[sizeof(LUA_SIGNATURE) + sizeof(LUAC_DATA)] ORDER=2 ARGUMENT_INDEX=2
++AST|            IDENTIFIER NAME=buff CODE=buff TYPE_FULL_NAME=char[sizeof(LUA_SIGNATURE) + sizeof(LUAC_DATA)] ORDER=2 ARGUMENT_INDEX=2
++AST|            IDENTIFIER NAME=buff CODE=buff TYPE_FULL_NAME=unsigned int[sof(c) + sof(t)] ORDER=1 ARGUMENT_INDEX=1
++AST|            IDENTIFIER NAME=buff CODE=buff TYPE_FULL_NAME=unsigned int[sof(c) + sof(t)] ORDER=1 ARGUMENT_INDEX=1
++AST|            IDENTIFIER NAME=char[L_MAXLENNUM + 1] CODE=char[L_MAXLENNUM + 1] TYPE_FULL_NAME=char[L_MAXLENNUM + 1] ORDER=1 ARGUMENT_INDEX=1
++AST|            IDENTIFIER NAME=nums CODE=nums TYPE_FULL_NAME=unsigned int[MAXABITS + 1] ORDER=1 ARGUMENT_INDEX=1
++AST|            IDENTIFIER NAME=nums CODE=nums TYPE_FULL_NAME=unsigned int[MAXABITS + 1] ORDER=2 ARGUMENT_INDEX=2
++AST|          CALL NAME=<operator>.alloc CODE=buff[L_MAXLENNUM + 1] TYPE_FULL_NAME=char[L_MAXLENNUM + 1] METHOD_FULL_NAME=<operator>.alloc ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
++AST|          IDENTIFIER NAME=buff CODE=buff TYPE_FULL_NAME=char[L_MAXLENNUM + 1] ORDER=1 ARGUMENT_INDEX=1
++AST|          IDENTIFIER NAME=buff CODE=buff TYPE_FULL_NAME=char[L_MAXLENNUM + 1] ORDER=1 ARGUMENT_INDEX=1
++AST|          IDENTIFIER NAME=buff CODE=buff TYPE_FULL_NAME=char[sizeof(LUA_SIGNATURE) + sizeof(LUAC_DATA)] ORDER=2 ARGUMENT_INDEX=2
++AST|          IDENTIFIER NAME=buff CODE=buff TYPE_FULL_NAME=char[sizeof(LUA_SIGNATURE) + sizeof(LUAC_DATA)] ORDER=2 ARGUMENT_INDEX=2
++AST|          IDENTIFIER NAME=buff CODE=buff TYPE_FULL_NAME=unsigned int[sof(c) + sof(t)] ORDER=1 ARGUMENT_INDEX=1
++AST|          IDENTIFIER NAME=buff CODE=buff TYPE_FULL_NAME=unsigned int[sof(c) + sof(t)] ORDER=1 ARGUMENT_INDEX=1
++AST|          IDENTIFIER NAME=buff CODE=buff TYPE_FULL_NAME=unsigned int[sof(c) + sof(t)] ORDER=1 ARGUMENT_INDEX=1
++AST|          IDENTIFIER NAME=char[sizeof(LUA_SIGNATURE) + sizeof(LUAC_DATA)] CODE=char[sizeof(LUA_SIGNATURE) + sizeof(LUAC_DATA)] TYPE_FULL_NAME=char[sizeof(LUA_SIGNATURE) + sizeof(LUAC_DATA)] ORDER=1 ARGUMENT_INDEX=1
++AST|          IDENTIFIER NAME=nums CODE=nums TYPE_FULL_NAME=unsigned int[MAXABITS + 1] ORDER=1 ARGUMENT_INDEX=1
++AST|          IDENTIFIER NAME=nums CODE=nums TYPE_FULL_NAME=unsigned int[MAXABITS + 1] ORDER=1 ARGUMENT_INDEX=1
++AST|          IDENTIFIER NAME=nums CODE=nums TYPE_FULL_NAME=unsigned int[MAXABITS + 1] ORDER=2 ARGUMENT_INDEX=2
++AST|          IDENTIFIER NAME=nums CODE=nums TYPE_FULL_NAME=unsigned int[MAXABITS + 1] ORDER=2 ARGUMENT_INDEX=2
++AST|          IDENTIFIER NAME=unsigned int[MAXABITS + 1] CODE=unsigned int[MAXABITS + 1] TYPE_FULL_NAME=unsigned int[MAXABITS + 1] ORDER=1 ARGUMENT_INDEX=1
++AST|          IDENTIFIER NAME=unsigned int[sof(c) + sof(t)] CODE=unsigned int[sof(c) + sof(t)] TYPE_FULL_NAME=unsigned int[sof(c) + sof(t)] ORDER=1 ARGUMENT_INDEX=1
++AST|          LOCAL NAME=buff CODE=char buff[L_MAXLENNUM + 1] TYPE_FULL_NAME=char[L_MAXLENNUM + 1] ORDER=1
++AST|        CALL NAME=<operator>.alloc CODE=buff[sizeof(LUA_SIGNATURE) + sizeof(LUAC_DATA)] TYPE_FULL_NAME=char[sizeof(LUA_SIGNATURE) + sizeof(LUAC_DATA)] METHOD_FULL_NAME=<operator>.alloc ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
++AST|        CALL NAME=<operator>.alloc CODE=buff[sof(c) + sof(t)] TYPE_FULL_NAME=unsigned int[sof(c) + sof(t)] METHOD_FULL_NAME=<operator>.alloc ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
++AST|        CALL NAME=<operator>.alloc CODE=nums[MAXABITS + 1] TYPE_FULL_NAME=unsigned int[MAXABITS + 1] METHOD_FULL_NAME=<operator>.alloc ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
++AST|        IDENTIFIER NAME=buff CODE=buff TYPE_FULL_NAME=char[sizeof(LUA_SIGNATURE) + sizeof(LUAC_DATA)] ORDER=1 ARGUMENT_INDEX=1
++AST|        IDENTIFIER NAME=buff CODE=buff TYPE_FULL_NAME=char[sizeof(LUA_SIGNATURE) + sizeof(LUAC_DATA)] ORDER=2 ARGUMENT_INDEX=2
++AST|        IDENTIFIER NAME=buff CODE=buff TYPE_FULL_NAME=unsigned int[sof(c) + sof(t)] ORDER=1 ARGUMENT_INDEX=1
++AST|        IDENTIFIER NAME=buff CODE=buff TYPE_FULL_NAME=unsigned int[sof(c) + sof(t)] ORDER=1 ARGUMENT_INDEX=1
++AST|        IDENTIFIER NAME=buff CODE=buff TYPE_FULL_NAME=unsigned int[sof(c) + sof(t)] ORDER=1 ARGUMENT_INDEX=1
++AST|        IDENTIFIER NAME=char[sizeof(LUA_SIGNATURE) + sizeof(LUAC_DATA)] CODE=char[sizeof(LUA_SIGNATURE) + sizeof(LUAC_DATA)] TYPE_FULL_NAME=char[sizeof(LUA_SIGNATURE) + sizeof(LUAC_DATA)] ORDER=1 ARGUMENT_INDEX=1
++AST|        IDENTIFIER NAME=nums CODE=nums TYPE_FULL_NAME=unsigned int[MAXABITS + 1] ORDER=1 ARGUMENT_INDEX=1
++AST|        IDENTIFIER NAME=nums CODE=nums TYPE_FULL_NAME=unsigned int[MAXABITS + 1] ORDER=1 ARGUMENT_INDEX=1
++AST|        IDENTIFIER NAME=nums CODE=nums TYPE_FULL_NAME=unsigned int[MAXABITS + 1] ORDER=2 ARGUMENT_INDEX=2
++AST|        IDENTIFIER NAME=nums CODE=nums TYPE_FULL_NAME=unsigned int[MAXABITS + 1] ORDER=2 ARGUMENT_INDEX=2
++AST|        IDENTIFIER NAME=unsigned int[MAXABITS + 1] CODE=unsigned int[MAXABITS + 1] TYPE_FULL_NAME=unsigned int[MAXABITS + 1] ORDER=1 ARGUMENT_INDEX=1
++AST|        IDENTIFIER NAME=unsigned int[sof(c) + sof(t)] CODE=unsigned int[sof(c) + sof(t)] TYPE_FULL_NAME=unsigned int[sof(c) + sof(t)] ORDER=1 ARGUMENT_INDEX=1
++AST|        LOCAL NAME=buff CODE=char buff[L_MAXLENNUM + 1] TYPE_FULL_NAME=char[L_MAXLENNUM + 1] ORDER=1
++AST|      CALL NAME=<operator>.alloc CODE=buff[sizeof(LUA_SIGNATURE) + sizeof(LUAC_DATA)] TYPE_FULL_NAME=char[sizeof(LUA_SIGNATURE) + sizeof(LUAC_DATA)] METHOD_FULL_NAME=<operator>.alloc ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
++AST|      CALL NAME=<operator>.alloc CODE=buff[sof(c) + sof(t)] TYPE_FULL_NAME=unsigned int[sof(c) + sof(t)] METHOD_FULL_NAME=<operator>.alloc ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
++AST|      CALL NAME=<operator>.alloc CODE=nums[MAXABITS + 1] TYPE_FULL_NAME=unsigned int[MAXABITS + 1] METHOD_FULL_NAME=<operator>.alloc ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
++AST|      IDENTIFIER NAME=buff CODE=buff TYPE_FULL_NAME=char[sizeof(LUA_SIGNATURE) + sizeof(LUAC_DATA)] ORDER=1 ARGUMENT_INDEX=1
++AST|      IDENTIFIER NAME=buff CODE=buff TYPE_FULL_NAME=char[sizeof(LUA_SIGNATURE) + sizeof(LUAC_DATA)] ORDER=2 ARGUMENT_INDEX=2
++AST|      IDENTIFIER NAME=buff CODE=buff TYPE_FULL_NAME=unsigned int[sof(c) + sof(t)] ORDER=1 ARGUMENT_INDEX=1
++AST|      IDENTIFIER NAME=buff CODE=buff TYPE_FULL_NAME=unsigned int[sof(c) + sof(t)] ORDER=1 ARGUMENT_INDEX=1
++AST|      IDENTIFIER NAME=nums CODE=nums TYPE_FULL_NAME=unsigned int[MAXABITS + 1] ORDER=1 ARGUMENT_INDEX=1
++AST|      LOCAL NAME=buff CODE=char buff[sizeof(LUA_SIGNATURE) + sizeof(LUAC_DATA)] TYPE_FULL_NAME=char[sizeof(LUA_SIGNATURE) + sizeof(LUAC_DATA)] ORDER=1
++AST|      LOCAL NAME=buff CODE=unsigned int buff[sof(c) + sof(t)] TYPE_FULL_NAME=unsigned int[sof(c) + sof(t)] ORDER=5
++AST|      LOCAL NAME=nums CODE=unsigned int nums[MAXABITS + 1] TYPE_FULL_NAME=unsigned int[MAXABITS + 1] ORDER=3
++AST|    LOCAL NAME=buff CODE=char buff[sizeof(LUA_SIGNATURE) + sizeof(LUAC_DATA)] TYPE_FULL_NAME=char[sizeof(LUA_SIGNATURE) + sizeof(LUAC_DATA)] ORDER=1
++AST|    LOCAL NAME=buff CODE=unsigned int buff[sof(c) + sof(t)] TYPE_FULL_NAME=unsigned int[sof(c) + sof(t)] ORDER=5
++AST|    LOCAL NAME=nums CODE=unsigned int nums[MAXABITS + 1] TYPE_FULL_NAME=unsigned int[MAXABITS + 1] ORDER=3
++EDGES|CONTAINS F:<includes> -> D:char[L_MAXLENNUM + 1]
++EDGES|CONTAINS F:<includes> -> D:char[sizeof(LUA_SIGNATURE) + sizeof(LUAC_DATA)]
++EDGES|CONTAINS F:<includes> -> D:unsigned int[MAXABITS + 1]
++EDGES|CONTAINS F:<includes> -> D:unsigned int[sof(c) + sof(t)]
++EDGES|EVAL_TYPE checkliteral#10 -> T:char[sizeof(LUA_SIGNATURE) + sizeof(LUAC_DATA)]
++EDGES|EVAL_TYPE checkliteral#11 -> T:char[sizeof(LUA_SIGNATURE) + sizeof(LUAC_DATA)]
++EDGES|EVAL_TYPE checkliteral#12 -> T:char[sizeof(LUA_SIGNATURE) + sizeof(LUAC_DATA)]
++EDGES|EVAL_TYPE checkliteral#29 -> T:char[sizeof(LUA_SIGNATURE) + sizeof(LUAC_DATA)]
++EDGES|EVAL_TYPE checkliteral#34 -> T:char[sizeof(LUA_SIGNATURE) + sizeof(LUAC_DATA)]
++EDGES|EVAL_TYPE checkliteral#39 -> T:char[sizeof(LUA_SIGNATURE) + sizeof(LUAC_DATA)]
++EDGES|EVAL_TYPE checkliteral#45 -> T:char[sizeof(LUA_SIGNATURE) + sizeof(LUAC_DATA)]
++EDGES|EVAL_TYPE checkliteral#8 -> T:char[sizeof(LUA_SIGNATURE) + sizeof(LUAC_DATA)]
++EDGES|EVAL_TYPE l_randomizePivot#100 -> T:unsigned int[sof(c) + sof(t)]
++EDGES|EVAL_TYPE l_randomizePivot#15 -> T:unsigned int[sof(c) + sof(t)]
++EDGES|EVAL_TYPE l_randomizePivot#17 -> T:unsigned int[sof(c) + sof(t)]
++EDGES|EVAL_TYPE l_randomizePivot#18 -> T:unsigned int[sof(c) + sof(t)]
++EDGES|EVAL_TYPE l_randomizePivot#19 -> T:unsigned int[sof(c) + sof(t)]
++EDGES|EVAL_TYPE l_randomizePivot#43 -> T:unsigned int[sof(c) + sof(t)]
++EDGES|EVAL_TYPE l_randomizePivot#59 -> T:unsigned int[sof(c) + sof(t)]
++EDGES|EVAL_TYPE l_randomizePivot#88 -> T:unsigned int[sof(c) + sof(t)]
++EDGES|EVAL_TYPE l_randomizePivot#92 -> T:unsigned int[sof(c) + sof(t)]
++EDGES|EVAL_TYPE l_str2d#111 -> T:char[L_MAXLENNUM + 1]
++EDGES|EVAL_TYPE l_str2d#48 -> T:char[L_MAXLENNUM + 1]
++EDGES|EVAL_TYPE l_str2d#50 -> T:char[L_MAXLENNUM + 1]
++EDGES|EVAL_TYPE l_str2d#51 -> T:char[L_MAXLENNUM + 1]
++EDGES|EVAL_TYPE l_str2d#52 -> T:char[L_MAXLENNUM + 1]
++EDGES|EVAL_TYPE l_str2d#79 -> T:char[L_MAXLENNUM + 1]
++EDGES|EVAL_TYPE l_str2d#83 -> T:char[L_MAXLENNUM + 1]
++EDGES|EVAL_TYPE l_str2d#97 -> T:char[L_MAXLENNUM + 1]
++EDGES|EVAL_TYPE rehash#102 -> T:unsigned int[MAXABITS + 1]
++EDGES|EVAL_TYPE rehash#12 -> T:unsigned int[MAXABITS + 1]
++EDGES|EVAL_TYPE rehash#14 -> T:unsigned int[MAXABITS + 1]
++EDGES|EVAL_TYPE rehash#15 -> T:unsigned int[MAXABITS + 1]
++EDGES|EVAL_TYPE rehash#16 -> T:unsigned int[MAXABITS + 1]
++EDGES|EVAL_TYPE rehash#51 -> T:unsigned int[MAXABITS + 1]
++EDGES|EVAL_TYPE rehash#60 -> T:unsigned int[MAXABITS + 1]
++EDGES|EVAL_TYPE rehash#68 -> T:unsigned int[MAXABITS + 1]
++EDGES|EVAL_TYPE rehash#96 -> T:unsigned int[MAXABITS + 1]
++EDGES|REF T:char[L_MAXLENNUM + 1] -> D:char[L_MAXLENNUM + 1]
++EDGES|REF T:char[sizeof(LUA_SIGNATURE) + sizeof(LUAC_DATA)] -> D:char[sizeof(LUA_SIGNATURE) + sizeof(LUAC_DATA)]
++EDGES|REF T:unsigned int[MAXABITS + 1] -> D:unsigned int[MAXABITS + 1]
++EDGES|REF T:unsigned int[sof(c) + sof(t)] -> D:unsigned int[sof(c) + sof(t)]
++EDGES|SOURCE_FILE D:char[L_MAXLENNUM + 1] -> F:<includes>
++EDGES|SOURCE_FILE D:char[sizeof(LUA_SIGNATURE) + sizeof(LUAC_DATA)] -> F:<includes>
++EDGES|SOURCE_FILE D:unsigned int[MAXABITS + 1] -> F:<includes>
++EDGES|SOURCE_FILE D:unsigned int[sof(c) + sof(t)] -> F:<includes>
++FLOWS|REACHING_DEF[char[L_MAXLENNUM + 1]] l_str2d#52 -> l_str2d#115
++FLOWS|REACHING_DEF[char[L_MAXLENNUM + 1]] l_str2d#52 -> l_str2d#51
++FLOWS|REACHING_DEF[char[L_MAXLENNUM + 1]] l_str2d#52 -> l_str2d#53
++FLOWS|REACHING_DEF[char[sizeof(LUA_SIGNATURE) + sizeof(LUAC_DATA)]] checkliteral#12 -> checkliteral#11
++FLOWS|REACHING_DEF[char[sizeof(LUA_SIGNATURE) + sizeof(LUAC_DATA)]] checkliteral#12 -> checkliteral#13
++FLOWS|REACHING_DEF[char[sizeof(LUA_SIGNATURE) + sizeof(LUAC_DATA)]] checkliteral#12 -> checkliteral#53
++FLOWS|REACHING_DEF[unsigned int[MAXABITS + 1]] rehash#16 -> rehash#113
++FLOWS|REACHING_DEF[unsigned int[MAXABITS + 1]] rehash#16 -> rehash#15
++FLOWS|REACHING_DEF[unsigned int[MAXABITS + 1]] rehash#16 -> rehash#17
++FLOWS|REACHING_DEF[unsigned int[sof(c) + sof(t)]] l_randomizePivot#19 -> l_randomizePivot#105
++FLOWS|REACHING_DEF[unsigned int[sof(c) + sof(t)]] l_randomizePivot#19 -> l_randomizePivot#18
++FLOWS|REACHING_DEF[unsigned int[sof(c) + sof(t)]] l_randomizePivot#19 -> l_randomizePivot#20
++NODES|TYPE NAME=char[L_MAXLENNUM + 1] FULL_NAME=char[L_MAXLENNUM + 1] TYPE_DECL_FULL_NAME=char[L_MAXLENNUM + 1]
++NODES|TYPE NAME=char[sizeof(LUA_SIGNATURE) + sizeof(LUAC_DATA)] FULL_NAME=char[sizeof(LUA_SIGNATURE) + sizeof(LUAC_DATA)] TYPE_DECL_FULL_NAME=char[sizeof(LUA_SIGNATURE) + sizeof(LUAC_DATA)]
++NODES|TYPE NAME=unsigned int[MAXABITS + 1] FULL_NAME=unsigned int[MAXABITS + 1] TYPE_DECL_FULL_NAME=unsigned int[MAXABITS + 1]
++NODES|TYPE NAME=unsigned int[sof(c) + sof(t)] FULL_NAME=unsigned int[sof(c) + sof(t)] TYPE_DECL_FULL_NAME=unsigned int[sof(c) + sof(t)]
++NODES|TYPE_DECL NAME=char[L_MAXLENNUM + 1] FULL_NAME=char[L_MAXLENNUM + 1] CODE=char[L_MAXLENNUM + 1] IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
++NODES|TYPE_DECL NAME=char[sizeof(LUA_SIGNATURE) + sizeof(LUAC_DATA)] FULL_NAME=char[sizeof(LUA_SIGNATURE) + sizeof(LUAC_DATA)] CODE=char[sizeof(LUA_SIGNATURE) + sizeof(LUAC_DATA)] IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
++NODES|TYPE_DECL NAME=unsigned int[MAXABITS + 1] FULL_NAME=unsigned int[MAXABITS + 1] CODE=unsigned int[MAXABITS + 1] IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
++NODES|TYPE_DECL NAME=unsigned int[sof(c) + sof(t)] FULL_NAME=unsigned int[sof(c) + sof(t)] CODE=unsigned int[sof(c) + sof(t)] IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>

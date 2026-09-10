@@ -1,0 +1,105 @@
+{
+  "status": "HELD_V2_COMPLETE_DIAGNOSTIC_PREVIEW_NO_ACCEPTANCE",
+  "createdAtUtc": "2026-09-08T20:11:20.843498+00:00",
+  "producerReview": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-v2-whole-preview/review.json",
+    "sha256": "9abf8f8dff092cf9c3a749d772ac6cf619fffa9f6a9c785033b2966aa8626c4b"
+  },
+  "sourceSha256": "a660a1117dd523ee85a5b27fe14e0906631e58d559c083bcffd87c34447d90a9",
+  "binarySha256": "c4f2259b2b3d7860873948c55282e1a770a99dfd98fc3ea1affdb3f99d9c42a9",
+  "knownHold": "The independently reproduced PICK METHOD CODE regression is not negated by no exact-method loss in these two projects.",
+  "projects": [
+    {
+      "case": "zlib-1.3.1-core-full",
+      "exitCode": 0,
+      "producerSecondsDiagnosticOnly": 116.85164483299013,
+      "candidateRawSha256": "25ee58bc4df37e5f19dbdf7cabc1eead8c4eeec7bbb727bab670029676d6f926",
+      "acceptedEighthRawSha256": "0f22c25de7b4c7ce2566d47adf200e06bbc86891530481a083966da6e959d6b6",
+      "rawBytesIdenticalToAcceptedEighth": false,
+      "exactMethodAsts": {
+        "oracle": 410,
+        "baselineTotal": 350,
+        "candidateTotal": 350,
+        "baselineExact": 160,
+        "candidateExact": 160,
+        "exactMethodsLost": [],
+        "exactMethodsGained": []
+      },
+      "changedMethodAsts": [
+        "inflateCodesUsed",
+        "inflateMark"
+      ],
+      "matchingRawRecordsGained": 1,
+      "matchingRawRecordsLost": 0,
+      "allRawRecordsAdded": 6,
+      "allRawRecordsRemoved": 16,
+      "completeBaselineCandidateDiff": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-v2-whole-preview/zlib-1.3.1-core-full/complete-baseline-candidate.diff",
+        "sha256": "f3b15c5f3bb036689e01f7ace89fe1416086c10741f902d54a1aa8bc220907b6",
+        "bytes": 6710
+      },
+      "completeOracleCandidateDiff": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-v2-whole-preview/zlib-1.3.1-core-full/complete-oracle-candidate.diff",
+        "sha256": "7e5d5aca6b8e27c6467e2330631e9c23cbf7c9fc7d4306ba0906ef876cff9522",
+        "bytes": 58439843
+      },
+      "notes": [
+        "Only two method ASTs change: inflateCodesUsed/inflateMark. Both were already nonexact prototype placeholders where Joern has actual function bodies; no new exact-method loss. Candidate return types change to longunsigned/long and associated unmatched type scaffolds disappear. Entire FLOW section is unchanged. These are diagnostic observations, not an assertion of complete method/property correctness."
+      ],
+      "changedHeaders": {
+        "inflateCodesUsed": {
+          "eighth": "METHOD NAME=inflateCodesUsed CODE=ZEXTERN unsigned long  ZEXPORT inflateCodesUsed(z_streamp); FULL_NAME=inflateCodesUsed SIGNATURE=ZEXTERN unsigned long(z_streamp) ORDER=1",
+          "candidate": "METHOD NAME=inflateCodesUsed CODE=extern long unsigned extern long unsigned (z_streamp); FULL_NAME=inflateCodesUsed SIGNATURE=longunsigned(z_streamp) ORDER=1",
+          "joern": "METHOD NAME=inflateCodesUsed CODE=unsigned long ZEXPORT inflateCodesUsed(z_streamp strm) {\\n    struct inflate_state FAR *state;\\n    if (inflateStateCheck(strm)) return (unsigned long)-1;\\n    state = (struct inflate_state FAR *)strm->state;\\n    return (unsigned long)(state->next - state->codes);\\n} FULL_NAME=inflateCodesUsed SIGNATURE=unsigned long(z_streamp) ORDER=1"
+        },
+        "inflateMark": {
+          "eighth": "METHOD NAME=inflateMark CODE=ZEXTERN long ZEXPORT inflateMark(z_streamp strm); FULL_NAME=inflateMark SIGNATURE=ZEXTERN long(z_streamp) ORDER=1",
+          "candidate": "METHOD NAME=inflateMark CODE=extern long extern long (z_streamp); FULL_NAME=inflateMark SIGNATURE=long(z_streamp) ORDER=1",
+          "joern": "METHOD NAME=inflateMark CODE=long ZEXPORT inflateMark(z_streamp strm) {\\n    struct inflate_state FAR *state;\\n\\n    if (inflateStateCheck(strm))\\n        return -(1L << 16);\\n    state = (struct inflate_state FAR *)strm->state;\\n    return (long)(((unsigned long)((long)state->back)) << 16) +\\n        (state->mode == COPY ? state->length :\\n            (state->mode == MATCH ? state->was - state->length : 0));\\n} FULL_NAME=inflateMark SIGNATURE=long(z_streamp) ORDER=1"
+        }
+      }
+    },
+    {
+      "case": "lua-5.4.7-full",
+      "exitCode": 0,
+      "producerSecondsDiagnosticOnly": 37.10021508397767,
+      "candidateRawSha256": "0ccddab7079f879c38d08269a2934adf8dcf0033b54e3de670f5e7f1c77a6294",
+      "acceptedEighthRawSha256": "0ccddab7079f879c38d08269a2934adf8dcf0033b54e3de670f5e7f1c77a6294",
+      "rawBytesIdenticalToAcceptedEighth": true,
+      "exactMethodAsts": {
+        "oracle": 2274,
+        "baselineTotal": 2221,
+        "candidateTotal": 2221,
+        "baselineExact": 1434,
+        "candidateExact": 1434,
+        "exactMethodsLost": [],
+        "exactMethodsGained": []
+      },
+      "changedMethodAsts": [],
+      "matchingRawRecordsGained": 0,
+      "matchingRawRecordsLost": 0,
+      "allRawRecordsAdded": 0,
+      "allRawRecordsRemoved": 0,
+      "completeBaselineCandidateDiff": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-v2-whole-preview/lua-5.4.7-full/complete-baseline-candidate.diff",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "completeOracleCandidateDiff": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-v2-whole-preview/lua-5.4.7-full/complete-oracle-candidate.diff",
+        "sha256": "b5b7e1c2e0a82feaba314e5ee02ba847c8bac6676c710ee6fb0916d2a5306b38",
+        "bytes": 58065597
+      },
+      "notes": [
+        "Complete Lua raw output is byte-identical to accepted eighth. It remains nonexact versus Joern."
+      ]
+    }
+  ],
+  "noPerformanceInference": "This frozen candidate is a debug build; timings are only run receipts. No resource gate, benchmark or comparison with accepted release time.",
+  "invocations": {
+    "zlib": 1,
+    "lua": 1,
+    "retries": 0
+  },
+  "scope": "Complete unfiltered selected Joern projection and all raw diffs retained. No new Joern execution, builds, root source edits, manifest proposal or acceptance."
+}

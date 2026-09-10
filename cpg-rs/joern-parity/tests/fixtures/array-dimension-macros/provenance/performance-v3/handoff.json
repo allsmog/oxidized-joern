@@ -1,0 +1,166 @@
+{
+  "status": "PASS_PERFORMANCE_ONLY_V3_PILOT_AND_BOUNDED_PRESERVATION",
+  "sourceSha256": "e9b27e9795e35b9f03b61bb2438337f38517850e48c04b5177380704a037fa0f",
+  "sourcePatchSha256": "48ff48a3cbfff9db8d6e2fcd30fa2c060441c79221b7896d42678ccbe13ede37",
+  "sourceInputCount": 195,
+  "sourceUnchanged": true,
+  "equivalence": {
+    "status": "PASS_OFFLINE_BOUNDED_FORMULA_EQUIVALENCE",
+    "childLists": 8421,
+    "predicateChecks": 530523,
+    "listLengths": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "childIndices": [
+      -2,
+      -1,
+      0,
+      1,
+      2
+    ],
+    "queries": [
+      -3,
+      -2,
+      -1,
+      0,
+      1,
+      2,
+      3
+    ],
+    "hasArgValues": [
+      false,
+      true
+    ],
+    "fieldIdentifierValues": [
+      false,
+      true
+    ],
+    "duplicateIndicesPreserved": true,
+    "testedFunctions": [
+      "used",
+      "defined",
+      "has_flow"
+    ],
+    "bound": "Exhaustive small-model equivalence to the current vector construction; no Rust implementation or graph producer executed. Mathematical formula extends to arbitrary finite lists because callers ask only existential membership.",
+    "scriptSha256": "595f2bf73d6af59d5959a4c26e61254414a2a5328601e9b02160e1a4c8c216d6"
+  },
+  "mainBlocksPassed": 308,
+  "completeProjectsByteIdentical": 14,
+  "rdSemanticsTestsPassed": 3,
+  "pilotSeconds": 3.6291230829956476,
+  "pilotRssMiB": 488.65625,
+  "graphAndEdgesByteIdenticalToHeldV2": true,
+  "repeatedAcceptance": false,
+  "newWorkspaceTestFunctions": 1,
+  "scope": "PTF allocation and sorting removal only; original vector mapping remains as unit specification, non-PTF behavior unchanged.",
+  "evidence": [
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/frozen-v3-ptf/bindings.json",
+      "sha256": "5365334c3027cb874a36a647722587f3f7a3a3fe50ee989997df765ef869e958",
+      "bytes": 24872
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/frozen-v3-ptf/v2-v3.patch",
+      "sha256": "48ff48a3cbfff9db8d6e2fcd30fa2c060441c79221b7896d42678ccbe13ede37",
+      "bytes": 4911
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/frozen-v3-ptf/source/cpg-rs/cpg-lang-c/src/exact.rs",
+      "sha256": "e9b27e9795e35b9f03b61bb2438337f38517850e48c04b5177380704a037fa0f",
+      "bytes": 416509
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/frozen-v3-ptf/cpg",
+      "sha256": "a230e38b8f951a9b0b6fa9fa4a6da616a4a5ab3b2fd96731c9798846b99e075e",
+      "bytes": 18986960
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/frozen-v3-ptf/joern-parity",
+      "sha256": "a1a5d87f52da3817ef935604112cda8a16a1333b28901ea537186efd8cf73410",
+      "bytes": 2482864
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/verification-v3-ptf/checks.json",
+      "sha256": "57fa22c83e3f47df35b8ac5f3c572159a2138731cdc9d5ccd8556a8b0d47472e",
+      "bytes": 1310
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/verification-v3-ptf/replay14.json",
+      "sha256": "59b5703df6ff388de073e646db40a38ea4a98911802dbac7da1a3fc42cf34500",
+      "bytes": 16326
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/verification-v3-ptf/main308.log",
+      "sha256": "c105179d62065e9cbf9f398ff94754c29ec03add1206db7dff281cb4c07b6be6",
+      "bytes": 7734
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/verification-v3-ptf/unit-tests.log",
+      "sha256": "58ed1728b00dd23000fb86b3c85b9e7916bab3de03c05af058d79c08fc35f04d",
+      "bytes": 1072
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/pilot-v3-ptf/run.json",
+      "sha256": "b8f127fb9d2a9cc7631e2b3e2f355c1c1b5466fc8f3f0eca73d3a29a48791526",
+      "bytes": 53231
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/pilot-v3-ptf/graph.cpg",
+      "sha256": "dfa78b2e2eef7995b3c788a289dd923a5a316cdb5d8eec2d2311940b85005113",
+      "bytes": 8471024
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/pilot-v3-ptf/edges.txt",
+      "sha256": "4272c678b1384f9664472927a120bab6be316ae696322fa6e4e6947120cdf65b",
+      "bytes": 15776184
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/tenth-performance-next/equivalence.json",
+      "sha256": "993154133d75a739b828664f85400ed08d8c5b3b17e5e2de9c4ec1fb4973a5e7",
+      "bytes": 825
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/tenth-performance-next/equivalence.py",
+      "sha256": "595f2bf73d6af59d5959a4c26e61254414a2a5328601e9b02160e1a4c8c216d6",
+      "bytes": 1762
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/tenth-performance-next/edit-v3.py",
+      "sha256": "485c79317ba806413256618bd431b5ff84825930548d0aa4428a35129ea6fe80",
+      "bytes": 4929
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/tenth-performance-next/build-v3.py",
+      "sha256": "fa6d89fe2d3afaefa64bf977d4e65438927c8e700fae367ad383983c2e134992",
+      "bytes": 2870
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/tenth-performance-next/check-v3.py",
+      "sha256": "fe642eb4192c0970a1fa01c415e9d1d97b8f4cdce4b3f0c0d163a01b4f7fad2c",
+      "bytes": 4953
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/tenth-performance-next/pilot-v3.py",
+      "sha256": "980887e24054bbad06932cf4d6178d57f6526329506907fe49a8562744c5d830",
+      "bytes": 3298
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/tenth-performance-next/V3.md",
+      "sha256": "35d2d4879a3d22de65c87df28ad7e0a0846aec13a2b5cc061604222c6a303706",
+      "bytes": 2008
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/tenth-batch/profile-held-v2/sample.txt",
+      "sha256": "97ea1e4021a1c460aadf24478eeb813f0b6d33e642afa48480554cb6a4ce8c2b",
+      "bytes": 713604
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/tenth-batch/profile-held-v2-late/sample.txt",
+      "sha256": "b5e2250b151bcb468d4172286a78457b410fad9e86e4e32fb62fbf3e99bfaa0c",
+      "bytes": 448005
+    }
+  ]
+}

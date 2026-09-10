@@ -1,0 +1,153 @@
+METHOD NAME=<global> CODE=<global> FULL_NAME=<includes>:<global> ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.sizeOf FULL_NAME=<operator>.sizeOf ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1
+  METHOD NAME=read CODE=int read(int value) { return ID(sizeof(value)); } FULL_NAME=read SIGNATURE=int(int) ORDER=1
+    METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+    METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+    BLOCK CODE={ return ID(sizeof(value)); } TYPE_FULL_NAME=void ORDER=2
+      RETURN CODE=return ID(sizeof(value)); ORDER=1
+        CALL NAME=ID CODE=ID(sizeof(value)) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=main.c:ID:ANY(1) SIGNATURE=ANY(1) ORDER=1 DISPATCH_TYPE=INLINED
+          BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+            CALL NAME=<operator>.sizeOf CODE=sizeof (value) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.sizeOf ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+              IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+    METHOD_REF CODE=read TYPE_FULL_NAME=read METHOD_FULL_NAME=read ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=ID CODE=#define ID(x) x FULL_NAME=main.c:ID:ANY(1) SIGNATURE=ANY(1) ORDER=1
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=3
+
+METHOD NAME=read CODE=int read(int value) { return ID(sizeof(value)); } FULL_NAME=read SIGNATURE=int(int) ORDER=1
+  METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+  BLOCK CODE={ return ID(sizeof(value)); } TYPE_FULL_NAME=void ORDER=2
+    RETURN CODE=return ID(sizeof(value)); ORDER=1
+      CALL NAME=ID CODE=ID(sizeof(value)) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=main.c:ID:ANY(1) SIGNATURE=ANY(1) ORDER=1 DISPATCH_TYPE=INLINED
+        BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+          CALL NAME=<operator>.sizeOf CODE=sizeof (value) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.sizeOf ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+            IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+
+NODES|META_DATA LANGUAGE=NEWC
+NODES|FILE NAME=<includes> ORDER=1
+NODES|FILE NAME=<unknown> ORDER=0
+NODES|FILE NAME=main.c ORDER=0
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<global> FILENAME=<unknown> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<includes>:<global> FILENAME=<includes> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|NAMESPACE NAME=<global>
+NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=<global> FULL_NAME=main.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=read FULL_NAME=read CODE=read AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+NODES|TYPE NAME=read FULL_NAME=read TYPE_DECL_FULL_NAME=read
+NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+EDGES|ARGUMENT read#4 -> read#5
+EDGES|ARGUMENT read#7 -> read#8
+EDGES|CALL read#5 -> main.c:ID:ANY(1)#0
+EDGES|CALL read#7 -> <operator>.sizeOf#0
+EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+EDGES|CFG <operator>.sizeOf#0 -> <operator>.sizeOf#4
+EDGES|CFG main.c:<global>#0 -> main.c:<global>#12
+EDGES|CFG main.c:<global>#1 -> read#5
+EDGES|CFG main.c:<global>#12 -> main.c:<global>#13
+EDGES|CFG main.c:ID:ANY(1)#0 -> main.c:ID:ANY(1)#4
+EDGES|CFG read#4 -> read#9
+EDGES|CFG read#5 -> read#4
+EDGES|CFG read#5 -> read#8
+EDGES|CFG read#7 -> read#4
+EDGES|CFG read#8 -> read#7
+EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+EDGES|CONTAINS <operator>.sizeOf#0 -> <operator>.sizeOf#2
+EDGES|CONTAINS D:main.c:<global> -> D:read
+EDGES|CONTAINS D:main.c:<global> -> main.c:<global>#0
+EDGES|CONTAINS D:main.c:<global> -> main.c:ID:ANY(1)#0
+EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+EDGES|CONTAINS F:<includes> -> D:ANY
+EDGES|CONTAINS F:<includes> -> D:int
+EDGES|CONTAINS F:<includes> -> D:void
+EDGES|CONTAINS F:main.c -> D:main.c:<global>
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#1
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#11
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#12
+EDGES|CONTAINS main.c:<global>#1 -> read#3
+EDGES|CONTAINS main.c:<global>#1 -> read#4
+EDGES|CONTAINS main.c:<global>#1 -> read#5
+EDGES|CONTAINS main.c:<global>#1 -> read#6
+EDGES|CONTAINS main.c:<global>#1 -> read#7
+EDGES|CONTAINS main.c:<global>#1 -> read#8
+EDGES|CONTAINS main.c:ID:ANY(1)#0 -> main.c:ID:ANY(1)#3
+EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.sizeOf#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.sizeOf#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.sizeOf#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.sizeOf#4 -> T:ANY
+EDGES|EVAL_TYPE main.c:<global>#11 -> T:ANY
+EDGES|EVAL_TYPE main.c:<global>#12 -> T:read
+EDGES|EVAL_TYPE main.c:<global>#13 -> T:ANY
+EDGES|EVAL_TYPE main.c:ID:ANY(1)#1 -> T:ANY
+EDGES|EVAL_TYPE main.c:ID:ANY(1)#2 -> T:ANY
+EDGES|EVAL_TYPE main.c:ID:ANY(1)#3 -> T:ANY
+EDGES|EVAL_TYPE main.c:ID:ANY(1)#4 -> T:ANY
+EDGES|EVAL_TYPE read#1 -> T:int
+EDGES|EVAL_TYPE read#2 -> T:int
+EDGES|EVAL_TYPE read#3 -> T:void
+EDGES|EVAL_TYPE read#5 -> T:ANY
+EDGES|EVAL_TYPE read#6 -> T:ANY
+EDGES|EVAL_TYPE read#7 -> T:ANY
+EDGES|EVAL_TYPE read#8 -> T:int
+EDGES|EVAL_TYPE read#9 -> T:int
+EDGES|PARAMETER_LINK <operator>.sizeOf#1 -> <operator>.sizeOf#3
+EDGES|PARAMETER_LINK main.c:ID:ANY(1)#1 -> main.c:ID:ANY(1)#2
+EDGES|PARAMETER_LINK read#1 -> read#2
+EDGES|REF NB:<global> -> NS:<global>
+EDGES|REF NB:<includes>:<global> -> NS:<global>
+EDGES|REF NB:main.c:<global> -> NS:<global>
+EDGES|REF T:ANY -> D:ANY
+EDGES|REF T:int -> D:int
+EDGES|REF T:read -> D:read
+EDGES|REF T:void -> D:void
+EDGES|REF main.c:<global>#12 -> main.c:<global>#1
+EDGES|REF read#8 -> read#1
+EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+EDGES|SOURCE_FILE D:ANY -> F:<includes>
+EDGES|SOURCE_FILE D:int -> F:<includes>
+EDGES|SOURCE_FILE D:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE D:read -> F:main.c
+EDGES|SOURCE_FILE D:void -> F:<includes>
+EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
+EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>
+EDGES|SOURCE_FILE NB:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#0 -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#1 -> F:main.c
+EDGES|SOURCE_FILE main.c:ID:ANY(1)#0 -> F:main.c
+FLOWS|REACHING_DEF[<RET>] read#4 -> read#9
+FLOWS|REACHING_DEF[ID(sizeof(value))] read#5 -> read#4
+FLOWS|REACHING_DEF[ID(sizeof(value))] read#5 -> read#9
+FLOWS|REACHING_DEF[] <operator>.sizeOf#0 -> <operator>.sizeOf#1
+FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#12
+FLOWS|REACHING_DEF[] main.c:<global>#1 -> read#1
+FLOWS|REACHING_DEF[] main.c:<global>#1 -> read#5
+FLOWS|REACHING_DEF[] main.c:ID:ANY(1)#0 -> main.c:ID:ANY(1)#1
+FLOWS|REACHING_DEF[p1] <operator>.sizeOf#1 -> <operator>.sizeOf#3
+FLOWS|REACHING_DEF[p1] <operator>.sizeOf#1 -> <operator>.sizeOf#4
+FLOWS|REACHING_DEF[p1] main.c:ID:ANY(1)#1 -> main.c:ID:ANY(1)#2
+FLOWS|REACHING_DEF[p1] main.c:ID:ANY(1)#1 -> main.c:ID:ANY(1)#4
+FLOWS|REACHING_DEF[value] read#1 -> read#2
+FLOWS|REACHING_DEF[value] read#1 -> read#9

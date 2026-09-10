@@ -1,0 +1,274 @@
+{
+  "status": "DIAGNOSIS_COMPLETE_REQUIRES_REPAIR_NOT_SOURCE_ACCEPTANCE",
+  "priorReceipt": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/definition-selection-review.json",
+    "sha256": "a632bb305c5d1400ba43dad0109e4b51af01c3306f0109d4439fe84d14a6df3f"
+  },
+  "version": {
+    "tag": "v4.0.555",
+    "tagObject": "e1f2b03a6400a141181516de3d94c3f86c316f53",
+    "commit": "d95237aeaf3d12cb4e63336def3a4d9d7315dfb4",
+    "tagResolution": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/upstream/tag-resolution.txt",
+      "sha256": "4eac817e8c5787d33c3170707c5796799bf09db19cfe7e1894c99f51280f0f47"
+    },
+    "commitSourceByteChecks": {
+      "MacroHandler.scala": {
+        "commitUrl": "https://raw.githubusercontent.com/joernio/joern/d95237aeaf3d12cb4e63336def3a4d9d7315dfb4/joern-cli/frontends/c2cpg/src/main/scala/io/joern/c2cpg/astcreation/MacroHandler.scala",
+        "sha256": "73cdeb7c41d9356cc6ba2fe2f276bb198a1a26b77d67e13fb1830491289f0ab6",
+        "tagAndCommitBytesEqual": true
+      },
+      "AstCreationPass.scala": {
+        "commitUrl": "https://raw.githubusercontent.com/joernio/joern/d95237aeaf3d12cb4e63336def3a4d9d7315dfb4/joern-cli/frontends/c2cpg/src/main/scala/io/joern/c2cpg/passes/AstCreationPass.scala",
+        "sha256": "561c1a211fd9f94fdbd24c1377113d4d7782fb41d26e93877737743185399a07",
+        "tagAndCommitBytesEqual": true
+      },
+      "AstCreator.scala": {
+        "commitUrl": "https://raw.githubusercontent.com/joernio/joern/d95237aeaf3d12cb4e63336def3a4d9d7315dfb4/joern-cli/frontends/c2cpg/src/main/scala/io/joern/c2cpg/astcreation/AstCreator.scala",
+        "sha256": "b90c7804a6ab74326f67da35124da0873c32be1340e6006f8a3d47720bc0141c",
+        "tagAndCommitBytesEqual": true
+      },
+      "CdtParser.scala": {
+        "commitUrl": "https://raw.githubusercontent.com/joernio/joern/d95237aeaf3d12cb4e63336def3a4d9d7315dfb4/joern-cli/frontends/c2cpg/src/main/scala/io/joern/c2cpg/parser/CdtParser.scala",
+        "sha256": "2c4e9bbf79048170c9ae63c8ce30af640db06e1a46eec5e4fb6fa6f5382132b4",
+        "tagAndCommitBytesEqual": true
+      }
+    }
+  },
+  "supplement": {
+    "liveRun": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/ties-and-order/live-run.json",
+      "sha256": "cb4f10a5c904d6e3e7ae556d0710ae12afe8eee25731ed6f7787f3a9ad9f7d90"
+    },
+    "raw": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/ties-and-order/live.stdout",
+      "sha256": "44933bed5425e8d085c8ae780988a50027c6883dd2fd3e2a8688d2678ce03344"
+    },
+    "oracle": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/ties-and-order/oracle.sc",
+      "sha256": "56431f14868678e64f9eb41026b44f1d3d7738404d28d2db62711b520c98c742"
+    },
+    "beforeReplay": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/ties-and-order/baseline-eighth/replay.json",
+      "sha256": "4611a005636bc95be1ecb504d6b47904f0f1076762154111a4c7b89df515f111"
+    },
+    "currentReplay": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/ties-and-order/candidate-v2/replay.json",
+      "sha256": "da9fccc36a7f5cecdeeb5222e33e8220e85f965e20a59a034a8ecd34cf3219d5"
+    },
+    "rows": [
+      {
+        "case": "header_event_tie_after",
+        "inputs": {
+          "main.c": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/ties-and-order/input/header_event_tie_after/main.c",
+            "sha256": "3c2f20484db3efcee95ff5bc4891b151e3f8cd33b350cc8a3949f233ee06eafa"
+          },
+          "api.h": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/ties-and-order/input/header_event_tie_after/api.h",
+            "sha256": "131c651f587e33d4865092b51b15078d561460ae2546252da319e47003dc7314"
+          }
+        },
+        "reference": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/ties-and-order/input/header_event_tie_after/expected.txt",
+          "sha256": "9fc92774be54ab173650a4ecefaf16fb796028b29bf765e4775e0f054c40ba52"
+        },
+        "canonicalLinesIncludingSeparators": 307,
+        "nonemptySelectedRecords": 297,
+        "baseline-eighth": {
+          "fullGraph": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/ties-and-order/baseline-eighth/header_event_tie_after/actual.txt",
+            "sha256": "c271c49a8bb7c628c8dbe6f0aae236d4a985a1e5ad9cacfd7f02527c3bc0482b"
+          },
+          "completeDifference": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/ties-and-order/baseline-eighth/header_event_tie_after/complete.diff",
+            "sha256": "e8d6720d3694c7de647b2e1f32f382d082c97c4cd24ca211b838e17cd780ed62"
+          }
+        },
+        "candidate-v2": {
+          "fullGraph": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/ties-and-order/candidate-v2/header_event_tie_after/actual.txt",
+            "sha256": "9fc92774be54ab173650a4ecefaf16fb796028b29bf765e4775e0f054c40ba52"
+          },
+          "completeDifference": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/ties-and-order/candidate-v2/header_event_tie_after/complete.diff",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        },
+        "liveMacroMethods": [
+          "METHOD NAME=MODE CODE=#define MODE 8 FULL_NAME=api.h:MODE:int(0) SIGNATURE=int(0) ORDER=1",
+          "METHOD NAME=RESULT CODE=#define RESULT 9 FULL_NAME=api.h:RESULT:int(0) SIGNATURE=int(0) ORDER=1",
+          "METHOD NAME=MODE CODE=#define MODE 1 FULL_NAME=main.c:MODE:int(0) SIGNATURE=int(0) ORDER=1"
+        ]
+      },
+      {
+        "case": "header_event_tie_before",
+        "inputs": {
+          "main.c": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/ties-and-order/input/header_event_tie_before/main.c",
+            "sha256": "d7e2bdc5330fcd657fc95455f74bb3fbb8aab5f6a3719156dd3d0aac9fceeccd"
+          },
+          "api.h": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/ties-and-order/input/header_event_tie_before/api.h",
+            "sha256": "9b6045f27b4cc4035e512fcc4c89caf312b15f35abb163f260fd5528888b3f8f"
+          }
+        },
+        "reference": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/ties-and-order/input/header_event_tie_before/expected.txt",
+          "sha256": "475475af54d05ceaff4865ed463b59978e1564d83039d649b68375be34356ffe"
+        },
+        "canonicalLinesIncludingSeparators": 139,
+        "nonemptySelectedRecords": 134,
+        "baseline-eighth": {
+          "fullGraph": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/ties-and-order/baseline-eighth/header_event_tie_before/actual.txt",
+            "sha256": "0bfcebe3ddfa99b0fbb444ef6b6d2fe40e14b8d63eece53b218a2920c461e87c"
+          },
+          "completeDifference": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/ties-and-order/baseline-eighth/header_event_tie_before/complete.diff",
+            "sha256": "eb0610ded2e8dd8da33d8970a6e824d3bde9b1ce08d1f620c34f8d8d7d0cd34a"
+          }
+        },
+        "candidate-v2": {
+          "fullGraph": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/ties-and-order/candidate-v2/header_event_tie_before/actual.txt",
+            "sha256": "0bfcebe3ddfa99b0fbb444ef6b6d2fe40e14b8d63eece53b218a2920c461e87c"
+          },
+          "completeDifference": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/ties-and-order/candidate-v2/header_event_tie_before/complete.diff",
+            "sha256": "85c70b0fb6278a9df49e7cd21fb2763517c05e7a22361a424d354aefd3167f8d"
+          }
+        },
+        "liveMacroMethods": [
+          "METHOD NAME=MODE CODE=#define MODE 3 FULL_NAME=api.h:MODE:int(0) SIGNATURE=int(0) ORDER=1"
+        ]
+      },
+      {
+        "case": "mixed_global_method_order",
+        "inputs": {
+          "main.c": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/ties-and-order/input/mixed_global_method_order/main.c",
+            "sha256": "ea98f5d983935e31a28e4fd53a9211f45802f3e0b643c816a93c3014174350e5"
+          }
+        },
+        "reference": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/ties-and-order/input/mixed_global_method_order/expected.txt",
+          "sha256": "5d190ba9d3236ea4da83d8940e62da44021b9c850d050896c18fd46ec622254b"
+        },
+        "canonicalLinesIncludingSeparators": 281,
+        "nonemptySelectedRecords": 273,
+        "baseline-eighth": {
+          "fullGraph": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/ties-and-order/baseline-eighth/mixed_global_method_order/actual.txt",
+            "sha256": "5d190ba9d3236ea4da83d8940e62da44021b9c850d050896c18fd46ec622254b"
+          },
+          "completeDifference": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/ties-and-order/baseline-eighth/mixed_global_method_order/complete.diff",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        },
+        "candidate-v2": {
+          "fullGraph": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/ties-and-order/candidate-v2/mixed_global_method_order/actual.txt",
+            "sha256": "5d190ba9d3236ea4da83d8940e62da44021b9c850d050896c18fd46ec622254b"
+          },
+          "completeDifference": {
+            "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/ties-and-order/candidate-v2/mixed_global_method_order/complete.diff",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        },
+        "liveMacroMethods": [
+          "METHOD NAME=PICK CODE=#define PICK 1 FULL_NAME=main.c:PICK:int(0) SIGNATURE=int(0) ORDER=1",
+          "METHOD NAME=PICK CODE=#define PICK 2L FULL_NAME=main.c:PICK:longint(0) SIGNATURE=longint(0) ORDER=1",
+          "METHOD NAME=PICK CODE=#define PICK 3LL FULL_NAME=main.c:PICK:longlongint(0) SIGNATURE=longlongint(0) ORDER=1"
+        ]
+      }
+    ]
+  },
+  "trace": {
+    "CdtTraceTies.scala": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/cdt-trace-ties/CdtTraceTies.scala",
+      "sha256": "61dab9099efc770a39dfb1c1eeeecec06cbbcc3634adea6b8ac42cd23918dab6"
+    },
+    "compile.stdout": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/cdt-trace-ties/compile.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "compile.stderr": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/cdt-trace-ties/compile.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "run.json": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/cdt-trace-ties/run.json",
+      "sha256": "e694cfc8c4f127fbfcddfe1c19987ff8f0f7d1e138ec583891d096c1fb97e9f1"
+    },
+    "trace.stdout": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/cdt-trace-ties/trace.stdout",
+      "sha256": "fa5aaeb4dc550bb1b840ba265550e1a82ce4bacf158330a699a1804d6488657c"
+    },
+    "trace.stderr": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/cdt-trace-ties/trace.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "first-prepare-failure.txt": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-macro-definition-review/cdt-trace-ties/first-prepare-failure.txt",
+      "sha256": "52a072e56b964ceeea033259cbdcb4391a7956fa82f21459a8e8ee137cf0514f"
+    }
+  },
+  "ties": {
+    "header_event_tie_after": {
+      "numericOffset": 41,
+      "rawExpansionOrder": [
+        "main.c MODE1 index1",
+        "api.h MODE3 index4"
+      ],
+      "stableSortedOrderSame": true,
+      "liveSelectedFirstStub": "main.c:MODE:int(0) CODE=#define MODE 1"
+    },
+    "header_event_tie_before": {
+      "numericOffset": 57,
+      "rawExpansionOrder": [
+        "api.h MODE3 index2",
+        "main.c MODE8 index5"
+      ],
+      "stableSortedOrderSame": true,
+      "liveSelectedFirstStub": "api.h:MODE:int(0) CODE=#define MODE 3"
+    }
+  },
+  "globalOrder": {
+    "case": "mixed_global_method_order",
+    "sourceInvocations": [
+      "first() at40 PICK1",
+      "global initializer at90 PICK2L",
+      "later() at156 PICK3LL"
+    ],
+    "liveStubDefinitionsByFullName": [
+      "METHOD NAME=PICK CODE=#define PICK 1 FULL_NAME=main.c:PICK:int(0) SIGNATURE=int(0) ORDER=1",
+      "METHOD NAME=PICK CODE=#define PICK 2L FULL_NAME=main.c:PICK:longint(0) SIGNATURE=longint(0) ORDER=1",
+      "METHOD NAME=PICK CODE=#define PICK 3LL FULL_NAME=main.c:PICK:longlongint(0) SIGNATURE=longlongint(0) ORDER=1"
+    ],
+    "requirement": "Resolve ownership once in original source declaration order; render from immutable invocation identity, or an equivalent mechanism. Function-first rendering, duplicate method views, and final scaffold rendering must not independently consume the queue."
+  },
+  "exactRule": [
+    "Construct one outer macro expansion event stream per CDT translation unit, including active directive conditions and included-header events. Preserve defining-file metadata and file-local numeric expansion offsets.",
+    "Stably sort events solely by numeric offset; equal offsets preserve the original TU expansion-location list order. Do not add filename ordering or include-position offsets.",
+    "Only an eligible original macro-expanded AST node consumes. Remove events from the front while offset<=nodeOffset until the first matching simple macro name. Nonmatching earlier events are discarded; later events stay queued.",
+    "No consumption during phantom/type discovery, synthetic copied arguments, unsupported recovery expansion, or duplicate graph text rendering. Pinned MacroHandler parent-expansion and lone-LOCAL eligibility rules remain material.",
+    "The selected event supplies defining file and macro definition CODE. The current AST node supplies return type; current MacroArgumentExtractor result count supplies signature arity. Do not copy old formal count or use old replacement text to lower current expression.",
+    "First registration wins for each resulting complete full name (file:name:returnType(arity)), not simply macro name."
+  ],
+  "counts": {
+    "newProjectsTotal": 16,
+    "canonicalLinesIncludingSeparators": 2925,
+    "nonemptySelectedRecords": 2838,
+    "baselineExact": 2,
+    "v2Exact": 6
+  },
+  "requiredCorrection": "branch_condition_entry_state PICK stub CODE1 was correct in eighth and live, lost in v1/v2; it remains a blocker until verified repaired. New conditional_before_redefine and earlier_function_condition repeat the same property regression. MODE/BAD mismatches predate this patch but have the same source-grounded queue remedy.",
+  "limits": [
+    "All complete raw/reference/baseline/v2 graphs are retained. No references were rewritten, filtered or relaxed.",
+    "Ties are verified for both source-order directions on two small supplied-header cases; broader equal-offset ordering follows the pinned stable-sort source, not a claim of exhaustive parser coverage.",
+    "No root/peer production edits, Cargo tests or whole-project producers were performed. The Java observer compiled only in ignored review storage against existing pinned libraries.",
+    "This receipt is a repair handoff, not an acceptance of current candidate source or whole-project correctness."
+  ]
+}

@@ -1,0 +1,435 @@
+{
+  "status": "PREPARED_INPUTS_ONLY_PRODUCERS_HELD",
+  "parentReleaseRequired": true,
+  "parentReleaseReceipt": null,
+  "acceptedTenthSourceCommit": null,
+  "acceptedTenthDocsCommit": null,
+  "baselineDescription": "Integrated tenth V4 candidate under parent acceptance; actual committed checkpoint will be bound before any run.",
+  "baselineExactSha256": "7ea06ac7361e2580b9d6fc77fdf6fa7e06cbb4b9bb294aa57787c3e8f9ce2da8",
+  "newProjects": 17,
+  "retainedAnchors": 2,
+  "totalProposedBatchProjects": 19,
+  "newExpectedGraphs": 0,
+  "producerRuns": 0,
+  "cargoBuilds": 0,
+  "sourceOrTestEdits": false,
+  "cases": [
+    {
+      "case": "unsigned_short",
+      "group": "isolated_scalar_spelling",
+      "sourceType": "unsigned short",
+      "fields": [
+        "Record.value"
+      ],
+      "purpose": "Original primitive MEMBER spelling trigger.",
+      "anticipatedAssertions": [
+        "Admit the complete AST/NODES/EDGES/FLOWS projection before adding a production expectation.",
+        "Compare raw MEMBER NAME, CODE, TYPE_FULL_NAME and ORDER for Record.value.",
+        "Follow the observed TYPE_FULL_NAME to the complete TYPE/TYPE_DECL registration and applicable EVAL_TYPE/REF/CONTAINS/SOURCE_FILE relationships.",
+        "Compare the complete ordinary method and all unrelated records with the frozen before graph."
+      ],
+      "expectedTypeFullName": null,
+      "expectedCompleteGraph": null,
+      "inputs": {
+        "main.c": "15c28619bfdeb3b65e60afb2011092c2c52d425ef4f4b67be09083a3657aea47"
+      },
+      "sourceLines": 7
+    },
+    {
+      "case": "short_unsigned",
+      "group": "isolated_scalar_spelling",
+      "sourceType": "short unsigned",
+      "fields": [
+        "Record.value"
+      ],
+      "purpose": "Order permutation without explicit int.",
+      "anticipatedAssertions": [
+        "Admit the complete AST/NODES/EDGES/FLOWS projection before adding a production expectation.",
+        "Compare raw MEMBER NAME, CODE, TYPE_FULL_NAME and ORDER for Record.value.",
+        "Follow the observed TYPE_FULL_NAME to the complete TYPE/TYPE_DECL registration and applicable EVAL_TYPE/REF/CONTAINS/SOURCE_FILE relationships.",
+        "Compare the complete ordinary method and all unrelated records with the frozen before graph."
+      ],
+      "expectedTypeFullName": null,
+      "expectedCompleteGraph": null,
+      "inputs": {
+        "main.c": "5fb6e70b45823d56203bd1b7c9e35750e574fd671788cf67cad78b17bb7c10a2"
+      },
+      "sourceLines": 7
+    },
+    {
+      "case": "unsigned_short_int",
+      "group": "isolated_scalar_spelling",
+      "sourceType": "unsigned short int",
+      "fields": [
+        "Record.value"
+      ],
+      "purpose": "Explicit int after the unsigned width.",
+      "anticipatedAssertions": [
+        "Admit the complete AST/NODES/EDGES/FLOWS projection before adding a production expectation.",
+        "Compare raw MEMBER NAME, CODE, TYPE_FULL_NAME and ORDER for Record.value.",
+        "Follow the observed TYPE_FULL_NAME to the complete TYPE/TYPE_DECL registration and applicable EVAL_TYPE/REF/CONTAINS/SOURCE_FILE relationships.",
+        "Compare the complete ordinary method and all unrelated records with the frozen before graph."
+      ],
+      "expectedTypeFullName": null,
+      "expectedCompleteGraph": null,
+      "inputs": {
+        "main.c": "76277bee00be9bb521ee0bc24c5127ef632678fc3e0aa233f4bba4de713fed85"
+      },
+      "sourceLines": 7
+    },
+    {
+      "case": "short_int_unsigned",
+      "group": "isolated_scalar_spelling",
+      "sourceType": "short int unsigned",
+      "fields": [
+        "Record.value"
+      ],
+      "purpose": "Order permutation with explicit int.",
+      "anticipatedAssertions": [
+        "Admit the complete AST/NODES/EDGES/FLOWS projection before adding a production expectation.",
+        "Compare raw MEMBER NAME, CODE, TYPE_FULL_NAME and ORDER for Record.value.",
+        "Follow the observed TYPE_FULL_NAME to the complete TYPE/TYPE_DECL registration and applicable EVAL_TYPE/REF/CONTAINS/SOURCE_FILE relationships.",
+        "Compare the complete ordinary method and all unrelated records with the frozen before graph."
+      ],
+      "expectedTypeFullName": null,
+      "expectedCompleteGraph": null,
+      "inputs": {
+        "main.c": "0c049f5c6fd7eb24665d96d4ff592154b323a755cc58e92d5fe0a499dd596648"
+      },
+      "sourceLines": 7
+    },
+    {
+      "case": "signed_short",
+      "group": "isolated_scalar_spelling",
+      "sourceType": "signed short",
+      "fields": [
+        "Record.value"
+      ],
+      "purpose": "Signed width in the MEMBER role.",
+      "anticipatedAssertions": [
+        "Admit the complete AST/NODES/EDGES/FLOWS projection before adding a production expectation.",
+        "Compare raw MEMBER NAME, CODE, TYPE_FULL_NAME and ORDER for Record.value.",
+        "Follow the observed TYPE_FULL_NAME to the complete TYPE/TYPE_DECL registration and applicable EVAL_TYPE/REF/CONTAINS/SOURCE_FILE relationships.",
+        "Compare the complete ordinary method and all unrelated records with the frozen before graph."
+      ],
+      "expectedTypeFullName": null,
+      "expectedCompleteGraph": null,
+      "inputs": {
+        "main.c": "da4b39f4cbd65496ecfcfe1a217413da07c5d35378b3a80ba7bc4fecec5dae79"
+      },
+      "sourceLines": 7
+    },
+    {
+      "case": "signed_char",
+      "group": "isolated_scalar_spelling",
+      "sourceType": "signed char",
+      "fields": [
+        "Record.value"
+      ],
+      "purpose": "Signed atomic primitive spelling.",
+      "anticipatedAssertions": [
+        "Admit the complete AST/NODES/EDGES/FLOWS projection before adding a production expectation.",
+        "Compare raw MEMBER NAME, CODE, TYPE_FULL_NAME and ORDER for Record.value.",
+        "Follow the observed TYPE_FULL_NAME to the complete TYPE/TYPE_DECL registration and applicable EVAL_TYPE/REF/CONTAINS/SOURCE_FILE relationships.",
+        "Compare the complete ordinary method and all unrelated records with the frozen before graph."
+      ],
+      "expectedTypeFullName": null,
+      "expectedCompleteGraph": null,
+      "inputs": {
+        "main.c": "65222d14e53a108d3e98d3e3efa30aeda2b6df4dbed97b88e92698dee74d32c0"
+      },
+      "sourceLines": 7
+    },
+    {
+      "case": "unsigned_char",
+      "group": "isolated_scalar_spelling",
+      "sourceType": "unsigned char",
+      "fields": [
+        "Record.value"
+      ],
+      "purpose": "Unsigned atomic primitive control.",
+      "anticipatedAssertions": [
+        "Admit the complete AST/NODES/EDGES/FLOWS projection before adding a production expectation.",
+        "Compare raw MEMBER NAME, CODE, TYPE_FULL_NAME and ORDER for Record.value.",
+        "Follow the observed TYPE_FULL_NAME to the complete TYPE/TYPE_DECL registration and applicable EVAL_TYPE/REF/CONTAINS/SOURCE_FILE relationships.",
+        "Compare the complete ordinary method and all unrelated records with the frozen before graph."
+      ],
+      "expectedTypeFullName": null,
+      "expectedCompleteGraph": null,
+      "inputs": {
+        "main.c": "ab73e292cafb2ac78baf257cb5a3710955bcfb9f71d82078478916590e813721"
+      },
+      "sourceLines": 7
+    },
+    {
+      "case": "unsigned_long_long_int",
+      "group": "isolated_scalar_spelling",
+      "sourceType": "unsigned long long int",
+      "fields": [
+        "Record.value"
+      ],
+      "purpose": "Two width tokens and explicit int.",
+      "anticipatedAssertions": [
+        "Admit the complete AST/NODES/EDGES/FLOWS projection before adding a production expectation.",
+        "Compare raw MEMBER NAME, CODE, TYPE_FULL_NAME and ORDER for Record.value.",
+        "Follow the observed TYPE_FULL_NAME to the complete TYPE/TYPE_DECL registration and applicable EVAL_TYPE/REF/CONTAINS/SOURCE_FILE relationships.",
+        "Compare the complete ordinary method and all unrelated records with the frozen before graph."
+      ],
+      "expectedTypeFullName": null,
+      "expectedCompleteGraph": null,
+      "inputs": {
+        "main.c": "c772a4b67dd1cfb5cf2943b6d97525c24063c4a476c33a2fba23664f480bae26"
+      },
+      "sourceLines": 7
+    },
+    {
+      "case": "volatile_unsigned_short",
+      "group": "isolated_scalar_spelling",
+      "sourceType": "volatile unsigned short",
+      "fields": [
+        "Record.value"
+      ],
+      "purpose": "Qualifier is a sibling of the type specifier.",
+      "anticipatedAssertions": [
+        "Admit the complete AST/NODES/EDGES/FLOWS projection before adding a production expectation.",
+        "Compare raw MEMBER NAME, CODE, TYPE_FULL_NAME and ORDER for Record.value.",
+        "Follow the observed TYPE_FULL_NAME to the complete TYPE/TYPE_DECL registration and applicable EVAL_TYPE/REF/CONTAINS/SOURCE_FILE relationships.",
+        "Compare the complete ordinary method and all unrelated records with the frozen before graph."
+      ],
+      "expectedTypeFullName": null,
+      "expectedCompleteGraph": null,
+      "inputs": {
+        "main.c": "e80f725b99b57290699d3daf7f4bb116df52d666ad1c6973bea83f82d0675d64"
+      },
+      "sourceLines": 7
+    },
+    {
+      "case": "const_unsigned_short",
+      "group": "isolated_scalar_spelling",
+      "sourceType": "const unsigned short",
+      "fields": [
+        "Record.value"
+      ],
+      "purpose": "Const base qualifier on a scalar MEMBER.",
+      "anticipatedAssertions": [
+        "Admit the complete AST/NODES/EDGES/FLOWS projection before adding a production expectation.",
+        "Compare raw MEMBER NAME, CODE, TYPE_FULL_NAME and ORDER for Record.value.",
+        "Follow the observed TYPE_FULL_NAME to the complete TYPE/TYPE_DECL registration and applicable EVAL_TYPE/REF/CONTAINS/SOURCE_FILE relationships.",
+        "Compare the complete ordinary method and all unrelated records with the frozen before graph."
+      ],
+      "expectedTypeFullName": null,
+      "expectedCompleteGraph": null,
+      "inputs": {
+        "main.c": "57e3d6a3da034eaeda3da20d1ba518bac47a740b3aa62c4f5bf16def20bbc385"
+      },
+      "sourceLines": 7
+    },
+    {
+      "case": "ordinary_numeric_control",
+      "group": "shape_or_fallback_control",
+      "fields": [
+        "NumericRecord.integer_value",
+        "NumericRecord.floating_value"
+      ],
+      "purpose": "Ordinary primitive numeric MEMBER types and an integer literal METHOD control.",
+      "anticipatedAssertions": [
+        "Retain a complete fresh graph even when the existing implementation is nonexact.",
+        "Identify each MEMBER by its enclosing aggregate and field name, compare NAME/CODE/TYPE_FULL_NAME/ORDER independently.",
+        "Preserve nonprimitive TYPE_DECL/TYPE/ALIAS_OF metadata from the complete projection and existing source-backed alias checks; the canonical structural edge projection itself remains unchanged.",
+        "Compare unrelated ordinary METHOD records and all prior-correct records before/after any later field-only implementation.",
+        "Classify suffix/initializer/alias failures separately rather than extending the primitive spelling claim."
+      ],
+      "expectedTypeFullName": null,
+      "expectedCompleteGraph": null,
+      "inputs": {
+        "main.c": "ca63fcf93080419061d59acd5f7cefe2818a399a29190125a011d7397e52caa6"
+      },
+      "sourceLines": 8
+    },
+    {
+      "case": "nonprimitive_scalar_control",
+      "group": "shape_or_fallback_control",
+      "fields": [
+        "Record.struct_value",
+        "Record.union_value",
+        "Record.alias_value"
+      ],
+      "purpose": "Same scalar declarator shape for struct tag, union tag and typedef-name MEMBER fallbacks; retain tag/alias scaffolding separately.",
+      "anticipatedAssertions": [
+        "Retain a complete fresh graph even when the existing implementation is nonexact.",
+        "Identify each MEMBER by its enclosing aggregate and field name, compare NAME/CODE/TYPE_FULL_NAME/ORDER independently.",
+        "Preserve nonprimitive TYPE_DECL/TYPE/ALIAS_OF metadata from the complete projection and existing source-backed alias checks; the canonical structural edge projection itself remains unchanged.",
+        "Compare unrelated ordinary METHOD records and all prior-correct records before/after any later field-only implementation.",
+        "Classify suffix/initializer/alias failures separately rather than extending the primitive spelling claim."
+      ],
+      "expectedTypeFullName": null,
+      "expectedCompleteGraph": null,
+      "inputs": {
+        "main.c": "30f7610f6251619e111dccd66822d2b620b131a00520a94432f29a23737cbcee"
+      },
+      "sourceLines": 17
+    },
+    {
+      "case": "unsigned_short_pointer",
+      "group": "shape_or_fallback_control",
+      "fields": [
+        "Record.value"
+      ],
+      "purpose": "Plain pointer suffix under the affected primitive base.",
+      "anticipatedAssertions": [
+        "Retain a complete fresh graph even when the existing implementation is nonexact.",
+        "Identify each MEMBER by its enclosing aggregate and field name, compare NAME/CODE/TYPE_FULL_NAME/ORDER independently.",
+        "Preserve nonprimitive TYPE_DECL/TYPE/ALIAS_OF metadata from the complete projection and existing source-backed alias checks; the canonical structural edge projection itself remains unchanged.",
+        "Compare unrelated ordinary METHOD records and all prior-correct records before/after any later field-only implementation.",
+        "Classify suffix/initializer/alias failures separately rather than extending the primitive spelling claim."
+      ],
+      "expectedTypeFullName": null,
+      "expectedCompleteGraph": null,
+      "inputs": {
+        "main.c": "7b5de0d2a5dc3eb44e456043dd90fba8820cb2f3c7c839919a8b3eec34c1a97e"
+      },
+      "sourceLines": 7
+    },
+    {
+      "case": "unsigned_short_array",
+      "group": "shape_or_fallback_control",
+      "fields": [
+        "Record.value"
+      ],
+      "purpose": "Numeric array suffix and any synthesized aggregate initializer scaffold; preserve complete diagnostics if unrelated lowering is nonexact.",
+      "anticipatedAssertions": [
+        "Retain a complete fresh graph even when the existing implementation is nonexact.",
+        "Identify each MEMBER by its enclosing aggregate and field name, compare NAME/CODE/TYPE_FULL_NAME/ORDER independently.",
+        "Preserve nonprimitive TYPE_DECL/TYPE/ALIAS_OF metadata from the complete projection and existing source-backed alias checks; the canonical structural edge projection itself remains unchanged.",
+        "Compare unrelated ordinary METHOD records and all prior-correct records before/after any later field-only implementation.",
+        "Classify suffix/initializer/alias failures separately rather than extending the primitive spelling claim."
+      ],
+      "expectedTypeFullName": null,
+      "expectedCompleteGraph": null,
+      "inputs": {
+        "main.c": "e30c69af8869ef328c2de4270ab270fc6a23211fac7b55533efadd02ccc3aa49"
+      },
+      "sourceLines": 7
+    },
+    {
+      "case": "base_qualified_pointer",
+      "group": "shape_or_fallback_control",
+      "fields": [
+        "Record.value"
+      ],
+      "purpose": "Const on the pointed-to base; observe MEMBER-role qualifier behavior without importing a parameter/local rule.",
+      "anticipatedAssertions": [
+        "Retain a complete fresh graph even when the existing implementation is nonexact.",
+        "Identify each MEMBER by its enclosing aggregate and field name, compare NAME/CODE/TYPE_FULL_NAME/ORDER independently.",
+        "Preserve nonprimitive TYPE_DECL/TYPE/ALIAS_OF metadata from the complete projection and existing source-backed alias checks; the canonical structural edge projection itself remains unchanged.",
+        "Compare unrelated ordinary METHOD records and all prior-correct records before/after any later field-only implementation.",
+        "Classify suffix/initializer/alias failures separately rather than extending the primitive spelling claim."
+      ],
+      "expectedTypeFullName": null,
+      "expectedCompleteGraph": null,
+      "inputs": {
+        "main.c": "683671d135a3d3d8385a92bba5f8fc1b87e1650c0b698282ee8416a11d110e0d"
+      },
+      "sourceLines": 7
+    },
+    {
+      "case": "pointer_qualified_pointer",
+      "group": "shape_or_fallback_control",
+      "fields": [
+        "Record.value"
+      ],
+      "purpose": "Const inside the pointer declarator; distinguish qualifier scope from the base-qualified pointer control.",
+      "anticipatedAssertions": [
+        "Retain a complete fresh graph even when the existing implementation is nonexact.",
+        "Identify each MEMBER by its enclosing aggregate and field name, compare NAME/CODE/TYPE_FULL_NAME/ORDER independently.",
+        "Preserve nonprimitive TYPE_DECL/TYPE/ALIAS_OF metadata from the complete projection and existing source-backed alias checks; the canonical structural edge projection itself remains unchanged.",
+        "Compare unrelated ordinary METHOD records and all prior-correct records before/after any later field-only implementation.",
+        "Classify suffix/initializer/alias failures separately rather than extending the primitive spelling claim."
+      ],
+      "expectedTypeFullName": null,
+      "expectedCompleteGraph": null,
+      "inputs": {
+        "main.c": "ce703562d1d768702fd9d0f4177d315a354346fd5924b53feca86633ab49dd29"
+      },
+      "sourceLines": 7
+    },
+    {
+      "case": "mixed_declarator_shapes",
+      "group": "shape_or_fallback_control",
+      "fields": [
+        "Record.scalar",
+        "Record.pointer",
+        "Record.table"
+      ],
+      "purpose": "One field declaration with three declarators; keep declaration order, base ownership and each existing suffix/initializer shape separate.",
+      "anticipatedAssertions": [
+        "Retain a complete fresh graph even when the existing implementation is nonexact.",
+        "Identify each MEMBER by its enclosing aggregate and field name, compare NAME/CODE/TYPE_FULL_NAME/ORDER independently.",
+        "Preserve nonprimitive TYPE_DECL/TYPE/ALIAS_OF metadata from the complete projection and existing source-backed alias checks; the canonical structural edge projection itself remains unchanged.",
+        "Compare unrelated ordinary METHOD records and all prior-correct records before/after any later field-only implementation.",
+        "Classify suffix/initializer/alias failures separately rather than extending the primitive spelling claim."
+      ],
+      "expectedTypeFullName": null,
+      "expectedCompleteGraph": null,
+      "inputs": {
+        "main.c": "78a9ab60868e0c24ba739ac8c1ed1cffb97913d16e6c14a8da5e985a0976dfe7"
+      },
+      "sourceLines": 7
+    }
+  ],
+  "anchors": [
+    {
+      "case": "tiny_fixedtables_include",
+      "kind": "unchanged_existing_anchor",
+      "sourceDirectory": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/cpg-rs/joern-parity/tests/fixtures/body-includes/cases/tiny_fixedtables_include",
+      "inputHashes": {
+        "fixed.h": "3039380a12e6dba1fb44314f13292d1b5ec6744aa80eff5599566a29ea94ea86",
+        "main.c": "7203039d3be732abfb9abaad7177eaa77efa51d6e9fa58d58733346eb6cb4dda"
+      },
+      "referencePath": "retained-anchors/tiny_fixedtables_include/expected.txt",
+      "expectedSha256": "fc4a1360d6f10152edb364c346a47ae73d2df2460fe5ef12da2d2e79cbb7dd3f",
+      "referenceOriginal": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/cpg-rs/joern-parity/tests/fixtures/body-includes/cases/tiny_fixedtables_include/expected.txt",
+      "newGate": false,
+      "admissionAssertion": "Fresh full oracle extraction must match this already-retained full reference before references are admitted.",
+      "knownBeforeDiagnostic": "Seven selected MEMBER/TYPE scaffold differences for unsigned short versus shortunsigned; complete METHOD parity is separately known for these tiny controls."
+    },
+    {
+      "case": "tiny_fixedtables_inline",
+      "kind": "unchanged_existing_anchor",
+      "sourceDirectory": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/cpg-rs/joern-parity/tests/fixtures/body-includes/cases/tiny_fixedtables_inline",
+      "inputHashes": {
+        "main.c": "8af2a0a9531deec50f16e8c125de4000c0636b443b11628e232bb9e9413d2a6f"
+      },
+      "referencePath": "retained-anchors/tiny_fixedtables_inline/expected.txt",
+      "expectedSha256": "6d613c7085ab54541cc1d9fa83494748e33fe70bfc5c541ee39f12aa8046cadd",
+      "referenceOriginal": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/cpg-rs/joern-parity/tests/fixtures/body-includes/cases/tiny_fixedtables_inline/expected.txt",
+      "newGate": false,
+      "admissionAssertion": "Fresh full oracle extraction must match this already-retained full reference before references are admitted.",
+      "knownBeforeDiagnostic": "Seven selected MEMBER/TYPE scaffold differences for unsigned short versus shortunsigned; complete METHOD parity is separately known for these tiny controls."
+    }
+  ],
+  "oracle": {
+    "path": "oracle.sc",
+    "sha256": "56431f14868678e64f9eb41026b44f1d3d7738404d28d2db62711b520c98c742",
+    "originalPath": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/cpg-rs/joern-parity/tests/fixtures/array-dimension-macros/oracle/array-dimension-controls/snapshot/oracle.sc",
+    "byteIdenticalProjection": true
+  },
+  "priorEvidenceBindings": {
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/primitive-member-next/NEXT.md": "6dfb2fb3e39230b2cf0b9180a12d855bcb7f57a5d904a6b0fa96f35ff79e0446",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/primitive-member-next/diagnosis-v1.json": "690d05de564290799e23e37d71898e39a53d5ec536502b2b885dfee8b97e449e",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/frozen-v4-dimensions/source/cpg-rs/cpg-lang-c/src/exact.rs": "7ea06ac7361e2580b9d6fc77fdf6fa7e06cbb4b9bb294aa57787c3e8f9ce2da8",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/package-v2-freeze.json": "5c111a73e64cf54b5f6cb0a84bcede39bc14278b2b732d129aeabdb1393308dc",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/array-package-v4-freeze-final.json": "d9872d542a1518cb3f13e34163d8de40846178d2c58e78868bb90da1199ce1f9",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/cpg-rs/joern-parity/tests/primitive_roles.rs": "6161c7dc80df3522f95809646edf189482d4d03d6b6b2b6a6dd2174e4bec5665",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/cpg-rs/joern-parity/tests/typedef_aggregates.rs": "3f3234f0ff17aab45caaf248083f0c4bf097420c2f81b32e8e5d4503596529b8",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/cpg-rs/joern-parity/tests/array_initializers.rs": "c831fc85ed9fd97a16620399c4f5bdef1c78e0c75a874228a0f54ce12bb0e4e2"
+  },
+  "planSha256": "8cb67b36db7de07c6a98193d37c23395d8c590f09f8b44fc95a1dbfef0b2e44f",
+  "implementation": "Not authorized by this preparation; read full new references before choosing any renderer change.",
+  "runtimeAdmission": "Reuse the existing independently reviewed complete Joern/JDK tree inventory and before/after runtime-bound driver after parent release. No executable launcher prepared.",
+  "preparationRevision": {
+    "previousDirectory": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/primitive-member-preparation-v1",
+    "previousFreezeSha256": "92fccb51611622bdf63f190165bb83ad5aad629a6dc62a9c4074659d094fdd1f",
+    "change": "Correct the source call-site citation to exact.rs:2654 and add missing spaces in the planning prose. Inputs, oracle, anchors, prior evidence and checks are byte-identical. No producer run."
+  }
+}

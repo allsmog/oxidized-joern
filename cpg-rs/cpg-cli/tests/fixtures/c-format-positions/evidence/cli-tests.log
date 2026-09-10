@@ -1,0 +1,132 @@
+   Compiling cpg-cli v0.1.1 (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-format-rules/.local/format-positions/candidate-workspace/cpg-cli)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.17s
+     Running unittests src/lib.rs (.local/format-positions/target/debug/deps/cpg_cli-c0e0d6c936afa841)
+
+running 45 tests
+test glob_tests::generated_route_registration_files_kept ... ok
+test apis::tests::qualified_spelling_extraction ... ok
+test export::tests::sanitize_remaps_absolute_and_hostile_names ... ok
+test export::tests::repr_and_format_parse_case_insensitively ... ok
+test coverage::tests::normalizes_every_spec_spelling ... ok
+test glob_tests::glob_match_star_semantics ... ok
+test glob_tests::go_generated_header_detection ... ok
+test glob_tests::language_parser_rejects_unknown_spellings ... ok
+test glob_tests::entries_from_glob_filters_by_name_and_file ... ok
+test glob_tests::language_parser_accepts_every_alias_and_canonicalizes ... ok
+test coverage::tests::reports_unmatched_entries_and_dead_spec_names ... ok
+test play::tests::parse_routes_handles_play_syntax ... ok
+test glob_tests::source_collection_rejects_missing_and_empty_roots ... ok
+test play::tests::play_entries_resolve_against_graph_full_names ... ok
+test glob_tests::json_summary_exposes_labels_and_provenance ... ok
+test glob_tests::source_collection_rejects_unreadable_matching_file_when_enforced ... ok
+test rules::tests::parses_authorization_census_conventions ... ok
+test rules::tests::parses_minimal_rule ... ok
+test rules::tests::rejects_missing_id ... ok
+test rules::tests::parses_pack_entry_globs ... ok
+test rules::tests::resolve_dispatches_iris_prefix_and_paths ... ok
+test rules::tests::builtin_packs_parse_and_are_complete ... ok
+test glob_tests::source_collection_applies_excludes_to_symlink_targets ... ok
+test rules::tests::tolerates_unknown_keys_and_sanitizers ... ok
+test vectors::tests::feature_hash_is_deterministic_and_distinct ... ok
+test rules::tests::iris_packs_parse_and_carry_sinks ... ok
+test vectors::tests::vectors_document_is_valid_json_with_aligned_arrays ... ok
+test glob_tests::source_collection_is_deterministic_and_rejects_invalid_utf8 ... ok
+test glob_tests::json_taint_request_honours_sanitizers ... ok
+test workspace::tests::manifest_atomic_writer_enforces_bound_and_cleans_failed_publish ... ok
+test glob_tests::source_collection_handles_symlinks_without_escape_or_cycles ... ok
+test glob_tests::generic_graph_load_requires_explicit_language ... ok
+test workspace::tests::manifest_cache_key_hashes_canonical_path_lang_and_shape_version ... ok
+test workspace::tests::detect_lang_counts_dominant_extension ... ok
+test workspace::tests::manifest_is_order_independent_and_covers_all_identity_inputs ... ok
+test workspace::tests::workspace_merge_output_rejects_symlink_target ... ok
+test glob_tests::external_summaries_are_equivalent_after_save_and_load ... ok
+test workspace::tests::workspace_merge_output_accepts_only_safe_regular_targets ... ok
+test workspace::tests::idl_discovery_finds_proto_and_thrift_dirs ... ok
+test workspace::tests::workspace_module_paths_are_normal_and_root_confined ... ok
+test workspace::tests::workspace_module_paths_reject_outward_symlinks ... ok
+test workspace::tests::manifest_language_is_validated_and_conflicts_fail ... ok
+test workspace::tests::manifest_cache_serializes_concurrent_builders ... ok
+test workspace::tests::manifest_cache_reuses_then_rebuilds_for_content_deletion_and_rename ... ok
+test workspace::tests::manifest_cache_rebuilds_for_policy_and_broken_pairs ... ok
+
+test result: ok. 45 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.24s
+
+     Running unittests src/main.rs (.local/format-positions/target/debug/deps/cpg-c7cdfb86e171fa9d)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/c_format_positions.rs (.local/format-positions/target/debug/deps/c_format_positions-eeb41462f69e79f0)
+
+running 2 tests
+test c_sink_selectors_use_zero_based_argument_positions ... ok
+test builtin_c_format_rule_excludes_data_and_stream_arguments ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+
+     Running tests/cli_metadata.rs (.local/format-positions/target/debug/deps/cli_metadata-0cd0803b360898bd)
+
+running 4 tests
+test version_matches_the_cargo_package ... ok
+test help_is_successful_and_lists_public_commands ... ok
+test build_rejects_invalid_language_without_creating_output ... ok
+test build_rejects_missing_or_empty_root_without_creating_output ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.52s
+
+     Running tests/mcp_stdio.rs (.local/format-positions/target/debug/deps/mcp_stdio-719ec75e783305aa)
+
+running 3 tests
+test mcp_rejects_outward_module_and_output_symlinks ... ok
+test mcp_rejects_path_and_merge_output_escape_attempts ... ok
+test mcp_session_covers_the_iris_loop ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s
+
+     Running tests/scan_sarif.rs (.local/format-positions/target/debug/deps/scan_sarif-b486d0cdd7ef6daf)
+
+running 3 tests
+test rule_sanitizer_suppresses_finding ... ok
+test server_scan_command_groups_findings_by_rule_id ... ok
+test scan_emits_valid_sarif_with_codeflows ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/source_idents.rs (.local/format-positions/target/debug/deps/source_idents-99e0486da37422e3)
+
+running 2 tests
+test no_idents_no_findings ... ok
+test request_reaches_system_through_format_and_helper ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/thrift_stitch.rs (.local/format-positions/target/debug/deps/thrift_stitch-015d74bfc3f62043)
+
+running 7 tests
+test slice_walks_all_fanout_targets ... ok
+test parses_services_methods_and_oneway ... ok
+test strips_comments_including_hash_and_block ... ok
+test extends_on_following_line_and_chain ... ok
+test entries_are_qualified_handler_methods ... ok
+test stitch_is_idempotent_on_existing_edges ... ok
+test stitches_only_hinted_calls_to_real_handlers ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/tools_parity.rs (.local/format-positions/target/debug/deps/tools_parity-0794fd66a8aa8ee6)
+
+running 4 tests
+test glob_flow_query_finds_interprocedural_flow ... ok
+test vectors_document_covers_every_node ... ok
+test export_splits_by_method_and_writes_dot ... ok
+test export_all_is_one_valid_json_graph ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+   Doc-tests cpg_cli
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

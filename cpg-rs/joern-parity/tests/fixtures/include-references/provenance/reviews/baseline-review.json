@@ -1,0 +1,78 @@
+{
+  "status": "PASS_BOUNDED_ACCEPTED_BASELINE_CAPTURE_REVIEW",
+  "capture": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/thirteenth-batch/accepted-capture-v1/run.json",
+    "sha256": "e6e3ba3647a49f4a55a3fbbb832ff4538cd167d0cb144370058bf38fe2fbb983"
+  },
+  "canonicalAdmission": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/include-reference-runner-v1/runs/first-complete-six-include-reference-batch/run.json",
+    "sha256": "d91a5e412fb4d7ba848ff10a357f9d5c77b1407403913ca4bff9c2fe9af7e495"
+  },
+  "cases": [
+    {
+      "name": "duplicate_supplied_macro_local",
+      "completeCanonicalEqualsFreshReference": true,
+      "fullSupplementReopensByteIdentically": true,
+      "commands": 4,
+      "savedGraph": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/thirteenth-batch/accepted-capture-v1/duplicate_supplied_macro_local/accepted-v2.cpg",
+        "sha256": "0c9843ddd4b6ab6b4f8f025efbd07f8d3dbbc6f6c1b5e79c7eaeae9d9d02256a"
+      }
+    },
+    {
+      "name": "tiny_fixedtables_include",
+      "completeCanonicalEqualsFreshReference": true,
+      "fullSupplementReopensByteIdentically": true,
+      "commands": 4,
+      "savedGraph": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/thirteenth-batch/accepted-capture-v1/tiny_fixedtables_include/accepted-v2.cpg",
+        "sha256": "7766fac53d772c9e4ed7b4b67f37390e30e23e41a24c24ff4095efffdf012217"
+      }
+    },
+    {
+      "name": "tiny_fixedtables_inline",
+      "completeCanonicalEqualsFreshReference": true,
+      "fullSupplementReopensByteIdentically": true,
+      "commands": 4,
+      "savedGraph": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/thirteenth-batch/accepted-capture-v1/tiny_fixedtables_inline/accepted-v2.cpg",
+        "sha256": "2822310f129d13ddf1fbf7411f1d288378d9573bc8c28fbc3a3a4823be7ea005"
+      }
+    },
+    {
+      "name": "inactive_body_include",
+      "completeCanonicalEqualsFreshReference": true,
+      "fullSupplementReopensByteIdentically": true,
+      "commands": 4,
+      "savedGraph": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/thirteenth-batch/accepted-capture-v1/inactive_body_include/accepted-v2.cpg",
+        "sha256": "5f0443ddfd688298b36557af34c34f64d3024a871e149470f163ac095dba5bb7"
+      }
+    },
+    {
+      "name": "repeated_direct_include",
+      "completeCanonicalEqualsFreshReference": true,
+      "fullSupplementReopensByteIdentically": true,
+      "commands": 4,
+      "savedGraph": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/thirteenth-batch/accepted-capture-v1/repeated_direct_include/accepted-v2.cpg",
+        "sha256": "f2d13864df2a49f410e40155e8dd52b4a078c4049a17a2d916bf7d943452ba67"
+      }
+    },
+    {
+      "name": "unresolved_include_pair",
+      "completeCanonicalEqualsFreshReference": true,
+      "fullSupplementReopensByteIdentically": true,
+      "commands": 4,
+      "savedGraph": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/thirteenth-batch/accepted-capture-v1/unresolved_include_pair/accepted-v2.cpg",
+        "sha256": "68e1dbba66084f512e307fe0ecf349efe5e38b5c3999d0341dbc043a9c50f0c0"
+      }
+    }
+  ],
+  "checks": 125,
+  "actualCommands": 24,
+  "producerReruns": 0,
+  "meaning": "All six accepted Rust canonical graphs equal freshly admitted Joern projections. This does not imply Import/Dependency metadata parity; those raw full observations remain pending.",
+  "reviewAttemptNote": "Initial read-only checker assumed path bindings were row objects; actual schema uses path->SHA strings. Corrected checker without any producer rerun or capture mutation."
+}

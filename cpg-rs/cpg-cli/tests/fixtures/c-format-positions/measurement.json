@@ -1,0 +1,95 @@
+{
+  "scope": "Built-in C format-string sink positions only. No frontend, analysis algorithm, other language pack or shared acceptance changes.",
+  "baseCommit": "06c3a5524628e6d9da8e311f272fb9ffd0856fba",
+  "validationSnapshot": {
+    "baselineRuleSha256": "fd292191d3b9c69098d9a76dd33f8a0c7ec3087a4356c8183bfbf16d53587f7c",
+    "frontendSourceSha256": "a14d21b4b49580f1bd825ed11d3c89ec3f323cb6a99a6ec4ee772b40a51d472b",
+    "snapshotPath": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-format-rules/.local/format-positions/candidate-workspace"
+  },
+  "ruleSourceSha256": "fc19394abdfe4c309d0e2e961516827d52c6da2e1b191593dab53c08276be2e5",
+  "testSourceSha256": "108fe1db6bcc2740438c6280469ead253a22a2e6e161937edaada5fce600ec26",
+  "fixtureSha256": "b59d36eaa2548cde629afefec97be164f41674da7606231e527ae8cf0466a33c",
+  "before": {
+    "explicitPositionContract": "pass",
+    "builtinRule": "fails: expected 4, actual 10",
+    "reportedMethods": [
+      "fprintf_data",
+      "fprintf_format",
+      "fprintf_stream",
+      "macro_data",
+      "macro_format",
+      "nested_data",
+      "printf_data",
+      "printf_format",
+      "syslog_data",
+      "syslog_format"
+    ]
+  },
+  "after": {
+    "positiveMethods": [
+      "printf_format",
+      "fprintf_format",
+      "syslog_format",
+      "macro_format"
+    ],
+    "negativeMethods": [
+      "printf_data",
+      "fprintf_data",
+      "fprintf_stream",
+      "syslog_data",
+      "killed_format",
+      "nested_data",
+      "macro_data"
+    ],
+    "focusedTests": {
+      "passed": 2,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 0
+    },
+    "fullCliSuite": {
+      "passed": 70,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 0
+    },
+    "clippy": "pass: -p cpg-cli --all-targets -- -D warnings",
+    "fmt": "pass: cargo fmt --all -- --check"
+  },
+  "luaReplay": {
+    "command": [
+      "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-format-rules/.local/format-positions/target/debug/cpg",
+      "scan",
+      "--load",
+      "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/real-project-review/lua-5.4.7/fourth-preview-a14-1/graph.cpg",
+      "--lang",
+      "c",
+      "-o",
+      "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-format-rules/.local/format-positions/lua-after.sarif"
+    ],
+    "exitCode": 0,
+    "seconds": 7.6211857500020415,
+    "binarySha256": "e297b1af0c84bfe4209064293f54c98aeb9e97fbaf8a72604ccb60e7edfa9800",
+    "graphSha256": "6af4314a293e02a5953cfd2619a039f15322c505e5e4212b7b460fc7b1e72b92",
+    "sarifSha256": "0becad10ba8527f8055f00b8752fa550f27725d671483aa6f0171d81c335aeec",
+    "findings": 0
+  },
+  "limits": [
+    "Loaded unchanged fourth-preview-a14 Lua graph; this replay changes scanner policy only.",
+    "Replay binary is a debug build, so its elapsed time is not comparable with release performance measurements.",
+    "No live Joern vulnerability verdict is claimed; format-position convention is runtime-tested through the production C scan layer.",
+    "Compiler source in the validation snapshot is frozen a14d21b4; only rules.rs differs in this worktree implementation."
+  ],
+  "artifactHashes": {
+    "README.md": "8e6317deec38b96c15871e4f9560d52ba08d790d776a59d5d0c37745007f2409",
+    "evidence/after-tests.log": "29eec0950be3cafce7062c31b73e54b206bf1cf487951e20e9e3c6e889310507",
+    "evidence/before-tests.log": "bbdcb185c88e53f04e852938d5a4b0978532137ba539a13fb4dcfc2e7c021de1",
+    "evidence/cli-tests.log": "768bf3ff76e6e18c08e352ac2426db7f38a75baf395b9e6e75516bdf82841baf",
+    "evidence/clippy.log": "f799d9c7ec1ae6afd65da5feddbbed24802a4a6ea1f247c6437846fc8ba1e45c",
+    "evidence/fmt.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "evidence/lua-after.log": "d95c6a89eea47e8e5ba074bae16b1a8bd3a7834771df6bf50b55034513bf1faa",
+    "evidence/lua-after.sarif": "0becad10ba8527f8055f00b8752fa550f27725d671483aa6f0171d81c335aeec",
+    "evidence/lua-replay.json": "456709d5d1723d1477cbb439fb74ee0ab2e89751d5deeacb7362fd160a4cbaaa",
+    "positions.c": "b59d36eaa2548cde629afefec97be164f41674da7606231e527ae8cf0466a33c"
+  }
+}

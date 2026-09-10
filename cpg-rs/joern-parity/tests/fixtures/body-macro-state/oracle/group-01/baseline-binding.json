@@ -1,0 +1,8 @@
+{
+  "exactSource": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/.local/body-preprocessor/candidate-v4/exact.rs",
+  "exactSha256": "8b132fab7d079a97e774b10d5b1f14c1a1df4f093ef8f437ebfcaadfdde33b3b",
+  "parityBinary": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/.local/body-preprocessor/candidate-v4/joern-parity",
+  "paritySha256": "575397f4a349231a559641e6ca12e76ed4fc42e6e1bc77e8ffeb12cb30f48b4a",
+  "purpose": "Read-only ninth unit diagnosis; eighth source/fixtures unchanged",
+  "projectCount": 17
+}

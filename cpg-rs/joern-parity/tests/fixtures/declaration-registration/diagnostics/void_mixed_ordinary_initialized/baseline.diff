@@ -1,0 +1,73 @@
+--- live
++++ baseline
+@@ -15,7 +15,7 @@
+   METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+   BLOCK CODE={ unsigned char ordinary = 0, (*callback)(void); } TYPE_FULL_NAME=void ORDER=2
+     LOCAL NAME=ordinary CODE=unsigned char ordinary TYPE_FULL_NAME=unsigned char ORDER=1
+-    LOCAL NAME=callback CODE=unsigned char ordinary = 0, (*callback)(void); TYPE_FULL_NAME=unsigned char(*)() ORDER=2
++    LOCAL NAME=callback CODE=unsigned char ordinary = 0, (*callback)(void); TYPE_FULL_NAME=unsigned char(*)(void) ORDER=2
+     CALL NAME=<operator>.assignment CODE=ordinary = 0 TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH
+       IDENTIFIER NAME=ordinary CODE=ordinary TYPE_FULL_NAME=unsigned char ORDER=1 ARGUMENT_INDEX=1
+       LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+@@ -27,7 +27,7 @@
+     METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+     BLOCK CODE={ unsigned char ordinary = 0, (*callback)(void); } TYPE_FULL_NAME=void ORDER=2
+       LOCAL NAME=ordinary CODE=unsigned char ordinary TYPE_FULL_NAME=unsigned char ORDER=1
+-      LOCAL NAME=callback CODE=unsigned char ordinary = 0, (*callback)(void); TYPE_FULL_NAME=unsigned char(*)() ORDER=2
++      LOCAL NAME=callback CODE=unsigned char ordinary = 0, (*callback)(void); TYPE_FULL_NAME=unsigned char(*)(void) ORDER=2
+       CALL NAME=<operator>.assignment CODE=ordinary = 0 TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH
+         IDENTIFIER NAME=ordinary CODE=ordinary TYPE_FULL_NAME=unsigned char ORDER=1 ARGUMENT_INDEX=1
+         LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+@@ -50,14 +50,14 @@
+ NODES|TYPE_DECL NAME=<global> FULL_NAME=registration.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=registration.c:<global> FILENAME=registration.c ORDER=1
+ NODES|TYPE_DECL NAME=unsigned FULL_NAME=unsigned CODE=unsigned IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE_DECL NAME=unsigned char FULL_NAME=unsigned char CODE=unsigned char IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+-NODES|TYPE_DECL NAME=unsigned char(*)() FULL_NAME=unsigned char(*)() CODE=unsigned char(*)() IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
++NODES|TYPE_DECL NAME=unsigned char(*)(void) FULL_NAME=unsigned char(*)(void) CODE=unsigned char(*)(void) IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+ NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+ NODES|TYPE NAME=registration FULL_NAME=registration TYPE_DECL_FULL_NAME=registration
+ NODES|TYPE NAME=unsigned FULL_NAME=unsigned TYPE_DECL_FULL_NAME=unsigned
+ NODES|TYPE NAME=unsigned char FULL_NAME=unsigned char TYPE_DECL_FULL_NAME=unsigned char
+-NODES|TYPE NAME=unsigned char(*)() FULL_NAME=unsigned char(*)() TYPE_DECL_FULL_NAME=unsigned char(*)()
++NODES|TYPE NAME=unsigned char(*)(void) FULL_NAME=unsigned char(*)(void) TYPE_DECL_FULL_NAME=unsigned char(*)(void)
+ NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+ EDGES|ARGUMENT registration#6 -> registration#7
+ EDGES|ARGUMENT registration#6 -> registration#8
+@@ -79,7 +79,7 @@
+ EDGES|CONTAINS F:<includes> -> D:int
+ EDGES|CONTAINS F:<includes> -> D:unsigned
+ EDGES|CONTAINS F:<includes> -> D:unsigned char
+-EDGES|CONTAINS F:<includes> -> D:unsigned char(*)()
++EDGES|CONTAINS F:<includes> -> D:unsigned char(*)(void)
+ EDGES|CONTAINS F:<includes> -> D:void
+ EDGES|CONTAINS F:registration.c -> D:registration.c:<global>
+ EDGES|CONTAINS registration#0 -> registration#3
+@@ -101,7 +101,7 @@
+ EDGES|EVAL_TYPE registration#2 -> T:void
+ EDGES|EVAL_TYPE registration#3 -> T:void
+ EDGES|EVAL_TYPE registration#4 -> T:unsigned char
+-EDGES|EVAL_TYPE registration#5 -> T:unsigned char(*)()
++EDGES|EVAL_TYPE registration#5 -> T:unsigned char(*)(void)
+ EDGES|EVAL_TYPE registration#6 -> T:void
+ EDGES|EVAL_TYPE registration#7 -> T:unsigned char
+ EDGES|EVAL_TYPE registration#8 -> T:int
+@@ -120,7 +120,7 @@
+ EDGES|REF T:registration -> D:registration
+ EDGES|REF T:unsigned -> D:unsigned
+ EDGES|REF T:unsigned char -> D:unsigned char
+-EDGES|REF T:unsigned char(*)() -> D:unsigned char(*)()
++EDGES|REF T:unsigned char(*)(void) -> D:unsigned char(*)(void)
+ EDGES|REF T:void -> D:void
+ EDGES|REF registration#7 -> registration#4
+ EDGES|REF registration.c:<global>#12 -> registration#0
+@@ -131,7 +131,7 @@
+ EDGES|SOURCE_FILE D:registration.c:<global> -> F:registration.c
+ EDGES|SOURCE_FILE D:unsigned -> F:<includes>
+ EDGES|SOURCE_FILE D:unsigned char -> F:<includes>
+-EDGES|SOURCE_FILE D:unsigned char(*)() -> F:<includes>
++EDGES|SOURCE_FILE D:unsigned char(*)(void) -> F:<includes>
+ EDGES|SOURCE_FILE D:void -> F:<includes>
+ EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
+ EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>

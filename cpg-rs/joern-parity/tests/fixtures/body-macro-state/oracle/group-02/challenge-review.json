@@ -1,0 +1,199 @@
+{
+  "status": "PREPARED_SEVEN_FRESH_CHALLENGES_NO_IMPLEMENTATION_VERDICT",
+  "sourceWrites": false,
+  "original17ReferencesModified": false,
+  "baselineSourceCommit": "26f4cef3775c0f77988187e04bc1693e8d43fc0d",
+  "baselineSourceSha256": "8b132fab7d079a97e774b10d5b1f14c1a1df4f093ef8f437ebfcaadfdde33b3b",
+  "baselineFrozenBindings": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/eighth-batch/final-real-differential/bin/source-bindings.json",
+    "sha256": "5e5c6b83be23a94a206ed20d65bd5f9c5f5842582d487d925cc9e4abfdfa0758"
+  },
+  "original17Freeze": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/.local/ninth-body-macro-diagnosis/diagnosis-freeze.json",
+    "sha256": "a926292cb06ec37fa5c5f963dbcd624d665d9b436e1934368080d28337a3220a"
+  },
+  "reviewedPlan": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/.local/ninth-body-macro-diagnosis/NEXT.md",
+    "sha256": "1ae202c55c45cea789d7d72252cb9818032edba9c1690b1f432624e7332a2f58"
+  },
+  "planReview": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/ninth-plan-review/final-review.json",
+    "sha256": "62f675addfad74d2c387aaa17ec9ce6b5a0be7f930faaec2b9dd46ca262a571c"
+  },
+  "liveRun": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-body-state-review/live-run.json",
+    "sha256": "1373e65ee32be9b21d3548e6b71d315da709cc4141c61f471d3dfd3db669ba8c"
+  },
+  "rawStdout": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-body-state-review/live.stdout",
+    "sha256": "82fd1a4d1007ddef8880bd35600c8a75f5db8dec7e3019477701f5e44592f97e"
+  },
+  "rawStderr": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-body-state-review/live.stderr",
+    "sha256": "1e35e7e77257805c488a3437603f8eedb03479f12b2948c752f761958e4823ab"
+  },
+  "oracleScript": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-body-state-review/oracle.sc",
+    "sha256": "56431f14868678e64f9eb41026b44f1d3d7738404d28d2db62711b520c98c742"
+  },
+  "baselineReplay": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-body-state-review/baseline-eighth/replay.json",
+    "sha256": "6b62faf06eee46e956c9a619d7aaf54e371c72f06e6c29fef932cb1b8f07b163"
+  },
+  "projects": 7,
+  "sourceFiles": 8,
+  "canonicalLinesIncludingSeparators": 2043,
+  "nonemptySelectedRecords": 1995,
+  "baselineFullExact": 1,
+  "allReferenceExtractionsExact": true,
+  "expectations": {
+    "recovery_entry_macros": "Protect an already exact complete graph. The original declaration/initializer recovery uses an intentionally empty macro context even though those Node IDs belong to the source tree. Recovery must not re-enable BAD or VALUE from a source snapshot; the later normal VALUE expansion still runs.",
+    "recovery_after_redefinition": "The first initializer must use the new invalid BAD definition and explicit empty recovery, then restore the current source environment before the subsequent valid BAD call and VALUE return.",
+    "nested_copied_arguments": "Copied/generated macro expression trees around VALUE redefinition must use the invocation expansion and empty nested context; temporary offsets or reused node allocations must not pull earlier source state.",
+    "block_macro_typedef_separation": "WORD macro persists beyond the C block and into a later function header; the local typedef T does not replace the outer T after the block. Macro and typedef/symbol state have different scopes.",
+    "header_after_body_undef": "Body #undef/#define affects the later supplied header, then header effects affect later functions. The earlier function keeps its old snapshot. Includes are file-scope in this probe; direct body includes are not claimed.",
+    "runtime_arms_lexical_order": "The preprocessor walks both runtime if/else bodies in lexical order, independent of runtime condition. Last lexical VALUE definition persists into the later function.",
+    "branch_condition_entry_state": "Selecting the first #if arm uses the entry PICK snapshot. Changing PICK inside that arm must not make the later #elif apply effects when another consumer revisits the conditional."
+  },
+  "baselineCases": [
+    {
+      "case": "block_macro_typedef_separation",
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/eighth-batch/final-real-differential/bin/joern-parity",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-body-state-review/input/block_macro_typedef_separation/main.c"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 0.010603125003399327,
+      "exact": false,
+      "completeDiffLines": 96,
+      "inputHashes": {
+        "main.c": "9ff8d024419a14a16b13da384bab9dfa8971dc29367a7a34820fe871cee187d5"
+      },
+      "expectedSha256": "8dfd0cfc2321f3a1db049382a218d4bccf6283de4489ea132010d68363897f7b",
+      "actualSha256": "8adf1f8a71cf9bb727a2ad9e12773fde7a9bd5bc3cf928c38fdc99ad1e5ffd29"
+    },
+    {
+      "case": "branch_condition_entry_state",
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/eighth-batch/final-real-differential/bin/joern-parity",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-body-state-review/input/branch_condition_entry_state/main.c"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 0.012273583008209243,
+      "exact": false,
+      "completeDiffLines": 38,
+      "inputHashes": {
+        "main.c": "ca6780bef76a0434fdc7a5f75639280458456f03c00dc8b44640d1d038e61dde"
+      },
+      "expectedSha256": "91abd763935d2faa5d86c475737147724af3e7a54be12b4d0588e5af2fc95d04",
+      "actualSha256": "d027e428792426b14887f9d07255be0a0dc1634d9a15406263b538d8fd09d4de"
+    },
+    {
+      "case": "header_after_body_undef",
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/eighth-batch/final-real-differential/bin/joern-parity",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-body-state-review/input/header_after_body_undef/api.h",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-body-state-review/input/header_after_body_undef/main.c"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 0.007966999983182177,
+      "exact": false,
+      "completeDiffLines": 38,
+      "inputHashes": {
+        "api.h": "0f6614af9f8923b667d0a9d22dd146bb5c541b10ef075ce755f8051597a6779e",
+        "main.c": "3c2f20484db3efcee95ff5bc4891b151e3f8cd33b350cc8a3949f233ee06eafa"
+      },
+      "expectedSha256": "da7cf6ae8c8a4acb89f907a446f528744d84308443f85c6ca8f90a19d4df7f67",
+      "actualSha256": "c271c49a8bb7c628c8dbe6f0aae236d4a985a1e5ad9cacfd7f02527c3bc0482b"
+    },
+    {
+      "case": "nested_copied_arguments",
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/eighth-batch/final-real-differential/bin/joern-parity",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-body-state-review/input/nested_copied_arguments/main.c"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 0.0073944589821621776,
+      "exact": false,
+      "completeDiffLines": 66,
+      "inputHashes": {
+        "main.c": "d7800b7e1fe82c5828fab49ab45b1a196b633b226928d0f3f0e7f2c619afff35"
+      },
+      "expectedSha256": "479ed66dc08319ad1db91cfd5d0a6f65977f8cc33e7ca6f13394b3e3302bccac",
+      "actualSha256": "cd1de61a2eceaec37ea33ee9055598ab63011206c01286d753e630ce8a9871ca"
+    },
+    {
+      "case": "recovery_after_redefinition",
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/eighth-batch/final-real-differential/bin/joern-parity",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-body-state-review/input/recovery_after_redefinition/main.c"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 0.009188749972963706,
+      "exact": false,
+      "completeDiffLines": 433,
+      "inputHashes": {
+        "main.c": "df03300eab9f3bfefbbed4703fb086f21e2d923633ddf549a6da56a0471d0f20"
+      },
+      "expectedSha256": "534dad90f2c6e3f426313d3caf9f1b8cc2aff99da4ee65e3f2e4bff29e37e746",
+      "actualSha256": "025752aa720dfa6c7031be11ed19aecb593948b05070400a1db54086e830fc38"
+    },
+    {
+      "case": "recovery_entry_macros",
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/eighth-batch/final-real-differential/bin/joern-parity",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-body-state-review/input/recovery_entry_macros/main.c"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 0.009771290991920978,
+      "exact": true,
+      "completeDiffLines": 0,
+      "inputHashes": {
+        "main.c": "3738b2aad94b9cf223084470b99faa34013576a976f27d0e50ca566f866c4116"
+      },
+      "expectedSha256": "c33f0b2f66222b41325dbcee78a7eff8fb20a583cb364ba074dc3fab5d0efebe",
+      "actualSha256": "c33f0b2f66222b41325dbcee78a7eff8fb20a583cb364ba074dc3fab5d0efebe"
+    },
+    {
+      "case": "runtime_arms_lexical_order",
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/eighth-batch/final-real-differential/bin/joern-parity",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-body-state-review/input/runtime_arms_lexical_order/main.c"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 0.0100992500083521,
+      "exact": false,
+      "completeDiffLines": 46,
+      "inputHashes": {
+        "main.c": "813800749f49894246046e6869c964c01ad3b29cd03acbd54d62c0bf7642f173"
+      },
+      "expectedSha256": "7dc65ebaff2997a57453d6dfa22ce6cdd06c108dc348b91a2d184dfe3a944b26",
+      "actualSha256": "6dafc169ec5d135ab2b6d988c329fded0eb1e6874f72bea00d255dd61d4271ba"
+    }
+  ],
+  "caseFileHashes": {
+    "input/block_macro_typedef_separation/expected.txt": "8dfd0cfc2321f3a1db049382a218d4bccf6283de4489ea132010d68363897f7b",
+    "input/block_macro_typedef_separation/main.c": "9ff8d024419a14a16b13da384bab9dfa8971dc29367a7a34820fe871cee187d5",
+    "input/branch_condition_entry_state/expected.txt": "91abd763935d2faa5d86c475737147724af3e7a54be12b4d0588e5af2fc95d04",
+    "input/branch_condition_entry_state/main.c": "ca6780bef76a0434fdc7a5f75639280458456f03c00dc8b44640d1d038e61dde",
+    "input/header_after_body_undef/api.h": "0f6614af9f8923b667d0a9d22dd146bb5c541b10ef075ce755f8051597a6779e",
+    "input/header_after_body_undef/expected.txt": "da7cf6ae8c8a4acb89f907a446f528744d84308443f85c6ca8f90a19d4df7f67",
+    "input/header_after_body_undef/main.c": "3c2f20484db3efcee95ff5bc4891b151e3f8cd33b350cc8a3949f233ee06eafa",
+    "input/nested_copied_arguments/expected.txt": "479ed66dc08319ad1db91cfd5d0a6f65977f8cc33e7ca6f13394b3e3302bccac",
+    "input/nested_copied_arguments/main.c": "d7800b7e1fe82c5828fab49ab45b1a196b633b226928d0f3f0e7f2c619afff35",
+    "input/recovery_after_redefinition/expected.txt": "534dad90f2c6e3f426313d3caf9f1b8cc2aff99da4ee65e3f2e4bff29e37e746",
+    "input/recovery_after_redefinition/main.c": "df03300eab9f3bfefbbed4703fb086f21e2d923633ddf549a6da56a0471d0f20",
+    "input/recovery_entry_macros/expected.txt": "c33f0b2f66222b41325dbcee78a7eff8fb20a583cb364ba074dc3fab5d0efebe",
+    "input/recovery_entry_macros/main.c": "3738b2aad94b9cf223084470b99faa34013576a976f27d0e50ca566f866c4116",
+    "input/runtime_arms_lexical_order/expected.txt": "7dc65ebaff2997a57453d6dfa22ce6cdd06c108dc348b91a2d184dfe3a944b26",
+    "input/runtime_arms_lexical_order/main.c": "813800749f49894246046e6869c964c01ad3b29cd03acbd54d62c0bf7642f173"
+  },
+  "reviewConstraints": [
+    "Use explicit context suppression for recovery as well as original-tree ownership. Original Node IDs alone cannot distinguish intentionally empty recovery from ordinary source lookup.",
+    "Restore macro state and typedef-tree state together across copied, expanded and recovery trees. Preserve disabled recursive names and expansion work limits.",
+    "Every macro consumer sees the same immutable source-entry snapshot; consumers do not replay directives or publish local C symbols into later file scope.",
+    "The seven controls are additive. Keep all17 original references, including their complete unresolved CODE-transport/type diagnostics; no reference replacement or filtering.",
+    "No new implementation has been reviewed or built. Frozen candidate replay, production tests, whole-project review and resource measurements remain future acceptance work."
+  ],
+  "historicalPlanNote": "The existing plan review contains a historical fixedtables-blocker statement predating the eighth correction. The claimed CODE degradation was disproven and retracted; root subsequently committed eighth and explicitly authorized this ninth task. That stale statement is not a current blocker or repair requirement."
+}

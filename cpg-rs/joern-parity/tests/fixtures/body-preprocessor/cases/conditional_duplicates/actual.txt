@@ -1,0 +1,222 @@
+METHOD NAME=<global> CODE=<global> FULL_NAME=<includes>:<global> ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.addition FULL_NAME=<operator>.addition ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<global> CODE=<global> FULL_NAME=locations.c:<global> ORDER=1
+  METHOD NAME=same CODE=int same(int x) {\n  return x;\n} FULL_NAME=same SIGNATURE=int(int) ORDER=1
+    METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+    METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+    BLOCK CODE={\n  return x;\n} TYPE_FULL_NAME=void ORDER=2
+      RETURN CODE=return x; ORDER=1
+        IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+  METHOD NAME=same CODE=int same(int x) {\n  return x + 1;\n} FULL_NAME=same<duplicate>0 SIGNATURE=int(int) ORDER=1
+    METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+    METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+    BLOCK CODE={\n  return x + 1;\n} TYPE_FULL_NAME=void ORDER=2
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+  METHOD NAME=same CODE=int same(int x) {\n  return x + 2;\n} FULL_NAME=same<duplicate>1 SIGNATURE=int(int) ORDER=1
+    METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+    METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+    BLOCK CODE={\n  return x + 2;\n} TYPE_FULL_NAME=void ORDER=2
+      RETURN CODE=return x + 2; ORDER=1
+        CALL NAME=<operator>.addition CODE=x + 2 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+          LITERAL CODE=2 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+    METHOD_REF CODE=same TYPE_FULL_NAME=same METHOD_FULL_NAME=same ORDER=1
+    METHOD_REF CODE=same TYPE_FULL_NAME=same METHOD_FULL_NAME=same ORDER=2
+    METHOD_REF CODE=same TYPE_FULL_NAME=same METHOD_FULL_NAME=same ORDER=3
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=same CODE=int same(int x) {\n  return x;\n} FULL_NAME=same SIGNATURE=int(int) ORDER=1
+  METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+  BLOCK CODE={\n  return x;\n} TYPE_FULL_NAME=void ORDER=2
+    RETURN CODE=return x; ORDER=1
+      IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+
+METHOD NAME=same CODE=int same(int x) {\n  return x + 1;\n} FULL_NAME=same<duplicate>0 SIGNATURE=int(int) ORDER=1
+  METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+  BLOCK CODE={\n  return x + 1;\n} TYPE_FULL_NAME=void ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+
+METHOD NAME=same CODE=int same(int x) {\n  return x + 2;\n} FULL_NAME=same<duplicate>1 SIGNATURE=int(int) ORDER=1
+  METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+  BLOCK CODE={\n  return x + 2;\n} TYPE_FULL_NAME=void ORDER=2
+    RETURN CODE=return x + 2; ORDER=1
+      CALL NAME=<operator>.addition CODE=x + 2 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+        LITERAL CODE=2 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+
+NODES|META_DATA LANGUAGE=NEWC
+NODES|FILE NAME=<includes> ORDER=1
+NODES|FILE NAME=<unknown> ORDER=0
+NODES|FILE NAME=locations.c ORDER=0
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<global> FILENAME=<unknown> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<includes>:<global> FILENAME=<includes> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=locations.c:<global> FILENAME=locations.c ORDER=1
+NODES|NAMESPACE NAME=<global>
+NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=<global> FULL_NAME=locations.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=locations.c:<global> FILENAME=locations.c ORDER=1
+NODES|TYPE_DECL NAME=same FULL_NAME=same CODE=same AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=locations.c:<global> FILENAME=locations.c ORDER=1
+NODES|TYPE_DECL NAME=same FULL_NAME=same<duplicate>0 CODE=same AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=locations.c:<global> FILENAME=locations.c ORDER=1
+NODES|TYPE_DECL NAME=same FULL_NAME=same<duplicate>1 CODE=same AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=locations.c:<global> FILENAME=locations.c ORDER=1
+NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+NODES|TYPE NAME=same FULL_NAME=same TYPE_DECL_FULL_NAME=same
+NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+EDGES|ARGUMENT same#4 -> same#5
+EDGES|ARGUMENT same<duplicate>1#4 -> same<duplicate>1#5
+EDGES|ARGUMENT same<duplicate>1#5 -> same<duplicate>1#6
+EDGES|ARGUMENT same<duplicate>1#5 -> same<duplicate>1#7
+EDGES|CALL same<duplicate>1#5 -> <operator>.addition#0
+EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+EDGES|CFG <operator>.addition#0 -> <operator>.addition#5
+EDGES|CFG locations.c:<global>#0 -> locations.c:<global>#23
+EDGES|CFG locations.c:<global>#1 -> same#5
+EDGES|CFG locations.c:<global>#13 -> same<duplicate>1#6
+EDGES|CFG locations.c:<global>#23 -> locations.c:<global>#24
+EDGES|CFG locations.c:<global>#24 -> locations.c:<global>#25
+EDGES|CFG locations.c:<global>#25 -> locations.c:<global>#26
+EDGES|CFG locations.c:<global>#8 -> same<duplicate>0#4
+EDGES|CFG same#4 -> same#6
+EDGES|CFG same#5 -> same#4
+EDGES|CFG same<duplicate>1#4 -> same<duplicate>1#8
+EDGES|CFG same<duplicate>1#5 -> same<duplicate>1#4
+EDGES|CFG same<duplicate>1#6 -> same<duplicate>1#7
+EDGES|CFG same<duplicate>1#7 -> same<duplicate>1#5
+EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+EDGES|CONTAINS <operator>.addition#0 -> <operator>.addition#2
+EDGES|CONTAINS D:locations.c:<global> -> D:same
+EDGES|CONTAINS D:locations.c:<global> -> D:same<duplicate>0
+EDGES|CONTAINS D:locations.c:<global> -> D:same<duplicate>1
+EDGES|CONTAINS D:locations.c:<global> -> locations.c:<global>#0
+EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+EDGES|CONTAINS F:<includes> -> D:ANY
+EDGES|CONTAINS F:<includes> -> D:int
+EDGES|CONTAINS F:<includes> -> D:void
+EDGES|CONTAINS F:locations.c -> D:locations.c:<global>
+EDGES|CONTAINS locations.c:<global>#0 -> locations.c:<global>#1
+EDGES|CONTAINS locations.c:<global>#0 -> locations.c:<global>#13
+EDGES|CONTAINS locations.c:<global>#0 -> locations.c:<global>#22
+EDGES|CONTAINS locations.c:<global>#0 -> locations.c:<global>#23
+EDGES|CONTAINS locations.c:<global>#0 -> locations.c:<global>#24
+EDGES|CONTAINS locations.c:<global>#0 -> locations.c:<global>#25
+EDGES|CONTAINS locations.c:<global>#0 -> locations.c:<global>#8
+EDGES|CONTAINS locations.c:<global>#1 -> same#3
+EDGES|CONTAINS locations.c:<global>#1 -> same#4
+EDGES|CONTAINS locations.c:<global>#1 -> same#5
+EDGES|CONTAINS locations.c:<global>#13 -> same<duplicate>1#3
+EDGES|CONTAINS locations.c:<global>#13 -> same<duplicate>1#4
+EDGES|CONTAINS locations.c:<global>#13 -> same<duplicate>1#5
+EDGES|CONTAINS locations.c:<global>#13 -> same<duplicate>1#6
+EDGES|CONTAINS locations.c:<global>#13 -> same<duplicate>1#7
+EDGES|CONTAINS locations.c:<global>#8 -> same<duplicate>0#3
+EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#6 -> T:ANY
+EDGES|EVAL_TYPE locations.c:<global>#22 -> T:ANY
+EDGES|EVAL_TYPE locations.c:<global>#23 -> T:same
+EDGES|EVAL_TYPE locations.c:<global>#24 -> T:same
+EDGES|EVAL_TYPE locations.c:<global>#25 -> T:same
+EDGES|EVAL_TYPE locations.c:<global>#26 -> T:ANY
+EDGES|EVAL_TYPE same#1 -> T:int
+EDGES|EVAL_TYPE same#2 -> T:int
+EDGES|EVAL_TYPE same#3 -> T:void
+EDGES|EVAL_TYPE same#5 -> T:int
+EDGES|EVAL_TYPE same#6 -> T:int
+EDGES|EVAL_TYPE same<duplicate>0#1 -> T:int
+EDGES|EVAL_TYPE same<duplicate>0#2 -> T:int
+EDGES|EVAL_TYPE same<duplicate>0#3 -> T:void
+EDGES|EVAL_TYPE same<duplicate>0#4 -> T:int
+EDGES|EVAL_TYPE same<duplicate>1#1 -> T:int
+EDGES|EVAL_TYPE same<duplicate>1#2 -> T:int
+EDGES|EVAL_TYPE same<duplicate>1#3 -> T:void
+EDGES|EVAL_TYPE same<duplicate>1#5 -> T:ANY
+EDGES|EVAL_TYPE same<duplicate>1#6 -> T:int
+EDGES|EVAL_TYPE same<duplicate>1#7 -> T:int
+EDGES|EVAL_TYPE same<duplicate>1#8 -> T:int
+EDGES|PARAMETER_LINK <operator>.addition#1 -> <operator>.addition#3
+EDGES|PARAMETER_LINK <operator>.addition#4 -> <operator>.addition#6
+EDGES|PARAMETER_LINK same#1 -> same#2
+EDGES|PARAMETER_LINK same<duplicate>0#1 -> same<duplicate>0#2
+EDGES|PARAMETER_LINK same<duplicate>1#1 -> same<duplicate>1#2
+EDGES|REF NB:<global> -> NS:<global>
+EDGES|REF NB:<includes>:<global> -> NS:<global>
+EDGES|REF NB:locations.c:<global> -> NS:<global>
+EDGES|REF T:ANY -> D:ANY
+EDGES|REF T:int -> D:int
+EDGES|REF T:same -> D:same
+EDGES|REF T:void -> D:void
+EDGES|REF locations.c:<global>#23 -> locations.c:<global>#1
+EDGES|REF locations.c:<global>#24 -> locations.c:<global>#1
+EDGES|REF locations.c:<global>#25 -> locations.c:<global>#1
+EDGES|REF same#5 -> same#1
+EDGES|REF same<duplicate>1#6 -> same<duplicate>1#1
+EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+EDGES|SOURCE_FILE D:ANY -> F:<includes>
+EDGES|SOURCE_FILE D:int -> F:<includes>
+EDGES|SOURCE_FILE D:locations.c:<global> -> F:locations.c
+EDGES|SOURCE_FILE D:same -> F:locations.c
+EDGES|SOURCE_FILE D:same<duplicate>0 -> F:locations.c
+EDGES|SOURCE_FILE D:same<duplicate>1 -> F:locations.c
+EDGES|SOURCE_FILE D:void -> F:<includes>
+EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
+EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>
+EDGES|SOURCE_FILE NB:locations.c:<global> -> F:locations.c
+EDGES|SOURCE_FILE locations.c:<global>#0 -> F:locations.c
+EDGES|SOURCE_FILE locations.c:<global>#1 -> F:locations.c
+EDGES|SOURCE_FILE locations.c:<global>#13 -> F:locations.c
+EDGES|SOURCE_FILE locations.c:<global>#8 -> F:locations.c
+FLOWS|REACHING_DEF[2] same<duplicate>1#7 -> same<duplicate>1#5
+FLOWS|REACHING_DEF[<RET>] same#4 -> same#6
+FLOWS|REACHING_DEF[<RET>] same<duplicate>1#4 -> same<duplicate>1#8
+FLOWS|REACHING_DEF[] <operator>.addition#0 -> <operator>.addition#1
+FLOWS|REACHING_DEF[] <operator>.addition#0 -> <operator>.addition#4
+FLOWS|REACHING_DEF[] locations.c:<global>#0 -> locations.c:<global>#23
+FLOWS|REACHING_DEF[] locations.c:<global>#0 -> locations.c:<global>#24
+FLOWS|REACHING_DEF[] locations.c:<global>#0 -> locations.c:<global>#25
+FLOWS|REACHING_DEF[] locations.c:<global>#1 -> same#1
+FLOWS|REACHING_DEF[] locations.c:<global>#1 -> same#5
+FLOWS|REACHING_DEF[] locations.c:<global>#13 -> same<duplicate>1#1
+FLOWS|REACHING_DEF[] locations.c:<global>#13 -> same<duplicate>1#6
+FLOWS|REACHING_DEF[] locations.c:<global>#13 -> same<duplicate>1#7
+FLOWS|REACHING_DEF[] locations.c:<global>#8 -> same<duplicate>0#1
+FLOWS|REACHING_DEF[p1] <operator>.addition#1 -> <operator>.addition#3
+FLOWS|REACHING_DEF[p1] <operator>.addition#1 -> <operator>.addition#5
+FLOWS|REACHING_DEF[p2] <operator>.addition#4 -> <operator>.addition#5
+FLOWS|REACHING_DEF[p2] <operator>.addition#4 -> <operator>.addition#6
+FLOWS|REACHING_DEF[x + 2] same<duplicate>1#5 -> same<duplicate>1#4
+FLOWS|REACHING_DEF[x + 2] same<duplicate>1#5 -> same<duplicate>1#8
+FLOWS|REACHING_DEF[x] same#1 -> same#2
+FLOWS|REACHING_DEF[x] same#1 -> same#5
+FLOWS|REACHING_DEF[x] same#1 -> same#6
+FLOWS|REACHING_DEF[x] same#5 -> same#4
+FLOWS|REACHING_DEF[x] same<duplicate>0#1 -> same<duplicate>0#2
+FLOWS|REACHING_DEF[x] same<duplicate>0#1 -> same<duplicate>0#4
+FLOWS|REACHING_DEF[x] same<duplicate>1#1 -> same<duplicate>1#2
+FLOWS|REACHING_DEF[x] same<duplicate>1#1 -> same<duplicate>1#6
+FLOWS|REACHING_DEF[x] same<duplicate>1#6 -> same<duplicate>1#2
+FLOWS|REACHING_DEF[x] same<duplicate>1#6 -> same<duplicate>1#5
+FLOWS|REACHING_DEF[x] same<duplicate>1#6 -> same<duplicate>1#8

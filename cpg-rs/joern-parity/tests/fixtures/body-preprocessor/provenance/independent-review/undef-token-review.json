@@ -1,0 +1,42 @@
+{
+  "status": "PASS_NO_INTRODUCED_LOSS_WITH_THREE_UNCHANGED_DIAGNOSTICS",
+  "source": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/eighth-body-review/frozen-v4/exact.rs",
+    "sha256": "8b132fab7d079a97e774b10d5b1f14c1a1df4f093ef8f437ebfcaadfdde33b3b"
+  },
+  "baselineReplay": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/eighth-body-review/undef-token/baseline/replay.json",
+    "sha256": "2fb8f3a92f9ea0bcd35fbbe85cc5c0a7e46d5ac79b03c0a3fb98b2529233835a"
+  },
+  "candidateReplay": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/eighth-body-review/undef-token/candidate-v4/replay.json",
+    "sha256": "619cee87eea53b2a1147b6e1cdaaa5d6c6d7c7490acc02c10dfe7319eb5a7fab"
+  },
+  "rawRun": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/eighth-body-review/undef-token/live-run.json",
+    "sha256": "4a58e5dcc6e32f5cc39a04d4f127111482a9bb8b8142d4eaa2af6a83d24d5b6c"
+  },
+  "rawStdout": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/eighth-body-review/undef-token/live.stdout",
+    "sha256": "b62a3325e9c6c1a4bdfc7cb50e8b5957a125ba876169e2dc7d46da4cdb957e50"
+  },
+  "rawExtractionAllFiveExact": true,
+  "retention": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/eighth-body-review/undef-token/retention.json",
+    "sha256": "966e88612ac1b184eac05fcd0cd38e7ad04e7ab96eaa396232e962df306e4b21"
+  },
+  "cases": 5,
+  "baselineExact": 1,
+  "candidateExact": 2,
+  "formerlyExactLost": 0,
+  "rawMatchingRecordsLost": 0,
+  "nonemptySelectedRecords": 486,
+  "canonicalLinesIncludingSeparators": 501,
+  "unchangedCompleteDiagnosticCases": [
+    "comment_between",
+    "formfeed_space",
+    "spliced_keyword"
+  ],
+  "improvedCase": "trailing_comment",
+  "unchangedExactControl": "unknown_directive"
+}

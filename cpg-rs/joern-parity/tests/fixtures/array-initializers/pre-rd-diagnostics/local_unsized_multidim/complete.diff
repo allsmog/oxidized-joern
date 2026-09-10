@@ -1,0 +1,15 @@
+--- live
++++ array-only
+@@ -209,10 +209,12 @@
+ FLOWS|REACHING_DEF[value[][2] = {{1, 2}, {3, 4}}] arrays#5 -> arrays#14
+ FLOWS|REACHING_DEF[value] arrays#6 -> arrays#14
+ FLOWS|REACHING_DEF[value] arrays#6 -> arrays#5
++FLOWS|REACHING_DEF[{1, 2}] arrays#8 -> arrays#11
+ FLOWS|REACHING_DEF[{1, 2}] arrays#8 -> arrays#14
+ FLOWS|REACHING_DEF[{1, 2}] arrays#8 -> arrays#7
+ FLOWS|REACHING_DEF[{3, 4}] arrays#11 -> arrays#14
+ FLOWS|REACHING_DEF[{3, 4}] arrays#11 -> arrays#7
++FLOWS|REACHING_DEF[{3, 4}] arrays#11 -> arrays#8
+ FLOWS|REACHING_DEF[{{1, 2}, {3, 4}}] arrays#7 -> arrays#14
+ FLOWS|REACHING_DEF[{{1, 2}, {3, 4}}] arrays#7 -> arrays#5
+ FLOWS|REACHING_DEF[{{1, 2}, {3, 4}}] arrays#7 -> arrays#6

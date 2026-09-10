@@ -1,0 +1,21 @@
+{
+  "builtin_branch": {
+    "main.c": "#define N 3\n#if defined(__STDC__)\nint active;\n#else\nint values[N];\n#endif\n"
+  },
+  "literal_inactive": {
+    "main.c": "#define N 3\n#if 0\nint values[N];\n#endif\n"
+  },
+  "inactive_define": {
+    "main.c": "#define N 3\n#if 0\n#undef N\n#define N 4\nint values[N];\n#endif\nint after[N];\n"
+  },
+  "later_define": {
+    "main.c": "#if 0\nint values[N];\n#endif\n#define N 3\nint after[N];\n"
+  },
+  "inactive_prototype": {
+    "main.c": "#define TYPE long\n#if 0\nTYPE f(int x);\n#endif\nint g(int x) { return f(x); }\n"
+  },
+  "inactive_include": {
+    "api.h": "#define N 4\n",
+    "main.c": "#define N 3\n#if 0\n#include \"api.h\"\nint values[N];\n#endif\nint after[N];\n"
+  }
+}

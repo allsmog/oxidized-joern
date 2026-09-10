@@ -1,0 +1,169 @@
+{
+  "status": "PASS_FINAL_ROOT_ELEVEN_PERSISTED_IDENTITY_METADATA",
+  "capture": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/twelfth-batch/final-eleven-capture-v2/run.json",
+    "sha256": "204c6506837a2479bab32f98ce83549005580cdadb91ba2a750f63ceb5f7a622"
+  },
+  "finalFormattedBuild": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/twelfth-batch/fmt-corrected/final-real-differential/bin/source-bindings.json",
+    "sha256": "7e5397d0a3d9ed1650e67c2959fc26006239d97d92ea820adf771200597e895d"
+  },
+  "sameCapturedAndFinalBinaries": true,
+  "all55ProcessStatusesAnd110RawStreamHashesVerified": true,
+  "cases": [
+    {
+      "case": "duplicate_inherited_static",
+      "canonicalSha256": "c5df3000f82af3f20a9f66a097dda0de4d6c564c96ccbccab468b82d55a809ff",
+      "supplementSha256": "9dc822db0bef389ae3bcc1d013b6dadb13167dcec18a4e787a2fd4f95c2a7e6c",
+      "reloadedSha256": "9dc822db0bef389ae3bcc1d013b6dadb13167dcec18a4e787a2fd4f95c2a7e6c",
+      "cpg2Version": 2,
+      "savedGraphSha256": "c74592f2f8bffe366c03683b0e553b576d76559bca6e2f61f036cdd81b5883f2",
+      "metadataRows": 8,
+      "metadataSha256": "6c727c1a59d67710e2e06dc11d9c1455f2036fc147e962893b57db4e2c538bac",
+      "nodeCount": 81,
+      "edgeCount": 264,
+      "completeSnapshotIdenticalToReviewedWorker": true
+    },
+    {
+      "case": "duplicate_inline_before_static",
+      "canonicalSha256": "ce7600085b9046a0c92962083258ef4e109fbd73d5cf1f53e9f7624c595e3d34",
+      "supplementSha256": "43b99d5e6ef0f3d7aa420f8618fe319426cdf853727bc19b25310183608bad40",
+      "reloadedSha256": "43b99d5e6ef0f3d7aa420f8618fe319426cdf853727bc19b25310183608bad40",
+      "cpg2Version": 2,
+      "savedGraphSha256": "f3ba5c4613cc457c4d2aa9d4a235f142077ff9dab34d76f738138da5b077c994",
+      "metadataRows": 8,
+      "metadataSha256": "a7d208f4648cc65231598ad4248d729a33c69c9aefeab1f3ba771e87ed56afba",
+      "nodeCount": 81,
+      "edgeCount": 264,
+      "completeSnapshotIdenticalToReviewedWorker": true
+    },
+    {
+      "case": "duplicate_literal_static",
+      "canonicalSha256": "24ba90231135bf5b373024abf28efcc8e7008511846aa8fc36a84cc51ab8320f",
+      "supplementSha256": "ad68d7179de0424ad90ab9cd14d1cdef8ed2797a874c81990cdf310431284ced",
+      "reloadedSha256": "ad68d7179de0424ad90ab9cd14d1cdef8ed2797a874c81990cdf310431284ced",
+      "cpg2Version": 2,
+      "savedGraphSha256": "5bdbc55028e65e7320f1b45b87dde172a699ee851ac5ecba9d53fd4882c4a55e",
+      "metadataRows": 10,
+      "metadataSha256": "0c9abf8eac1cba2d2f2de731001a044b4726bb0f348fe6fde546f781a3d8949b",
+      "nodeCount": 83,
+      "edgeCount": 266,
+      "completeSnapshotIdenticalToReviewedWorker": true
+    },
+    {
+      "case": "duplicate_plain",
+      "canonicalSha256": "c5df3000f82af3f20a9f66a097dda0de4d6c564c96ccbccab468b82d55a809ff",
+      "supplementSha256": "e889a83a602d896d873485fcc4eb46e02cc5dc3c23861093d9a24793b0db2857",
+      "reloadedSha256": "e889a83a602d896d873485fcc4eb46e02cc5dc3c23861093d9a24793b0db2857",
+      "cpg2Version": 2,
+      "savedGraphSha256": "28ee060a3d6b6edc45bdf72496c02a4f794e281512508ae4664f6c4346a5053b",
+      "metadataRows": 8,
+      "metadataSha256": "a7d208f4648cc65231598ad4248d729a33c69c9aefeab1f3ba771e87ed56afba",
+      "nodeCount": 81,
+      "edgeCount": 264,
+      "completeSnapshotIdenticalToReviewedWorker": true
+    },
+    {
+      "case": "duplicate_same_file_location_order",
+      "canonicalSha256": "14f8293316af43db5914452ef3ee73d2c8136e6ba7f806d42cab105048c8e16f",
+      "supplementSha256": "457efd9ae61f29b1db5a5ba6dd33d1fab64c98918e5aa4c5eb5ba414181e601a",
+      "reloadedSha256": "457efd9ae61f29b1db5a5ba6dd33d1fab64c98918e5aa4c5eb5ba414181e601a",
+      "cpg2Version": 2,
+      "savedGraphSha256": "2df367a960759e57f5933e2fa84e54bae6a5ec0b163a75463d670ddcf7966339",
+      "metadataRows": 13,
+      "metadataSha256": "745c342a08dab531a2740284a567f3ff2722ee8f8bdcfd3828e4b2dd09774a51",
+      "nodeCount": 94,
+      "edgeCount": 310,
+      "completeSnapshotIdenticalToReviewedWorker": true
+    },
+    {
+      "case": "duplicate_static_late_prototype",
+      "canonicalSha256": "24ba90231135bf5b373024abf28efcc8e7008511846aa8fc36a84cc51ab8320f",
+      "supplementSha256": "d719ba6a12895a5ec0e41c90acd8227ad4075685930286726a788a1ab4bbfe47",
+      "reloadedSha256": "d719ba6a12895a5ec0e41c90acd8227ad4075685930286726a788a1ab4bbfe47",
+      "cpg2Version": 2,
+      "savedGraphSha256": "be07f2e0ef746ce15f5613c6302e3d6d17b97a753e0c49dce7198709b8c3b90e",
+      "metadataRows": 10,
+      "metadataSha256": "69c3342fb70a0d12fbb871065c59a54bd97055e1dafe90530296cd9f0a45449d",
+      "nodeCount": 83,
+      "edgeCount": 266,
+      "completeSnapshotIdenticalToReviewedWorker": true
+    },
+    {
+      "case": "duplicate_supplied_macro_local",
+      "canonicalSha256": "f6fbe553c410856221e2a39fcdeb700d4ebfd5e8e79b7c0259a6d30ad42e32ac",
+      "supplementSha256": "aa4c43b587736b9bf7e74665e06806ba861525964485e3a3c374aebbf3ee79d3",
+      "reloadedSha256": "aa4c43b587736b9bf7e74665e06806ba861525964485e3a3c374aebbf3ee79d3",
+      "cpg2Version": 2,
+      "savedGraphSha256": "0c9843ddd4b6ab6b4f8f025efbd07f8d3dbbc6f6c1b5e79c7eaeae9d9d02256a",
+      "metadataRows": 8,
+      "metadataSha256": "6c727c1a59d67710e2e06dc11d9c1455f2036fc147e962893b57db4e2c538bac",
+      "nodeCount": 87,
+      "edgeCount": 276,
+      "completeSnapshotIdenticalToReviewedWorker": true
+    },
+    {
+      "case": "unique_plain_and_static",
+      "canonicalSha256": "dfda8291ef3947dbfc14b6f3740eee7a88c1d6072cb816e95179182bb314e32d",
+      "supplementSha256": "732d1d120c469aa96b8e2d6ecf1361d81383bea2095dffa1db40affb1fd8bb2b",
+      "reloadedSha256": "732d1d120c469aa96b8e2d6ecf1361d81383bea2095dffa1db40affb1fd8bb2b",
+      "cpg2Version": 2,
+      "savedGraphSha256": "5487aa24aa12a9d94112ed17195d24d3e9e44f44eb63002e7c1fb7cf84466bbf",
+      "metadataRows": 7,
+      "metadataSha256": "c952f8ff8a5d97d626c9be846d430a164fff467f54ede1df7ce21dac65fdd309",
+      "nodeCount": 68,
+      "edgeCount": 229,
+      "completeSnapshotIdenticalToReviewedWorker": true
+    },
+    {
+      "case": "tiny_fixedtables_include",
+      "canonicalSha256": "fc4a1360d6f10152edb364c346a47ae73d2df2460fe5ef12da2d2e79cbb7dd3f",
+      "supplementSha256": "4ee92b50ab79430ecbece8c2adcd3a4d6d064d8f7f5b1baf98f02c6ea0caa2bf",
+      "reloadedSha256": "4ee92b50ab79430ecbece8c2adcd3a4d6d064d8f7f5b1baf98f02c6ea0caa2bf",
+      "cpg2Version": 2,
+      "savedGraphSha256": "7766fac53d772c9e4ed7b4b67f37390e30e23e41a24c24ff4095efffdf012217",
+      "metadataRows": 2,
+      "metadataSha256": "9697038c4c9cbc3d0c4853697da746d7c20d68ef99d6ee10f886cd8418c1412e",
+      "nodeCount": 151,
+      "edgeCount": 638,
+      "completeSnapshotIdenticalToReviewedWorker": true
+    },
+    {
+      "case": "tiny_fixedtables_inline",
+      "canonicalSha256": "6d613c7085ab54541cc1d9fa83494748e33fe70bfc5c541ee39f12aa8046cadd",
+      "supplementSha256": "74d3e1e686f9a33c4002e0302b69cda801afb99a3a2f35cf43fd29490537e209",
+      "reloadedSha256": "74d3e1e686f9a33c4002e0302b69cda801afb99a3a2f35cf43fd29490537e209",
+      "cpg2Version": 2,
+      "savedGraphSha256": "2822310f129d13ddf1fbf7411f1d288378d9573bc8c28fbc3a3a4823be7ea005",
+      "metadataRows": 2,
+      "metadataSha256": "9697038c4c9cbc3d0c4853697da746d7c20d68ef99d6ee10f886cd8418c1412e",
+      "nodeCount": 125,
+      "edgeCount": 489,
+      "completeSnapshotIdenticalToReviewedWorker": true
+    },
+    {
+      "case": "unsigned_short_array",
+      "canonicalSha256": "500f0b8fd015d905346cdc8b0d9dea88b91ecb24bf068504ff9ddb59b1916ef0",
+      "supplementSha256": "9e3e3b3ec9b42957efe1e835dc72bd38e67fc3b644075eab50c568f1c9c151e9",
+      "reloadedSha256": "9e3e3b3ec9b42957efe1e835dc72bd38e67fc3b644075eab50c568f1c9c151e9",
+      "cpg2Version": 2,
+      "savedGraphSha256": "645c7e910f607c7033e93ae112f861282d472e6b7957dae0d53fd61fd919b83d",
+      "metadataRows": 5,
+      "metadataSha256": "ce2497a78201863013695134548b32fe8dd22cd0be203f4d6b797a960c7a9cb2",
+      "nodeCount": 51,
+      "edgeCount": 126,
+      "completeSnapshotIdenticalToReviewedWorker": true
+    }
+  ],
+  "fullSnapshotEquality": "Each complete root in-memory snapshot equals its complete reopened snapshot and the already independently reviewed worker snapshot, byte for byte.",
+  "metadataRows": 81,
+  "lineRepair": {
+    "introducedLossesRestored": 7,
+    "preexistingGapImproved": 1,
+    "workerOccurrenceProof": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/twelfth-language-replay-v3/metadata-review.json",
+      "sha256": "0d11712dc2f1e7c2bfcd76ce351e126608d3c12921f9742142ab50f2776f284a"
+    }
+  },
+  "scope": "All11 complete canonical references and81 observed stored metadata occurrence rows; no full Joern supplemental parity. Complete unsupported property/relationship diagnostics remain preserved. No producers rerun."
+}

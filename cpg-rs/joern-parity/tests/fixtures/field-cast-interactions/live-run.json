@@ -1,0 +1,64 @@
+{
+  "command": [
+    "/Users/shayaunnejad/vibe-code/joern-oxidized/.local/astra-sprint/oracle/runtime/joern-cli/joern",
+    "--script",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/field-cast-interactions/oracle.sc",
+    "--param",
+    "inputPath=/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/field-cast-interactions/input"
+  ],
+  "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/field-cast-interactions/oracle-workspace",
+  "exitCode": 0,
+  "wallSeconds": 7.926893458003178,
+  "inputHashes": {
+    "cast_index": "d27eab79d3bf83b3378363ca2d11e07748e35637fbcb001c7ab7091c136fab43",
+    "composite_index": "c4c1e103189af6418f64fa9d56b174329b7ec46424f8a470e06cffd64e4084e0",
+    "cast_receiver": "4326f49cab8f0747d9abcd4ec195db95899239d4571126f702a6462e11d67dcc",
+    "outer_function": "15b6704a51e1a9acc0218ae88bf908e2591e18d6056de2a52921b3a625caede6",
+    "sibling_cast_fields": "56e48b0cf24c0033081c8e4523d04c552f9c40499248b48548f1b62b9bf5119c",
+    "unicode_receiver": "54733d537b008f63ced717aacbcc4260d585de17f29a05f76f6e508f935304ed"
+  },
+  "scriptSha256": "56431f14868678e64f9eb41026b44f1d3d7738404d28d2db62711b520c98c742",
+  "sharedOracleSha256": "bd2e18fab06ecd7897d796f5b31dac6669dc45ecf70c54fb1d5cc0fe29f3c1ab",
+  "joernVersion": "4.0.555",
+  "officialArchiveSha256": "12989883d6b5aeacc97b2dc0ecc4e2951bf50e48cb244f8c8f333d11a8be0c7e",
+  "projects": [
+    {
+      "case": "cast_index",
+      "canonicalLinesIncludingSeparators": 376,
+      "nonemptySelectedRecords": 367,
+      "expectedSha256": "c0837e55ba0d741bf97f567f0d3219db15146ac19d101e97684ce3d4d5185ad7"
+    },
+    {
+      "case": "cast_receiver",
+      "canonicalLinesIncludingSeparators": 314,
+      "nonemptySelectedRecords": 305,
+      "expectedSha256": "0c213c359e93087fdcfe693239ea0243d8d5fe25c53ed4c8efede58eb5e12c10"
+    },
+    {
+      "case": "composite_index",
+      "canonicalLinesIncludingSeparators": 353,
+      "nonemptySelectedRecords": 343,
+      "expectedSha256": "13e422f45e1024e603c1a0490406db3e44f6674102a4e38b4d55464521245de6"
+    },
+    {
+      "case": "outer_function",
+      "canonicalLinesIncludingSeparators": 392,
+      "nonemptySelectedRecords": 383,
+      "expectedSha256": "aab3a3364f0d586f0eb44c17cd4a8fb19d43339a3b34e170e595ddfec96b6cea"
+    },
+    {
+      "case": "sibling_cast_fields",
+      "canonicalLinesIncludingSeparators": 531,
+      "nonemptySelectedRecords": 520,
+      "expectedSha256": "5478c16e8c5476c3e45b32ce2d23383832bdc80d917d09128790ea5cd1f44689"
+    },
+    {
+      "case": "unicode_receiver",
+      "canonicalLinesIncludingSeparators": 304,
+      "nonemptySelectedRecords": 295,
+      "expectedSha256": "75d177458d1f16cf460f6d2d7325d93bb4e01aeaac1ff52ac3482afd5c9194f4"
+    }
+  ],
+  "rawStdoutSha256": "c30e47c40ac8479b78f3db606b68a2b9a8db9e40ea980dc1eb14392cfeb633a3",
+  "rawStderrSha256": "a6e22620f97b1f4974c9d018781189691d87f65b6b410432bd608cecf6217c7a"
+}

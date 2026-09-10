@@ -35,7 +35,16 @@ use std::time::{Duration, Instant};
 /// v9: generated Go files that register HTTP routes (oapi-codegen server
 /// stubs) are KEPT at collection time (`go_generated_registers_routes`) —
 /// file-set change, same staleness hazard as a shape change.
-pub const GRAPH_SHAPE_VERSION: u32 = 12;
+/// v12: C braceless `if` consequences are present in canonical AST/CFG/DDG.
+/// v13: C callable declarations, loop conditions, and preprocessing expanded.
+/// v14: C type roles, storage modifiers, blocks, and reaching definitions expanded.
+/// v15: C CFG/RD scheduling, array initializers, and supplied-header macros.
+/// v16: C field macros, nested cast tokens, typedef aggregates and recovery.
+/// v23: C method bindings and modifier properties use the CPG2 version 2 payload.
+/// v24: Physical C include references and their properties use CPG2 version 3.
+/// v25: Finalized C macro stubs retain their observed binding components.
+/// v26: Combine compiler inputs, extended schema and C parity metadata.
+pub const GRAPH_SHAPE_VERSION: u32 = 26;
 
 const CACHE_MANIFEST_VERSION: u32 = 1;
 const CACHE_GRAPH_FORMAT: &str = "CPG2";

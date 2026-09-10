@@ -1,0 +1,9 @@
+{
+  "createdAtUtc": "2026-09-08T15:35:22.136722+00:00",
+  "scope": "Full combined frontend plus parameter macro shadow repair; debug executable for isolated interaction replay. Final release and full gates pending.",
+  "files": {
+    "exact.rs": "1603202779e066f2a9039f2fa3b075ab5722d9bb806be885e90f0b7c43a26d0d",
+    "import.rs": "3fb6695576fe87e463b5e44160bcbe828321bf32149d67abcc2256eb88d11aba",
+    "joern-parity": "d8b87819eec1b3eae2605c76b4f870774fb954d3757e62871ef480cd1e9c6f39"
+  }
+}

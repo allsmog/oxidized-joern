@@ -1,0 +1,216 @@
+METHOD NAME=<global> CODE=<global> FULL_NAME=<includes>:<global> ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1
+  METHOD NAME=ui CODE=unsigned int ui(void) { return 1U; } FULL_NAME=ui SIGNATURE=unsigned int(void) ORDER=1
+    METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    BLOCK CODE={ return 1U; } TYPE_FULL_NAME=void ORDER=2
+      RETURN CODE=return 1U; ORDER=1
+        LITERAL CODE=1U TYPE_FULL_NAME=unsigned int ORDER=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=unsigned int ORDER=3
+  METHOD NAME=ul CODE=unsigned long ul(void) { return 1UL; } FULL_NAME=ul SIGNATURE=unsigned long(void) ORDER=1
+    METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    BLOCK CODE={ return 1UL; } TYPE_FULL_NAME=void ORDER=2
+      RETURN CODE=return 1UL; ORDER=1
+        LITERAL CODE=1UL TYPE_FULL_NAME=unsigned longint ORDER=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=unsigned long ORDER=3
+  METHOD NAME=ull CODE=unsigned long long ull(void) { return 1ULL; } FULL_NAME=ull SIGNATURE=unsigned longlong(void) ORDER=1
+    METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    BLOCK CODE={ return 1ULL; } TYPE_FULL_NAME=void ORDER=2
+      RETURN CODE=return 1ULL; ORDER=1
+        LITERAL CODE=1ULL TYPE_FULL_NAME=unsigned longlongint ORDER=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=unsigned longlong ORDER=3
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+    METHOD_REF CODE=ui TYPE_FULL_NAME=ui METHOD_FULL_NAME=ui ORDER=1
+    METHOD_REF CODE=ul TYPE_FULL_NAME=ul METHOD_FULL_NAME=ul ORDER=2
+    METHOD_REF CODE=ull TYPE_FULL_NAME=ull METHOD_FULL_NAME=ull ORDER=3
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=ui CODE=unsigned int ui(void) { return 1U; } FULL_NAME=ui SIGNATURE=unsigned int(void) ORDER=1
+  METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  BLOCK CODE={ return 1U; } TYPE_FULL_NAME=void ORDER=2
+    RETURN CODE=return 1U; ORDER=1
+      LITERAL CODE=1U TYPE_FULL_NAME=unsigned int ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=unsigned int ORDER=3
+
+METHOD NAME=ul CODE=unsigned long ul(void) { return 1UL; } FULL_NAME=ul SIGNATURE=unsigned long(void) ORDER=1
+  METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  BLOCK CODE={ return 1UL; } TYPE_FULL_NAME=void ORDER=2
+    RETURN CODE=return 1UL; ORDER=1
+      LITERAL CODE=1UL TYPE_FULL_NAME=unsigned longint ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=unsigned long ORDER=3
+
+METHOD NAME=ull CODE=unsigned long long ull(void) { return 1ULL; } FULL_NAME=ull SIGNATURE=unsigned longlong(void) ORDER=1
+  METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  BLOCK CODE={ return 1ULL; } TYPE_FULL_NAME=void ORDER=2
+    RETURN CODE=return 1ULL; ORDER=1
+      LITERAL CODE=1ULL TYPE_FULL_NAME=unsigned longlongint ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=unsigned longlong ORDER=3
+
+NODES|META_DATA LANGUAGE=NEWC
+NODES|FILE NAME=<includes> ORDER=1
+NODES|FILE NAME=<unknown> ORDER=0
+NODES|FILE NAME=main.c ORDER=0
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<global> FILENAME=<unknown> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<includes>:<global> FILENAME=<includes> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|NAMESPACE NAME=<global>
+NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=<global> FULL_NAME=main.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=ui FULL_NAME=ui CODE=ui AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=ul FULL_NAME=ul CODE=ul AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=ull FULL_NAME=ull CODE=ull AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=unsigned int FULL_NAME=unsigned int CODE=unsigned int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=unsigned long FULL_NAME=unsigned long CODE=unsigned long IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=unsigned longint FULL_NAME=unsigned longint CODE=unsigned longint IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=unsigned longlong FULL_NAME=unsigned longlong CODE=unsigned longlong IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=unsigned longlongint FULL_NAME=unsigned longlongint CODE=unsigned longlongint IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+NODES|TYPE NAME=ui FULL_NAME=ui TYPE_DECL_FULL_NAME=ui
+NODES|TYPE NAME=ul FULL_NAME=ul TYPE_DECL_FULL_NAME=ul
+NODES|TYPE NAME=ull FULL_NAME=ull TYPE_DECL_FULL_NAME=ull
+NODES|TYPE NAME=unsigned int FULL_NAME=unsigned int TYPE_DECL_FULL_NAME=unsigned int
+NODES|TYPE NAME=unsigned long FULL_NAME=unsigned long TYPE_DECL_FULL_NAME=unsigned long
+NODES|TYPE NAME=unsigned longint FULL_NAME=unsigned longint TYPE_DECL_FULL_NAME=unsigned longint
+NODES|TYPE NAME=unsigned longlong FULL_NAME=unsigned longlong TYPE_DECL_FULL_NAME=unsigned longlong
+NODES|TYPE NAME=unsigned longlongint FULL_NAME=unsigned longlongint TYPE_DECL_FULL_NAME=unsigned longlongint
+NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+EDGES|ARGUMENT ui#4 -> ui#5
+EDGES|ARGUMENT ul#4 -> ul#5
+EDGES|ARGUMENT ull#4 -> ull#5
+EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+EDGES|CFG main.c:<global>#0 -> main.c:<global>#23
+EDGES|CFG main.c:<global>#1 -> ui#5
+EDGES|CFG main.c:<global>#15 -> ull#5
+EDGES|CFG main.c:<global>#23 -> main.c:<global>#24
+EDGES|CFG main.c:<global>#24 -> main.c:<global>#25
+EDGES|CFG main.c:<global>#25 -> main.c:<global>#26
+EDGES|CFG main.c:<global>#8 -> ul#5
+EDGES|CFG ui#4 -> ui#6
+EDGES|CFG ui#5 -> ui#4
+EDGES|CFG ul#4 -> ul#6
+EDGES|CFG ul#5 -> ul#4
+EDGES|CFG ull#4 -> ull#6
+EDGES|CFG ull#5 -> ull#4
+EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+EDGES|CONTAINS D:main.c:<global> -> D:ui
+EDGES|CONTAINS D:main.c:<global> -> D:ul
+EDGES|CONTAINS D:main.c:<global> -> D:ull
+EDGES|CONTAINS D:main.c:<global> -> main.c:<global>#0
+EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+EDGES|CONTAINS F:<includes> -> D:ANY
+EDGES|CONTAINS F:<includes> -> D:unsigned int
+EDGES|CONTAINS F:<includes> -> D:unsigned long
+EDGES|CONTAINS F:<includes> -> D:unsigned longint
+EDGES|CONTAINS F:<includes> -> D:unsigned longlong
+EDGES|CONTAINS F:<includes> -> D:unsigned longlongint
+EDGES|CONTAINS F:<includes> -> D:void
+EDGES|CONTAINS F:main.c -> D:main.c:<global>
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#1
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#15
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#22
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#23
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#24
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#25
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#8
+EDGES|CONTAINS main.c:<global>#1 -> ui#3
+EDGES|CONTAINS main.c:<global>#1 -> ui#4
+EDGES|CONTAINS main.c:<global>#1 -> ui#5
+EDGES|CONTAINS main.c:<global>#15 -> ull#3
+EDGES|CONTAINS main.c:<global>#15 -> ull#4
+EDGES|CONTAINS main.c:<global>#15 -> ull#5
+EDGES|CONTAINS main.c:<global>#8 -> ul#3
+EDGES|CONTAINS main.c:<global>#8 -> ul#4
+EDGES|CONTAINS main.c:<global>#8 -> ul#5
+EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+EDGES|EVAL_TYPE main.c:<global>#22 -> T:ANY
+EDGES|EVAL_TYPE main.c:<global>#23 -> T:ui
+EDGES|EVAL_TYPE main.c:<global>#24 -> T:ul
+EDGES|EVAL_TYPE main.c:<global>#25 -> T:ull
+EDGES|EVAL_TYPE main.c:<global>#26 -> T:ANY
+EDGES|EVAL_TYPE ui#1 -> T:void
+EDGES|EVAL_TYPE ui#2 -> T:void
+EDGES|EVAL_TYPE ui#3 -> T:void
+EDGES|EVAL_TYPE ui#5 -> T:unsigned int
+EDGES|EVAL_TYPE ui#6 -> T:unsigned int
+EDGES|EVAL_TYPE ul#1 -> T:void
+EDGES|EVAL_TYPE ul#2 -> T:void
+EDGES|EVAL_TYPE ul#3 -> T:void
+EDGES|EVAL_TYPE ul#5 -> T:unsigned longint
+EDGES|EVAL_TYPE ul#6 -> T:unsigned long
+EDGES|EVAL_TYPE ull#1 -> T:void
+EDGES|EVAL_TYPE ull#2 -> T:void
+EDGES|EVAL_TYPE ull#3 -> T:void
+EDGES|EVAL_TYPE ull#5 -> T:unsigned longlongint
+EDGES|EVAL_TYPE ull#6 -> T:unsigned longlong
+EDGES|PARAMETER_LINK ui#1 -> ui#2
+EDGES|PARAMETER_LINK ul#1 -> ul#2
+EDGES|PARAMETER_LINK ull#1 -> ull#2
+EDGES|REF NB:<global> -> NS:<global>
+EDGES|REF NB:<includes>:<global> -> NS:<global>
+EDGES|REF NB:main.c:<global> -> NS:<global>
+EDGES|REF T:ANY -> D:ANY
+EDGES|REF T:ui -> D:ui
+EDGES|REF T:ul -> D:ul
+EDGES|REF T:ull -> D:ull
+EDGES|REF T:unsigned int -> D:unsigned int
+EDGES|REF T:unsigned long -> D:unsigned long
+EDGES|REF T:unsigned longint -> D:unsigned longint
+EDGES|REF T:unsigned longlong -> D:unsigned longlong
+EDGES|REF T:unsigned longlongint -> D:unsigned longlongint
+EDGES|REF T:void -> D:void
+EDGES|REF main.c:<global>#23 -> main.c:<global>#1
+EDGES|REF main.c:<global>#24 -> main.c:<global>#8
+EDGES|REF main.c:<global>#25 -> main.c:<global>#15
+EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+EDGES|SOURCE_FILE D:ANY -> F:<includes>
+EDGES|SOURCE_FILE D:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE D:ui -> F:main.c
+EDGES|SOURCE_FILE D:ul -> F:main.c
+EDGES|SOURCE_FILE D:ull -> F:main.c
+EDGES|SOURCE_FILE D:unsigned int -> F:<includes>
+EDGES|SOURCE_FILE D:unsigned long -> F:<includes>
+EDGES|SOURCE_FILE D:unsigned longint -> F:<includes>
+EDGES|SOURCE_FILE D:unsigned longlong -> F:<includes>
+EDGES|SOURCE_FILE D:unsigned longlongint -> F:<includes>
+EDGES|SOURCE_FILE D:void -> F:<includes>
+EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
+EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>
+EDGES|SOURCE_FILE NB:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#0 -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#1 -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#15 -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#8 -> F:main.c
+FLOWS|REACHING_DEF[1ULL] ull#5 -> ull#4
+FLOWS|REACHING_DEF[1UL] ul#5 -> ul#4
+FLOWS|REACHING_DEF[1U] ui#5 -> ui#4
+FLOWS|REACHING_DEF[<RET>] ui#4 -> ui#6
+FLOWS|REACHING_DEF[<RET>] ul#4 -> ul#6
+FLOWS|REACHING_DEF[<RET>] ull#4 -> ull#6
+FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#23
+FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#24
+FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#25
+FLOWS|REACHING_DEF[] main.c:<global>#1 -> ui#1
+FLOWS|REACHING_DEF[] main.c:<global>#1 -> ui#4
+FLOWS|REACHING_DEF[] main.c:<global>#1 -> ui#5
+FLOWS|REACHING_DEF[] main.c:<global>#15 -> ull#1
+FLOWS|REACHING_DEF[] main.c:<global>#15 -> ull#4
+FLOWS|REACHING_DEF[] main.c:<global>#15 -> ull#5
+FLOWS|REACHING_DEF[] main.c:<global>#8 -> ul#1
+FLOWS|REACHING_DEF[] main.c:<global>#8 -> ul#4
+FLOWS|REACHING_DEF[] main.c:<global>#8 -> ul#5
+FLOWS|REACHING_DEF[] ui#1 -> ui#2
+FLOWS|REACHING_DEF[] ui#1 -> ui#6
+FLOWS|REACHING_DEF[] ul#1 -> ul#2
+FLOWS|REACHING_DEF[] ul#1 -> ul#6
+FLOWS|REACHING_DEF[] ull#1 -> ull#2
+FLOWS|REACHING_DEF[] ull#1 -> ull#6

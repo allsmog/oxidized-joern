@@ -1,0 +1,12 @@
+{
+  "plain_call_control": "void render(char *p, int n) {\n    (void)snprintf(p, n, \"%d\", n);\n}\n",
+  "if_true": "int value(int x) {\n#if 1\n    return x;\n#endif\n    return 0;\n}\n",
+  "if_else": "int first(int x);\nint second(int x);\nint choose(int x) {\n#if 0\n    return first(x);\n#else\n    return second(x);\n#endif\n}\n",
+  "if_elif": "int choose(int x) {\n#if 0\n    return 1;\n#elif 1\n    return x;\n#else\n    return 2;\n#endif\n}\n",
+  "snprintf_defined": "void render(char *p, int n) {\n#if !defined(NO_snprintf) && !defined(NO_vsnprintf)\n    (void)snprintf(p, n, \"%d\", n);\n#else\n    sprintf(p, \"%d\", n);\n#endif\n}\n",
+  "ifndef_control": "void render(char *p, int n) {\n#ifndef NO_snprintf\n    (void)snprintf(p, n, \"%d\", n);\n#else\n    sprintf(p, \"%d\", n);\n#endif\n}\n",
+  "inactive_phantoms": "int choose(void) {\n#if 0\n    return discarded;\n#else\n    return selected;\n#endif\n}\n",
+  "definition_positions": "#define FLAG 1\nint before(int x) {\n#if FLAG\n    return x;\n#else\n    return 0;\n#endif\n}\n#undef FLAG\n#define FLAG 0\nint after(int x) {\n#if FLAG\n    return x;\n#else\n    return 0;\n#endif\n}\n",
+  "local_definition": "int choose(int x) {\n#define BODY_FLAG 1\n#if BODY_FLAG\n    return x;\n#else\n    return 0;\n#endif\n}\n",
+  "inactive_call_only": "int choose(int x) {\n#if 0\n    discarded_call(x);\n#endif\n    return x;\n}\n"
+}

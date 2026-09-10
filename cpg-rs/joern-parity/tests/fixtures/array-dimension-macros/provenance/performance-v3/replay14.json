@@ -1,0 +1,272 @@
+{
+  "candidateBindingSha256": "5365334c3027cb874a36a647722587f3f7a3a3fe50ee989997df765ef869e958",
+  "rows": [
+    {
+      "case": "body_include_macro_only",
+      "status": 0,
+      "seconds": 0.3663515000080224,
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/frozen-v3-ptf/joern-parity",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/verification-v3-ptf/cases/body_include_macro_only/input/api.h",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/verification-v3-ptf/cases/body_include_macro_only/input/main.c"
+      ],
+      "inputs": {
+        "api.h": "39c6a0ef8f0732115cce55a2ccc6edaa9f16cd4f0d45fb43ed5e4fe0b6849ee3",
+        "main.c": "18895073d0db98c33aa9c6aaa7924c07e99610f9efede43a31e34715d60319e5"
+      },
+      "v2Sha256": "c158364df1717bdc80e6d94d22b9567689d8c7d8d8517a96eabc44b8a993f49a",
+      "v3Sha256": "c158364df1717bdc80e6d94d22b9567689d8c7d8d8517a96eabc44b8a993f49a",
+      "expectedSha256": "c158364df1717bdc80e6d94d22b9567689d8c7d8d8517a96eabc44b8a993f49a",
+      "identicalToV2": true,
+      "completeOracleExact": true
+    },
+    {
+      "case": "guarded_nested_relative_include",
+      "status": 0,
+      "seconds": 0.012567583005875349,
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/frozen-v3-ptf/joern-parity",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/verification-v3-ptf/cases/guarded_nested_relative_include/input/headers/api.h",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/verification-v3-ptf/cases/guarded_nested_relative_include/input/headers/leaf values.h",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/verification-v3-ptf/cases/guarded_nested_relative_include/input/main.c"
+      ],
+      "inputs": {
+        "main.c": "88fd0f5da7a18648c6cb6eb85382212b6130d95e9090b3992eb04c1e0af826d4",
+        "headers/api.h": "4212ba295d8db18bad200705c0f44cd0268d53f02388ba498ef218783af832b9",
+        "headers/leaf values.h": "4a1886cf47df5e5da7c13efecd2ec4233db0a08e0e9bcc9c6caaa276f015f3f1"
+      },
+      "v2Sha256": "43156ea80dd53d452190969c4a313d5cc2a295a77806a8329511ca71885aa5cb",
+      "v3Sha256": "43156ea80dd53d452190969c4a313d5cc2a295a77806a8329511ca71885aa5cb",
+      "expectedSha256": "43156ea80dd53d452190969c4a313d5cc2a295a77806a8329511ca71885aa5cb",
+      "identicalToV2": true,
+      "completeOracleExact": true
+    },
+    {
+      "case": "inactive_body_include",
+      "status": 0,
+      "seconds": 0.011656625021714717,
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/frozen-v3-ptf/joern-parity",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/verification-v3-ptf/cases/inactive_body_include/input/inactive.h",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/verification-v3-ptf/cases/inactive_body_include/input/main.c"
+      ],
+      "inputs": {
+        "main.c": "6f9fc5b3121682bbce24044f2bedfc75774968c616951955ea4f0c0bb9ba76a6",
+        "inactive.h": "e6be797d4b0e670eb494b4dd9050eb1042f56b832f8218b2a8905b2ab1ac5d7d"
+      },
+      "v2Sha256": "dee62aa4096c4c46c16ebb0a91c5906c1f6786a8b5483d6508ad2837a6a80f3e",
+      "v3Sha256": "dee62aa4096c4c46c16ebb0a91c5906c1f6786a8b5483d6508ad2837a6a80f3e",
+      "expectedSha256": "dee62aa4096c4c46c16ebb0a91c5906c1f6786a8b5483d6508ad2837a6a80f3e",
+      "identicalToV2": true,
+      "completeOracleExact": true
+    },
+    {
+      "case": "nested_scope_typedef_macro",
+      "status": 0,
+      "seconds": 0.012420417013345286,
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/frozen-v3-ptf/joern-parity",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/verification-v3-ptf/cases/nested_scope_typedef_macro/input/main.c",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/verification-v3-ptf/cases/nested_scope_typedef_macro/input/scope.h"
+      ],
+      "inputs": {
+        "main.c": "15477e5092143e0b32762327e15d6323a40786dc7444d23868fdb300c85a2b72",
+        "scope.h": "0180b80ae57402852b44fe3f0a26dc6d93a91123f1d0e869b0d4d339e9271bdd"
+      },
+      "v2Sha256": "e73d9af14f883513c4f5f343a0a0c84257d4e0d700186565927958f9c4bb66a1",
+      "v3Sha256": "e73d9af14f883513c4f5f343a0a0c84257d4e0d700186565927958f9c4bb66a1",
+      "expectedSha256": "e73d9af14f883513c4f5f343a0a0c84257d4e0d700186565927958f9c4bb66a1",
+      "identicalToV2": true,
+      "completeOracleExact": true
+    },
+    {
+      "case": "primitive_static_array_include",
+      "status": 0,
+      "seconds": 0.012380500003928319,
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/frozen-v3-ptf/joern-parity",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/verification-v3-ptf/cases/primitive_static_array_include/input/main.c",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/verification-v3-ptf/cases/primitive_static_array_include/input/table.h"
+      ],
+      "inputs": {
+        "main.c": "ef12857b61998de6a68ac326cb8005363a62cf1d35e93da452c63700bc6e71ff",
+        "table.h": "01722e7790931e4dffd1479a5bca2487679e42b6ea367e58798b1a37977aca51"
+      },
+      "v2Sha256": "7a413043d5f75a93899094c5efd86725bad67c504e81b463d5530af182c8759c",
+      "v3Sha256": "7a413043d5f75a93899094c5efd86725bad67c504e81b463d5530af182c8759c",
+      "expectedSha256": "7a413043d5f75a93899094c5efd86725bad67c504e81b463d5530af182c8759c",
+      "identicalToV2": true,
+      "completeOracleExact": true
+    },
+    {
+      "case": "primitive_static_array_inline",
+      "status": 0,
+      "seconds": 0.006983083992963657,
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/frozen-v3-ptf/joern-parity",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/verification-v3-ptf/cases/primitive_static_array_inline/input/main.c"
+      ],
+      "inputs": {
+        "main.c": "eb948f536a5a05c904ea98da790f9a48729a7b6f0cd3ad7454de45e564758128"
+      },
+      "v2Sha256": "d709ab346526f395dbab7d12c694fe3f16b6f05dc0c288d4cfc05b6da32a3a70",
+      "v3Sha256": "d709ab346526f395dbab7d12c694fe3f16b6f05dc0c288d4cfc05b6da32a3a70",
+      "expectedSha256": "d709ab346526f395dbab7d12c694fe3f16b6f05dc0c288d4cfc05b6da32a3a70",
+      "identicalToV2": true,
+      "completeOracleExact": true
+    },
+    {
+      "case": "repeated_include_context",
+      "status": 0,
+      "seconds": 0.012098415987566113,
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/frozen-v3-ptf/joern-parity",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/verification-v3-ptf/cases/repeated_include_context/input/main.c",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/verification-v3-ptf/cases/repeated_include_context/input/nested/table.h",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/verification-v3-ptf/cases/repeated_include_context/input/repeat.h"
+      ],
+      "inputs": {
+        "repeat.h": "19dcabefdf697b3ed835d49328b7d35d218acf0dffa5f64c96235d93a9cafb84",
+        "main.c": "3978e883bd0aaf3d326144a6cd78a87a525f590207de23552f98049932b3e20f",
+        "nested/table.h": "3bb7ed86169716c309a9d27e0016132128da26348425a566436c287738a3c15a"
+      },
+      "v2Sha256": "308c876d33cccfc46676406966a5b2ce7d4b2d0dbb02e2019c6393415901295e",
+      "v3Sha256": "308c876d33cccfc46676406966a5b2ce7d4b2d0dbb02e2019c6393415901295e",
+      "expectedSha256": "febd4ffe0c249f8dbd0f4fac596f35b065914292f1d1e886f1d691a1c87ffaba",
+      "identicalToV2": true,
+      "completeOracleExact": false
+    },
+    {
+      "case": "tiny_fixedtables_include",
+      "status": 0,
+      "seconds": 0.012307875003898516,
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/frozen-v3-ptf/joern-parity",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/verification-v3-ptf/cases/tiny_fixedtables_include/input/fixed.h",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/verification-v3-ptf/cases/tiny_fixedtables_include/input/main.c"
+      ],
+      "inputs": {
+        "fixed.h": "3039380a12e6dba1fb44314f13292d1b5ec6744aa80eff5599566a29ea94ea86",
+        "main.c": "7203039d3be732abfb9abaad7177eaa77efa51d6e9fa58d58733346eb6cb4dda"
+      },
+      "v2Sha256": "3b15e5adbaa6fba426e00c4b695cafb905e530dc4627573646e3388279393796",
+      "v3Sha256": "3b15e5adbaa6fba426e00c4b695cafb905e530dc4627573646e3388279393796",
+      "expectedSha256": "fc4a1360d6f10152edb364c346a47ae73d2df2460fe5ef12da2d2e79cbb7dd3f",
+      "identicalToV2": true,
+      "completeOracleExact": false
+    },
+    {
+      "case": "tiny_fixedtables_inline",
+      "status": 0,
+      "seconds": 0.011705750017426908,
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/frozen-v3-ptf/joern-parity",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/verification-v3-ptf/cases/tiny_fixedtables_inline/input/main.c"
+      ],
+      "inputs": {
+        "main.c": "8af2a0a9531deec50f16e8c125de4000c0636b443b11628e232bb9e9413d2a6f"
+      },
+      "v2Sha256": "7fc32775a3481703dbe3d002b091e4c68c04bea03c0b2d808c6711e06307fb55",
+      "v3Sha256": "7fc32775a3481703dbe3d002b091e4c68c04bea03c0b2d808c6711e06307fb55",
+      "expectedSha256": "6d613c7085ab54541cc1d9fa83494748e33fe70bfc5c541ee39f12aa8046cadd",
+      "identicalToV2": true,
+      "completeOracleExact": false
+    },
+    {
+      "case": "unresolved_header_controls",
+      "status": 0,
+      "seconds": 0.0068029999965801835,
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/frozen-v3-ptf/joern-parity",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/verification-v3-ptf/cases/unresolved_header_controls/input/decoys/missing-system.h",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/verification-v3-ptf/cases/unresolved_header_controls/input/decoys/missing.h",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/verification-v3-ptf/cases/unresolved_header_controls/input/main.c"
+      ],
+      "inputs": {
+        "main.c": "5c95fbe23189d58962a246715705b7072c989f997d3c32c52951e37529178540",
+        "decoys/missing-system.h": "26fb8a822fc16e65f00ab026f77d90c83eae8b1224749241467a16131d6cf2c9",
+        "decoys/missing.h": "34a841d961784ae753f6d50c9addf13918ab1ccedc4f043e3c485a43cd722495"
+      },
+      "v2Sha256": "c6de4af73fa85060da17bdb4a33a1d50614b906e92d4b5c2c3307b011017bb43",
+      "v3Sha256": "c6de4af73fa85060da17bdb4a33a1d50614b906e92d4b5c2c3307b011017bb43",
+      "expectedSha256": "11f5a05e9c4c5f9ed1420f7ddd69e503c800596a00374b71f6c6adabbbdd9635",
+      "identicalToV2": true,
+      "completeOracleExact": false
+    },
+    {
+      "case": "used_scalar_include",
+      "status": 0,
+      "seconds": 0.006540000002132729,
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/frozen-v3-ptf/joern-parity",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/verification-v3-ptf/cases/used_scalar_include/input/main.c",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/verification-v3-ptf/cases/used_scalar_include/input/value.h"
+      ],
+      "inputs": {
+        "value.h": "9078af34397a7ca8248cdc31c60670042893dc4abe485490ce0cb400f4d7df32",
+        "main.c": "5d296e0bff001e708d474a0d9fd6b262d47da11f197e1322007fc116a641d252"
+      },
+      "v2Sha256": "a0e7f199b0f8c6f197508cc6f998f509ea515ff368cbe3048f8eb021fbee14ad",
+      "v3Sha256": "a0e7f199b0f8c6f197508cc6f998f509ea515ff368cbe3048f8eb021fbee14ad",
+      "expectedSha256": "a0e7f199b0f8c6f197508cc6f998f509ea515ff368cbe3048f8eb021fbee14ad",
+      "identicalToV2": true,
+      "completeOracleExact": true
+    },
+    {
+      "case": "used_scalar_inline",
+      "status": 0,
+      "seconds": 0.006620666012167931,
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/frozen-v3-ptf/joern-parity",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/verification-v3-ptf/cases/used_scalar_inline/input/main.c"
+      ],
+      "inputs": {
+        "main.c": "4f6acf89c5ef6ed3f224fbb4f7c737f69219c98ac6fc15a312831b699a991221"
+      },
+      "v2Sha256": "f4104faa7c7c5d9b0d23a34be8e6834d3e7a5a72b2f7312c43c2e8b78aea7dc6",
+      "v3Sha256": "f4104faa7c7c5d9b0d23a34be8e6834d3e7a5a72b2f7312c43c2e8b78aea7dc6",
+      "expectedSha256": "f4104faa7c7c5d9b0d23a34be8e6834d3e7a5a72b2f7312c43c2e8b78aea7dc6",
+      "identicalToV2": true,
+      "completeOracleExact": true
+    },
+    {
+      "case": "included_call_origin",
+      "status": 0,
+      "seconds": 0.0069861660012975335,
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/frozen-v3-ptf/joern-parity",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/verification-v3-ptf/cases/included_call_origin/input/api.h",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/verification-v3-ptf/cases/included_call_origin/input/main.c"
+      ],
+      "inputs": {
+        "api.h": "3064f0f3d560eb7f40dfe541d055b10025f6a6f82d2e8ee2f3dd57915d1205d2",
+        "main.c": "205780cf31cc2024bab2bdf052a8242d00d1faa3dab0a203f1b511133e18eba2"
+      },
+      "v2Sha256": "ede00de3f22c2caff78996f3bdbed91ba716cbf206b9aa17da6dbac113d1f2a9",
+      "v3Sha256": "ede00de3f22c2caff78996f3bdbed91ba716cbf206b9aa17da6dbac113d1f2a9",
+      "expectedSha256": "ede00de3f22c2caff78996f3bdbed91ba716cbf206b9aa17da6dbac113d1f2a9",
+      "identicalToV2": true,
+      "completeOracleExact": true
+    },
+    {
+      "case": "inline_call_origin",
+      "status": 0,
+      "seconds": 0.0063965420122258365,
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/frozen-v3-ptf/joern-parity",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/verification-v3-ptf/cases/inline_call_origin/input/main.c"
+      ],
+      "inputs": {
+        "main.c": "7383be649c1b401ba51209a1c8dd51fef9e8269f8cab79fa985fc71474614faa"
+      },
+      "v2Sha256": "208ef8ac9a5ed8db304690a3d4b3e46555b578e757b56c0a89c4f2df4e503ec4",
+      "v3Sha256": "208ef8ac9a5ed8db304690a3d4b3e46555b578e757b56c0a89c4f2df4e503ec4",
+      "expectedSha256": "208ef8ac9a5ed8db304690a3d4b3e46555b578e757b56c0a89c4f2df4e503ec4",
+      "identicalToV2": true,
+      "completeOracleExact": true
+    }
+  ],
+  "projects": 14,
+  "allIdenticalToV2": true,
+  "oracleExact": 10
+}

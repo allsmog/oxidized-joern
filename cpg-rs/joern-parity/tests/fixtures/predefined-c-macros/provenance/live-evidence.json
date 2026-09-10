@@ -1,0 +1,885 @@
+{
+  "status": "PINNED_LIVE_PREDEFINED_C_MACRO_EVIDENCE_READY",
+  "oracleVersion": "v4.0.555",
+  "javaHome": "/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home",
+  "officialArchiveSha256": "12989883d6b5aeacc97b2dc0ecc4e2951bf50e48cb244f8c8f333d11a8be0c7e",
+  "groups": [
+    {
+      "name": "conditions_and_headers",
+      "raw": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/live.stdout",
+        "sha256": "795dc5bd3b77b735325064e9f805612ce290f6da93c820601b0954630b3de40c"
+      },
+      "run": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/live-run.json",
+        "sha256": "f4fa3301c4f963a0987c6ffbc1a8f727689a8df29156ec4236a959baebf04fd8"
+      },
+      "script": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/oracle.sc",
+        "sha256": "026c39b15177cd8cde094a871f5a64b4a20411003d9a81b21874283f7dc1dcb3"
+      },
+      "completeReplay": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/review-probes.json",
+        "sha256": "84dfe87bce889dba082aea2bd2b2140331e78d35d9106745d21812875341003a"
+      }
+    },
+    {
+      "name": "overrides",
+      "raw": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/override/live.stdout",
+        "sha256": "f01907d37a961bb6fa6ceff097a81fcb49ebcb8bcbdbe51dc6c257aa27ccfe29"
+      },
+      "run": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/override/live-run.json",
+        "sha256": "4287c9dab607753ccc6857a0bce5e20478b165a1bf2fbf9bcfad47fff71356fd"
+      },
+      "script": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/override/oracle.sc",
+        "sha256": "026c39b15177cd8cde094a871f5a64b4a20411003d9a81b21874283f7dc1dcb3"
+      },
+      "completeReplay": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/override/review-probes.json",
+        "sha256": "819de40d1bb3e405718b7aa7832f682eec186a7983f39ca0f8f5fee3702c439a"
+      }
+    },
+    {
+      "name": "direct_values",
+      "raw": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/values/live.stdout",
+        "sha256": "35ed39d55b36e4b6b6396ec38924b03c0b84dd0eb97f387fdd84c5e23957d4f5"
+      },
+      "run": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/values/live-run.json",
+        "sha256": "aceea92364a2b7283e66849b2f8c15347a7fab0d11688887cdffc4614cf5374c"
+      },
+      "script": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/values/oracle.sc",
+        "sha256": "026c39b15177cd8cde094a871f5a64b4a20411003d9a81b21874283f7dc1dcb3"
+      },
+      "completeReplay": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/values/review-probes.json",
+        "sha256": "8c211dec45c4e7b97affec3f5dd29ccea09096219cc2137cc0b8f5e7c09630be"
+      }
+    },
+    {
+      "name": "body_combinations",
+      "raw": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/body-combinations/live.stdout",
+        "sha256": "ba48d4471bba45285185cd07c256442daa822e636dee6c6dd88eb133d7105516"
+      },
+      "run": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/body-combinations/live-run.json",
+        "sha256": "a03f34dba313d8a5a565a9f4b2e76a88f32c348fd7c85950db2787a5a87440c1"
+      },
+      "script": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/body-combinations/oracle.sc",
+        "sha256": "026c39b15177cd8cde094a871f5a64b4a20411003d9a81b21874283f7dc1dcb3"
+      },
+      "completeReplay": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/body-combinations/review-probes.json",
+        "sha256": "d36ea26373e8dc7728f13de4eda5d9251f1ba2687b3d7ea3c71f21883752d249"
+      }
+    }
+  ],
+  "cases": [
+    {
+      "group": "conditions_and_headers",
+      "name": "c_language",
+      "directory": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/input/c_language",
+      "inputs": {
+        "main.c": "8ee789bc0c63c359be573bf517b4e6bcd82382a726777ce4ff19777c5f083d05"
+      },
+      "expected": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/input/c_language/expected.txt",
+        "sha256": "cfe1c5405c0b47cc06ca7462e7917e20805a6e8c7f4bf603c78b3f661257d4b1"
+      },
+      "before": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/input/c_language/before.txt",
+        "sha256": "c82e5535b8e365c8a3956b514e96b92d53a18bb2e3d16c25b466261df42c42c6"
+      },
+      "v1": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/input/c_language/candidate.txt",
+        "sha256": "c82e5535b8e365c8a3956b514e96b92d53a18bb2e3d16c25b466261df42c42c6"
+      },
+      "v1CompleteDiff": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/input/c_language/candidate.diff",
+        "sha256": "8875a7c89e617a67c365956e14046d0e1a95c9d3ad937919c0623a3b50ff9cf5"
+      },
+      "activeSelectedMethods": [
+        "METHOD NAME=selected_true"
+      ],
+      "nonemptySelectedRecords": 172,
+      "canonicalLines": 177,
+      "baselineExact": false,
+      "v1Exact": false
+    },
+    {
+      "group": "conditions_and_headers",
+      "name": "cplusplus",
+      "directory": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/input/cplusplus",
+      "inputs": {
+        "main.c": "4e1c790798ef40dd20198dce25c20d36b7e813b61494244055b2dc444e736077"
+      },
+      "expected": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/input/cplusplus/expected.txt",
+        "sha256": "c82e5535b8e365c8a3956b514e96b92d53a18bb2e3d16c25b466261df42c42c6"
+      },
+      "before": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/input/cplusplus/before.txt",
+        "sha256": "c82e5535b8e365c8a3956b514e96b92d53a18bb2e3d16c25b466261df42c42c6"
+      },
+      "v1": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/input/cplusplus/candidate.txt",
+        "sha256": "c82e5535b8e365c8a3956b514e96b92d53a18bb2e3d16c25b466261df42c42c6"
+      },
+      "v1CompleteDiff": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/input/cplusplus/candidate.diff",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "activeSelectedMethods": [
+        "METHOD NAME=selected_false"
+      ],
+      "nonemptySelectedRecords": 172,
+      "canonicalLines": 177,
+      "baselineExact": true,
+      "v1Exact": true
+    },
+    {
+      "group": "conditions_and_headers",
+      "name": "explicit_stdc_header",
+      "directory": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/input/explicit_stdc_header",
+      "inputs": {
+        "api.h": "92e0ee8d2d116af2c47387843c76dd1c99e92dcaca8f5b2a86f0f74018352830",
+        "config.h": "75a419f5b61b0701fdff7a11149359191e94e141b567400b3d66cc17d433767e",
+        "main.c": "a91ffc29a2ad755fdb0a6622ab56f4f2305efd8cfb3badf431fafd00937e44eb"
+      },
+      "expected": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/input/explicit_stdc_header/expected.txt",
+        "sha256": "3d7abe43f8dbea50465c909d8874a7fdc02f03f3bb616167c5923bc5e1719a8d"
+      },
+      "before": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/input/explicit_stdc_header/before.txt",
+        "sha256": "3d7abe43f8dbea50465c909d8874a7fdc02f03f3bb616167c5923bc5e1719a8d"
+      },
+      "v1": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/input/explicit_stdc_header/candidate.txt",
+        "sha256": "3d7abe43f8dbea50465c909d8874a7fdc02f03f3bb616167c5923bc5e1719a8d"
+      },
+      "v1CompleteDiff": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/input/explicit_stdc_header/candidate.diff",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "activeSelectedMethods": [
+        "METHOD NAME=fallback_disabled"
+      ],
+      "nonemptySelectedRecords": 361,
+      "canonicalLines": 372,
+      "baselineExact": true,
+      "v1Exact": true
+    },
+    {
+      "group": "conditions_and_headers",
+      "name": "gcc",
+      "directory": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/input/gcc",
+      "inputs": {
+        "main.c": "1142402eea506e8248d5c6f6223d350e23be37061b04a36bb54332b8879aaf9b"
+      },
+      "expected": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/input/gcc/expected.txt",
+        "sha256": "c82e5535b8e365c8a3956b514e96b92d53a18bb2e3d16c25b466261df42c42c6"
+      },
+      "before": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/input/gcc/before.txt",
+        "sha256": "c82e5535b8e365c8a3956b514e96b92d53a18bb2e3d16c25b466261df42c42c6"
+      },
+      "v1": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/input/gcc/candidate.txt",
+        "sha256": "c82e5535b8e365c8a3956b514e96b92d53a18bb2e3d16c25b466261df42c42c6"
+      },
+      "v1CompleteDiff": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/input/gcc/candidate.diff",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "activeSelectedMethods": [
+        "METHOD NAME=selected_false"
+      ],
+      "nonemptySelectedRecords": 172,
+      "canonicalLines": 177,
+      "baselineExact": true,
+      "v1Exact": true
+    },
+    {
+      "group": "conditions_and_headers",
+      "name": "gcc_derived_header",
+      "directory": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/input/gcc_derived_header",
+      "inputs": {
+        "api.h": "92e0ee8d2d116af2c47387843c76dd1c99e92dcaca8f5b2a86f0f74018352830",
+        "config.h": "b43e98dfb8c113fa9d48a679b625233f6cb88cd046e0258a966626ee37e6dead",
+        "main.c": "a91ffc29a2ad755fdb0a6622ab56f4f2305efd8cfb3badf431fafd00937e44eb"
+      },
+      "expected": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/input/gcc_derived_header/expected.txt",
+        "sha256": "ea17026358292fa644cb3f6055ff840ab23c2426fb1cd85560d787e703ac5fef"
+      },
+      "before": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/input/gcc_derived_header/before.txt",
+        "sha256": "2aec1c7de75679d4ac7d8b3c6d3934587bb18a5441ce4706ce6f119057aa266a"
+      },
+      "v1": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/input/gcc_derived_header/candidate.txt",
+        "sha256": "ea17026358292fa644cb3f6055ff840ab23c2426fb1cd85560d787e703ac5fef"
+      },
+      "v1CompleteDiff": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/input/gcc_derived_header/candidate.diff",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "activeSelectedMethods": [
+        "METHOD NAME=fallback_enabled"
+      ],
+      "nonemptySelectedRecords": 361,
+      "canonicalLines": 372,
+      "baselineExact": false,
+      "v1Exact": true
+    },
+    {
+      "group": "conditions_and_headers",
+      "name": "stdc",
+      "directory": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/input/stdc",
+      "inputs": {
+        "main.c": "1e98f91e09c34a91afbaf40b566bf4639abe4bfc7483cfa30e0a273ca6a99ce2"
+      },
+      "expected": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/input/stdc/expected.txt",
+        "sha256": "cfe1c5405c0b47cc06ca7462e7917e20805a6e8c7f4bf603c78b3f661257d4b1"
+      },
+      "before": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/input/stdc/before.txt",
+        "sha256": "c82e5535b8e365c8a3956b514e96b92d53a18bb2e3d16c25b466261df42c42c6"
+      },
+      "v1": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/input/stdc/candidate.txt",
+        "sha256": "c82e5535b8e365c8a3956b514e96b92d53a18bb2e3d16c25b466261df42c42c6"
+      },
+      "v1CompleteDiff": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/input/stdc/candidate.diff",
+        "sha256": "8875a7c89e617a67c365956e14046d0e1a95c9d3ad937919c0623a3b50ff9cf5"
+      },
+      "activeSelectedMethods": [
+        "METHOD NAME=selected_true"
+      ],
+      "nonemptySelectedRecords": 172,
+      "canonicalLines": 177,
+      "baselineExact": false,
+      "v1Exact": false
+    },
+    {
+      "group": "conditions_and_headers",
+      "name": "stdc_derived_header",
+      "directory": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/input/stdc_derived_header",
+      "inputs": {
+        "api.h": "92e0ee8d2d116af2c47387843c76dd1c99e92dcaca8f5b2a86f0f74018352830",
+        "config.h": "192341792bc8a5c26fcaf2dded4aa2003b16fbc018a4e3ab6b5ed18aa88aa333",
+        "main.c": "a91ffc29a2ad755fdb0a6622ab56f4f2305efd8cfb3badf431fafd00937e44eb"
+      },
+      "expected": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/input/stdc_derived_header/expected.txt",
+        "sha256": "3d7abe43f8dbea50465c909d8874a7fdc02f03f3bb616167c5923bc5e1719a8d"
+      },
+      "before": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/input/stdc_derived_header/before.txt",
+        "sha256": "2aec1c7de75679d4ac7d8b3c6d3934587bb18a5441ce4706ce6f119057aa266a"
+      },
+      "v1": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/input/stdc_derived_header/candidate.txt",
+        "sha256": "ea17026358292fa644cb3f6055ff840ab23c2426fb1cd85560d787e703ac5fef"
+      },
+      "v1CompleteDiff": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/input/stdc_derived_header/candidate.diff",
+        "sha256": "0e93a53743a956b12809ef877389c85ce6c294818a1987c3b02eab6a33111527"
+      },
+      "activeSelectedMethods": [
+        "METHOD NAME=fallback_disabled"
+      ],
+      "nonemptySelectedRecords": 361,
+      "canonicalLines": 372,
+      "baselineExact": false,
+      "v1Exact": false
+    },
+    {
+      "group": "conditions_and_headers",
+      "name": "stdc_version",
+      "directory": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/input/stdc_version",
+      "inputs": {
+        "main.c": "14f07365c7a5c669a71b38f7f6fcc9be46597e61b78d73a1263096638d0a582e"
+      },
+      "expected": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/input/stdc_version/expected.txt",
+        "sha256": "cfe1c5405c0b47cc06ca7462e7917e20805a6e8c7f4bf603c78b3f661257d4b1"
+      },
+      "before": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/input/stdc_version/before.txt",
+        "sha256": "c82e5535b8e365c8a3956b514e96b92d53a18bb2e3d16c25b466261df42c42c6"
+      },
+      "v1": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/input/stdc_version/candidate.txt",
+        "sha256": "c82e5535b8e365c8a3956b514e96b92d53a18bb2e3d16c25b466261df42c42c6"
+      },
+      "v1CompleteDiff": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/input/stdc_version/candidate.diff",
+        "sha256": "8875a7c89e617a67c365956e14046d0e1a95c9d3ad937919c0623a3b50ff9cf5"
+      },
+      "activeSelectedMethods": [
+        "METHOD NAME=selected_true"
+      ],
+      "nonemptySelectedRecords": 172,
+      "canonicalLines": 177,
+      "baselineExact": false,
+      "v1Exact": false
+    },
+    {
+      "group": "conditions_and_headers",
+      "name": "undefined_stdc_header",
+      "directory": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/input/undefined_stdc_header",
+      "inputs": {
+        "api.h": "92e0ee8d2d116af2c47387843c76dd1c99e92dcaca8f5b2a86f0f74018352830",
+        "config.h": "0c34904ca92b6b9cf6a74812487ee0d4c60e543beb8ae3d0cc1418da6a477e44",
+        "main.c": "a91ffc29a2ad755fdb0a6622ab56f4f2305efd8cfb3badf431fafd00937e44eb"
+      },
+      "expected": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/input/undefined_stdc_header/expected.txt",
+        "sha256": "ea17026358292fa644cb3f6055ff840ab23c2426fb1cd85560d787e703ac5fef"
+      },
+      "before": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/input/undefined_stdc_header/before.txt",
+        "sha256": "2aec1c7de75679d4ac7d8b3c6d3934587bb18a5441ce4706ce6f119057aa266a"
+      },
+      "v1": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/input/undefined_stdc_header/candidate.txt",
+        "sha256": "ea17026358292fa644cb3f6055ff840ab23c2426fb1cd85560d787e703ac5fef"
+      },
+      "v1CompleteDiff": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/input/undefined_stdc_header/candidate.diff",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "activeSelectedMethods": [
+        "METHOD NAME=fallback_enabled"
+      ],
+      "nonemptySelectedRecords": 361,
+      "canonicalLines": 372,
+      "baselineExact": false,
+      "v1Exact": true
+    },
+    {
+      "group": "conditions_and_headers",
+      "name": "version_c99",
+      "directory": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/input/version_c99",
+      "inputs": {
+        "main.c": "a1b11d5f721cdff2b9b8b38a61a7f96d30a4809ad3639ba2cd3e82e4152f9222"
+      },
+      "expected": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/input/version_c99/expected.txt",
+        "sha256": "cfe1c5405c0b47cc06ca7462e7917e20805a6e8c7f4bf603c78b3f661257d4b1"
+      },
+      "before": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/input/version_c99/before.txt",
+        "sha256": "c82e5535b8e365c8a3956b514e96b92d53a18bb2e3d16c25b466261df42c42c6"
+      },
+      "v1": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/input/version_c99/candidate.txt",
+        "sha256": "c82e5535b8e365c8a3956b514e96b92d53a18bb2e3d16c25b466261df42c42c6"
+      },
+      "v1CompleteDiff": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/input/version_c99/candidate.diff",
+        "sha256": "8875a7c89e617a67c365956e14046d0e1a95c9d3ad937919c0623a3b50ff9cf5"
+      },
+      "activeSelectedMethods": [
+        "METHOD NAME=selected_true"
+      ],
+      "nonemptySelectedRecords": 172,
+      "canonicalLines": 177,
+      "baselineExact": false,
+      "v1Exact": false
+    },
+    {
+      "group": "overrides",
+      "name": "stdc_redefined_two",
+      "directory": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/override/input/stdc_redefined_two",
+      "inputs": {
+        "main.c": "642f91077d2f3ee17831427f34274d33c08d164c2b656820b6423b9b4886a1ec"
+      },
+      "expected": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/override/input/stdc_redefined_two/expected.txt",
+        "sha256": "cfe1c5405c0b47cc06ca7462e7917e20805a6e8c7f4bf603c78b3f661257d4b1"
+      },
+      "before": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/override/input/stdc_redefined_two/before.txt",
+        "sha256": "cfe1c5405c0b47cc06ca7462e7917e20805a6e8c7f4bf603c78b3f661257d4b1"
+      },
+      "v1": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/override/input/stdc_redefined_two/candidate.txt",
+        "sha256": "cfe1c5405c0b47cc06ca7462e7917e20805a6e8c7f4bf603c78b3f661257d4b1"
+      },
+      "v1CompleteDiff": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/override/input/stdc_redefined_two/candidate.diff",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "activeSelectedMethods": [
+        "METHOD NAME=selected_true"
+      ],
+      "nonemptySelectedRecords": 172,
+      "canonicalLines": 177,
+      "baselineExact": true,
+      "v1Exact": true
+    },
+    {
+      "group": "overrides",
+      "name": "stdc_undef",
+      "directory": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/override/input/stdc_undef",
+      "inputs": {
+        "main.c": "f11edf331650d4a7c3dc382fd517fcfc1cad9a2fe54e69892247c348dcc41715"
+      },
+      "expected": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/override/input/stdc_undef/expected.txt",
+        "sha256": "c82e5535b8e365c8a3956b514e96b92d53a18bb2e3d16c25b466261df42c42c6"
+      },
+      "before": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/override/input/stdc_undef/before.txt",
+        "sha256": "c82e5535b8e365c8a3956b514e96b92d53a18bb2e3d16c25b466261df42c42c6"
+      },
+      "v1": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/override/input/stdc_undef/candidate.txt",
+        "sha256": "c82e5535b8e365c8a3956b514e96b92d53a18bb2e3d16c25b466261df42c42c6"
+      },
+      "v1CompleteDiff": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/override/input/stdc_undef/candidate.diff",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "activeSelectedMethods": [
+        "METHOD NAME=selected_false"
+      ],
+      "nonemptySelectedRecords": 172,
+      "canonicalLines": 177,
+      "baselineExact": true,
+      "v1Exact": true
+    },
+    {
+      "group": "overrides",
+      "name": "stdc_value_one",
+      "directory": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/override/input/stdc_value_one",
+      "inputs": {
+        "main.c": "ca3d6a5e2b06456b7cf153ffb6c11e52c4e1be1680c1310a5b60eaf794b63608"
+      },
+      "expected": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/override/input/stdc_value_one/expected.txt",
+        "sha256": "cfe1c5405c0b47cc06ca7462e7917e20805a6e8c7f4bf603c78b3f661257d4b1"
+      },
+      "before": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/override/input/stdc_value_one/before.txt",
+        "sha256": "c82e5535b8e365c8a3956b514e96b92d53a18bb2e3d16c25b466261df42c42c6"
+      },
+      "v1": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/override/input/stdc_value_one/candidate.txt",
+        "sha256": "c82e5535b8e365c8a3956b514e96b92d53a18bb2e3d16c25b466261df42c42c6"
+      },
+      "v1CompleteDiff": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/override/input/stdc_value_one/candidate.diff",
+        "sha256": "8875a7c89e617a67c365956e14046d0e1a95c9d3ad937919c0623a3b50ff9cf5"
+      },
+      "activeSelectedMethods": [
+        "METHOD NAME=selected_true"
+      ],
+      "nonemptySelectedRecords": 172,
+      "canonicalLines": 177,
+      "baselineExact": false,
+      "v1Exact": false
+    },
+    {
+      "group": "overrides",
+      "name": "stdc_zero",
+      "directory": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/override/input/stdc_zero",
+      "inputs": {
+        "main.c": "c697c66a600f31297f4e24fda6205050f450b8d77f8c922b026908d607811339"
+      },
+      "expected": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/override/input/stdc_zero/expected.txt",
+        "sha256": "c82e5535b8e365c8a3956b514e96b92d53a18bb2e3d16c25b466261df42c42c6"
+      },
+      "before": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/override/input/stdc_zero/before.txt",
+        "sha256": "c82e5535b8e365c8a3956b514e96b92d53a18bb2e3d16c25b466261df42c42c6"
+      },
+      "v1": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/override/input/stdc_zero/candidate.txt",
+        "sha256": "c82e5535b8e365c8a3956b514e96b92d53a18bb2e3d16c25b466261df42c42c6"
+      },
+      "v1CompleteDiff": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/override/input/stdc_zero/candidate.diff",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "activeSelectedMethods": [
+        "METHOD NAME=selected_false"
+      ],
+      "nonemptySelectedRecords": 172,
+      "canonicalLines": 177,
+      "baselineExact": true,
+      "v1Exact": true
+    },
+    {
+      "group": "direct_values",
+      "name": "hosted",
+      "directory": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/values/input/hosted",
+      "inputs": {
+        "main.c": "e70a24db8668e19f5ad39b67a9d525b13a2e320c3a79fd2a3a2780fa200870e6"
+      },
+      "expected": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/values/input/hosted/expected.txt",
+        "sha256": "a858a74b714943aae7276d66717c5afe871787597e1b41aff67b653c59bfe3f2"
+      },
+      "before": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/values/input/hosted/before.txt",
+        "sha256": "9f0e2b749d81c154004b60481b0c1141e262d9e6d142ebfa30554d0247cf52aa"
+      },
+      "v1": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/values/input/hosted/candidate.txt",
+        "sha256": "9f0e2b749d81c154004b60481b0c1141e262d9e6d142ebfa30554d0247cf52aa"
+      },
+      "v1CompleteDiff": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/values/input/hosted/candidate.diff",
+        "sha256": "8708b0e13b948e9d5e54cb5db0fee9796ec4126d6b5648bba6b78b2521c5274e"
+      },
+      "activeSelectedMethods": [],
+      "nonemptySelectedRecords": 166,
+      "canonicalLines": 171,
+      "baselineExact": false,
+      "v1Exact": false
+    },
+    {
+      "group": "direct_values",
+      "name": "hosted_redefined",
+      "directory": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/values/input/hosted_redefined",
+      "inputs": {
+        "main.c": "2782a2ab63b9b5dec70952eaf588f681127078fdcd28f1657d93de14a8aef583"
+      },
+      "expected": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/values/input/hosted_redefined/expected.txt",
+        "sha256": "a27fbb38c715ea02a9582be90cde00b82eeba878ae6ff4b91387aec24f503b51"
+      },
+      "before": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/values/input/hosted_redefined/before.txt",
+        "sha256": "a27fbb38c715ea02a9582be90cde00b82eeba878ae6ff4b91387aec24f503b51"
+      },
+      "v1": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/values/input/hosted_redefined/candidate.txt",
+        "sha256": "a27fbb38c715ea02a9582be90cde00b82eeba878ae6ff4b91387aec24f503b51"
+      },
+      "v1CompleteDiff": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/values/input/hosted_redefined/candidate.diff",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "activeSelectedMethods": [],
+      "nonemptySelectedRecords": 166,
+      "canonicalLines": 171,
+      "baselineExact": true,
+      "v1Exact": true
+    },
+    {
+      "group": "direct_values",
+      "name": "hosted_undef",
+      "directory": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/values/input/hosted_undef",
+      "inputs": {
+        "main.c": "5adfab581695652c43f3a78f9c2ca5c5fd32f5541a7eb8407cac5a87d0044990"
+      },
+      "expected": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/values/input/hosted_undef/expected.txt",
+        "sha256": "c82e5535b8e365c8a3956b514e96b92d53a18bb2e3d16c25b466261df42c42c6"
+      },
+      "before": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/values/input/hosted_undef/before.txt",
+        "sha256": "c82e5535b8e365c8a3956b514e96b92d53a18bb2e3d16c25b466261df42c42c6"
+      },
+      "v1": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/values/input/hosted_undef/candidate.txt",
+        "sha256": "c82e5535b8e365c8a3956b514e96b92d53a18bb2e3d16c25b466261df42c42c6"
+      },
+      "v1CompleteDiff": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/values/input/hosted_undef/candidate.diff",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "activeSelectedMethods": [
+        "METHOD NAME=selected_false"
+      ],
+      "nonemptySelectedRecords": 172,
+      "canonicalLines": 177,
+      "baselineExact": true,
+      "v1Exact": true
+    },
+    {
+      "group": "direct_values",
+      "name": "stdc",
+      "directory": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/values/input/stdc",
+      "inputs": {
+        "main.c": "5aa71dc8592978b2914f2a3ef8334c4c56353aa13e7ca7044fe8df88779bb4c3"
+      },
+      "expected": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/values/input/stdc/expected.txt",
+        "sha256": "47fded01e8c363a1e071bfd95f5be55314769a611dafcc3f8ab19cdebc20e967"
+      },
+      "before": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/values/input/stdc/before.txt",
+        "sha256": "b535959585ad58ce3894822e6394cc53d0df952ec7121abcdd3f2e702811a40a"
+      },
+      "v1": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/values/input/stdc/candidate.txt",
+        "sha256": "b535959585ad58ce3894822e6394cc53d0df952ec7121abcdd3f2e702811a40a"
+      },
+      "v1CompleteDiff": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/values/input/stdc/candidate.diff",
+        "sha256": "84c0cc55a25ebedcd997e94bbba02aa4850bc7756e5589e922b8c74dd022a28b"
+      },
+      "activeSelectedMethods": [],
+      "nonemptySelectedRecords": 166,
+      "canonicalLines": 171,
+      "baselineExact": false,
+      "v1Exact": false
+    },
+    {
+      "group": "direct_values",
+      "name": "version",
+      "directory": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/values/input/version",
+      "inputs": {
+        "main.c": "b2a91e30e44d0fe0bdd5469260f12dc86b00f24e8ff24a37b373e35a68af8a74"
+      },
+      "expected": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/values/input/version/expected.txt",
+        "sha256": "3193197f56b96bc93fc7829e718dccfab7166a1609823b3eb16da7d3f4ad3e34"
+      },
+      "before": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/values/input/version/before.txt",
+        "sha256": "fd46ec904b30a12455a4542bb5a3eefbddbfae6247747954bcccd3ed01ead92e"
+      },
+      "v1": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/values/input/version/candidate.txt",
+        "sha256": "fd46ec904b30a12455a4542bb5a3eefbddbfae6247747954bcccd3ed01ead92e"
+      },
+      "v1CompleteDiff": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/values/input/version/candidate.diff",
+        "sha256": "a63d5d536df78706ddbd681c8d6ee117bdf88f9f2a75bd439282c74356d8cdf9"
+      },
+      "activeSelectedMethods": [],
+      "nonemptySelectedRecords": 171,
+      "canonicalLines": 176,
+      "baselineExact": false,
+      "v1Exact": false
+    },
+    {
+      "group": "direct_values",
+      "name": "version_redefined",
+      "directory": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/values/input/version_redefined",
+      "inputs": {
+        "main.c": "d8e9d5b232cbdf7b794c586bd25f25c5ecee4339289df5a57db6402692a00d00"
+      },
+      "expected": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/values/input/version_redefined/expected.txt",
+        "sha256": "072f1ae15cd476118a63e6f43a76e47682d00bea39addec816f46ab3ce4e1e6d"
+      },
+      "before": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/values/input/version_redefined/before.txt",
+        "sha256": "072f1ae15cd476118a63e6f43a76e47682d00bea39addec816f46ab3ce4e1e6d"
+      },
+      "v1": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/values/input/version_redefined/candidate.txt",
+        "sha256": "072f1ae15cd476118a63e6f43a76e47682d00bea39addec816f46ab3ce4e1e6d"
+      },
+      "v1CompleteDiff": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/values/input/version_redefined/candidate.diff",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "activeSelectedMethods": [],
+      "nonemptySelectedRecords": 166,
+      "canonicalLines": 171,
+      "baselineExact": true,
+      "v1Exact": true
+    },
+    {
+      "group": "direct_values",
+      "name": "version_undef",
+      "directory": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/values/input/version_undef",
+      "inputs": {
+        "main.c": "27562f210dfd1b7548c927457071649e9f007f86275a3d9b907e72669ae01177"
+      },
+      "expected": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/values/input/version_undef/expected.txt",
+        "sha256": "c82e5535b8e365c8a3956b514e96b92d53a18bb2e3d16c25b466261df42c42c6"
+      },
+      "before": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/values/input/version_undef/before.txt",
+        "sha256": "c82e5535b8e365c8a3956b514e96b92d53a18bb2e3d16c25b466261df42c42c6"
+      },
+      "v1": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/values/input/version_undef/candidate.txt",
+        "sha256": "c82e5535b8e365c8a3956b514e96b92d53a18bb2e3d16c25b466261df42c42c6"
+      },
+      "v1CompleteDiff": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/values/input/version_undef/candidate.diff",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "activeSelectedMethods": [
+        "METHOD NAME=selected_false"
+      ],
+      "nonemptySelectedRecords": 172,
+      "canonicalLines": 177,
+      "baselineExact": true,
+      "v1Exact": true
+    },
+    {
+      "group": "body_combinations",
+      "name": "combined",
+      "directory": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/body-combinations/input/combined",
+      "inputs": {
+        "main.c": "45f28f43bc7c03b64cdde4ac437169525a39374bcf62796643e9bbc5edc0322b"
+      },
+      "expected": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/body-combinations/input/combined/expected.txt",
+        "sha256": "3055cedb74658f8c59e7744c72944d4593a9e14ad0ae30cf18096c6a9ebd860e"
+      },
+      "before": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/body-combinations/input/combined/before.txt",
+        "sha256": "6a7b7ee8d856b9d33a4099763e2902a94afbefc91b668fb8b76a1947718bad6f"
+      },
+      "v1": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/body-combinations/input/combined/candidate.txt",
+        "sha256": "6a7b7ee8d856b9d33a4099763e2902a94afbefc91b668fb8b76a1947718bad6f"
+      },
+      "v1CompleteDiff": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/body-combinations/input/combined/candidate.diff",
+        "sha256": "4804d3c846b89a050b2a5877af3842e4052b07945459167a88c0bc16dd3f89dc"
+      },
+      "activeSelectedMethods": [],
+      "nonemptySelectedRecords": 229,
+      "canonicalLines": 236,
+      "baselineExact": false,
+      "v1Exact": false
+    },
+    {
+      "group": "body_combinations",
+      "name": "redefined_combined",
+      "directory": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/body-combinations/input/redefined_combined",
+      "inputs": {
+        "main.c": "fb480ff0eacfa185380db26afd4ded11ddc36ae6674ead516c6fd0b229ccf1d9"
+      },
+      "expected": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/body-combinations/input/redefined_combined/expected.txt",
+        "sha256": "2206bb600bbcc120f01a18d2c324a155e0d9a95949e25bd7d1437b734e2dcee8"
+      },
+      "before": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/body-combinations/input/redefined_combined/before.txt",
+        "sha256": "2030832a24adbf13e9e9ed80a2ec15e0df064b1b49be8d4c845e75da1feb2a55"
+      },
+      "v1": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/body-combinations/input/redefined_combined/candidate.txt",
+        "sha256": "2030832a24adbf13e9e9ed80a2ec15e0df064b1b49be8d4c845e75da1feb2a55"
+      },
+      "v1CompleteDiff": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/body-combinations/input/redefined_combined/candidate.diff",
+        "sha256": "1fb8b5cd519671a468c73b839719a603a608bad3bea1c5ef2d7c7533a6fcb03e"
+      },
+      "activeSelectedMethods": [],
+      "nonemptySelectedRecords": 229,
+      "canonicalLines": 236,
+      "baselineExact": false,
+      "v1Exact": false
+    },
+    {
+      "group": "body_combinations",
+      "name": "undefined_direct",
+      "directory": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/body-combinations/input/undefined_direct",
+      "inputs": {
+        "main.c": "283bd227e6e7761ca3826a3ddf39b5e24b033dca8423b015ff61cbc90e2cd476"
+      },
+      "expected": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/body-combinations/input/undefined_direct/expected.txt",
+        "sha256": "6a7b7ee8d856b9d33a4099763e2902a94afbefc91b668fb8b76a1947718bad6f"
+      },
+      "before": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/body-combinations/input/undefined_direct/before.txt",
+        "sha256": "6a7b7ee8d856b9d33a4099763e2902a94afbefc91b668fb8b76a1947718bad6f"
+      },
+      "v1": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/body-combinations/input/undefined_direct/candidate.txt",
+        "sha256": "6a7b7ee8d856b9d33a4099763e2902a94afbefc91b668fb8b76a1947718bad6f"
+      },
+      "v1CompleteDiff": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/body-combinations/input/undefined_direct/candidate.diff",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "activeSelectedMethods": [],
+      "nonemptySelectedRecords": 168,
+      "canonicalLines": 172,
+      "baselineExact": true,
+      "v1Exact": true
+    },
+    {
+      "group": "body_combinations",
+      "name": "user_macro",
+      "directory": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/body-combinations/input/user_macro",
+      "inputs": {
+        "main.c": "7291dd75353411b44ab68e6fa6b623e2ed9e10147d1d99d9c3efd6b529db471d"
+      },
+      "expected": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/body-combinations/input/user_macro/expected.txt",
+        "sha256": "9a8b633cff514b13e50dcdfd8019b36cafcc839b47b82216625c47423d07c452"
+      },
+      "before": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/body-combinations/input/user_macro/before.txt",
+        "sha256": "9a9d06a1e44525085c728fd98a32bc8211bc61814e4a2f8f28e130c26a863ad0"
+      },
+      "v1": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/body-combinations/input/user_macro/candidate.txt",
+        "sha256": "9a9d06a1e44525085c728fd98a32bc8211bc61814e4a2f8f28e130c26a863ad0"
+      },
+      "v1CompleteDiff": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-predefines-review/body-combinations/input/user_macro/candidate.diff",
+        "sha256": "2f10bef261e14dd60c7407fb3545cf428a85f9ae6feaa77f7424be6505660ad0"
+      },
+      "activeSelectedMethods": [],
+      "nonemptySelectedRecords": 223,
+      "canonicalLines": 228,
+      "baselineExact": false,
+      "v1Exact": false
+    }
+  ],
+  "totals": {
+    "projects": 25,
+    "canonicalLines": 5344,
+    "nonemptySelectedRecords": 5192,
+    "baselineExact": 11,
+    "v1Exact": 13
+  },
+  "pinnedBytecodeReceipts": [
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/sixth-batch/pinned-predefines/bindings.json",
+      "sha256": "fdda30b841aac60ac2f9bbdf7300995a6dfb00cf396aef26ead083a97c473841"
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/sixth-batch/pinned-predefines/preprocessor-binding.json",
+      "sha256": "dc9c950078b938dd22af964fbb72c1cf92085773ac64eaead3692e10a32fcd26"
+    }
+  ],
+  "confirmedDefaults": {
+    "__STDC__": "1",
+    "__STDC_VERSION__": "199901L",
+    "__STDC_HOSTED__": "1"
+  },
+  "confirmedAbsentInThisDefaultCSetup": [
+    "__GNUC__",
+    "__cplusplus"
+  ],
+  "semantics": [
+    "Explicit #undef removes each tested builtin; later definitions override it.",
+    "Direct expression occurrence creates an INLINED CALL with expansion BLOCK and LITERAL. Builtin synthetic METHOD CODE is present and empty; it is not an absent CODE property.",
+    "Direct builtin method identity is source-file-qualified, e.g. main.c:__STDC__:int(0), with literal type int for1 and longint for199901L. Explicit redefinitions use actual #define text as METHOD CODE.",
+    "Inside a user macro, builtin tokens fully expand to literals inside that user macro expansion; no separate builtin wrapper/method is emitted for those nested tokens.",
+    "A zconf-like config deriving STDC from __STDC__ disables fallback reserve/release prototypes, leaving CALL typeANY. A header with STDC undefined or derived only from absent __GNUC__ enables the prototypes and yields void*/void."
+  ],
+  "scope": "All selected AST/NODES/EDGES/FLOWS records and separators retained; additional LOC metadata preserved in raw output. No producer/reference bytes were edited and no root source was modified. v1 comparisons are diagnostics, not acceptance of the new default implementation. Standard-context absence here does not claim all GNU/CDT builtin parity."
+}

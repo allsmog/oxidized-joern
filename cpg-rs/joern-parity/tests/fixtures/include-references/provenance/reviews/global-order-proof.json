@@ -1,0 +1,533 @@
+{
+  "status": "PASS_READ_ONLY",
+  "cases": {
+    "duplicate_supplied_macro_local": {
+      "source": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/thirteenth-batch/accepted-capture-v1/duplicate_supplied_macro_local/supplement.stdout",
+        "sha256": "aa4c43b587736b9bf7e74665e06806ba861525964485e3a3c374aebbf3ee79d3"
+      },
+      "globalTypeOrdersAlreadyEqual": {
+        "a.c:<global>": {
+          "JoernCompleteNode": {
+            "id": "167503724546",
+            "label": "TYPE_DECL",
+            "properties": {
+              "AST_PARENT_FULL_NAME": {
+                "kind": "string",
+                "value": "a.c:<global>"
+              },
+              "AST_PARENT_TYPE": {
+                "kind": "string",
+                "value": "NAMESPACE_BLOCK"
+              },
+              "CODE": {
+                "kind": "string",
+                "value": "<global>"
+              },
+              "COLUMN_NUMBER": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "1"
+              },
+              "FILENAME": {
+                "kind": "string",
+                "value": "a.c"
+              },
+              "FULL_NAME": {
+                "kind": "string",
+                "value": "a.c:<global>"
+              },
+              "LINE_NUMBER": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "1"
+              },
+              "NAME": {
+                "kind": "string",
+                "value": "<global>"
+              },
+              "ORDER": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "2"
+              }
+            }
+          },
+          "acceptedRustCompleteNode": {
+            "id": "68",
+            "label": "TYPE_DECL",
+            "properties": {
+              "CODE": {
+                "kind": "string",
+                "value": "<global>"
+              },
+              "FULL_NAME": {
+                "kind": "string",
+                "value": "a.c:<global>"
+              },
+              "NAME": {
+                "kind": "string",
+                "value": "<global>"
+              }
+            },
+            "record": "NODE",
+            "storage": {
+              "argumentIndex": {
+                "class": "rust.i32",
+                "kind": "number",
+                "value": "-1"
+              },
+              "filePartitionId": "2",
+              "kind": "2",
+              "order": {
+                "class": "rust.i32",
+                "kind": "number",
+                "value": "2"
+              }
+            }
+          }
+        },
+        "b.c:<global>": {
+          "JoernCompleteNode": {
+            "id": "167503724549",
+            "label": "TYPE_DECL",
+            "properties": {
+              "AST_PARENT_FULL_NAME": {
+                "kind": "string",
+                "value": "b.c:<global>"
+              },
+              "AST_PARENT_TYPE": {
+                "kind": "string",
+                "value": "NAMESPACE_BLOCK"
+              },
+              "CODE": {
+                "kind": "string",
+                "value": "<global>"
+              },
+              "COLUMN_NUMBER": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "1"
+              },
+              "FILENAME": {
+                "kind": "string",
+                "value": "b.c"
+              },
+              "FULL_NAME": {
+                "kind": "string",
+                "value": "b.c:<global>"
+              },
+              "LINE_NUMBER": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "1"
+              },
+              "NAME": {
+                "kind": "string",
+                "value": "<global>"
+              },
+              "ORDER": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "2"
+              }
+            }
+          },
+          "acceptedRustCompleteNode": {
+            "id": "70",
+            "label": "TYPE_DECL",
+            "properties": {
+              "CODE": {
+                "kind": "string",
+                "value": "<global>"
+              },
+              "FULL_NAME": {
+                "kind": "string",
+                "value": "b.c:<global>"
+              },
+              "NAME": {
+                "kind": "string",
+                "value": "<global>"
+              }
+            },
+            "record": "NODE",
+            "storage": {
+              "argumentIndex": {
+                "class": "rust.i32",
+                "kind": "number",
+                "value": "-1"
+              },
+              "filePartitionId": "4",
+              "kind": "2",
+              "order": {
+                "class": "rust.i32",
+                "kind": "number",
+                "value": "2"
+              }
+            }
+          }
+        }
+      }
+    },
+    "inactive_body_include": {
+      "source": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/thirteenth-batch/accepted-capture-v1/inactive_body_include/supplement.stdout",
+        "sha256": "8cf090b6d060840ad6a90b18e3fef5bc675c118366e2752dc05db1fcb0769ac2"
+      },
+      "globalTypeOrdersAlreadyEqual": {
+        "main.c:<global>": {
+          "JoernCompleteNode": {
+            "id": "167503724547",
+            "label": "TYPE_DECL",
+            "properties": {
+              "AST_PARENT_FULL_NAME": {
+                "kind": "string",
+                "value": "main.c:<global>"
+              },
+              "AST_PARENT_TYPE": {
+                "kind": "string",
+                "value": "NAMESPACE_BLOCK"
+              },
+              "CODE": {
+                "kind": "string",
+                "value": "<global>"
+              },
+              "COLUMN_NUMBER": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "1"
+              },
+              "FILENAME": {
+                "kind": "string",
+                "value": "main.c"
+              },
+              "FULL_NAME": {
+                "kind": "string",
+                "value": "main.c:<global>"
+              },
+              "LINE_NUMBER": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "1"
+              },
+              "NAME": {
+                "kind": "string",
+                "value": "<global>"
+              },
+              "ORDER": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "3"
+              }
+            }
+          },
+          "acceptedRustCompleteNode": {
+            "id": "62",
+            "label": "TYPE_DECL",
+            "properties": {
+              "CODE": {
+                "kind": "string",
+                "value": "<global>"
+              },
+              "FULL_NAME": {
+                "kind": "string",
+                "value": "main.c:<global>"
+              },
+              "NAME": {
+                "kind": "string",
+                "value": "<global>"
+              }
+            },
+            "record": "NODE",
+            "storage": {
+              "argumentIndex": {
+                "class": "rust.i32",
+                "kind": "number",
+                "value": "-1"
+              },
+              "filePartitionId": "3",
+              "kind": "2",
+              "order": {
+                "class": "rust.i32",
+                "kind": "number",
+                "value": "3"
+              }
+            }
+          }
+        }
+      }
+    },
+    "repeated_direct_include": {
+      "source": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/thirteenth-batch/accepted-capture-v1/repeated_direct_include/supplement.stdout",
+        "sha256": "01275003029af753c86c801a41918336fab15761b68f94fa1c944e9c98a130db"
+      },
+      "globalTypeOrdersAlreadyEqual": {
+        "main.c:<global>": {
+          "JoernCompleteNode": {
+            "id": "167503724545",
+            "label": "TYPE_DECL",
+            "properties": {
+              "AST_PARENT_FULL_NAME": {
+                "kind": "string",
+                "value": "main.c:<global>"
+              },
+              "AST_PARENT_TYPE": {
+                "kind": "string",
+                "value": "NAMESPACE_BLOCK"
+              },
+              "CODE": {
+                "kind": "string",
+                "value": "<global>"
+              },
+              "COLUMN_NUMBER": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "1"
+              },
+              "FILENAME": {
+                "kind": "string",
+                "value": "main.c"
+              },
+              "FULL_NAME": {
+                "kind": "string",
+                "value": "main.c:<global>"
+              },
+              "LINE_NUMBER": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "1"
+              },
+              "NAME": {
+                "kind": "string",
+                "value": "<global>"
+              },
+              "ORDER": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "3"
+              }
+            }
+          },
+          "acceptedRustCompleteNode": {
+            "id": "35",
+            "label": "TYPE_DECL",
+            "properties": {
+              "CODE": {
+                "kind": "string",
+                "value": "<global>"
+              },
+              "FULL_NAME": {
+                "kind": "string",
+                "value": "main.c:<global>"
+              },
+              "NAME": {
+                "kind": "string",
+                "value": "<global>"
+              }
+            },
+            "record": "NODE",
+            "storage": {
+              "argumentIndex": {
+                "class": "rust.i32",
+                "kind": "number",
+                "value": "-1"
+              },
+              "filePartitionId": "2",
+              "kind": "2",
+              "order": {
+                "class": "rust.i32",
+                "kind": "number",
+                "value": "3"
+              }
+            }
+          }
+        }
+      }
+    },
+    "tiny_fixedtables_include": {
+      "source": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/thirteenth-batch/accepted-capture-v1/tiny_fixedtables_include/supplement.stdout",
+        "sha256": "4ee92b50ab79430ecbece8c2adcd3a4d6d064d8f7f5b1baf98f02c6ea0caa2bf"
+      },
+      "globalTypeOrdersAlreadyEqual": {
+        "main.c:<global>": {
+          "JoernCompleteNode": {
+            "id": "167503724548",
+            "label": "TYPE_DECL",
+            "properties": {
+              "AST_PARENT_FULL_NAME": {
+                "kind": "string",
+                "value": "main.c:<global>"
+              },
+              "AST_PARENT_TYPE": {
+                "kind": "string",
+                "value": "NAMESPACE_BLOCK"
+              },
+              "CODE": {
+                "kind": "string",
+                "value": "<global>"
+              },
+              "COLUMN_NUMBER": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "1"
+              },
+              "FILENAME": {
+                "kind": "string",
+                "value": "main.c"
+              },
+              "FULL_NAME": {
+                "kind": "string",
+                "value": "main.c:<global>"
+              },
+              "LINE_NUMBER": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "1"
+              },
+              "NAME": {
+                "kind": "string",
+                "value": "<global>"
+              },
+              "ORDER": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "2"
+              }
+            }
+          },
+          "acceptedRustCompleteNode": {
+            "id": "133",
+            "label": "TYPE_DECL",
+            "properties": {
+              "CODE": {
+                "kind": "string",
+                "value": "<global>"
+              },
+              "FULL_NAME": {
+                "kind": "string",
+                "value": "main.c:<global>"
+              },
+              "NAME": {
+                "kind": "string",
+                "value": "<global>"
+              }
+            },
+            "record": "NODE",
+            "storage": {
+              "argumentIndex": {
+                "class": "rust.i32",
+                "kind": "number",
+                "value": "-1"
+              },
+              "filePartitionId": "3",
+              "kind": "2",
+              "order": {
+                "class": "rust.i32",
+                "kind": "number",
+                "value": "2"
+              }
+            }
+          }
+        }
+      }
+    },
+    "tiny_fixedtables_inline": {
+      "source": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/thirteenth-batch/accepted-capture-v1/tiny_fixedtables_inline/supplement.stdout",
+        "sha256": "74d3e1e686f9a33c4002e0302b69cda801afb99a3a2f35cf43fd29490537e209"
+      },
+      "globalTypeOrdersAlreadyEqual": {}
+    },
+    "unresolved_include_pair": {
+      "source": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/thirteenth-batch/accepted-capture-v1/unresolved_include_pair/supplement.stdout",
+        "sha256": "2b297cc1f1be36a80b3c96d74ca513577ae4395e9dcb0108ab948ddc814321f7"
+      },
+      "globalTypeOrdersAlreadyEqual": {
+        "main.c:<global>": {
+          "JoernCompleteNode": {
+            "id": "167503724545",
+            "label": "TYPE_DECL",
+            "properties": {
+              "AST_PARENT_FULL_NAME": {
+                "kind": "string",
+                "value": "main.c:<global>"
+              },
+              "AST_PARENT_TYPE": {
+                "kind": "string",
+                "value": "NAMESPACE_BLOCK"
+              },
+              "CODE": {
+                "kind": "string",
+                "value": "<global>"
+              },
+              "COLUMN_NUMBER": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "1"
+              },
+              "FILENAME": {
+                "kind": "string",
+                "value": "main.c"
+              },
+              "FULL_NAME": {
+                "kind": "string",
+                "value": "main.c:<global>"
+              },
+              "LINE_NUMBER": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "1"
+              },
+              "NAME": {
+                "kind": "string",
+                "value": "<global>"
+              },
+              "ORDER": {
+                "kind": "number",
+                "class": "java.lang.Integer",
+                "value": "3"
+              }
+            }
+          },
+          "acceptedRustCompleteNode": {
+            "id": "25",
+            "label": "TYPE_DECL",
+            "properties": {
+              "CODE": {
+                "kind": "string",
+                "value": "<global>"
+              },
+              "FULL_NAME": {
+                "kind": "string",
+                "value": "main.c:<global>"
+              },
+              "NAME": {
+                "kind": "string",
+                "value": "<global>"
+              }
+            },
+            "record": "NODE",
+            "storage": {
+              "argumentIndex": {
+                "class": "rust.i32",
+                "kind": "number",
+                "value": "-1"
+              },
+              "filePartitionId": "2",
+              "kind": "2",
+              "order": {
+                "class": "rust.i32",
+                "kind": "number",
+                "value": "3"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "completeFactsSha256": "59e3de52e4d303389be3213bd5f7821c0ffde985f1141c1eeb740ca7c4015292"
+}

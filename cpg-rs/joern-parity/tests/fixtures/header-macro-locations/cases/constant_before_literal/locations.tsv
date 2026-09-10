@@ -1,0 +1,61 @@
+<includes>:<global>	0	METHOD	<global>	<global>	1	<absent>	1	<absent>
+<includes>:<global>	1	BLOCK	<absent>	<absent>	1	<absent>	<absent>	<absent>
+<includes>:<global>	2	METHOD_RETURN	<absent>	RET	2	<absent>	1	<absent>
+<operator>.assignment	0	METHOD	<operator>.assignment	<absent>	0	<absent>	<absent>	<absent>
+<operator>.assignment	1	METHOD_PARAMETER_IN	p1	p1	1	<absent>	<absent>	<absent>
+<operator>.assignment	2	BLOCK	<absent>	<absent>	1	1	<absent>	<absent>
+<operator>.assignment	3	METHOD_PARAMETER_OUT	p1	p1	1	<absent>	<absent>	<absent>
+<operator>.assignment	4	METHOD_PARAMETER_IN	p2	p2	2	<absent>	<absent>	<absent>
+<operator>.assignment	5	METHOD_RETURN	<absent>	RET	2	<absent>	<absent>	<absent>
+<operator>.assignment	6	METHOD_PARAMETER_OUT	p2	p2	2	<absent>	<absent>	<absent>
+defs.h:<global>	0	METHOD	<global>	<global>	1	<absent>	1	1
+defs.h:<global>	1	BLOCK	<absent>	<absent>	1	<absent>	1	1
+defs.h:<global>	2	METHOD_RETURN	<absent>	RET	2	<absent>	1	1
+defs.h:SEVENTEEN:int(0)	0	METHOD	SEVENTEEN	#define SEVENTEEN 17	1	<absent>	1	1
+defs.h:SEVENTEEN:int(0)	1	BLOCK	<absent>	<absent>	1	<absent>	<absent>	<absent>
+defs.h:SEVENTEEN:int(0)	2	METHOD_RETURN	<absent>	RET	2	<absent>	1	1
+locations.c:<global>	0	METHOD	<global>	<global>	1	<absent>	1	1
+locations.c:<global>	1	METHOD	probe	void probe(void) {\n  int value = SEVENTEEN;\n  sink(\n      17\n  );\n  value = 17;\n  sink(value);\n}	1	<absent>	3	1
+locations.c:<global>	2	METHOD_PARAMETER_IN		void	1	<absent>	3	12
+locations.c:<global>	3	METHOD_PARAMETER_OUT		void	1	<absent>	3	12
+locations.c:<global>	4	BLOCK	<absent>	{\n  int value = SEVENTEEN;\n  sink(\n      17\n  );\n  value = 17;\n  sink(value);\n}	2	<absent>	3	18
+locations.c:<global>	5	LOCAL	value	int value	1	<absent>	4	7
+locations.c:<global>	6	CALL	<operator>.assignment	value = SEVENTEEN	2	<absent>	4	7
+locations.c:<global>	7	IDENTIFIER	value	value	1	1	4	7
+locations.c:<global>	8	CALL	SEVENTEEN	SEVENTEEN	2	2	4	15
+locations.c:<global>	9	BLOCK	<absent>	<absent>	1	1	4	15
+locations.c:<global>	10	LITERAL	<absent>	17	1	<absent>	4	15
+locations.c:<global>	11	CALL	sink	sink(\n      17\n  )	3	<absent>	5	3
+locations.c:<global>	12	LITERAL	<absent>	17	1	1	6	7
+locations.c:<global>	13	CALL	<operator>.assignment	value = 17	4	<absent>	8	3
+locations.c:<global>	14	IDENTIFIER	value	value	1	1	8	3
+locations.c:<global>	15	LITERAL	<absent>	17	2	2	8	11
+locations.c:<global>	16	CALL	sink	sink(value)	5	<absent>	9	3
+locations.c:<global>	17	IDENTIFIER	value	value	1	1	9	8
+locations.c:<global>	18	METHOD_RETURN	<absent>	RET	3	<absent>	3	1
+locations.c:<global>	19	BLOCK	<absent>	<absent>	1	<absent>	1	1
+locations.c:<global>	20	METHOD_REF	<absent>	probe	1	<absent>	3	1
+locations.c:<global>	21	METHOD_RETURN	<absent>	RET	2	<absent>	1	1
+probe	0	METHOD	probe	void probe(void) {\n  int value = SEVENTEEN;\n  sink(\n      17\n  );\n  value = 17;\n  sink(value);\n}	1	<absent>	3	1
+probe	1	METHOD_PARAMETER_IN		void	1	<absent>	3	12
+probe	2	METHOD_PARAMETER_OUT		void	1	<absent>	3	12
+probe	3	BLOCK	<absent>	{\n  int value = SEVENTEEN;\n  sink(\n      17\n  );\n  value = 17;\n  sink(value);\n}	2	<absent>	3	18
+probe	4	LOCAL	value	int value	1	<absent>	4	7
+probe	5	CALL	<operator>.assignment	value = SEVENTEEN	2	<absent>	4	7
+probe	6	IDENTIFIER	value	value	1	1	4	7
+probe	7	CALL	SEVENTEEN	SEVENTEEN	2	2	4	15
+probe	8	BLOCK	<absent>	<absent>	1	1	4	15
+probe	9	LITERAL	<absent>	17	1	<absent>	4	15
+probe	10	CALL	sink	sink(\n      17\n  )	3	<absent>	5	3
+probe	11	LITERAL	<absent>	17	1	1	6	7
+probe	12	CALL	<operator>.assignment	value = 17	4	<absent>	8	3
+probe	13	IDENTIFIER	value	value	1	1	8	3
+probe	14	LITERAL	<absent>	17	2	2	8	11
+probe	15	CALL	sink	sink(value)	5	<absent>	9	3
+probe	16	IDENTIFIER	value	value	1	1	9	8
+probe	17	METHOD_RETURN	<absent>	RET	3	<absent>	3	1
+sink	0	METHOD	sink	void sink(int value);	1	<absent>	2	6
+sink	1	METHOD_PARAMETER_IN	value	int value	1	<absent>	2	11
+sink	2	METHOD_PARAMETER_OUT	value	int value	1	<absent>	2	11
+sink	3	BLOCK	<absent>	<absent>	2	<absent>	<absent>	<absent>
+sink	4	METHOD_RETURN	<absent>	RET	3	<absent>	2	6

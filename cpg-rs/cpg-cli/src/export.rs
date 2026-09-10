@@ -20,6 +20,7 @@
 //! json is the machine-readable form the Scala tool lacked.
 
 use cpg_core::{Cpg, EdgeKind, NodeId, Query};
+use serde::{ser::SerializeSeq, Serialize, Serializer};
 use std::collections::HashSet;
 use std::io::Write;
 
@@ -196,15 +197,29 @@ fn write_subgraph(
     let edges = edges_within(cpg, nodes, repr.edge_kinds());
     let f = std::fs::File::create(path)?;
     let mut w = std::io::BufWriter::new(f);
-    match format {
-        Format::Dot => write_dot(cpg, graph_name, nodes, &edges, &mut w)?,
-        Format::Graphml => write_graphml(cpg, nodes, &edges, &mut w)?,
-        Format::Json => write_json(cpg, nodes, &edges, &mut w)?,
-    }
+    write_graph(cpg, graph_name, nodes, &edges, format, &mut w)?;
     stats.nodes += nodes.len();
     stats.edges += edges.len();
     stats.files += 1;
     Ok(())
+}
+
+fn write_graph(
+    cpg: &Cpg,
+    graph_name: &str,
+    nodes: &[NodeId],
+    edges: &[(NodeId, NodeId, EdgeKind)],
+    format: Format,
+    w: &mut impl Write,
+) -> std::io::Result<()> {
+    match format {
+        Format::Dot => write_dot(cpg, graph_name, nodes, edges, w)?,
+        Format::Graphml => write_graphml(cpg, nodes, edges, w)?,
+        Format::Json => write_json(cpg, nodes, edges, w)?,
+    }
+    // Streaming can leave a final tail in BufWriter; dropping it discards a
+    // flush error. Only report success after all serialized bytes are written.
+    w.flush()
 }
 
 fn dot_escape(s: &str) -> String {
@@ -289,31 +304,74 @@ fn write_json(
     edges: &[(NodeId, NodeId, EdgeKind)],
     w: &mut impl Write,
 ) -> std::io::Result<()> {
-    let node_objs: Vec<serde_json::Value> = nodes
-        .iter()
-        .map(|&n| {
-            serde_json::json!({
-                "id": n.0,
-                "kind": format!("{:?}", cpg.kind_of(n)),
-                "name": cpg.name_of(n),
-                "code": cpg.code_of(n),
-                "file": cpg.path_of(cpg.file_of(n)),
-                "line": cpg.line_of(n),
-            })
-        })
-        .collect();
-    let edge_objs: Vec<serde_json::Value> = edges
-        .iter()
-        .map(|(src, dst, kind)| {
-            serde_json::json!({"src": src.0, "dst": dst.0, "kind": format!("{kind:?}")})
-        })
-        .collect();
-    let doc = serde_json::json!({"nodes": node_objs, "edges": edge_objs});
-    write!(
+    // Value's maps sorted keys alphabetically. Keep that exact field order
+    // while serializing borrowed graph data one record at a time, avoiding
+    // both a second graph of Values and a whole-export pretty String.
+    #[derive(Serialize)]
+    struct Graph<'a> {
+        edges: Edges<'a>,
+        nodes: Nodes<'a>,
+    }
+    struct Edges<'a>(&'a [(NodeId, NodeId, EdgeKind)]);
+    impl Serialize for Edges<'_> {
+        fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+            #[derive(Serialize)]
+            struct Edge {
+                dst: u32,
+                kind: String,
+                src: u32,
+            }
+            let mut sequence = serializer.serialize_seq(Some(self.0.len()))?;
+            for &(src, dst, kind) in self.0 {
+                sequence.serialize_element(&Edge {
+                    dst: dst.0,
+                    kind: format!("{kind:?}"),
+                    src: src.0,
+                })?;
+            }
+            sequence.end()
+        }
+    }
+    struct Nodes<'a>(&'a Cpg, &'a [NodeId]);
+    impl Serialize for Nodes<'_> {
+        fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+            #[derive(Serialize)]
+            struct Node<'a> {
+                code: Option<&'a str>,
+                file: Option<&'a str>,
+                id: u32,
+                kind: String,
+                line: Option<u32>,
+                name: Option<&'a str>,
+            }
+            let cpg = self.0;
+            let mut sequence = serializer.serialize_seq(Some(self.1.len()))?;
+            for &node in self.1 {
+                sequence.serialize_element(&Node {
+                    code: cpg.code_of(node),
+                    file: cpg.path_of(cpg.file_of(node)),
+                    id: node.0,
+                    kind: format!("{:?}", cpg.kind_of(node)),
+                    line: cpg.line_of(node),
+                    name: cpg.name_of(node),
+                })?;
+            }
+            sequence.end()
+        }
+    }
+    serde_json::to_writer_pretty(
         w,
-        "{}",
-        serde_json::to_string_pretty(&doc).expect("serialize")
+        &Graph {
+            edges: Edges(edges),
+            nodes: Nodes(cpg, nodes),
+        },
     )
+    .map_err(|error| {
+        std::io::Error::new(
+            error.io_error_kind().unwrap_or(std::io::ErrorKind::Other),
+            error,
+        )
+    })
 }
 
 /// JoernExport's filename sanitisation: anything outside [a-zA-Z0-9-_./]
@@ -343,6 +401,117 @@ fn sanitize(s: &str) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn json_empty_graph_keeps_exact_layout_without_a_trailing_newline() {
+        let mut bytes = Vec::new();
+        write_json(&Cpg::new(), &[], &[], &mut bytes).unwrap();
+        assert_eq!(bytes, b"{\n  \"edges\": [],\n  \"nodes\": []\n}");
+    }
+
+    #[test]
+    fn json_preserves_property_order_nulls_escaping_and_graph_order() {
+        let mut cpg = Cpg::new();
+        let file = cpg.file_id("unicode/λ.c");
+        let a = cpg.add_node(cpg_core::NodeKind::Call, file);
+        let code = cpg.intern("quote\" slash\\ line\n tab\t");
+        cpg.set_code(a, code);
+        let name = cpg.intern("λ");
+        cpg.set_name(a, name);
+        cpg.set_line(a, u32::MAX);
+        let b = cpg.add_node(cpg_core::NodeKind::Literal, cpg_core::FileId(u32::MAX));
+        let mut bytes = Vec::new();
+        write_json(
+            &cpg,
+            &[b, a],
+            &[(a, b, EdgeKind::Ast), (b, b, EdgeKind::Ref)],
+            &mut bytes,
+        )
+        .unwrap();
+        assert_eq!(
+            String::from_utf8(bytes).unwrap(),
+            r#"{
+  "edges": [
+    {
+      "dst": 1,
+      "kind": "Ast",
+      "src": 0
+    },
+    {
+      "dst": 1,
+      "kind": "Ref",
+      "src": 1
+    }
+  ],
+  "nodes": [
+    {
+      "code": null,
+      "file": null,
+      "id": 1,
+      "kind": "Literal",
+      "line": null,
+      "name": null
+    },
+    {
+      "code": "quote\" slash\\ line\n tab\t",
+      "file": "unicode/λ.c",
+      "id": 0,
+      "kind": "Call",
+      "line": 4294967295,
+      "name": "λ"
+    }
+  ]
+}"#
+        );
+    }
+
+    #[test]
+    fn json_propagates_partial_write_failures_with_the_original_error_kind() {
+        struct FailingWriter {
+            remaining: usize,
+        }
+        impl Write for FailingWriter {
+            fn write(&mut self, bytes: &[u8]) -> std::io::Result<usize> {
+                if self.remaining == 0 {
+                    return Err(std::io::Error::new(
+                        std::io::ErrorKind::BrokenPipe,
+                        "fixture writer closed",
+                    ));
+                }
+                let written = self.remaining.min(bytes.len());
+                self.remaining -= written;
+                Ok(written)
+            }
+            fn flush(&mut self) -> std::io::Result<()> {
+                Ok(())
+            }
+        }
+        let error =
+            write_json(&Cpg::new(), &[], &[], &mut FailingWriter { remaining: 12 }).unwrap_err();
+        assert_eq!(error.kind(), std::io::ErrorKind::BrokenPipe);
+    }
+
+    #[test]
+    fn export_reports_a_failure_that_occurs_only_when_its_buffer_is_flushed() {
+        struct RejectWrites;
+        impl Write for RejectWrites {
+            fn write(&mut self, _: &[u8]) -> std::io::Result<usize> {
+                Err(std::io::Error::new(
+                    std::io::ErrorKind::BrokenPipe,
+                    "fixture sink closed",
+                ))
+            }
+            fn flush(&mut self) -> std::io::Result<()> {
+                Ok(())
+            }
+        }
+        for format in [Format::Json, Format::Dot, Format::Graphml] {
+            let mut buffered = std::io::BufWriter::with_capacity(8192, RejectWrites);
+            let error =
+                write_graph(&Cpg::new(), "empty", &[], &[], format, &mut buffered).unwrap_err();
+            assert_eq!(error.kind(), std::io::ErrorKind::BrokenPipe, "{format:?}");
+        }
+    }
 
     #[test]
     fn sanitize_remaps_absolute_and_hostile_names() {

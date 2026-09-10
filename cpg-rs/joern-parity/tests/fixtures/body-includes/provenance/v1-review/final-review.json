@@ -1,0 +1,30 @@
+{
+  "status": "HELD_INTRODUCED_SEMANTIC_OWNERSHIP_REGRESSION",
+  "sourceSha256": "96207d5b7b7b3d4bbfa77c8b93f407132eb0d2525e7e8f7915ad784e167ad406",
+  "binarySha256": "2cfaa3551fe0ba0797cf5f52db65f7163b04b772db8c57409bf126d4c7454d7a",
+  "projects": 12,
+  "baselineExact": 2,
+  "candidateExact": 7,
+  "rawMatchingGained": 1106,
+  "rawMatchingLost": 4,
+  "genuineSemanticOwnershipLosses": 2,
+  "ordinalCoincidences": 2,
+  "requiredFix": "Restore the previously matching header-owned macro METHOD SOURCE_FILE and CONTAINS edges without blanket filename reassignment.",
+  "verification": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/tenth-body-include-v1-review/verification.json",
+    "sha256": "a886fa81485129a7dbd5e4f2c78058a60229b62c543d6c43ebaab632ca37b78d",
+    "bytes": 29817
+  },
+  "review": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/tenth-body-include-v1-review/review.md",
+    "sha256": "c9ae75d0dddba103805368e2d4cd4257f9d85f20008db53e398caf61dc53e1df",
+    "bytes": 5262
+  },
+  "fullRegressionEvidence": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/tenth-body-include-v1-review/ownership-regression.json",
+    "sha256": "d359d88126e2fd7cd3f9a7849d5693039c27e11aadda1495d9c967c926a99d4f",
+    "bytes": 10226
+  },
+  "noProducersBuildsOrSourceEdits": true,
+  "notRequired": "Closing every remaining complete-project diagnostic is not required to repair this bounded introduced regression."
+}

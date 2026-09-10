@@ -1,0 +1,19 @@
+{
+  "exact.rs": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-macro-state/candidate-v8/exact.rs",
+    "sha256": "f8dd06912d8acddeae363ee398df4b10c1502f4d0b47acd64cbe449c34789ec1"
+  },
+  "joern-parity": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-macro-state/candidate-v8/joern-parity",
+    "sha256": "cc3e84176ed1bc01fc0ad8a10e7f2f61fcedaa420e3e40ac277831143241289a"
+  },
+  "buildLog": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-macro-state/build-v8.log",
+    "sha256": "38bffeb6115c5ddb58825f7c8f31327a675a8c6b81029f73da36c7d975eb18fe"
+  },
+  "build": {
+    "exitCode": 0,
+    "sourceStableDuringBuild": true,
+    "command": "cargo build --manifest-path cpg-rs/Cargo.toml -p joern-parity"
+  }
+}

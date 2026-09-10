@@ -1,0 +1,118 @@
+{
+  "binary": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-declaration-macros/.local/header-return-regression/frozen-final-v3/joern-parity",
+    "sha256": "453402b825089bd8ea3a43f3ab087004afde5296dc29c0206ab11ad7a815ddfb"
+  },
+  "liveReceipt": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-declaration-macros/.local/header-return-regression/live-run.json",
+    "sha256": "ac7f79d0e8eb91bbee375e186126ef55a8a6fcfacaabd260e1a646cf63bef030"
+  },
+  "results": [
+    {
+      "case": "header_alias_parenthesized",
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-declaration-macros/.local/header-return-regression/frozen-final-v3/joern-parity",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-declaration-macros/.local/header-return-regression/input/header_alias_parenthesized/api.h",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-declaration-macros/.local/header-return-regression/input/header_alias_parenthesized/main.c"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 0.29209870799968485,
+      "exact": true,
+      "completeDiffLines": 0,
+      "inputHashes": {
+        "api.h": "d272c2302999e2d6f14f43f7d832cd1ecb62d3307f41fe6af3dfe2e915bd46f9",
+        "main.c": "1bd5ba0b963dd6b1fb51064ae441f4f9171db08da6a47b4225871fb145a5ec3a"
+      },
+      "expectedSha256": "3bae738719490454ace89a9b14c470c0dacc15265ca7825c821e5ae9d1f52d03",
+      "actualSha256": "3bae738719490454ace89a9b14c470c0dacc15265ca7825c821e5ae9d1f52d03"
+    },
+    {
+      "case": "header_macro_parenthesized",
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-declaration-macros/.local/header-return-regression/frozen-final-v3/joern-parity",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-declaration-macros/.local/header-return-regression/input/header_macro_parenthesized/api.h",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-declaration-macros/.local/header-return-regression/input/header_macro_parenthesized/main.c"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 0.009198416999424808,
+      "exact": false,
+      "completeDiffLines": 11,
+      "inputHashes": {
+        "api.h": "48968e036d742ad2f2d2c416f6c7a85b9b1d3b1d1ab660c4fad67d30db5f9188",
+        "main.c": "d064cf1e1c689b2530bff927a1fe024ee1463291b847324a8a5be0de79115848"
+      },
+      "expectedSha256": "f88c92c1958a754994967cae78129c834e6b46dc64005aca2b4b70525449ba33",
+      "actualSha256": "b162fd04dae531654921a36c945a0366ec76723bf2b7b01b6acd79efb2262ecf"
+    },
+    {
+      "case": "header_parenthesized",
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-declaration-macros/.local/header-return-regression/frozen-final-v3/joern-parity",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-declaration-macros/.local/header-return-regression/input/header_parenthesized/api.h",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-declaration-macros/.local/header-return-regression/input/header_parenthesized/main.c"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 0.007680041002458893,
+      "exact": true,
+      "completeDiffLines": 0,
+      "inputHashes": {
+        "api.h": "e15f64845f64372e47e5b04d8ae150fc28ab27fd71cd03a41adad1874868f241",
+        "main.c": "d064cf1e1c689b2530bff927a1fe024ee1463291b847324a8a5be0de79115848"
+      },
+      "expectedSha256": "8b30b7acec679ec41b7c84f7824278aebd25fea7da59d5fc63e662a6b8dc8eae",
+      "actualSha256": "8b30b7acec679ec41b7c84f7824278aebd25fea7da59d5fc63e662a6b8dc8eae"
+    },
+    {
+      "case": "header_parenthesized_pointer",
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-declaration-macros/.local/header-return-regression/frozen-final-v3/joern-parity",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-declaration-macros/.local/header-return-regression/input/header_parenthesized_pointer/api.h",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-declaration-macros/.local/header-return-regression/input/header_parenthesized_pointer/main.c"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 0.006416083997464739,
+      "exact": true,
+      "completeDiffLines": 0,
+      "inputHashes": {
+        "api.h": "e9cdac48dfabb4e3b9c4d42363498e7a9049e201ba3a70591173c008ab501da5",
+        "main.c": "deef70ab32f0a4ea1926a211ab496ee20f6183d9e136f9c3a2f418fdec811df4"
+      },
+      "expectedSha256": "ee10428a98bf79abbd39446d38a94bc015b7114fedec9359339fcdf6a5768342",
+      "actualSha256": "ee10428a98bf79abbd39446d38a94bc015b7114fedec9359339fcdf6a5768342"
+    },
+    {
+      "case": "header_plain_macro_alias",
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-declaration-macros/.local/header-return-regression/frozen-final-v3/joern-parity",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-declaration-macros/.local/header-return-regression/input/header_plain_macro_alias/api.h",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-declaration-macros/.local/header-return-regression/input/header_plain_macro_alias/main.c"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 0.006142416998045519,
+      "exact": true,
+      "completeDiffLines": 0,
+      "inputHashes": {
+        "api.h": "ca816776b9da998b0ce8c80951a40821bd59d283f18f2e379eefbd0fa55c42c1",
+        "main.c": "1bd5ba0b963dd6b1fb51064ae441f4f9171db08da6a47b4225871fb145a5ec3a"
+      },
+      "expectedSha256": "b6f3fd9d3df6493f8b1dd0c737869aab6e99fe4f747c391c130bf62a0ba0db0a",
+      "actualSha256": "b6f3fd9d3df6493f8b1dd0c737869aab6e99fe4f747c391c130bf62a0ba0db0a"
+    },
+    {
+      "case": "parenthesized_same_file",
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-declaration-macros/.local/header-return-regression/frozen-final-v3/joern-parity",
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-declaration-macros/.local/header-return-regression/input/parenthesized_same_file/main.c"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 0.005549292007344775,
+      "exact": true,
+      "completeDiffLines": 0,
+      "inputHashes": {
+        "main.c": "422c4a4f70e24b6b97c294e33cad6c2943928d48ddaa74cfab27f86184e85ee1"
+      },
+      "expectedSha256": "19fefceb45290f78b8ad7ad516ae2871696a9b8e0c89ffa0565b9aca65ecaee0",
+      "actualSha256": "19fefceb45290f78b8ad7ad516ae2871696a9b8e0c89ffa0565b9aca65ecaee0"
+    }
+  ]
+}

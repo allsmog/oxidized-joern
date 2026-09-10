@@ -1,0 +1,65 @@
+{
+  "command": [
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-inactive-declarations/.local/inactive-declarations/frozen-candidate/joern-parity",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/live-real-differential/zlib-1.3.1-core-full/input/adler32.c",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/live-real-differential/zlib-1.3.1-core-full/input/compress.c",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/live-real-differential/zlib-1.3.1-core-full/input/crc32.c",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/live-real-differential/zlib-1.3.1-core-full/input/crc32.h",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/live-real-differential/zlib-1.3.1-core-full/input/deflate.c",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/live-real-differential/zlib-1.3.1-core-full/input/deflate.h",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/live-real-differential/zlib-1.3.1-core-full/input/gzclose.c",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/live-real-differential/zlib-1.3.1-core-full/input/gzguts.h",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/live-real-differential/zlib-1.3.1-core-full/input/gzlib.c",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/live-real-differential/zlib-1.3.1-core-full/input/gzread.c",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/live-real-differential/zlib-1.3.1-core-full/input/gzwrite.c",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/live-real-differential/zlib-1.3.1-core-full/input/infback.c",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/live-real-differential/zlib-1.3.1-core-full/input/inffast.c",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/live-real-differential/zlib-1.3.1-core-full/input/inffast.h",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/live-real-differential/zlib-1.3.1-core-full/input/inffixed.h",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/live-real-differential/zlib-1.3.1-core-full/input/inflate.c",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/live-real-differential/zlib-1.3.1-core-full/input/inflate.h",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/live-real-differential/zlib-1.3.1-core-full/input/inftrees.c",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/live-real-differential/zlib-1.3.1-core-full/input/inftrees.h",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/live-real-differential/zlib-1.3.1-core-full/input/trees.c",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/live-real-differential/zlib-1.3.1-core-full/input/trees.h",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/live-real-differential/zlib-1.3.1-core-full/input/uncompr.c",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/live-real-differential/zlib-1.3.1-core-full/input/zconf.h",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/live-real-differential/zlib-1.3.1-core-full/input/zlib.h",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/live-real-differential/zlib-1.3.1-core-full/input/zutil.c",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/live-real-differential/zlib-1.3.1-core-full/input/zutil.h"
+  ],
+  "exitCode": 0,
+  "wallSeconds": 6.83708204200957,
+  "beforeRun": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/sixth-batch/final-real-differential-v2/zlib-1.3.1-core-full/run.json",
+    "sha256": "8207dde6b5c34f248553ec6b37f2b6ae5f63b9ed85ca5ad82816813785f977be"
+  },
+  "sourceBinding": {
+    "beforeBinding": {
+      "createdAtUtc": "2026-09-08T16:23:27.764286+00:00",
+      "parentRevision": "4b6a7ebb6531bd4371112efc27f8993d33f92670",
+      "workingChangesPresent": true,
+      "frozenBeforeFinalGates": true,
+      "sources": {
+        "cpg-rs/cpg-lang-c/src/exact.rs": "58d287bf0986d86dd94e1e199b62007b2a1e88ba2b136b166b2ba6b71ad0df52",
+        "cpg-rs/cpg-lang-c/src/import.rs": "3fb6695576fe87e463b5e44160bcbe828321bf32149d67abcc2256eb88d11aba",
+        "cpg-rs/joern-parity/src/production.rs": "2535a739735e38bf1c2015afb191cc74ea20488cd58e5b5c3897494e1dd683bb",
+        "cpg-rs/cpg-cli/src/workspace.rs": "78d02b54d43f30e7ef8397278870072620dd5c5671a6d81457d2edbbf0c535d1",
+        "cpg-rs/cpg-cli/src/rules.rs": "fc19394abdfe4c309d0e2e961516827d52c6da2e1b191593dab53c08276be2e5",
+        "cpg-rs/cpg-cli/src/export.rs": "49ed223d835380399bfca43c387f120ba2f22c88fbb7c8fe4d423463501fd057",
+        "cpg-rs/Cargo.toml": "0c095573bd24459caa83a975c4fdec291e8b11bef92745576f935f5fd17f0d29",
+        "cpg-rs/Cargo.lock": "fa7eab41e0c072e6b33205997fd241e7d87b511f9fd91ceee6ee1fdc9a099a63"
+      },
+      "binaries": {
+        "cpg": "7e736176bd7408ad0dd3f8f6852d52ab9e5c1fa07abac28acf61529839872e24",
+        "joern-parity": "9280342b38a2da5b57249180c11f4adcfe878d77f2114ba47c64dce847c6e68a"
+      }
+    },
+    "files": {
+      "exact.rs": "c79d93566b3ac603b5d2c40e68bc58b03f43db0ab91a7c4c8b4b6c0d2fd71c43",
+      "joern-parity": "281abd04c22880183d99ee6f83c0ac619566e089b3c0ce23ad1c1300addde655"
+    }
+  },
+  "outputSha256": "6281927566e1d2228ae77d3e8563e0b18ecdb192afac1cea539df6864b677639",
+  "stderrSha256": "f3a767ed84738f65024319668fcbaaf92aa54c78c700e25f45e7f3bc9d2ccdeb"
+}

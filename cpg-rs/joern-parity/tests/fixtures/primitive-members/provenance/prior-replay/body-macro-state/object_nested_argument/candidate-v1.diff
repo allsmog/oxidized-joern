@@ -1,0 +1,108 @@
+--- live
++++ candidate-v1
+@@ -10,6 +10,12 @@
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+   METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+ 
++METHOD NAME=CALL FULL_NAME=CALL ORDER=0
++  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
++  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
++  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
++  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
++
+ METHOD NAME=consume CODE=int consume(int value); FULL_NAME=consume SIGNATURE=int(int) ORDER=1
+   METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+   METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+@@ -21,7 +27,7 @@
+     METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+     METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+     BLOCK CODE={ CALL(WRAP(ARG));\n#undef WRAP\n#define WRAP(x) ((x)+1)\nreturn WRAP(ARG); } TYPE_FULL_NAME=void ORDER=2
+-      CALL NAME=consume CODE=consume((1)) TYPE_FULL_NAME=int METHOD_FULL_NAME=consume ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
++      CALL NAME=CALL CODE=CALL(WRAP(ARG)) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=CALL ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+         CALL NAME=WRAP CODE=WRAP(ARG) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=main.c:WRAP:ANY(1) SIGNATURE=ANY(1) ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=INLINED
+           BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+             LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=1
+@@ -46,7 +52,7 @@
+   METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+   METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+   BLOCK CODE={ CALL(WRAP(ARG));\n#undef WRAP\n#define WRAP(x) ((x)+1)\nreturn WRAP(ARG); } TYPE_FULL_NAME=void ORDER=2
+-    CALL NAME=consume CODE=consume((1)) TYPE_FULL_NAME=int METHOD_FULL_NAME=consume ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
++    CALL NAME=CALL CODE=CALL(WRAP(ARG)) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=CALL ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+       CALL NAME=WRAP CODE=WRAP(ARG) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=main.c:WRAP:ANY(1) SIGNATURE=ANY(1) ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=INLINED
+         BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+           LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=1
+@@ -80,11 +86,12 @@
+ EDGES|ARGUMENT sample#4 -> sample#5
+ EDGES|ARGUMENT sample#8 -> sample#9
+ EDGES|CALL sample#11 -> <operator>.addition#0
+-EDGES|CALL sample#4 -> consume#0
++EDGES|CALL sample#4 -> CALL#0
+ EDGES|CALL sample#5 -> main.c:WRAP:ANY(1)#0
+ EDGES|CALL sample#9 -> main.c:WRAP:ANY(1)#0
+ EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+ EDGES|CFG <operator>.addition#0 -> <operator>.addition#5
++EDGES|CFG CALL#0 -> CALL#4
+ EDGES|CFG consume#0 -> consume#4
+ EDGES|CFG main.c:<global>#0 -> main.c:<global>#17
+ EDGES|CFG main.c:<global>#1 -> sample#5
+@@ -102,6 +109,7 @@
+ EDGES|CFG sample#9 -> sample#8
+ EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+ EDGES|CONTAINS <operator>.addition#0 -> <operator>.addition#2
++EDGES|CONTAINS CALL#0 -> CALL#2
+ EDGES|CONTAINS D:main.c:<global> -> D:sample
+ EDGES|CONTAINS D:main.c:<global> -> consume#0
+ EDGES|CONTAINS D:main.c:<global> -> main.c:<global>#0
+@@ -135,6 +143,10 @@
+ EDGES|EVAL_TYPE <operator>.addition#4 -> T:ANY
+ EDGES|EVAL_TYPE <operator>.addition#5 -> T:ANY
+ EDGES|EVAL_TYPE <operator>.addition#6 -> T:ANY
++EDGES|EVAL_TYPE CALL#1 -> T:ANY
++EDGES|EVAL_TYPE CALL#2 -> T:ANY
++EDGES|EVAL_TYPE CALL#3 -> T:ANY
++EDGES|EVAL_TYPE CALL#4 -> T:ANY
+ EDGES|EVAL_TYPE consume#1 -> T:int
+ EDGES|EVAL_TYPE consume#2 -> T:int
+ EDGES|EVAL_TYPE consume#3 -> T:ANY
+@@ -154,13 +166,14 @@
+ EDGES|EVAL_TYPE sample#14 -> T:int
+ EDGES|EVAL_TYPE sample#2 -> T:void
+ EDGES|EVAL_TYPE sample#3 -> T:void
+-EDGES|EVAL_TYPE sample#4 -> T:int
++EDGES|EVAL_TYPE sample#4 -> T:ANY
+ EDGES|EVAL_TYPE sample#5 -> T:ANY
+ EDGES|EVAL_TYPE sample#6 -> T:ANY
+ EDGES|EVAL_TYPE sample#7 -> T:int
+ EDGES|EVAL_TYPE sample#9 -> T:ANY
+ EDGES|PARAMETER_LINK <operator>.addition#1 -> <operator>.addition#3
+ EDGES|PARAMETER_LINK <operator>.addition#4 -> <operator>.addition#6
++EDGES|PARAMETER_LINK CALL#1 -> CALL#3
+ EDGES|PARAMETER_LINK consume#1 -> consume#2
+ EDGES|PARAMETER_LINK main.c:WRAP:ANY(1)#1 -> main.c:WRAP:ANY(1)#2
+ EDGES|PARAMETER_LINK sample#1 -> sample#2
+@@ -189,11 +202,13 @@
+ FLOWS|REACHING_DEF[1] sample#12 -> sample#11
+ FLOWS|REACHING_DEF[1] sample#13 -> sample#11
+ FLOWS|REACHING_DEF[<RET>] sample#8 -> sample#14
++FLOWS|REACHING_DEF[CALL(WRAP(ARG))] sample#4 -> sample#14
+ FLOWS|REACHING_DEF[WRAP(ARG)] sample#5 -> sample#4
+ FLOWS|REACHING_DEF[WRAP(ARG)] sample#9 -> sample#14
+ FLOWS|REACHING_DEF[WRAP(ARG)] sample#9 -> sample#8
+ FLOWS|REACHING_DEF[] <operator>.addition#0 -> <operator>.addition#1
+ FLOWS|REACHING_DEF[] <operator>.addition#0 -> <operator>.addition#4
++FLOWS|REACHING_DEF[] CALL#0 -> CALL#1
+ FLOWS|REACHING_DEF[] consume#0 -> consume#1
+ FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#17
+ FLOWS|REACHING_DEF[] main.c:<global>#1 -> sample#1
+@@ -205,9 +220,10 @@
+ FLOWS|REACHING_DEF[] main.c:WRAP:ANY(1)#0 -> main.c:WRAP:ANY(1)#1
+ FLOWS|REACHING_DEF[] sample#1 -> sample#14
+ FLOWS|REACHING_DEF[] sample#1 -> sample#2
+-FLOWS|REACHING_DEF[consume((1))] sample#4 -> sample#14
+ FLOWS|REACHING_DEF[p1] <operator>.addition#1 -> <operator>.addition#3
+ FLOWS|REACHING_DEF[p1] <operator>.addition#1 -> <operator>.addition#5
++FLOWS|REACHING_DEF[p1] CALL#1 -> CALL#3
++FLOWS|REACHING_DEF[p1] CALL#1 -> CALL#4
+ FLOWS|REACHING_DEF[p1] main.c:WRAP:ANY(1)#1 -> main.c:WRAP:ANY(1)#2
+ FLOWS|REACHING_DEF[p1] main.c:WRAP:ANY(1)#1 -> main.c:WRAP:ANY(1)#4
+ FLOWS|REACHING_DEF[p2] <operator>.addition#4 -> <operator>.addition#5

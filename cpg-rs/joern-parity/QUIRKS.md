@@ -213,3 +213,146 @@ pins it, so a regression shows up as a diff.
   `longunsigned`), and a declaration ALSO registers its decl-specifier type
   — `unsigned char c` registers bare `unsigned`, `const char *p` registers
   `char` (CDT's typeForDeclSpecifier path).
+
+- **Identifier truth tests and loop bodies** (`corpus/control_truth_loops.c`):
+  scalar identifiers become integer `!= 0` calls; plain pointer identifiers
+  use `!= NULL`. Explicit comparisons, calls, arithmetic, and negation keep
+  their existing expression shape. Braceless loop bodies are direct children
+  of the control structure. Missing FOR clauses reserve ORDER slots, and
+  multiple initializer declarators share one initializer BLOCK after their
+  LOCALs. A `do` body ending in unconditional return leaves the condition and
+  subsequent tail disconnected; those nodes have no reaching-definition facts.
+- **External declarations** (`corpus/external_functions.c`,
+  `corpus/external_declarations.c`, `corpus/prototype_a.c`,
+  `corpus/prototype_b.c`): unused prototypes remain external METHOD scaffolds;
+  repeated ordinary declarations coalesce and a matching ordinary definition
+  supersedes its prototype.
+  Unnamed parameters keep empty names and pair IN/OUT by position. A `(void)`
+  declaration retains a void parameter. Variadic signatures contain `...`,
+  while the synthetic `<param>N` parameter takes the preceding parameter's
+  type. Unresolved zero-argument calls create a stub with `p0` at ORDER=0.
+- **Callable values and lexical scope** (`corpus/function_pointers.c`,
+  `corpus/callable_scope.c`): function-pointer object types retain declarator
+  shape (`int(*)(int)`), their LOCAL CODE includes the full declaration, and
+  their initializer's LHS IDENTIFIER has empty CODE. Address-valued references
+  to known functions are METHOD_REF nodes. A block or FOR initializer can
+  shadow a function or parameter; leaving that scope restores the previous
+  binding. Parenthesized callees use pointerCall even when naming a function.
+- **FOR locals in the lone-identifier optimization**
+  (`corpus/callable_scope.c`): Joern's Method.local traverses contained BLOCKs
+  and their direct LOCAL children. A LOCAL directly under a FOR control
+  structure is absent from that list. Thus an otherwise lone initializer
+  identifier can be removed from its assignment GEN set, even though the
+  declaration exists in the AST. Verified against the pinned runtime's
+  MethodMethods and OptimizedReachingDefTransferFunction bytecode and live
+  reaching-definition output.
+- **Conditional translation-unit declarations**
+  (`corpus/conditional_top_level.c`, `corpus/conditional_prototypes.c`): both
+  active and inactive declarations retain scaffolding. Inactive function
+  bodies retain BLOCK CODE without executable children. Macro definitions and
+  `#undef` apply in source order; each method keeps the macro environment at
+  its position. Repeated same-file definitions receive distinct identities.
+- **INLINED reaching-definition entry edges** (`corpus/macros.c` and the
+  `corpus/conditional_macro_order.c` fixture): expansion BLOCKs carry ARGUMENT_INDEX but have
+  no ARGUMENT edge. They are excluded from the call's actual argument set.
+  A call with arguments does not get a method-entry dependency merely because
+  its arguments are literals; a zero-argument macro can retain that dependency.
+- **File-scope sized arrays**
+  (`tests/fixtures/array-declarations/arrays.c`): uninitialized globals emit
+  an `<operator>.arrayInitializer` with dimension arguments. Local arrays
+  retain the assignment and `<operator>.alloc` form, including its type
+  operand. Global dimensions must not enlarge the local allocation stub's
+  arity. Explicit initializers have separate, incompletely matched behavior.
+- **Parenthesized declarations and typedefs** (`corpus/mixed_prototypes.c`,
+  `corpus/parenthesized_prototypes.c`, `corpus/parenthesized_definitions.c`,
+  `corpus/typedef_shapes.c`): parenthesized functions retain unresolved
+  namespace identities. An ordinary call can therefore require a separate
+  stub. Mixed declarations classify each declarator independently; ordinary
+  typedef aliases survive even beside function typedefs that produce no
+  alias node. Supplied quoted relative headers contribute ordered macro
+  definitions and removals for declaration spelling. These cached header
+  effects do not implement caller-conditioned header preprocessing.
+
+- **Macro metadata can precede its current replacement**
+  ([complete body macro state fixtures](tests/fixtures/body-macro-state/README.md)):
+  c2cpg's macro expansion-event queue is stably sorted by file-local offsets,
+  including condition and supplied-header events. An earlier matching event can
+  supply synthetic METHOD CODE and its defining-file full-name prefix; first
+  registration by full name wins. Current actual arguments and expansion type
+  determine arity/type, while source-file ownership stays with the invoking TU.
+  Quoted text and `defined` operands do not expand. Object callees retain separate
+  argument events unless a still-eligible function macro consumes the following
+  parentheses; disabled recursive tokens remain ineligible. This bounded port
+  retains a current-metadata fallback when no event matches and documents the
+  remaining complete diagnostics; it does not claim full MacroHandler parity.
+
+### Included declarations and macro METHOD pass precedence
+
+The [complete body-include family](tests/fixtures/body-includes/README.md) pins
+that selected body-header declarations join the caller's lexical block, while
+local typedef TYPE_DECL file properties and expression line coordinates can
+refer to the physical header. Caller-file include directives consume dependency
+sibling positions even in the retained inactive/guard-skipped controls.
+
+Macro metadata uses still follow lexical include traversal, independently of
+the previously observed queue's stable file-local offset ordering. The final
+synthetic METHOD record is subject to c2cpg's source-pass then `.h`-pass merge:
+a generated header-pass record wins a duplicate full name, with first
+registration within each class. CODE and source/parent ownership are selected
+together. The repeated N fixture therefore retains one caller-owned macro
+method and one header-owned method; merely defining a macro in a header does
+not make its method header-owned. The complete repeated fixture still retains
+the earlier no-eligible-event/no-wrapper limitation. This is a bounded observed
+rule, not full MacroHandler, include-resolution or source-coordinate parity.
+
+### Macro spelling in object array dimensions
+
+The [complete array-dimension controls](tests/fixtures/array-dimension-macros/README.md)
+pin a distinction in TYPE_FULL_NAME: a bare macro dimension such as `N`
+expands to `3`, while compound dimensions `N+1`, `(N+1)` and `+N` retain
+their source spelling. Their numeric partner methods remain exact. This is
+an observed type-spelling rule, not general constant folding. Restricting
+expansion to a bare identifier restores the three complete controls and the
+96 matching zlib records lost by the held tenth candidate.
+
+### Primitive MEMBER declaration spelling
+
+The [complete primitive MEMBER fixtures](tests/fixtures/primitive-members/README.md)
+pin declaration-role spelling for field bases: `unsigned short` and `short
+unsigned` become `shortunsigned`, while an explicit `int` yields `short unsigned
+int`. `signed char` becomes `signedchar`; `unsigned char` keeps its space.
+Base `const` is absent from the type, base `volatile` remains, and pointer
+qualifiers remain in CODE without changing the pointer type suffix. Each member
+of a mixed declaration keeps its own declarator CODE and suffix.
+
+The measured change uses the existing declaration renderer only for field
+bases. Enum members, named-type fallback, member suffixes and initializer
+construction retain their existing paths. Complete nonprimitive and older
+`member_types` diagnostics remain recorded separately from the 18 complete
+graph gates, including two retained fixedtables anchors.
+
+### Duplicate function identities and stored metadata
+
+The eight [complete function-identity controls](tests/function_identities.rs)
+pin c2cpg's duplicate pass: definitions sort by filename, line and column;
+the first full name stays unchanged and later definitions receive
+`<duplicate>0`, `<duplicate>1`, and so on. For a duplicate carrying a literal
+STATIC modifier, matching CALL NAME and METHOD_FULL_NAME change in its file,
+except that the first definition's entire file is excluded. An inherited
+static prototype, an `inline static` prefix and a macro spelling expanding to
+static do not produce that modifier in these controls. METHOD_REF spelling
+and semantic REF targets retain the original name; their physical source
+lines still belong to their own originating definitions.
+
+Separate complete saved-CPG observations pin BINDING NAME, METHOD_FULL_NAME,
+optional SIGNATURE and distinct BINDS/REF endpoints. The retained array-member
+initializer binds from the file-global TYPE_DECL and has no binding signature.
+Its modifiers are CONSTRUCTOR/ORDER 2 and STATIC/ORDER 3, both without locations.
+Ordinary literal STATIC modifiers retain the observed definition lines.
+CPG2 version 2 stores these properties; retained version 1 graphs reopen with
+the new modifier property absent.
+
+The canonical oracle omits BINDING properties and MODIFIER_TYPE. The complete
+supplemental observations retain IMPORT/DEPENDENCY omissions, unstored columns
+and end locations, property-presence limitations, and edge differences.
+Canonical equality therefore does not establish complete schema parity.

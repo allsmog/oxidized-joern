@@ -1,0 +1,37 @@
+{
+  "liveMethods": 2274,
+  "baselineExact": 1431,
+  "candidateExact": 1434,
+  "gained": [
+    "luaH_realasize",
+    "luaT_callorderTM",
+    "setfield"
+  ],
+  "lost": [],
+  "targets": {
+    "luaH_realasize": {
+      "completeMethodExact": true,
+      "snprintfCallsBefore": [],
+      "snprintfCallsCandidate": [],
+      "snprintfCallsJoern": []
+    },
+    "luaT_callorderTM": {
+      "completeMethodExact": true,
+      "snprintfCallsBefore": [],
+      "snprintfCallsCandidate": [],
+      "snprintfCallsJoern": []
+    },
+    "setfield": {
+      "completeMethodExact": true,
+      "snprintfCallsBefore": [],
+      "snprintfCallsCandidate": [],
+      "snprintfCallsJoern": []
+    }
+  },
+  "bindings": {
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/seventh-batch/final-real-differential/lua-5.4.7-full/rust.stdout": "82b4836ad6d4cd6934a38b538df6559d3dbb5b1f54f14ed1a3bd1bb72a9be065",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/sixth-batch/fresh-real-oracles/lua-5.4.7-full/joern.stdout": "36079a6db169b6e450b9d4d91dc0025beb076832e497e0eeb83c11047f8b643e",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/.local/body-preprocessor/whole-lua-v4/actual.txt": "0ccddab7079f879c38d08269a2934adf8dcf0033b54e3de670f5e7f1c77a6294",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-preprocessor/.local/body-preprocessor/whole-lua-v4/run.json": "4b4e718698739e3a0ae94e9210cb3366a5037beb7477565fdb321ebb3a46b544"
+  }
+}

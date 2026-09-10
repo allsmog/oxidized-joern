@@ -1,10 +1,44 @@
 //! Differential harness for the shipped exact C lowering.
 
 mod production;
+mod supplemental;
 
 fn main() {
     let mut args = std::env::args().skip(1);
     let mode = match args.next() {
+        Some(arg) if arg == "--production-supplemental" => {
+            let paths: Vec<String> = args.collect();
+            if paths.is_empty() {
+                eprintln!("usage: joern-parity --production-supplemental <file.c>...");
+                std::process::exit(2);
+            }
+            match cpg_lang_c::exact::read_sources_from_paths(&paths) {
+                Ok(sources) => print!(
+                    "{}",
+                    supplemental::snapshot(&production::build_graph(&sources))
+                ),
+                Err(error) => {
+                    eprintln!("read production supplemental inputs: {error}");
+                    std::process::exit(1);
+                }
+            }
+            return;
+        }
+        Some(arg) if arg == "--supplemental-cpg" => {
+            let paths: Vec<String> = args.collect();
+            if paths.len() != 1 {
+                eprintln!("usage: joern-parity --supplemental-cpg <graph.cpg>");
+                std::process::exit(2);
+            }
+            match cpg_core::Cpg::load(&paths[0]) {
+                Ok(cpg) => print!("{}", supplemental::snapshot(&cpg)),
+                Err(error) => {
+                    eprintln!("{error}");
+                    std::process::exit(1);
+                }
+            }
+            return;
+        }
         Some(arg) if arg == "--lowering" => {
             let paths: Vec<String> = args.collect();
             if paths.is_empty() {

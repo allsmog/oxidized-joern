@@ -1,0 +1,69 @@
+{
+  "$schema": "https://docs.oasis-open.org/sarif/sarif/v2.1.0/os/schemas/sarif-schema-2.1.0.json",
+  "version": "2.1.0",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "cpg",
+          "version": "0.1.1",
+          "informationUri": "https://github.com/allsmog/oxidized-joern",
+          "rules": [
+            {
+              "id": "C-CMD-001",
+              "name": "input-to-system",
+              "shortDescription": {
+                "text": "external input reaches shell execution"
+              },
+              "fullDescription": {
+                "text": "external input reaches shell execution"
+              },
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "properties": {
+                "cwe": "CWE-78",
+                "severity": "high"
+              }
+            },
+            {
+              "id": "C-BUF-002",
+              "name": "input-to-unbounded-copy",
+              "shortDescription": {
+                "text": "external input reaches an unbounded string copy"
+              },
+              "fullDescription": {
+                "text": "external input reaches an unbounded string copy"
+              },
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "properties": {
+                "cwe": "CWE-120",
+                "severity": "high"
+              }
+            },
+            {
+              "id": "C-FMT-003",
+              "name": "input-to-format",
+              "shortDescription": {
+                "text": "external input reaches a format string position"
+              },
+              "fullDescription": {
+                "text": "external input reaches a format string position"
+              },
+              "defaultConfiguration": {
+                "level": "warning"
+              },
+              "properties": {
+                "cwe": "CWE-134",
+                "severity": "medium"
+              }
+            }
+          ]
+        }
+      },
+      "results": []
+    }
+  ]
+}

@@ -77,8 +77,11 @@ impl Frontend for CFrontend {
             .iter()
             .map(|(path, source)| ((*path).to_string(), (*source).to_string()))
             .collect();
-        let dump = exact::canonical_dump_sources_with_config(&sources, &self.preprocessor);
-        Some(import::graph_from_canonical_dump(&dump, &sources))
+        let (dump, origins, metadata) =
+            exact::canonical_dump_sources_with_metadata_and_config(&sources, &self.preprocessor);
+        Some(import::graph_from_canonical_dump_with_metadata(
+            &dump, &sources, &origins, &metadata,
+        ))
     }
 
     fn build_file(&mut self, cpg: &mut Cpg, path: &str, source: &str) -> BuildResult {

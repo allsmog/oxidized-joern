@@ -1,0 +1,91 @@
+--- fresh-live
++++ candidate
+@@ -14,7 +14,7 @@
+     METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+     BLOCK CODE={ return VALUE(); } TYPE_FULL_NAME=void ORDER=2
+       RETURN CODE=return VALUE(); ORDER=1
+-        CALL NAME=VALUE CODE=VALUE() TYPE_FULL_NAME=ANY METHOD_FULL_NAME=main.c:VALUE:ANY(0) SIGNATURE=ANY(0) ORDER=1 DISPATCH_TYPE=INLINED
++        CALL NAME=VALUE CODE=VALUE() TYPE_FULL_NAME=float METHOD_FULL_NAME=main.c:VALUE:float(0) SIGNATURE=float(0) ORDER=1 DISPATCH_TYPE=INLINED
+           BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+             CALL NAME=<operator>.minus CODE=-1.0f TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.minus ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+               LITERAL CODE=1.0f TYPE_FULL_NAME=float ORDER=1 ARGUMENT_INDEX=1
+@@ -23,16 +23,16 @@
+     METHOD_REF CODE=value TYPE_FULL_NAME=value METHOD_FULL_NAME=value ORDER=1
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+ 
+-METHOD NAME=VALUE CODE=#define VALUE() -1.0f FULL_NAME=main.c:VALUE:ANY(0) SIGNATURE=ANY(0) ORDER=1
++METHOD NAME=VALUE CODE=#define VALUE() -1.0f FULL_NAME=main.c:VALUE:float(0) SIGNATURE=float(0) ORDER=1
+   BLOCK TYPE_FULL_NAME=ANY ORDER=1
+-  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
++  METHOD_RETURN CODE=RET TYPE_FULL_NAME=float ORDER=2
+ 
+ METHOD NAME=value CODE=long double value(void) { return VALUE(); } FULL_NAME=value SIGNATURE=longdouble(void) ORDER=1
+   METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+   METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+   BLOCK CODE={ return VALUE(); } TYPE_FULL_NAME=void ORDER=2
+     RETURN CODE=return VALUE(); ORDER=1
+-      CALL NAME=VALUE CODE=VALUE() TYPE_FULL_NAME=ANY METHOD_FULL_NAME=main.c:VALUE:ANY(0) SIGNATURE=ANY(0) ORDER=1 DISPATCH_TYPE=INLINED
++      CALL NAME=VALUE CODE=VALUE() TYPE_FULL_NAME=float METHOD_FULL_NAME=main.c:VALUE:float(0) SIGNATURE=float(0) ORDER=1 DISPATCH_TYPE=INLINED
+         BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+           CALL NAME=<operator>.minus CODE=-1.0f TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.minus ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+             LITERAL CODE=1.0f TYPE_FULL_NAME=float ORDER=1 ARGUMENT_INDEX=1
+@@ -59,14 +59,14 @@
+ NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+ EDGES|ARGUMENT value#4 -> value#5
+ EDGES|ARGUMENT value#7 -> value#8
+-EDGES|CALL value#5 -> main.c:VALUE:ANY(0)#0
++EDGES|CALL value#5 -> main.c:VALUE:float(0)#0
+ EDGES|CALL value#7 -> <operator>.minus#0
+ EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+ EDGES|CFG <operator>.minus#0 -> <operator>.minus#4
+ EDGES|CFG main.c:<global>#0 -> main.c:<global>#12
+ EDGES|CFG main.c:<global>#1 -> value#5
+ EDGES|CFG main.c:<global>#12 -> main.c:<global>#13
+-EDGES|CFG main.c:VALUE:ANY(0)#0 -> main.c:VALUE:ANY(0)#2
++EDGES|CFG main.c:VALUE:float(0)#0 -> main.c:VALUE:float(0)#2
+ EDGES|CFG value#4 -> value#9
+ EDGES|CFG value#5 -> value#4
+ EDGES|CFG value#5 -> value#8
+@@ -76,7 +76,7 @@
+ EDGES|CONTAINS <operator>.minus#0 -> <operator>.minus#2
+ EDGES|CONTAINS D:main.c:<global> -> D:value
+ EDGES|CONTAINS D:main.c:<global> -> main.c:<global>#0
+-EDGES|CONTAINS D:main.c:<global> -> main.c:VALUE:ANY(0)#0
++EDGES|CONTAINS D:main.c:<global> -> main.c:VALUE:float(0)#0
+ EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+ EDGES|CONTAINS F:<includes> -> D:ANY
+ EDGES|CONTAINS F:<includes> -> D:float
+@@ -92,7 +92,7 @@
+ EDGES|CONTAINS main.c:<global>#1 -> value#6
+ EDGES|CONTAINS main.c:<global>#1 -> value#7
+ EDGES|CONTAINS main.c:<global>#1 -> value#8
+-EDGES|CONTAINS main.c:VALUE:ANY(0)#0 -> main.c:VALUE:ANY(0)#1
++EDGES|CONTAINS main.c:VALUE:float(0)#0 -> main.c:VALUE:float(0)#1
+ EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+ EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+ EDGES|EVAL_TYPE <operator>.minus#1 -> T:ANY
+@@ -102,12 +102,12 @@
+ EDGES|EVAL_TYPE main.c:<global>#11 -> T:ANY
+ EDGES|EVAL_TYPE main.c:<global>#12 -> T:value
+ EDGES|EVAL_TYPE main.c:<global>#13 -> T:ANY
+-EDGES|EVAL_TYPE main.c:VALUE:ANY(0)#1 -> T:ANY
+-EDGES|EVAL_TYPE main.c:VALUE:ANY(0)#2 -> T:ANY
++EDGES|EVAL_TYPE main.c:VALUE:float(0)#1 -> T:ANY
++EDGES|EVAL_TYPE main.c:VALUE:float(0)#2 -> T:float
+ EDGES|EVAL_TYPE value#1 -> T:void
+ EDGES|EVAL_TYPE value#2 -> T:void
+ EDGES|EVAL_TYPE value#3 -> T:void
+-EDGES|EVAL_TYPE value#5 -> T:ANY
++EDGES|EVAL_TYPE value#5 -> T:float
+ EDGES|EVAL_TYPE value#6 -> T:ANY
+ EDGES|EVAL_TYPE value#7 -> T:ANY
+ EDGES|EVAL_TYPE value#8 -> T:float
+@@ -135,7 +135,7 @@
+ EDGES|SOURCE_FILE NB:main.c:<global> -> F:main.c
+ EDGES|SOURCE_FILE main.c:<global>#0 -> F:main.c
+ EDGES|SOURCE_FILE main.c:<global>#1 -> F:main.c
+-EDGES|SOURCE_FILE main.c:VALUE:ANY(0)#0 -> F:main.c
++EDGES|SOURCE_FILE main.c:VALUE:float(0)#0 -> F:main.c
+ FLOWS|REACHING_DEF[-1.0f] value#7 -> value#9
+ FLOWS|REACHING_DEF[1.0f] value#8 -> value#7
+ FLOWS|REACHING_DEF[<RET>] value#4 -> value#9

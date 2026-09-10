@@ -1,0 +1,5 @@
+# Retain raw unified-diff context, location records, and test-log EOF bytes.
+cases/*/*.diff -whitespace
+diagnostics/*/*.diff -whitespace
+provenance/review-conditional-live.stdout -whitespace
+provenance/validation/*.log whitespace=-blank-at-eof

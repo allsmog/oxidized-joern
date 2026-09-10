@@ -1,0 +1,199 @@
+METHOD NAME=<global> CODE=<global> FULL_NAME=<includes>:<global> ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=first CODE=RET first(RET x) {return x;} FULL_NAME=first SIGNATURE=RET(RET) ORDER=1
+  METHOD_PARAMETER_IN NAME=x CODE=RET x TYPE_FULL_NAME=RET ORDER=1
+  METHOD_PARAMETER_OUT NAME=x CODE=RET x TYPE_FULL_NAME=RET ORDER=1
+  BLOCK CODE={return x;} TYPE_FULL_NAME=void ORDER=2
+    RETURN CODE=return x; ORDER=1
+      IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=RET ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=RET ORDER=3
+
+METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1
+  METHOD NAME=first CODE=RET first(RET x) {return x;} FULL_NAME=first SIGNATURE=RET(RET) ORDER=1
+    METHOD_PARAMETER_IN NAME=x CODE=RET x TYPE_FULL_NAME=RET ORDER=1
+    METHOD_PARAMETER_OUT NAME=x CODE=RET x TYPE_FULL_NAME=RET ORDER=1
+    BLOCK CODE={return x;} TYPE_FULL_NAME=void ORDER=2
+      RETURN CODE=return x; ORDER=1
+        IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=RET ORDER=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=RET ORDER=3
+  METHOD NAME=second CODE=RET second(RET x) {return x;} FULL_NAME=second SIGNATURE=RET(RET) ORDER=1
+    METHOD_PARAMETER_IN NAME=x CODE=RET x TYPE_FULL_NAME=RET ORDER=1
+    METHOD_PARAMETER_OUT NAME=x CODE=RET x TYPE_FULL_NAME=RET ORDER=1
+    BLOCK CODE={return x;} TYPE_FULL_NAME=void ORDER=2
+      RETURN CODE=return x; ORDER=1
+        IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=RET ORDER=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=RET ORDER=3
+  METHOD NAME=unknown CODE=RET unknown(RET x) {return x;} FULL_NAME=unknown SIGNATURE=RET(RET) ORDER=1
+    METHOD_PARAMETER_IN NAME=x CODE=RET x TYPE_FULL_NAME=RET ORDER=1
+    METHOD_PARAMETER_OUT NAME=x CODE=RET x TYPE_FULL_NAME=RET ORDER=1
+    BLOCK CODE={return x;} TYPE_FULL_NAME=void ORDER=2
+      RETURN CODE=return x; ORDER=1
+        IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=RET ORDER=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=RET ORDER=3
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+    METHOD_REF CODE=first TYPE_FULL_NAME=first METHOD_FULL_NAME=first ORDER=1
+    METHOD_REF CODE=second TYPE_FULL_NAME=second METHOD_FULL_NAME=second ORDER=2
+    METHOD_REF CODE=unknown TYPE_FULL_NAME=unknown METHOD_FULL_NAME=unknown ORDER=3
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=second CODE=RET second(RET x) {return x;} FULL_NAME=second SIGNATURE=RET(RET) ORDER=1
+  METHOD_PARAMETER_IN NAME=x CODE=RET x TYPE_FULL_NAME=RET ORDER=1
+  METHOD_PARAMETER_OUT NAME=x CODE=RET x TYPE_FULL_NAME=RET ORDER=1
+  BLOCK CODE={return x;} TYPE_FULL_NAME=void ORDER=2
+    RETURN CODE=return x; ORDER=1
+      IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=RET ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=RET ORDER=3
+
+METHOD NAME=unknown CODE=RET unknown(RET x) {return x;} FULL_NAME=unknown SIGNATURE=RET(RET) ORDER=1
+  METHOD_PARAMETER_IN NAME=x CODE=RET x TYPE_FULL_NAME=RET ORDER=1
+  METHOD_PARAMETER_OUT NAME=x CODE=RET x TYPE_FULL_NAME=RET ORDER=1
+  BLOCK CODE={return x;} TYPE_FULL_NAME=void ORDER=2
+    RETURN CODE=return x; ORDER=1
+      IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=RET ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=RET ORDER=3
+
+NODES|META_DATA LANGUAGE=NEWC
+NODES|FILE NAME=<includes> ORDER=1
+NODES|FILE NAME=<unknown> ORDER=0
+NODES|FILE NAME=main.c ORDER=0
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<global> FILENAME=<unknown> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<includes>:<global> FILENAME=<includes> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|NAMESPACE NAME=<global>
+NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=RET FULL_NAME=RET CODE=RET IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=first FULL_NAME=first CODE=first AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=<global> FULL_NAME=main.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=second FULL_NAME=second CODE=second AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=unknown FULL_NAME=unknown CODE=unknown AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+NODES|TYPE NAME=RET FULL_NAME=RET TYPE_DECL_FULL_NAME=RET
+NODES|TYPE NAME=first FULL_NAME=first TYPE_DECL_FULL_NAME=first
+NODES|TYPE NAME=second FULL_NAME=second TYPE_DECL_FULL_NAME=second
+NODES|TYPE NAME=unknown FULL_NAME=unknown TYPE_DECL_FULL_NAME=unknown
+NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+EDGES|ARGUMENT first#4 -> first#5
+EDGES|ARGUMENT second#4 -> second#5
+EDGES|ARGUMENT unknown#4 -> unknown#5
+EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+EDGES|CFG first#0 -> first#5
+EDGES|CFG first#4 -> first#6
+EDGES|CFG first#5 -> first#4
+EDGES|CFG main.c:<global>#0 -> main.c:<global>#23
+EDGES|CFG main.c:<global>#15 -> unknown#5
+EDGES|CFG main.c:<global>#23 -> main.c:<global>#24
+EDGES|CFG main.c:<global>#24 -> main.c:<global>#25
+EDGES|CFG main.c:<global>#25 -> main.c:<global>#26
+EDGES|CFG main.c:<global>#8 -> second#5
+EDGES|CFG second#4 -> second#6
+EDGES|CFG second#5 -> second#4
+EDGES|CFG unknown#4 -> unknown#6
+EDGES|CFG unknown#5 -> unknown#4
+EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+EDGES|CONTAINS D:main.c:<global> -> D:first
+EDGES|CONTAINS D:main.c:<global> -> D:second
+EDGES|CONTAINS D:main.c:<global> -> D:unknown
+EDGES|CONTAINS D:main.c:<global> -> main.c:<global>#0
+EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+EDGES|CONTAINS F:<includes> -> D:ANY
+EDGES|CONTAINS F:<includes> -> D:RET
+EDGES|CONTAINS F:<includes> -> D:void
+EDGES|CONTAINS F:main.c -> D:main.c:<global>
+EDGES|CONTAINS first#0 -> first#3
+EDGES|CONTAINS first#0 -> first#4
+EDGES|CONTAINS first#0 -> first#5
+EDGES|CONTAINS main.c:<global>#0 -> first#0
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#15
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#22
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#23
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#24
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#25
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#8
+EDGES|CONTAINS main.c:<global>#15 -> unknown#3
+EDGES|CONTAINS main.c:<global>#15 -> unknown#4
+EDGES|CONTAINS main.c:<global>#15 -> unknown#5
+EDGES|CONTAINS main.c:<global>#8 -> second#3
+EDGES|CONTAINS main.c:<global>#8 -> second#4
+EDGES|CONTAINS main.c:<global>#8 -> second#5
+EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+EDGES|EVAL_TYPE first#1 -> T:RET
+EDGES|EVAL_TYPE first#2 -> T:RET
+EDGES|EVAL_TYPE first#3 -> T:void
+EDGES|EVAL_TYPE first#5 -> T:RET
+EDGES|EVAL_TYPE first#6 -> T:RET
+EDGES|EVAL_TYPE main.c:<global>#22 -> T:ANY
+EDGES|EVAL_TYPE main.c:<global>#23 -> T:first
+EDGES|EVAL_TYPE main.c:<global>#24 -> T:second
+EDGES|EVAL_TYPE main.c:<global>#25 -> T:unknown
+EDGES|EVAL_TYPE main.c:<global>#26 -> T:ANY
+EDGES|EVAL_TYPE second#1 -> T:RET
+EDGES|EVAL_TYPE second#2 -> T:RET
+EDGES|EVAL_TYPE second#3 -> T:void
+EDGES|EVAL_TYPE second#5 -> T:RET
+EDGES|EVAL_TYPE second#6 -> T:RET
+EDGES|EVAL_TYPE unknown#1 -> T:RET
+EDGES|EVAL_TYPE unknown#2 -> T:RET
+EDGES|EVAL_TYPE unknown#3 -> T:void
+EDGES|EVAL_TYPE unknown#5 -> T:RET
+EDGES|EVAL_TYPE unknown#6 -> T:RET
+EDGES|PARAMETER_LINK first#1 -> first#2
+EDGES|PARAMETER_LINK second#1 -> second#2
+EDGES|PARAMETER_LINK unknown#1 -> unknown#2
+EDGES|REF NB:<global> -> NS:<global>
+EDGES|REF NB:<includes>:<global> -> NS:<global>
+EDGES|REF NB:main.c:<global> -> NS:<global>
+EDGES|REF T:ANY -> D:ANY
+EDGES|REF T:RET -> D:RET
+EDGES|REF T:first -> D:first
+EDGES|REF T:second -> D:second
+EDGES|REF T:unknown -> D:unknown
+EDGES|REF T:void -> D:void
+EDGES|REF first#5 -> first#1
+EDGES|REF main.c:<global>#23 -> first#0
+EDGES|REF main.c:<global>#24 -> main.c:<global>#8
+EDGES|REF main.c:<global>#25 -> main.c:<global>#15
+EDGES|REF second#5 -> second#1
+EDGES|REF unknown#5 -> unknown#1
+EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+EDGES|SOURCE_FILE D:ANY -> F:<includes>
+EDGES|SOURCE_FILE D:RET -> F:<includes>
+EDGES|SOURCE_FILE D:first -> F:main.c
+EDGES|SOURCE_FILE D:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE D:second -> F:main.c
+EDGES|SOURCE_FILE D:unknown -> F:main.c
+EDGES|SOURCE_FILE D:void -> F:<includes>
+EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
+EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>
+EDGES|SOURCE_FILE NB:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE first#0 -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#0 -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#15 -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#8 -> F:main.c
+FLOWS|REACHING_DEF[<RET>] first#4 -> first#6
+FLOWS|REACHING_DEF[<RET>] second#4 -> second#6
+FLOWS|REACHING_DEF[<RET>] unknown#4 -> unknown#6
+FLOWS|REACHING_DEF[] first#0 -> first#1
+FLOWS|REACHING_DEF[] first#0 -> first#5
+FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#23
+FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#24
+FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#25
+FLOWS|REACHING_DEF[] main.c:<global>#15 -> unknown#1
+FLOWS|REACHING_DEF[] main.c:<global>#15 -> unknown#5
+FLOWS|REACHING_DEF[] main.c:<global>#8 -> second#1
+FLOWS|REACHING_DEF[] main.c:<global>#8 -> second#5
+FLOWS|REACHING_DEF[x] first#1 -> first#2
+FLOWS|REACHING_DEF[x] first#1 -> first#5
+FLOWS|REACHING_DEF[x] first#1 -> first#6
+FLOWS|REACHING_DEF[x] first#5 -> first#4
+FLOWS|REACHING_DEF[x] second#1 -> second#2
+FLOWS|REACHING_DEF[x] second#1 -> second#5
+FLOWS|REACHING_DEF[x] second#1 -> second#6
+FLOWS|REACHING_DEF[x] second#5 -> second#4
+FLOWS|REACHING_DEF[x] unknown#1 -> unknown#2
+FLOWS|REACHING_DEF[x] unknown#1 -> unknown#5
+FLOWS|REACHING_DEF[x] unknown#1 -> unknown#6
+FLOWS|REACHING_DEF[x] unknown#5 -> unknown#4

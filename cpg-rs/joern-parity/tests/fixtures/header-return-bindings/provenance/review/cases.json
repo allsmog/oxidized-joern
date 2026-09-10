@@ -1,0 +1,18 @@
+{
+  "review_anonymous_alias": {
+    "api.h": "typedef struct { int value; } Item;\nItem get_item(int value);\n",
+    "main.c": "#include \"api.h\"\nint read_value(int value) { get_item(value); return value; }\n"
+  },
+  "review_invalid_redeclaration": {
+    "api.h": "typedef int T;\ntypedef unsigned UNKNOWN T;\nT get_value(int value);\n",
+    "main.c": "#include \"api.h\"\nint read_value(int value) { return get_value(value); }\n"
+  },
+  "review_late_alias": {
+    "api.h": "T get_value(int value);\ntypedef int T;\n",
+    "main.c": "#include \"api.h\"\nint read_value(int value) { return get_value(value); }\n"
+  },
+  "review_named_alias": {
+    "api.h": "typedef struct Tag { int value; } Item;\nItem get_item(int value);\n",
+    "main.c": "#include \"api.h\"\nint read_value(int value) { get_item(value); return value; }\n"
+  }
+}

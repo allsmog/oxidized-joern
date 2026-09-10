@@ -1,0 +1,196 @@
+--- accepted/import.rs
++++ frozen-v2/import.rs
+@@ -25,6 +25,14 @@
+ }
+ 
+ pub fn graph_from_canonical_dump(dump: &str, sources: &[(String, String)]) -> Cpg {
++    graph_from_canonical_dump_with_origins(dump, sources, &[])
++}
++
++pub(crate) fn graph_from_canonical_dump_with_origins(
++    dump: &str,
++    sources: &[(String, String)],
++    origins: &[crate::exact::IncludedSourceOrigin],
++) -> Cpg {
+     let mut raw_nodes = Vec::new();
+     let mut raw_edges = Vec::new();
+     let mut raw_ast_edges = Vec::new();
+@@ -200,6 +208,24 @@
+         raw_to_node.push(node);
+     }
+ 
++    // Resolve only declaration roots while the address table is live. The
++    // descendant ranges remain in the graph, so no per-node origin map survives
++    // into location matching. Duplicate method views resolve to the same IDs.
++    let mut included_roots = HashMap::new();
++    for origin in origins {
++        let first = resolve_address(
++            &address_to_raw,
++            &format!("{}#{}", origin.block, origin.nodes.start),
++        );
++        let depth = raw_nodes[first].depth;
++        for ordinal in origin.nodes.clone() {
++            let raw = resolve_address(&address_to_raw, &format!("{}#{ordinal}", origin.block));
++            if raw_nodes[raw].depth == depth {
++                included_roots.entry(raw_to_node[raw]).or_insert(origin);
++            }
++        }
++    }
++
+     // All raw properties and file ownership have now been copied into the graph.
+     drop(raw_nodes);
+     drop(source_files);
+@@ -222,7 +248,7 @@
+         cpg.mark_layer_authoritative(layer);
+     }
+ 
+-    assign_source_lines(&mut cpg, sources);
++    assign_source_lines(&mut cpg, sources, &included_roots);
+     cpg
+ }
+ 
+@@ -833,7 +859,12 @@
+ /// order. Method CODE preserves the parsed function text; anchor it first, then
+ /// match complete tokens inside that source range. Children may overlap their
+ /// parent's expression, while ordinary siblings consume source monotonically.
+-fn assign_source_lines(cpg: &mut Cpg, sources: &[(String, String)]) {
++fn assign_source_lines(
++    cpg: &mut Cpg,
++    sources: &[(String, String)],
++    included_roots: &HashMap<NodeId, &crate::exact::IncludedSourceOrigin>,
++) {
++    let foreign_roots: HashSet<_> = included_roots.keys().copied().collect();
+     let mut parser = tree_sitter::Parser::new();
+     parser
+         .set_language(&tree_sitter_c::LANGUAGE.into())
+@@ -932,7 +963,28 @@
+                 &tokens,
+                 range.clone(),
+                 tokens[range.start].line,
++                &foreign_roots,
+             );
++        }
++        // The header's physical tokens locate included declaration roots after
++        // caller searches have skipped them. Header nodes keep their caller AST
++        // owner and acquire no invented FILENAME or SOURCE_FILE properties.
++        for (&root, origin) in included_roots {
++            if origin.file != *path {
++                continue;
++            }
++            let start = tokens.partition_point(|token| token.start < origin.span.start);
++            let end = tokens.partition_point(|token| token.start < origin.span.end);
++            if start < end {
++                locate_ast(
++                    cpg,
++                    root,
++                    &tokens,
++                    start..end,
++                    tokens[start].line,
++                    &foreign_roots,
++                );
++            }
+         }
+         // Global declarations have their own source stream. Excluding function
+         // definitions prevents a repeated initializer from matching a local one.
+@@ -948,7 +1000,14 @@
+         if !global_tokens.is_empty() {
+             for &method in &methods {
+                 if cpg.name_of(method) == Some("<global>") {
+-                    locate_ast(cpg, method, &global_tokens, 0..global_tokens.len(), 1);
++                    locate_ast(
++                        cpg,
++                        method,
++                        &global_tokens,
++                        0..global_tokens.len(),
++                        1,
++                        &foreign_roots,
++                    );
+                 }
+             }
+         }
+@@ -1075,6 +1134,7 @@
+     tokens: &[SourceToken<'_>],
+     range: std::ops::Range<usize>,
+     inherited_line: u32,
++    foreign_roots: &HashSet<NodeId>,
+ ) -> usize {
+     let kind = cpg.kind_of(node);
+     let code = cpg.code_of(node).unwrap_or("");
+@@ -1141,7 +1201,7 @@
+     let mut children: Vec<_> = cpg.out_kind(node, EdgeKind::Ast).collect();
+     children.sort_by_key(|&child| (cpg.order_of(child), child));
+     for child in children {
+-        if cpg.kind_of(child) == NodeKind::Method {
++        if cpg.kind_of(child) == NodeKind::Method || foreign_roots.contains(&child) {
+             continue;
+         }
+         // A normalized identifier condition introduces a zero/NULL literal
+@@ -1191,6 +1251,7 @@
+             tokens,
+             declaration_span.unwrap_or(next..child_range.end),
+             line,
++            foreign_roots,
+         );
+         // LOCAL and mirrored parameters describe overlapping source with the
+         // assignment/parameter nodes that follow, and do not consume it.
+@@ -1243,6 +1304,60 @@
+             index += 1;
+         }
+         nodes
++    }
++
++    #[test]
++    fn included_initializer_uses_header_lines_without_consuming_caller_calls() {
++        use cpg_frontend::Frontend;
++        // Full pinned include/inline observations separately retain columns;
++        // the shared Cpg currently exposes line coordinates only.
++        for included in [true, false] {
++            let main = if included {
++                "int consume(int value);\nint probe(void) {\n#include \"api.h\"\n    consume(7);\n    return included;\n}\n"
++            } else {
++                "int consume(int value);\nint probe(void) {\n    int included = consume(7);\n    consume(7);\n    return included;\n}\n"
++            };
++            let mut sources = vec![("locations.c", main)];
++            if included {
++                sources.push(("api.h", "int included = consume(7);\n"));
++            }
++            let cpg = crate::CFrontend::new().build_project(&sources).unwrap();
++            let nodes = method_nodes(&cpg, "probe");
++            let initializer_line = if included { 1 } else { 3 };
++            let local = nodes
++                .iter()
++                .copied()
++                .find(|&node| {
++                    cpg.kind_of(node) == NodeKind::Local && cpg.name_of(node) == Some("included")
++                })
++                .unwrap();
++            assert_eq!(cpg.line_of(local), Some(initializer_line));
++            assert_eq!(cpg.type_full_name_of(local), Some("int"));
++            let mut call_lines: Vec<_> = nodes
++                .iter()
++                .copied()
++                .filter(|&node| {
++                    cpg.kind_of(node) == NodeKind::Call && cpg.name_of(node) == Some("consume")
++                })
++                .map(|node| cpg.line_of(node).unwrap())
++                .collect();
++            call_lines.sort_unstable();
++            assert_eq!(call_lines, [initializer_line, 4]);
++            let ret = nodes
++                .iter()
++                .copied()
++                .find(|&node| cpg.kind_of(node) == NodeKind::Return)
++                .unwrap();
++            assert_eq!(cpg.line_of(ret), Some(5));
++            for node in nodes.iter().copied().filter(|&node| {
++                matches!(
++                    cpg.kind_of(node),
++                    NodeKind::Local | NodeKind::Call | NodeKind::Identifier | NodeKind::Literal
++                )
++            }) {
++                assert_eq!(cpg.out_kind(node, EdgeKind::SourceFile).count(), 0);
++            }
++        }
+     }
+ 
+     #[test]

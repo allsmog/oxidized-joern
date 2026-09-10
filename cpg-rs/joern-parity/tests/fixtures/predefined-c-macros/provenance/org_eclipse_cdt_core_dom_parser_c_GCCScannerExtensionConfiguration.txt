@@ -1,0 +1,175 @@
+Compiled from "GCCScannerExtensionConfiguration.java"
+public class org.eclipse.cdt.core.dom.parser.c.GCCScannerExtensionConfiguration extends org.eclipse.cdt.core.dom.parser.GNUScannerExtensionConfiguration {
+  private static final int VERSION_4_2;
+
+  private static final int VERSION_4_7;
+
+  private static org.eclipse.cdt.core.dom.parser.c.GCCScannerExtensionConfiguration CONFIG;
+
+  private static org.eclipse.cdt.core.dom.parser.c.GCCScannerExtensionConfiguration CONFIG_4_2;
+
+  private static org.eclipse.cdt.core.dom.parser.c.GCCScannerExtensionConfiguration CONFIG_4_7;
+
+  private static org.eclipse.cdt.core.dom.parser.c.GCCScannerExtensionConfiguration CONFIG_MSVC;
+
+  static {};
+    Code:
+       0: iconst_4
+       1: iconst_2
+       2: invokestatic  #16                 // Method version:(II)I
+       5: putstatic     #20                 // Field VERSION_4_2:I
+       8: iconst_4
+       9: bipush        7
+      11: invokestatic  #16                 // Method version:(II)I
+      14: putstatic     #22                 // Field VERSION_4_7:I
+      17: new           #1                  // class org/eclipse/cdt/core/dom/parser/c/GCCScannerExtensionConfiguration
+      20: dup
+      21: invokespecial #24                 // Method "<init>":()V
+      24: putstatic     #27                 // Field CONFIG:Lorg/eclipse/cdt/core/dom/parser/c/GCCScannerExtensionConfiguration;
+      27: new           #1                  // class org/eclipse/cdt/core/dom/parser/c/GCCScannerExtensionConfiguration
+      30: dup
+      31: getstatic     #20                 // Field VERSION_4_2:I
+      34: invokespecial #29                 // Method "<init>":(I)V
+      37: putstatic     #32                 // Field CONFIG_4_2:Lorg/eclipse/cdt/core/dom/parser/c/GCCScannerExtensionConfiguration;
+      40: new           #1                  // class org/eclipse/cdt/core/dom/parser/c/GCCScannerExtensionConfiguration
+      43: dup
+      44: getstatic     #22                 // Field VERSION_4_7:I
+      47: invokespecial #29                 // Method "<init>":(I)V
+      50: putstatic     #34                 // Field CONFIG_4_7:Lorg/eclipse/cdt/core/dom/parser/c/GCCScannerExtensionConfiguration;
+      53: new           #1                  // class org/eclipse/cdt/core/dom/parser/c/GCCScannerExtensionConfiguration
+      56: dup
+      57: getstatic     #36                 // Field org/eclipse/cdt/core/dom/parser/c/GCCScannerExtensionConfiguration$CompilerType.MSVC:Lorg/eclipse/cdt/core/dom/parser/c/GCCScannerExtensionConfiguration$CompilerType;
+      60: iconst_0
+      61: invokespecial #42                 // Method "<init>":(Lorg/eclipse/cdt/core/dom/parser/c/GCCScannerExtensionConfiguration$CompilerType;I)V
+      64: putstatic     #45                 // Field CONFIG_MSVC:Lorg/eclipse/cdt/core/dom/parser/c/GCCScannerExtensionConfiguration;
+      67: return
+
+  public static org.eclipse.cdt.core.dom.parser.c.GCCScannerExtensionConfiguration getInstance();
+    Code:
+       0: getstatic     #27                 // Field CONFIG:Lorg/eclipse/cdt/core/dom/parser/c/GCCScannerExtensionConfiguration;
+       3: areturn
+
+  public static org.eclipse.cdt.core.dom.parser.c.GCCScannerExtensionConfiguration getInstance(org.eclipse.cdt.core.parser.IScannerInfo);
+    Code:
+       0: aload_0
+       1: ifnull        111
+       4: aload_0
+       5: invokeinterface #52,  1           // InterfaceMethod org/eclipse/cdt/core/parser/IScannerInfo.getDefinedSymbols:()Ljava/util/Map;
+      10: astore_1
+      11: aload_1
+      12: ldc           #58                 // String _MSC_VER
+      14: invokeinterface #60,  2           // InterfaceMethod java/util/Map.get:(Ljava/lang/Object;)Ljava/lang/Object;
+      19: checkcast     #66                 // class java/lang/String
+      22: astore_2
+      23: aload_2
+      24: ifnull        41
+      27: aload_2
+      28: invokestatic  #68                 // Method java/lang/Integer.valueOf:(Ljava/lang/String;)Ljava/lang/Integer;
+      31: invokevirtual #74                 // Method java/lang/Integer.intValue:()I
+      34: ifle          41
+      37: getstatic     #45                 // Field CONFIG_MSVC:Lorg/eclipse/cdt/core/dom/parser/c/GCCScannerExtensionConfiguration;
+      40: areturn
+      41: aload_1
+      42: ldc           #78                 // String __GNUC__
+      44: invokeinterface #60,  2           // InterfaceMethod java/util/Map.get:(Ljava/lang/Object;)Ljava/lang/Object;
+      49: checkcast     #66                 // class java/lang/String
+      52: invokestatic  #68                 // Method java/lang/Integer.valueOf:(Ljava/lang/String;)Ljava/lang/Integer;
+      55: invokevirtual #74                 // Method java/lang/Integer.intValue:()I
+      58: istore_3
+      59: aload_1
+      60: ldc           #80                 // String __GNUC_MINOR__
+      62: invokeinterface #60,  2           // InterfaceMethod java/util/Map.get:(Ljava/lang/Object;)Ljava/lang/Object;
+      67: checkcast     #66                 // class java/lang/String
+      70: invokestatic  #68                 // Method java/lang/Integer.valueOf:(Ljava/lang/String;)Ljava/lang/Integer;
+      73: invokevirtual #74                 // Method java/lang/Integer.intValue:()I
+      76: istore        4
+      78: iload_3
+      79: iload         4
+      81: invokestatic  #16                 // Method version:(II)I
+      84: istore        5
+      86: iload         5
+      88: getstatic     #22                 // Field VERSION_4_7:I
+      91: if_icmplt     98
+      94: getstatic     #34                 // Field CONFIG_4_7:Lorg/eclipse/cdt/core/dom/parser/c/GCCScannerExtensionConfiguration;
+      97: areturn
+      98: iload         5
+     100: getstatic     #20                 // Field VERSION_4_2:I
+     103: if_icmplt     111
+     106: getstatic     #32                 // Field CONFIG_4_2:Lorg/eclipse/cdt/core/dom/parser/c/GCCScannerExtensionConfiguration;
+     109: areturn
+     110: astore_1
+     111: getstatic     #27                 // Field CONFIG:Lorg/eclipse/cdt/core/dom/parser/c/GCCScannerExtensionConfiguration;
+     114: areturn
+    Exception table:
+       from    to  target type
+           4    40   110   Class java/lang/Exception
+          41    97   110   Class java/lang/Exception
+          98   109   110   Class java/lang/Exception
+
+  public org.eclipse.cdt.core.dom.parser.c.GCCScannerExtensionConfiguration();
+    Code:
+       0: aload_0
+       1: iconst_0
+       2: invokespecial #29                 // Method "<init>":(I)V
+       5: return
+
+  public org.eclipse.cdt.core.dom.parser.c.GCCScannerExtensionConfiguration(int);
+    Code:
+       0: aload_0
+       1: getstatic     #97                 // Field org/eclipse/cdt/core/dom/parser/c/GCCScannerExtensionConfiguration$CompilerType.GCC:Lorg/eclipse/cdt/core/dom/parser/c/GCCScannerExtensionConfiguration$CompilerType;
+       4: iload_1
+       5: invokespecial #42                 // Method "<init>":(Lorg/eclipse/cdt/core/dom/parser/c/GCCScannerExtensionConfiguration$CompilerType;I)V
+       8: return
+
+  public org.eclipse.cdt.core.dom.parser.c.GCCScannerExtensionConfiguration(org.eclipse.cdt.core.dom.parser.c.GCCScannerExtensionConfiguration$CompilerType, int);
+    Code:
+       0: aload_0
+       1: invokespecial #100                // Method org/eclipse/cdt/core/dom/parser/GNUScannerExtensionConfiguration."<init>":()V
+       4: aload_0
+       5: ldc           #101                // String __null
+       7: ldc           #103                // String (void *)0
+       9: invokevirtual #105                // Method addMacro:(Ljava/lang/String;Ljava/lang/String;)V
+      12: aload_0
+      13: ldc           #109                // String __builtin_offsetof(T,m)
+      15: ldc           #111                // String ((size_t) &((T *)0)->m)
+      17: invokevirtual #105                // Method addMacro:(Ljava/lang/String;Ljava/lang/String;)V
+      20: aload_1
+      21: getstatic     #36                 // Field org/eclipse/cdt/core/dom/parser/c/GCCScannerExtensionConfiguration$CompilerType.MSVC:Lorg/eclipse/cdt/core/dom/parser/c/GCCScannerExtensionConfiguration$CompilerType;
+      24: if_acmpeq     35
+      27: aload_0
+      28: ldc           #113                // String __STDC__
+      30: ldc           #115                // String 1
+      32: invokevirtual #105                // Method addMacro:(Ljava/lang/String;Ljava/lang/String;)V
+      35: iload_2
+      36: getstatic     #20                 // Field VERSION_4_2:I
+      39: if_icmplt     72
+      42: aload_0
+      43: getstatic     #117                // Field org/eclipse/cdt/core/parser/GCCKeywords.cp_decimal32:[C
+      46: sipush        179
+      49: invokevirtual #125                // Method addKeyword:([CI)V
+      52: aload_0
+      53: getstatic     #129                // Field org/eclipse/cdt/core/parser/GCCKeywords.cp_decimal64:[C
+      56: sipush        180
+      59: invokevirtual #125                // Method addKeyword:([CI)V
+      62: aload_0
+      63: getstatic     #132                // Field org/eclipse/cdt/core/parser/GCCKeywords.cp_decimal128:[C
+      66: sipush        181
+      69: invokevirtual #125                // Method addKeyword:([CI)V
+      72: iload_2
+      73: getstatic     #22                 // Field VERSION_4_7:I
+      76: if_icmplt     99
+      79: aload_0
+      80: getstatic     #135                // Field org/eclipse/cdt/core/parser/GCCKeywords.cp__float128:[C
+      83: sipush        176
+      86: invokevirtual #125                // Method addKeyword:([CI)V
+      89: aload_0
+      90: getstatic     #138                // Field org/eclipse/cdt/core/parser/GCCKeywords.cp__int128:[C
+      93: sipush        175
+      96: invokevirtual #125                // Method addKeyword:([CI)V
+      99: return
+
+  public boolean supportMinAndMaxOperators();
+    Code:
+       0: iconst_0
+       1: ireturn
+}

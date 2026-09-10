@@ -1,0 +1,506 @@
+--- Joern
++++ before
+@@ -10,12 +10,6 @@
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+   METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+ 
+-METHOD NAME=M FULL_NAME=M ORDER=0
+-  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+-  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+-  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+-  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+-
+ METHOD NAME=helper CODE=int helper(int); FULL_NAME=helper SIGNATURE=int(int) ORDER=1
+   METHOD_PARAMETER_IN NAME= CODE=int TYPE_FULL_NAME=int ORDER=1
+   METHOD_PARAMETER_OUT NAME= CODE=int TYPE_FULL_NAME=int ORDER=1
+@@ -27,15 +21,20 @@
+     METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+     METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+     BLOCK CODE={ int y=out(x,F,M(x)); { int y=M(x); out(y,"%d",M(x)); } return y; } TYPE_FULL_NAME=void ORDER=2
+-      LOCAL NAME=F CODE=<unknown> F TYPE_FULL_NAME=ANY ORDER=0
++      LOCAL NAME=UNDEF CODE=<unknown> UNDEF TYPE_FULL_NAME=ANY ORDER=0
+       LOCAL NAME=y CODE=int y TYPE_FULL_NAME=int ORDER=1
+       CALL NAME=<operator>.assignment CODE=y=out(x,F,M(x)) TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+         IDENTIFIER NAME=y CODE=y TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+-        CALL NAME=out CODE=out(x,F,M(x)) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=out ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+-          IDENTIFIER NAME=x CODE=<unknown> x TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+-          IDENTIFIER NAME=F CODE=<unknown> F TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+-          CALL NAME=M CODE=M(x) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=M ORDER=3 ARGUMENT_INDEX=3 DISPATCH_TYPE=STATIC_DISPATCH
+-            IDENTIFIER NAME=x CODE=<unknown> x TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
++        CALL NAME=out CODE=out(x,F,M(x)) TYPE_FULL_NAME=int METHOD_FULL_NAME=out ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
++          IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
++          CALL NAME=F CODE=F TYPE_FULL_NAME=char* METHOD_FULL_NAME=main.c:F:char*(0) SIGNATURE=char*(0) ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=INLINED
++            BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
++              LITERAL CODE="%" UNDEF "d" TYPE_FULL_NAME=char* ORDER=1
++          CALL NAME=M CODE=M(x) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=main.c:M:ANY(1) SIGNATURE=ANY(1) ORDER=3 ARGUMENT_INDEX=3 DISPATCH_TYPE=INLINED
++            IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
++            BLOCK TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
++              CALL NAME=helper CODE=helper(x) TYPE_FULL_NAME=int METHOD_FULL_NAME=helper ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
++                IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+       BLOCK CODE={ int y=M(x); out(y,"%d",M(x)); } TYPE_FULL_NAME=void ORDER=3
+         LOCAL NAME=y CODE=int y TYPE_FULL_NAME=int ORDER=1
+         CALL NAME=<operator>.assignment CODE=y=M(x) TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+@@ -54,11 +53,15 @@
+               CALL NAME=helper CODE=helper(x) TYPE_FULL_NAME=int METHOD_FULL_NAME=helper ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+                 IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+       RETURN CODE=return y; ORDER=4
+-        IDENTIFIER NAME=y CODE=<unknown> y TYPE_FULL_NAME=int ORDER=1
++        IDENTIFIER NAME=y CODE=y TYPE_FULL_NAME=int ORDER=1
+     METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+   BLOCK TYPE_FULL_NAME=ANY ORDER=1
+     METHOD_REF CODE=test TYPE_FULL_NAME=test METHOD_FULL_NAME=test ORDER=1
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
++
++METHOD NAME=F CODE=#define F "%" UNDEF "d" FULL_NAME=main.c:F:char*(0) SIGNATURE=char*(0) ORDER=1
++  BLOCK TYPE_FULL_NAME=ANY ORDER=1
++  METHOD_RETURN CODE=RET TYPE_FULL_NAME=char* ORDER=2
+ 
+ METHOD NAME=M CODE=#define M(x) helper(x) FULL_NAME=main.c:M:ANY(1) SIGNATURE=ANY(1) ORDER=1
+   METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+@@ -80,15 +83,20 @@
+   METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+   METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+   BLOCK CODE={ int y=out(x,F,M(x)); { int y=M(x); out(y,"%d",M(x)); } return y; } TYPE_FULL_NAME=void ORDER=2
+-    LOCAL NAME=F CODE=<unknown> F TYPE_FULL_NAME=ANY ORDER=0
++    LOCAL NAME=UNDEF CODE=<unknown> UNDEF TYPE_FULL_NAME=ANY ORDER=0
+     LOCAL NAME=y CODE=int y TYPE_FULL_NAME=int ORDER=1
+     CALL NAME=<operator>.assignment CODE=y=out(x,F,M(x)) TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+       IDENTIFIER NAME=y CODE=y TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+-      CALL NAME=out CODE=out(x,F,M(x)) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=out ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+-        IDENTIFIER NAME=x CODE=<unknown> x TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+-        IDENTIFIER NAME=F CODE=<unknown> F TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+-        CALL NAME=M CODE=M(x) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=M ORDER=3 ARGUMENT_INDEX=3 DISPATCH_TYPE=STATIC_DISPATCH
+-          IDENTIFIER NAME=x CODE=<unknown> x TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
++      CALL NAME=out CODE=out(x,F,M(x)) TYPE_FULL_NAME=int METHOD_FULL_NAME=out ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
++        IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
++        CALL NAME=F CODE=F TYPE_FULL_NAME=char* METHOD_FULL_NAME=main.c:F:char*(0) SIGNATURE=char*(0) ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=INLINED
++          BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
++            LITERAL CODE="%" UNDEF "d" TYPE_FULL_NAME=char* ORDER=1
++        CALL NAME=M CODE=M(x) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=main.c:M:ANY(1) SIGNATURE=ANY(1) ORDER=3 ARGUMENT_INDEX=3 DISPATCH_TYPE=INLINED
++          IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
++          BLOCK TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
++            CALL NAME=helper CODE=helper(x) TYPE_FULL_NAME=int METHOD_FULL_NAME=helper ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
++              IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+     BLOCK CODE={ int y=M(x); out(y,"%d",M(x)); } TYPE_FULL_NAME=void ORDER=3
+       LOCAL NAME=y CODE=int y TYPE_FULL_NAME=int ORDER=1
+       CALL NAME=<operator>.assignment CODE=y=M(x) TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+@@ -107,7 +115,7 @@
+             CALL NAME=helper CODE=helper(x) TYPE_FULL_NAME=int METHOD_FULL_NAME=helper ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+               IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+     RETURN CODE=return y; ORDER=4
+-      IDENTIFIER NAME=y CODE=<unknown> y TYPE_FULL_NAME=int ORDER=1
++      IDENTIFIER NAME=y CODE=y TYPE_FULL_NAME=int ORDER=1
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+ 
+ NODES|META_DATA LANGUAGE=NEWC
+@@ -129,62 +137,70 @@
+ NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+ NODES|TYPE NAME=test FULL_NAME=test TYPE_DECL_FULL_NAME=test
+ NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+-EDGES|ARGUMENT test#11 -> test#12
+-EDGES|ARGUMENT test#15 -> test#16
+-EDGES|ARGUMENT test#15 -> test#17
+-EDGES|ARGUMENT test#17 -> test#18
++EDGES|ARGUMENT test#13 -> test#14
++EDGES|ARGUMENT test#16 -> test#17
+ EDGES|ARGUMENT test#20 -> test#21
++EDGES|ARGUMENT test#20 -> test#22
+ EDGES|ARGUMENT test#22 -> test#23
+-EDGES|ARGUMENT test#22 -> test#24
+-EDGES|ARGUMENT test#22 -> test#25
+ EDGES|ARGUMENT test#25 -> test#26
+-EDGES|ARGUMENT test#28 -> test#29
++EDGES|ARGUMENT test#27 -> test#28
++EDGES|ARGUMENT test#27 -> test#29
++EDGES|ARGUMENT test#27 -> test#30
+ EDGES|ARGUMENT test#30 -> test#31
++EDGES|ARGUMENT test#33 -> test#34
++EDGES|ARGUMENT test#35 -> test#36
+ EDGES|ARGUMENT test#6 -> test#7
+ EDGES|ARGUMENT test#6 -> test#8
+ EDGES|ARGUMENT test#8 -> test#10
+-EDGES|ARGUMENT test#8 -> test#11
++EDGES|ARGUMENT test#8 -> test#13
+ EDGES|ARGUMENT test#8 -> test#9
+-EDGES|CALL test#11 -> M#0
+-EDGES|CALL test#15 -> <operator>.assignment#0
+-EDGES|CALL test#17 -> main.c:M:ANY(1)#0
+-EDGES|CALL test#20 -> helper#0
+-EDGES|CALL test#22 -> out#0
+-EDGES|CALL test#25 -> main.c:M:ANY(1)#0
+-EDGES|CALL test#28 -> helper#0
++EDGES|CALL test#10 -> main.c:F:char*(0)#0
++EDGES|CALL test#13 -> main.c:M:ANY(1)#0
++EDGES|CALL test#16 -> helper#0
++EDGES|CALL test#20 -> <operator>.assignment#0
++EDGES|CALL test#22 -> main.c:M:ANY(1)#0
++EDGES|CALL test#25 -> helper#0
++EDGES|CALL test#27 -> out#0
++EDGES|CALL test#30 -> main.c:M:ANY(1)#0
++EDGES|CALL test#33 -> helper#0
+ EDGES|CALL test#6 -> <operator>.assignment#0
+ EDGES|CALL test#8 -> out#0
+ EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+ EDGES|CFG <operator>.assignment#0 -> <operator>.assignment#5
+-EDGES|CFG M#0 -> M#4
+ EDGES|CFG helper#0 -> helper#4
+-EDGES|CFG main.c:<global>#0 -> main.c:<global>#35
++EDGES|CFG main.c:<global>#0 -> main.c:<global>#40
+ EDGES|CFG main.c:<global>#1 -> test#7
+-EDGES|CFG main.c:<global>#35 -> main.c:<global>#36
++EDGES|CFG main.c:<global>#40 -> main.c:<global>#41
++EDGES|CFG main.c:F:char*(0)#0 -> main.c:F:char*(0)#2
+ EDGES|CFG main.c:M:ANY(1)#0 -> main.c:M:ANY(1)#4
+ EDGES|CFG out#0 -> out#8
+ EDGES|CFG test#10 -> test#12
+-EDGES|CFG test#11 -> test#8
+-EDGES|CFG test#12 -> test#11
+-EDGES|CFG test#13 -> test#31
+-EDGES|CFG test#15 -> test#23
+-EDGES|CFG test#16 -> test#18
+-EDGES|CFG test#17 -> test#15
+-EDGES|CFG test#17 -> test#21
+-EDGES|CFG test#18 -> test#17
+-EDGES|CFG test#20 -> test#15
+-EDGES|CFG test#21 -> test#20
+-EDGES|CFG test#22 -> test#13
+-EDGES|CFG test#23 -> test#24
+-EDGES|CFG test#24 -> test#26
+-EDGES|CFG test#25 -> test#22
+-EDGES|CFG test#25 -> test#29
++EDGES|CFG test#10 -> test#14
++EDGES|CFG test#12 -> test#14
++EDGES|CFG test#13 -> test#17
++EDGES|CFG test#13 -> test#8
++EDGES|CFG test#14 -> test#13
++EDGES|CFG test#16 -> test#8
++EDGES|CFG test#17 -> test#16
++EDGES|CFG test#18 -> test#36
++EDGES|CFG test#20 -> test#28
++EDGES|CFG test#21 -> test#23
++EDGES|CFG test#22 -> test#20
++EDGES|CFG test#22 -> test#26
++EDGES|CFG test#23 -> test#22
++EDGES|CFG test#25 -> test#20
+ EDGES|CFG test#26 -> test#25
+-EDGES|CFG test#28 -> test#22
+-EDGES|CFG test#29 -> test#28
+-EDGES|CFG test#30 -> test#32
++EDGES|CFG test#27 -> test#18
++EDGES|CFG test#28 -> test#29
++EDGES|CFG test#29 -> test#31
++EDGES|CFG test#30 -> test#27
++EDGES|CFG test#30 -> test#34
+ EDGES|CFG test#31 -> test#30
+-EDGES|CFG test#6 -> test#16
++EDGES|CFG test#33 -> test#27
++EDGES|CFG test#34 -> test#33
++EDGES|CFG test#35 -> test#37
++EDGES|CFG test#36 -> test#35
++EDGES|CFG test#6 -> test#21
+ EDGES|CFG test#7 -> test#9
+ EDGES|CFG test#8 -> test#6
+ EDGES|CFG test#9 -> test#10
+@@ -193,6 +209,7 @@
+ EDGES|CONTAINS D:main.c:<global> -> D:test
+ EDGES|CONTAINS D:main.c:<global> -> helper#0
+ EDGES|CONTAINS D:main.c:<global> -> main.c:<global>#0
++EDGES|CONTAINS D:main.c:<global> -> main.c:F:char*(0)#0
+ EDGES|CONTAINS D:main.c:<global> -> main.c:M:ANY(1)#0
+ EDGES|CONTAINS D:main.c:<global> -> out#0
+ EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+@@ -201,20 +218,19 @@
+ EDGES|CONTAINS F:<includes> -> D:int
+ EDGES|CONTAINS F:<includes> -> D:void
+ EDGES|CONTAINS F:main.c -> D:main.c:<global>
+-EDGES|CONTAINS M#0 -> M#2
+ EDGES|CONTAINS helper#0 -> helper#3
+ EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#1
+-EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#34
+-EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#35
++EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#39
++EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#40
+ EDGES|CONTAINS main.c:<global>#1 -> test#10
+ EDGES|CONTAINS main.c:<global>#1 -> test#11
+ EDGES|CONTAINS main.c:<global>#1 -> test#12
+ EDGES|CONTAINS main.c:<global>#1 -> test#13
++EDGES|CONTAINS main.c:<global>#1 -> test#14
+ EDGES|CONTAINS main.c:<global>#1 -> test#15
+ EDGES|CONTAINS main.c:<global>#1 -> test#16
+ EDGES|CONTAINS main.c:<global>#1 -> test#17
+ EDGES|CONTAINS main.c:<global>#1 -> test#18
+-EDGES|CONTAINS main.c:<global>#1 -> test#19
+ EDGES|CONTAINS main.c:<global>#1 -> test#20
+ EDGES|CONTAINS main.c:<global>#1 -> test#21
+ EDGES|CONTAINS main.c:<global>#1 -> test#22
+@@ -228,10 +244,16 @@
+ EDGES|CONTAINS main.c:<global>#1 -> test#3
+ EDGES|CONTAINS main.c:<global>#1 -> test#30
+ EDGES|CONTAINS main.c:<global>#1 -> test#31
++EDGES|CONTAINS main.c:<global>#1 -> test#32
++EDGES|CONTAINS main.c:<global>#1 -> test#33
++EDGES|CONTAINS main.c:<global>#1 -> test#34
++EDGES|CONTAINS main.c:<global>#1 -> test#35
++EDGES|CONTAINS main.c:<global>#1 -> test#36
+ EDGES|CONTAINS main.c:<global>#1 -> test#6
+ EDGES|CONTAINS main.c:<global>#1 -> test#7
+ EDGES|CONTAINS main.c:<global>#1 -> test#8
+ EDGES|CONTAINS main.c:<global>#1 -> test#9
++EDGES|CONTAINS main.c:F:char*(0)#0 -> main.c:F:char*(0)#1
+ EDGES|CONTAINS main.c:M:ANY(1)#0 -> main.c:M:ANY(1)#3
+ EDGES|CONTAINS out#0 -> out#7
+ EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+@@ -242,17 +264,15 @@
+ EDGES|EVAL_TYPE <operator>.assignment#4 -> T:ANY
+ EDGES|EVAL_TYPE <operator>.assignment#5 -> T:ANY
+ EDGES|EVAL_TYPE <operator>.assignment#6 -> T:ANY
+-EDGES|EVAL_TYPE M#1 -> T:ANY
+-EDGES|EVAL_TYPE M#2 -> T:ANY
+-EDGES|EVAL_TYPE M#3 -> T:ANY
+-EDGES|EVAL_TYPE M#4 -> T:ANY
+ EDGES|EVAL_TYPE helper#1 -> T:int
+ EDGES|EVAL_TYPE helper#2 -> T:int
+ EDGES|EVAL_TYPE helper#3 -> T:ANY
+ EDGES|EVAL_TYPE helper#4 -> T:int
+-EDGES|EVAL_TYPE main.c:<global>#34 -> T:ANY
+-EDGES|EVAL_TYPE main.c:<global>#35 -> T:test
+-EDGES|EVAL_TYPE main.c:<global>#36 -> T:ANY
++EDGES|EVAL_TYPE main.c:<global>#39 -> T:ANY
++EDGES|EVAL_TYPE main.c:<global>#40 -> T:test
++EDGES|EVAL_TYPE main.c:<global>#41 -> T:ANY
++EDGES|EVAL_TYPE main.c:F:char*(0)#1 -> T:ANY
++EDGES|EVAL_TYPE main.c:F:char*(0)#2 -> T:char*
+ EDGES|EVAL_TYPE main.c:M:ANY(1)#1 -> T:ANY
+ EDGES|EVAL_TYPE main.c:M:ANY(1)#2 -> T:ANY
+ EDGES|EVAL_TYPE main.c:M:ANY(1)#3 -> T:ANY
+@@ -266,39 +286,43 @@
+ EDGES|EVAL_TYPE out#7 -> T:ANY
+ EDGES|EVAL_TYPE out#8 -> T:int
+ EDGES|EVAL_TYPE test#1 -> T:int
+-EDGES|EVAL_TYPE test#10 -> T:ANY
++EDGES|EVAL_TYPE test#10 -> T:char*
+ EDGES|EVAL_TYPE test#11 -> T:ANY
+-EDGES|EVAL_TYPE test#12 -> T:int
+-EDGES|EVAL_TYPE test#13 -> T:void
++EDGES|EVAL_TYPE test#12 -> T:char*
++EDGES|EVAL_TYPE test#13 -> T:ANY
+ EDGES|EVAL_TYPE test#14 -> T:int
+-EDGES|EVAL_TYPE test#15 -> T:void
++EDGES|EVAL_TYPE test#15 -> T:ANY
+ EDGES|EVAL_TYPE test#16 -> T:int
+-EDGES|EVAL_TYPE test#17 -> T:ANY
+-EDGES|EVAL_TYPE test#18 -> T:int
+-EDGES|EVAL_TYPE test#19 -> T:ANY
++EDGES|EVAL_TYPE test#17 -> T:int
++EDGES|EVAL_TYPE test#18 -> T:void
++EDGES|EVAL_TYPE test#19 -> T:int
+ EDGES|EVAL_TYPE test#2 -> T:int
+-EDGES|EVAL_TYPE test#20 -> T:int
++EDGES|EVAL_TYPE test#20 -> T:void
+ EDGES|EVAL_TYPE test#21 -> T:int
+-EDGES|EVAL_TYPE test#22 -> T:int
++EDGES|EVAL_TYPE test#22 -> T:ANY
+ EDGES|EVAL_TYPE test#23 -> T:int
+-EDGES|EVAL_TYPE test#24 -> T:char*
+-EDGES|EVAL_TYPE test#25 -> T:ANY
++EDGES|EVAL_TYPE test#24 -> T:ANY
++EDGES|EVAL_TYPE test#25 -> T:int
+ EDGES|EVAL_TYPE test#26 -> T:int
+-EDGES|EVAL_TYPE test#27 -> T:ANY
++EDGES|EVAL_TYPE test#27 -> T:int
+ EDGES|EVAL_TYPE test#28 -> T:int
+-EDGES|EVAL_TYPE test#29 -> T:int
++EDGES|EVAL_TYPE test#29 -> T:char*
+ EDGES|EVAL_TYPE test#3 -> T:void
++EDGES|EVAL_TYPE test#30 -> T:ANY
+ EDGES|EVAL_TYPE test#31 -> T:int
+-EDGES|EVAL_TYPE test#32 -> T:int
++EDGES|EVAL_TYPE test#32 -> T:ANY
++EDGES|EVAL_TYPE test#33 -> T:int
++EDGES|EVAL_TYPE test#34 -> T:int
++EDGES|EVAL_TYPE test#36 -> T:int
++EDGES|EVAL_TYPE test#37 -> T:int
+ EDGES|EVAL_TYPE test#4 -> T:ANY
+ EDGES|EVAL_TYPE test#5 -> T:int
+ EDGES|EVAL_TYPE test#6 -> T:void
+ EDGES|EVAL_TYPE test#7 -> T:int
+-EDGES|EVAL_TYPE test#8 -> T:ANY
++EDGES|EVAL_TYPE test#8 -> T:int
+ EDGES|EVAL_TYPE test#9 -> T:int
+ EDGES|PARAMETER_LINK <operator>.assignment#1 -> <operator>.assignment#3
+ EDGES|PARAMETER_LINK <operator>.assignment#4 -> <operator>.assignment#6
+-EDGES|PARAMETER_LINK M#1 -> M#3
+ EDGES|PARAMETER_LINK helper#1 -> helper#2
+ EDGES|PARAMETER_LINK main.c:M:ANY(1)#1 -> main.c:M:ANY(1)#2
+ EDGES|PARAMETER_LINK out#1 -> out#2
+@@ -313,14 +337,13 @@
+ EDGES|REF T:int -> D:int
+ EDGES|REF T:test -> D:test
+ EDGES|REF T:void -> D:void
+-EDGES|REF main.c:<global>#35 -> main.c:<global>#1
+-EDGES|REF test#10 -> test#4
+-EDGES|REF test#12 -> test#1
+-EDGES|REF test#16 -> test#14
+-EDGES|REF test#21 -> test#1
+-EDGES|REF test#23 -> test#14
+-EDGES|REF test#29 -> test#1
+-EDGES|REF test#31 -> test#5
++EDGES|REF main.c:<global>#40 -> main.c:<global>#1
++EDGES|REF test#17 -> test#1
++EDGES|REF test#21 -> test#19
++EDGES|REF test#26 -> test#1
++EDGES|REF test#28 -> test#19
++EDGES|REF test#34 -> test#1
++EDGES|REF test#36 -> test#5
+ EDGES|REF test#7 -> test#5
+ EDGES|REF test#9 -> test#1
+ EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+@@ -336,49 +359,44 @@
+ EDGES|SOURCE_FILE helper#0 -> F:main.c
+ EDGES|SOURCE_FILE main.c:<global>#0 -> F:main.c
+ EDGES|SOURCE_FILE main.c:<global>#1 -> F:main.c
++EDGES|SOURCE_FILE main.c:F:char*(0)#0 -> F:main.c
+ EDGES|SOURCE_FILE main.c:M:ANY(1)#0 -> F:main.c
+ EDGES|SOURCE_FILE out#0 -> F:main.c
+-FLOWS|REACHING_DEF["%d"] test#24 -> test#22
+-FLOWS|REACHING_DEF["%d"] test#24 -> test#23
+-FLOWS|REACHING_DEF["%d"] test#24 -> test#25
+-FLOWS|REACHING_DEF[<RET>] test#30 -> test#32
+-FLOWS|REACHING_DEF[<unknown> F] test#10 -> test#11
+-FLOWS|REACHING_DEF[<unknown> F] test#10 -> test#32
+-FLOWS|REACHING_DEF[<unknown> F] test#10 -> test#8
+-FLOWS|REACHING_DEF[<unknown> F] test#10 -> test#9
+-FLOWS|REACHING_DEF[<unknown> x] test#12 -> test#11
+-FLOWS|REACHING_DEF[<unknown> x] test#12 -> test#9
+-FLOWS|REACHING_DEF[<unknown> x] test#9 -> test#10
+-FLOWS|REACHING_DEF[<unknown> x] test#9 -> test#11
+-FLOWS|REACHING_DEF[<unknown> x] test#9 -> test#18
+-FLOWS|REACHING_DEF[<unknown> x] test#9 -> test#8
+-FLOWS|REACHING_DEF[<unknown> y] test#31 -> test#30
+-FLOWS|REACHING_DEF[M(x)] test#11 -> test#10
+-FLOWS|REACHING_DEF[M(x)] test#11 -> test#8
+-FLOWS|REACHING_DEF[M(x)] test#11 -> test#9
+-FLOWS|REACHING_DEF[M(x)] test#17 -> test#15
+-FLOWS|REACHING_DEF[M(x)] test#17 -> test#16
+-FLOWS|REACHING_DEF[M(x)] test#25 -> test#22
+-FLOWS|REACHING_DEF[M(x)] test#25 -> test#23
+-FLOWS|REACHING_DEF[M(x)] test#25 -> test#32
++FLOWS|REACHING_DEF["%d"] test#29 -> test#27
++FLOWS|REACHING_DEF["%d"] test#29 -> test#28
++FLOWS|REACHING_DEF["%d"] test#29 -> test#30
++FLOWS|REACHING_DEF[<RET>] test#35 -> test#37
++FLOWS|REACHING_DEF[F] test#10 -> test#13
++FLOWS|REACHING_DEF[F] test#10 -> test#37
++FLOWS|REACHING_DEF[F] test#10 -> test#8
++FLOWS|REACHING_DEF[F] test#10 -> test#9
++FLOWS|REACHING_DEF[M(x)] test#13 -> test#10
++FLOWS|REACHING_DEF[M(x)] test#13 -> test#8
++FLOWS|REACHING_DEF[M(x)] test#13 -> test#9
++FLOWS|REACHING_DEF[M(x)] test#22 -> test#20
++FLOWS|REACHING_DEF[M(x)] test#22 -> test#21
++FLOWS|REACHING_DEF[M(x)] test#30 -> test#27
++FLOWS|REACHING_DEF[M(x)] test#30 -> test#28
++FLOWS|REACHING_DEF[M(x)] test#30 -> test#37
+ FLOWS|REACHING_DEF[] <operator>.assignment#0 -> <operator>.assignment#1
+ FLOWS|REACHING_DEF[] <operator>.assignment#0 -> <operator>.assignment#4
+-FLOWS|REACHING_DEF[] M#0 -> M#1
+ FLOWS|REACHING_DEF[] helper#0 -> helper#1
+ FLOWS|REACHING_DEF[] helper#1 -> helper#2
+ FLOWS|REACHING_DEF[] helper#1 -> helper#4
+-FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#35
++FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#40
+ FLOWS|REACHING_DEF[] main.c:<global>#1 -> test#1
+ FLOWS|REACHING_DEF[] main.c:<global>#1 -> test#10
+ FLOWS|REACHING_DEF[] main.c:<global>#1 -> test#12
+-FLOWS|REACHING_DEF[] main.c:<global>#1 -> test#13
++FLOWS|REACHING_DEF[] main.c:<global>#1 -> test#14
++FLOWS|REACHING_DEF[] main.c:<global>#1 -> test#17
+ FLOWS|REACHING_DEF[] main.c:<global>#1 -> test#18
+-FLOWS|REACHING_DEF[] main.c:<global>#1 -> test#21
+ FLOWS|REACHING_DEF[] main.c:<global>#1 -> test#23
+-FLOWS|REACHING_DEF[] main.c:<global>#1 -> test#24
+ FLOWS|REACHING_DEF[] main.c:<global>#1 -> test#26
++FLOWS|REACHING_DEF[] main.c:<global>#1 -> test#28
+ FLOWS|REACHING_DEF[] main.c:<global>#1 -> test#29
+ FLOWS|REACHING_DEF[] main.c:<global>#1 -> test#31
++FLOWS|REACHING_DEF[] main.c:<global>#1 -> test#34
++FLOWS|REACHING_DEF[] main.c:<global>#1 -> test#36
+ FLOWS|REACHING_DEF[] main.c:<global>#1 -> test#9
+ FLOWS|REACHING_DEF[] main.c:M:ANY(1)#0 -> main.c:M:ANY(1)#1
+ FLOWS|REACHING_DEF[] out#0 -> out#1
+@@ -390,40 +408,49 @@
+ FLOWS|REACHING_DEF[] out#3 -> out#8
+ FLOWS|REACHING_DEF[] out#5 -> out#6
+ FLOWS|REACHING_DEF[] out#5 -> out#8
+-FLOWS|REACHING_DEF[helper(x)] test#20 -> test#32
+-FLOWS|REACHING_DEF[helper(x)] test#28 -> test#32
+-FLOWS|REACHING_DEF[out(x,F,M(x))] test#8 -> test#32
++FLOWS|REACHING_DEF[helper(x)] test#16 -> test#37
++FLOWS|REACHING_DEF[helper(x)] test#25 -> test#37
++FLOWS|REACHING_DEF[helper(x)] test#33 -> test#37
++FLOWS|REACHING_DEF[out(x,F,M(x))] test#8 -> test#37
+ FLOWS|REACHING_DEF[out(x,F,M(x))] test#8 -> test#6
+ FLOWS|REACHING_DEF[out(x,F,M(x))] test#8 -> test#7
+-FLOWS|REACHING_DEF[out(y,"%d",M(x))] test#22 -> test#32
++FLOWS|REACHING_DEF[out(y,"%d",M(x))] test#27 -> test#37
+ FLOWS|REACHING_DEF[p1] <operator>.assignment#1 -> <operator>.assignment#3
+ FLOWS|REACHING_DEF[p1] <operator>.assignment#1 -> <operator>.assignment#5
+-FLOWS|REACHING_DEF[p1] M#1 -> M#3
+-FLOWS|REACHING_DEF[p1] M#1 -> M#4
+ FLOWS|REACHING_DEF[p1] main.c:M:ANY(1)#1 -> main.c:M:ANY(1)#2
+ FLOWS|REACHING_DEF[p1] main.c:M:ANY(1)#1 -> main.c:M:ANY(1)#4
+ FLOWS|REACHING_DEF[p2] <operator>.assignment#4 -> <operator>.assignment#5
+ FLOWS|REACHING_DEF[p2] <operator>.assignment#4 -> <operator>.assignment#6
+-FLOWS|REACHING_DEF[x] test#1 -> test#12
++FLOWS|REACHING_DEF[x] test#1 -> test#14
+ FLOWS|REACHING_DEF[x] test#1 -> test#2
+-FLOWS|REACHING_DEF[x] test#18 -> test#17
+-FLOWS|REACHING_DEF[x] test#18 -> test#21
+-FLOWS|REACHING_DEF[x] test#18 -> test#26
+-FLOWS|REACHING_DEF[x] test#21 -> test#20
+-FLOWS|REACHING_DEF[x] test#21 -> test#26
+-FLOWS|REACHING_DEF[x] test#26 -> test#2
++FLOWS|REACHING_DEF[x] test#14 -> test#13
++FLOWS|REACHING_DEF[x] test#14 -> test#17
++FLOWS|REACHING_DEF[x] test#14 -> test#9
++FLOWS|REACHING_DEF[x] test#17 -> test#16
++FLOWS|REACHING_DEF[x] test#17 -> test#9
++FLOWS|REACHING_DEF[x] test#23 -> test#22
++FLOWS|REACHING_DEF[x] test#23 -> test#26
++FLOWS|REACHING_DEF[x] test#23 -> test#31
+ FLOWS|REACHING_DEF[x] test#26 -> test#25
+-FLOWS|REACHING_DEF[x] test#26 -> test#29
+-FLOWS|REACHING_DEF[x] test#26 -> test#32
+-FLOWS|REACHING_DEF[x] test#29 -> test#2
+-FLOWS|REACHING_DEF[x] test#29 -> test#28
+-FLOWS|REACHING_DEF[x] test#29 -> test#32
+-FLOWS|REACHING_DEF[y=M(x)] test#15 -> test#32
+-FLOWS|REACHING_DEF[y=out(x,F,M(x))] test#6 -> test#32
+-FLOWS|REACHING_DEF[y] test#16 -> test#15
+-FLOWS|REACHING_DEF[y] test#16 -> test#23
+-FLOWS|REACHING_DEF[y] test#23 -> test#22
+-FLOWS|REACHING_DEF[y] test#23 -> test#25
+-FLOWS|REACHING_DEF[y] test#23 -> test#31
+-FLOWS|REACHING_DEF[y] test#23 -> test#32
++FLOWS|REACHING_DEF[x] test#26 -> test#31
++FLOWS|REACHING_DEF[x] test#31 -> test#2
++FLOWS|REACHING_DEF[x] test#31 -> test#30
++FLOWS|REACHING_DEF[x] test#31 -> test#34
++FLOWS|REACHING_DEF[x] test#31 -> test#37
++FLOWS|REACHING_DEF[x] test#34 -> test#2
++FLOWS|REACHING_DEF[x] test#34 -> test#33
++FLOWS|REACHING_DEF[x] test#34 -> test#37
++FLOWS|REACHING_DEF[x] test#9 -> test#10
++FLOWS|REACHING_DEF[x] test#9 -> test#13
++FLOWS|REACHING_DEF[x] test#9 -> test#23
++FLOWS|REACHING_DEF[x] test#9 -> test#8
++FLOWS|REACHING_DEF[y=M(x)] test#20 -> test#37
++FLOWS|REACHING_DEF[y=out(x,F,M(x))] test#6 -> test#37
++FLOWS|REACHING_DEF[y] test#21 -> test#20
++FLOWS|REACHING_DEF[y] test#21 -> test#28
++FLOWS|REACHING_DEF[y] test#28 -> test#27
++FLOWS|REACHING_DEF[y] test#28 -> test#30
++FLOWS|REACHING_DEF[y] test#28 -> test#36
++FLOWS|REACHING_DEF[y] test#28 -> test#37
++FLOWS|REACHING_DEF[y] test#36 -> test#35
+ FLOWS|REACHING_DEF[y] test#7 -> test#6

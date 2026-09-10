@@ -1,0 +1,46 @@
+{
+  "previousParityExpectations": {
+    "zlib-1.3.1-core": {
+      "sourceFiles": 26,
+      "nodes": 70524,
+      "graphSha256": "26ecae9626c5059ea63c0973b44a0ff3fe6becea9475db9fa9447b7a0f54525e",
+      "edgesSha256": "ada19b518904aeeb1ab0a08ffef510b9e536f8659e3a6e9b17ae68312c571f17",
+      "exportSha256": "5dc07f543b0b7d835cbdac4aec89ee26dce15e5d15ef271df36bb9b3fa769552",
+      "sarifSha256": "0becad10ba8527f8055f00b8752fa550f27725d671483aa6f0171d81c335aeec",
+      "findings": 0
+    },
+    "lua-5.4.7": {
+      "sourceFiles": 61,
+      "nodes": 121130,
+      "graphSha256": "b637a82fe51e9dd7d010266d6ce9b7a603ecc9e63fffab5d74ed4691c0ab3f64",
+      "edgesSha256": "695835694ee5e0bd96da1039c072f87efd0b0c79d0732599f96a4019a15d459d",
+      "exportSha256": "76e958d83709342f8ecf36c17266582ef290616fed8ce6b492e3af12d2871e3b",
+      "sarifSha256": "0becad10ba8527f8055f00b8752fa550f27725d671483aa6f0171d81c335aeec",
+      "findings": 0
+    }
+  },
+  "integratedMeasurements": [
+    {
+      "edgesSha256": "2126aa766921ee882f31a2a46492626bc7a0e747cc7407e5060fed73c2555aac",
+      "exportSha256": "d4a2234d7fdfc36d74504f1f9fdd3d67675e0fa75d6751d04e2e2ddea86f7e30",
+      "findings": 0,
+      "graphSha256": "13bb2877077a64b49eacc550fdc30b6ffd5383bdb79240445c481e41c418a927",
+      "id": "zlib-1.3.1-core",
+      "nodes": 70607,
+      "peakRssMiB": 518.9,
+      "sarifSha256": "3e7f677599d01bd854c6a5c9a7eace4ff2ba547a5fab09333f41f78335f17bba",
+      "sourceFiles": 26
+    },
+    {
+      "edgesSha256": "4ae6fb033f6f3f8300d2ba7a2837979cff9a616863aa4ca6543b667a2c4efee6",
+      "exportSha256": "feb97e86bac8f8211fceb85485a6a3007dda36468b7e76b9ef9ae95e01832a72",
+      "findings": 3,
+      "graphSha256": "d67d29e8550d77cb90d8a202e85380785f02c4a572bc821e40f4a6b4e4659446",
+      "id": "lua-5.4.7",
+      "nodes": 121857,
+      "peakRssMiB": 734.8,
+      "sarifSha256": "a21710881a907ec91c0b7f409d239a3f1eb855f0d35cb74bff48aa5487ae951d",
+      "sourceFiles": 61
+    }
+  ]
+}

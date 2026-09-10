@@ -1,0 +1,222 @@
+Compiled from "GNUScannerExtensionConfiguration.java"
+public abstract class org.eclipse.cdt.core.dom.parser.GNUScannerExtensionConfiguration extends org.eclipse.cdt.core.dom.parser.AbstractScannerExtensionConfiguration {
+  private static org.eclipse.cdt.core.dom.parser.GNUScannerExtensionConfiguration sInstance;
+
+  protected static int version(int, int);
+    Code:
+       0: iload_0
+       1: bipush        16
+       3: ishl
+       4: iload_1
+       5: iadd
+       6: ireturn
+
+  public org.eclipse.cdt.core.dom.parser.GNUScannerExtensionConfiguration();
+    Code:
+       0: aload_0
+       1: invokespecial #18                 // Method org/eclipse/cdt/core/dom/parser/AbstractScannerExtensionConfiguration."<init>":()V
+       4: aload_0
+       5: ldc           #20                 // String __complex__
+       7: ldc           #22                 // String _Complex
+       9: invokevirtual #24                 // Method addMacro:(Ljava/lang/String;Ljava/lang/String;)V
+      12: aload_0
+      13: ldc           #28                 // String __extension__
+      15: ldc           #30                 // String
+      17: invokevirtual #24                 // Method addMacro:(Ljava/lang/String;Ljava/lang/String;)V
+      20: aload_0
+      21: ldc           #32                 // String __imag__
+      23: ldc           #34                 // String (int)
+      25: invokevirtual #24                 // Method addMacro:(Ljava/lang/String;Ljava/lang/String;)V
+      28: aload_0
+      29: ldc           #36                 // String __real__
+      31: ldc           #34                 // String (int)
+      33: invokevirtual #24                 // Method addMacro:(Ljava/lang/String;Ljava/lang/String;)V
+      36: aload_0
+      37: ldc           #38                 // String __stdcall
+      39: ldc           #30                 // String
+      41: invokevirtual #24                 // Method addMacro:(Ljava/lang/String;Ljava/lang/String;)V
+      44: aload_0
+      45: ldc           #40                 // String __thread
+      47: ldc           #30                 // String
+      49: invokevirtual #24                 // Method addMacro:(Ljava/lang/String;Ljava/lang/String;)V
+      52: aload_0
+      53: ldc           #42                 // String __builtin_va_arg(ap,type)
+      55: ldc           #44                 // String *(typeof(type) *)ap
+      57: invokevirtual #24                 // Method addMacro:(Ljava/lang/String;Ljava/lang/String;)V
+      60: aload_0
+      61: ldc           #46                 // String __builtin_types_compatible_p(x,y)
+      63: ldc           #48                 // String __builtin_types_compatible_p(sizeof(x),sizeof(y))
+      65: invokevirtual #24                 // Method addMacro:(Ljava/lang/String;Ljava/lang/String;)V
+      68: aload_0
+      69: ldc           #50                 // String __offsetof__(x)
+      71: ldc           #52                 // String (x)
+      73: invokevirtual #24                 // Method addMacro:(Ljava/lang/String;Ljava/lang/String;)V
+      76: aload_0
+      77: ldc           #54                 // String __has_include
+      79: ldc           #30                 // String
+      81: invokevirtual #24                 // Method addMacro:(Ljava/lang/String;Ljava/lang/String;)V
+      84: aload_0
+      85: ldc           #56                 // String __has_include_next
+      87: ldc           #30                 // String
+      89: invokevirtual #24                 // Method addMacro:(Ljava/lang/String;Ljava/lang/String;)V
+      92: aload_0
+      93: getstatic     #58                 // Field org/eclipse/cdt/core/parser/Keywords.cINCLUDE_NEXT:[C
+      96: bipush        11
+      98: invokevirtual #66                 // Method addPreprocessorKeyword:([CI)V
+     101: aload_0
+     102: getstatic     #70                 // Field org/eclipse/cdt/core/parser/Keywords.cIMPORT:[C
+     105: bipush        12
+     107: invokevirtual #66                 // Method addPreprocessorKeyword:([CI)V
+     110: aload_0
+     111: getstatic     #73                 // Field org/eclipse/cdt/core/parser/Keywords.cWARNING:[C
+     114: bipush        13
+     116: invokevirtual #66                 // Method addPreprocessorKeyword:([CI)V
+     119: aload_0
+     120: getstatic     #76                 // Field org/eclipse/cdt/core/parser/Keywords.cIDENT:[C
+     123: bipush        -2
+     125: invokevirtual #66                 // Method addPreprocessorKeyword:([CI)V
+     128: aload_0
+     129: getstatic     #79                 // Field org/eclipse/cdt/core/parser/Keywords.cSCCS:[C
+     132: bipush        -2
+     134: invokevirtual #66                 // Method addPreprocessorKeyword:([CI)V
+     137: aload_0
+     138: getstatic     #82                 // Field org/eclipse/cdt/core/parser/Keywords.cASSERT:[C
+     141: bipush        -2
+     143: invokevirtual #66                 // Method addPreprocessorKeyword:([CI)V
+     146: aload_0
+     147: getstatic     #85                 // Field org/eclipse/cdt/core/parser/Keywords.cUNASSERT:[C
+     150: bipush        -2
+     152: invokevirtual #66                 // Method addPreprocessorKeyword:([CI)V
+     155: aload_0
+     156: getstatic     #88                 // Field org/eclipse/cdt/core/parser/GCCKeywords.cp__ALIGNOF:[C
+     159: sipush        151
+     162: invokevirtual #95                 // Method addKeyword:([CI)V
+     165: aload_0
+     166: getstatic     #98                 // Field org/eclipse/cdt/core/parser/GCCKeywords.cp__ALIGNOF__:[C
+     169: sipush        151
+     172: invokevirtual #95                 // Method addKeyword:([CI)V
+     175: aload_0
+     176: getstatic     #101                // Field org/eclipse/cdt/core/parser/GCCKeywords.cp__ASM:[C
+     179: bipush        56
+     181: invokevirtual #95                 // Method addKeyword:([CI)V
+     184: aload_0
+     185: getstatic     #106                // Field org/eclipse/cdt/core/parser/GCCKeywords.cp__ASM__:[C
+     188: bipush        56
+     190: invokevirtual #95                 // Method addKeyword:([CI)V
+     193: aload_0
+     194: getstatic     #109                // Field org/eclipse/cdt/core/parser/GCCKeywords.cp__ATTRIBUTE:[C
+     197: sipush        154
+     200: invokevirtual #95                 // Method addKeyword:([CI)V
+     203: aload_0
+     204: getstatic     #112                // Field org/eclipse/cdt/core/parser/GCCKeywords.cp__ATTRIBUTE__:[C
+     207: sipush        154
+     210: invokevirtual #95                 // Method addKeyword:([CI)V
+     213: aload_0
+     214: getstatic     #115                // Field org/eclipse/cdt/core/parser/GCCKeywords.cp__CONST:[C
+     217: bipush        67
+     219: invokevirtual #95                 // Method addKeyword:([CI)V
+     222: aload_0
+     223: getstatic     #118                // Field org/eclipse/cdt/core/parser/GCCKeywords.cp__CONST__:[C
+     226: bipush        67
+     228: invokevirtual #95                 // Method addKeyword:([CI)V
+     231: aload_0
+     232: getstatic     #121                // Field org/eclipse/cdt/core/parser/GCCKeywords.cp__DECLSPEC:[C
+     235: sipush        155
+     238: invokevirtual #95                 // Method addKeyword:([CI)V
+     241: aload_0
+     242: getstatic     #124                // Field org/eclipse/cdt/core/parser/GCCKeywords.cp__DECLTYPE:[C
+     245: sipush        5204
+     248: invokevirtual #95                 // Method addKeyword:([CI)V
+     251: aload_0
+     252: getstatic     #127                // Field org/eclipse/cdt/core/parser/GCCKeywords.cp__INLINE:[C
+     255: bipush        87
+     257: invokevirtual #95                 // Method addKeyword:([CI)V
+     260: aload_0
+     261: getstatic     #130                // Field org/eclipse/cdt/core/parser/GCCKeywords.cp__INLINE__:[C
+     264: bipush        87
+     266: invokevirtual #95                 // Method addKeyword:([CI)V
+     269: aload_0
+     270: getstatic     #133                // Field org/eclipse/cdt/core/parser/GCCKeywords.cp__RESTRICT:[C
+     273: sipush        137
+     276: invokevirtual #95                 // Method addKeyword:([CI)V
+     279: aload_0
+     280: getstatic     #136                // Field org/eclipse/cdt/core/parser/GCCKeywords.cp__RESTRICT__:[C
+     283: sipush        137
+     286: invokevirtual #95                 // Method addKeyword:([CI)V
+     289: aload_0
+     290: getstatic     #139                // Field org/eclipse/cdt/core/parser/GCCKeywords.cp__VOLATILE:[C
+     293: bipush        124
+     295: invokevirtual #95                 // Method addKeyword:([CI)V
+     298: aload_0
+     299: getstatic     #142                // Field org/eclipse/cdt/core/parser/GCCKeywords.cp__VOLATILE__:[C
+     302: bipush        124
+     304: invokevirtual #95                 // Method addKeyword:([CI)V
+     307: aload_0
+     308: getstatic     #145                // Field org/eclipse/cdt/core/parser/GCCKeywords.cp__SIGNED:[C
+     311: bipush        108
+     313: invokevirtual #95                 // Method addKeyword:([CI)V
+     316: aload_0
+     317: getstatic     #148                // Field org/eclipse/cdt/core/parser/GCCKeywords.cp__SIGNED__:[C
+     320: bipush        108
+     322: invokevirtual #95                 // Method addKeyword:([CI)V
+     325: aload_0
+     326: getstatic     #151                // Field org/eclipse/cdt/core/parser/GCCKeywords.cp__TYPEOF:[C
+     329: sipush        150
+     332: invokevirtual #95                 // Method addKeyword:([CI)V
+     335: aload_0
+     336: getstatic     #154                // Field org/eclipse/cdt/core/parser/GCCKeywords.cp__TYPEOF__:[C
+     339: sipush        150
+     342: invokevirtual #95                 // Method addKeyword:([CI)V
+     345: aload_0
+     346: getstatic     #157                // Field org/eclipse/cdt/core/parser/GCCKeywords.cpTYPEOF:[C
+     349: sipush        150
+     352: invokevirtual #95                 // Method addKeyword:([CI)V
+     355: return
+
+  public boolean support$InIdentifiers();
+    Code:
+       0: iconst_1
+       1: ireturn
+
+  public char[] supportAdditionalNumericLiteralSuffixes();
+    Code:
+       0: ldc           #165                // String ij
+       2: invokevirtual #167                // Method java/lang/String.toCharArray:()[C
+       5: areturn
+
+  public boolean supportUserDefinedLiterals();
+    Code:
+       0: iconst_0
+       1: ireturn
+
+  public boolean supportDigitSeparators();
+    Code:
+       0: iconst_0
+       1: ireturn
+
+  public static org.eclipse.cdt.core.parser.IMacro[] getAdditionalGNUMacros();
+    Code:
+       0: getstatic     #179                // Field sInstance:Lorg/eclipse/cdt/core/dom/parser/GNUScannerExtensionConfiguration;
+       3: ifnonnull     16
+       6: new           #181                // class org/eclipse/cdt/core/dom/parser/GNUScannerExtensionConfiguration$1
+       9: dup
+      10: invokespecial #183                // Method org/eclipse/cdt/core/dom/parser/GNUScannerExtensionConfiguration$1."<init>":()V
+      13: putstatic     #179                // Field sInstance:Lorg/eclipse/cdt/core/dom/parser/GNUScannerExtensionConfiguration;
+      16: getstatic     #179                // Field sInstance:Lorg/eclipse/cdt/core/dom/parser/GNUScannerExtensionConfiguration;
+      19: invokevirtual #184                // Method getAdditionalMacros:()[Lorg/eclipse/cdt/core/parser/IMacro;
+      22: areturn
+
+  public static void addAdditionalGNUKeywords(org.eclipse.cdt.core.parser.util.CharArrayIntMap);
+    Code:
+       0: getstatic     #179                // Field sInstance:Lorg/eclipse/cdt/core/dom/parser/GNUScannerExtensionConfiguration;
+       3: ifnonnull     16
+       6: new           #190                // class org/eclipse/cdt/core/dom/parser/GNUScannerExtensionConfiguration$2
+       9: dup
+      10: invokespecial #192                // Method org/eclipse/cdt/core/dom/parser/GNUScannerExtensionConfiguration$2."<init>":()V
+      13: putstatic     #179                // Field sInstance:Lorg/eclipse/cdt/core/dom/parser/GNUScannerExtensionConfiguration;
+      16: aload_0
+      17: getstatic     #179                // Field sInstance:Lorg/eclipse/cdt/core/dom/parser/GNUScannerExtensionConfiguration;
+      20: invokevirtual #193                // Method getAdditionalKeywords:()Lorg/eclipse/cdt/core/parser/util/CharArrayIntMap;
+      23: invokevirtual #197                // Method org/eclipse/cdt/core/parser/util/CharArrayIntMap.putAll:(Lorg/eclipse/cdt/core/parser/util/CharArrayIntMap;)V
+      26: return
+}

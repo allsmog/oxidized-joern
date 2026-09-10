@@ -1,0 +1,1043 @@
+{
+  "schemaVersion": 1,
+  "status": "accepted bounded C parity checkpoint; full port remains incomplete",
+  "codeRevision": "aba030923a2eb02a7d542875e4274c1b44271608",
+  "baselineCodeRevision": "862e54ee5a4cd6efaff156bb0f844090ebce5e89",
+  "integrationStartedAtUtc": "2026-09-08T13:14:11+00:00",
+  "validationCompletedAtUtc": "2026-09-08T14:46:51.471649+00:00",
+  "integrationAcceptanceElapsedMinutes": 92.67,
+  "timingScope": "Wall-clock integration and acceptance window including parallel agents, reviews, measurements and infrastructure interruptions; not person-hours, from-scratch implementation time, or a model-speed forecast.",
+  "oracle": {
+    "version": "4.0.555",
+    "jdk": "21.0.12",
+    "sourceFiles": 42,
+    "sourceLines": 563,
+    "methodBlocks": 291,
+    "sectionBlocks": 17,
+    "comparisonBlocks": 308,
+    "nonemptyAstRecords": 5363,
+    "nodeRecords": 534,
+    "edgeRecords": 9532,
+    "flowRecords": 3685,
+    "canonicalLinesIncludingAstSeparators": 19405,
+    "referencePath": "cpg-rs/joern-parity/oracle_all.txt",
+    "referenceSha256": "0cd3403a367ae297f2ddf60b70684f0b84cd81c9e2ca0c149f6663749df70abf",
+    "scriptPath": "cpg-rs/joern-parity/oracle.sc",
+    "scriptSha256": "bd2e18fab06ecd7897d796f5b31dac6669dc45ecf70c54fb1d5cc0fe29f3c1ab",
+    "wholeProjectsRegeneratedFresh": false,
+    "transport": "Physical LF in reaching-definition labels is escaped as literal backslash-n before sorting. This is not an injective or lossless property encoding; CRLF differences remain diagnosed.",
+    "wholeProjectsReusedFourthBatchSavedReferences": true
+  },
+  "gates": {
+    "lockedWorkspaceTestsPassed": 432,
+    "failedIgnoredOrFilteredWorkspaceTests": 0,
+    "checkerTestsPassed": 17,
+    "formatting": "passed",
+    "strictWorkspaceAllTargetsClippy": "passed",
+    "dependencyAudit": "passed",
+    "lockedDependenciesAudited": 73,
+    "committedParity": "308/308",
+    "strictFreshLiveParity": "308/308",
+    "nativeRelease": "passed",
+    "nativeArchive": "passed",
+    "officialRealProjectAcceptance": "passed",
+    "containerAndOtherPlatforms": "not run in this batch"
+  },
+  "frozenBuild": {
+    "createdAtUtc": "2026-09-08T14:38:31.105627+00:00",
+    "parentRevision": "d68417922e63cbbdb3da4cd9c05419bca702b442",
+    "workingChangesPresent": true,
+    "sources": {
+      "cpg-rs/cpg-lang-c/src/exact.rs": "41c3d86167b4fdcc0ae3e035fe24417968730e93f2d47181dae98f1666e3873c",
+      "cpg-rs/cpg-lang-c/src/import.rs": "c46783747a5e0189678b95b29354e143c901af9039f40796d85f46f68c54dfc5",
+      "cpg-rs/joern-parity/src/production.rs": "2535a739735e38bf1c2015afb191cc74ea20488cd58e5b5c3897494e1dd683bb",
+      "cpg-rs/cpg-cli/src/workspace.rs": "153467ca5731ab6afc9e485058484c730aec6ff0ae5fc02a950b1bcb11466f21",
+      "cpg-rs/cpg-cli/src/rules.rs": "fc19394abdfe4c309d0e2e961516827d52c6da2e1b191593dab53c08276be2e5",
+      "cpg-rs/cpg-cli/src/export.rs": "49ed223d835380399bfca43c387f120ba2f22c88fbb7c8fe4d423463501fd057",
+      "cpg-rs/Cargo.toml": "0c095573bd24459caa83a975c4fdec291e8b11bef92745576f935f5fd17f0d29",
+      "cpg-rs/Cargo.lock": "fa7eab41e0c072e6b33205997fd241e7d87b511f9fd91ceee6ee1fdc9a099a63"
+    },
+    "binaries": {
+      "cpg": "24c3ad52af6a6edc05daa6b828d059a6c96a30edfc950ea95ef4778b08fc3f4e",
+      "joern-parity": "3c1ab1cb3d6833086b06105355f908a86be573f230fdbedc1bdc87faea979e17"
+    }
+  },
+  "sourceCommitMatchesAllFrozenSources": true,
+  "binaries": {
+    "cpg": {
+      "path": ".local/astra-sprint/fifth-batch/final-real-differential-v2/bin/cpg",
+      "sha256": "24c3ad52af6a6edc05daa6b828d059a6c96a30edfc950ea95ef4778b08fc3f4e"
+    },
+    "joern-parity": {
+      "path": ".local/astra-sprint/fifth-batch/final-real-differential-v2/bin/joern-parity",
+      "sha256": "3c1ab1cb3d6833086b06105355f908a86be573f230fdbedc1bdc87faea979e17"
+    }
+  },
+  "archive": {
+    "path": ".local/astra-sprint/fifth-batch/final-v2/dist/oxidized-joern-cpg-macos-arm64.tar.gz",
+    "sha256": "209d02eeb272d270f57630720d9965da667212992cb524bc17497f936fbf7207",
+    "platform": "macos-arm64",
+    "version": "0.1.1"
+  },
+  "realProjectMeasurements": {
+    "zlib-1.3.1-core": {
+      "expected": {
+        "sourceFiles": 26,
+        "nodes": 66237,
+        "graphSha256": "557bca5a8db74cf9c24118d4b88317b6389495452161cc20dfb6c52a5a84ad8f",
+        "edgesSha256": "e95753bf2b8daf045f94c54d9485899619dee93889cd7e7fdf37d834be0bd428",
+        "exportSha256": "2400960df7ddd063de0b3eedf4c5ef249793a2eeb2d53107b8c6e9764a398c72",
+        "sarifSha256": "0becad10ba8527f8055f00b8752fa550f27725d671483aa6f0171d81c335aeec",
+        "findings": 0
+      },
+      "trials": [
+        {
+          "sourceFiles": 26,
+          "nodes": 66237,
+          "findings": 0,
+          "graphSha256": "557bca5a8db74cf9c24118d4b88317b6389495452161cc20dfb6c52a5a84ad8f",
+          "edgesSha256": "e95753bf2b8daf045f94c54d9485899619dee93889cd7e7fdf37d834be0bd428",
+          "exportSha256": "2400960df7ddd063de0b3eedf4c5ef249793a2eeb2d53107b8c6e9764a398c72",
+          "sarifSha256": "0becad10ba8527f8055f00b8752fa550f27725d671483aa6f0171d81c335aeec",
+          "buildSeconds": 6.8886665829923,
+          "buildRssMiB": 482.984375,
+          "exportSeconds": 0.1989224999997532,
+          "exportRssMiB": 53.6875,
+          "scanSeconds": 0.9057843750051688,
+          "scanRssMiB": 64.078125
+        },
+        {
+          "sourceFiles": 26,
+          "nodes": 66237,
+          "findings": 0,
+          "graphSha256": "557bca5a8db74cf9c24118d4b88317b6389495452161cc20dfb6c52a5a84ad8f",
+          "edgesSha256": "e95753bf2b8daf045f94c54d9485899619dee93889cd7e7fdf37d834be0bd428",
+          "exportSha256": "2400960df7ddd063de0b3eedf4c5ef249793a2eeb2d53107b8c6e9764a398c72",
+          "sarifSha256": "0becad10ba8527f8055f00b8752fa550f27725d671483aa6f0171d81c335aeec",
+          "buildSeconds": 6.442436375000398,
+          "buildRssMiB": 485.203125,
+          "exportSeconds": 0.17502400001103524,
+          "exportRssMiB": 54.109375,
+          "scanSeconds": 0.9196627920027822,
+          "scanRssMiB": 64.578125
+        }
+      ],
+      "update": {
+        "seconds": 19.334788207997917,
+        "rssMiB": 638.6875,
+        "output": "update-equivalent 26 files"
+      }
+    },
+    "lua-5.4.7": {
+      "expected": {
+        "sourceFiles": 61,
+        "nodes": 119201,
+        "graphSha256": "519c76efde2b16300d23af0b5b31b04eeff6fa4d7741794822a9452cc5193d3d",
+        "edgesSha256": "1126b63b285c673a3e5d310a9f833076a60389f220a475783058cfd8b9079684",
+        "exportSha256": "85673156c8516b8e77caaf42a982ba930cfabd877c725ec87a417f5f27152b43",
+        "sarifSha256": "0becad10ba8527f8055f00b8752fa550f27725d671483aa6f0171d81c335aeec",
+        "findings": 0
+      },
+      "trials": [
+        {
+          "sourceFiles": 61,
+          "nodes": 119201,
+          "findings": 0,
+          "graphSha256": "519c76efde2b16300d23af0b5b31b04eeff6fa4d7741794822a9452cc5193d3d",
+          "edgesSha256": "1126b63b285c673a3e5d310a9f833076a60389f220a475783058cfd8b9079684",
+          "exportSha256": "85673156c8516b8e77caaf42a982ba930cfabd877c725ec87a417f5f27152b43",
+          "sarifSha256": "0becad10ba8527f8055f00b8752fa550f27725d671483aa6f0171d81c335aeec",
+          "buildSeconds": 4.973243333995924,
+          "buildRssMiB": 472.03125,
+          "exportSeconds": 0.29880804200365674,
+          "exportRssMiB": 77.109375,
+          "scanSeconds": 1.3099706249922747,
+          "scanRssMiB": 108.390625
+        },
+        {
+          "sourceFiles": 61,
+          "nodes": 119201,
+          "findings": 0,
+          "graphSha256": "519c76efde2b16300d23af0b5b31b04eeff6fa4d7741794822a9452cc5193d3d",
+          "edgesSha256": "1126b63b285c673a3e5d310a9f833076a60389f220a475783058cfd8b9079684",
+          "exportSha256": "85673156c8516b8e77caaf42a982ba930cfabd877c725ec87a417f5f27152b43",
+          "sarifSha256": "0becad10ba8527f8055f00b8752fa550f27725d671483aa6f0171d81c335aeec",
+          "buildSeconds": 4.96147741698951,
+          "buildRssMiB": 471.125,
+          "exportSeconds": 0.31276624999009073,
+          "exportRssMiB": 76.796875,
+          "scanSeconds": 1.2775572079990525,
+          "scanRssMiB": 108.015625
+        }
+      ],
+      "update": {
+        "seconds": 14.89954499999294,
+        "rssMiB": 674.0625,
+        "output": "update-equivalent 61 files"
+      }
+    }
+  },
+  "realProjectOfficialOutput": [
+    "PASS zlib-1.3.1-core: 26 files, 66237 nodes, build <= 20s, peak RSS 490.6 MiB, incremental equivalence 18.33s",
+    "PASS lua-5.4.7: 61 files, 119201 nodes, build <= 20s, peak RSS 637.6 MiB, incremental equivalence 14.62s"
+  ],
+  "realProjectMeasurementScope": "Per-command build/export/scan/update RSS uses /usr/bin/time -l. Official script reports cumulative child-process peak RSS; Lua printed peak can include prior zlib update. RSS gate is checked before update equivalence. No new update RSS ceiling is asserted. Resource measurements ran concurrently with a separate canonical comparison.",
+  "manifest": {
+    "path": "cpg-rs/acceptance/real-projects/manifest.json",
+    "sha256": "0d5a5346c4978a92906b9a8fca97d79f48a400a77a754a0e559f6539d4d02d65",
+    "beforeSha256": "117a870e6aa3cdcc666373e35d737891b7ad8c38ab3303bd8b084a82c032dc84",
+    "onlyExpectedFieldsChanged": true,
+    "sourceInputsLicensesExclusionsScanExpectationsAndBudgetsUnchanged": true,
+    "changes": [
+      {
+        "project": "zlib-1.3.1-core",
+        "field": "expected.nodes",
+        "before": 65902,
+        "after": 66237
+      },
+      {
+        "project": "zlib-1.3.1-core",
+        "field": "expected.graphSha256",
+        "before": "e6a217fbd4ef6aa0e4a61bbdcffcacfba265faeceff94beae40587cff2aa8346",
+        "after": "557bca5a8db74cf9c24118d4b88317b6389495452161cc20dfb6c52a5a84ad8f"
+      },
+      {
+        "project": "zlib-1.3.1-core",
+        "field": "expected.edgesSha256",
+        "before": "eeec6ff44ea6ccd817309d2ea6295d35ae9e8f94654ef3ee28edbb51827a3a56",
+        "after": "e95753bf2b8daf045f94c54d9485899619dee93889cd7e7fdf37d834be0bd428"
+      },
+      {
+        "project": "zlib-1.3.1-core",
+        "field": "expected.exportSha256",
+        "before": "d7421f742eb25e6cc525c00a54552554252c6767f93d70bbfa23cc12ee19cae8",
+        "after": "2400960df7ddd063de0b3eedf4c5ef249793a2eeb2d53107b8c6e9764a398c72"
+      },
+      {
+        "project": "lua-5.4.7",
+        "field": "expected.nodes",
+        "before": 114922,
+        "after": 119201
+      },
+      {
+        "project": "lua-5.4.7",
+        "field": "expected.graphSha256",
+        "before": "4e492abd98fc6199f9eb67ba2e0118fe4be69a355778e6370139aaab2ccb59a6",
+        "after": "519c76efde2b16300d23af0b5b31b04eeff6fa4d7741794822a9452cc5193d3d"
+      },
+      {
+        "project": "lua-5.4.7",
+        "field": "expected.edgesSha256",
+        "before": "8f5e4a8cac9b7996a55d25402b5c2a4212db4042bd198f7dde9cd00d690128f9",
+        "after": "1126b63b285c673a3e5d310a9f833076a60389f220a475783058cfd8b9079684"
+      },
+      {
+        "project": "lua-5.4.7",
+        "field": "expected.exportSha256",
+        "before": "ce4ad095cff599746cb17e937b5984606c99855736c8aacbd7e507af3550ddc4",
+        "after": "85673156c8516b8e77caaf42a982ba930cfabd877c725ec87a417f5f27152b43"
+      }
+    ],
+    "review": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/fifth-final-v2-review/manifest-review.json",
+      "sha256": "57d5c48f15375030c424849aa0b03258a58fbee691c6e9ab01dec077e87bfdfa"
+    },
+    "appliedReview": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/fifth-final-v2-review/applied-review.json",
+      "sha256": "9b40bf47dabba1ad038ed50b3f091ded0cb691f1716d17c972eb7e40c2193e85"
+    }
+  },
+  "semanticReview": {
+    "review": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/fifth-project-review/final-v2/final-review.json",
+      "sha256": "e1f810d3610cde08cdacce19d3ba8974834d5cc6abf9b054a640d133448b1f27"
+    },
+    "claimBoundary": "No remaining introduced semantic loss was identified in the reviewed changed facts; neither complete projection is exact.",
+    "operandRepair": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/fifth-project-review/tokenizer-priority/final-review.json",
+      "sha256": "0cffc78e41e0e57c711af52ec7e242f3800f789a70586af3166ce6245801723d"
+    },
+    "preRepairLosses": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/fifth-project-review/final-priority/loss-review.json",
+      "sha256": "f757d21331201f932aca96166c2be9dba93dd9a20c4012a2b2322358fa8d5d74"
+    }
+  },
+  "fixtureInventory": {
+    "field-macros": {
+      "references": [
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/field-macros/cases/array_receiver/expected.txt",
+          "sha256": "6613c5f071dbeca9cbed37d180735b9842b6ab88c82618e65faa4cab8b05761e"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/field-macros/cases/cycle/expected.txt",
+          "sha256": "8c89190a7afa2d6cf3af2b93ffef94e19a509bcd1022dab56da3e06192b7df13"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/field-macros/cases/field_alias/expected.txt",
+          "sha256": "f314bf11ce3d87f25608e07be9322678921945e9b0f57634263e8518520b8561"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/field-macros/cases/field_subscript/expected.txt",
+          "sha256": "1b2eb8b860085939a1d4e7f1272bf79cc6aa8fc2cd22ec35c900062a49ebaabe"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/field-macros/cases/function_macro/expected.txt",
+          "sha256": "02849896d3411a1e67f4404d1609d9e8fa7ec1d0c1db3ee055524e94dd6686d1"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/field-macros/cases/function_name/expected.txt",
+          "sha256": "8c89190a7afa2d6cf3af2b93ffef94e19a509bcd1022dab56da3e06192b7df13"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/field-macros/cases/nonfield/expected.txt",
+          "sha256": "65626bd8596e687947ca71651de9705cb62ebaef3209a288a032f0babe58bec9"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/field-macros/cases/object_chain/expected.txt",
+          "sha256": "f314bf11ce3d87f25608e07be9322678921945e9b0f57634263e8518520b8561"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/field-macros/cases/redefinition/expected.txt",
+          "sha256": "6883f1cc97672ae6945045492897ccabbadfd3ae83a7a8f334a84751c4b454c3"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/field-macros/cases/statement/expected.txt",
+          "sha256": "e5e58cc0dfa8cec1d26a4ba5535f3c76a35f0ad83afb11d942c0843821708fc4"
+        }
+      ],
+      "exactCases": 10,
+      "canonicalLinesIncludingSeparators": 2366,
+      "nonemptyRecords": 2309,
+      "measurement": {
+        "path": "cpg-rs/joern-parity/tests/fixtures/field-macros/measurement.json",
+        "sha256": "44974690905523cef3e2fa1dd3554e59797c8aaf305f7f9f769fc37733e3a379"
+      }
+    },
+    "direct-field-macros": {
+      "references": [
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/direct-field-macros/cases/array_receiver/expected.txt",
+          "sha256": "9fdede32f7b73ceabcf9b17829fc9a7d41b371a2fb9a4e82ed9e1fa11544cdca"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/direct-field-macros/cases/arrow/expected.txt",
+          "sha256": "efcc62c482beeedbc691c34ef42fe8229362547387aff19c260c8e345d0b5ac2"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/direct-field-macros/cases/binary_replacement/expected.txt",
+          "sha256": "c0bf19d34dc96270dca9e7e6c12e56ed219fd603260d031d7b92f9176780cb40"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/direct-field-macros/cases/call_index/expected.txt",
+          "sha256": "f4e1c4c2369316116d1fc6b30a4cb7c54261a4dbdd3602e9d9a900b8ca689560"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/direct-field-macros/cases/cycle/expected.txt",
+          "sha256": "454ba90c09814cc8cb377b4c8c1391d94720c5e6baaab8705fa0fba71510bb3d"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/direct-field-macros/cases/dot/expected.txt",
+          "sha256": "03b57392a29e22153ac51c44a42ac7977d006cd64dc09c2a3db7827f78fcf772"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/direct-field-macros/cases/expression_index/expected.txt",
+          "sha256": "89750c60d8bdc6710e7d2a8930e294c63a9fd6a3d867d7accb7f32eef2597e78"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/direct-field-macros/cases/field_subscript/expected.txt",
+          "sha256": "f28ce7e9d3eaafdbd8813b01f17120690d5d3ad7725e96e345df4e5d4b05cac0"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/direct-field-macros/cases/field_then_index/expected.txt",
+          "sha256": "011416dfa6e0c13b3a8ae9d9b31dbff7363887b8653b25b77b118f2eb4cb3bd4"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/direct-field-macros/cases/function_name/expected.txt",
+          "sha256": "454ba90c09814cc8cb377b4c8c1391d94720c5e6baaab8705fa0fba71510bb3d"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/direct-field-macros/cases/global_index/expected.txt",
+          "sha256": "e676eeefd5abbb5b1626ee09da5bde681be949d0d7573dd82198f942c7b8dfe2"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/direct-field-macros/cases/indirect_recursive_index/expected.txt",
+          "sha256": "15b7e08bc2c6b1f2258d566bc8aa65b7459807657b616a708c2e8ab626d4343a"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/direct-field-macros/cases/multiline/expected.txt",
+          "sha256": "8984ec28c96482fbb8e7a3a535ad67f7df2d9275e5d7d1b1b7b0b1fd6b8119f8"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/direct-field-macros/cases/multiple_literals/expected.txt",
+          "sha256": "26e83e5d6ecf237af9ebce13898b44071e150de905d60eb86e936798d76e48b5"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/direct-field-macros/cases/object_chain/expected.txt",
+          "sha256": "efcc62c482beeedbc691c34ef42fe8229362547387aff19c260c8e345d0b5ac2"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/direct-field-macros/cases/object_macro_index/expected.txt",
+          "sha256": "bc147ae1a1d9ce9c80844175cdc6449b713cf42cca99b592665d3dfaf6719b99"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/direct-field-macros/cases/parameter_index/expected.txt",
+          "sha256": "120e5db52e4bce892fdedd86d67015cc7d9b2ff103eca9b0e98135eddf7cb264"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/direct-field-macros/cases/recursive_index/expected.txt",
+          "sha256": "d2934fe413ec7c450918ad289343e86c13c7c6d1900bc26f6b6f224b9f306c0b"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/direct-field-macros/cases/repeated/expected.txt",
+          "sha256": "e564a9b80ce825fef659220b1a5fcb0c4b9ee290d4c549303fc0195febc4c72e"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/direct-field-macros/cases/sibling_owners/expected.txt",
+          "sha256": "ad71a1365793380e18e0f512bb592476194c80634313a217813ab569853bcc13"
+        }
+      ],
+      "exactCases": 20,
+      "canonicalLinesIncludingSeparators": 5329,
+      "nonemptyRecords": 5187,
+      "measurement": {
+        "path": "cpg-rs/joern-parity/tests/fixtures/direct-field-macros/measurement.json",
+        "sha256": "057d425fa07b0022593f658167f53e01a4d3b62988fb3523ba379cfde27b51bc"
+      }
+    },
+    "nested-macro-casts": {
+      "references": [
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/nested-macro-casts/cases/boundaries/expected.txt",
+          "sha256": "e2c6b718b3a6df03763286144b0b02f268940dbe5683595f6d9541800b401254"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/nested-macro-casts/cases/composite/expected.txt",
+          "sha256": "2c71b6a5905cff0f8a47cc41dbb04fe9579b917f84eeddad820e9a0454bd408d"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/nested-macro-casts/cases/nested/expected.txt",
+          "sha256": "d6d39fa09775dc5994a661ef9378882917c2102e2a5c2e614f067085fc1a392d"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/nested-macro-casts/cases/types/expected.txt",
+          "sha256": "4500750dbd9d197fdefd53715d3201ff71ae7d4f72162e445786a86fa24e7a37"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/nested-macro-casts/cases/unicode/expected.txt",
+          "sha256": "7c42dcf02523f94e55624471f9a8378ad0463a5c26ecaca0b11a66e8da2698f1"
+        }
+      ],
+      "exactCases": 5,
+      "canonicalLinesIncludingSeparators": 3157,
+      "nonemptyRecords": 3090,
+      "measurement": {
+        "path": "cpg-rs/joern-parity/tests/fixtures/nested-macro-casts/measurement.json",
+        "sha256": "1e917da348f6e2bfe172cde0bb7e9d6d8f094151a688bd89128b4fb027c072b8"
+      }
+    },
+    "typedef-aggregates": {
+      "references": [
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/typedef-aggregates/cases/alias_existing/expected.txt",
+          "sha256": "ef0d0af07bbbe8f0e6a992921f1199023958df6168482973efecb68b883fd7f1"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/typedef-aggregates/cases/anonymous_array/expected.txt",
+          "sha256": "3536871f30014840613df828730ac6141ffdfd5bc631f3f390eada51986748bd"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/typedef-aggregates/cases/anonymous_macro/expected.txt",
+          "sha256": "be964debe12d9fd0a482bc50d97fa1079c6ea58ac1d74c7ab43cdfd42df14038"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/typedef-aggregates/cases/anonymous_plain/expected.txt",
+          "sha256": "72a792ddc0947fccd868c7e249dd8e2d42602cff5dde808dc4d8344e4040d92d"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/typedef-aggregates/cases/anonymous_union/expected.txt",
+          "sha256": "c54f1a44a93680e15cddda7678ceccb246c560cab9613c32b8c13aad99c6c29c"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/typedef-aggregates/cases/array_alias/expected.txt",
+          "sha256": "6c3710d2dc5ec003bd64ecfc8653e75023588edb323c5c34f124c971ba3d7075"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/typedef-aggregates/cases/conditional_aggregate/expected.txt",
+          "sha256": "ffc53d68fbdb5753734311057ca243953f193f69b7f426baf304650d38b259eb"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/typedef-aggregates/cases/dimension_parenthesized/expected.txt",
+          "sha256": "4d4fbe1095c82a00313b55daf7ab95ff6292985ae9a9ae33d048b18fbff65a00"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/typedef-aggregates/cases/function_macro_size/expected.txt",
+          "sha256": "152b2edb28c2853ec14e9ebf97b68c56a6bb2d9c4d768a7213976acd7481c486"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/typedef-aggregates/cases/header_size/expected.txt",
+          "sha256": "9c1add22ea5b389cb4490629e42e12824d11422d0466f134ba871e27bd137401"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/typedef-aggregates/cases/lua_rn/expected.txt",
+          "sha256": "af03cea1dbadde38e9a6886e936262d0a6713e64d92c9c2918e88a28f28bc76c"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/typedef-aggregates/cases/macro_expression/expected.txt",
+          "sha256": "d1ecf57c666f3faad922cc2670ac6f7d57ffbeac804d838426bc8f17313a00c8"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/typedef-aggregates/cases/macro_parenthesized/expected.txt",
+          "sha256": "985f88b7d8befa30d170d06ba3e62dcf401848905eb9b53cf0a46f53b98ae985"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/typedef-aggregates/cases/macro_source_order/expected.txt",
+          "sha256": "28ddf592e8c40c4c50bd2c845208a3939c46ba755ffbe3c0b6962e90ed5d44a9"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/typedef-aggregates/cases/multidimensional/expected.txt",
+          "sha256": "3e43205e25177d0a10547bcc71ab03362d3a712f93e0a5e6bcb19adecda55300"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/typedef-aggregates/cases/multiple_aliases/expected.txt",
+          "sha256": "6a0c24dc58aa83ae98f184acacb9dc7ed3fc6e9251b095adc624f6a3c99dfd72"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/typedef-aggregates/cases/named_macro/expected.txt",
+          "sha256": "5a82a55c60bf8ad688e51894b44d681143479078041d825a10ea358115a4d918"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/typedef-aggregates/cases/named_multiple/expected.txt",
+          "sha256": "efc87aea3087e5af10ab9eb479fe1301be26677ffef1ee8af4f41cee8e403746"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/typedef-aggregates/cases/named_pointer/expected.txt",
+          "sha256": "5118a4688bfd95d7a888222229e5b5449c3657d73958d011b10b0f2b050288ff"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/typedef-aggregates/cases/ordinary_multidimensional/expected.txt",
+          "sha256": "63448934006ae36f4fb080740c16b13814db7ae517eac306a83efb927845cbdc"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/typedef-aggregates/cases/plain_alias/expected.txt",
+          "sha256": "89b8766e2391e28c9735c10cdc41cc46ccb204ffa36603cbf371b25a1e454110"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/typedef-aggregates/cases/pointer_alias/expected.txt",
+          "sha256": "3f111d65d91c6b714d39a9a9b58b728db68f24ccdf9c2556810e65877c8cc65f"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/typedef-aggregates/cases/pointer_first/expected.txt",
+          "sha256": "a1c2921c156cfc063dbaffaeac18479babb4e32f232e9b3a179aa42542265403"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/typedef-aggregates/cases/qualified_pointer_member/expected.txt",
+          "sha256": "220b120b67da211c8baf960c54d8f96b665b43706c5789ecf27ee846127b364f"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/typedef-aggregates/cases/same_tag_alias/expected.txt",
+          "sha256": "5c759e6d279d77583d49ba22796af70a235792e13d3ae3d13d6006d1803ea20d"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/typedef-aggregates/cases/tagged_array/expected.txt",
+          "sha256": "a3189e40ce8b847df7e510b47ffcd791b624e117c8bf0954bc5372b02cfb9881"
+        }
+      ],
+      "exactCases": 26,
+      "canonicalLinesIncludingSeparators": 3686,
+      "nonemptyRecords": 3570,
+      "measurement": {
+        "path": "cpg-rs/joern-parity/tests/fixtures/typedef-aggregates/measurement.json",
+        "sha256": "582a13ff6fbac01e7fcf53a49a721bc1fd9704a73a8358fd01f06ef93ff05b0e"
+      }
+    },
+    "macro-recovery": {
+      "references": [
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/macro-recovery/cases/bad_condition/expected.txt",
+          "sha256": "02a76da00ae85500615bf44511a74b5ece9d89d9b24f69e558aa24d1b4ff4bd3"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/macro-recovery/cases/bad_conditional/expected.txt",
+          "sha256": "6177721024d3260af48c1ad48d2f2a795ee78088a9343ec59f11862606184d81"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/macro-recovery/cases/bad_expression/expected.txt",
+          "sha256": "3a0b1f47111bb23f68932aa1e0ce27b80b4b280cc7edd80b08d65563ea8d05d7"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/macro-recovery/cases/bad_format/expected.txt",
+          "sha256": "ed08cc9f15a3d84af977868df1536d7887903a832ebd7269f03543d002697707"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/macro-recovery/cases/bad_while/expected.txt",
+          "sha256": "928e946c99c7c71454b2cf97c3f01c89fdc038ca44991a4638fb5410b44816bf"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/macro-recovery/cases/callable_later_callee/expected.txt",
+          "sha256": "c95b6c04f5361b32b5ba73625f7c8726cbddfe8ea3f219876f952da8cd17b01c"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/macro-recovery/cases/callable_later_macro_callee/expected.txt",
+          "sha256": "6e9bc7fff074f79e2721a1b643818452ced7c931bf5c1a91346913d961adf48a"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/macro-recovery/cases/callable_later_method_ref/expected.txt",
+          "sha256": "0e57bf7e794f958243e25846594370ee2e8323a5484e0b75c06ad1c306822ef1"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/macro-recovery/cases/global_argument/expected.txt",
+          "sha256": "8cef323de1a756627d43eadb0c30f56ba9476ccb146e8ddf2cce8551ce01ea0a"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/macro-recovery/cases/good_format/expected.txt",
+          "sha256": "cb8a1c6e0d1ed4d531f52efb664e4e8918d12b543a2850c60a0613fcfd355271"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/macro-recovery/cases/multiple_declarators/expected.txt",
+          "sha256": "a56ea1128b61d7d44c39e487355df967a5b7bf06e5e56770f4c033976e12f8ca"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/macro-recovery/cases/nested_bad_format/expected.txt",
+          "sha256": "ed08cc9f15a3d84af977868df1536d7887903a832ebd7269f03543d002697707"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/macro-recovery/cases/order_extra_global_arg_later/expected.txt",
+          "sha256": "1bdb0c0a638684bef31d722cd5f1058e870d03292deee0a151ffa9c4ba7a67cb"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/macro-recovery/cases/order_extra_global_arg_only/expected.txt",
+          "sha256": "c5df510487211bf66740c1b88654d9fc7479eb26df2703b9a64fdec85875238f"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/macro-recovery/cases/order_extra_global_reverse/expected.txt",
+          "sha256": "8c8773f8ded788d83a2688e6745f7e1d11b7b181c37a957fba91392e3923c98c"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/macro-recovery/cases/order_extra_recovery_repeat_helper/expected.txt",
+          "sha256": "4435e914aecd2615e91421e66364a04b10bb493569e08a36393391a909e67cac"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/macro-recovery/cases/order_ordinary_ab/expected.txt",
+          "sha256": "61b8b24013a5ab03ffa60e79eab4b5fd53804cfd49a118c91fe25f4dac65e6f0"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/macro-recovery/cases/order_ordinary_aba/expected.txt",
+          "sha256": "93c75b9912d2736bded482871e829bb7dbe934dc41b0cae70d245f651c1a878a"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/macro-recovery/cases/order_ordinary_ba/expected.txt",
+          "sha256": "6daf35f5499f711f7c602dc6258fd44d60420fe1ca08ac53418bb7644b3802e4"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/macro-recovery/cases/order_ordinary_call/expected.txt",
+          "sha256": "f24308e4c50a4c9dcfb9bb6b087267ca019890854c1218ba97ad64e102fcd3cf"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/macro-recovery/cases/order_recovery_forward/expected.txt",
+          "sha256": "5ddfcc2a74f73161813142e836a7c8a9811b4684e2240ac59ea205765c9f4445"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/macro-recovery/cases/order_recovery_renamed/expected.txt",
+          "sha256": "80f28f6c33274bfc28cc6ba47221465669bb4f272f80418dac449202799ae7e3"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/macro-recovery/cases/order_recovery_repeat/expected.txt",
+          "sha256": "6fa9ba523bbbab8b046aab3e1506aedaec07cb823e322154b464c368e7d9b2ba"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/macro-recovery/cases/order_recovery_reverse/expected.txt",
+          "sha256": "173afdde2cee56e9161eae5ca5475994b3dc7217bbea2f66820ffa2c7fb449d3"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/macro-recovery/cases/order_recovery_unknown/expected.txt",
+          "sha256": "973a76650814fbb08fefad4534c0a4e9bc6ef8c15123a4faa683faf9b883cd91"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/macro-recovery/cases/pointer_call/expected.txt",
+          "sha256": "b554fa3179949fd6e0c171b21647201ea3f7b6a25556db1bef2b705d015ab721"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/macro-recovery/cases/return_bad_format/expected.txt",
+          "sha256": "63f6e86b3e5169fc1625aa8a9473db90ec6b2165fcc8616408ae20974ac0009f"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/macro-recovery/cases/review_bare_function_sibling/expected.txt",
+          "sha256": "e56d9b26bdb4f135633bf115b49bfd040b823ae3eaf4802a6f6acb68757b9f17"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/macro-recovery/cases/review_defined_function_argument/expected.txt",
+          "sha256": "92a20e68131f10c6843c9a5891ac32692290d8b2ff78513e3236b60285ea4449"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/macro-recovery/cases/review_function_argument/expected.txt",
+          "sha256": "675d181d4ffde4a3ddc918cb3281c0ce8a36bb94c668813d9e415357618863ee"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/macro-recovery/cases/review_ordinary_after_recovery/expected.txt",
+          "sha256": "e985d6adab675ca5b5f6f7bc451cbaaab6876871e909a8a943d71090ba22e466"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/macro-recovery/cases/review_scoped_callback/expected.txt",
+          "sha256": "900f5febedd74538517d3dc5dcc72c121731570aff30966953093c6c7ff65211"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/macro-recovery/cases/shadowing/expected.txt",
+          "sha256": "52c2644eee861abbcdf23d11d9964304357777d31642dc3b069012c37591eabe"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/macro-recovery/cases/sibling_shadow/expected.txt",
+          "sha256": "dfe965cd035addb52daec6e9454be4a5c9cc5c0b73942b0ef536f6b629068401"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/macro-recovery/cases/sizeof_array/expected.txt",
+          "sha256": "c6d17fe1b63caf9cd477ee4bc3b7c3f1a8a906e2dc6e1693973adf564473ae96"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/macro-recovery/cases/sizeof_basic/expected.txt",
+          "sha256": "60b06791b0241a5a8c2038083921ad0d038dd3a9f82ffeab441b270bb176148a"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/macro-recovery/cases/sizeof_function_pointer/expected.txt",
+          "sha256": "0da0df6f1ce731e67eb29e635d312c0901598f25381dbaf16903523d3685d555"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/macro-recovery/cases/sizeof_pointer/expected.txt",
+          "sha256": "4b7ef75f792410807498857fe7b52ed13acbb390c591a7ff675506e7354ebcf7"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/macro-recovery/cases/sizeof_qualified_pointer/expected.txt",
+          "sha256": "2cc4c079f852d9fe843a134d6328307acb65e189655c39274ff8275e09244609"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/macro-recovery/cases/sizeof_repeated_basics/expected.txt",
+          "sha256": "b3d18068abddb895f077e0e74755fe633e85276111f5ab4f7cd6f5f65c20a767"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/macro-recovery/cases/sizeof_review_postfix_qualifier/expected.txt",
+          "sha256": "a765ccba2d6afadd80aa7a62ebf38a38c5afa83d099fef0b7dd408fc1a41d00a"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/macro-recovery/cases/sizeof_tagged_pointer/expected.txt",
+          "sha256": "26a9653e1d8159e98addb22e18bda821305a76fce11b52045ce85f34aaefc1ea"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/macro-recovery/cases/sizeof_unsigned_pointer/expected.txt",
+          "sha256": "d1b63db6980cacfddbb38011b812f266909b7633ba7677a7fc89bbe9d1c56149"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/macro-recovery/cases/special_null_interleaved/expected.txt",
+          "sha256": "9a25345c016e07bd90d0ba0de795fec6534c0914b87d3c286648e1d4539b79bb"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/macro-recovery/cases/special_sizeof_interleaved/expected.txt",
+          "sha256": "63a4f707897957e813b8663efa796a6a6e6238e4c5028157d8cb6f6bd7d1ed92"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/macro-recovery/cases/special_sizeof_types/expected.txt",
+          "sha256": "4f7045091fbe28ce972df485b5db0a81983156e2e549917f6c67a312ad696d5f"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/macro-recovery/cases/unknown_name/expected.txt",
+          "sha256": "9b22e95c187e332f065ef19b45f93e9981c058d211c93634be943e6b76bf41ad"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/macro-recovery/cases/valid_then_recovery/expected.txt",
+          "sha256": "420472a2fb0e63a73c1aacbb102571f4cba76a25409d683b84e598a960b429a4"
+        }
+      ],
+      "exactCases": 48,
+      "canonicalLinesIncludingSeparators": 11073,
+      "nonemptyRecords": 10787,
+      "measurement": {
+        "path": "cpg-rs/joern-parity/tests/fixtures/macro-recovery/measurement.json",
+        "sha256": "c450782b4356b6d69791c2a29b4ce1e5d1ffb299834c092895f74ddeb25ec012"
+      }
+    },
+    "field-cast-interactions": {
+      "references": [
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/field-cast-interactions/cases/cast_index/expected.txt",
+          "sha256": "c0837e55ba0d741bf97f567f0d3219db15146ac19d101e97684ce3d4d5185ad7"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/field-cast-interactions/cases/outer_function/expected.txt",
+          "sha256": "aab3a3364f0d586f0eb44c17cd4a8fb19d43339a3b34e170e595ddfec96b6cea"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/field-cast-interactions/cases/sibling_cast_fields/expected.txt",
+          "sha256": "5478c16e8c5476c3e45b32ce2d23383832bdc80d917d09128790ea5cd1f44689"
+        }
+      ],
+      "exactCases": 3,
+      "canonicalLinesIncludingSeparators": 1299,
+      "nonemptyRecords": 1270,
+      "measurement": {
+        "path": "cpg-rs/joern-parity/tests/fixtures/field-cast-interactions/measurement.json",
+        "sha256": "ad06af9969e77820cefa5ceb6b5bb26c2ce693c65ce1220b865a5ecd6b04a7e0"
+      }
+    },
+    "direct-macro-arguments": {
+      "references": [
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/direct-macro-arguments/cases/comment_operator/expected.txt",
+          "sha256": "be2e52b0e4795f248f5836c508a38c51638928c3a26c43566ef146b013f5bc05"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/direct-macro-arguments/cases/continued_comment/expected.txt",
+          "sha256": "ba4c39a15d027c7fd01e625115c669f3c8ce1fb4eaf3be485fd5098d5e35f694"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/direct-macro-arguments/cases/continued_comment_boundary/expected.txt",
+          "sha256": "c3a4328e60d97b633181e4524e9605424528fc4b7a75a17007e9069dc8eb36a1"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/direct-macro-arguments/cases/first_type/expected.txt",
+          "sha256": "f49bd15bcc54faaa2e06937ba7fb9c67bf582e69d2075d858745f0df4470e618"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/direct-macro-arguments/cases/nested_comma/expected.txt",
+          "sha256": "1fdf03442a91531e528710d94f333f522d8ef5a26b01a3104ab2b1adf0e2e322"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/direct-macro-arguments/cases/nested_operator/expected.txt",
+          "sha256": "719e9817fa8f531b9f4a904d6e9f45e380adbb96dad298da7e6b05adfe7f50b3"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/direct-macro-arguments/cases/operator_slots/expected.txt",
+          "sha256": "6977727b2228411c1a67bf8ca05821bde7f2793997bbe4431a582b0a56a681cd"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/direct-macro-arguments/cases/operators/expected.txt",
+          "sha256": "cf7e8eef0ff38312edbdae45f3147c7208b8309075c7448b03ef8a0466c81e25"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/direct-macro-arguments/cases/quoted_tokens/expected.txt",
+          "sha256": "5dd2c1da98294572d884e8df91b6a5cc913fe74a478d8eb95f20ac81139ffecd"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/direct-macro-arguments/cases/quoted_whitespace/expected.txt",
+          "sha256": "07419b4bfabbe21bda5475997bcb7f5ed3e10378fdad726096122d5fedd5c544"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/direct-macro-arguments/cases/shifts/expected.txt",
+          "sha256": "fe84cf9bb9540093a0fbff7dfcd91460666c61663586635f61ceca6c6385dd0a"
+        },
+        {
+          "path": "cpg-rs/joern-parity/tests/fixtures/direct-macro-arguments/cases/unknown_operand/expected.txt",
+          "sha256": "a016a85ef66601cf528949f0181f9244ee676423f5913bc175bb7de444a93a79"
+        }
+      ],
+      "exactCases": 12,
+      "canonicalLinesIncludingSeparators": 3162,
+      "nonemptyRecords": 3092,
+      "measurement": {
+        "path": "cpg-rs/joern-parity/tests/fixtures/direct-macro-arguments/measurement.json",
+        "sha256": "5bd496be06a65f151b05c63c3d19b060e12715d92598a16cd84741ec5a659290"
+      }
+    }
+  },
+  "reviewBindings": {
+    "nestedFieldRoot": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/fifth-batch/nested-field-review.json",
+      "sha256": "c4f5350c2e6bb2296c2994c63529c1357ed93690234ac6a5a1444b1e3283a948"
+    },
+    "directFieldIndependent": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/field-review/review.json",
+      "sha256": "6733a7818651df352676977b00372f74bd5d15cc15e1dee90b48c846f957fc39"
+    },
+    "typedefIndependent": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-field-macros/.local/typedef-review/review-final.json",
+      "sha256": "753f276453ad51eb3d3f887272968edbdea6053535c4ca07c79e7a16b8f7c4a2"
+    },
+    "recoveryIndependent": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-field-macros/.local/recovery-review/final-95cd430f3b1f/review.json",
+      "sha256": "0dce0e939eea3bf772c1b67216b491889e5c23ca0eea7d40c201cbc4b9b1262e"
+    },
+    "sizeofIndependent": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/sizeof-final-review/final-review.json",
+      "sha256": "bd2828aba5e56267c9c232519f0e08bbece51ce92949ded563978c8b9c52eea1"
+    },
+    "fieldCastInteractions": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/field-cast-interactions/receipt.json",
+      "sha256": "fa0e3ac5b65450714c57d17c462658795b65718a3684705318f82fa34e1e625d"
+    },
+    "recoveryAndInteractionPackage": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-field-macros/.local/package-review/review.json",
+      "sha256": "a48b121e5f49096b045894ba4fc3be98bf591901e8b80deec494eaa08ea3c0a1"
+    },
+    "preRepairWholeReview": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/fifth-project-review/final-pre-repair/review.json",
+      "sha256": "ea4396f2afd75f2c25125ffc86de5ba287200ff1c1f87af247a145e6af0f5bde"
+    },
+    "preRepairOperandLossReview": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/fifth-project-review/final-priority/loss-review.json",
+      "sha256": "f757d21331201f932aca96166c2be9dba93dd9a20c4012a2b2322358fa8d5d74"
+    },
+    "directArgumentsIndependent": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/direct-macro-arguments/review.json",
+      "sha256": "9345a79d2e1dd037a3cce499989d0bafe018106e300f5c26eb55c8e2be6367e6"
+    },
+    "wrongLanguageSourceReview": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/fifth-project-review/wrong-language-source-review.json",
+      "sha256": "2a5d26957232bbc088bc7f5b7cfb4642a7ca3462af575066962c1a02164f7c30"
+    },
+    "repairedOperandReview": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/fifth-project-review/tokenizer-priority/final-review.json",
+      "sha256": "0cffc78e41e0e57c711af52ec7e242f3800f789a70586af3166ce6245801723d"
+    },
+    "directArgumentsPackage": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/direct-macro-arguments/package-review.json",
+      "sha256": "f02e62d1b7d031aa9b89a4e75012180859102256fdfab398b5bb0e85c546d6f4"
+    },
+    "finalWholeComparison": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/fifth-project-review/final-v2/review.json",
+      "sha256": "be641a88155b1630e25e9444565b732ec3c9f06f58ecc667b5782d1714189843"
+    },
+    "finalSemantic": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/fifth-project-review/final-v2/final-review.json",
+      "sha256": "e1f810d3610cde08cdacce19d3ba8974834d5cc6abf9b054a640d133448b1f27"
+    },
+    "finalBuildBindings": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/fifth-final-v2-review/freeze-review.json",
+      "sha256": "e138cd0ae147baf61ef1332705842ea02c1215058f19e1f54f9d17f978475ae2"
+    },
+    "manifestReview": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/fifth-final-v2-review/manifest-review.json",
+      "sha256": "57d5c48f15375030c424849aa0b03258a58fbee691c6e9ab01dec077e87bfdfa"
+    },
+    "manifestApplied": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/fifth-final-v2-review/applied-review.json",
+      "sha256": "9b40bf47dabba1ad038ed50b3f091ded0cb691f1716d17c972eb7e40c2193e85"
+    }
+  },
+  "gateLogs": {
+    "clippy": {
+      "path": ".local/astra-sprint/fifth-batch/final-v2/clippy.log",
+      "sha256": "ca5a02f1d96fa40d99b23878af9f1e21f20b9bcd239168f0763883ddccc0ddd4"
+    },
+    "committed-parity": {
+      "path": ".local/astra-sprint/fifth-batch/final-v2/committed-parity.log",
+      "sha256": "c105179d62065e9cbf9f398ff94754c29ec03add1206db7dff281cb4c07b6be6"
+    },
+    "fmt": {
+      "path": ".local/astra-sprint/fifth-batch/final-v2/fmt.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "live-parity": {
+      "path": ".local/astra-sprint/fifth-batch/final-v2/live-parity.log",
+      "sha256": "715e0c188ca0e7a744ace60c9fa451649f34143022f2a1a163bd46303772dd68"
+    },
+    "native-release": {
+      "path": ".local/astra-sprint/fifth-batch/final-v2/native-release.log",
+      "sha256": "a2697c4259b7041deb022102d8e184c21d12165e26ab3556e615ebe8f76c7d16"
+    },
+    "official-real-project": {
+      "path": ".local/astra-sprint/fifth-batch/final-v2/official-real-project.log",
+      "sha256": "a42cda12d8d09ae8a9c282218cc09f1f2be7e794329ac01fade40357538163dd"
+    },
+    "package-release": {
+      "path": ".local/astra-sprint/fifth-batch/final-v2/package-release.log",
+      "sha256": "9dab6f2eef95082e8453caf308785e0967cae656383f870832f4ee8bd4848df8"
+    },
+    "real-project-measurements": {
+      "path": ".local/astra-sprint/fifth-batch/final-v2/real-project-measurements.log",
+      "sha256": "a866c32638964faab282e7febe2818875d3f9dc80c6f9f01bf32e520f635ecfc"
+    },
+    "release-build": {
+      "path": ".local/astra-sprint/fifth-batch/final-v2/release-build.log",
+      "sha256": "14fe7ed2ca2e809105e7452defc87998a65f9a2441c9f834d007f0278f859743"
+    },
+    "whole-project-comparison": {
+      "path": ".local/astra-sprint/fifth-batch/final-v2/whole-project-comparison.log",
+      "sha256": "126deaa5bbdfbd8ad754b22ad987cdf2cf58085e5715464fbe026b0d7ddd823c"
+    },
+    "workspace-tests": {
+      "path": ".local/astra-sprint/fifth-batch/final-v2/workspace-tests.log",
+      "sha256": "7b62ac88880b8bf11a53ff5e173f2797da43145496a010b6a1bf1b329c533da4"
+    },
+    "checker-tests": {
+      "path": ".local/astra-sprint/fifth-batch/checker-tests.log",
+      "sha256": "1802752834f0e92e05ca02f1e51d121349d1dd565c9246e70eb5cd893db9f109"
+    },
+    "dependency-audit": {
+      "path": ".local/astra-sprint/fifth-batch/dependency-audit.log",
+      "sha256": "1b0c59f6e9760929ebaf2c065664b66ea0864df7f9fd87f90374d38f2e4fbc5a"
+    }
+  },
+  "wholeProjectComparison": {
+    "path": "docs/conformance/astra-fifth-batch-metrics.json",
+    "sha256": "1022fa8e99ec9228abcad81a97a938f48265f9285dd217f61daa1f99e5f55328"
+  },
+  "savedFourthWholeOracleRuns": {
+    "path": ".local/astra-sprint/fourth-batch/fresh-real-oracles/runs.json",
+    "sha256": "e76174085c0753690b8b63371dd998bb49fa78d16e9613105dbdcd8dcbf5a9ac"
+  },
+  "measurementScript": {
+    "path": ".local/astra-sprint/real-project-review/measure.py",
+    "sha256": "b1b60bedadc297e54e087fbeebc79a019ac36ee9715030d0b39298572cca0533"
+  },
+  "comparisonScript": {
+    "path": ".local/astra-sprint/fifth-batch/compare-final-v2.py",
+    "sha256": "191ca386a09b5b68fd24b75ceeb9cd72591403eae359b31a7affeef78e46e461"
+  },
+  "originalCheckout": {
+    "path": "/Users/shayaunnejad/vibe-code/joern-oxidized",
+    "head": "6fcb30a25bbee3ca3c05b5b197cd3ce93ca4d11a",
+    "status": " M cpg-rs/ARCHITECTURE_GAPS.md\n M plans/README.md\n?? plans/001-fail-closed-filesystem-boundary.md\n?? plans/002-harden-cpg-persistence.md\n?? plans/003-content-correct-cache-and-reopen.md\n?? plans/004-enforce-release-acceptance-gates.md\n?? plans/006-complete-cpg-persistence-safety.md\n?? plans/007-bind-release-to-verified-contract.md\n?? plans/008-make-graph-language-metadata-explicit.md\n?? plans/009-refresh-architecture-and-product-docs.md\n?? plans/010-differential-gate-shared-reaching-def.md\n?? plans/011-migrate-summaries-to-canonical-value-flow.md\n?? plans/012-close-filesystem-boundary-residuals.md\n",
+    "dirtyFileCount": 13,
+    "hashes": {
+      "cpg-rs/ARCHITECTURE_GAPS.md": "1a106157606f81799b7fa70f0b7b0c7577a2c4279d731b3bab9409a9a65b70f4",
+      "plans/README.md": "620ad4469826655fb3c8a74cbdeef12d6319053e86e6370e3f156ebb97f2ba4b",
+      "plans/001-fail-closed-filesystem-boundary.md": "00cf7a9468a5f9f6b16b23c1c1e472a043e10687e53f161ee8aeaa8eb1897430",
+      "plans/002-harden-cpg-persistence.md": "b074d8136eddda21755c3afe084bcee619f2e5d0be207ce563e03c4dfb11b34a",
+      "plans/003-content-correct-cache-and-reopen.md": "1533c2d00dd11c4ca49645022542fcdb22bb4276fad75466deff8a85667508f9",
+      "plans/004-enforce-release-acceptance-gates.md": "f398c211f342598eb1d1572a0bb3018e01d5ceefb8ce9886939429855900ef87",
+      "plans/006-complete-cpg-persistence-safety.md": "79768aa08589d22cefbd30cbd670783d1d8ec917705ed8a534196230866794d6",
+      "plans/007-bind-release-to-verified-contract.md": "7265e6108e9fda4d864c0f0a0cfcabc152fd5cb233a3aa34b1536ead0153ddbd",
+      "plans/008-make-graph-language-metadata-explicit.md": "9a784d8db065ee7fedb47479bf6d8846d22d8501e5b8bcd4b665a0edf9134c40",
+      "plans/009-refresh-architecture-and-product-docs.md": "a33dd8d5c11d168c4c562228e7bb50643c85f6b637206a7adc9c7f481e547744",
+      "plans/010-differential-gate-shared-reaching-def.md": "5efb01ce175101b0eccdc8f92bb9a6a0370bb276a00224be90e248e00f032bb3",
+      "plans/011-migrate-summaries-to-canonical-value-flow.md": "77fef056be77c825db626b799870787f0a4f7b830206423abc04d2827d0f45ff",
+      "plans/012-close-filesystem-boundary-residuals.md": "3c91974a8f1cc26aa1deeeb7daf507f29c632b5960168a8a4695de612902e1cf"
+    },
+    "unchanged": true
+  },
+  "retention": {
+    "path": ".local/astra-sprint/fifth-batch/final-v2/retention-validation.json",
+    "sha256": "7699569a9d594e5937fdf4e5d5197b3a1cda165a710230fbcc426a8b36d1ca3d"
+  },
+  "sourceScope": {
+    "path": ".local/astra-sprint/fifth-batch/source-scope-review.json",
+    "sha256": "496bba86368732456377c29b3120d05bd6dbac5dae910cc907c9f39541507412"
+  },
+  "integrationBranch": "codex/astra-parity-sprint",
+  "cacheShapeVersion": 16,
+  "pushed": false,
+  "merged": false,
+  "artifactAvailability": "Source and small reference fixtures are committed locally. The report, metrics and this receipt record the checkpoint for review. Large whole-project outputs, intermediate reviews, frozen executables and logs remain at hash-bound ignored local paths; a fresh clone does not include them. Five typedef-aggregate raw producer logs also remain in external scratch; all small inputs and expected graphs are portable.",
+  "earlierCandidate": {
+    "sourceSha256": "ff4fb5699c560b17a3fe838b8b3f93f328df4cbf4e561d968289bc99c387aad0",
+    "workspaceTestsPassed": 428,
+    "mainGatePassed": 308,
+    "accepted": false,
+    "reason": "Complete project review found direct macro argument operand omissions despite these passing gates. Repaired before acceptance.",
+    "bindings": {
+      "path": ".local/astra-sprint/fifth-batch/final-real-differential/bin/source-bindings.json",
+      "sha256": "f362a02460d161ff513bbe0e0013022b821c3412fd715e4b3f308277a9d3a9f0"
+    },
+    "measurements": {
+      "path": ".local/astra-sprint/real-project-review/fifth-final-measurements.json",
+      "sha256": "7db4549f79c6afff117fd9a8fdda6811bfd72742448cf9986fa9b19c1f81afd1"
+    }
+  },
+  "abortedValidation": {
+    "path": ".local/astra-sprint/fifth-batch/aborted-pre-package-validation.json",
+    "sha256": "f2856c5e761da32862ca7c9a7ec48e6c98120a2037ae6c5dfdbf2ea41c729cb1"
+  },
+  "nextCWork": [
+    "Resolve remaining typedef-cast context with complete graph oracles.",
+    "Continue macro/source-parser, type-resolution and schema differences.",
+    "Preserve source-occurrence checks for graph facts alongside exact method/body counters."
+  ]
+}

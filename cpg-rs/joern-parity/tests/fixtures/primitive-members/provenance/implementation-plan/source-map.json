@@ -1,0 +1,65 @@
+[
+  {
+    "path": "cpg-rs/cpg-lang-c/src/exact.rs",
+    "sha256": "7ea06ac7361e2580b9d6fc77fdf6fa7e06cbb4b9bb294aa57787c3e8f9ce2da8",
+    "line": 2611,
+    "text": "    fn emit_type_decl(&mut self, n: Node, b: &[u8], depth: usize) {",
+    "meaning": "Aggregate MEMBER emission; enum path is separate."
+  },
+  {
+    "path": "cpg-rs/cpg-lang-c/src/exact.rs",
+    "sha256": "7ea06ac7361e2580b9d6fc77fdf6fa7e06cbb4b9bb294aa57787c3e8f9ce2da8",
+    "line": 2654,
+    "text": "            let ty = normalize_type(",
+    "meaning": "Only proposed base-type selection call site."
+  },
+  {
+    "path": "cpg-rs/cpg-lang-c/src/exact.rs",
+    "sha256": "7ea06ac7361e2580b9d6fc77fdf6fa7e06cbb4b9bb294aa57787c3e8f9ce2da8",
+    "line": 2674,
+    "text": "                            tfn: Some(format!(\"{ty}{}\", member_decl_suffix(d, b, &self.macros))),",
+    "meaning": "Combines chosen base with existing member_decl_suffix."
+  },
+  {
+    "path": "cpg-rs/cpg-lang-c/src/exact.rs",
+    "sha256": "7ea06ac7361e2580b9d6fc77fdf6fa7e06cbb4b9bb294aa57787c3e8f9ce2da8",
+    "line": 6931,
+    "text": "fn member_decl_suffix(n: Node, b: &[u8], macros: &HashMap<String, MacroDef>) -> String {",
+    "meaning": "Retain suffix and macro dimension rules unchanged."
+  },
+  {
+    "path": "cpg-rs/cpg-lang-c/src/exact.rs",
+    "sha256": "7ea06ac7361e2580b9d6fc77fdf6fa7e06cbb4b9bb294aa57787c3e8f9ce2da8",
+    "line": 7085,
+    "text": "enum TypeRole {",
+    "meaning": "Existing roles remain distinct."
+  },
+  {
+    "path": "cpg-rs/cpg-lang-c/src/exact.rs",
+    "sha256": "7ea06ac7361e2580b9d6fc77fdf6fa7e06cbb4b9bb294aa57787c3e8f9ce2da8",
+    "line": 7123,
+    "text": "fn declaration_type(declaration: Node, b: &[u8], role: TypeRole) -> String {",
+    "meaning": "Potential declaration-role entry, conditional on live qualifier evidence."
+  },
+  {
+    "path": "cpg-rs/cpg-lang-c/src/exact.rs",
+    "sha256": "7ea06ac7361e2580b9d6fc77fdf6fa7e06cbb4b9bb294aa57787c3e8f9ce2da8",
+    "line": 7132,
+    "text": "fn specifier_type_for_role(",
+    "meaning": "Qualifiers and nonprimitive fallback shared with other roles."
+  },
+  {
+    "path": "cpg-rs/cpg-lang-c/src/exact.rs",
+    "sha256": "7ea06ac7361e2580b9d6fc77fdf6fa7e06cbb4b9bb294aa57787c3e8f9ce2da8",
+    "line": 7157,
+    "text": "fn primitive_type(raw: &str, role: TypeRole) -> Option<String> {",
+    "meaning": "Existing primitive token renderer; do not change globally for MEMBER-specific evidence."
+  },
+  {
+    "path": "cpg-rs/cpg-lang-c/src/exact.rs",
+    "sha256": "7ea06ac7361e2580b9d6fc77fdf6fa7e06cbb4b9bb294aa57787c3e8f9ce2da8",
+    "line": 7318,
+    "text": "fn normalize_type(base: &str) -> String {",
+    "meaning": "Nonprimitive fallback and historical unsigned-long mapping remain unchanged."
+  }
+]

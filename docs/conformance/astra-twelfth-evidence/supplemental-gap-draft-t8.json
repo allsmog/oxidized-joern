@@ -1,0 +1,91 @@
+{
+  "status": "PASS_T8_ALL_SIX_CRITERIA_2_OF_2",
+  "previousReview": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/twelfth-gap-draft-t8-v1/review.json",
+    "sha256": "4a7bd140b991e08165632c6df2715388e96b9088e4cddadd67ded72d7768c038"
+  },
+  "report": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/twelfth-supplemental-gap-report-v2/REPORT.md",
+    "sha256": "b5b27db1f32d12883f42102d7eff90b89006d333573994dea78c1ac2aef48e36"
+  },
+  "evidence": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/twelfth-supplemental-gap-report-v2/evidence.json",
+    "sha256": "f84020f498ee2926fd79de6aed8ecaf61db7dee6cc8e8eedec305cbb968ab8eb"
+  },
+  "delta": "Only the link label per-case counts became aggregate counts. Evidence bytes unchanged; V1 unchanged.",
+  "scores": [
+    {
+      "criterion": "Grounding",
+      "score": 2,
+      "receipt": "Corrected label accurately describes the unchanged aggregate counts; original substantive factual review remains bound."
+    },
+    {
+      "criterion": "Contract",
+      "score": 2,
+      "receipt": "States bounded11-case result, observed gaps, multiplicity/property limits, smallest proposed increment and explicit anti-scope. No implementation or whole acceptance claim."
+    },
+    {
+      "criterion": "Register",
+      "score": 2,
+      "receipt": "No applicable banned vocabulary, inflated status, PPA labels, emoji or canned AI phrasing. Named graph/schema terms are appropriate for the engineering audience."
+    },
+    {
+      "criterion": "Veracity",
+      "score": 2,
+      "receipt": "Current final33f build binds identical4567/8c45 binaries to captured11 results. Proposed next increment remains explicitly unimplemented."
+    },
+    {
+      "criterion": "Gates",
+      "score": 2,
+      "receipt": "Read-only local evidence report; no source change, oracle alteration, producer launch or new release/whole acceptance claim."
+    },
+    {
+      "criterion": "Usefulness",
+      "score": 2,
+      "receipt": "Next increment specifies3 observed include occurrences, occurrence multiplicity, global namespace ownership, properties/missingness, persistence and unchanged existing canonical/identity gates."
+    }
+  ],
+  "weakestClaimsVerbatim": [
+    "These are bounded results from the [complete capture review](../twelfth-root-eleven-review-v2/result/final-review.json), with [aggregate counts and original snapshot hashes](evidence.json).",
+    "The executable bytes are unchanged after the final test-only lint correction.",
+    "In the observed graph, each import belongs to its caller\u2019s global `NAMESPACE_BLOCK`, including the body include.",
+    "The AST count differences occur between file, namespace, type-declaration, method and import nodes.",
+    "Rust retains line numbers, but has no column/end/offset storage."
+  ],
+  "links": [
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/twelfth-root-eleven-review-v2/result/final-review.json",
+      "sha256": "f49071787f448bb48aea7f15eaf79458a14cea0ed920e9fb9a9468ca9f9179d0"
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/twelfth-supplemental-gap-report-v2/evidence.json",
+      "sha256": "f84020f498ee2926fd79de6aed8ecaf61db7dee6cc8e8eedec305cbb968ab8eb"
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/twelfth-lint-continuity-review/review.json",
+      "sha256": "404be0c795e93cdb2e255faaf86a89c245277389da408270a15ea6cbcc74f92d"
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/twelfth-supplemental-gap-report-v2/evidence.json",
+      "sha256": "f84020f498ee2926fd79de6aed8ecaf61db7dee6cc8e8eedec305cbb968ab8eb"
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/twelfth-supplemental-gap-report-v2/evidence.json",
+      "sha256": "f84020f498ee2926fd79de6aed8ecaf61db7dee6cc8e8eedec305cbb968ab8eb"
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/twelfth-supplemental-gap-report-v2/evidence.json",
+      "sha256": "f84020f498ee2926fd79de6aed8ecaf61db7dee6cc8e8eedec305cbb968ab8eb"
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/joern-parity/tests/fixtures/body-macro-state/provenance/upstream/AstCreatorHelper.scala",
+      "sha256": "1c3514cb3e006b8c8bf1bb6b5cee072969416a8c94353d185a5ebacbe00e92f2"
+    }
+  ],
+  "fixes": [],
+  "registerHits": [],
+  "localArtifactScope": "Current shared-worktree links verified. Parent must remap and reverify links when copying to durable docs.",
+  "figures": "No graphical figure; the6-row table sums to840 and preserves edge occurrence counts.",
+  "producerRuns": 0,
+  "rootWrites": false
+}

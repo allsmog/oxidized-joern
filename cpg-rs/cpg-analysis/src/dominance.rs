@@ -2,7 +2,9 @@
 
 use crate::pass::{Pass, PassContext};
 use cpg_core::{Cpg, EdgeKind, FileId, NodeId, NodeKind};
-use std::collections::{BTreeSet, HashMap, HashSet};
+#[cfg(test)]
+use std::collections::BTreeSet;
+use std::collections::{HashMap, HashSet};
 
 pub struct DominancePass;
 pub struct PostDominancePass;
@@ -57,9 +59,118 @@ fn materialize(cpg: &mut Cpg, file: FileId, reverse: bool, edge: EdgeKind) {
     }
 }
 
+/// Compute immediate dominators in reverse postorder. One parent per node
+/// replaces the quadratic collection of complete dominator sets. A virtual
+/// root joins multiple exits for post-dominance; it is never materialized.
+pub fn immediate_dominance_edges(
+    cpg: &Cpg,
+    method: NodeId,
+    reverse: bool,
+) -> Vec<(NodeId, NodeId)> {
+    let nodes = reachable_cfg(cpg, method);
+    let index: HashMap<_, _> = nodes
+        .iter()
+        .enumerate()
+        .map(|(i, &node)| (node, i))
+        .collect();
+    let root = nodes.len();
+    let mut successors = vec![Vec::new(); root + 1];
+    let mut predecessors = vec![Vec::new(); root + 1];
+    for (i, &node) in nodes.iter().enumerate() {
+        let mut has_successor = false;
+        for next in cpg.out_kind(node, EdgeKind::Cfg) {
+            if let Some(&j) = index.get(&next) {
+                has_successor = true;
+                let (from, to) = if reverse { (j, i) } else { (i, j) };
+                successors[from].push(to);
+                predecessors[to].push(from);
+            }
+        }
+        if (reverse && !has_successor) || (!reverse && node == method) {
+            successors[root].push(i);
+            predecessors[i].push(root);
+        }
+    }
+    // Iterative DFS also handles large straight-line methods without using
+    // the process stack. Reverse traversal excludes nodes unable to exit.
+    let mut seen = vec![false; root + 1];
+    seen[root] = true;
+    let mut stack = vec![(root, 0)];
+    let mut order = Vec::with_capacity(root + 1);
+    while let Some((node, next)) = stack.pop() {
+        if let Some(&child) = successors[node].get(next) {
+            stack.push((node, next + 1));
+            if !seen[child] {
+                seen[child] = true;
+                stack.push((child, 0));
+            }
+        } else {
+            order.push(node);
+        }
+    }
+    order.reverse();
+    let mut rank = vec![usize::MAX; root + 1];
+    for (i, &node) in order.iter().enumerate() {
+        rank[node] = i;
+    }
+    let mut parent = vec![usize::MAX; root + 1];
+    parent[root] = root;
+    loop {
+        let mut changed = false;
+        for &node in order.iter().skip(1) {
+            let mut incoming = predecessors[node]
+                .iter()
+                .copied()
+                .filter(|&p| parent[p] != usize::MAX);
+            let Some(mut common) = incoming.next() else {
+                continue;
+            };
+            for mut other in incoming {
+                while common != other {
+                    if rank[common] > rank[other] {
+                        common = parent[common];
+                    } else {
+                        other = parent[other];
+                    }
+                }
+            }
+            if parent[node] != common {
+                parent[node] = common;
+                changed = true;
+            }
+        }
+        if !changed {
+            break;
+        }
+    }
+    let mut edges: Vec<_> = (0..root)
+        .filter(|&node| parent[node] < root)
+        .map(|node| (nodes[parent[node]], nodes[node]))
+        .collect();
+    edges.sort_unstable();
+    edges
+}
+
+fn reachable_cfg(cpg: &Cpg, method: NodeId) -> Vec<NodeId> {
+    let mut seen = HashSet::new();
+    let mut stack = vec![method];
+    while let Some(node) = stack.pop() {
+        if !seen.insert(node) {
+            continue;
+        }
+        let mut successors: Vec<NodeId> = cpg.out_kind(node, EdgeKind::Cfg).collect();
+        successors.reverse();
+        stack.extend(successors);
+    }
+    let mut nodes: Vec<NodeId> = seen.into_iter().collect();
+    nodes.sort_unstable();
+    nodes
+}
+
+#[cfg(test)]
 /// Immediate dominator edges. With `reverse = true`, computes the immediate
 /// post-dominator tree by running the same fixed point over the reversed CFG.
-pub fn immediate_dominance_edges(
+fn reference_immediate_dominance_edges(
     cpg: &Cpg,
     method: NodeId,
     reverse: bool,
@@ -160,27 +271,76 @@ pub fn immediate_dominance_edges(
     edges
 }
 
-fn reachable_cfg(cpg: &Cpg, method: NodeId) -> Vec<NodeId> {
-    let mut seen = HashSet::new();
-    let mut stack = vec![method];
-    while let Some(node) = stack.pop() {
-        if !seen.insert(node) {
-            continue;
-        }
-        let mut successors: Vec<NodeId> = cpg.out_kind(node, EdgeKind::Cfg).collect();
-        successors.reverse();
-        stack.extend(successors);
-    }
-    let mut nodes: Vec<NodeId> = seen.into_iter().collect();
-    nodes.sort_unstable();
-    nodes
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::query::{QueryCompiler, QueryExecutor, QueryResult};
     use cpg_core::CpgBuilder;
+
+    #[test]
+    fn immediate_parents_match_set_reference_across_cyclic_cfgs() {
+        let mut state = 731_u64;
+        for size in 2..14 {
+            for _ in 0..16 {
+                let mut cpg = Cpg::new();
+                let file = cpg.file_id("generated.c");
+                let nodes: Vec<_> = (0..size)
+                    .map(|_| cpg.add_node(NodeKind::Call, file))
+                    .collect();
+                // Every node has an exit path, with random shortcuts and
+                // backedges that include irreducible, multiple-entry loops.
+                for pair in nodes.windows(2) {
+                    cpg.add_edge(pair[0], pair[1], EdgeKind::Cfg);
+                }
+                for &from in &nodes[..size - 1] {
+                    for &to in &nodes {
+                        state = state.wrapping_mul(6364136223846793005).wrapping_add(1);
+                        if state >> 61 == 0 {
+                            cpg.add_edge(from, to, EdgeKind::Cfg);
+                        }
+                    }
+                }
+                for reverse in [false, true] {
+                    assert_eq!(
+                        immediate_dominance_edges(&cpg, nodes[0], reverse),
+                        reference_immediate_dominance_edges(&cpg, nodes[0], reverse)
+                    );
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn large_cfg_and_multiple_exits_do_not_require_quadratic_storage() {
+        let mut cpg = Cpg::new();
+        let file = cpg.file_id("large.c");
+        let nodes: Vec<_> = (0..10_000)
+            .map(|_| cpg.add_node(NodeKind::Call, file))
+            .collect();
+        for pair in nodes.windows(2) {
+            cpg.add_edge(pair[0], pair[1], EdgeKind::Cfg);
+        }
+        for reverse in [false, true] {
+            let edges = immediate_dominance_edges(&cpg, nodes[0], reverse);
+            let mut expected: Vec<_> = nodes
+                .windows(2)
+                .map(|p| if reverse { (p[1], p[0]) } else { (p[0], p[1]) })
+                .collect();
+            expected.sort_unstable();
+            assert_eq!(edges, expected);
+        }
+        let exit = cpg.add_node(NodeKind::Call, file);
+        cpg.add_edge(nodes[0], exit, EdgeKind::Cfg);
+        let post = immediate_dominance_edges(&cpg, nodes[0], true);
+        assert!(!post.iter().any(|&(_, child)| child == nodes[0]));
+        // A branch that never exits has no post-dominator in the exit tree.
+        let cycle = cpg.add_node(NodeKind::Call, file);
+        cpg.add_edge(nodes[0], cycle, EdgeKind::Cfg);
+        cpg.add_edge(cycle, cycle, EdgeKind::Cfg);
+        assert!(!immediate_dominance_edges(&cpg, nodes[0], true)
+            .iter()
+            .any(|&(_, child)| child == cycle));
+    }
 
     #[test]
     fn computes_branch_dominator_and_post_dominator_trees() {

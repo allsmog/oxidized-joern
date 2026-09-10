@@ -1,0 +1,17 @@
+body_state_then_include False 50
+conditional_local_typedef False 159
+cross_function_state False 50
+elif_definition False 46
+header_then_local_undef False 46
+inactive_effects True 0
+inactive_function_effects True 0
+inactive_typedef_shadow False 28
+local_definition False 46
+local_function_macro False 158
+local_redefinition False 20
+local_type_macro False 41
+local_undef False 46
+nested_block_persistence False 47
+no_backwards_leak False 54
+runtime_if_directive False 47
+selected_arm_definition False 46

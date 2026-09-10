@@ -1,0 +1,118 @@
+{
+  "command": [
+    "/Users/shayaunnejad/vibe-code/joern-oxidized/.local/astra-sprint/oracle/runtime/joern-cli/joern",
+    "--script",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/field-review/reduced/oracle.sc",
+    "--param",
+    "inputPath=/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/field-review/reduced/input"
+  ],
+  "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/field-review/reduced/oracle-workspace",
+  "exitCode": 0,
+  "wallSeconds": 12.384845209002378,
+  "inputHashes": {
+    "recursive_index": "39b168666536a9561f7aa7a66f3dcbc446b5d4d88715d72ae0ea9a27c65e565a",
+    "indirect_recursive_index": "df28c759da5720b78575119abde5a4db45f4bbae03efb5706b1a5f43a5abf934",
+    "call_index": "e341c36e5e0599ca47cba72ea28115abd920661d709f4ff60b0a4408e0a48209",
+    "sibling_owners": "4dd51f31210dc94105bd1de2a9b0b812ec440da04305457bf0bd7a98c52dade0",
+    "conditional_piece": "319579a0ae9d3acb7dbce230ef024a559cdd7c0edee57779c205eb883d2d0198",
+    "quoted_piece": "7bda49207f62e8d52fae90b92eca4fb6bc07cb9d199e7fafe91a92409d761b68"
+  },
+  "scriptSha256": "56431f14868678e64f9eb41026b44f1d3d7738404d28d2db62711b520c98c742",
+  "rows": [
+    {
+      "case": "call_index",
+      "canonicalLines": 315,
+      "before": {
+        "exit": 0,
+        "exact": false,
+        "diffLines": 264
+      },
+      "after": {
+        "exit": 0,
+        "exact": true,
+        "diffLines": 0
+      }
+    },
+    {
+      "case": "conditional_piece",
+      "canonicalLines": 321,
+      "before": {
+        "exit": 0,
+        "exact": false,
+        "diffLines": 282
+      },
+      "after": {
+        "exit": 0,
+        "exact": false,
+        "diffLines": 96
+      }
+    },
+    {
+      "case": "indirect_recursive_index",
+      "canonicalLines": 278,
+      "before": {
+        "exit": 0,
+        "exact": false,
+        "diffLines": 248
+      },
+      "after": {
+        "exit": 0,
+        "exact": true,
+        "diffLines": 0
+      }
+    },
+    {
+      "case": "quoted_piece",
+      "canonicalLines": 305,
+      "before": {
+        "exit": 0,
+        "exact": false,
+        "diffLines": 299
+      },
+      "after": {
+        "exit": 0,
+        "exact": false,
+        "diffLines": 20
+      }
+    },
+    {
+      "case": "recursive_index",
+      "canonicalLines": 278,
+      "before": {
+        "exit": 0,
+        "exact": false,
+        "diffLines": 248
+      },
+      "after": {
+        "exit": 0,
+        "exact": true,
+        "diffLines": 0
+      }
+    },
+    {
+      "case": "sibling_owners",
+      "canonicalLines": 378,
+      "before": {
+        "exit": 0,
+        "exact": false,
+        "diffLines": 342
+      },
+      "after": {
+        "exit": 0,
+        "exact": true,
+        "diffLines": 0
+      }
+    }
+  ],
+  "sourceSha256": "ca1b0c49524a2dc94915cb0709d592f03b7b5b3fe0a080dac6fc2e3f4ddf5369",
+  "binaries": {
+    "before": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-field-macros/.local/field-macros/frozen-nested/joern-parity",
+      "sha256": "c1b538010db3fd48722ec3095c8ff83e4e1bc95e329ef92083cee6db5c1d8dcd"
+    },
+    "after": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-field-macros/.local/field-macros/direct/frozen-candidate/joern-parity",
+      "sha256": "9d2004bcd35364748f6d252fb2d315aa7161f40de496f5b26403cbdfc3cf2709"
+    }
+  }
+}

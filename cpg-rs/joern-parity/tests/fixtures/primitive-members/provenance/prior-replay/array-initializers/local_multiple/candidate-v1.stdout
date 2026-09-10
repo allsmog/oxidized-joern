@@ -1,0 +1,344 @@
+METHOD NAME=<global> CODE=<global> FULL_NAME=<includes>:<global> ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.alloc FULL_NAME=<operator>.alloc ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.arrayInitializer FULL_NAME=<operator>.arrayInitializer ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.assignment FULL_NAME=<operator>.assignment ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=arrays CODE=void arrays(void) { int first[2] = {1}, other=3, second[1]={other}; } FULL_NAME=arrays SIGNATURE=void(void) ORDER=1
+  METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  BLOCK CODE={ int first[2] = {1}, other=3, second[1]={other}; } TYPE_FULL_NAME=void ORDER=2
+    LOCAL NAME=first CODE=int first[2] TYPE_FULL_NAME=int[2] ORDER=1
+    LOCAL NAME=other CODE=int other TYPE_FULL_NAME=int ORDER=2
+    LOCAL NAME=second CODE=int second[1] TYPE_FULL_NAME=int[1] ORDER=3
+    CALL NAME=<operator>.assignment CODE=first[2] = {1} TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=4 DISPATCH_TYPE=STATIC_DISPATCH
+      IDENTIFIER NAME=first CODE=first TYPE_FULL_NAME=int[2] ORDER=1 ARGUMENT_INDEX=1
+      CALL NAME=<operator>.alloc CODE=first[2] = {1} TYPE_FULL_NAME=int[2] METHOD_FULL_NAME=<operator>.alloc ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=int[2] CODE=int[2] TYPE_FULL_NAME=int[2] ORDER=1 ARGUMENT_INDEX=1
+        LITERAL CODE=2 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+    CALL NAME=<operator>.assignment CODE=second[1]={other} TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=5 DISPATCH_TYPE=STATIC_DISPATCH
+      IDENTIFIER NAME=second CODE=second TYPE_FULL_NAME=int[1] ORDER=1 ARGUMENT_INDEX=1
+      CALL NAME=<operator>.alloc CODE=second[1]={other} TYPE_FULL_NAME=int[1] METHOD_FULL_NAME=<operator>.alloc ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=int[1] CODE=int[1] TYPE_FULL_NAME=int[1] ORDER=1 ARGUMENT_INDEX=1
+        LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+    CALL NAME=<operator>.assignment CODE=first[2] = {1} TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=6 DISPATCH_TYPE=STATIC_DISPATCH
+      IDENTIFIER NAME=first CODE=first TYPE_FULL_NAME=int[2] ORDER=1 ARGUMENT_INDEX=1
+      CALL NAME=<operator>.arrayInitializer CODE={1} TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.arrayInitializer ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+        LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+    CALL NAME=<operator>.assignment CODE=other=3 TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=7 DISPATCH_TYPE=STATIC_DISPATCH
+      IDENTIFIER NAME=other CODE=other TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+      LITERAL CODE=3 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+    CALL NAME=<operator>.assignment CODE=second[1]={other} TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=8 DISPATCH_TYPE=STATIC_DISPATCH
+      IDENTIFIER NAME=second CODE=second TYPE_FULL_NAME=int[1] ORDER=1 ARGUMENT_INDEX=1
+      CALL NAME=<operator>.arrayInitializer CODE={other} TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.arrayInitializer ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=other CODE=other TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+
+METHOD NAME=<global> CODE=<global> FULL_NAME=arrays.c:<global> ORDER=1
+  METHOD NAME=arrays CODE=void arrays(void) { int first[2] = {1}, other=3, second[1]={other}; } FULL_NAME=arrays SIGNATURE=void(void) ORDER=1
+    METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    BLOCK CODE={ int first[2] = {1}, other=3, second[1]={other}; } TYPE_FULL_NAME=void ORDER=2
+      LOCAL NAME=first CODE=int first[2] TYPE_FULL_NAME=int[2] ORDER=1
+      LOCAL NAME=other CODE=int other TYPE_FULL_NAME=int ORDER=2
+      LOCAL NAME=second CODE=int second[1] TYPE_FULL_NAME=int[1] ORDER=3
+      CALL NAME=<operator>.assignment CODE=first[2] = {1} TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=4 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=first CODE=first TYPE_FULL_NAME=int[2] ORDER=1 ARGUMENT_INDEX=1
+        CALL NAME=<operator>.alloc CODE=first[2] = {1} TYPE_FULL_NAME=int[2] METHOD_FULL_NAME=<operator>.alloc ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=int[2] CODE=int[2] TYPE_FULL_NAME=int[2] ORDER=1 ARGUMENT_INDEX=1
+          LITERAL CODE=2 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+      CALL NAME=<operator>.assignment CODE=second[1]={other} TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=5 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=second CODE=second TYPE_FULL_NAME=int[1] ORDER=1 ARGUMENT_INDEX=1
+        CALL NAME=<operator>.alloc CODE=second[1]={other} TYPE_FULL_NAME=int[1] METHOD_FULL_NAME=<operator>.alloc ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=int[1] CODE=int[1] TYPE_FULL_NAME=int[1] ORDER=1 ARGUMENT_INDEX=1
+          LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+      CALL NAME=<operator>.assignment CODE=first[2] = {1} TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=6 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=first CODE=first TYPE_FULL_NAME=int[2] ORDER=1 ARGUMENT_INDEX=1
+        CALL NAME=<operator>.arrayInitializer CODE={1} TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.arrayInitializer ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+          LITERAL CODE=1 TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+      CALL NAME=<operator>.assignment CODE=other=3 TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=7 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=other CODE=other TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+        LITERAL CODE=3 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+      CALL NAME=<operator>.assignment CODE=second[1]={other} TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.assignment ORDER=8 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=second CODE=second TYPE_FULL_NAME=int[1] ORDER=1 ARGUMENT_INDEX=1
+        CALL NAME=<operator>.arrayInitializer CODE={other} TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.arrayInitializer ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=other CODE=other TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+    METHOD_REF CODE=arrays TYPE_FULL_NAME=arrays METHOD_FULL_NAME=arrays ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+NODES|META_DATA LANGUAGE=NEWC
+NODES|FILE NAME=<includes> ORDER=1
+NODES|FILE NAME=<unknown> ORDER=0
+NODES|FILE NAME=arrays.c ORDER=0
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<global> FILENAME=<unknown> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<includes>:<global> FILENAME=<includes> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=arrays.c:<global> FILENAME=arrays.c ORDER=1
+NODES|NAMESPACE NAME=<global>
+NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=arrays FULL_NAME=arrays CODE=arrays AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=arrays.c:<global> FILENAME=arrays.c ORDER=1
+NODES|TYPE_DECL NAME=<global> FULL_NAME=arrays.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=arrays.c:<global> FILENAME=arrays.c ORDER=1
+NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=int[1] FULL_NAME=int[1] CODE=int[1] IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=int[2] FULL_NAME=int[2] CODE=int[2] IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+NODES|TYPE NAME=arrays FULL_NAME=arrays TYPE_DECL_FULL_NAME=arrays
+NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+NODES|TYPE NAME=int[1] FULL_NAME=int[1] TYPE_DECL_FULL_NAME=int[1]
+NODES|TYPE NAME=int[2] FULL_NAME=int[2] TYPE_DECL_FULL_NAME=int[2]
+NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+EDGES|ARGUMENT arrays#12 -> arrays#13
+EDGES|ARGUMENT arrays#12 -> arrays#14
+EDGES|ARGUMENT arrays#14 -> arrays#15
+EDGES|ARGUMENT arrays#14 -> arrays#16
+EDGES|ARGUMENT arrays#17 -> arrays#18
+EDGES|ARGUMENT arrays#17 -> arrays#19
+EDGES|ARGUMENT arrays#19 -> arrays#20
+EDGES|ARGUMENT arrays#21 -> arrays#22
+EDGES|ARGUMENT arrays#21 -> arrays#23
+EDGES|ARGUMENT arrays#24 -> arrays#25
+EDGES|ARGUMENT arrays#24 -> arrays#26
+EDGES|ARGUMENT arrays#26 -> arrays#27
+EDGES|ARGUMENT arrays#7 -> arrays#8
+EDGES|ARGUMENT arrays#7 -> arrays#9
+EDGES|ARGUMENT arrays#9 -> arrays#10
+EDGES|ARGUMENT arrays#9 -> arrays#11
+EDGES|CALL arrays#12 -> <operator>.assignment#0
+EDGES|CALL arrays#14 -> <operator>.alloc#0
+EDGES|CALL arrays#17 -> <operator>.assignment#0
+EDGES|CALL arrays#19 -> <operator>.arrayInitializer#0
+EDGES|CALL arrays#21 -> <operator>.assignment#0
+EDGES|CALL arrays#24 -> <operator>.assignment#0
+EDGES|CALL arrays#26 -> <operator>.arrayInitializer#0
+EDGES|CALL arrays#7 -> <operator>.assignment#0
+EDGES|CALL arrays#9 -> <operator>.alloc#0
+EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+EDGES|CFG <operator>.alloc#0 -> <operator>.alloc#5
+EDGES|CFG <operator>.arrayInitializer#0 -> <operator>.arrayInitializer#4
+EDGES|CFG <operator>.assignment#0 -> <operator>.assignment#5
+EDGES|CFG arrays#0 -> arrays#8
+EDGES|CFG arrays#10 -> arrays#11
+EDGES|CFG arrays#11 -> arrays#9
+EDGES|CFG arrays#12 -> arrays#18
+EDGES|CFG arrays#13 -> arrays#15
+EDGES|CFG arrays#14 -> arrays#12
+EDGES|CFG arrays#15 -> arrays#16
+EDGES|CFG arrays#16 -> arrays#14
+EDGES|CFG arrays#17 -> arrays#22
+EDGES|CFG arrays#18 -> arrays#20
+EDGES|CFG arrays#19 -> arrays#17
+EDGES|CFG arrays#20 -> arrays#19
+EDGES|CFG arrays#21 -> arrays#25
+EDGES|CFG arrays#22 -> arrays#23
+EDGES|CFG arrays#23 -> arrays#21
+EDGES|CFG arrays#24 -> arrays#28
+EDGES|CFG arrays#25 -> arrays#27
+EDGES|CFG arrays#26 -> arrays#24
+EDGES|CFG arrays#27 -> arrays#26
+EDGES|CFG arrays#7 -> arrays#13
+EDGES|CFG arrays#8 -> arrays#10
+EDGES|CFG arrays#9 -> arrays#7
+EDGES|CFG arrays.c:<global>#0 -> arrays.c:<global>#31
+EDGES|CFG arrays.c:<global>#31 -> arrays.c:<global>#32
+EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+EDGES|CONTAINS <operator>.alloc#0 -> <operator>.alloc#2
+EDGES|CONTAINS <operator>.arrayInitializer#0 -> <operator>.arrayInitializer#2
+EDGES|CONTAINS <operator>.assignment#0 -> <operator>.assignment#2
+EDGES|CONTAINS D:arrays.c:<global> -> D:arrays
+EDGES|CONTAINS D:arrays.c:<global> -> arrays.c:<global>#0
+EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+EDGES|CONTAINS F:<includes> -> D:ANY
+EDGES|CONTAINS F:<includes> -> D:int
+EDGES|CONTAINS F:<includes> -> D:int[1]
+EDGES|CONTAINS F:<includes> -> D:int[2]
+EDGES|CONTAINS F:<includes> -> D:void
+EDGES|CONTAINS F:arrays.c -> D:arrays.c:<global>
+EDGES|CONTAINS arrays#0 -> arrays#10
+EDGES|CONTAINS arrays#0 -> arrays#11
+EDGES|CONTAINS arrays#0 -> arrays#12
+EDGES|CONTAINS arrays#0 -> arrays#13
+EDGES|CONTAINS arrays#0 -> arrays#14
+EDGES|CONTAINS arrays#0 -> arrays#15
+EDGES|CONTAINS arrays#0 -> arrays#16
+EDGES|CONTAINS arrays#0 -> arrays#17
+EDGES|CONTAINS arrays#0 -> arrays#18
+EDGES|CONTAINS arrays#0 -> arrays#19
+EDGES|CONTAINS arrays#0 -> arrays#20
+EDGES|CONTAINS arrays#0 -> arrays#21
+EDGES|CONTAINS arrays#0 -> arrays#22
+EDGES|CONTAINS arrays#0 -> arrays#23
+EDGES|CONTAINS arrays#0 -> arrays#24
+EDGES|CONTAINS arrays#0 -> arrays#25
+EDGES|CONTAINS arrays#0 -> arrays#26
+EDGES|CONTAINS arrays#0 -> arrays#27
+EDGES|CONTAINS arrays#0 -> arrays#3
+EDGES|CONTAINS arrays#0 -> arrays#7
+EDGES|CONTAINS arrays#0 -> arrays#8
+EDGES|CONTAINS arrays#0 -> arrays#9
+EDGES|CONTAINS arrays.c:<global>#0 -> arrays#0
+EDGES|CONTAINS arrays.c:<global>#0 -> arrays.c:<global>#30
+EDGES|CONTAINS arrays.c:<global>#0 -> arrays.c:<global>#31
+EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.alloc#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.alloc#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.alloc#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.alloc#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.alloc#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.alloc#6 -> T:ANY
+EDGES|EVAL_TYPE <operator>.arrayInitializer#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.arrayInitializer#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.arrayInitializer#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.arrayInitializer#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.assignment#6 -> T:ANY
+EDGES|EVAL_TYPE arrays#1 -> T:void
+EDGES|EVAL_TYPE arrays#10 -> T:int[2]
+EDGES|EVAL_TYPE arrays#11 -> T:int
+EDGES|EVAL_TYPE arrays#12 -> T:void
+EDGES|EVAL_TYPE arrays#13 -> T:int[1]
+EDGES|EVAL_TYPE arrays#14 -> T:int[1]
+EDGES|EVAL_TYPE arrays#15 -> T:int[1]
+EDGES|EVAL_TYPE arrays#16 -> T:int
+EDGES|EVAL_TYPE arrays#17 -> T:void
+EDGES|EVAL_TYPE arrays#18 -> T:int[2]
+EDGES|EVAL_TYPE arrays#19 -> T:ANY
+EDGES|EVAL_TYPE arrays#2 -> T:void
+EDGES|EVAL_TYPE arrays#20 -> T:int
+EDGES|EVAL_TYPE arrays#21 -> T:void
+EDGES|EVAL_TYPE arrays#22 -> T:int
+EDGES|EVAL_TYPE arrays#23 -> T:int
+EDGES|EVAL_TYPE arrays#24 -> T:void
+EDGES|EVAL_TYPE arrays#25 -> T:int[1]
+EDGES|EVAL_TYPE arrays#26 -> T:ANY
+EDGES|EVAL_TYPE arrays#27 -> T:int
+EDGES|EVAL_TYPE arrays#28 -> T:void
+EDGES|EVAL_TYPE arrays#3 -> T:void
+EDGES|EVAL_TYPE arrays#4 -> T:int[2]
+EDGES|EVAL_TYPE arrays#5 -> T:int
+EDGES|EVAL_TYPE arrays#6 -> T:int[1]
+EDGES|EVAL_TYPE arrays#7 -> T:void
+EDGES|EVAL_TYPE arrays#8 -> T:int[2]
+EDGES|EVAL_TYPE arrays#9 -> T:int[2]
+EDGES|EVAL_TYPE arrays.c:<global>#30 -> T:ANY
+EDGES|EVAL_TYPE arrays.c:<global>#31 -> T:arrays
+EDGES|EVAL_TYPE arrays.c:<global>#32 -> T:ANY
+EDGES|PARAMETER_LINK <operator>.alloc#1 -> <operator>.alloc#3
+EDGES|PARAMETER_LINK <operator>.alloc#4 -> <operator>.alloc#6
+EDGES|PARAMETER_LINK <operator>.arrayInitializer#1 -> <operator>.arrayInitializer#3
+EDGES|PARAMETER_LINK <operator>.assignment#1 -> <operator>.assignment#3
+EDGES|PARAMETER_LINK <operator>.assignment#4 -> <operator>.assignment#6
+EDGES|PARAMETER_LINK arrays#1 -> arrays#2
+EDGES|REF NB:<global> -> NS:<global>
+EDGES|REF NB:<includes>:<global> -> NS:<global>
+EDGES|REF NB:arrays.c:<global> -> NS:<global>
+EDGES|REF T:ANY -> D:ANY
+EDGES|REF T:arrays -> D:arrays
+EDGES|REF T:int -> D:int
+EDGES|REF T:int[1] -> D:int[1]
+EDGES|REF T:int[2] -> D:int[2]
+EDGES|REF T:void -> D:void
+EDGES|REF arrays#13 -> arrays#6
+EDGES|REF arrays#18 -> arrays#4
+EDGES|REF arrays#22 -> arrays#5
+EDGES|REF arrays#25 -> arrays#6
+EDGES|REF arrays#27 -> arrays#5
+EDGES|REF arrays#8 -> arrays#4
+EDGES|REF arrays.c:<global>#31 -> arrays#0
+EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+EDGES|SOURCE_FILE D:ANY -> F:<includes>
+EDGES|SOURCE_FILE D:arrays -> F:arrays.c
+EDGES|SOURCE_FILE D:arrays.c:<global> -> F:arrays.c
+EDGES|SOURCE_FILE D:int -> F:<includes>
+EDGES|SOURCE_FILE D:int[1] -> F:<includes>
+EDGES|SOURCE_FILE D:int[2] -> F:<includes>
+EDGES|SOURCE_FILE D:void -> F:<includes>
+EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
+EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>
+EDGES|SOURCE_FILE NB:arrays.c:<global> -> F:arrays.c
+EDGES|SOURCE_FILE arrays#0 -> F:arrays.c
+EDGES|SOURCE_FILE arrays.c:<global>#0 -> F:arrays.c
+FLOWS|REACHING_DEF[1] arrays#16 -> arrays#14
+FLOWS|REACHING_DEF[1] arrays#20 -> arrays#19
+FLOWS|REACHING_DEF[2] arrays#11 -> arrays#9
+FLOWS|REACHING_DEF[3] arrays#23 -> arrays#21
+FLOWS|REACHING_DEF[3] arrays#23 -> arrays#22
+FLOWS|REACHING_DEF[] <operator>.alloc#0 -> <operator>.alloc#1
+FLOWS|REACHING_DEF[] <operator>.alloc#0 -> <operator>.alloc#4
+FLOWS|REACHING_DEF[] <operator>.arrayInitializer#0 -> <operator>.arrayInitializer#1
+FLOWS|REACHING_DEF[] <operator>.assignment#0 -> <operator>.assignment#1
+FLOWS|REACHING_DEF[] <operator>.assignment#0 -> <operator>.assignment#4
+FLOWS|REACHING_DEF[] arrays#0 -> arrays#1
+FLOWS|REACHING_DEF[] arrays#0 -> arrays#10
+FLOWS|REACHING_DEF[] arrays#0 -> arrays#11
+FLOWS|REACHING_DEF[] arrays#0 -> arrays#15
+FLOWS|REACHING_DEF[] arrays#0 -> arrays#16
+FLOWS|REACHING_DEF[] arrays#0 -> arrays#20
+FLOWS|REACHING_DEF[] arrays#0 -> arrays#23
+FLOWS|REACHING_DEF[] arrays#0 -> arrays#27
+FLOWS|REACHING_DEF[] arrays#1 -> arrays#2
+FLOWS|REACHING_DEF[] arrays#1 -> arrays#28
+FLOWS|REACHING_DEF[] arrays.c:<global>#0 -> arrays.c:<global>#31
+FLOWS|REACHING_DEF[first[2] = {1}] arrays#17 -> arrays#28
+FLOWS|REACHING_DEF[first[2] = {1}] arrays#9 -> arrays#7
+FLOWS|REACHING_DEF[first[2] = {1}] arrays#9 -> arrays#8
+FLOWS|REACHING_DEF[first] arrays#18 -> arrays#17
+FLOWS|REACHING_DEF[first] arrays#18 -> arrays#28
+FLOWS|REACHING_DEF[first] arrays#8 -> arrays#7
+FLOWS|REACHING_DEF[int[1]] arrays#15 -> arrays#14
+FLOWS|REACHING_DEF[int[1]] arrays#15 -> arrays#28
+FLOWS|REACHING_DEF[int[2]] arrays#10 -> arrays#28
+FLOWS|REACHING_DEF[int[2]] arrays#10 -> arrays#9
+FLOWS|REACHING_DEF[other=3] arrays#21 -> arrays#28
+FLOWS|REACHING_DEF[other] arrays#22 -> arrays#21
+FLOWS|REACHING_DEF[other] arrays#22 -> arrays#27
+FLOWS|REACHING_DEF[other] arrays#27 -> arrays#26
+FLOWS|REACHING_DEF[other] arrays#27 -> arrays#28
+FLOWS|REACHING_DEF[p1] <operator>.alloc#1 -> <operator>.alloc#3
+FLOWS|REACHING_DEF[p1] <operator>.alloc#1 -> <operator>.alloc#5
+FLOWS|REACHING_DEF[p1] <operator>.arrayInitializer#1 -> <operator>.arrayInitializer#3
+FLOWS|REACHING_DEF[p1] <operator>.arrayInitializer#1 -> <operator>.arrayInitializer#4
+FLOWS|REACHING_DEF[p1] <operator>.assignment#1 -> <operator>.assignment#3
+FLOWS|REACHING_DEF[p1] <operator>.assignment#1 -> <operator>.assignment#5
+FLOWS|REACHING_DEF[p2] <operator>.alloc#4 -> <operator>.alloc#5
+FLOWS|REACHING_DEF[p2] <operator>.alloc#4 -> <operator>.alloc#6
+FLOWS|REACHING_DEF[p2] <operator>.assignment#4 -> <operator>.assignment#5
+FLOWS|REACHING_DEF[p2] <operator>.assignment#4 -> <operator>.assignment#6
+FLOWS|REACHING_DEF[second[1]={other}] arrays#14 -> arrays#12
+FLOWS|REACHING_DEF[second[1]={other}] arrays#14 -> arrays#13
+FLOWS|REACHING_DEF[second[1]={other}] arrays#24 -> arrays#28
+FLOWS|REACHING_DEF[second] arrays#13 -> arrays#12
+FLOWS|REACHING_DEF[second] arrays#25 -> arrays#24
+FLOWS|REACHING_DEF[second] arrays#25 -> arrays#28
+FLOWS|REACHING_DEF[{1}] arrays#19 -> arrays#17
+FLOWS|REACHING_DEF[{1}] arrays#19 -> arrays#18
+FLOWS|REACHING_DEF[{1}] arrays#19 -> arrays#28
+FLOWS|REACHING_DEF[{other}] arrays#26 -> arrays#24
+FLOWS|REACHING_DEF[{other}] arrays#26 -> arrays#25
+FLOWS|REACHING_DEF[{other}] arrays#26 -> arrays#28

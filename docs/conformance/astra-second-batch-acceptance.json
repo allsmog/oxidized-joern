@@ -1,0 +1,282 @@
+{
+  "schemaVersion": 1,
+  "codeRevision": "c5ea712dbfd03d114af4450f79c89629a360b6a6",
+  "startedAtUtc": "2026-09-08T06:32:00+00:00",
+  "validationCompletedAtUtc": "2026-09-08T08:26:51.793179+00:00",
+  "elapsedMinutes": 114.86,
+  "oracle": {
+    "version": "4.0.555",
+    "jdk": "21.0.12",
+    "sourceFiles": 41,
+    "sourceLines": 544,
+    "methodBlocks": 280,
+    "sectionBlocks": 17,
+    "comparisonBlocks": 297,
+    "nonemptyAstRecords": 5186,
+    "nodeRecords": 515,
+    "edgeRecords": 9224,
+    "flowRecords": 3587,
+    "referenceSha256": "64086e4bfcffc635ed3b008e1e955680a97fd27a1213c1dbd7dc13f9233e0b0f"
+  },
+  "gates": {
+    "lockedWorkspaceTestsPassed": 357,
+    "checkerTestsPassed": 17,
+    "formatting": "passed",
+    "strictWorkspaceAllTargetsClippy": "passed",
+    "dependencyAudit": "passed",
+    "lockedDependenciesAudited": 73,
+    "committedParity": "297/297",
+    "strictFreshLiveParity": "297/297",
+    "nativeRelease": "passed",
+    "nativeArchive": "passed",
+    "officialRealProjectAcceptance": "passed",
+    "containerAndOtherPlatforms": "not run in this batch"
+  },
+  "binaries": {
+    "cpg": {
+      "path": "cpg-rs/target/release/cpg",
+      "sha256": "54d379e2265984d2f71ed6e20c991213d456752b14ed9ea30081e0726ab458ce"
+    },
+    "joern-parity": {
+      "path": "cpg-rs/target/release/joern-parity",
+      "sha256": "f8293e5a34811b908f3ee11dea5ed1a3ff9933ffb595bf057ed3a1e234f4ea93"
+    }
+  },
+  "archive": {
+    "path": ".local/astra-sprint/second-batch/post-repair/dist/oxidized-joern-cpg-macos-arm64.tar.gz",
+    "sha256": "f5aa3840b79b94b016280e95a65e62e08a56fd608f6fc1f9aa7d87da7bc213a7",
+    "platform": "macos-arm64",
+    "version": "0.1.1"
+  },
+  "realProjectMeasurements": {
+    "zlib-1.3.1-core": {
+      "expected": {
+        "sourceFiles": 26,
+        "nodes": 18068,
+        "graphSha256": "0840d389dd36353658f86473a19cd718a4dc0a982410a9065d923c07fa8d5bf8",
+        "edgesSha256": "aa20f0da67c0c679e645c60bebb65d0ede7bbbe9010580411cfef375da630606",
+        "exportSha256": "ffc7b7a9fb5c4f7e6a067bca5e9a7b0033c21355b020335e9177fe3be699ea65",
+        "sarifSha256": "0becad10ba8527f8055f00b8752fa550f27725d671483aa6f0171d81c335aeec",
+        "findings": 0
+      },
+      "trials": [
+        {
+          "sourceFiles": 26,
+          "nodes": 18068,
+          "findings": 0,
+          "graphSha256": "0840d389dd36353658f86473a19cd718a4dc0a982410a9065d923c07fa8d5bf8",
+          "edgesSha256": "aa20f0da67c0c679e645c60bebb65d0ede7bbbe9010580411cfef375da630606",
+          "exportSha256": "ffc7b7a9fb5c4f7e6a067bca5e9a7b0033c21355b020335e9177fe3be699ea65",
+          "sarifSha256": "0becad10ba8527f8055f00b8752fa550f27725d671483aa6f0171d81c335aeec",
+          "buildSeconds": 5.213351583995973,
+          "buildRssMiB": 144.734375,
+          "exportSeconds": 0.12489895800536033,
+          "exportRssMiB": 254.8125,
+          "scanSeconds": 0.04418416701082606,
+          "scanRssMiB": 21.984375
+        },
+        {
+          "sourceFiles": 26,
+          "nodes": 18068,
+          "findings": 0,
+          "graphSha256": "0840d389dd36353658f86473a19cd718a4dc0a982410a9065d923c07fa8d5bf8",
+          "edgesSha256": "aa20f0da67c0c679e645c60bebb65d0ede7bbbe9010580411cfef375da630606",
+          "exportSha256": "ffc7b7a9fb5c4f7e6a067bca5e9a7b0033c21355b020335e9177fe3be699ea65",
+          "sarifSha256": "0becad10ba8527f8055f00b8752fa550f27725d671483aa6f0171d81c335aeec",
+          "buildSeconds": 4.920666999998502,
+          "buildRssMiB": 145.265625,
+          "exportSeconds": 0.10858433300745673,
+          "exportRssMiB": 255.703125,
+          "scanSeconds": 0.04542304200003855,
+          "scanRssMiB": 22.484375
+        }
+      ],
+      "update": {
+        "seconds": 15.022255834002863,
+        "rssMiB": 192.703125,
+        "output": "update-equivalent 26 files"
+      }
+    },
+    "lua-5.4.7": {
+      "expected": {
+        "sourceFiles": 61,
+        "nodes": 75998,
+        "graphSha256": "b8d7e57dfb60953d75934fe9d10a7c47659afdfb4d7285d0f0f1a053889a56c5",
+        "edgesSha256": "beb1428d856b6fa1df2d3d451bffebdb746eec83184d1a62f0f0068edd4cf0b2",
+        "exportSha256": "d337772421f21e61f607c101a1dc5337203948e626a06d948a6a893e86750e66",
+        "sarifSha256": "0becad10ba8527f8055f00b8752fa550f27725d671483aa6f0171d81c335aeec",
+        "findings": 0
+      },
+      "trials": [
+        {
+          "sourceFiles": 61,
+          "nodes": 75998,
+          "findings": 0,
+          "graphSha256": "b8d7e57dfb60953d75934fe9d10a7c47659afdfb4d7285d0f0f1a053889a56c5",
+          "edgesSha256": "beb1428d856b6fa1df2d3d451bffebdb746eec83184d1a62f0f0068edd4cf0b2",
+          "exportSha256": "d337772421f21e61f607c101a1dc5337203948e626a06d948a6a893e86750e66",
+          "sarifSha256": "0becad10ba8527f8055f00b8752fa550f27725d671483aa6f0171d81c335aeec",
+          "buildSeconds": 2.849026416995912,
+          "buildRssMiB": 371.3125,
+          "exportSeconds": 0.46985704099643044,
+          "exportRssMiB": 920.890625,
+          "scanSeconds": 0.3255515420023585,
+          "scanRssMiB": 64.453125
+        },
+        {
+          "sourceFiles": 61,
+          "nodes": 75998,
+          "findings": 0,
+          "graphSha256": "b8d7e57dfb60953d75934fe9d10a7c47659afdfb4d7285d0f0f1a053889a56c5",
+          "edgesSha256": "beb1428d856b6fa1df2d3d451bffebdb746eec83184d1a62f0f0068edd4cf0b2",
+          "exportSha256": "d337772421f21e61f607c101a1dc5337203948e626a06d948a6a893e86750e66",
+          "sarifSha256": "0becad10ba8527f8055f00b8752fa550f27725d671483aa6f0171d81c335aeec",
+          "buildSeconds": 2.802501458005281,
+          "buildRssMiB": 350.65625,
+          "exportSeconds": 0.4404150830087019,
+          "exportRssMiB": 920.890625,
+          "scanSeconds": 0.3229261660017073,
+          "scanRssMiB": 64.359375
+        }
+      ],
+      "update": {
+        "seconds": 8.37371595800505,
+        "rssMiB": 542.9375,
+        "output": "update-equivalent 61 files"
+      }
+    }
+  },
+  "realProjectOfficialOutput": [
+    "PASS zlib-1.3.1-core: 26 files, 18068 nodes, build <= 20s, peak RSS 255.0 MiB, incremental equivalence 14.45s",
+    "PASS lua-5.4.7: 61 files, 75998 nodes, build <= 20s, peak RSS 920.6 MiB, incremental equivalence 8.37s"
+  ],
+  "manifest": {
+    "path": "cpg-rs/acceptance/real-projects/manifest.json",
+    "sha256": "93973163f353c3fc12d03f27ac12a58e18427408a77055ac783f3a49780acd42",
+    "onlyExpectedFieldsChanged": true,
+    "inputsExclusionsLicensesBudgetsUnchanged": true
+  },
+  "semanticReview": {
+    "status": "pass",
+    "path": ".local/astra-sprint/second-batch/export-semantic-review.json",
+    "sha256": "120a0f2d17eec977284fcd13d5f83cc552347fe9033fd5e53d3a5957f96f5534",
+    "finding": "No source-body methods or declared locals lost; removed calls classified by observed repairs; repeated Lua assignments retain lines 981 and 1098."
+  },
+  "logs": {
+    "workspace-tests.log": {
+      "path": ".local/astra-sprint/second-batch/post-repair/workspace-tests.log",
+      "sha256": "18ac0cbc7efc01f2fd0c5362535e0fd45b7bdcf797aad9ac909312c7accd5b77"
+    },
+    "fmt.log": {
+      "path": ".local/astra-sprint/second-batch/post-repair/fmt.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "clippy.log": {
+      "path": ".local/astra-sprint/second-batch/post-repair/clippy.log",
+      "sha256": "68c4dec407c2a2121966c46cd21ef304ec6bbfb7c9aefcfacc05bd7fa787e01f"
+    },
+    "release-build.log": {
+      "path": ".local/astra-sprint/second-batch/post-repair/release-build.log",
+      "sha256": "2190bedbd0cf225cc2d7997bd76888532bd5292791dd70e4993a2b93b6dde077"
+    },
+    "native-release.log": {
+      "path": ".local/astra-sprint/second-batch/post-repair/native-release.log",
+      "sha256": "067b37fe7900624b97bb349271bb70786aa89f49f5a27dea3ffe6388eac1f8ad"
+    },
+    "checker-tests.log": {
+      "path": ".local/astra-sprint/second-batch/post-repair/checker-tests.log",
+      "sha256": "044a44e56fa3a591ed26e15ae607215d64b40faa467995b29edfbea79fa957e0"
+    },
+    "live-parity.log": {
+      "path": ".local/astra-sprint/second-batch/post-repair/live-parity.log",
+      "sha256": "c59fbf37b8378f32acb85fd960eb9f5256078ba5eb18c9f9150234dbe2c46eca"
+    },
+    "committed-parity.log": {
+      "path": ".local/astra-sprint/second-batch/post-repair/committed-parity.log",
+      "sha256": "30229d2678a43919307930c8b3e66f51ef1ce43c04d200d10a0db682ec0daf13"
+    },
+    "audit.log": {
+      "path": ".local/astra-sprint/second-batch/post-repair/audit.log",
+      "sha256": "2a91a692bdd0f166d94bb45220a29b5f469072246f9ef0b5205b36dd0375393b"
+    },
+    "real-project-measurements.log": {
+      "path": ".local/astra-sprint/second-batch/post-repair/real-project-measurements.log",
+      "sha256": "94fd371b19111d1f352373d257575e40a134e6eeb85c45a29c10af4eb427d8ce"
+    },
+    "real-project-acceptance.log": {
+      "path": ".local/astra-sprint/second-batch/post-repair/real-project-acceptance.log",
+      "sha256": "35d2c9d9db7bb142639836575fcf7558e22dec617a59dcc920257f0bf05b3994"
+    },
+    "archive-release.log": {
+      "path": ".local/astra-sprint/second-batch/post-repair/archive-release.log",
+      "sha256": "f5b9159b6fbeb9d86ce624cdea8542aedf2911f073311dc9f7922cdc3a9c2f93"
+    }
+  },
+  "limitations": [
+    "Selected graph projection and finite outcomes; not whole-language or product parity.",
+    "Whole-project live outputs are retained earlier oracle runs; the selected corpus was regenerated fresh.",
+    "Acceptance runner RSS is cumulative child-process high-water; per-command RSS is recorded separately.",
+    "Zero built-in scan findings establish deterministic output, not absence of vulnerabilities."
+  ],
+  "isolatedCacheRepairMeasurement": {
+    "scope": "Earlier isolated cache-only repair on a saved 72,414-node Lua graph. These binaries and graph are distinct from the final c5ea integration and its 75,998-node Lua acceptance graph.",
+    "sourceWorktree": "joern-oxidized-astra-direct",
+    "sourcePath": ".local/astra-direct/perf/final-measurement.json",
+    "sourceSha256": "703fb73fb9b76e6d72ebe5b3ee2d7439dea5560c88f77fa5a1cfb0b7776612b2",
+    "measurement": {
+      "date_utc": "2026-09-08",
+      "platform": "macOS-26.6.2-arm64-arm-64bit-Mach-O",
+      "graph_sha256": "a6ffc56bdd52a653383e6e9c7f190c9deffe64c39cb796a4ee8cb50e7c8d3482",
+      "graph_nodes": 72414,
+      "graph_named_calls": 6520,
+      "binary_sha256": {
+        "baseline": "6fb2b2985e44d464242fa02af031f887b2db9ddcf2bbf633bc1f28e262922656",
+        "cached": "26f91a8fc90e5c64c49963f3ec42d068ae243292a6f91cbd1ce4a7a44f0130e2"
+      },
+      "runs": [
+        {
+          "variant": "baseline",
+          "round": 1,
+          "wall_seconds": 0.2339,
+          "exit_code": 0,
+          "sarif_sha256": "0becad10ba8527f8055f00b8752fa550f27725d671483aa6f0171d81c335aeec"
+        },
+        {
+          "variant": "cached",
+          "round": 1,
+          "wall_seconds": 0.41,
+          "exit_code": 0,
+          "sarif_sha256": "0becad10ba8527f8055f00b8752fa550f27725d671483aa6f0171d81c335aeec"
+        },
+        {
+          "variant": "baseline",
+          "round": 2,
+          "wall_seconds": 0.2089,
+          "exit_code": 0,
+          "sarif_sha256": "0becad10ba8527f8055f00b8752fa550f27725d671483aa6f0171d81c335aeec"
+        },
+        {
+          "variant": "cached",
+          "round": 2,
+          "wall_seconds": 0.381,
+          "exit_code": 0,
+          "sarif_sha256": "0becad10ba8527f8055f00b8752fa550f27725d671483aa6f0171d81c335aeec"
+        },
+        {
+          "variant": "baseline",
+          "round": 3,
+          "wall_seconds": 0.1719,
+          "exit_code": 0,
+          "sarif_sha256": "0becad10ba8527f8055f00b8752fa550f27725d671483aa6f0171d81c335aeec"
+        },
+        {
+          "variant": "cached",
+          "round": 3,
+          "wall_seconds": 0.306,
+          "exit_code": 0,
+          "sarif_sha256": "0becad10ba8527f8055f00b8752fa550f27725d671483aa6f0171d81c335aeec"
+        }
+      ]
+    }
+  }
+}

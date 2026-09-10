@@ -1,0 +1,44 @@
+--- Joern4.0.555
++++ /Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/eighth-batch/final-real-differential/bin/joern-parity
+@@ -57,6 +57,7 @@
+ NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+ NODES|NAMESPACE NAME=<global>
+ NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
++NODES|TYPE_DECL NAME=BASE FULL_NAME=BASE CODE=BASE IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE_DECL NAME=T FULL_NAME=T CODE=typedef BASE T; AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=main.c ORDER=1
+ NODES|TYPE_DECL NAME=choose FULL_NAME=choose CODE=choose AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+ NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+@@ -64,7 +65,7 @@
+ NODES|TYPE_DECL NAME=setup FULL_NAME=setup CODE=setup AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+ NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+-NODES|TYPE NAME=T FULL_NAME=T TYPE_DECL_FULL_NAME=T
++NODES|TYPE NAME=BASE FULL_NAME=BASE TYPE_DECL_FULL_NAME=BASE
+ NODES|TYPE NAME=choose FULL_NAME=choose TYPE_DECL_FULL_NAME=choose
+ NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+ NODES|TYPE NAME=setup FULL_NAME=setup TYPE_DECL_FULL_NAME=setup
+@@ -89,6 +90,7 @@
+ EDGES|CONTAINS D:main.c:<global> -> main.c:<global>#0
+ EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+ EDGES|CONTAINS F:<includes> -> D:ANY
++EDGES|CONTAINS F:<includes> -> D:BASE
+ EDGES|CONTAINS F:<includes> -> D:int
+ EDGES|CONTAINS F:<includes> -> D:void
+ EDGES|CONTAINS F:main.c -> D:main.c:<global>
+@@ -133,7 +135,7 @@
+ EDGES|REF NB:<includes>:<global> -> NS:<global>
+ EDGES|REF NB:main.c:<global> -> NS:<global>
+ EDGES|REF T:ANY -> D:ANY
+-EDGES|REF T:T -> setup#4
++EDGES|REF T:BASE -> D:BASE
+ EDGES|REF T:choose -> D:choose
+ EDGES|REF T:int -> D:int
+ EDGES|REF T:setup -> D:setup
+@@ -144,6 +146,7 @@
+ EDGES|REF main.c:<global>#19 -> choose#0
+ EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+ EDGES|SOURCE_FILE D:ANY -> F:<includes>
++EDGES|SOURCE_FILE D:BASE -> F:<includes>
+ EDGES|SOURCE_FILE D:choose -> F:main.c
+ EDGES|SOURCE_FILE D:int -> F:<includes>
+ EDGES|SOURCE_FILE D:main.c:<global> -> F:main.c

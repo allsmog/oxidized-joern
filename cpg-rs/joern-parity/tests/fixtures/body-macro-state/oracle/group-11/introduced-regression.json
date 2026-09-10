@@ -1,0 +1,153 @@
+{
+  "status": "CONFIRMED_INTRODUCED_COMPLETE_GRAPH_REGRESSIONS_V4",
+  "source": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-macro-state/candidate-v4/exact.rs",
+    "sha256": "35dd9430be3309294dc84aa7e76796f9997c4ff0845a2f56013aa3e01513b096"
+  },
+  "binary": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-macro-state/candidate-v4/joern-parity",
+    "sha256": "5584f11047e1358ef7645386cfe79244787cd5cd9e942645e38e2540f7304673"
+  },
+  "liveRun": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-v4-review/literal-events/live-run.json",
+    "sha256": "23064c702b52cc54eaf77ad1c1b7b8f632b8e910ae5d01b93953274fd5ea962d"
+  },
+  "raw": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-v4-review/literal-events/live.stdout",
+    "sha256": "ca9e52ec1eb8c44c8209cc265def791749456996d09b7bb2ebac05174a8e49b3"
+  },
+  "oracle": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-v4-review/literal-events/oracle.sc",
+    "sha256": "56431f14868678e64f9eb41026b44f1d3d7738404d28d2db62711b520c98c742"
+  },
+  "eighthReplay": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-v4-review/literal-events/baseline-eighth/replay.json",
+    "sha256": "82dbf6205ee500ecc5501d6881bb21df589d8c8dd844d342c7b56cc9e35d3ac4"
+  },
+  "v4Replay": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-v4-review/literal-events/candidate-v4/replay.json",
+    "sha256": "575a3d93c8fdfce3bcacfa1d46492272591544f117074c404175cbe88b4cd732"
+  },
+  "rows": [
+    {
+      "case": "quoted_body",
+      "input": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-v4-review/literal-events/input/quoted_body/main.c",
+        "sha256": "75acd23ca80415ee49a065c251c0e5d90f5156178c3ba8cf7ecf00aa1684b41f"
+      },
+      "reference": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-v4-review/literal-events/input/quoted_body/expected.txt",
+        "sha256": "35884becc042692977427d48c6567febab9a21fc8b914f7207f43379426c1d99"
+      },
+      "eighth": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-v4-review/literal-events/baseline-eighth/quoted_body/actual.txt",
+        "sha256": "35884becc042692977427d48c6567febab9a21fc8b914f7207f43379426c1d99"
+      },
+      "v4": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-v4-review/literal-events/candidate-v4/quoted_body/actual.txt",
+        "sha256": "91d627a93ef8ad47bbfd13ad9d9dc1c9947264a1171cf551fdd8b4393148168d"
+      },
+      "completeDiff": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-v4-review/literal-events/candidate-v4/quoted_body/complete.diff",
+        "sha256": "2ecdff786da703ac68a4274469a04726de402868761990ff9f57bb5ad280ca4b"
+      },
+      "beforeExact": true,
+      "v4Exact": false,
+      "liveAndEighthMacroMethod": "METHOD NAME=PICK CODE=#define PICK 2 FULL_NAME=main.c:PICK:int(0) SIGNATURE=int(0) ORDER=1",
+      "v4MacroMethod": "METHOD NAME=PICK CODE=#define PICK 1 FULL_NAME=main.c:PICK:int(0) SIGNATURE=int(0) ORDER=1",
+      "allOtherRecordsEqual": true
+    },
+    {
+      "case": "quoted_global",
+      "input": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-v4-review/literal-events/input/quoted_global/main.c",
+        "sha256": "8ea896a40fee1e43447af47825ef2a56f41807365b98a01e79a4d99c650d5258"
+      },
+      "reference": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-v4-review/literal-events/input/quoted_global/expected.txt",
+        "sha256": "9d1fdb0108e75717c16c3dfbc8166a85bed98eff2cab75868b8abc4b9eef386b"
+      },
+      "eighth": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-v4-review/literal-events/baseline-eighth/quoted_global/actual.txt",
+        "sha256": "9d1fdb0108e75717c16c3dfbc8166a85bed98eff2cab75868b8abc4b9eef386b"
+      },
+      "v4": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-v4-review/literal-events/candidate-v4/quoted_global/actual.txt",
+        "sha256": "ba04fadd54b9c676d37902a5985bc13a30baa0db637d2ec2d24e31dea5f34b11"
+      },
+      "completeDiff": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-v4-review/literal-events/candidate-v4/quoted_global/complete.diff",
+        "sha256": "2db629c6932041093b448218e0a89973dbd9b6c99ef4978cefe1f080f0b57b4c"
+      },
+      "beforeExact": true,
+      "v4Exact": false,
+      "liveAndEighthMacroMethod": "METHOD NAME=PICK CODE=#define PICK 2 FULL_NAME=main.c:PICK:int(0) SIGNATURE=int(0) ORDER=1",
+      "v4MacroMethod": "METHOD NAME=PICK CODE=#define PICK 1 FULL_NAME=main.c:PICK:int(0) SIGNATURE=int(0) ORDER=1",
+      "allOtherRecordsEqual": true
+    },
+    {
+      "case": "prefixed_quoted",
+      "input": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-v4-review/literal-events/input/prefixed_quoted/main.c",
+        "sha256": "9a1de16b815e679485ff42419d51751e48522473c3e68a395afd54e8669fadb1"
+      },
+      "reference": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-v4-review/literal-events/input/prefixed_quoted/expected.txt",
+        "sha256": "c4292b1dbdb434b3a989d96ea75735f2ea60898f969344ce3c33b888a6d3a960"
+      },
+      "eighth": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-v4-review/literal-events/baseline-eighth/prefixed_quoted/actual.txt",
+        "sha256": "c4292b1dbdb434b3a989d96ea75735f2ea60898f969344ce3c33b888a6d3a960"
+      },
+      "v4": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-v4-review/literal-events/candidate-v4/prefixed_quoted/actual.txt",
+        "sha256": "c68592c58c196c33ebb2d68035ab34625daca064a2ff66ad623357dbb7592a0b"
+      },
+      "completeDiff": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-v4-review/literal-events/candidate-v4/prefixed_quoted/complete.diff",
+        "sha256": "2ecdff786da703ac68a4274469a04726de402868761990ff9f57bb5ad280ca4b"
+      },
+      "beforeExact": true,
+      "v4Exact": false,
+      "liveAndEighthMacroMethod": "METHOD NAME=PICK CODE=#define PICK 2 FULL_NAME=main.c:PICK:int(0) SIGNATURE=int(0) ORDER=1",
+      "v4MacroMethod": "METHOD NAME=PICK CODE=#define PICK 1 FULL_NAME=main.c:PICK:int(0) SIGNATURE=int(0) ORDER=1",
+      "allOtherRecordsEqual": true
+    },
+    {
+      "case": "character_literal",
+      "input": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-v4-review/literal-events/input/character_literal/main.c",
+        "sha256": "d6b11c62cd953af0274ab3df0106a627d507a6468eda660fa0d70794c1ffbc8b"
+      },
+      "reference": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-v4-review/literal-events/input/character_literal/expected.txt",
+        "sha256": "c7f3f2062dbca109ab831a2c0768c93939703e620813b8c5332f3b6b773ddefb"
+      },
+      "eighth": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-v4-review/literal-events/baseline-eighth/character_literal/actual.txt",
+        "sha256": "c7f3f2062dbca109ab831a2c0768c93939703e620813b8c5332f3b6b773ddefb"
+      },
+      "v4": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-v4-review/literal-events/candidate-v4/character_literal/actual.txt",
+        "sha256": "c7f3f2062dbca109ab831a2c0768c93939703e620813b8c5332f3b6b773ddefb"
+      },
+      "completeDiff": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/ninth-v4-review/literal-events/candidate-v4/character_literal/complete.diff",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "beforeExact": true,
+      "v4Exact": true,
+      "liveAndEighthMacroMethod": "METHOD NAME=PICK CODE=#define PICK 2 FULL_NAME=main.c:PICK:int(0) SIGNATURE=int(0) ORDER=1",
+      "v4MacroMethod": "METHOD NAME=PICK CODE=#define PICK 2 FULL_NAME=main.c:PICK:int(0) SIGNATURE=int(0) ORDER=1",
+      "allOtherRecordsEqual": true
+    }
+  ],
+  "beforeExact": 4,
+  "v4Exact": 1,
+  "requiredFix": "Exclude complete quoted literal token trees from macro metadata expansion-event discovery. Ordinary string contents are not macro expansions; retain these four full reference gates, including character-literal control.",
+  "cause": "collect_macro_expansions descends through string_literal into string_content; an ordinary content token exactly equal to a macro name queues that macro definition. Later valid invocation consumes the spurious earlier definition and overwrites previously correct macro METHOD CODE.",
+  "limits": [
+    "Held v4 is not accepted. Existing50 replay stays45exact/0matching losses, but new4 uncover3 formerlyexact regressions.",
+    "No reference filtering, oracle updates, source changes or root mutations performed."
+  ]
+}

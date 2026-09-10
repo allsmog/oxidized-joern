@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "status": "PARENT_APPROVED_INCLUDE_REFERENCE_PRODUCER_RELEASE",
+  "producerHoldReleased": true,
+  "preparedManifestSha256": "1bb29f024e0017de19299e15ef80cb82df964dd05986bd79a61efc6aa52b716b",
+  "repository": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint",
+  "sourceCommit": "afe23fc4bedbbf6b669f2bd6dfed0f0af141ecfc",
+  "documentationCommit": "afe23fc4bedbbf6b669f2bd6dfed0f0af141ecfc",
+  "acceptance": {
+    "repositoryPath": "docs/conformance/astra-twelfth-batch-acceptance.json",
+    "sha256": "7ddd8ddd9ff9bfa37439a99260d4f8a04e3f23706eee7e64a9bd9ea74273c749"
+  },
+  "documentationBlobs": [
+    {
+      "repositoryPath": "docs/conformance/astra-twelfth-batch-2026-09-09.md",
+      "sha256": "d86db8ffa1a85a2f2f87cb3692b6bfe596f6b2fc11b7362d582d2ed284af5f09"
+    },
+    {
+      "repositoryPath": "docs/conformance/astra-twelfth-batch-metrics.json",
+      "sha256": "7114f9e78897cd97093954d0955e494af1cef5cd53ba4347de1ddd52c90f41d0"
+    },
+    {
+      "repositoryPath": "cpg-rs/PROGRESS.md",
+      "sha256": "9ee0254a916011271191c2d355e1e13279f0d5e2dff1e192839f79241344a370"
+    }
+  ],
+  "frozenBuild": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/twelfth-batch/lint-corrected/final-real-differential/bin/source-bindings.json",
+    "sha256": "33f4740b78f60a142a615b1a07b2a2ea448ed7955e9464395e72fe6a8af91dda",
+    "bytes": 2121168
+  },
+  "closeout": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/twelfth-batch/closeout.json",
+    "sha256": "3e5b304e0ae451b8260d06cb1d6040020adc3588696a6fd4325d45ef967021f9"
+  },
+  "gates": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/twelfth-batch/lint-corrected/final/gates.json",
+    "sha256": "724d83b09ae597fd33988361e93301c0789d4c8d4ecd0b87809fc24e663c6828"
+  },
+  "note": "Root reviewed the exact bounded adaptation and independent review. Release one six-case canonical batch only; full observation remains a separate saved-store operation.",
+  "reviews": [
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/thirteenth-batch/canonical-runner-root-review-v1.json",
+      "sha256": "6687e30f270f64b48e30333c357f3172b88b9dfd8300eb6ef5e3a51638e6858b"
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-include-references/.local/thirteenth-canonical-runner-review-v1/review.json",
+      "sha256": "a3f591565875dbb8a8bf48fd3ad489644894b132bc3c939e400d8499a007f379"
+    }
+  ]
+}

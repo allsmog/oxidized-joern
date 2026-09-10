@@ -1,0 +1,46 @@
+--- joern
++++ actual
+@@ -6,8 +6,8 @@
+   METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+   METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+   BLOCK CODE={\n#define BODY_FLAG 1\n#if BODY_FLAG\n    return x;\n#else\n    return 0;\n#endif\n} TYPE_FULL_NAME=void ORDER=2
+-    RETURN CODE=return x; ORDER=1
+-      IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1
++    RETURN CODE=return 0; ORDER=1
++      LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=1
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+ 
+ METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1
+@@ -15,8 +15,8 @@
+     METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+     METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+     BLOCK CODE={\n#define BODY_FLAG 1\n#if BODY_FLAG\n    return x;\n#else\n    return 0;\n#endif\n} TYPE_FULL_NAME=void ORDER=2
+-      RETURN CODE=return x; ORDER=1
+-        IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1
++      RETURN CODE=return 0; ORDER=1
++        LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=1
+     METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+   BLOCK TYPE_FULL_NAME=ANY ORDER=1
+     METHOD_REF CODE=choose TYPE_FULL_NAME=choose METHOD_FULL_NAME=choose ORDER=1
+@@ -78,7 +78,6 @@
+ EDGES|REF T:choose -> D:choose
+ EDGES|REF T:int -> D:int
+ EDGES|REF T:void -> D:void
+-EDGES|REF choose#5 -> choose#1
+ EDGES|REF main.c:<global>#9 -> choose#0
+ EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+ EDGES|SOURCE_FILE D:ANY -> F:<includes>
+@@ -91,11 +90,11 @@
+ EDGES|SOURCE_FILE NB:main.c:<global> -> F:main.c
+ EDGES|SOURCE_FILE choose#0 -> F:main.c
+ EDGES|SOURCE_FILE main.c:<global>#0 -> F:main.c
++FLOWS|REACHING_DEF[0] choose#5 -> choose#4
+ FLOWS|REACHING_DEF[<RET>] choose#4 -> choose#6
+ FLOWS|REACHING_DEF[] choose#0 -> choose#1
++FLOWS|REACHING_DEF[] choose#0 -> choose#4
+ FLOWS|REACHING_DEF[] choose#0 -> choose#5
+ FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#9
+ FLOWS|REACHING_DEF[x] choose#1 -> choose#2
+-FLOWS|REACHING_DEF[x] choose#1 -> choose#5
+ FLOWS|REACHING_DEF[x] choose#1 -> choose#6
+-FLOWS|REACHING_DEF[x] choose#5 -> choose#4

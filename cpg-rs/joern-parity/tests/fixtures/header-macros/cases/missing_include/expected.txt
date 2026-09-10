@@ -1,0 +1,127 @@
+METHOD NAME=<global> CODE=<global> FULL_NAME=<includes>:<global> ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=ABSENT FULL_NAME=ABSENT ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1
+  METHOD NAME=probe CODE=int probe(int value) { return ABSENT(value); } FULL_NAME=probe SIGNATURE=int(int) ORDER=1
+    METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+    METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+    BLOCK CODE={ return ABSENT(value); } TYPE_FULL_NAME=void ORDER=2
+      RETURN CODE=return ABSENT(value); ORDER=1
+        CALL NAME=ABSENT CODE=ABSENT(value) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=ABSENT ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+    METHOD_REF CODE=probe TYPE_FULL_NAME=probe METHOD_FULL_NAME=probe ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=probe CODE=int probe(int value) { return ABSENT(value); } FULL_NAME=probe SIGNATURE=int(int) ORDER=1
+  METHOD_PARAMETER_IN NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=value CODE=int value TYPE_FULL_NAME=int ORDER=1
+  BLOCK CODE={ return ABSENT(value); } TYPE_FULL_NAME=void ORDER=2
+    RETURN CODE=return ABSENT(value); ORDER=1
+      CALL NAME=ABSENT CODE=ABSENT(value) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=ABSENT ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+
+NODES|META_DATA LANGUAGE=NEWC
+NODES|FILE NAME=<includes> ORDER=1
+NODES|FILE NAME=<unknown> ORDER=0
+NODES|FILE NAME=main.c ORDER=0
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<global> FILENAME=<unknown> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<includes>:<global> FILENAME=<includes> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|NAMESPACE NAME=<global>
+NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=<global> FULL_NAME=main.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=2
+NODES|TYPE_DECL NAME=probe FULL_NAME=probe CODE=probe AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+NODES|TYPE NAME=probe FULL_NAME=probe TYPE_DECL_FULL_NAME=probe
+NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+EDGES|ARGUMENT probe#4 -> probe#5
+EDGES|ARGUMENT probe#5 -> probe#6
+EDGES|CALL probe#5 -> ABSENT#0
+EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+EDGES|CFG ABSENT#0 -> ABSENT#4
+EDGES|CFG main.c:<global>#0 -> main.c:<global>#10
+EDGES|CFG main.c:<global>#1 -> probe#6
+EDGES|CFG main.c:<global>#10 -> main.c:<global>#11
+EDGES|CFG probe#4 -> probe#7
+EDGES|CFG probe#5 -> probe#4
+EDGES|CFG probe#6 -> probe#5
+EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+EDGES|CONTAINS ABSENT#0 -> ABSENT#2
+EDGES|CONTAINS D:main.c:<global> -> D:probe
+EDGES|CONTAINS D:main.c:<global> -> main.c:<global>#0
+EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+EDGES|CONTAINS F:<includes> -> D:ANY
+EDGES|CONTAINS F:<includes> -> D:int
+EDGES|CONTAINS F:<includes> -> D:void
+EDGES|CONTAINS F:main.c -> D:main.c:<global>
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#1
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#10
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#9
+EDGES|CONTAINS main.c:<global>#1 -> probe#3
+EDGES|CONTAINS main.c:<global>#1 -> probe#4
+EDGES|CONTAINS main.c:<global>#1 -> probe#5
+EDGES|CONTAINS main.c:<global>#1 -> probe#6
+EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+EDGES|EVAL_TYPE ABSENT#1 -> T:ANY
+EDGES|EVAL_TYPE ABSENT#2 -> T:ANY
+EDGES|EVAL_TYPE ABSENT#3 -> T:ANY
+EDGES|EVAL_TYPE ABSENT#4 -> T:ANY
+EDGES|EVAL_TYPE main.c:<global>#10 -> T:probe
+EDGES|EVAL_TYPE main.c:<global>#11 -> T:ANY
+EDGES|EVAL_TYPE main.c:<global>#9 -> T:ANY
+EDGES|EVAL_TYPE probe#1 -> T:int
+EDGES|EVAL_TYPE probe#2 -> T:int
+EDGES|EVAL_TYPE probe#3 -> T:void
+EDGES|EVAL_TYPE probe#5 -> T:ANY
+EDGES|EVAL_TYPE probe#6 -> T:int
+EDGES|EVAL_TYPE probe#7 -> T:int
+EDGES|PARAMETER_LINK ABSENT#1 -> ABSENT#3
+EDGES|PARAMETER_LINK probe#1 -> probe#2
+EDGES|REF NB:<global> -> NS:<global>
+EDGES|REF NB:<includes>:<global> -> NS:<global>
+EDGES|REF NB:main.c:<global> -> NS:<global>
+EDGES|REF T:ANY -> D:ANY
+EDGES|REF T:int -> D:int
+EDGES|REF T:probe -> D:probe
+EDGES|REF T:void -> D:void
+EDGES|REF main.c:<global>#10 -> main.c:<global>#1
+EDGES|REF probe#6 -> probe#1
+EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+EDGES|SOURCE_FILE D:ANY -> F:<includes>
+EDGES|SOURCE_FILE D:int -> F:<includes>
+EDGES|SOURCE_FILE D:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE D:probe -> F:main.c
+EDGES|SOURCE_FILE D:void -> F:<includes>
+EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
+EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>
+EDGES|SOURCE_FILE NB:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#0 -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#1 -> F:main.c
+FLOWS|REACHING_DEF[<RET>] probe#4 -> probe#7
+FLOWS|REACHING_DEF[ABSENT(value)] probe#5 -> probe#4
+FLOWS|REACHING_DEF[ABSENT(value)] probe#5 -> probe#7
+FLOWS|REACHING_DEF[] ABSENT#0 -> ABSENT#1
+FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#10
+FLOWS|REACHING_DEF[] main.c:<global>#1 -> probe#1
+FLOWS|REACHING_DEF[] main.c:<global>#1 -> probe#6
+FLOWS|REACHING_DEF[p1] ABSENT#1 -> ABSENT#3
+FLOWS|REACHING_DEF[p1] ABSENT#1 -> ABSENT#4
+FLOWS|REACHING_DEF[value] probe#1 -> probe#2
+FLOWS|REACHING_DEF[value] probe#1 -> probe#6
+FLOWS|REACHING_DEF[value] probe#6 -> probe#2
+FLOWS|REACHING_DEF[value] probe#6 -> probe#5
+FLOWS|REACHING_DEF[value] probe#6 -> probe#7

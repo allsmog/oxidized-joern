@@ -1,0 +1,23 @@
+{
+  "command": [
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/tenth-batch/repaired-final-real-differential/bin/joern-parity",
+    "--production",
+    "main.c"
+  ],
+  "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/tiny_fixedtables_inline/input",
+  "sourceBefore": {
+    "files": {
+      "main.c": {
+        "kind": "file",
+        "sha256": "8af2a0a9531deec50f16e8c125de4000c0636b443b11628e232bb9e9413d2a6f",
+        "bytes": 333
+      }
+    },
+    "directories": []
+  },
+  "baselineBinary": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/tenth-batch/repaired-final-real-differential/bin/joern-parity",
+    "sha256": "ca569f9d75143d9c20e7c8054c8bbf7949640e6eb0213fba806e8224b0994141",
+    "bytes": 2482864
+  }
+}

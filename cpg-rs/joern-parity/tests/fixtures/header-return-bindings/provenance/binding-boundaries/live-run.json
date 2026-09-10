@@ -1,0 +1,72 @@
+{
+  "command": [
+    "/Users/shayaunnejad/vibe-code/joern-oxidized/.local/astra-sprint/oracle/runtime/joern-cli/joern",
+    "--script",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-declaration-macros/.local/header-return-regression/binding-boundaries/oracle.sc",
+    "--param",
+    "inputPath=/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-declaration-macros/.local/header-return-regression/binding-boundaries/input"
+  ],
+  "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-declaration-macros/.local/header-return-regression/binding-boundaries/oracle-workspace",
+  "exitCode": 0,
+  "wallSeconds": 11.338168417001725,
+  "inputHashes": {
+    "callback_alias": {
+      "api.h": "10665ef477d4d30f252362f479c951326a8913d03013770949988ac775502d24",
+      "main.c": "1bd5ba0b963dd6b1fb51064ae441f4f9171db08da6a47b4225871fb145a5ec3a"
+    },
+    "caller_alias": {
+      "api.h": "f81f2f3e6c1aa7f8eb598b6c803801f10bef31b0317693b71a8c1bf5f528f143",
+      "main.c": "26651bdecddb19157d813edb127dd8f9548ba4f11a8c5375c8448ccfe6ebd724"
+    },
+    "late_alias": {
+      "api.h": "d82fdee075b8401a7c351274ea068687f177877805c2a17cdfda5f1e4b4995a9",
+      "main.c": "d064cf1e1c689b2530bff927a1fe024ee1463291b847324a8a5be0de79115848"
+    },
+    "pointer_alias": {
+      "api.h": "5e2819e63158bc898a38f0fb7f9b9fbeb28091f82fd14382ff15c25ee03bb4aa",
+      "main.c": "be9522dc6401e0f6526c3ff44b84eebfefff439c4479d791751afd77a6407313"
+    },
+    "cycle_alias": {
+      "api.h": "56a7a6535ea61a23ecdf50d55c421fde6346530e75eab2b12aaf2104bc0689df",
+      "main.c": "d064cf1e1c689b2530bff927a1fe024ee1463291b847324a8a5be0de79115848"
+    }
+  },
+  "scriptSha256": "56431f14868678e64f9eb41026b44f1d3d7738404d28d2db62711b520c98c742",
+  "sharedOracleSha256": "bd2e18fab06ecd7897d796f5b31dac6669dc45ecf70c54fb1d5cc0fe29f3c1ab",
+  "joernVersion": "4.0.555",
+  "officialArchiveSha256": "12989883d6b5aeacc97b2dc0ecc4e2951bf50e48cb244f8c8f333d11a8be0c7e",
+  "projects": [
+    {
+      "case": "callback_alias",
+      "canonicalLinesIncludingSeparators": 156,
+      "nonemptySelectedRecords": 151,
+      "expectedSha256": "b0551add242367f673b3d941462dd46bc773d4968d3f0fff2f9e7f5ec4858a8f"
+    },
+    {
+      "case": "caller_alias",
+      "canonicalLinesIncludingSeparators": 162,
+      "nonemptySelectedRecords": 157,
+      "expectedSha256": "6f111b174a88155c3ba1fae4253e1fa2e7f5f03124639f1287a15e6163e28db4"
+    },
+    {
+      "case": "cycle_alias",
+      "canonicalLinesIncludingSeparators": 163,
+      "nonemptySelectedRecords": 158,
+      "expectedSha256": "1fd5088a4dc47b90d32eecec71856046a532caf3f254c022eaf7f74d66181514"
+    },
+    {
+      "case": "late_alias",
+      "canonicalLinesIncludingSeparators": 162,
+      "nonemptySelectedRecords": 157,
+      "expectedSha256": "8391488e065b4e3ee55dbcbd259068b19d642e86f25b7c596c58b293e1944d26"
+    },
+    {
+      "case": "pointer_alias",
+      "canonicalLinesIncludingSeparators": 162,
+      "nonemptySelectedRecords": 157,
+      "expectedSha256": "1d63953810276a61b4b13ec9ef6cf059e65806e2307aef9596bfafffe1541511"
+    }
+  ],
+  "rawStdoutSha256": "933934a32a2fde10bbef45ab6298a2e9eb647023b8fedeeec5439d43239a8308",
+  "rawStderrSha256": "237c43cf9c73b03b86b89827fc17ceb3d6c06362badbb424aade2c3264ec934d"
+}

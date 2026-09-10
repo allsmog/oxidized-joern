@@ -1,0 +1,21 @@
+{
+  "baselineCommit": "e38bf19a044629e9ea6fc67248d249fb7b0321be",
+  "baselineSourceSha256": "c79d93566b3ac603b5d2c40e68bc58b03f43db0ab91a7c4c8b4b6c0d2fd71c43",
+  "finalSource": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-inactive-declarations/.local/spaced-method-names/frozen-candidate/exact.rs",
+    "sha256": "652e7331fb55ca41d8f0697e3274cc42ed82681ba0ade993a33f0a9fac6bc12b"
+  },
+  "finalBinary": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-inactive-declarations/.local/spaced-method-names/frozen-candidate/joern-parity",
+    "sha256": "39eb7dea31b3e9dfc8ece589d1fca835b5bc8308119a73001409dc913ec996aa"
+  },
+  "sourceOnlyPatch": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-inactive-declarations/.local/spaced-method-names/source.patch",
+    "sha256": "05fc7068331f052decc7fe173c69aef9a7c9f2a28118ce1bb10bd8310de21c40"
+  },
+  "buildLog": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-inactive-declarations/.local/spaced-method-names/build-repaired.log",
+    "sha256": "78a60def921f0d37e126bbfe395e6c8e041f49a58b2a5213fcd7dec164f267b4"
+  },
+  "scope": "Dedicated FULL_NAME extraction and direct unit matrix; no CODE parser, oracle/checker, solver, cache, or graph schema edits."
+}

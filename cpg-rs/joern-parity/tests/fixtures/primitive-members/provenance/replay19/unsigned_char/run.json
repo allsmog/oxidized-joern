@@ -1,0 +1,55 @@
+{
+  "case": "unsigned_char",
+  "retainedAnchor": false,
+  "command": [
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/frozen-v1/joern-parity",
+    "--production",
+    "main.c"
+  ],
+  "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/unsigned_char/input",
+  "seconds": 0.004194791981717572,
+  "exitCode": 0,
+  "timeout": false,
+  "error": null,
+  "beforeExact": true,
+  "candidateExact": true,
+  "beforeCandidateIdentical": true,
+  "inputHashes": {
+    "main.c": "ab73e292cafb2ac78baf257cb5a3710955bcfb9f71d82078478916590e813721"
+  },
+  "counts": {
+    "includingSeparators": {
+      "expected": 119,
+      "before": 119,
+      "candidate": 119,
+      "matchingBefore": 119,
+      "matchingCandidate": 119,
+      "gained": 0,
+      "lost": 0,
+      "lostRecords": {},
+      "gainedRecords": {}
+    },
+    "nonempty": {
+      "expected": 115,
+      "before": 115,
+      "candidate": 115,
+      "matchingBefore": 115,
+      "matchingCandidate": 115,
+      "gained": 0,
+      "lost": 0,
+      "lostRecords": {},
+      "gainedRecords": {}
+    }
+  },
+  "files": {
+    "actual.txt": "4a794f1b11f8d0b222bdc91d3e45abe0c55ecbdbaf64db736a95f91828aec8d4",
+    "before-candidate.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "before.txt": "4a794f1b11f8d0b222bdc91d3e45abe0c55ecbdbaf64db736a95f91828aec8d4",
+    "expected-before.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "expected-candidate.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "expected.txt": "4a794f1b11f8d0b222bdc91d3e45abe0c55ecbdbaf64db736a95f91828aec8d4",
+    "input/main.c": "ab73e292cafb2ac78baf257cb5a3710955bcfb9f71d82078478916590e813721",
+    "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout.txt": "4a794f1b11f8d0b222bdc91d3e45abe0c55ecbdbaf64db736a95f91828aec8d4"
+  }
+}

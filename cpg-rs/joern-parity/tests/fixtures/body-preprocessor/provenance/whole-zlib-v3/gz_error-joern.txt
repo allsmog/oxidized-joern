@@ -1,0 +1,127 @@
+METHOD NAME=gz_error CODE=void ZLIB_INTERNAL gz_error(gz_statep state, int err, const char *msg) {\n    /* free previously allocated message and clear */\n    if (state->msg != NULL) {\n        if (state->err != Z_MEM_ERROR)\n            free(state->msg);\n        state->msg = NULL;\n    }\n\n    /* if fatal, set state->x.have to 0 so that the gzgetc() macro fails */\n    if (err != Z_OK && err != Z_BUF_ERROR)\n        state->x.have = 0;\n\n    /* set error code, and if no message, then done */\n    state->err = err;\n    if (msg == NULL)\n        return;\n\n    /* for an out of memory error, return literal string when requested */\n    if (err == Z_MEM_ERROR)\n        return;\n\n    /* construct error message with path */\n    if ((state->msg = (char *)malloc(strlen(state->path) + strlen(msg) + 3)) ==\n            NULL) {\n        state->err = Z_MEM_ERROR;\n        return;\n    }\n#if !defined(NO_snprintf) && !defined(NO_vsnprintf)\n    (void)snprintf(state->msg, strlen(state->path) + strlen(msg) + 3,\n                   "%s%s%s", stat... FULL_NAME=gz_error SIGNATURE=void(gz_statep,int,char*) ORDER=1
+  METHOD_PARAMETER_IN NAME=state CODE=gz_statep state TYPE_FULL_NAME=gz_statep ORDER=1
+  METHOD_PARAMETER_OUT NAME=state CODE=gz_statep state TYPE_FULL_NAME=gz_statep ORDER=1
+  METHOD_PARAMETER_IN NAME=err CODE=int err TYPE_FULL_NAME=int ORDER=2
+  METHOD_PARAMETER_OUT NAME=err CODE=int err TYPE_FULL_NAME=int ORDER=2
+  METHOD_PARAMETER_IN NAME=msg CODE=const char *msg TYPE_FULL_NAME=char* ORDER=3
+  METHOD_PARAMETER_OUT NAME=msg CODE=const char *msg TYPE_FULL_NAME=char* ORDER=3
+  BLOCK CODE={\n    /* free previously allocated message and clear */\n    if (state->msg != NULL) {\n        if (state->err != Z_MEM_ERROR)\n            free(state->msg);\n        state->msg = NULL;\n    }\n\n    /* if fatal, set state->x.have to 0 so that the gzgetc() macro fails */\n    if (err != Z_OK && err != Z_BUF_ERROR)\n        state->x.have = 0;\n\n    /* set error code, and if no message, then done */\n    state->err = err;\n    if (msg == NULL)\n        return;\n\n    /* for an out of memory error, return literal string when requested */\n    if (err == Z_MEM_ERROR)\n        return;\n\n    /* construct error message with path */\n    if ((state->msg = (char *)malloc(strlen(state->path) + strlen(msg) + 3)) ==\n            NULL) {\n        state->err = Z_MEM_ERROR;\n        return;\n    }\n#if !defined(NO_snprintf) && !defined(NO_vsnprintf)\n    (void)snprintf(state->msg, strlen(state->path) + strlen(msg) + 3,\n                   "%s%s%s", state->path, ": ", msg);\n#else\n    strcpy(state->msg, state->path);\n    str... TYPE_FULL_NAME=void ORDER=4
+    LOCAL NAME=NULL CODE=<unknown> NULL TYPE_FULL_NAME=ANY ORDER=0
+    CONTROL_STRUCTURE CODE=if (state->msg != NULL) {\n        if (state->err != Z_MEM_ERROR)\n            free(state->msg);\n        state->msg = NULL;\n    } ORDER=1
+      CALL NAME=<operator>.notEquals CODE=state->msg != NULL TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.notEquals ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+        CALL NAME=<operator>.indirectFieldAccess CODE=state->msg TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=state CODE=state TYPE_FULL_NAME=gz_statep ORDER=1 ARGUMENT_INDEX=1
+          FIELD_IDENTIFIER CODE=msg ORDER=2 ARGUMENT_INDEX=2
+        IDENTIFIER NAME=NULL CODE=<unknown> NULL TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+      BLOCK CODE={\n        if (state->err != Z_MEM_ERROR)\n            free(state->msg);\n        state->msg = NULL;\n    } TYPE_FULL_NAME=void ORDER=2
+        CONTROL_STRUCTURE CODE=if (state->err != Z_MEM_ERROR)\n            free(state->msg); ORDER=1
+          CALL NAME=<operator>.notEquals CODE=state->err != Z_MEM_ERROR TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.notEquals ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+            CALL NAME=<operator>.indirectFieldAccess CODE=state->err TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+              IDENTIFIER NAME=state CODE=state TYPE_FULL_NAME=gz_statep ORDER=1 ARGUMENT_INDEX=1
+              FIELD_IDENTIFIER CODE=err ORDER=2 ARGUMENT_INDEX=2
+            CALL NAME=Z_MEM_ERROR CODE=Z_MEM_ERROR TYPE_FULL_NAME=ANY METHOD_FULL_NAME=zlib.h:Z_MEM_ERROR:ANY(0) SIGNATURE=ANY(0) ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=INLINED
+              BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+                CALL NAME=<operator>.minus CODE=-4 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.minus ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+                  LITERAL CODE=4 TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+          BLOCK TYPE_FULL_NAME=ANY ORDER=2
+            CALL NAME=free CODE=free(state->msg) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=free ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+              CALL NAME=<operator>.indirectFieldAccess CODE=state->msg TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                IDENTIFIER NAME=state CODE=state TYPE_FULL_NAME=gz_statep ORDER=1 ARGUMENT_INDEX=1
+                FIELD_IDENTIFIER CODE=msg ORDER=2 ARGUMENT_INDEX=2
+        CALL NAME=<operator>.assignment CODE=state->msg = NULL TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=2 DISPATCH_TYPE=STATIC_DISPATCH
+          CALL NAME=<operator>.indirectFieldAccess CODE=state->msg TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+            IDENTIFIER NAME=state CODE=state TYPE_FULL_NAME=gz_statep ORDER=1 ARGUMENT_INDEX=1
+            FIELD_IDENTIFIER CODE=msg ORDER=2 ARGUMENT_INDEX=2
+          IDENTIFIER NAME=NULL CODE=<unknown> NULL TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+    CONTROL_STRUCTURE CODE=if (err != Z_OK && err != Z_BUF_ERROR)\n        state->x.have = 0; ORDER=2
+      CALL NAME=<operator>.logicalAnd CODE=err != Z_OK && err != Z_BUF_ERROR TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.logicalAnd ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+        CALL NAME=<operator>.notEquals CODE=err != Z_OK TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.notEquals ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=err CODE=err TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+          CALL NAME=Z_OK CODE=Z_OK TYPE_FULL_NAME=int METHOD_FULL_NAME=zlib.h:Z_OK:int(0) SIGNATURE=int(0) ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=INLINED
+            BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+              LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=1
+        CALL NAME=<operator>.notEquals CODE=err != Z_BUF_ERROR TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.notEquals ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=err CODE=err TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+          CALL NAME=Z_BUF_ERROR CODE=Z_BUF_ERROR TYPE_FULL_NAME=ANY METHOD_FULL_NAME=zlib.h:Z_BUF_ERROR:ANY(0) SIGNATURE=ANY(0) ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=INLINED
+            BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+              CALL NAME=<operator>.minus CODE=-5 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.minus ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+                LITERAL CODE=5 TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+      BLOCK TYPE_FULL_NAME=ANY ORDER=2
+        CALL NAME=<operator>.assignment CODE=state->x.have = 0 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+          CALL NAME=<operator>.fieldAccess CODE=state->x.have TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.fieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+            CALL NAME=<operator>.indirectFieldAccess CODE=state->x TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+              IDENTIFIER NAME=state CODE=state TYPE_FULL_NAME=gz_statep ORDER=1 ARGUMENT_INDEX=1
+              FIELD_IDENTIFIER CODE=x ORDER=2 ARGUMENT_INDEX=2
+            FIELD_IDENTIFIER CODE=have ORDER=2 ARGUMENT_INDEX=2
+          LITERAL CODE=0 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+    CALL NAME=<operator>.assignment CODE=state->err = err TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=3 DISPATCH_TYPE=STATIC_DISPATCH
+      CALL NAME=<operator>.indirectFieldAccess CODE=state->err TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=state CODE=state TYPE_FULL_NAME=gz_statep ORDER=1 ARGUMENT_INDEX=1
+        FIELD_IDENTIFIER CODE=err ORDER=2 ARGUMENT_INDEX=2
+      IDENTIFIER NAME=err CODE=err TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+    CONTROL_STRUCTURE CODE=if (msg == NULL)\n        return; ORDER=4
+      CALL NAME=<operator>.equals CODE=msg == NULL TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.equals ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=msg CODE=msg TYPE_FULL_NAME=char* ORDER=1 ARGUMENT_INDEX=1
+        IDENTIFIER NAME=NULL CODE=<unknown> NULL TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+      BLOCK TYPE_FULL_NAME=ANY ORDER=2
+        RETURN CODE=return; ORDER=1
+    CONTROL_STRUCTURE CODE=if (err == Z_MEM_ERROR)\n        return; ORDER=5
+      CALL NAME=<operator>.equals CODE=err == Z_MEM_ERROR TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.equals ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+        IDENTIFIER NAME=err CODE=err TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+        CALL NAME=Z_MEM_ERROR CODE=Z_MEM_ERROR TYPE_FULL_NAME=ANY METHOD_FULL_NAME=zlib.h:Z_MEM_ERROR:ANY(0) SIGNATURE=ANY(0) ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=INLINED
+          BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+            CALL NAME=<operator>.minus CODE=-4 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.minus ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+              LITERAL CODE=4 TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+      BLOCK TYPE_FULL_NAME=ANY ORDER=2
+        RETURN CODE=return; ORDER=1
+    CONTROL_STRUCTURE CODE=if ((state->msg = (char *)malloc(strlen(state->path) + strlen(msg) + 3)) ==\n            NULL) {\n        state->err = Z_MEM_ERROR;\n        return;\n    } ORDER=6
+      CALL NAME=<operator>.equals CODE=(state->msg = (char *)malloc(strlen(state->path) + strlen(msg) + 3)) ==\n            NULL TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.equals ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+        CALL NAME=<operator>.assignment CODE=state->msg = (char *)malloc(strlen(state->path) + strlen(msg) + 3) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+          CALL NAME=<operator>.indirectFieldAccess CODE=state->msg TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+            IDENTIFIER NAME=state CODE=state TYPE_FULL_NAME=gz_statep ORDER=1 ARGUMENT_INDEX=1
+            FIELD_IDENTIFIER CODE=msg ORDER=2 ARGUMENT_INDEX=2
+          CALL NAME=<operator>.cast CODE=(char *)malloc(strlen(state->path) + strlen(msg) + 3) TYPE_FULL_NAME=char METHOD_FULL_NAME=<operator>.cast ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+            TYPE_REF CODE=char * TYPE_FULL_NAME=char ORDER=1 ARGUMENT_INDEX=1
+            CALL NAME=malloc CODE=malloc(strlen(state->path) + strlen(msg) + 3) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=malloc ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+              CALL NAME=<operator>.addition CODE=strlen(state->path) + strlen(msg) + 3 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                CALL NAME=<operator>.addition CODE=strlen(state->path) + strlen(msg) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                  CALL NAME=strlen CODE=strlen(state->path) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=strlen ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                    CALL NAME=<operator>.indirectFieldAccess CODE=state->path TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                      IDENTIFIER NAME=state CODE=state TYPE_FULL_NAME=gz_statep ORDER=1 ARGUMENT_INDEX=1
+                      FIELD_IDENTIFIER CODE=path ORDER=2 ARGUMENT_INDEX=2
+                  CALL NAME=strlen CODE=strlen(msg) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=strlen ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+                    IDENTIFIER NAME=msg CODE=msg TYPE_FULL_NAME=char* ORDER=1 ARGUMENT_INDEX=1
+                LITERAL CODE=3 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+        IDENTIFIER NAME=NULL CODE=<unknown> NULL TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+      BLOCK CODE={\n        state->err = Z_MEM_ERROR;\n        return;\n    } TYPE_FULL_NAME=void ORDER=2
+        CALL NAME=<operator>.assignment CODE=state->err = Z_MEM_ERROR TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.assignment ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+          CALL NAME=<operator>.indirectFieldAccess CODE=state->err TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+            IDENTIFIER NAME=state CODE=state TYPE_FULL_NAME=gz_statep ORDER=1 ARGUMENT_INDEX=1
+            FIELD_IDENTIFIER CODE=err ORDER=2 ARGUMENT_INDEX=2
+          CALL NAME=Z_MEM_ERROR CODE=Z_MEM_ERROR TYPE_FULL_NAME=ANY METHOD_FULL_NAME=zlib.h:Z_MEM_ERROR:ANY(0) SIGNATURE=ANY(0) ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=INLINED
+            BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+              CALL NAME=<operator>.minus CODE=-4 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.minus ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+                LITERAL CODE=4 TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+        RETURN CODE=return; ORDER=2
+    CALL NAME=<operator>.cast CODE=(void)snprintf(state->msg, strlen(state->path) + strlen(msg) + 3,\n                   "%s%s%s", state->path, ": ", msg) TYPE_FULL_NAME=void METHOD_FULL_NAME=<operator>.cast ORDER=7 DISPATCH_TYPE=STATIC_DISPATCH
+      TYPE_REF CODE=void TYPE_FULL_NAME=void ORDER=1 ARGUMENT_INDEX=1
+      CALL NAME=snprintf CODE=snprintf(state->msg, strlen(state->path) + strlen(msg) + 3,\n                   "%s%s%s", state->path, ": ", msg) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=snprintf ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+        CALL NAME=<operator>.indirectFieldAccess CODE=state->msg TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=state CODE=state TYPE_FULL_NAME=gz_statep ORDER=1 ARGUMENT_INDEX=1
+          FIELD_IDENTIFIER CODE=msg ORDER=2 ARGUMENT_INDEX=2
+        CALL NAME=<operator>.addition CODE=strlen(state->path) + strlen(msg) + 3 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+          CALL NAME=<operator>.addition CODE=strlen(state->path) + strlen(msg) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+            CALL NAME=strlen CODE=strlen(state->path) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=strlen ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+              CALL NAME=<operator>.indirectFieldAccess CODE=state->path TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH
+                IDENTIFIER NAME=state CODE=state TYPE_FULL_NAME=gz_statep ORDER=1 ARGUMENT_INDEX=1
+                FIELD_IDENTIFIER CODE=path ORDER=2 ARGUMENT_INDEX=2
+            CALL NAME=strlen CODE=strlen(msg) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=strlen ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH
+              IDENTIFIER NAME=msg CODE=msg TYPE_FULL_NAME=char* ORDER=1 ARGUMENT_INDEX=1
+          LITERAL CODE=3 TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=2
+        LITERAL CODE="%s%s%s" TYPE_FULL_NAME=char* ORDER=3 ARGUMENT_INDEX=3
+        CALL NAME=<operator>.indirectFieldAccess CODE=state->path TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.indirectFieldAccess ORDER=4 ARGUMENT_INDEX=4 DISPATCH_TYPE=STATIC_DISPATCH
+          IDENTIFIER NAME=state CODE=state TYPE_FULL_NAME=gz_statep ORDER=1 ARGUMENT_INDEX=1
+          FIELD_IDENTIFIER CODE=path ORDER=2 ARGUMENT_INDEX=2
+        LITERAL CODE=": " TYPE_FULL_NAME=char* ORDER=5 ARGUMENT_INDEX=5
+        IDENTIFIER NAME=msg CODE=msg TYPE_FULL_NAME=char* ORDER=6 ARGUMENT_INDEX=6
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=5

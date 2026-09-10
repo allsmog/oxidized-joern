@@ -1,0 +1,71 @@
+{
+  "case": "unsigned_long_long_int",
+  "retainedAnchor": false,
+  "command": [
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/frozen-v1/joern-parity",
+    "--production",
+    "main.c"
+  ],
+  "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/unsigned_long_long_int/input",
+  "seconds": 0.003830250003375113,
+  "exitCode": 0,
+  "timeout": false,
+  "error": null,
+  "beforeExact": false,
+  "candidateExact": true,
+  "beforeCandidateIdentical": false,
+  "inputHashes": {
+    "main.c": "c772a4b67dd1cfb5cf2943b6d97525c24063c4a476c33a2fba23664f480bae26"
+  },
+  "counts": {
+    "includingSeparators": {
+      "expected": 119,
+      "before": 119,
+      "candidate": 119,
+      "matchingBefore": 112,
+      "matchingCandidate": 119,
+      "gained": 7,
+      "lost": 0,
+      "lostRecords": {},
+      "gainedRecords": {
+        "    MEMBER NAME=value CODE=value TYPE_FULL_NAME=longlong unsigned int ORDER=1": 1,
+        "NODES|TYPE_DECL NAME=longlong unsigned int FULL_NAME=longlong unsigned int CODE=longlong unsigned int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>": 1,
+        "NODES|TYPE NAME=longlong unsigned int FULL_NAME=longlong unsigned int TYPE_DECL_FULL_NAME=longlong unsigned int": 1,
+        "EDGES|CONTAINS F:<includes> -> D:longlong unsigned int": 1,
+        "EDGES|EVAL_TYPE main.c:<global>#2 -> T:longlong unsigned int": 1,
+        "EDGES|REF T:longlong unsigned int -> D:longlong unsigned int": 1,
+        "EDGES|SOURCE_FILE D:longlong unsigned int -> F:<includes>": 1
+      }
+    },
+    "nonempty": {
+      "expected": 115,
+      "before": 115,
+      "candidate": 115,
+      "matchingBefore": 108,
+      "matchingCandidate": 115,
+      "gained": 7,
+      "lost": 0,
+      "lostRecords": {},
+      "gainedRecords": {
+        "    MEMBER NAME=value CODE=value TYPE_FULL_NAME=longlong unsigned int ORDER=1": 1,
+        "NODES|TYPE_DECL NAME=longlong unsigned int FULL_NAME=longlong unsigned int CODE=longlong unsigned int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>": 1,
+        "NODES|TYPE NAME=longlong unsigned int FULL_NAME=longlong unsigned int TYPE_DECL_FULL_NAME=longlong unsigned int": 1,
+        "EDGES|CONTAINS F:<includes> -> D:longlong unsigned int": 1,
+        "EDGES|EVAL_TYPE main.c:<global>#2 -> T:longlong unsigned int": 1,
+        "EDGES|REF T:longlong unsigned int -> D:longlong unsigned int": 1,
+        "EDGES|SOURCE_FILE D:longlong unsigned int -> F:<includes>": 1
+      }
+    }
+  },
+  "files": {
+    "actual.txt": "8cdd2dbee080157990c124b09867988f64b4c790a00ab92b5be48b270c61a720",
+    "before-candidate.diff": "6978afbbae33d661989b6e59b8c4b70e13244d5879c9afce46bb9f611a7d8702",
+    "before.txt": "f85a47d40520d00231233b3234bf711a871491b288e9118737e3d0250f78478c",
+    "expected-before.diff": "9f2da2fdc048d93ccf4c9f1fa364341905a6bf219870889bbffa27adce09cc15",
+    "expected-candidate.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "expected.txt": "8cdd2dbee080157990c124b09867988f64b4c790a00ab92b5be48b270c61a720",
+    "input/main.c": "c772a4b67dd1cfb5cf2943b6d97525c24063c4a476c33a2fba23664f480bae26",
+    "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout.txt": "8cdd2dbee080157990c124b09867988f64b4c790a00ab92b5be48b270c61a720"
+  }
+}

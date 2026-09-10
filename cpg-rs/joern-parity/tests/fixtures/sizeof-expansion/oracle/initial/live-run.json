@@ -1,0 +1,15 @@
+{
+  "command": [
+    "/Users/shayaunnejad/vibe-code/joern-oxidized/.local/astra-sprint/oracle/runtime/joern-cli/joern",
+    "--script",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/sixth-batch/sizeof-expansion/oracle.sc",
+    "--param",
+    "inputPath=/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/sixth-batch/sizeof-expansion/input"
+  ],
+  "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/sixth-batch/sizeof-expansion/oracle-workspace",
+  "exitCode": 0,
+  "wallSeconds": 20.307155208007316,
+  "scriptSha256": "56431f14868678e64f9eb41026b44f1d3d7738404d28d2db62711b520c98c742",
+  "stdoutSha256": "3e4836fa45cd237a59e8ce41963eee0c82f99849841262d287c726a0397b3a61",
+  "inputManifestSha256": "951ebc26a1924e7d98357cf20bc8551cd1d10e31fa56e5c32126d2b7e1e9517d"
+}

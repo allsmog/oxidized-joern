@@ -50,10 +50,8 @@ int selected(void) {
 }
 
 #[test]
-fn inactive_symbols_and_top_level_declarations_do_not_leak() {
-    let cpg = graph(
-        r#"
-#define BUILD_LIVE 1
+fn configured_translation_unit_excludes_inactive_declarations() {
+    let source = r#"
 #if BUILD_LIVE
 int live_function(void) { return 1; }
 #else
@@ -66,8 +64,13 @@ int dead_after_undef(void) { return 2; }
 #else
 int live_after_undef(void) { return 3; }
 #endif
-"#,
-    );
+"#;
+    let cpg = CFrontend::with_preprocessor(cpg_lang_c::exact::PreprocessorConfig {
+        defines: vec!["BUILD_LIVE=1".into()],
+        ..Default::default()
+    })
+    .build_project(&[("preprocessor.c", source)])
+    .unwrap();
 
     assert_eq!(cpg.method_named("live_function").len(), 1);
     assert_eq!(cpg.method_named("live_after_undef").len(), 1);

@@ -1,0 +1,28 @@
+{
+  "command": [
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/twelfth-batch/lint-corrected/final-real-differential/bin/cpg",
+    "build",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/thirteenth-batch/accepted-capture-v1/tiny_fixedtables_include/input",
+    "--lang",
+    "c",
+    "-o",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/thirteenth-batch/accepted-capture-v1/tiny_fixedtables_include/accepted-v2.cpg"
+  ],
+  "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/thirteenth-batch/accepted-capture-v1/tiny_fixedtables_include",
+  "exitCode": 0,
+  "error": null,
+  "timedOut": false,
+  "seconds": 0.01947420899523422,
+  "stdout": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/thirteenth-batch/accepted-capture-v1/tiny_fixedtables_include/persist.stdout",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "error": null
+  },
+  "stderr": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/thirteenth-batch/accepted-capture-v1/tiny_fixedtables_include/persist.stderr",
+    "bytes": 312,
+    "sha256": "aa67a2cb34212b075ebc077c8b1cd31e22142b76c655d09eec6addd47fc56dc3",
+    "error": null
+  }
+}

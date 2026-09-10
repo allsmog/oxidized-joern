@@ -1,0 +1,268 @@
+METHOD NAME=<global> CODE=<global> FULL_NAME=<includes>:<global> ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.addition FULL_NAME=<operator>.addition ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.pointerCall FULL_NAME=<operator>.pointerCall ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=declared CODE=unsigned long declared(unsigned long value); FULL_NAME=declared SIGNATURE=longunsigned(longunsigned) ORDER=1
+  METHOD_PARAMETER_IN NAME=value CODE=unsigned long value TYPE_FULL_NAME=longunsigned ORDER=1
+  METHOD_PARAMETER_OUT NAME=value CODE=unsigned long value TYPE_FULL_NAME=longunsigned ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=longunsigned ORDER=3
+
+METHOD NAME=defined CODE=unsigned long defined(unsigned long value) { return value; } FULL_NAME=defined SIGNATURE=unsigned long(longunsigned) ORDER=1
+  METHOD_PARAMETER_IN NAME=value CODE=unsigned long value TYPE_FULL_NAME=longunsigned ORDER=1
+  METHOD_PARAMETER_OUT NAME=value CODE=unsigned long value TYPE_FULL_NAME=longunsigned ORDER=1
+  BLOCK CODE={ return value; } TYPE_FULL_NAME=void ORDER=2
+    RETURN CODE=return value; ORDER=1
+      IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=longunsigned ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=unsigned long ORDER=3
+
+METHOD NAME=paren_calls CODE=unsigned long paren_calls(unsigned long value) { return (declared)(value) + (defined)(value); } FULL_NAME=paren_calls SIGNATURE=unsigned long(longunsigned) ORDER=1
+  METHOD_PARAMETER_IN NAME=value CODE=unsigned long value TYPE_FULL_NAME=longunsigned ORDER=1
+  METHOD_PARAMETER_OUT NAME=value CODE=unsigned long value TYPE_FULL_NAME=longunsigned ORDER=1
+  BLOCK CODE={ return (declared)(value) + (defined)(value); } TYPE_FULL_NAME=void ORDER=2
+    RETURN CODE=return (declared)(value) + (defined)(value); ORDER=1
+      CALL NAME=<operator>.addition CODE=(declared)(value) + (defined)(value) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+        CALL NAME=<operator>.pointerCall CODE=(declared)(value) TYPE_FULL_NAME=unsigned longint METHOD_FULL_NAME=<operator>.pointerCall ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=DYNAMIC_DISPATCH
+          METHOD_REF CODE=declared TYPE_FULL_NAME=longunsigned METHOD_FULL_NAME=declared ORDER=1
+          IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=longunsigned ORDER=2 ARGUMENT_INDEX=1
+        CALL NAME=<operator>.pointerCall CODE=(defined)(value) TYPE_FULL_NAME=unsigned longint METHOD_FULL_NAME=<operator>.pointerCall ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=DYNAMIC_DISPATCH
+          METHOD_REF CODE=defined TYPE_FULL_NAME=unsigned long METHOD_FULL_NAME=defined ORDER=1
+          IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=longunsigned ORDER=2 ARGUMENT_INDEX=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=unsigned long ORDER=3
+
+METHOD NAME=<global> CODE=<global> FULL_NAME=paren_calls.c:<global> ORDER=1
+  METHOD NAME=defined CODE=unsigned long defined(unsigned long value) { return value; } FULL_NAME=defined SIGNATURE=unsigned long(longunsigned) ORDER=1
+    METHOD_PARAMETER_IN NAME=value CODE=unsigned long value TYPE_FULL_NAME=longunsigned ORDER=1
+    METHOD_PARAMETER_OUT NAME=value CODE=unsigned long value TYPE_FULL_NAME=longunsigned ORDER=1
+    BLOCK CODE={ return value; } TYPE_FULL_NAME=void ORDER=2
+      RETURN CODE=return value; ORDER=1
+        IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=longunsigned ORDER=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=unsigned long ORDER=3
+  METHOD NAME=paren_calls CODE=unsigned long paren_calls(unsigned long value) { return (declared)(value) + (defined)(value); } FULL_NAME=paren_calls SIGNATURE=unsigned long(longunsigned) ORDER=1
+    METHOD_PARAMETER_IN NAME=value CODE=unsigned long value TYPE_FULL_NAME=longunsigned ORDER=1
+    METHOD_PARAMETER_OUT NAME=value CODE=unsigned long value TYPE_FULL_NAME=longunsigned ORDER=1
+    BLOCK CODE={ return (declared)(value) + (defined)(value); } TYPE_FULL_NAME=void ORDER=2
+      RETURN CODE=return (declared)(value) + (defined)(value); ORDER=1
+        CALL NAME=<operator>.addition CODE=(declared)(value) + (defined)(value) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+          CALL NAME=<operator>.pointerCall CODE=(declared)(value) TYPE_FULL_NAME=unsigned longint METHOD_FULL_NAME=<operator>.pointerCall ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=DYNAMIC_DISPATCH
+            METHOD_REF CODE=declared TYPE_FULL_NAME=longunsigned METHOD_FULL_NAME=declared ORDER=1
+            IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=longunsigned ORDER=2 ARGUMENT_INDEX=1
+          CALL NAME=<operator>.pointerCall CODE=(defined)(value) TYPE_FULL_NAME=unsigned longint METHOD_FULL_NAME=<operator>.pointerCall ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=DYNAMIC_DISPATCH
+            METHOD_REF CODE=defined TYPE_FULL_NAME=unsigned long METHOD_FULL_NAME=defined ORDER=1
+            IDENTIFIER NAME=value CODE=value TYPE_FULL_NAME=longunsigned ORDER=2 ARGUMENT_INDEX=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=unsigned long ORDER=3
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+    METHOD_REF CODE=defined TYPE_FULL_NAME=defined METHOD_FULL_NAME=defined ORDER=1
+    METHOD_REF CODE=paren_calls TYPE_FULL_NAME=paren_calls METHOD_FULL_NAME=paren_calls ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+NODES|META_DATA LANGUAGE=NEWC
+NODES|FILE NAME=<includes> ORDER=1
+NODES|FILE NAME=<unknown> ORDER=0
+NODES|FILE NAME=paren_calls.c ORDER=0
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<global> FILENAME=<unknown> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<includes>:<global> FILENAME=<includes> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=paren_calls.c:<global> FILENAME=paren_calls.c ORDER=1
+NODES|NAMESPACE NAME=<global>
+NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=defined FULL_NAME=defined CODE=defined AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=paren_calls.c:<global> FILENAME=paren_calls.c ORDER=1
+NODES|TYPE_DECL NAME=longunsigned FULL_NAME=longunsigned CODE=longunsigned IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=paren_calls FULL_NAME=paren_calls CODE=paren_calls AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=paren_calls.c:<global> FILENAME=paren_calls.c ORDER=1
+NODES|TYPE_DECL NAME=<global> FULL_NAME=paren_calls.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=paren_calls.c:<global> FILENAME=paren_calls.c ORDER=1
+NODES|TYPE_DECL NAME=unsigned long FULL_NAME=unsigned long CODE=unsigned long IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=unsigned longint FULL_NAME=unsigned longint CODE=unsigned longint IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+NODES|TYPE NAME=defined FULL_NAME=defined TYPE_DECL_FULL_NAME=defined
+NODES|TYPE NAME=longunsigned FULL_NAME=longunsigned TYPE_DECL_FULL_NAME=longunsigned
+NODES|TYPE NAME=paren_calls FULL_NAME=paren_calls TYPE_DECL_FULL_NAME=paren_calls
+NODES|TYPE NAME=unsigned long FULL_NAME=unsigned long TYPE_DECL_FULL_NAME=unsigned long
+NODES|TYPE NAME=unsigned longint FULL_NAME=unsigned longint TYPE_DECL_FULL_NAME=unsigned longint
+NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+EDGES|ARGUMENT defined#4 -> defined#5
+EDGES|ARGUMENT paren_calls#4 -> paren_calls#5
+EDGES|ARGUMENT paren_calls#5 -> paren_calls#6
+EDGES|ARGUMENT paren_calls#5 -> paren_calls#9
+EDGES|ARGUMENT paren_calls#6 -> paren_calls#8
+EDGES|ARGUMENT paren_calls#9 -> paren_calls#11
+EDGES|CALL paren_calls#5 -> <operator>.addition#0
+EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+EDGES|CFG <operator>.addition#0 -> <operator>.addition#5
+EDGES|CFG <operator>.pointerCall#0 -> <operator>.pointerCall#4
+EDGES|CFG declared#0 -> declared#4
+EDGES|CFG defined#0 -> defined#5
+EDGES|CFG defined#4 -> defined#6
+EDGES|CFG defined#5 -> defined#4
+EDGES|CFG paren_calls#0 -> paren_calls#7
+EDGES|CFG paren_calls#10 -> paren_calls#11
+EDGES|CFG paren_calls#11 -> paren_calls#9
+EDGES|CFG paren_calls#4 -> paren_calls#12
+EDGES|CFG paren_calls#5 -> paren_calls#4
+EDGES|CFG paren_calls#6 -> paren_calls#10
+EDGES|CFG paren_calls#7 -> paren_calls#8
+EDGES|CFG paren_calls#8 -> paren_calls#6
+EDGES|CFG paren_calls#9 -> paren_calls#5
+EDGES|CFG paren_calls.c:<global>#0 -> paren_calls.c:<global>#22
+EDGES|CFG paren_calls.c:<global>#22 -> paren_calls.c:<global>#23
+EDGES|CFG paren_calls.c:<global>#23 -> paren_calls.c:<global>#24
+EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+EDGES|CONTAINS <operator>.addition#0 -> <operator>.addition#2
+EDGES|CONTAINS <operator>.pointerCall#0 -> <operator>.pointerCall#2
+EDGES|CONTAINS D:paren_calls.c:<global> -> D:defined
+EDGES|CONTAINS D:paren_calls.c:<global> -> D:paren_calls
+EDGES|CONTAINS D:paren_calls.c:<global> -> declared#0
+EDGES|CONTAINS D:paren_calls.c:<global> -> paren_calls.c:<global>#0
+EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+EDGES|CONTAINS F:<includes> -> D:ANY
+EDGES|CONTAINS F:<includes> -> D:longunsigned
+EDGES|CONTAINS F:<includes> -> D:unsigned long
+EDGES|CONTAINS F:<includes> -> D:unsigned longint
+EDGES|CONTAINS F:<includes> -> D:void
+EDGES|CONTAINS F:paren_calls.c -> D:paren_calls.c:<global>
+EDGES|CONTAINS declared#0 -> declared#3
+EDGES|CONTAINS defined#0 -> defined#3
+EDGES|CONTAINS defined#0 -> defined#4
+EDGES|CONTAINS defined#0 -> defined#5
+EDGES|CONTAINS paren_calls#0 -> paren_calls#10
+EDGES|CONTAINS paren_calls#0 -> paren_calls#11
+EDGES|CONTAINS paren_calls#0 -> paren_calls#3
+EDGES|CONTAINS paren_calls#0 -> paren_calls#4
+EDGES|CONTAINS paren_calls#0 -> paren_calls#5
+EDGES|CONTAINS paren_calls#0 -> paren_calls#6
+EDGES|CONTAINS paren_calls#0 -> paren_calls#7
+EDGES|CONTAINS paren_calls#0 -> paren_calls#8
+EDGES|CONTAINS paren_calls#0 -> paren_calls#9
+EDGES|CONTAINS paren_calls.c:<global>#0 -> defined#0
+EDGES|CONTAINS paren_calls.c:<global>#0 -> paren_calls#0
+EDGES|CONTAINS paren_calls.c:<global>#0 -> paren_calls.c:<global>#21
+EDGES|CONTAINS paren_calls.c:<global>#0 -> paren_calls.c:<global>#22
+EDGES|CONTAINS paren_calls.c:<global>#0 -> paren_calls.c:<global>#23
+EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#6 -> T:ANY
+EDGES|EVAL_TYPE <operator>.pointerCall#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.pointerCall#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.pointerCall#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.pointerCall#4 -> T:ANY
+EDGES|EVAL_TYPE declared#1 -> T:longunsigned
+EDGES|EVAL_TYPE declared#2 -> T:longunsigned
+EDGES|EVAL_TYPE declared#3 -> T:ANY
+EDGES|EVAL_TYPE declared#4 -> T:longunsigned
+EDGES|EVAL_TYPE defined#1 -> T:longunsigned
+EDGES|EVAL_TYPE defined#2 -> T:longunsigned
+EDGES|EVAL_TYPE defined#3 -> T:void
+EDGES|EVAL_TYPE defined#5 -> T:longunsigned
+EDGES|EVAL_TYPE defined#6 -> T:unsigned long
+EDGES|EVAL_TYPE paren_calls#1 -> T:longunsigned
+EDGES|EVAL_TYPE paren_calls#10 -> T:unsigned long
+EDGES|EVAL_TYPE paren_calls#11 -> T:longunsigned
+EDGES|EVAL_TYPE paren_calls#12 -> T:unsigned long
+EDGES|EVAL_TYPE paren_calls#2 -> T:longunsigned
+EDGES|EVAL_TYPE paren_calls#3 -> T:void
+EDGES|EVAL_TYPE paren_calls#5 -> T:ANY
+EDGES|EVAL_TYPE paren_calls#6 -> T:unsigned longint
+EDGES|EVAL_TYPE paren_calls#7 -> T:longunsigned
+EDGES|EVAL_TYPE paren_calls#8 -> T:longunsigned
+EDGES|EVAL_TYPE paren_calls#9 -> T:unsigned longint
+EDGES|EVAL_TYPE paren_calls.c:<global>#21 -> T:ANY
+EDGES|EVAL_TYPE paren_calls.c:<global>#22 -> T:defined
+EDGES|EVAL_TYPE paren_calls.c:<global>#23 -> T:paren_calls
+EDGES|EVAL_TYPE paren_calls.c:<global>#24 -> T:ANY
+EDGES|PARAMETER_LINK <operator>.addition#1 -> <operator>.addition#3
+EDGES|PARAMETER_LINK <operator>.addition#4 -> <operator>.addition#6
+EDGES|PARAMETER_LINK <operator>.pointerCall#1 -> <operator>.pointerCall#3
+EDGES|PARAMETER_LINK declared#1 -> declared#2
+EDGES|PARAMETER_LINK defined#1 -> defined#2
+EDGES|PARAMETER_LINK paren_calls#1 -> paren_calls#2
+EDGES|REF NB:<global> -> NS:<global>
+EDGES|REF NB:<includes>:<global> -> NS:<global>
+EDGES|REF NB:paren_calls.c:<global> -> NS:<global>
+EDGES|REF T:ANY -> D:ANY
+EDGES|REF T:defined -> D:defined
+EDGES|REF T:longunsigned -> D:longunsigned
+EDGES|REF T:paren_calls -> D:paren_calls
+EDGES|REF T:unsigned long -> D:unsigned long
+EDGES|REF T:unsigned longint -> D:unsigned longint
+EDGES|REF T:void -> D:void
+EDGES|REF defined#5 -> defined#1
+EDGES|REF paren_calls#10 -> defined#0
+EDGES|REF paren_calls#11 -> paren_calls#1
+EDGES|REF paren_calls#7 -> declared#0
+EDGES|REF paren_calls#8 -> paren_calls#1
+EDGES|REF paren_calls.c:<global>#22 -> defined#0
+EDGES|REF paren_calls.c:<global>#23 -> paren_calls#0
+EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+EDGES|SOURCE_FILE D:ANY -> F:<includes>
+EDGES|SOURCE_FILE D:defined -> F:paren_calls.c
+EDGES|SOURCE_FILE D:longunsigned -> F:<includes>
+EDGES|SOURCE_FILE D:paren_calls -> F:paren_calls.c
+EDGES|SOURCE_FILE D:paren_calls.c:<global> -> F:paren_calls.c
+EDGES|SOURCE_FILE D:unsigned long -> F:<includes>
+EDGES|SOURCE_FILE D:unsigned longint -> F:<includes>
+EDGES|SOURCE_FILE D:void -> F:<includes>
+EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
+EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>
+EDGES|SOURCE_FILE NB:paren_calls.c:<global> -> F:paren_calls.c
+EDGES|SOURCE_FILE declared#0 -> F:paren_calls.c
+EDGES|SOURCE_FILE defined#0 -> F:paren_calls.c
+EDGES|SOURCE_FILE paren_calls#0 -> F:paren_calls.c
+EDGES|SOURCE_FILE paren_calls.c:<global>#0 -> F:paren_calls.c
+FLOWS|REACHING_DEF[(declared)(value) + (defined)(value)] paren_calls#5 -> paren_calls#12
+FLOWS|REACHING_DEF[(declared)(value) + (defined)(value)] paren_calls#5 -> paren_calls#4
+FLOWS|REACHING_DEF[(declared)(value)] paren_calls#6 -> paren_calls#12
+FLOWS|REACHING_DEF[(declared)(value)] paren_calls#6 -> paren_calls#5
+FLOWS|REACHING_DEF[(defined)(value)] paren_calls#9 -> paren_calls#12
+FLOWS|REACHING_DEF[(defined)(value)] paren_calls#9 -> paren_calls#5
+FLOWS|REACHING_DEF[<RET>] defined#4 -> defined#6
+FLOWS|REACHING_DEF[<RET>] paren_calls#4 -> paren_calls#12
+FLOWS|REACHING_DEF[] <operator>.addition#0 -> <operator>.addition#1
+FLOWS|REACHING_DEF[] <operator>.addition#0 -> <operator>.addition#4
+FLOWS|REACHING_DEF[] <operator>.pointerCall#0 -> <operator>.pointerCall#1
+FLOWS|REACHING_DEF[] declared#0 -> declared#1
+FLOWS|REACHING_DEF[] defined#0 -> defined#1
+FLOWS|REACHING_DEF[] defined#0 -> defined#5
+FLOWS|REACHING_DEF[] paren_calls#0 -> paren_calls#1
+FLOWS|REACHING_DEF[] paren_calls#0 -> paren_calls#10
+FLOWS|REACHING_DEF[] paren_calls#0 -> paren_calls#11
+FLOWS|REACHING_DEF[] paren_calls#0 -> paren_calls#7
+FLOWS|REACHING_DEF[] paren_calls#0 -> paren_calls#8
+FLOWS|REACHING_DEF[] paren_calls.c:<global>#0 -> paren_calls.c:<global>#22
+FLOWS|REACHING_DEF[] paren_calls.c:<global>#0 -> paren_calls.c:<global>#23
+FLOWS|REACHING_DEF[p1] <operator>.addition#1 -> <operator>.addition#3
+FLOWS|REACHING_DEF[p1] <operator>.addition#1 -> <operator>.addition#5
+FLOWS|REACHING_DEF[p1] <operator>.pointerCall#1 -> <operator>.pointerCall#3
+FLOWS|REACHING_DEF[p1] <operator>.pointerCall#1 -> <operator>.pointerCall#4
+FLOWS|REACHING_DEF[p2] <operator>.addition#4 -> <operator>.addition#5
+FLOWS|REACHING_DEF[p2] <operator>.addition#4 -> <operator>.addition#6
+FLOWS|REACHING_DEF[value] declared#1 -> declared#2
+FLOWS|REACHING_DEF[value] declared#1 -> declared#4
+FLOWS|REACHING_DEF[value] defined#1 -> defined#2
+FLOWS|REACHING_DEF[value] defined#1 -> defined#5
+FLOWS|REACHING_DEF[value] defined#1 -> defined#6
+FLOWS|REACHING_DEF[value] defined#5 -> defined#4
+FLOWS|REACHING_DEF[value] paren_calls#1 -> paren_calls#2
+FLOWS|REACHING_DEF[value] paren_calls#1 -> paren_calls#8
+FLOWS|REACHING_DEF[value] paren_calls#11 -> paren_calls#12
+FLOWS|REACHING_DEF[value] paren_calls#11 -> paren_calls#2
+FLOWS|REACHING_DEF[value] paren_calls#11 -> paren_calls#9
+FLOWS|REACHING_DEF[value] paren_calls#8 -> paren_calls#11
+FLOWS|REACHING_DEF[value] paren_calls#8 -> paren_calls#6

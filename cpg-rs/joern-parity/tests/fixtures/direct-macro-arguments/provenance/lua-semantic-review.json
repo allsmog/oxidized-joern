@@ -1,0 +1,309 @@
+{
+  "status": "PASS_BOUNDED_LUA_OPERAND_REGRESSION_REPAIR",
+  "claimBoundary": "Approves the independently checked isolated Lua repair bytes and closes the two observed operand omissions. It is not final combined root acceptance and does not claim complete Joern projection equality. The zlib comparison entry is a reused pre-repair control, not output from this isolated tokenizer binary.",
+  "producerRun": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-arguments/.local/macro-arguments/lua-replay/run.json",
+    "sha256": "9d482745150393be8e873735989b19996783d27904b5a98a820e1950a97736ec",
+    "bytes": 10230
+  },
+  "frozenBindings": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-arguments/.local/macro-arguments/frozen-candidate/bindings.json",
+    "sha256": "2ea2519338abb9a68992657635fbbc2273ccad5adebd6b86f3835bb59c4180e2",
+    "bytes": 171
+  },
+  "independentlyVerified": {
+    "source": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-arguments/.local/macro-arguments/frozen-candidate/exact.rs",
+      "sha256": "41c3d86167b4fdcc0ae3e035fe24417968730e93f2d47181dae98f1666e3873c",
+      "bytes": 335781
+    },
+    "binary": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-arguments/.local/macro-arguments/frozen-candidate/joern-parity",
+      "sha256": "4e6217f855eef725b46032a45951078bb6340568d78b3180f57cb0001dd21ea1",
+      "bytes": 11172720
+    },
+    "raw": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-arguments/.local/macro-arguments/lua-replay/rust.stdout",
+      "sha256": "be69e912f5d4421c259f60476c2e5103c14d2c63cbf5b82bab8c6c6500135e48",
+      "bytes": 64459098
+    }
+  },
+  "unchangedInputFilesVerified": 61,
+  "completeComparison": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/fifth-project-review/tokenizer-repair/review.json",
+    "sha256": "3a1740ca60d7017b5f95ae902c903e6446c430c34562c729904ada3ba9f3352d",
+    "bytes": 417697
+  },
+  "summary": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/fifth-project-review/tokenizer-repair/tokenizer-summary.json",
+    "sha256": "9e930c2db4a8509ece66df4621158e883fa0aa48c378b966e3a9fd711d51c552",
+    "bytes": 10510
+  },
+  "fullAncestryOccurrenceReview": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/fifth-project-review/tokenizer-priority/occurrence-fact-review.json",
+    "sha256": "c2bbacac7ec42d2c7c88a33dc1cab28a6d8f9e864ade68efb90a2bef782afc23",
+    "bytes": 1172604
+  },
+  "allLossClassification": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/fifth-project-review/tokenizer-repair/lua-5.4.7-full/semantic-loss-classification-v2/summary.json",
+    "sha256": "940e19f531e3156b4f3292ec7eee82954285e87ac507daf89f4555a5e2d5d15a",
+    "bytes": 7076
+  },
+  "restoredFormerlyMatchingFacts": {
+    "structural": 26,
+    "flows": 19,
+    "total": 45,
+    "ambiguousCurrentOccurrences": 0
+  },
+  "intarithOccurrence": "RHS v2 of the unique RETURN intop(+, v1, v2), under its right pointerCall and addition, now emits FLOWS|REACHING_DEF[v2] intarith#32 -> intarith#8. Both v1/v2 copied and expanded operands are present. Full ancestor paths prove the source is not the separate luaV_shiftr return.",
+  "luaVShiftlOccurrences": "Both unique returns intop(>>, x, -y) and intop(<<, x, y) retain their invocation copies and expanded right operands. Complete AST has80records again; old outer cast/pointerCall difference remains.",
+  "currentExactCounts": {
+    "allMethodAsts": 1132,
+    "primaryMethodAsts": 214,
+    "primaryBlocks": 249,
+    "activePrimaryBlocks": 227
+  },
+  "transitionsFromPreRepairCandidate": {
+    "methodExactNames": {
+      "lost": [],
+      "gained": []
+    },
+    "bodyExactNames": {
+      "lost": [],
+      "gained": [
+        "previousinstruction"
+      ]
+    }
+  },
+  "previouslyExactMethodsRegressedAgainstFourth": [],
+  "rawMatchingRecordDeltasAgainstFourth": {
+    "AST": {
+      "lost": 242,
+      "gained": 8769
+    },
+    "NODES": {
+      "lost": 0,
+      "gained": 120
+    },
+    "EDGES": {
+      "lost": 9594,
+      "gained": 41806
+    },
+    "FLOWS": {
+      "lost": 2019,
+      "gained": 19815
+    }
+  },
+  "rawLossClassifications": {
+    "raw_address_match_was_not_same_endpoints_and_parents": 8508,
+    "fact_multiplicity_retained_at_other_addresses": 3105
+  },
+  "priorFourFlows": [
+    {
+      "fourthOracleRecord": "FLOWS|REACHING_DEF[level] checkclosemth#14 -> checkclosemth#4",
+      "signature": [
+        "FLOWS",
+        "level",
+        "c914ad5b7b43b3ea4d2c464a35afeda2753589f0ee48424609367811c9044730",
+        "3a02b3d7856735836826f680f6a68f44981815dc27c79a6cee3732f11c9f1d1c"
+      ],
+      "baselineSameFingerprint": true,
+      "oracleSemanticMultiplicity": 1,
+      "currentSemanticMultiplicity": 1,
+      "currentEquivalentRecords": [
+        {
+          "record": "FLOWS|REACHING_DEF[level] checkclosemth#14 -> checkclosemth#4",
+          "multiplicity": 1
+        }
+      ],
+      "currentEndpointAddresses": [
+        [
+          "checkclosemth#14"
+        ],
+        [
+          "checkclosemth#4"
+        ]
+      ],
+      "ambiguousCurrentEndpointAddresses": false
+    },
+    {
+      "fourthOracleRecord": "FLOWS|REACHING_DEF[level] checktoclose#9 -> checktoclose#4",
+      "signature": [
+        "FLOWS",
+        "level",
+        "4a6071446f3bc52d9df6d6e08f24f2536e0bbfd11a7fb7645e2865c115f24e6a",
+        "37ec85cb83187d61e83ca468d5b167647e500369cb879ed10712a2e3b83e09ff"
+      ],
+      "baselineSameFingerprint": true,
+      "oracleSemanticMultiplicity": 1,
+      "currentSemanticMultiplicity": 1,
+      "currentEquivalentRecords": [
+        {
+          "record": "FLOWS|REACHING_DEF[level] checktoclose#9 -> checktoclose#4",
+          "multiplicity": 1
+        }
+      ],
+      "currentEndpointAddresses": [
+        [
+          "checktoclose#9"
+        ],
+        [
+          "checktoclose#4"
+        ]
+      ],
+      "ambiguousCurrentEndpointAddresses": false
+    },
+    {
+      "fourthOracleRecord": "FLOWS|REACHING_DEF[reg] freereg#8 -> freereg#4",
+      "signature": [
+        "FLOWS",
+        "reg",
+        "4a3f9d8a2dc925249ce46c5cd3ebf31b07cc7709ea0670a29b7e2f88708cff02",
+        "e4ead874f1f4124cf6549b169f34f5f80fcf4eb501c344d0227bbc3a37bc749d"
+      ],
+      "baselineSameFingerprint": true,
+      "oracleSemanticMultiplicity": 1,
+      "currentSemanticMultiplicity": 1,
+      "currentEquivalentRecords": [
+        {
+          "record": "FLOWS|REACHING_DEF[reg] freereg#8 -> freereg#4",
+          "multiplicity": 1
+        }
+      ],
+      "currentEndpointAddresses": [
+        [
+          "freereg#8"
+        ],
+        [
+          "freereg#4"
+        ]
+      ],
+      "ambiguousCurrentEndpointAddresses": false
+    },
+    {
+      "fourthOracleRecord": "FLOWS|REACHING_DEF[var->k] singlevar#25 -> singlevar#4",
+      "signature": [
+        "FLOWS",
+        "var->k",
+        "2f584e3f8881e750d7c544a938889e53e53e1129845c21c9666a0c837e92ee44",
+        "4ccb7d05138d84900e3d442683167033003dfd7c3d67b522b5185db242cc6c47"
+      ],
+      "baselineSameFingerprint": true,
+      "oracleSemanticMultiplicity": 1,
+      "currentSemanticMultiplicity": 1,
+      "currentEquivalentRecords": [
+        {
+          "record": "FLOWS|REACHING_DEF[var->k] singlevar#25 -> singlevar#4",
+          "multiplicity": 1
+        }
+      ],
+      "currentEndpointAddresses": [
+        [
+          "singlevar#25"
+        ],
+        [
+          "singlevar#4"
+        ]
+      ],
+      "ambiguousCurrentEndpointAddresses": false
+    }
+  ],
+  "priorThreeRestoredStubs": [
+    {
+      "fullName": "liolib.c:L_MAXLENNUM:int(0)",
+      "baselineExact": false,
+      "currentExact": true,
+      "calls": {
+        "oracle": [
+          {
+            "raw": "EDGES|CALL RN.<clinit>:RN()#4 -> liolib.c:L_MAXLENNUM:int(0)#0",
+            "sourceMethod": "RN.<clinit>:RN()",
+            "sourceRecord": "CALL NAME=L_MAXLENNUM CODE=L_MAXLENNUM TYPE_FULL_NAME=int METHOD_FULL_NAME=liolib.c:L_MAXLENNUM:int(0) SIGNATURE=int(0) ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=INLINED",
+            "sourceParentRecord": "CALL NAME=<operator>.addition CODE=L_MAXLENNUM + 1 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH"
+          }
+        ],
+        "baseline": [],
+        "current": [
+          {
+            "raw": "EDGES|CALL RN.<clinit>:RN()#4 -> liolib.c:L_MAXLENNUM:int(0)#0",
+            "sourceMethod": "RN.<clinit>:RN()",
+            "sourceRecord": "CALL NAME=L_MAXLENNUM CODE=L_MAXLENNUM TYPE_FULL_NAME=int METHOD_FULL_NAME=liolib.c:L_MAXLENNUM:int(0) SIGNATURE=int(0) ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=INLINED",
+            "sourceParentRecord": "CALL NAME=<operator>.addition CODE=L_MAXLENNUM + 1 TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 ARGUMENT_INDEX=1 DISPATCH_TYPE=STATIC_DISPATCH"
+          }
+        ]
+      },
+      "oracleCallerFingerprintsRetained": true,
+      "candidateAdditionalCallerFingerprintCount": 0
+    },
+    {
+      "fullName": "lua_tointeger",
+      "baselineExact": false,
+      "currentExact": true,
+      "calls": {
+        "oracle": [
+          {
+            "raw": "EDGES|CALL g_write#55 -> lua_tointeger#0",
+            "sourceMethod": "g_write",
+            "sourceRecord": "CALL NAME=lua_tointeger CODE=lua_tointeger(L, arg) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=lua_tointeger ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH",
+            "sourceParentRecord": "CALL NAME=<operator>.cast CODE=(LUAI_UACINT)lua_tointeger(L, arg) TYPE_FULL_NAME=LUAI_UACINT METHOD_FULL_NAME=<operator>.cast ORDER=3 ARGUMENT_INDEX=3 DISPATCH_TYPE=STATIC_DISPATCH"
+          }
+        ],
+        "baseline": [],
+        "current": [
+          {
+            "raw": "EDGES|CALL g_write#55 -> lua_tointeger#0",
+            "sourceMethod": "g_write",
+            "sourceRecord": "CALL NAME=lua_tointeger CODE=lua_tointeger(L, arg) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=lua_tointeger ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH",
+            "sourceParentRecord": "CALL NAME=<operator>.cast CODE=(LUAI_UACINT)lua_tointeger(L, arg) TYPE_FULL_NAME=LUAI_UACINT METHOD_FULL_NAME=<operator>.cast ORDER=3 ARGUMENT_INDEX=3 DISPATCH_TYPE=STATIC_DISPATCH"
+          }
+        ]
+      },
+      "oracleCallerFingerprintsRetained": true,
+      "candidateAdditionalCallerFingerprintCount": 0
+    },
+    {
+      "fullName": "lua_tonumber",
+      "baselineExact": false,
+      "currentExact": true,
+      "calls": {
+        "oracle": [
+          {
+            "raw": "EDGES|CALL g_write#63 -> lua_tonumber#0",
+            "sourceMethod": "g_write",
+            "sourceRecord": "CALL NAME=lua_tonumber CODE=lua_tonumber(L, arg) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=lua_tonumber ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH",
+            "sourceParentRecord": "CALL NAME=<operator>.cast CODE=(LUAI_UACNUMBER)lua_tonumber(L, arg) TYPE_FULL_NAME=LUAI_UACNUMBER METHOD_FULL_NAME=<operator>.cast ORDER=3 ARGUMENT_INDEX=3 DISPATCH_TYPE=STATIC_DISPATCH"
+          }
+        ],
+        "baseline": [],
+        "current": [
+          {
+            "raw": "EDGES|CALL g_write#63 -> lua_tonumber#0",
+            "sourceMethod": "g_write",
+            "sourceRecord": "CALL NAME=lua_tonumber CODE=lua_tonumber(L, arg) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=lua_tonumber ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=STATIC_DISPATCH",
+            "sourceParentRecord": "CALL NAME=<operator>.cast CODE=(LUAI_UACNUMBER)lua_tonumber(L, arg) TYPE_FULL_NAME=LUAI_UACNUMBER METHOD_FULL_NAME=<operator>.cast ORDER=3 ARGUMENT_INDEX=3 DISPATCH_TYPE=STATIC_DISPATCH"
+          }
+        ]
+      },
+      "oracleCallerFingerprintsRetained": true,
+      "candidateAdditionalCallerFingerprintCount": 0
+    }
+  ],
+  "completeProjectionExact": false,
+  "artifacts": {
+    "intarith.ast": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/fifth-project-review/tokenizer-priority/intarith.ast",
+      "sha256": "63d93b5bfd4d275021212b6086e3a8252515f4cd87880231a3d1ddd1b3b4c98a",
+      "bytes": 26468
+    },
+    "luaV_shiftl.ast": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/fifth-project-review/tokenizer-priority/luaV_shiftl.ast",
+      "sha256": "7a460f589fa3c8cf126e5b44b60521f76c338fdcabcd86536dbe24665842d57f",
+      "bytes": 9715
+    }
+  },
+  "limits": [
+    "Immediate-parent fingerprints alone can alias source occurrences; the45 targeted regressions add nearest-RETURN identity and retain complete ancestor paths with no candidate ambiguity.",
+    "The remaining raw losses are address coincidences or facts preserved at shifted addresses under this selected fingerprint projection; this is not a claim about all omitted or altered Joern metadata.",
+    "Source was read only; no builds, fresh oracle runs, integration edits or manifest changes were performed by this review."
+  ]
+}

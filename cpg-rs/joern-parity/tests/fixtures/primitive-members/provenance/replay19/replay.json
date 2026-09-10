@@ -1,0 +1,1353 @@
+{
+  "status": "COMPLETE_FROZEN_CANDIDATE_REPLAY",
+  "frozenBindings": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/frozen-v1/bindings.json",
+  "frozenBindingsSha256": "9a036a96c94a34c9bffc85ba101b5db0ea0af40f581f6621cc8c40851cfb98b9",
+  "binarySha256": "fe5dd8c3036ca44e1112dadc08a748f46165e782894c77c38165ca8c4565cf2c",
+  "baselineReceipt": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/primitive-member-baseline-v1/runs/accepted-tenth-1/run.json",
+  "baselineReceiptSha256": "584ca9ae5fa97f60600fc31c2491c64e88831f5369346cc0df395d7e55015efd",
+  "copyReceiptSha256": "4b1ea21785a601abc7ff4f37e7446283f4eff02897ebe21a5fb4bc6b455331fe",
+  "helperSha256": "6c2a7e1a51734347b66141639dedbe3b7c9cd873aef3643ca8cdae00733535a1",
+  "sourceInputsUnchanged": true,
+  "cases": [
+    {
+      "case": "base_qualified_pointer",
+      "retainedAnchor": false,
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/frozen-v1/joern-parity",
+        "--production",
+        "main.c"
+      ],
+      "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/base_qualified_pointer/input",
+      "seconds": 0.24410691700177267,
+      "exitCode": 0,
+      "timeout": false,
+      "error": null,
+      "beforeExact": false,
+      "candidateExact": true,
+      "beforeCandidateIdentical": false,
+      "inputHashes": {
+        "main.c": "683671d135a3d3d8385a92bba5f8fc1b87e1650c0b698282ee8416a11d110e0d"
+      },
+      "counts": {
+        "includingSeparators": {
+          "expected": 119,
+          "before": 119,
+          "candidate": 119,
+          "matchingBefore": 112,
+          "matchingCandidate": 119,
+          "gained": 7,
+          "lost": 0,
+          "lostRecords": {},
+          "gainedRecords": {
+            "    MEMBER NAME=value CODE=*value TYPE_FULL_NAME=shortunsigned* ORDER=1": 1,
+            "NODES|TYPE_DECL NAME=shortunsigned* FULL_NAME=shortunsigned* CODE=shortunsigned* IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>": 1,
+            "NODES|TYPE NAME=shortunsigned* FULL_NAME=shortunsigned* TYPE_DECL_FULL_NAME=shortunsigned*": 1,
+            "EDGES|CONTAINS F:<includes> -> D:shortunsigned*": 1,
+            "EDGES|EVAL_TYPE main.c:<global>#2 -> T:shortunsigned*": 1,
+            "EDGES|REF T:shortunsigned* -> D:shortunsigned*": 1,
+            "EDGES|SOURCE_FILE D:shortunsigned* -> F:<includes>": 1
+          }
+        },
+        "nonempty": {
+          "expected": 115,
+          "before": 115,
+          "candidate": 115,
+          "matchingBefore": 108,
+          "matchingCandidate": 115,
+          "gained": 7,
+          "lost": 0,
+          "lostRecords": {},
+          "gainedRecords": {
+            "    MEMBER NAME=value CODE=*value TYPE_FULL_NAME=shortunsigned* ORDER=1": 1,
+            "NODES|TYPE_DECL NAME=shortunsigned* FULL_NAME=shortunsigned* CODE=shortunsigned* IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>": 1,
+            "NODES|TYPE NAME=shortunsigned* FULL_NAME=shortunsigned* TYPE_DECL_FULL_NAME=shortunsigned*": 1,
+            "EDGES|CONTAINS F:<includes> -> D:shortunsigned*": 1,
+            "EDGES|EVAL_TYPE main.c:<global>#2 -> T:shortunsigned*": 1,
+            "EDGES|REF T:shortunsigned* -> D:shortunsigned*": 1,
+            "EDGES|SOURCE_FILE D:shortunsigned* -> F:<includes>": 1
+          }
+        }
+      },
+      "files": {
+        "actual.txt": "53b149c0c3b91fc21969901c294099353666c6e0842f621bf49d596a9017cb5c",
+        "before-candidate.diff": "22105b295d6050b1f32115e372b25257b2f5172ed1c220fbd09dbef41ec45acb",
+        "before.txt": "fbaa5726235b4fef3793f017331847ece1bd623819660858f4a7405b5e55d00b",
+        "expected-before.diff": "2a06359e4cd2008f7dbe3e1c4c9053b3bff2eb458db2c6e2ef236379686b51f6",
+        "expected-candidate.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "expected.txt": "53b149c0c3b91fc21969901c294099353666c6e0842f621bf49d596a9017cb5c",
+        "input/main.c": "683671d135a3d3d8385a92bba5f8fc1b87e1650c0b698282ee8416a11d110e0d",
+        "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout.txt": "53b149c0c3b91fc21969901c294099353666c6e0842f621bf49d596a9017cb5c"
+      }
+    },
+    {
+      "case": "const_unsigned_short",
+      "retainedAnchor": false,
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/frozen-v1/joern-parity",
+        "--production",
+        "main.c"
+      ],
+      "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/const_unsigned_short/input",
+      "seconds": 0.007237165991682559,
+      "exitCode": 0,
+      "timeout": false,
+      "error": null,
+      "beforeExact": false,
+      "candidateExact": true,
+      "beforeCandidateIdentical": false,
+      "inputHashes": {
+        "main.c": "57e3d6a3da034eaeda3da20d1ba518bac47a740b3aa62c4f5bf16def20bbc385"
+      },
+      "counts": {
+        "includingSeparators": {
+          "expected": 119,
+          "before": 119,
+          "candidate": 119,
+          "matchingBefore": 112,
+          "matchingCandidate": 119,
+          "gained": 7,
+          "lost": 0,
+          "lostRecords": {},
+          "gainedRecords": {
+            "    MEMBER NAME=value CODE=value TYPE_FULL_NAME=shortunsigned ORDER=1": 1,
+            "NODES|TYPE_DECL NAME=shortunsigned FULL_NAME=shortunsigned CODE=shortunsigned IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>": 1,
+            "NODES|TYPE NAME=shortunsigned FULL_NAME=shortunsigned TYPE_DECL_FULL_NAME=shortunsigned": 1,
+            "EDGES|CONTAINS F:<includes> -> D:shortunsigned": 1,
+            "EDGES|EVAL_TYPE main.c:<global>#2 -> T:shortunsigned": 1,
+            "EDGES|REF T:shortunsigned -> D:shortunsigned": 1,
+            "EDGES|SOURCE_FILE D:shortunsigned -> F:<includes>": 1
+          }
+        },
+        "nonempty": {
+          "expected": 115,
+          "before": 115,
+          "candidate": 115,
+          "matchingBefore": 108,
+          "matchingCandidate": 115,
+          "gained": 7,
+          "lost": 0,
+          "lostRecords": {},
+          "gainedRecords": {
+            "    MEMBER NAME=value CODE=value TYPE_FULL_NAME=shortunsigned ORDER=1": 1,
+            "NODES|TYPE_DECL NAME=shortunsigned FULL_NAME=shortunsigned CODE=shortunsigned IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>": 1,
+            "NODES|TYPE NAME=shortunsigned FULL_NAME=shortunsigned TYPE_DECL_FULL_NAME=shortunsigned": 1,
+            "EDGES|CONTAINS F:<includes> -> D:shortunsigned": 1,
+            "EDGES|EVAL_TYPE main.c:<global>#2 -> T:shortunsigned": 1,
+            "EDGES|REF T:shortunsigned -> D:shortunsigned": 1,
+            "EDGES|SOURCE_FILE D:shortunsigned -> F:<includes>": 1
+          }
+        }
+      },
+      "files": {
+        "actual.txt": "7ffc36c68f07466a0ab2f31de41b75a9f73e7e130ddf547cbc96d1b4fa774284",
+        "before-candidate.diff": "d1c554ac9a8a893f7cb08d249ea1832a50ebcc92dac4786ec03d989a8833f102",
+        "before.txt": "41381915fe3da9041f17b5b93d2cb9b2ebe5df5372f2f8807d2c557a38034fbf",
+        "expected-before.diff": "0bdcbe28ec03425b5bb28c431eaff82ebdad0f4bc84f589f25e35fbcc1983445",
+        "expected-candidate.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "expected.txt": "7ffc36c68f07466a0ab2f31de41b75a9f73e7e130ddf547cbc96d1b4fa774284",
+        "input/main.c": "57e3d6a3da034eaeda3da20d1ba518bac47a740b3aa62c4f5bf16def20bbc385",
+        "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout.txt": "7ffc36c68f07466a0ab2f31de41b75a9f73e7e130ddf547cbc96d1b4fa774284"
+      }
+    },
+    {
+      "case": "mixed_declarator_shapes",
+      "retainedAnchor": false,
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/frozen-v1/joern-parity",
+        "--production",
+        "main.c"
+      ],
+      "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/mixed_declarator_shapes/input",
+      "seconds": 0.006759334006346762,
+      "exitCode": 0,
+      "timeout": false,
+      "error": null,
+      "beforeExact": false,
+      "candidateExact": true,
+      "beforeCandidateIdentical": false,
+      "inputHashes": {
+        "main.c": "78a9ab60868e0c24ba739ac8c1ed1cffb97913d16e6c14a8da5e985a0976dfe7"
+      },
+      "counts": {
+        "includingSeparators": {
+          "expected": 180,
+          "before": 180,
+          "candidate": 180,
+          "matchingBefore": 159,
+          "matchingCandidate": 180,
+          "gained": 21,
+          "lost": 0,
+          "lostRecords": {},
+          "gainedRecords": {
+            "    MEMBER NAME=scalar CODE=scalar TYPE_FULL_NAME=shortunsigned ORDER=1": 1,
+            "    MEMBER NAME=pointer CODE=*pointer TYPE_FULL_NAME=shortunsigned* ORDER=2": 1,
+            "    MEMBER NAME=table CODE=table[3] TYPE_FULL_NAME=shortunsigned[3] ORDER=3": 1,
+            "NODES|TYPE_DECL NAME=shortunsigned FULL_NAME=shortunsigned CODE=shortunsigned IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>": 1,
+            "NODES|TYPE_DECL NAME=shortunsigned* FULL_NAME=shortunsigned* CODE=shortunsigned* IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>": 1,
+            "NODES|TYPE_DECL NAME=shortunsigned[3] FULL_NAME=shortunsigned[3] CODE=shortunsigned[3] IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>": 1,
+            "NODES|TYPE NAME=shortunsigned FULL_NAME=shortunsigned TYPE_DECL_FULL_NAME=shortunsigned": 1,
+            "NODES|TYPE NAME=shortunsigned* FULL_NAME=shortunsigned* TYPE_DECL_FULL_NAME=shortunsigned*": 1,
+            "NODES|TYPE NAME=shortunsigned[3] FULL_NAME=shortunsigned[3] TYPE_DECL_FULL_NAME=shortunsigned[3]": 1,
+            "EDGES|CONTAINS F:<includes> -> D:shortunsigned": 1,
+            "EDGES|CONTAINS F:<includes> -> D:shortunsigned*": 1,
+            "EDGES|CONTAINS F:<includes> -> D:shortunsigned[3]": 1,
+            "EDGES|EVAL_TYPE main.c:<global>#2 -> T:shortunsigned": 1,
+            "EDGES|EVAL_TYPE main.c:<global>#3 -> T:shortunsigned*": 1,
+            "EDGES|EVAL_TYPE main.c:<global>#4 -> T:shortunsigned[3]": 1,
+            "EDGES|REF T:shortunsigned -> D:shortunsigned": 1,
+            "EDGES|REF T:shortunsigned* -> D:shortunsigned*": 1,
+            "EDGES|REF T:shortunsigned[3] -> D:shortunsigned[3]": 1,
+            "EDGES|SOURCE_FILE D:shortunsigned -> F:<includes>": 1,
+            "EDGES|SOURCE_FILE D:shortunsigned* -> F:<includes>": 1,
+            "EDGES|SOURCE_FILE D:shortunsigned[3] -> F:<includes>": 1
+          }
+        },
+        "nonempty": {
+          "expected": 174,
+          "before": 174,
+          "candidate": 174,
+          "matchingBefore": 153,
+          "matchingCandidate": 174,
+          "gained": 21,
+          "lost": 0,
+          "lostRecords": {},
+          "gainedRecords": {
+            "    MEMBER NAME=scalar CODE=scalar TYPE_FULL_NAME=shortunsigned ORDER=1": 1,
+            "    MEMBER NAME=pointer CODE=*pointer TYPE_FULL_NAME=shortunsigned* ORDER=2": 1,
+            "    MEMBER NAME=table CODE=table[3] TYPE_FULL_NAME=shortunsigned[3] ORDER=3": 1,
+            "NODES|TYPE_DECL NAME=shortunsigned FULL_NAME=shortunsigned CODE=shortunsigned IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>": 1,
+            "NODES|TYPE_DECL NAME=shortunsigned* FULL_NAME=shortunsigned* CODE=shortunsigned* IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>": 1,
+            "NODES|TYPE_DECL NAME=shortunsigned[3] FULL_NAME=shortunsigned[3] CODE=shortunsigned[3] IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>": 1,
+            "NODES|TYPE NAME=shortunsigned FULL_NAME=shortunsigned TYPE_DECL_FULL_NAME=shortunsigned": 1,
+            "NODES|TYPE NAME=shortunsigned* FULL_NAME=shortunsigned* TYPE_DECL_FULL_NAME=shortunsigned*": 1,
+            "NODES|TYPE NAME=shortunsigned[3] FULL_NAME=shortunsigned[3] TYPE_DECL_FULL_NAME=shortunsigned[3]": 1,
+            "EDGES|CONTAINS F:<includes> -> D:shortunsigned": 1,
+            "EDGES|CONTAINS F:<includes> -> D:shortunsigned*": 1,
+            "EDGES|CONTAINS F:<includes> -> D:shortunsigned[3]": 1,
+            "EDGES|EVAL_TYPE main.c:<global>#2 -> T:shortunsigned": 1,
+            "EDGES|EVAL_TYPE main.c:<global>#3 -> T:shortunsigned*": 1,
+            "EDGES|EVAL_TYPE main.c:<global>#4 -> T:shortunsigned[3]": 1,
+            "EDGES|REF T:shortunsigned -> D:shortunsigned": 1,
+            "EDGES|REF T:shortunsigned* -> D:shortunsigned*": 1,
+            "EDGES|REF T:shortunsigned[3] -> D:shortunsigned[3]": 1,
+            "EDGES|SOURCE_FILE D:shortunsigned -> F:<includes>": 1,
+            "EDGES|SOURCE_FILE D:shortunsigned* -> F:<includes>": 1,
+            "EDGES|SOURCE_FILE D:shortunsigned[3] -> F:<includes>": 1
+          }
+        }
+      },
+      "files": {
+        "actual.txt": "1d3402f00cd066767d6a87552aa217b8292a66629c72309165bafaa1a8d4ff0d",
+        "before-candidate.diff": "0f26f619cf0f0315f459dc92dd28f194a2ecc37189cf219239243bf2b72b40df",
+        "before.txt": "11aaaca3111248fd6db26a5a93cef887572c7667f643269e8d8004011d24ba44",
+        "expected-before.diff": "2e3347fbc11f8ea97a0bfe5eeea127ece5c6b2a89d978fd8705b02a1a2865821",
+        "expected-candidate.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "expected.txt": "1d3402f00cd066767d6a87552aa217b8292a66629c72309165bafaa1a8d4ff0d",
+        "input/main.c": "78a9ab60868e0c24ba739ac8c1ed1cffb97913d16e6c14a8da5e985a0976dfe7",
+        "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout.txt": "1d3402f00cd066767d6a87552aa217b8292a66629c72309165bafaa1a8d4ff0d"
+      }
+    },
+    {
+      "case": "nonprimitive_scalar_control",
+      "retainedAnchor": false,
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/frozen-v1/joern-parity",
+        "--production",
+        "main.c"
+      ],
+      "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/nonprimitive_scalar_control/input",
+      "seconds": 0.005865499988431111,
+      "exitCode": 0,
+      "timeout": false,
+      "error": null,
+      "beforeExact": false,
+      "candidateExact": false,
+      "beforeCandidateIdentical": true,
+      "inputHashes": {
+        "main.c": "30f7610f6251619e111dccd66822d2b620b131a00520a94432f29a23737cbcee"
+      },
+      "counts": {
+        "includingSeparators": {
+          "expected": 182,
+          "before": 162,
+          "candidate": 162,
+          "matchingBefore": 162,
+          "matchingCandidate": 162,
+          "gained": 0,
+          "lost": 0,
+          "lostRecords": {},
+          "gainedRecords": {}
+        },
+        "nonempty": {
+          "expected": 178,
+          "before": 158,
+          "candidate": 158,
+          "matchingBefore": 158,
+          "matchingCandidate": 158,
+          "gained": 0,
+          "lost": 0,
+          "lostRecords": {},
+          "gainedRecords": {}
+        }
+      },
+      "files": {
+        "actual.txt": "2193e03adf6e49107881f79b1006f5787adfa5d2084cd57bf9dc59120045a3bd",
+        "before-candidate.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "before.txt": "2193e03adf6e49107881f79b1006f5787adfa5d2084cd57bf9dc59120045a3bd",
+        "expected-before.diff": "340cce6526020b965801a1afc19ab81cdd676c4d04ac00985f4a5f9dad76b0a4",
+        "expected-candidate.diff": "9a74faa46a83cbddef0a1445a190629e6cebea7918994ea1f37cd836d65e303d",
+        "expected.txt": "d01b88fb2012eb6671de933e8be87c445c1cc7d951aeee509276ddd6373dd34c",
+        "input/main.c": "30f7610f6251619e111dccd66822d2b620b131a00520a94432f29a23737cbcee",
+        "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout.txt": "2193e03adf6e49107881f79b1006f5787adfa5d2084cd57bf9dc59120045a3bd"
+      }
+    },
+    {
+      "case": "ordinary_numeric_control",
+      "retainedAnchor": false,
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/frozen-v1/joern-parity",
+        "--production",
+        "main.c"
+      ],
+      "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/ordinary_numeric_control/input",
+      "seconds": 0.004978707991540432,
+      "exitCode": 0,
+      "timeout": false,
+      "error": null,
+      "beforeExact": true,
+      "candidateExact": true,
+      "beforeCandidateIdentical": true,
+      "inputHashes": {
+        "main.c": "ca63fcf93080419061d59acd5f7cefe2818a399a29190125a011d7397e52caa6"
+      },
+      "counts": {
+        "includingSeparators": {
+          "expected": 121,
+          "before": 121,
+          "candidate": 121,
+          "matchingBefore": 121,
+          "matchingCandidate": 121,
+          "gained": 0,
+          "lost": 0,
+          "lostRecords": {},
+          "gainedRecords": {}
+        },
+        "nonempty": {
+          "expected": 117,
+          "before": 117,
+          "candidate": 117,
+          "matchingBefore": 117,
+          "matchingCandidate": 117,
+          "gained": 0,
+          "lost": 0,
+          "lostRecords": {},
+          "gainedRecords": {}
+        }
+      },
+      "files": {
+        "actual.txt": "4528adacb40f21e1aa33eb4195cfb87470e8f5a3a288a1678486d1800c63aef1",
+        "before-candidate.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "before.txt": "4528adacb40f21e1aa33eb4195cfb87470e8f5a3a288a1678486d1800c63aef1",
+        "expected-before.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "expected-candidate.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "expected.txt": "4528adacb40f21e1aa33eb4195cfb87470e8f5a3a288a1678486d1800c63aef1",
+        "input/main.c": "ca63fcf93080419061d59acd5f7cefe2818a399a29190125a011d7397e52caa6",
+        "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout.txt": "4528adacb40f21e1aa33eb4195cfb87470e8f5a3a288a1678486d1800c63aef1"
+      }
+    },
+    {
+      "case": "pointer_qualified_pointer",
+      "retainedAnchor": false,
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/frozen-v1/joern-parity",
+        "--production",
+        "main.c"
+      ],
+      "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/pointer_qualified_pointer/input",
+      "seconds": 0.005057500005932525,
+      "exitCode": 0,
+      "timeout": false,
+      "error": null,
+      "beforeExact": false,
+      "candidateExact": true,
+      "beforeCandidateIdentical": false,
+      "inputHashes": {
+        "main.c": "ce703562d1d768702fd9d0f4177d315a354346fd5924b53feca86633ab49dd29"
+      },
+      "counts": {
+        "includingSeparators": {
+          "expected": 119,
+          "before": 119,
+          "candidate": 119,
+          "matchingBefore": 112,
+          "matchingCandidate": 119,
+          "gained": 7,
+          "lost": 0,
+          "lostRecords": {},
+          "gainedRecords": {
+            "    MEMBER NAME=value CODE=* const value TYPE_FULL_NAME=shortunsigned* ORDER=1": 1,
+            "NODES|TYPE_DECL NAME=shortunsigned* FULL_NAME=shortunsigned* CODE=shortunsigned* IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>": 1,
+            "NODES|TYPE NAME=shortunsigned* FULL_NAME=shortunsigned* TYPE_DECL_FULL_NAME=shortunsigned*": 1,
+            "EDGES|CONTAINS F:<includes> -> D:shortunsigned*": 1,
+            "EDGES|EVAL_TYPE main.c:<global>#2 -> T:shortunsigned*": 1,
+            "EDGES|REF T:shortunsigned* -> D:shortunsigned*": 1,
+            "EDGES|SOURCE_FILE D:shortunsigned* -> F:<includes>": 1
+          }
+        },
+        "nonempty": {
+          "expected": 115,
+          "before": 115,
+          "candidate": 115,
+          "matchingBefore": 108,
+          "matchingCandidate": 115,
+          "gained": 7,
+          "lost": 0,
+          "lostRecords": {},
+          "gainedRecords": {
+            "    MEMBER NAME=value CODE=* const value TYPE_FULL_NAME=shortunsigned* ORDER=1": 1,
+            "NODES|TYPE_DECL NAME=shortunsigned* FULL_NAME=shortunsigned* CODE=shortunsigned* IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>": 1,
+            "NODES|TYPE NAME=shortunsigned* FULL_NAME=shortunsigned* TYPE_DECL_FULL_NAME=shortunsigned*": 1,
+            "EDGES|CONTAINS F:<includes> -> D:shortunsigned*": 1,
+            "EDGES|EVAL_TYPE main.c:<global>#2 -> T:shortunsigned*": 1,
+            "EDGES|REF T:shortunsigned* -> D:shortunsigned*": 1,
+            "EDGES|SOURCE_FILE D:shortunsigned* -> F:<includes>": 1
+          }
+        }
+      },
+      "files": {
+        "actual.txt": "1efb5791f73bc51f3d36709eb8f61cd5e9850b3b01fe4687ff8a64f26e01b625",
+        "before-candidate.diff": "65c594f67014b3ff12ac721d66b0a43baf5f928b46bb898f3f97734e6a3b344c",
+        "before.txt": "103bb7bd2403c9dfb79594295cd790c013c2d71366d813f9e4c606fbfe500fb6",
+        "expected-before.diff": "e91c4d66a9b8441214beb351b5affa5edf2a46c51aabb34388188f3b0bd4e3f8",
+        "expected-candidate.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "expected.txt": "1efb5791f73bc51f3d36709eb8f61cd5e9850b3b01fe4687ff8a64f26e01b625",
+        "input/main.c": "ce703562d1d768702fd9d0f4177d315a354346fd5924b53feca86633ab49dd29",
+        "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout.txt": "1efb5791f73bc51f3d36709eb8f61cd5e9850b3b01fe4687ff8a64f26e01b625"
+      }
+    },
+    {
+      "case": "short_int_unsigned",
+      "retainedAnchor": false,
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/frozen-v1/joern-parity",
+        "--production",
+        "main.c"
+      ],
+      "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/short_int_unsigned/input",
+      "seconds": 0.004850500001339242,
+      "exitCode": 0,
+      "timeout": false,
+      "error": null,
+      "beforeExact": false,
+      "candidateExact": true,
+      "beforeCandidateIdentical": false,
+      "inputHashes": {
+        "main.c": "0c049f5c6fd7eb24665d96d4ff592154b323a755cc58e92d5fe0a499dd596648"
+      },
+      "counts": {
+        "includingSeparators": {
+          "expected": 119,
+          "before": 119,
+          "candidate": 119,
+          "matchingBefore": 112,
+          "matchingCandidate": 119,
+          "gained": 7,
+          "lost": 0,
+          "lostRecords": {},
+          "gainedRecords": {
+            "    MEMBER NAME=value CODE=value TYPE_FULL_NAME=short unsigned int ORDER=1": 1,
+            "NODES|TYPE_DECL NAME=short unsigned int FULL_NAME=short unsigned int CODE=short unsigned int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>": 1,
+            "NODES|TYPE NAME=short unsigned int FULL_NAME=short unsigned int TYPE_DECL_FULL_NAME=short unsigned int": 1,
+            "EDGES|CONTAINS F:<includes> -> D:short unsigned int": 1,
+            "EDGES|EVAL_TYPE main.c:<global>#2 -> T:short unsigned int": 1,
+            "EDGES|REF T:short unsigned int -> D:short unsigned int": 1,
+            "EDGES|SOURCE_FILE D:short unsigned int -> F:<includes>": 1
+          }
+        },
+        "nonempty": {
+          "expected": 115,
+          "before": 115,
+          "candidate": 115,
+          "matchingBefore": 108,
+          "matchingCandidate": 115,
+          "gained": 7,
+          "lost": 0,
+          "lostRecords": {},
+          "gainedRecords": {
+            "    MEMBER NAME=value CODE=value TYPE_FULL_NAME=short unsigned int ORDER=1": 1,
+            "NODES|TYPE_DECL NAME=short unsigned int FULL_NAME=short unsigned int CODE=short unsigned int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>": 1,
+            "NODES|TYPE NAME=short unsigned int FULL_NAME=short unsigned int TYPE_DECL_FULL_NAME=short unsigned int": 1,
+            "EDGES|CONTAINS F:<includes> -> D:short unsigned int": 1,
+            "EDGES|EVAL_TYPE main.c:<global>#2 -> T:short unsigned int": 1,
+            "EDGES|REF T:short unsigned int -> D:short unsigned int": 1,
+            "EDGES|SOURCE_FILE D:short unsigned int -> F:<includes>": 1
+          }
+        }
+      },
+      "files": {
+        "actual.txt": "92cfd06fee6b3bcb4a94e9eb9f76234322feb6f521fafbbcd7ab928d2d4b92e0",
+        "before-candidate.diff": "4ee1ee5c48ee946a92810aed815c8f6132d6dfaeb6a9735686311fe008f83667",
+        "before.txt": "5614d64321db129964d63ba14ccae2c83a982e8c40dc1f526fc1384a3cd7cfa4",
+        "expected-before.diff": "141f0848a6309e5765ebf8f4949070459cd7bf4b4a1d51bd5061f1982e523f7c",
+        "expected-candidate.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "expected.txt": "92cfd06fee6b3bcb4a94e9eb9f76234322feb6f521fafbbcd7ab928d2d4b92e0",
+        "input/main.c": "0c049f5c6fd7eb24665d96d4ff592154b323a755cc58e92d5fe0a499dd596648",
+        "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout.txt": "92cfd06fee6b3bcb4a94e9eb9f76234322feb6f521fafbbcd7ab928d2d4b92e0"
+      }
+    },
+    {
+      "case": "short_unsigned",
+      "retainedAnchor": false,
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/frozen-v1/joern-parity",
+        "--production",
+        "main.c"
+      ],
+      "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/short_unsigned/input",
+      "seconds": 0.004579375003231689,
+      "exitCode": 0,
+      "timeout": false,
+      "error": null,
+      "beforeExact": false,
+      "candidateExact": true,
+      "beforeCandidateIdentical": false,
+      "inputHashes": {
+        "main.c": "5fb6e70b45823d56203bd1b7c9e35750e574fd671788cf67cad78b17bb7c10a2"
+      },
+      "counts": {
+        "includingSeparators": {
+          "expected": 119,
+          "before": 119,
+          "candidate": 119,
+          "matchingBefore": 112,
+          "matchingCandidate": 119,
+          "gained": 7,
+          "lost": 0,
+          "lostRecords": {},
+          "gainedRecords": {
+            "    MEMBER NAME=value CODE=value TYPE_FULL_NAME=shortunsigned ORDER=1": 1,
+            "NODES|TYPE_DECL NAME=shortunsigned FULL_NAME=shortunsigned CODE=shortunsigned IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>": 1,
+            "NODES|TYPE NAME=shortunsigned FULL_NAME=shortunsigned TYPE_DECL_FULL_NAME=shortunsigned": 1,
+            "EDGES|CONTAINS F:<includes> -> D:shortunsigned": 1,
+            "EDGES|EVAL_TYPE main.c:<global>#2 -> T:shortunsigned": 1,
+            "EDGES|REF T:shortunsigned -> D:shortunsigned": 1,
+            "EDGES|SOURCE_FILE D:shortunsigned -> F:<includes>": 1
+          }
+        },
+        "nonempty": {
+          "expected": 115,
+          "before": 115,
+          "candidate": 115,
+          "matchingBefore": 108,
+          "matchingCandidate": 115,
+          "gained": 7,
+          "lost": 0,
+          "lostRecords": {},
+          "gainedRecords": {
+            "    MEMBER NAME=value CODE=value TYPE_FULL_NAME=shortunsigned ORDER=1": 1,
+            "NODES|TYPE_DECL NAME=shortunsigned FULL_NAME=shortunsigned CODE=shortunsigned IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>": 1,
+            "NODES|TYPE NAME=shortunsigned FULL_NAME=shortunsigned TYPE_DECL_FULL_NAME=shortunsigned": 1,
+            "EDGES|CONTAINS F:<includes> -> D:shortunsigned": 1,
+            "EDGES|EVAL_TYPE main.c:<global>#2 -> T:shortunsigned": 1,
+            "EDGES|REF T:shortunsigned -> D:shortunsigned": 1,
+            "EDGES|SOURCE_FILE D:shortunsigned -> F:<includes>": 1
+          }
+        }
+      },
+      "files": {
+        "actual.txt": "33b6a8ed56ff9b624cfa8bf0410d5bd9372fcdbf1cb41fde895ef129446ba90f",
+        "before-candidate.diff": "93d7b31264aa731624e38e083287b6e6517e95bfdf8d7c699bdb7d117316a3f0",
+        "before.txt": "cde860a27c45998c02c762c349ddc9ff5a45706790dfeb486fdc892eb24aaa79",
+        "expected-before.diff": "1f4a262f5aeeb14436cbb593f69780257bd30d6088727ad90a23a8925439f9a3",
+        "expected-candidate.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "expected.txt": "33b6a8ed56ff9b624cfa8bf0410d5bd9372fcdbf1cb41fde895ef129446ba90f",
+        "input/main.c": "5fb6e70b45823d56203bd1b7c9e35750e574fd671788cf67cad78b17bb7c10a2",
+        "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout.txt": "33b6a8ed56ff9b624cfa8bf0410d5bd9372fcdbf1cb41fde895ef129446ba90f"
+      }
+    },
+    {
+      "case": "signed_char",
+      "retainedAnchor": false,
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/frozen-v1/joern-parity",
+        "--production",
+        "main.c"
+      ],
+      "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/signed_char/input",
+      "seconds": 0.004253457998856902,
+      "exitCode": 0,
+      "timeout": false,
+      "error": null,
+      "beforeExact": false,
+      "candidateExact": true,
+      "beforeCandidateIdentical": false,
+      "inputHashes": {
+        "main.c": "65222d14e53a108d3e98d3e3efa30aeda2b6df4dbed97b88e92698dee74d32c0"
+      },
+      "counts": {
+        "includingSeparators": {
+          "expected": 119,
+          "before": 119,
+          "candidate": 119,
+          "matchingBefore": 112,
+          "matchingCandidate": 119,
+          "gained": 7,
+          "lost": 0,
+          "lostRecords": {},
+          "gainedRecords": {
+            "    MEMBER NAME=value CODE=value TYPE_FULL_NAME=signedchar ORDER=1": 1,
+            "NODES|TYPE_DECL NAME=signedchar FULL_NAME=signedchar CODE=signedchar IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>": 1,
+            "NODES|TYPE NAME=signedchar FULL_NAME=signedchar TYPE_DECL_FULL_NAME=signedchar": 1,
+            "EDGES|CONTAINS F:<includes> -> D:signedchar": 1,
+            "EDGES|EVAL_TYPE main.c:<global>#2 -> T:signedchar": 1,
+            "EDGES|REF T:signedchar -> D:signedchar": 1,
+            "EDGES|SOURCE_FILE D:signedchar -> F:<includes>": 1
+          }
+        },
+        "nonempty": {
+          "expected": 115,
+          "before": 115,
+          "candidate": 115,
+          "matchingBefore": 108,
+          "matchingCandidate": 115,
+          "gained": 7,
+          "lost": 0,
+          "lostRecords": {},
+          "gainedRecords": {
+            "    MEMBER NAME=value CODE=value TYPE_FULL_NAME=signedchar ORDER=1": 1,
+            "NODES|TYPE_DECL NAME=signedchar FULL_NAME=signedchar CODE=signedchar IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>": 1,
+            "NODES|TYPE NAME=signedchar FULL_NAME=signedchar TYPE_DECL_FULL_NAME=signedchar": 1,
+            "EDGES|CONTAINS F:<includes> -> D:signedchar": 1,
+            "EDGES|EVAL_TYPE main.c:<global>#2 -> T:signedchar": 1,
+            "EDGES|REF T:signedchar -> D:signedchar": 1,
+            "EDGES|SOURCE_FILE D:signedchar -> F:<includes>": 1
+          }
+        }
+      },
+      "files": {
+        "actual.txt": "01213a09ac6d7a925b92e76fa1e9424a8c6e1d1f60201de3f0701c987ac794aa",
+        "before-candidate.diff": "b7bcb73961d7b87b7e60ade54a077ca1479e5ade65d2787d1b53f3b04f06fa0e",
+        "before.txt": "450ee58b73fd4e3bb70e91538302fd1c334b3e04a5b9262ddfb36e617c8cb5e8",
+        "expected-before.diff": "747d70895d6d0a12c099dd31dc0635a71c6061995eaa5456fd6ba83026454287",
+        "expected-candidate.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "expected.txt": "01213a09ac6d7a925b92e76fa1e9424a8c6e1d1f60201de3f0701c987ac794aa",
+        "input/main.c": "65222d14e53a108d3e98d3e3efa30aeda2b6df4dbed97b88e92698dee74d32c0",
+        "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout.txt": "01213a09ac6d7a925b92e76fa1e9424a8c6e1d1f60201de3f0701c987ac794aa"
+      }
+    },
+    {
+      "case": "signed_short",
+      "retainedAnchor": false,
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/frozen-v1/joern-parity",
+        "--production",
+        "main.c"
+      ],
+      "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/signed_short/input",
+      "seconds": 0.004169124993495643,
+      "exitCode": 0,
+      "timeout": false,
+      "error": null,
+      "beforeExact": false,
+      "candidateExact": true,
+      "beforeCandidateIdentical": false,
+      "inputHashes": {
+        "main.c": "da4b39f4cbd65496ecfcfe1a217413da07c5d35378b3a80ba7bc4fecec5dae79"
+      },
+      "counts": {
+        "includingSeparators": {
+          "expected": 119,
+          "before": 119,
+          "candidate": 119,
+          "matchingBefore": 112,
+          "matchingCandidate": 119,
+          "gained": 7,
+          "lost": 0,
+          "lostRecords": {},
+          "gainedRecords": {
+            "    MEMBER NAME=value CODE=value TYPE_FULL_NAME=shortsigned ORDER=1": 1,
+            "NODES|TYPE_DECL NAME=shortsigned FULL_NAME=shortsigned CODE=shortsigned IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>": 1,
+            "NODES|TYPE NAME=shortsigned FULL_NAME=shortsigned TYPE_DECL_FULL_NAME=shortsigned": 1,
+            "EDGES|CONTAINS F:<includes> -> D:shortsigned": 1,
+            "EDGES|EVAL_TYPE main.c:<global>#2 -> T:shortsigned": 1,
+            "EDGES|REF T:shortsigned -> D:shortsigned": 1,
+            "EDGES|SOURCE_FILE D:shortsigned -> F:<includes>": 1
+          }
+        },
+        "nonempty": {
+          "expected": 115,
+          "before": 115,
+          "candidate": 115,
+          "matchingBefore": 108,
+          "matchingCandidate": 115,
+          "gained": 7,
+          "lost": 0,
+          "lostRecords": {},
+          "gainedRecords": {
+            "    MEMBER NAME=value CODE=value TYPE_FULL_NAME=shortsigned ORDER=1": 1,
+            "NODES|TYPE_DECL NAME=shortsigned FULL_NAME=shortsigned CODE=shortsigned IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>": 1,
+            "NODES|TYPE NAME=shortsigned FULL_NAME=shortsigned TYPE_DECL_FULL_NAME=shortsigned": 1,
+            "EDGES|CONTAINS F:<includes> -> D:shortsigned": 1,
+            "EDGES|EVAL_TYPE main.c:<global>#2 -> T:shortsigned": 1,
+            "EDGES|REF T:shortsigned -> D:shortsigned": 1,
+            "EDGES|SOURCE_FILE D:shortsigned -> F:<includes>": 1
+          }
+        }
+      },
+      "files": {
+        "actual.txt": "d1a36fa051100458c9a44e8cafb4499d361950fe1e5f8ff5fd4f0b2e9aa22d39",
+        "before-candidate.diff": "232ff31cd89cd19238b90b184495a2429637df04781bfe5e108407d5cdedc529",
+        "before.txt": "6c8bd98f1ee2c25500259d0c66bc8e6d716075b2c4dc5de8eedb3a3100911cc0",
+        "expected-before.diff": "1dc404e294ea57cf997d55ad12837605e6ef38dc35a36cb0f6cdf53f88fc89fa",
+        "expected-candidate.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "expected.txt": "d1a36fa051100458c9a44e8cafb4499d361950fe1e5f8ff5fd4f0b2e9aa22d39",
+        "input/main.c": "da4b39f4cbd65496ecfcfe1a217413da07c5d35378b3a80ba7bc4fecec5dae79",
+        "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout.txt": "d1a36fa051100458c9a44e8cafb4499d361950fe1e5f8ff5fd4f0b2e9aa22d39"
+      }
+    },
+    {
+      "case": "tiny_fixedtables_include",
+      "retainedAnchor": true,
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/frozen-v1/joern-parity",
+        "--production",
+        "fixed.h",
+        "main.c"
+      ],
+      "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/tiny_fixedtables_include/input",
+      "seconds": 0.0081482500245329,
+      "exitCode": 0,
+      "timeout": false,
+      "error": null,
+      "beforeExact": false,
+      "candidateExact": true,
+      "beforeCandidateIdentical": false,
+      "inputHashes": {
+        "fixed.h": "3039380a12e6dba1fb44314f13292d1b5ec6744aa80eff5599566a29ea94ea86",
+        "main.c": "7203039d3be732abfb9abaad7177eaa77efa51d6e9fa58d58733346eb6cb4dda"
+      },
+      "counts": {
+        "includingSeparators": {
+          "expected": 735,
+          "before": 735,
+          "candidate": 735,
+          "matchingBefore": 728,
+          "matchingCandidate": 735,
+          "gained": 7,
+          "lost": 0,
+          "lostRecords": {},
+          "gainedRecords": {
+            "    MEMBER NAME=value CODE=value TYPE_FULL_NAME=shortunsigned ORDER=3": 1,
+            "NODES|TYPE_DECL NAME=shortunsigned FULL_NAME=shortunsigned CODE=shortunsigned IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>": 1,
+            "NODES|TYPE NAME=shortunsigned FULL_NAME=shortunsigned TYPE_DECL_FULL_NAME=shortunsigned": 1,
+            "EDGES|CONTAINS F:<includes> -> D:shortunsigned": 1,
+            "EDGES|EVAL_TYPE main.c:<global>#4 -> T:shortunsigned": 1,
+            "EDGES|REF T:shortunsigned -> D:shortunsigned": 1,
+            "EDGES|SOURCE_FILE D:shortunsigned -> F:<includes>": 1
+          }
+        },
+        "nonempty": {
+          "expected": 726,
+          "before": 726,
+          "candidate": 726,
+          "matchingBefore": 719,
+          "matchingCandidate": 726,
+          "gained": 7,
+          "lost": 0,
+          "lostRecords": {},
+          "gainedRecords": {
+            "    MEMBER NAME=value CODE=value TYPE_FULL_NAME=shortunsigned ORDER=3": 1,
+            "NODES|TYPE_DECL NAME=shortunsigned FULL_NAME=shortunsigned CODE=shortunsigned IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>": 1,
+            "NODES|TYPE NAME=shortunsigned FULL_NAME=shortunsigned TYPE_DECL_FULL_NAME=shortunsigned": 1,
+            "EDGES|CONTAINS F:<includes> -> D:shortunsigned": 1,
+            "EDGES|EVAL_TYPE main.c:<global>#4 -> T:shortunsigned": 1,
+            "EDGES|REF T:shortunsigned -> D:shortunsigned": 1,
+            "EDGES|SOURCE_FILE D:shortunsigned -> F:<includes>": 1
+          }
+        }
+      },
+      "files": {
+        "actual.txt": "fc4a1360d6f10152edb364c346a47ae73d2df2460fe5ef12da2d2e79cbb7dd3f",
+        "before-candidate.diff": "31cefe1b85711f8e971dfd58554f541441ce94585ba85562808263f8e6ed2fde",
+        "before.txt": "3b15e5adbaa6fba426e00c4b695cafb905e530dc4627573646e3388279393796",
+        "expected-before.diff": "bb03cb9ae6a4023a32274f665d27c812b8cc07eab227e19d27facd44a2134ad8",
+        "expected-candidate.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "expected.txt": "fc4a1360d6f10152edb364c346a47ae73d2df2460fe5ef12da2d2e79cbb7dd3f",
+        "input/fixed.h": "3039380a12e6dba1fb44314f13292d1b5ec6744aa80eff5599566a29ea94ea86",
+        "input/main.c": "7203039d3be732abfb9abaad7177eaa77efa51d6e9fa58d58733346eb6cb4dda",
+        "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout.txt": "fc4a1360d6f10152edb364c346a47ae73d2df2460fe5ef12da2d2e79cbb7dd3f"
+      }
+    },
+    {
+      "case": "tiny_fixedtables_inline",
+      "retainedAnchor": true,
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/frozen-v1/joern-parity",
+        "--production",
+        "main.c"
+      ],
+      "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/tiny_fixedtables_inline/input",
+      "seconds": 0.0073817920056171715,
+      "exitCode": 0,
+      "timeout": false,
+      "error": null,
+      "beforeExact": false,
+      "candidateExact": true,
+      "beforeCandidateIdentical": false,
+      "inputHashes": {
+        "main.c": "8af2a0a9531deec50f16e8c125de4000c0636b443b11628e232bb9e9413d2a6f"
+      },
+      "counts": {
+        "includingSeparators": {
+          "expected": 581,
+          "before": 581,
+          "candidate": 581,
+          "matchingBefore": 574,
+          "matchingCandidate": 581,
+          "gained": 7,
+          "lost": 0,
+          "lostRecords": {},
+          "gainedRecords": {
+            "    MEMBER NAME=value CODE=value TYPE_FULL_NAME=shortunsigned ORDER=3": 1,
+            "NODES|TYPE_DECL NAME=shortunsigned FULL_NAME=shortunsigned CODE=shortunsigned IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>": 1,
+            "NODES|TYPE NAME=shortunsigned FULL_NAME=shortunsigned TYPE_DECL_FULL_NAME=shortunsigned": 1,
+            "EDGES|CONTAINS F:<includes> -> D:shortunsigned": 1,
+            "EDGES|EVAL_TYPE main.c:<global>#4 -> T:shortunsigned": 1,
+            "EDGES|REF T:shortunsigned -> D:shortunsigned": 1,
+            "EDGES|SOURCE_FILE D:shortunsigned -> F:<includes>": 1
+          }
+        },
+        "nonempty": {
+          "expected": 573,
+          "before": 573,
+          "candidate": 573,
+          "matchingBefore": 566,
+          "matchingCandidate": 573,
+          "gained": 7,
+          "lost": 0,
+          "lostRecords": {},
+          "gainedRecords": {
+            "    MEMBER NAME=value CODE=value TYPE_FULL_NAME=shortunsigned ORDER=3": 1,
+            "NODES|TYPE_DECL NAME=shortunsigned FULL_NAME=shortunsigned CODE=shortunsigned IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>": 1,
+            "NODES|TYPE NAME=shortunsigned FULL_NAME=shortunsigned TYPE_DECL_FULL_NAME=shortunsigned": 1,
+            "EDGES|CONTAINS F:<includes> -> D:shortunsigned": 1,
+            "EDGES|EVAL_TYPE main.c:<global>#4 -> T:shortunsigned": 1,
+            "EDGES|REF T:shortunsigned -> D:shortunsigned": 1,
+            "EDGES|SOURCE_FILE D:shortunsigned -> F:<includes>": 1
+          }
+        }
+      },
+      "files": {
+        "actual.txt": "6d613c7085ab54541cc1d9fa83494748e33fe70bfc5c541ee39f12aa8046cadd",
+        "before-candidate.diff": "26a125992a0d913c2934aa9a0ce4ceb99ca9c9ae0765f9f0f1e8727cd5f81a5b",
+        "before.txt": "7fc32775a3481703dbe3d002b091e4c68c04bea03c0b2d808c6711e06307fb55",
+        "expected-before.diff": "5286b65a8ac89502e65459c2cd90b91e5491a1d7afd04154439d492f1ec8297f",
+        "expected-candidate.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "expected.txt": "6d613c7085ab54541cc1d9fa83494748e33fe70bfc5c541ee39f12aa8046cadd",
+        "input/main.c": "8af2a0a9531deec50f16e8c125de4000c0636b443b11628e232bb9e9413d2a6f",
+        "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout.txt": "6d613c7085ab54541cc1d9fa83494748e33fe70bfc5c541ee39f12aa8046cadd"
+      }
+    },
+    {
+      "case": "unsigned_char",
+      "retainedAnchor": false,
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/frozen-v1/joern-parity",
+        "--production",
+        "main.c"
+      ],
+      "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/unsigned_char/input",
+      "seconds": 0.004194791981717572,
+      "exitCode": 0,
+      "timeout": false,
+      "error": null,
+      "beforeExact": true,
+      "candidateExact": true,
+      "beforeCandidateIdentical": true,
+      "inputHashes": {
+        "main.c": "ab73e292cafb2ac78baf257cb5a3710955bcfb9f71d82078478916590e813721"
+      },
+      "counts": {
+        "includingSeparators": {
+          "expected": 119,
+          "before": 119,
+          "candidate": 119,
+          "matchingBefore": 119,
+          "matchingCandidate": 119,
+          "gained": 0,
+          "lost": 0,
+          "lostRecords": {},
+          "gainedRecords": {}
+        },
+        "nonempty": {
+          "expected": 115,
+          "before": 115,
+          "candidate": 115,
+          "matchingBefore": 115,
+          "matchingCandidate": 115,
+          "gained": 0,
+          "lost": 0,
+          "lostRecords": {},
+          "gainedRecords": {}
+        }
+      },
+      "files": {
+        "actual.txt": "4a794f1b11f8d0b222bdc91d3e45abe0c55ecbdbaf64db736a95f91828aec8d4",
+        "before-candidate.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "before.txt": "4a794f1b11f8d0b222bdc91d3e45abe0c55ecbdbaf64db736a95f91828aec8d4",
+        "expected-before.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "expected-candidate.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "expected.txt": "4a794f1b11f8d0b222bdc91d3e45abe0c55ecbdbaf64db736a95f91828aec8d4",
+        "input/main.c": "ab73e292cafb2ac78baf257cb5a3710955bcfb9f71d82078478916590e813721",
+        "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout.txt": "4a794f1b11f8d0b222bdc91d3e45abe0c55ecbdbaf64db736a95f91828aec8d4"
+      }
+    },
+    {
+      "case": "unsigned_long_long_int",
+      "retainedAnchor": false,
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/frozen-v1/joern-parity",
+        "--production",
+        "main.c"
+      ],
+      "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/unsigned_long_long_int/input",
+      "seconds": 0.003830250003375113,
+      "exitCode": 0,
+      "timeout": false,
+      "error": null,
+      "beforeExact": false,
+      "candidateExact": true,
+      "beforeCandidateIdentical": false,
+      "inputHashes": {
+        "main.c": "c772a4b67dd1cfb5cf2943b6d97525c24063c4a476c33a2fba23664f480bae26"
+      },
+      "counts": {
+        "includingSeparators": {
+          "expected": 119,
+          "before": 119,
+          "candidate": 119,
+          "matchingBefore": 112,
+          "matchingCandidate": 119,
+          "gained": 7,
+          "lost": 0,
+          "lostRecords": {},
+          "gainedRecords": {
+            "    MEMBER NAME=value CODE=value TYPE_FULL_NAME=longlong unsigned int ORDER=1": 1,
+            "NODES|TYPE_DECL NAME=longlong unsigned int FULL_NAME=longlong unsigned int CODE=longlong unsigned int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>": 1,
+            "NODES|TYPE NAME=longlong unsigned int FULL_NAME=longlong unsigned int TYPE_DECL_FULL_NAME=longlong unsigned int": 1,
+            "EDGES|CONTAINS F:<includes> -> D:longlong unsigned int": 1,
+            "EDGES|EVAL_TYPE main.c:<global>#2 -> T:longlong unsigned int": 1,
+            "EDGES|REF T:longlong unsigned int -> D:longlong unsigned int": 1,
+            "EDGES|SOURCE_FILE D:longlong unsigned int -> F:<includes>": 1
+          }
+        },
+        "nonempty": {
+          "expected": 115,
+          "before": 115,
+          "candidate": 115,
+          "matchingBefore": 108,
+          "matchingCandidate": 115,
+          "gained": 7,
+          "lost": 0,
+          "lostRecords": {},
+          "gainedRecords": {
+            "    MEMBER NAME=value CODE=value TYPE_FULL_NAME=longlong unsigned int ORDER=1": 1,
+            "NODES|TYPE_DECL NAME=longlong unsigned int FULL_NAME=longlong unsigned int CODE=longlong unsigned int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>": 1,
+            "NODES|TYPE NAME=longlong unsigned int FULL_NAME=longlong unsigned int TYPE_DECL_FULL_NAME=longlong unsigned int": 1,
+            "EDGES|CONTAINS F:<includes> -> D:longlong unsigned int": 1,
+            "EDGES|EVAL_TYPE main.c:<global>#2 -> T:longlong unsigned int": 1,
+            "EDGES|REF T:longlong unsigned int -> D:longlong unsigned int": 1,
+            "EDGES|SOURCE_FILE D:longlong unsigned int -> F:<includes>": 1
+          }
+        }
+      },
+      "files": {
+        "actual.txt": "8cdd2dbee080157990c124b09867988f64b4c790a00ab92b5be48b270c61a720",
+        "before-candidate.diff": "6978afbbae33d661989b6e59b8c4b70e13244d5879c9afce46bb9f611a7d8702",
+        "before.txt": "f85a47d40520d00231233b3234bf711a871491b288e9118737e3d0250f78478c",
+        "expected-before.diff": "9f2da2fdc048d93ccf4c9f1fa364341905a6bf219870889bbffa27adce09cc15",
+        "expected-candidate.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "expected.txt": "8cdd2dbee080157990c124b09867988f64b4c790a00ab92b5be48b270c61a720",
+        "input/main.c": "c772a4b67dd1cfb5cf2943b6d97525c24063c4a476c33a2fba23664f480bae26",
+        "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout.txt": "8cdd2dbee080157990c124b09867988f64b4c790a00ab92b5be48b270c61a720"
+      }
+    },
+    {
+      "case": "unsigned_short",
+      "retainedAnchor": false,
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/frozen-v1/joern-parity",
+        "--production",
+        "main.c"
+      ],
+      "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/unsigned_short/input",
+      "seconds": 0.004033625009469688,
+      "exitCode": 0,
+      "timeout": false,
+      "error": null,
+      "beforeExact": false,
+      "candidateExact": true,
+      "beforeCandidateIdentical": false,
+      "inputHashes": {
+        "main.c": "15c28619bfdeb3b65e60afb2011092c2c52d425ef4f4b67be09083a3657aea47"
+      },
+      "counts": {
+        "includingSeparators": {
+          "expected": 119,
+          "before": 119,
+          "candidate": 119,
+          "matchingBefore": 112,
+          "matchingCandidate": 119,
+          "gained": 7,
+          "lost": 0,
+          "lostRecords": {},
+          "gainedRecords": {
+            "    MEMBER NAME=value CODE=value TYPE_FULL_NAME=shortunsigned ORDER=1": 1,
+            "NODES|TYPE_DECL NAME=shortunsigned FULL_NAME=shortunsigned CODE=shortunsigned IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>": 1,
+            "NODES|TYPE NAME=shortunsigned FULL_NAME=shortunsigned TYPE_DECL_FULL_NAME=shortunsigned": 1,
+            "EDGES|CONTAINS F:<includes> -> D:shortunsigned": 1,
+            "EDGES|EVAL_TYPE main.c:<global>#2 -> T:shortunsigned": 1,
+            "EDGES|REF T:shortunsigned -> D:shortunsigned": 1,
+            "EDGES|SOURCE_FILE D:shortunsigned -> F:<includes>": 1
+          }
+        },
+        "nonempty": {
+          "expected": 115,
+          "before": 115,
+          "candidate": 115,
+          "matchingBefore": 108,
+          "matchingCandidate": 115,
+          "gained": 7,
+          "lost": 0,
+          "lostRecords": {},
+          "gainedRecords": {
+            "    MEMBER NAME=value CODE=value TYPE_FULL_NAME=shortunsigned ORDER=1": 1,
+            "NODES|TYPE_DECL NAME=shortunsigned FULL_NAME=shortunsigned CODE=shortunsigned IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>": 1,
+            "NODES|TYPE NAME=shortunsigned FULL_NAME=shortunsigned TYPE_DECL_FULL_NAME=shortunsigned": 1,
+            "EDGES|CONTAINS F:<includes> -> D:shortunsigned": 1,
+            "EDGES|EVAL_TYPE main.c:<global>#2 -> T:shortunsigned": 1,
+            "EDGES|REF T:shortunsigned -> D:shortunsigned": 1,
+            "EDGES|SOURCE_FILE D:shortunsigned -> F:<includes>": 1
+          }
+        }
+      },
+      "files": {
+        "actual.txt": "67200ecf8fbbbf5beacd4025936a0f959c30ede649497118d7510d2bea4f7b88",
+        "before-candidate.diff": "ffdd2bea60621a5b1d60b0b81ab4ac93eb3fe9369853ac77c4d8fdff50cfd9ad",
+        "before.txt": "99a38cf210662b412e3cae339c3ecab70a46b00473554191fff08e4ba622019a",
+        "expected-before.diff": "24565ba57fd2d0cddbb58602bc96f89707fd99c8e69c0f230807081d31a464f4",
+        "expected-candidate.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "expected.txt": "67200ecf8fbbbf5beacd4025936a0f959c30ede649497118d7510d2bea4f7b88",
+        "input/main.c": "15c28619bfdeb3b65e60afb2011092c2c52d425ef4f4b67be09083a3657aea47",
+        "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout.txt": "67200ecf8fbbbf5beacd4025936a0f959c30ede649497118d7510d2bea4f7b88"
+      }
+    },
+    {
+      "case": "unsigned_short_array",
+      "retainedAnchor": false,
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/frozen-v1/joern-parity",
+        "--production",
+        "main.c"
+      ],
+      "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/unsigned_short_array/input",
+      "seconds": 0.0042710840061772615,
+      "exitCode": 0,
+      "timeout": false,
+      "error": null,
+      "beforeExact": false,
+      "candidateExact": true,
+      "beforeCandidateIdentical": false,
+      "inputHashes": {
+        "main.c": "e30c69af8869ef328c2de4270ab270fc6a23211fac7b55533efadd02ccc3aa49"
+      },
+      "counts": {
+        "includingSeparators": {
+          "expected": 166,
+          "before": 166,
+          "candidate": 166,
+          "matchingBefore": 159,
+          "matchingCandidate": 166,
+          "gained": 7,
+          "lost": 0,
+          "lostRecords": {},
+          "gainedRecords": {
+            "    MEMBER NAME=value CODE=value[3] TYPE_FULL_NAME=shortunsigned[3] ORDER=1": 1,
+            "NODES|TYPE_DECL NAME=shortunsigned[3] FULL_NAME=shortunsigned[3] CODE=shortunsigned[3] IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>": 1,
+            "NODES|TYPE NAME=shortunsigned[3] FULL_NAME=shortunsigned[3] TYPE_DECL_FULL_NAME=shortunsigned[3]": 1,
+            "EDGES|CONTAINS F:<includes> -> D:shortunsigned[3]": 1,
+            "EDGES|EVAL_TYPE main.c:<global>#2 -> T:shortunsigned[3]": 1,
+            "EDGES|REF T:shortunsigned[3] -> D:shortunsigned[3]": 1,
+            "EDGES|SOURCE_FILE D:shortunsigned[3] -> F:<includes>": 1
+          }
+        },
+        "nonempty": {
+          "expected": 160,
+          "before": 160,
+          "candidate": 160,
+          "matchingBefore": 153,
+          "matchingCandidate": 160,
+          "gained": 7,
+          "lost": 0,
+          "lostRecords": {},
+          "gainedRecords": {
+            "    MEMBER NAME=value CODE=value[3] TYPE_FULL_NAME=shortunsigned[3] ORDER=1": 1,
+            "NODES|TYPE_DECL NAME=shortunsigned[3] FULL_NAME=shortunsigned[3] CODE=shortunsigned[3] IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>": 1,
+            "NODES|TYPE NAME=shortunsigned[3] FULL_NAME=shortunsigned[3] TYPE_DECL_FULL_NAME=shortunsigned[3]": 1,
+            "EDGES|CONTAINS F:<includes> -> D:shortunsigned[3]": 1,
+            "EDGES|EVAL_TYPE main.c:<global>#2 -> T:shortunsigned[3]": 1,
+            "EDGES|REF T:shortunsigned[3] -> D:shortunsigned[3]": 1,
+            "EDGES|SOURCE_FILE D:shortunsigned[3] -> F:<includes>": 1
+          }
+        }
+      },
+      "files": {
+        "actual.txt": "500f0b8fd015d905346cdc8b0d9dea88b91ecb24bf068504ff9ddb59b1916ef0",
+        "before-candidate.diff": "104620afc9402be51a6a09f51d0325b2e8aea832b7e4c7ccdb650ac982444423",
+        "before.txt": "05bbf56f6e7e62880c9d2ed791e5d9ee6e12021997dde484d6eff81f87622b36",
+        "expected-before.diff": "5901c6f06934224eeb07fe597bde88e00d27267cc609654aa35427b8ce74a0ff",
+        "expected-candidate.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "expected.txt": "500f0b8fd015d905346cdc8b0d9dea88b91ecb24bf068504ff9ddb59b1916ef0",
+        "input/main.c": "e30c69af8869ef328c2de4270ab270fc6a23211fac7b55533efadd02ccc3aa49",
+        "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout.txt": "500f0b8fd015d905346cdc8b0d9dea88b91ecb24bf068504ff9ddb59b1916ef0"
+      }
+    },
+    {
+      "case": "unsigned_short_int",
+      "retainedAnchor": false,
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/frozen-v1/joern-parity",
+        "--production",
+        "main.c"
+      ],
+      "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/unsigned_short_int/input",
+      "seconds": 0.003798833000473678,
+      "exitCode": 0,
+      "timeout": false,
+      "error": null,
+      "beforeExact": false,
+      "candidateExact": true,
+      "beforeCandidateIdentical": false,
+      "inputHashes": {
+        "main.c": "76277bee00be9bb521ee0bc24c5127ef632678fc3e0aa233f4bba4de713fed85"
+      },
+      "counts": {
+        "includingSeparators": {
+          "expected": 119,
+          "before": 119,
+          "candidate": 119,
+          "matchingBefore": 112,
+          "matchingCandidate": 119,
+          "gained": 7,
+          "lost": 0,
+          "lostRecords": {},
+          "gainedRecords": {
+            "    MEMBER NAME=value CODE=value TYPE_FULL_NAME=short unsigned int ORDER=1": 1,
+            "NODES|TYPE_DECL NAME=short unsigned int FULL_NAME=short unsigned int CODE=short unsigned int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>": 1,
+            "NODES|TYPE NAME=short unsigned int FULL_NAME=short unsigned int TYPE_DECL_FULL_NAME=short unsigned int": 1,
+            "EDGES|CONTAINS F:<includes> -> D:short unsigned int": 1,
+            "EDGES|EVAL_TYPE main.c:<global>#2 -> T:short unsigned int": 1,
+            "EDGES|REF T:short unsigned int -> D:short unsigned int": 1,
+            "EDGES|SOURCE_FILE D:short unsigned int -> F:<includes>": 1
+          }
+        },
+        "nonempty": {
+          "expected": 115,
+          "before": 115,
+          "candidate": 115,
+          "matchingBefore": 108,
+          "matchingCandidate": 115,
+          "gained": 7,
+          "lost": 0,
+          "lostRecords": {},
+          "gainedRecords": {
+            "    MEMBER NAME=value CODE=value TYPE_FULL_NAME=short unsigned int ORDER=1": 1,
+            "NODES|TYPE_DECL NAME=short unsigned int FULL_NAME=short unsigned int CODE=short unsigned int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>": 1,
+            "NODES|TYPE NAME=short unsigned int FULL_NAME=short unsigned int TYPE_DECL_FULL_NAME=short unsigned int": 1,
+            "EDGES|CONTAINS F:<includes> -> D:short unsigned int": 1,
+            "EDGES|EVAL_TYPE main.c:<global>#2 -> T:short unsigned int": 1,
+            "EDGES|REF T:short unsigned int -> D:short unsigned int": 1,
+            "EDGES|SOURCE_FILE D:short unsigned int -> F:<includes>": 1
+          }
+        }
+      },
+      "files": {
+        "actual.txt": "2f53a7bf0e015f6d42627dde4d6c54bafcd2e55b0b81a3f2b80b70f9a46cf3d1",
+        "before-candidate.diff": "5beee5ac7a4cf3644ebb2c2e72fc44772290eeee77f5f49bfd6d7cc429dd6a77",
+        "before.txt": "837530af832de745ef82ac69484e1aa20fc4a712dd159cd2bbfc65bcdb6d0de6",
+        "expected-before.diff": "d9d435ec1be208432a1ca3c9b96a8f88d435434b93d175b0a22c9350d420c6ab",
+        "expected-candidate.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "expected.txt": "2f53a7bf0e015f6d42627dde4d6c54bafcd2e55b0b81a3f2b80b70f9a46cf3d1",
+        "input/main.c": "76277bee00be9bb521ee0bc24c5127ef632678fc3e0aa233f4bba4de713fed85",
+        "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout.txt": "2f53a7bf0e015f6d42627dde4d6c54bafcd2e55b0b81a3f2b80b70f9a46cf3d1"
+      }
+    },
+    {
+      "case": "unsigned_short_pointer",
+      "retainedAnchor": false,
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/frozen-v1/joern-parity",
+        "--production",
+        "main.c"
+      ],
+      "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/unsigned_short_pointer/input",
+      "seconds": 0.003785458975471556,
+      "exitCode": 0,
+      "timeout": false,
+      "error": null,
+      "beforeExact": false,
+      "candidateExact": true,
+      "beforeCandidateIdentical": false,
+      "inputHashes": {
+        "main.c": "7b5de0d2a5dc3eb44e456043dd90fba8820cb2f3c7c839919a8b3eec34c1a97e"
+      },
+      "counts": {
+        "includingSeparators": {
+          "expected": 119,
+          "before": 119,
+          "candidate": 119,
+          "matchingBefore": 112,
+          "matchingCandidate": 119,
+          "gained": 7,
+          "lost": 0,
+          "lostRecords": {},
+          "gainedRecords": {
+            "    MEMBER NAME=value CODE=*value TYPE_FULL_NAME=shortunsigned* ORDER=1": 1,
+            "NODES|TYPE_DECL NAME=shortunsigned* FULL_NAME=shortunsigned* CODE=shortunsigned* IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>": 1,
+            "NODES|TYPE NAME=shortunsigned* FULL_NAME=shortunsigned* TYPE_DECL_FULL_NAME=shortunsigned*": 1,
+            "EDGES|CONTAINS F:<includes> -> D:shortunsigned*": 1,
+            "EDGES|EVAL_TYPE main.c:<global>#2 -> T:shortunsigned*": 1,
+            "EDGES|REF T:shortunsigned* -> D:shortunsigned*": 1,
+            "EDGES|SOURCE_FILE D:shortunsigned* -> F:<includes>": 1
+          }
+        },
+        "nonempty": {
+          "expected": 115,
+          "before": 115,
+          "candidate": 115,
+          "matchingBefore": 108,
+          "matchingCandidate": 115,
+          "gained": 7,
+          "lost": 0,
+          "lostRecords": {},
+          "gainedRecords": {
+            "    MEMBER NAME=value CODE=*value TYPE_FULL_NAME=shortunsigned* ORDER=1": 1,
+            "NODES|TYPE_DECL NAME=shortunsigned* FULL_NAME=shortunsigned* CODE=shortunsigned* IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>": 1,
+            "NODES|TYPE NAME=shortunsigned* FULL_NAME=shortunsigned* TYPE_DECL_FULL_NAME=shortunsigned*": 1,
+            "EDGES|CONTAINS F:<includes> -> D:shortunsigned*": 1,
+            "EDGES|EVAL_TYPE main.c:<global>#2 -> T:shortunsigned*": 1,
+            "EDGES|REF T:shortunsigned* -> D:shortunsigned*": 1,
+            "EDGES|SOURCE_FILE D:shortunsigned* -> F:<includes>": 1
+          }
+        }
+      },
+      "files": {
+        "actual.txt": "75c4b6060b1e8d56e967c641dd7050a696c00ab95b37b284633ca58ad5fdb0f9",
+        "before-candidate.diff": "ca816dd581b0e010ccce508bd3ec81d60d2e701c83e77d63cb149c5e129e350d",
+        "before.txt": "056956ce53a8af9468f0d835629ead78fb3f211db183fa59c04958ac528fa800",
+        "expected-before.diff": "613da8aac2ce26dcce0c8851e690ce8de81c500432176c874b838b003c9dcc91",
+        "expected-candidate.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "expected.txt": "75c4b6060b1e8d56e967c641dd7050a696c00ab95b37b284633ca58ad5fdb0f9",
+        "input/main.c": "7b5de0d2a5dc3eb44e456043dd90fba8820cb2f3c7c839919a8b3eec34c1a97e",
+        "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout.txt": "75c4b6060b1e8d56e967c641dd7050a696c00ab95b37b284633ca58ad5fdb0f9"
+      }
+    },
+    {
+      "case": "volatile_unsigned_short",
+      "retainedAnchor": false,
+      "command": [
+        "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/frozen-v1/joern-parity",
+        "--production",
+        "main.c"
+      ],
+      "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-primitive-members/.local/primitive-members/replay19-v1/volatile_unsigned_short/input",
+      "seconds": 0.003827582986559719,
+      "exitCode": 0,
+      "timeout": false,
+      "error": null,
+      "beforeExact": false,
+      "candidateExact": true,
+      "beforeCandidateIdentical": false,
+      "inputHashes": {
+        "main.c": "e80f725b99b57290699d3daf7f4bb116df52d666ad1c6973bea83f82d0675d64"
+      },
+      "counts": {
+        "includingSeparators": {
+          "expected": 119,
+          "before": 119,
+          "candidate": 119,
+          "matchingBefore": 112,
+          "matchingCandidate": 119,
+          "gained": 7,
+          "lost": 0,
+          "lostRecords": {},
+          "gainedRecords": {
+            "    MEMBER NAME=value CODE=value TYPE_FULL_NAME=volatile shortunsigned ORDER=1": 1,
+            "NODES|TYPE_DECL NAME=volatile shortunsigned FULL_NAME=volatile shortunsigned CODE=volatile shortunsigned IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>": 1,
+            "NODES|TYPE NAME=volatile shortunsigned FULL_NAME=volatile shortunsigned TYPE_DECL_FULL_NAME=volatile shortunsigned": 1,
+            "EDGES|CONTAINS F:<includes> -> D:volatile shortunsigned": 1,
+            "EDGES|EVAL_TYPE main.c:<global>#2 -> T:volatile shortunsigned": 1,
+            "EDGES|REF T:volatile shortunsigned -> D:volatile shortunsigned": 1,
+            "EDGES|SOURCE_FILE D:volatile shortunsigned -> F:<includes>": 1
+          }
+        },
+        "nonempty": {
+          "expected": 115,
+          "before": 115,
+          "candidate": 115,
+          "matchingBefore": 108,
+          "matchingCandidate": 115,
+          "gained": 7,
+          "lost": 0,
+          "lostRecords": {},
+          "gainedRecords": {
+            "    MEMBER NAME=value CODE=value TYPE_FULL_NAME=volatile shortunsigned ORDER=1": 1,
+            "NODES|TYPE_DECL NAME=volatile shortunsigned FULL_NAME=volatile shortunsigned CODE=volatile shortunsigned IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>": 1,
+            "NODES|TYPE NAME=volatile shortunsigned FULL_NAME=volatile shortunsigned TYPE_DECL_FULL_NAME=volatile shortunsigned": 1,
+            "EDGES|CONTAINS F:<includes> -> D:volatile shortunsigned": 1,
+            "EDGES|EVAL_TYPE main.c:<global>#2 -> T:volatile shortunsigned": 1,
+            "EDGES|REF T:volatile shortunsigned -> D:volatile shortunsigned": 1,
+            "EDGES|SOURCE_FILE D:volatile shortunsigned -> F:<includes>": 1
+          }
+        }
+      },
+      "files": {
+        "actual.txt": "3dc76afa755430aab0204df9f9ef02f714b67b2468229d70a316746460e2e8d9",
+        "before-candidate.diff": "61878466e0d8f693a8d611237af245a510a3bc2ac0a731c3f0fd13002036a43f",
+        "before.txt": "599fde6e4b6ea50c1480760d5a46d18363005bafb1c4ec089d4c57d392648ac7",
+        "expected-before.diff": "2fa0621b11de84914cb3bf7fdf5a678c01a0ef100c7109848532e825f05edc5b",
+        "expected-candidate.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "expected.txt": "3dc76afa755430aab0204df9f9ef02f714b67b2468229d70a316746460e2e8d9",
+        "input/main.c": "e80f725b99b57290699d3daf7f4bb116df52d666ad1c6973bea83f82d0675d64",
+        "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout.txt": "3dc76afa755430aab0204df9f9ef02f714b67b2468229d70a316746460e2e8d9"
+      }
+    }
+  ],
+  "summary": {
+    "caseCount": 19,
+    "beforeExact": 2,
+    "candidateExact": 18,
+    "successful": 19,
+    "nonemptyGained": 126,
+    "nonemptyLost": 0
+  }
+}

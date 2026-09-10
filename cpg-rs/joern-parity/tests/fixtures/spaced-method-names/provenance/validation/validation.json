@@ -1,0 +1,37 @@
+{
+  "status": "PASS",
+  "cargoTarget": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/target",
+  "tests": {
+    "command": "cargo test --manifest-path cpg-rs/Cargo.toml -p cpg-lang-c -p cpg-analysis -p joern-parity",
+    "passed": 331,
+    "failed": 0,
+    "newProductionTests": 3,
+    "newParserUnitTests": 1
+  },
+  "clippy": "cargo clippy --manifest-path cpg-rs/Cargo.toml -p cpg-lang-c -p cpg-analysis -p joern-parity --all-targets -- -D warnings",
+  "fmt": "cargo fmt --manifest-path cpg-rs/Cargo.toml --all -- --check",
+  "mainCommitted": "308/308 comparison blocks byte-identical to Joern",
+  "mainFreshLive": "308/308 comparison blocks byte-identical to Joern",
+  "earlierValidationNotes": [
+    "tests.log retains an initial test authoring mistake (guessed macro stub signature/order); expected graph was unchanged and assertion was corrected to actual live ANY(1), exit#4 before tests-corrected.log.",
+    "fmt-final.log retains the removed extra blank line before a test; fmt-final-complete.log passes.",
+    "rejected-first retains a separate real implementation regression exposed by independent fresh references."
+  ],
+  "logHashes": {
+    "build-final.log": "5246db178cfe79d25cc804433feb17744178ac13dd9747f773b8d19bbaae89e0",
+    "build-repaired.log": "78a60def921f0d37e126bbfe395e6c8e041f49a58b2a5213fcd7dec164f267b4",
+    "tests.log": "3e2afa0f1d8c8c426358e39e0bf7366a427f526eaa2e2f6a6579c0854eaead9f",
+    "tests-corrected.log": "1597a31efdb11aa63301022528fe8e1f8bd39e0680932730a32cf1bd8e5db91f",
+    "tests-final-complete.log": "850188ee725c2509f7344a730147dbe99060a3157b2b41ac520c4970bf1a908b",
+    "focused-final.log": "3435294aa4818a8d71a1804754dee8a0d76d1296bd11b76254657fc889a06cfb",
+    "clippy-final-complete.log": "805701c1a9ddca1a32fe96c45c6dc62648591cfb117206c482202a3968fff126",
+    "fmt-final.log": "ff4b661f5f469f75889811c3b2aae0043348046d4e33a9850d58da17442f353d",
+    "fmt-final-complete.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "main308-final.log": "c105179d62065e9cbf9f398ff94754c29ec03add1206db7dff281cb4c07b6be6",
+    "main308-live-final.log": "715e0c188ca0e7a744ace60c9fa451649f34143022f2a1a163bd46303772dd68"
+  },
+  "testExecutableHashes": {
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/target/debug/deps/spaced_method_names-da993fb4132af238": "a4be2a851e926ee46473ff4965f33c5a89dab7a0f08a14ae278ff0a909d35f4e",
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/target/debug/deps/cpg_lang_c-1bb197e58826ab6f": "01902de2801932f8b1cf4165db4b228c14e64356e47916c300736c4d75ed1777"
+  }
+}

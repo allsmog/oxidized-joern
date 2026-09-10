@@ -1,0 +1,71 @@
+{
+  "completedAtUtc": "2026-09-09T03:01:51.807778+00:00",
+  "workspaceTests": 482,
+  "workspaceResultGroups": 80,
+  "checkerTests": 17,
+  "auditedCrates": 73,
+  "committedBlocks": 308,
+  "freshLiveBlocks": 308,
+  "allFailedIgnoredFiltered": 0,
+  "formatting": "passed",
+  "strictClippy": "passed",
+  "nativeRelease": "passed",
+  "nativeArchive": "passed",
+  "officialRealProjectAcceptance": "passed",
+  "nativePlatform": "macos-arm64",
+  "containerOtherPlatformsRun": false,
+  "frozenBuildSha256": "33f4740b78f60a142a615b1a07b2a2ea448ed7955e9464395e72fe6a8af91dda",
+  "allFrozenInputFilesUnchanged": 149,
+  "allFrozenFixtureFilesUnchanged": 11642,
+  "manifestSha256": "0d5eb8bd2ea2a0cc7cde1c56c885d10eaf9bddfaed79189f308d11b8acd05d11",
+  "logs": {
+    "fmt.log": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/twelfth-batch/lint-corrected/final/fmt.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "workspace-tests.log": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/twelfth-batch/lint-corrected/final/workspace-tests.log",
+      "sha256": "4a20241b3fe325904caeff218f9500224d5edc07f831392db1c695e78bfdf5c8"
+    },
+    "clippy.log": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/twelfth-batch/lint-corrected/final/clippy.log",
+      "sha256": "5604fc8f0c276397a55db4bd7008236712075c0ad37d3b3a0f1fe362b1b85a36"
+    },
+    "release-build.log": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/twelfth-batch/lint-corrected/final/release-build.log",
+      "sha256": "a9e4173640ecb9b6eaedc25dfca6f328cca2d91808265964bb4da4bd31284ad6"
+    },
+    "release-recheck.log": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/twelfth-batch/lint-corrected/final/release-recheck.log",
+      "sha256": "85c8dbac64ed6a362d668bf3988686e26e947620bb15cfdbe2e999a0ff8261b2"
+    },
+    "committed-parity.log": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/twelfth-batch/lint-corrected/final/committed-parity.log",
+      "sha256": "c105179d62065e9cbf9f398ff94754c29ec03add1206db7dff281cb4c07b6be6"
+    },
+    "live-parity.log": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/twelfth-batch/lint-corrected/final/live-parity.log",
+      "sha256": "715e0c188ca0e7a744ace60c9fa451649f34143022f2a1a163bd46303772dd68"
+    },
+    "checker-tests.log": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/twelfth-batch/lint-corrected/final/checker-tests.log",
+      "sha256": "640a7514c4256fdb1c4c34a475d7b31020b1019b92330eed517394059585d8d9"
+    },
+    "dependency-audit.log": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/twelfth-batch/lint-corrected/final/dependency-audit.log",
+      "sha256": "2a91a692bdd0f166d94bb45220a29b5f469072246f9ef0b5205b36dd0375393b"
+    },
+    "native-release.log": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/twelfth-batch/lint-corrected/final/native-release.log",
+      "sha256": "58084930795a28d2f767903a9ad1fd789ef28e671a269b53dc2960a3acf0bf76"
+    },
+    "native-archive.log": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/twelfth-batch/lint-corrected/final/native-archive.log",
+      "sha256": "4f490dc09e29ff22be18c629d21ff66b9ad924d4625187543d77e01fd5dcd56f"
+    },
+    "official-real-project-acceptance.log": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/twelfth-batch/lint-corrected/final/official-real-project-acceptance.log",
+      "sha256": "e08bc1e6638c2d1f9ef31481fb0c673221ed080ca5885839799c80c3b28686ec"
+    }
+  }
+}

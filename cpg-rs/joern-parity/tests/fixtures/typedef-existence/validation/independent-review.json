@@ -1,0 +1,61 @@
+{
+  "status": "PASS_BOUNDED_TYPEDEF_EXISTENCE_GUARD",
+  "source": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/typedef-existence/frozen/exact.rs",
+    "sha256": "76f0c8bc15a6bff023659427ccc057c4b3f38ec2d9343d11cbc3c24f2b424948"
+  },
+  "importer": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/typedef-existence/frozen/import.rs",
+    "sha256": "3fb6695576fe87e463b5e44160bcbe828321bf32149d67abcc2256eb88d11aba"
+  },
+  "binary": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/typedef-existence/frozen/joern-parity",
+    "sha256": "aa1f75003fcf68d6e9f10d6c5d8555425327392139ec8a8025591a050dba70a7"
+  },
+  "bindings": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/typedef-existence/frozen/bindings.json",
+    "sha256": "8acd28b7dff835d5e2bc66ddb3ae524ae6dc183f581ab7b6a92037d4f8d202d1"
+  },
+  "delta": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-typedef-guard-review/source.diff",
+    "sha256": "6a39952e1d19d9fdfcf9b32d8d0ee3e1d3b14e6a66ce253eb34a29d57b90e966"
+  },
+  "independentCompleteReplay": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/sixth-typedef-guard-review/provided-review.json",
+    "sha256": "e81cd3f0a2329c7a0f7fccfafa0007789dfc22d30d5f69c5103537d9bdcb6edf"
+  },
+  "independentProjects": 17,
+  "independentExactBeforeAndAfter": [
+    7,
+    7
+  ],
+  "formerlyExactLost": [],
+  "largerProvidedProject": {
+    "case": "lua_all_headers",
+    "mode": "Raw/reference/source and saved source-bound candidate hashes verified; not rerun by this reviewer.",
+    "expected": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-cast-context/.local/cast-regression/input/lua_all_headers/expected.txt",
+      "sha256": "1365bf6673e9cc807589b6c7f120c8c682d48fcbf21630738a77473634c00a19"
+    },
+    "actual": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-cast-context/.local/cast-regression/typedef_existence/lua_all_headers/actual.txt",
+      "sha256": "cd3550b4dae5f27ad9122438456ec29e74766c405d2e52025b6b6df7b5f20836"
+    },
+    "producerReceipt": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-macro-cast-context/.local/cast-regression/typedef_existence/replay.json",
+      "sha256": "d8bb97ab014fd358a2d86da1f746ef3f34789260ff1e21e56399256c3d36619c"
+    },
+    "completeProjectionExact": false
+  },
+  "sourceReview": [
+    "The guard validates only typedef name existence; it does not change emitted source TYPE_DECL, TYPE, member, RD or scaffold lowering.",
+    "Macro expansion uses the definition-site immutable state and shared65536 budget. Incomplete/budget-failed expansions do not fabricate aliases.",
+    "Only one error-free type_definition is accepted after reparse. Sized primitive modifier plus type_identifier (such as unsigned UNKNOWN) is explicitly rejected because tree-sitter accepts this invalid shape.",
+    "Plain unresolved typedef bases remain allowed as pinned CDT does; valid primitive, pointer/function aliases retain names. The same helper applies to top-level include state and local expression snapshots."
+  ],
+  "limits": [
+    "No complete Joern cast/type coverage is claimed. Full diagnostics (including upstream aggregate/header scaffolding) remain retained.",
+    "Whole-v2 and builtin/default/header interactions require the parent final replay; this review does not approve whole-v1.",
+    "An earlier optional all-node ancestry review process exhausted memory/swap; it was killed. Failed partial scratch writes are preserved and this bounded review avoids large producer reruns."
+  ]
+}

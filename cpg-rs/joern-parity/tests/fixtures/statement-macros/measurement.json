@@ -1,0 +1,696 @@
+{
+  "startedAtUtc": "2026-09-08T11:05:28.521250+00:00",
+  "implementationVerifiedAtUtc": "2026-09-08T11:25:49.997277+00:00",
+  "scope": "statement/compound C macro expansion; exact selected AST/NODES/EDGES/FLOWS projection from pinned live Joern",
+  "base": {
+    "gitCommit": "867b599bfa02d91569aef5a257a8d6f04bff8b64",
+    "description": "Base worktree plus three independently frozen root source files; git commit alone does not describe the tested baseline.",
+    "copiedSource": {
+      "cpg-rs/cpg-lang-c/src/exact.rs": {
+        "sourcePath": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/cpg-lang-c/src/exact.rs",
+        "beforePath": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-statement-macros/.local/statement-macros/before/cpg-rs/cpg-lang-c/src/exact.rs",
+        "sha256": "2a9fbe88d542ebc0c70b7501cd7e7fa2249c612346a2556b42144b0c7b53685e",
+        "initialCopySha256": "1387450aa28e968ad77d76d578e4e5ad062a40905c4e1d6a446d62f9a4b9456c"
+      },
+      "cpg-rs/cpg-lang-c/src/import.rs": {
+        "sourcePath": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/cpg-lang-c/src/import.rs",
+        "beforePath": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-statement-macros/.local/statement-macros/before/cpg-rs/cpg-lang-c/src/import.rs",
+        "sha256": "473d97a6dc3ad5b45c5681aa7be5e8140a727198b559a1e03b4c8d4b4936f159"
+      },
+      "cpg-rs/joern-parity/src/production.rs": {
+        "sourcePath": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/cpg-rs/joern-parity/src/production.rs",
+        "beforePath": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-statement-macros/.local/statement-macros/before/cpg-rs/joern-parity/src/production.rs",
+        "sha256": "2535a739735e38bf1c2015afb191cc74ea20488cd58e5b5c3897494e1dd683bb"
+      }
+    },
+    "binaryPath": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-statement-macros/.local/statement-macros/before-joern-parity",
+    "binarySha256": "962b7502905f1a60a8f3a4de1e684f3b7063b9fd6dc667152f005cffdddbe9ee"
+  },
+  "candidate": {
+    "exactSourceSha256": "d8a5ca126a3a92b9617241d224aa50c3fc27e0a055f39e0699bec9fa9a64d657",
+    "importSourceSha256": "473d97a6dc3ad5b45c5681aa7be5e8140a727198b559a1e03b4c8d4b4936f159",
+    "productionSourceSha256": "2535a739735e38bf1c2015afb191cc74ea20488cd58e5b5c3897494e1dd683bb",
+    "binaryPath": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-statement-macros/.local/statement-macros/candidate-joern-parity",
+    "binarySha256": "19a05a72dcbd40ba1e965d8b24eaf573597a9846171a3d3addb6ba10a7e49bbb",
+    "sourcePatchPath": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-statement-macros/.local/statement-macros/statement-macros-source.patch",
+    "sourcePatchSha256": "78786fa64fb8e8ee37fc8bb47600489765c5c50f928e2e6bb0f51c3f90e7c170"
+  },
+  "reference": {
+    "joernVersion": "v4.0.555",
+    "archiveSha256": "12989883d6b5aeacc97b2dc0ecc4e2951bf50e48cb244f8c8f333d11a8be0c7e",
+    "jdkVersion": "21.0.12",
+    "oracleScript": "../../../oracle.sc",
+    "oracleScriptSha256": "bd2e18fab06ecd7897d796f5b31dac6669dc45ecf70c54fb1d5cc0fe29f3c1ab",
+    "transport": "Every AST/NODES/EDGES/FLOWS selected record retained; only AST prefix removed. Shared newline escaping is noninjective."
+  },
+  "summary": {
+    "probes": 28,
+    "conformantProjects": 26,
+    "baselineConformantProjects": 0,
+    "diagnostics": 2,
+    "selectedRecords": 9647,
+    "conformantSelectedRecords": 8985,
+    "diagnosticSelectedRecords": 662
+  },
+  "flowOutcomes": {
+    "total": 7,
+    "beforeMatching": 3,
+    "afterMatching": 7,
+    "correctedFalseNegatives": [
+      "brace_entry",
+      "do_entry",
+      "if_entry",
+      "while_entry"
+    ],
+    "oraclePath": "flows/outcomes.txt",
+    "oracleSha256": "9a9cf786e6df81e39f5db5079bf63cf06dce7dd4d1e3caf6b29b76f122274b74",
+    "beforeMeasurement": "The frozen baseline canonical graph was imported into unchanged production analysis; complete replay source and output retained.",
+    "beforeProbePath": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-statement-macros/.local/statement-macros/baseline-flow-probe.rs",
+    "beforeProbeSha256": "995837df66b7abc9a50d40e07d7da46a5c56a83337e666ee99adc0768e336238",
+    "beforeOutputPath": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-statement-macros/.local/statement-macros/baseline-flow.log",
+    "beforeOutputSha256": "b752bd6b59d374985d36a45b1f14dc597fb6b257e5010791a9bbbd807de29db4"
+  },
+  "validation": {
+    "dedicatedCargoTarget": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-statement-macros/.local/target",
+    "relevantTests": {
+      "passed": 278,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 0
+    },
+    "focusedTests": 3,
+    "rdSchedulingOrderingAndLoopTests": 5,
+    "mainCommittedBlocks": 308,
+    "mainLiveBlocks": 308,
+    "strictClippy": "PASS",
+    "format": "PASS",
+    "commands": [
+      "CARGO_TARGET_DIR=.local/target cargo test --offline --manifest-path cpg-rs/Cargo.toml -p cpg-lang-c -p cpg-analysis -p joern-parity",
+      "CARGO_TARGET_DIR=.local/target cargo clippy --offline --manifest-path cpg-rs/Cargo.toml -p cpg-lang-c -p cpg-analysis -p joern-parity --all-targets -- -D warnings",
+      "CARGO_TARGET_DIR=<dedicated target> cpg-rs/joern-parity/check.sh --committed-only",
+      "JAVA_HOME=<JDK21> JOERN=<pinned runtime> CARGO_TARGET_DIR=<dedicated target> cpg-rs/joern-parity/check.sh --live"
+    ],
+    "logs": {
+      "focused-tests.log": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-statement-macros/.local/statement-macros/focused-tests.log",
+        "sha256": "9ab41287637894d41c9d7a69a29ad877d46af20be5aa5380f3d8fdeb117e91e2"
+      },
+      "rd-regressions.log": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-statement-macros/.local/statement-macros/rd-regressions.log",
+        "sha256": "091117f42277298133015ab471d1e86b5f235bf2fc97cda95409ab12d6cc5b20"
+      },
+      "relevant-tests.log": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-statement-macros/.local/statement-macros/relevant-tests.log",
+        "sha256": "a6c3c3e3724920aea16285a5f0a6ceb74f8c771f5219fb06534f63d122229c9f"
+      },
+      "main-committed.log": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-statement-macros/.local/statement-macros/main-committed.log",
+        "sha256": "c105179d62065e9cbf9f398ff94754c29ec03add1206db7dff281cb4c07b6be6"
+      },
+      "main-live.log": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-statement-macros/.local/statement-macros/main-live.log",
+        "sha256": "715e0c188ca0e7a744ace60c9fa451649f34143022f2a1a163bd46303772dd68"
+      },
+      "clippy.log": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-statement-macros/.local/statement-macros/clippy.log",
+        "sha256": "34e32a5e85799a059829fba79cfc8555a2c4d130999834cc694674a5956522ac"
+      },
+      "fmt.log": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-statement-macros/.local/statement-macros/fmt.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    "sourceLineAssertions": {
+      "z_first": {
+        "invocationAndAllDescendants": 4,
+        "followingSink": 5
+      },
+      "a_second": {
+        "invocationAndAllDescendants": 8,
+        "followingSink": 9
+      }
+    }
+  },
+  "cases": {
+    "brace_assign": {
+      "group": "initial",
+      "exact": true,
+      "records": 235,
+      "beforeDiffLines": 29,
+      "afterDiffLines": 0,
+      "exitCode": 0,
+      "inputPath": "cases/brace_assign/main.c",
+      "inputSha256": "9514cae3a8762437f52492228ee8dfa487ee97ae656df0cbc5f2dad24675af1d",
+      "referencePath": "cases/brace_assign/expected.txt",
+      "referenceSha256": "3fd8af43ccf82f3c9918f254a47fa1be0c9be7fa7dd493b90fcf161ef30a83fb",
+      "rawOraclePath": "oracle/brace_assign/oracle.stdout",
+      "rawOracleSha256": "9014f56ddd4e77e5795970c431510918ebdf49354aad68b500dd515d50c45da6",
+      "sections": {
+        "AST": 62,
+        "NODES": 19,
+        "EDGES": 114,
+        "FLOWS": 40
+      }
+    },
+    "brace_local": {
+      "group": "initial",
+      "exact": true,
+      "records": 329,
+      "beforeDiffLines": 289,
+      "afterDiffLines": 0,
+      "exitCode": 0,
+      "inputPath": "cases/brace_local/main.c",
+      "inputSha256": "8d1455e9177304bcb93c6bbaf4acdf1870e4a50a0e7c8b1744f44704a7c2f056",
+      "referencePath": "cases/brace_local/expected.txt",
+      "referenceSha256": "700ebdc40ca91069fca25ce09dbef16846131ec3c5b93bfd008954a436f930c7",
+      "rawOraclePath": "oracle/brace_local/oracle.stdout",
+      "rawOracleSha256": "105b2cbae0a44d92e0d76689720f4e91b42894c622fab31200dd2ce76c6892c8",
+      "sections": {
+        "AST": 88,
+        "NODES": 19,
+        "EDGES": 157,
+        "FLOWS": 65
+      }
+    },
+    "brace_multi": {
+      "group": "initial",
+      "exact": true,
+      "records": 397,
+      "beforeDiffLines": 372,
+      "afterDiffLines": 0,
+      "exitCode": 0,
+      "inputPath": "cases/brace_multi/main.c",
+      "inputSha256": "46b3993e449a6804a2b7ec1cb1824bc19f1172117ff241eaec374e96125b7413",
+      "referencePath": "cases/brace_multi/expected.txt",
+      "referenceSha256": "478ea805bd208f275064cd72f9fe82348410f7d6f1a1c22e7ea926d9ab57490b",
+      "rawOraclePath": "oracle/brace_multi/oracle.stdout",
+      "rawOracleSha256": "e99fafa178871cd3465dac5bb0fc187d7194a2f16ec10af4792fdfb3a945f1e3",
+      "sections": {
+        "AST": 102,
+        "NODES": 19,
+        "EDGES": 193,
+        "FLOWS": 83
+      }
+    },
+    "do_assign": {
+      "group": "initial",
+      "exact": true,
+      "records": 252,
+      "beforeDiffLines": 219,
+      "afterDiffLines": 0,
+      "exitCode": 0,
+      "inputPath": "cases/do_assign/main.c",
+      "inputSha256": "44dc722c973a23998bab8c0087dcaae34b5f9511272f93b466b9143b4ca42224",
+      "referencePath": "cases/do_assign/expected.txt",
+      "referenceSha256": "7e4db03e58192ece4f91872af99b7d282948186949ace9aca75fd3b0b30ac74b",
+      "rawOraclePath": "oracle/do_assign/oracle.stdout",
+      "rawOracleSha256": "2fa3dae77c227b8253b541ed0eb2152b21f1fcc04b87420c738c87f5f62b53a0",
+      "sections": {
+        "AST": 68,
+        "NODES": 19,
+        "EDGES": 123,
+        "FLOWS": 42
+      }
+    },
+    "do_local": {
+      "group": "initial",
+      "exact": true,
+      "records": 346,
+      "beforeDiffLines": 326,
+      "afterDiffLines": 0,
+      "exitCode": 0,
+      "inputPath": "cases/do_local/main.c",
+      "inputSha256": "7744efbc7697d82008099f8396d7229612d9e5ad4157a6ae5afaa2dc52c25d29",
+      "referencePath": "cases/do_local/expected.txt",
+      "referenceSha256": "5ab11bb8d7795114371359bb79433ae0d671b50ff81632ad7ce284c3dcfde4e8",
+      "rawOraclePath": "oracle/do_local/oracle.stdout",
+      "rawOracleSha256": "f0f165f74532cd284d430c3cb6a92f3dde75de66daa96e36b5baa974fb26bcb7",
+      "sections": {
+        "AST": 94,
+        "NODES": 19,
+        "EDGES": 166,
+        "FLOWS": 67
+      }
+    },
+    "flow_brace": {
+      "group": "initial",
+      "exact": true,
+      "records": 365,
+      "beforeDiffLines": 242,
+      "afterDiffLines": 0,
+      "exitCode": 0,
+      "inputPath": "cases/flow_brace/main.c",
+      "inputSha256": "48022f35f04165179c270c8e69c40c9016ef27eae454c29569b9a90cf73cb16a",
+      "referencePath": "cases/flow_brace/expected.txt",
+      "referenceSha256": "3ed32028382046e9e2f732ed5615b4f236a4a3e4a7ea02c5ed76e6846e6e97bc",
+      "rawOraclePath": "oracle/flow_brace/oracle.stdout",
+      "rawOracleSha256": "ea16346fa4d79edde7cf5a2be6691abf57a6eb4f4e3f5de04319249e433f4f59",
+      "sections": {
+        "AST": 98,
+        "NODES": 17,
+        "EDGES": 175,
+        "FLOWS": 75
+      }
+    },
+    "lua_shape": {
+      "group": "initial",
+      "exact": false,
+      "records": 399,
+      "beforeDiffLines": 383,
+      "afterDiffLines": 114,
+      "exitCode": 0,
+      "inputPath": "diagnostics/lua_shape/main.c",
+      "inputSha256": "9014f87fbdef2e29d54cdf9c11589b36c5a7912c34a9fbc7f93d0b1c5e14c6a8",
+      "referencePath": "diagnostics/lua_shape/expected.txt",
+      "referenceSha256": "d9a0f1475ee17a061d49f849f492e85de913ca6a6e63c98056f6c60368a0dfdf",
+      "rawOraclePath": "oracle/lua_shape/oracle.stdout",
+      "rawOracleSha256": "51da6dc8f7bbb5b4fdd2d09f4c52f65f358a19a604b6ce4c6bed67f9d2644996",
+      "sections": {
+        "AST": 107,
+        "NODES": 22,
+        "EDGES": 194,
+        "FLOWS": 76
+      }
+    },
+    "nested_macro": {
+      "group": "initial",
+      "exact": true,
+      "records": 329,
+      "beforeDiffLines": 289,
+      "afterDiffLines": 0,
+      "exitCode": 0,
+      "inputPath": "cases/nested_macro/main.c",
+      "inputSha256": "68f8bd720f40448ba6e8086eda9222882872953e751bc21e58210cdd5c072142",
+      "referencePath": "cases/nested_macro/expected.txt",
+      "referenceSha256": "b50d5b663123c9f0d63856191732d674da2f10ed08a584ffbd8b94330b8cd4ad",
+      "rawOraclePath": "oracle/nested_macro/oracle.stdout",
+      "rawOracleSha256": "3bd41c9e472702a5d2df181bbe23a35460e6be451a4c474dd40037562efd16f2",
+      "sections": {
+        "AST": 88,
+        "NODES": 19,
+        "EDGES": 157,
+        "FLOWS": 65
+      }
+    },
+    "object_compound": {
+      "group": "initial",
+      "exact": true,
+      "records": 143,
+      "beforeDiffLines": 29,
+      "afterDiffLines": 0,
+      "exitCode": 0,
+      "inputPath": "cases/object_compound/main.c",
+      "inputSha256": "f95424d08156d31b68426119f3ddcfddbcfff6bb480e972546946aa122a4ecda",
+      "referencePath": "cases/object_compound/expected.txt",
+      "referenceSha256": "feb7bd19978eda60b69fb46d58f8c4b3de26fac01523299a8a2376981fc674a1",
+      "rawOraclePath": "oracle/object_compound/oracle.stdout",
+      "rawOracleSha256": "3e22ea2400364fb68b1bcb98c68fed07d4ac8bc7fca65a243416ad93eda525c9",
+      "sections": {
+        "AST": 38,
+        "NODES": 17,
+        "EDGES": 76,
+        "FLOWS": 12
+      }
+    },
+    "while_assign": {
+      "group": "initial",
+      "exact": true,
+      "records": 328,
+      "beforeDiffLines": 319,
+      "afterDiffLines": 0,
+      "exitCode": 0,
+      "inputPath": "cases/while_assign/main.c",
+      "inputSha256": "52bd14d50cbb26d61af3472568f76deeb7dc75102e5dd204bbf63564fcee957b",
+      "referencePath": "cases/while_assign/expected.txt",
+      "referenceSha256": "afaeaea9775c174861bc4e7b20bdbe01b390ab5b76bdbf43572fb7ade9c32fb8",
+      "rawOraclePath": "oracle/while_assign/oracle.stdout",
+      "rawOracleSha256": "a0bcfa8ff9f966635c2d85f7b81ca84df54a35efdc51bfed95a1bec7ab83130e",
+      "sections": {
+        "AST": 90,
+        "NODES": 19,
+        "EDGES": 159,
+        "FLOWS": 60
+      }
+    },
+    "array_declaration": {
+      "group": "boundaries",
+      "exact": true,
+      "records": 326,
+      "beforeDiffLines": 314,
+      "afterDiffLines": 0,
+      "exitCode": 0,
+      "inputPath": "cases/array_declaration/main.c",
+      "inputSha256": "c050d7e63d37eefd42bf8eb6af6372ce580a263c3c2f6dc33fab6d4fa192ca72",
+      "referencePath": "cases/array_declaration/expected.txt",
+      "referenceSha256": "b35de3e5bc81cb2b0998de1261712c2701e0ad712c3f68b5168566ae9831fb1c",
+      "rawOraclePath": "oracle/array_declaration/oracle.stdout",
+      "rawOracleSha256": "39d4c3e4105c3dafc6650a6ef1a0cd411f6ec2e5605c230f744bd7d506525c5a",
+      "sections": {
+        "AST": 88,
+        "NODES": 21,
+        "EDGES": 165,
+        "FLOWS": 52
+      }
+    },
+    "block_comments": {
+      "group": "boundaries",
+      "exact": false,
+      "records": 263,
+      "beforeDiffLines": 257,
+      "afterDiffLines": 113,
+      "exitCode": 0,
+      "inputPath": "diagnostics/block_comments/main.c",
+      "inputSha256": "851da2bf9b63496c5264e4a09c946fa2c279a2465547083e336b92032ab9a6e7",
+      "referencePath": "diagnostics/block_comments/expected.txt",
+      "referenceSha256": "74e2628d62bec2f240c1ebd8c368d6f052501acf8b700c2a3222b59f83275f4b",
+      "rawOraclePath": "oracle/block_comments/oracle.stdout",
+      "rawOracleSha256": "da9929e708ad86c9076bcea981ba9fff33e9c8a34fe5c6dc8867fd691c59fc29",
+      "sections": {
+        "AST": 70,
+        "NODES": 19,
+        "EDGES": 129,
+        "FLOWS": 45
+      }
+    },
+    "brace_declarations": {
+      "group": "boundaries",
+      "exact": true,
+      "records": 329,
+      "beforeDiffLines": 304,
+      "afterDiffLines": 0,
+      "exitCode": 0,
+      "inputPath": "cases/brace_declarations/main.c",
+      "inputSha256": "bd5f5f7c7021f792130d36287e85529f592fe9146ed87f74247e6196b05afe3a",
+      "referencePath": "cases/brace_declarations/expected.txt",
+      "referenceSha256": "cc0242e91bb5ae02b3524ab46d365013d39c772aa9b3fb1128e9b82b615dfb18",
+      "rawOraclePath": "oracle/brace_declarations/oracle.stdout",
+      "rawOracleSha256": "692923683e9f3a4b38965fc4ed6ae918b13d6919a01d73b90303eba22f88ff06",
+      "sections": {
+        "AST": 84,
+        "NODES": 23,
+        "EDGES": 159,
+        "FLOWS": 63
+      }
+    },
+    "braceless_do": {
+      "group": "boundaries",
+      "exact": true,
+      "records": 248,
+      "beforeDiffLines": 192,
+      "afterDiffLines": 0,
+      "exitCode": 0,
+      "inputPath": "cases/braceless_do/main.c",
+      "inputSha256": "c2ed5edd4b9a06b3af27f5e323482c14d507e804a4a1b2efe1f4ae8c5887e9a9",
+      "referencePath": "cases/braceless_do/expected.txt",
+      "referenceSha256": "742e327aaa95b817b7a35e9eb40dac138867cc16f99b593c607ce65f6899bd31",
+      "rawOraclePath": "oracle/braceless_do/oracle.stdout",
+      "rawOracleSha256": "c3b9d3e76b2377bcf836f4ef9cfd07caa080756c403742d543a16e9755e89f58",
+      "sections": {
+        "AST": 66,
+        "NODES": 19,
+        "EDGES": 121,
+        "FLOWS": 42
+      }
+    },
+    "do_nested": {
+      "group": "boundaries",
+      "exact": true,
+      "records": 303,
+      "beforeDiffLines": 257,
+      "afterDiffLines": 0,
+      "exitCode": 0,
+      "inputPath": "cases/do_nested/main.c",
+      "inputSha256": "e76bf6f9b1a3eb5bd57b57a65f17c76f6520631093cb9bb506a5a09feb1f8081",
+      "referencePath": "cases/do_nested/expected.txt",
+      "referenceSha256": "a0ad741b4181dedbde1e05df231a5222964a69dedd7f201210455f701aee020e",
+      "rawOraclePath": "oracle/do_nested/oracle.stdout",
+      "rawOracleSha256": "fdce6c51e489575046491bcf775f395f7cd3d60da6aa8337f41d9921bbcc54b6",
+      "sections": {
+        "AST": 84,
+        "NODES": 19,
+        "EDGES": 150,
+        "FLOWS": 50
+      }
+    },
+    "for_statement": {
+      "group": "boundaries",
+      "exact": true,
+      "records": 359,
+      "beforeDiffLines": 337,
+      "afterDiffLines": 0,
+      "exitCode": 0,
+      "inputPath": "cases/for_statement/main.c",
+      "inputSha256": "2665a5f67dd357ed4fac057f526c1e15878e317366cc8d8a50e6d9e626146ec0",
+      "referencePath": "cases/for_statement/expected.txt",
+      "referenceSha256": "4969bcf00afe0d989263805c6535bacfb436090ef5be0f8f7ae819b843ed11ad",
+      "rawOraclePath": "oracle/for_statement/oracle.stdout",
+      "rawOracleSha256": "b3b9476dd92588f7665a71169745dbca158e706363f3d39027d4aafad17fdebd",
+      "sections": {
+        "AST": 98,
+        "NODES": 19,
+        "EDGES": 176,
+        "FLOWS": 66
+      }
+    },
+    "if_statement": {
+      "group": "boundaries",
+      "exact": true,
+      "records": 334,
+      "beforeDiffLines": 326,
+      "afterDiffLines": 0,
+      "exitCode": 0,
+      "inputPath": "cases/if_statement/main.c",
+      "inputSha256": "979da55c8603783b903b791af53f90c9e39fe331d168cbdc4b448b157fa5a516",
+      "referencePath": "cases/if_statement/expected.txt",
+      "referenceSha256": "69f8d204cf7ef50112c308585656fdab540ad392efef9aeaf553b9f8307385ed",
+      "rawOraclePath": "oracle/if_statement/oracle.stdout",
+      "rawOracleSha256": "2db8257ef178962ba2d20aae5c0b80755c56049b999ea593140d488bc8ff41c3",
+      "sections": {
+        "AST": 92,
+        "NODES": 19,
+        "EDGES": 165,
+        "FLOWS": 58
+      }
+    },
+    "lua_nested": {
+      "group": "boundaries",
+      "exact": true,
+      "records": 458,
+      "beforeDiffLines": 415,
+      "afterDiffLines": 0,
+      "exitCode": 0,
+      "inputPath": "cases/lua_nested/main.c",
+      "inputSha256": "9517589c443c2a2576cd8fa0762ffd5b649f2755fadc045bf34c2b3ffaf22b57",
+      "referencePath": "cases/lua_nested/expected.txt",
+      "referenceSha256": "66d44e041d5c29ba9f73919f40e004e813ad1234ae4e489ccc7cb1aa7426b94d",
+      "rawOraclePath": "oracle/lua_nested/oracle.stdout",
+      "rawOracleSha256": "ac5a0aadbdfc74e4e1a034162d43c6a0a5ff17d77007e20df2dc829d0f6e6330",
+      "sections": {
+        "AST": 124,
+        "NODES": 21,
+        "EDGES": 227,
+        "FLOWS": 86
+      }
+    },
+    "lua_struct": {
+      "group": "boundaries",
+      "exact": true,
+      "records": 395,
+      "beforeDiffLines": 352,
+      "afterDiffLines": 0,
+      "exitCode": 0,
+      "inputPath": "cases/lua_struct/main.c",
+      "inputSha256": "b361bfaa5f625db930843e1bb4f7fee04417ca49dc3f4b7d373da88071337dd3",
+      "referencePath": "cases/lua_struct/expected.txt",
+      "referenceSha256": "3e4f41cf43e6957799c5405c726d6966efa7b1d942fe7494a55e65363c1e243c",
+      "rawOraclePath": "oracle/lua_struct/oracle.stdout",
+      "rawOracleSha256": "5a2553f9142a2dbd2f82a91bee7417d20aac4448f4dee33b693a38fa99ef17d6",
+      "sections": {
+        "AST": 106,
+        "NODES": 21,
+        "EDGES": 192,
+        "FLOWS": 76
+      }
+    },
+    "nested_blocks": {
+      "group": "boundaries",
+      "exact": true,
+      "records": 327,
+      "beforeDiffLines": 325,
+      "afterDiffLines": 0,
+      "exitCode": 0,
+      "inputPath": "cases/nested_blocks/main.c",
+      "inputSha256": "b733001c17a6ed9c8c253b509e7adc5e557cc44423f20698f80bb716f8464b14",
+      "referencePath": "cases/nested_blocks/expected.txt",
+      "referenceSha256": "0bb8d35cc334d4af96c49120d3214358abf312c0e770d62c15ecf4ac1c7cebd1",
+      "rawOraclePath": "oracle/nested_blocks/oracle.stdout",
+      "rawOracleSha256": "5f90313637c43d3cfbcaabb4c4cced187e2d04197330778c880c5e41178112c6",
+      "sections": {
+        "AST": 88,
+        "NODES": 19,
+        "EDGES": 160,
+        "FLOWS": 60
+      }
+    },
+    "return_statement": {
+      "group": "boundaries",
+      "exact": true,
+      "records": 141,
+      "beforeDiffLines": 105,
+      "afterDiffLines": 0,
+      "exitCode": 0,
+      "inputPath": "cases/return_statement/main.c",
+      "inputSha256": "24c6b8138ae8781f439a794aad7e67bff4c3c39de14880086c5e2604449cf037",
+      "referencePath": "cases/return_statement/expected.txt",
+      "referenceSha256": "8b1db4b92094be135e2a30d275058d9adcb16046529ad9acb2b75c8aae0d2f5e",
+      "rawOraclePath": "oracle/return_statement/oracle.stdout",
+      "rawOracleSha256": "4968629e68fd0a29a0b77aff4e48ddbed19fd190eebee1c1225f0bd9613e41a1",
+      "sections": {
+        "AST": 36,
+        "NODES": 17,
+        "EDGES": 72,
+        "FLOWS": 16
+      }
+    },
+    "shadow_after": {
+      "group": "boundaries",
+      "exact": true,
+      "records": 314,
+      "beforeDiffLines": 282,
+      "afterDiffLines": 0,
+      "exitCode": 0,
+      "inputPath": "cases/shadow_after/main.c",
+      "inputSha256": "6edef0932fe611ab5a69b59abe09182d1e5cd7bf918185efa89370ae53bd5643",
+      "referencePath": "cases/shadow_after/expected.txt",
+      "referenceSha256": "e3320ade4f9489d4b8c09a58cfae58a8ee513aa8c1677853f63b24ec2194091f",
+      "rawOraclePath": "oracle/shadow_after/oracle.stdout",
+      "rawOracleSha256": "ab350e28b59198e562977749412c8f1746fb1c87089b8ef4aa0a9e8e446feae1",
+      "sections": {
+        "AST": 82,
+        "NODES": 19,
+        "EDGES": 150,
+        "FLOWS": 63
+      }
+    },
+    "empty_block": {
+      "group": "final",
+      "exact": true,
+      "records": 116,
+      "beforeDiffLines": 29,
+      "afterDiffLines": 0,
+      "exitCode": 0,
+      "inputPath": "cases/empty_block/main.c",
+      "inputSha256": "334532cf5f545f9df2895f7a4666a6f0c12c556454caec338b6c6adf5393f2bd",
+      "referencePath": "cases/empty_block/expected.txt",
+      "referenceSha256": "2eac1b6c2dca04a6e62fef2fe57be2dbbc2755fcf092a64a42b9572259655732",
+      "rawOraclePath": "oracle/empty_block/oracle.stdout",
+      "rawOracleSha256": "eced10ce49053c41c48dbd803c55c20d46f9b6f09046710dcbcbac684b1a3353",
+      "sections": {
+        "AST": 30,
+        "NODES": 17,
+        "EDGES": 60,
+        "FLOWS": 9
+      }
+    },
+    "for_empty": {
+      "group": "final",
+      "exact": true,
+      "records": 303,
+      "beforeDiffLines": 295,
+      "afterDiffLines": 0,
+      "exitCode": 0,
+      "inputPath": "cases/for_empty/main.c",
+      "inputSha256": "a079a84bcc00d1296f99e45a1645589e2a77938cff6ffe8a4f0b35bb9a541f78",
+      "referencePath": "cases/for_empty/expected.txt",
+      "referenceSha256": "ca4e2fd820d1625060ab119479965e8295e27c039d19f7807f5ddcc8abf9f41b",
+      "rawOraclePath": "oracle/for_empty/oracle.stdout",
+      "rawOracleSha256": "edc76099a4cbe35cec9d5d3d981d7578b4e1eb84c7d0daf329409fa4705682ef",
+      "sections": {
+        "AST": 84,
+        "NODES": 19,
+        "EDGES": 148,
+        "FLOWS": 52
+      }
+    },
+    "for_expression": {
+      "group": "final",
+      "exact": true,
+      "records": 353,
+      "beforeDiffLines": 345,
+      "afterDiffLines": 0,
+      "exitCode": 0,
+      "inputPath": "cases/for_expression/main.c",
+      "inputSha256": "5d7046bbf5dc9ecc569a3432a967020e32d2eecc32c6c1c5d7935f419f210af3",
+      "referencePath": "cases/for_expression/expected.txt",
+      "referenceSha256": "ea6a7e78e63985672184dcee062e642d3f399346436a1d0d5f381bb6ba4d8db3",
+      "rawOraclePath": "oracle/for_expression/oracle.stdout",
+      "rawOracleSha256": "6614e7aa121881dc26c45ec0642e59a97738dd64517ee24c006956f13aaabcbd",
+      "sections": {
+        "AST": 96,
+        "NODES": 19,
+        "EDGES": 174,
+        "FLOWS": 64
+      }
+    },
+    "macro_flows": {
+      "group": "final",
+      "exact": true,
+      "records": 1189,
+      "beforeDiffLines": 1129,
+      "afterDiffLines": 0,
+      "exitCode": 0,
+      "inputPath": "cases/macro_flows/main.c",
+      "inputSha256": "47915572d55edd2083d4f131f8190395b273289d6ef3383ea6895435d7c47bea",
+      "referencePath": "cases/macro_flows/expected.txt",
+      "referenceSha256": "34a62f4ddccca1e3992c06878330df9d3c0dbec4b0abc15957cbc81957e36215",
+      "rawOraclePath": "oracle/macro_flows/oracle.stdout",
+      "rawOracleSha256": "7516dd97dc23643cbc3d35c9962152dea23b508fa896b22f1664caeff92b3bbc",
+      "sections": {
+        "AST": 352,
+        "NODES": 29,
+        "EDGES": 602,
+        "FLOWS": 206
+      }
+    },
+    "pointer_qualifier": {
+      "group": "final",
+      "exact": true,
+      "records": 263,
+      "beforeDiffLines": 238,
+      "afterDiffLines": 0,
+      "exitCode": 0,
+      "inputPath": "cases/pointer_qualifier/main.c",
+      "inputSha256": "eba03fe3b0d549f7f6324edc6f336e901280347f7212ff29879584f10817fdc3",
+      "referencePath": "cases/pointer_qualifier/expected.txt",
+      "referenceSha256": "53eaa56cc62786a48a076524fb100d4932a4a2179460eddafdfb79379d2f6a7d",
+      "rawOraclePath": "oracle/pointer_qualifier/oracle.stdout",
+      "rawOracleSha256": "7b2e43487716f9ca5d7c110555203c0728e88869ba56f2cc77c9a35d334b65a2",
+      "sections": {
+        "AST": 70,
+        "NODES": 19,
+        "EDGES": 129,
+        "FLOWS": 45
+      }
+    },
+    "source_lines": {
+      "group": "final",
+      "exact": true,
+      "records": 503,
+      "beforeDiffLines": 518,
+      "afterDiffLines": 0,
+      "exitCode": 0,
+      "inputPath": "cases/source_lines/main.c",
+      "inputSha256": "65aa2c8862854e57884c5ef3346a7412f1355a6210c42d27c2213f4307c60787",
+      "referencePath": "cases/source_lines/expected.txt",
+      "referenceSha256": "37356c8fcbe595ab8eb255c94168918977fe6321869a8c20ee40aaa4bdded29f",
+      "rawOraclePath": "oracle/source_lines/oracle.stdout",
+      "rawOracleSha256": "0f9eb243c8c542d6bb24694cf2d950a1fb240b3828570a13afbd7c5729d39859",
+      "sections": {
+        "AST": 136,
+        "NODES": 21,
+        "EDGES": 242,
+        "FLOWS": 104
+      }
+    }
+  }
+}

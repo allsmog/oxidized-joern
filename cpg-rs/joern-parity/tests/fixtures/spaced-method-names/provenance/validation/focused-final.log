@@ -1,0 +1,11 @@
+   Compiling joern-parity v0.1.1 (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-inactive-declarations/cpg-rs/joern-parity)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.38s
+     Running tests/spaced_method_names.rs (/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/target/debug/deps/spaced_method_names-da993fb4132af238)
+
+running 3 tests
+test method_prefix_collision_cannot_steal_header_or_macro_entry_edges ... ok
+test code_property_markers_preserve_method_origin_edges ... ok
+test complete_method_names_preserve_cfg_and_reaching_definitions ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+

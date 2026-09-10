@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "status": "TEMPLATE_NOT_APPROVED",
+  "observationHoldReleased": false,
+  "preparedManifestSha256": null,
+  "sourceCommit": "a806866acc83ce9b40b69259fe9e430a3e818dd0",
+  "documentationCommit": "a806866acc83ce9b40b69259fe9e430a3e818dd0",
+  "frozenBuild": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/thirteenth-batch/final-release-v2/bin/source-bindings.json",
+    "sha256": "d339e070ad6dc154a344b8d1c07953fb6fd85e21c3cb79381286fc08847691e5",
+    "bytes": 2153885
+  },
+  "canonicalRun": null,
+  "canonicalRelease": null,
+  "historicalObservation": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/thirteenth-include-observer-v1/runs/first-complete-six-include-saved-cpg-observation/run.json",
+    "sha256": "a202d40d8f7f9bf363365fd0857c589c0a031c3a6340f17f7b08b63974c7ed06",
+    "bytes": 1177575
+  },
+  "note": "Parent must approve this exact preparation after admitting the four complete canonical projects. Observe four fresh saved store pairs only; the one historical full supplement is a comparison input. This template is not approval."
+}

@@ -1,0 +1,14 @@
+RESULT|after_return_entry|true
+RESULT|bare_entry|false
+RESULT|break_block_entry|true
+RESULT|continue_entry|true
+RESULT|empty_entry|false
+RESULT|kill_entry|true
+RESULT|labeled_entry|false
+RESULT|loop_block_entry|false
+RESULT|nested_entry|false
+RESULT|return_entry|false
+RESULT|source_before_break_entry|true
+RESULT|source_before_continue_entry|true
+RESULT|source_before_return_entry|true
+RESULT|switch_entry|false

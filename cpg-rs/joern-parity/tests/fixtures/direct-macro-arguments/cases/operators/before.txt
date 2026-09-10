@@ -1,0 +1,529 @@
+METHOD NAME=<global> CODE=<global> FULL_NAME=<includes>:<global> ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.addition FULL_NAME=<operator>.addition ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.and FULL_NAME=<operator>.and ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.pointerCall FULL_NAME=<operator>.pointerCall ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.subtraction FULL_NAME=<operator>.subtraction ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=bitand CODE=int bitand(int a,int b) {return APPLY(&,a,b); } FULL_NAME=bitand SIGNATURE=int(int,int) ORDER=1
+  METHOD_PARAMETER_IN NAME=a CODE=int a TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=a CODE=int a TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_IN NAME=b CODE=int b TYPE_FULL_NAME=int ORDER=2
+  METHOD_PARAMETER_OUT NAME=b CODE=int b TYPE_FULL_NAME=int ORDER=2
+  BLOCK CODE={return APPLY(&,a,b); } TYPE_FULL_NAME=void ORDER=3
+    RETURN CODE=return APPLY(&,a,b); ORDER=1
+      CALL NAME=APPLY CODE=APPLY(&,a,b) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=main.c:APPLY:ANY(3) SIGNATURE=ANY(3) ORDER=1 DISPATCH_TYPE=INLINED
+        IDENTIFIER NAME=b CODE=b TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=2
+        BLOCK TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+          CALL NAME=<operator>.and CODE=(b) & a(b) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.and ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+            IDENTIFIER NAME=b CODE=b TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+            CALL NAME=<operator>.pointerCall CODE=a(b) TYPE_FULL_NAME=int METHOD_FULL_NAME=<operator>.pointerCall ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=DYNAMIC_DISPATCH
+              IDENTIFIER NAME=a CODE=a TYPE_FULL_NAME=int ORDER=1
+              IDENTIFIER NAME=b CODE=b TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=4
+
+METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1
+  METHOD NAME=plus CODE=int plus(int a,int b) {return APPLY(+,a,b); } FULL_NAME=plus SIGNATURE=int(int,int) ORDER=1
+    METHOD_PARAMETER_IN NAME=a CODE=int a TYPE_FULL_NAME=int ORDER=1
+    METHOD_PARAMETER_OUT NAME=a CODE=int a TYPE_FULL_NAME=int ORDER=1
+    METHOD_PARAMETER_IN NAME=b CODE=int b TYPE_FULL_NAME=int ORDER=2
+    METHOD_PARAMETER_OUT NAME=b CODE=int b TYPE_FULL_NAME=int ORDER=2
+    BLOCK CODE={return APPLY(+,a,b); } TYPE_FULL_NAME=void ORDER=3
+      RETURN CODE=return APPLY(+,a,b); ORDER=1
+        CALL NAME=APPLY CODE=APPLY(+,a,b) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=main.c:APPLY:ANY(3) SIGNATURE=ANY(3) ORDER=1 DISPATCH_TYPE=INLINED
+          IDENTIFIER NAME=b CODE=b TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=2
+          BLOCK TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+            CALL NAME=<operator>.addition CODE=(b) + a(b) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+              IDENTIFIER NAME=b CODE=b TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+              CALL NAME=<operator>.pointerCall CODE=a(b) TYPE_FULL_NAME=int METHOD_FULL_NAME=<operator>.pointerCall ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=DYNAMIC_DISPATCH
+                IDENTIFIER NAME=a CODE=a TYPE_FULL_NAME=int ORDER=1
+                IDENTIFIER NAME=b CODE=b TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=4
+  METHOD NAME=minus CODE=int minus(int a,int b) {return APPLY(-,a,b); } FULL_NAME=minus SIGNATURE=int(int,int) ORDER=1
+    METHOD_PARAMETER_IN NAME=a CODE=int a TYPE_FULL_NAME=int ORDER=1
+    METHOD_PARAMETER_OUT NAME=a CODE=int a TYPE_FULL_NAME=int ORDER=1
+    METHOD_PARAMETER_IN NAME=b CODE=int b TYPE_FULL_NAME=int ORDER=2
+    METHOD_PARAMETER_OUT NAME=b CODE=int b TYPE_FULL_NAME=int ORDER=2
+    BLOCK CODE={return APPLY(-,a,b); } TYPE_FULL_NAME=void ORDER=3
+      RETURN CODE=return APPLY(-,a,b); ORDER=1
+        CALL NAME=APPLY CODE=APPLY(-,a,b) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=main.c:APPLY:ANY(3) SIGNATURE=ANY(3) ORDER=1 DISPATCH_TYPE=INLINED
+          IDENTIFIER NAME=b CODE=b TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=2
+          BLOCK TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+            CALL NAME=<operator>.subtraction CODE=(b) - a(b) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.subtraction ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+              IDENTIFIER NAME=b CODE=b TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+              CALL NAME=<operator>.pointerCall CODE=a(b) TYPE_FULL_NAME=int METHOD_FULL_NAME=<operator>.pointerCall ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=DYNAMIC_DISPATCH
+                IDENTIFIER NAME=a CODE=a TYPE_FULL_NAME=int ORDER=1
+                IDENTIFIER NAME=b CODE=b TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=4
+  METHOD NAME=bitand CODE=int bitand(int a,int b) {return APPLY(&,a,b); } FULL_NAME=bitand SIGNATURE=int(int,int) ORDER=1
+    METHOD_PARAMETER_IN NAME=a CODE=int a TYPE_FULL_NAME=int ORDER=1
+    METHOD_PARAMETER_OUT NAME=a CODE=int a TYPE_FULL_NAME=int ORDER=1
+    METHOD_PARAMETER_IN NAME=b CODE=int b TYPE_FULL_NAME=int ORDER=2
+    METHOD_PARAMETER_OUT NAME=b CODE=int b TYPE_FULL_NAME=int ORDER=2
+    BLOCK CODE={return APPLY(&,a,b); } TYPE_FULL_NAME=void ORDER=3
+      RETURN CODE=return APPLY(&,a,b); ORDER=1
+        CALL NAME=APPLY CODE=APPLY(&,a,b) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=main.c:APPLY:ANY(3) SIGNATURE=ANY(3) ORDER=1 DISPATCH_TYPE=INLINED
+          IDENTIFIER NAME=b CODE=b TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=2
+          BLOCK TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+            CALL NAME=<operator>.and CODE=(b) & a(b) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.and ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+              IDENTIFIER NAME=b CODE=b TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+              CALL NAME=<operator>.pointerCall CODE=a(b) TYPE_FULL_NAME=int METHOD_FULL_NAME=<operator>.pointerCall ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=DYNAMIC_DISPATCH
+                IDENTIFIER NAME=a CODE=a TYPE_FULL_NAME=int ORDER=1
+                IDENTIFIER NAME=b CODE=b TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=4
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+    METHOD_REF CODE=plus TYPE_FULL_NAME=plus METHOD_FULL_NAME=plus ORDER=1
+    METHOD_REF CODE=minus TYPE_FULL_NAME=minus METHOD_FULL_NAME=minus ORDER=2
+    METHOD_REF CODE=bitand TYPE_FULL_NAME=bitand METHOD_FULL_NAME=bitand ORDER=3
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=APPLY CODE=#define APPLY(op,a,b) ((a) op (b)) FULL_NAME=main.c:APPLY:ANY(3) SIGNATURE=ANY(3) ORDER=1
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_IN NAME=p3 CODE=p3 TYPE_FULL_NAME=ANY ORDER=3
+  METHOD_PARAMETER_OUT NAME=p3 CODE=p3 TYPE_FULL_NAME=ANY ORDER=3
+  BLOCK TYPE_FULL_NAME=ANY ORDER=4
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=5
+
+METHOD NAME=minus CODE=int minus(int a,int b) {return APPLY(-,a,b); } FULL_NAME=minus SIGNATURE=int(int,int) ORDER=1
+  METHOD_PARAMETER_IN NAME=a CODE=int a TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=a CODE=int a TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_IN NAME=b CODE=int b TYPE_FULL_NAME=int ORDER=2
+  METHOD_PARAMETER_OUT NAME=b CODE=int b TYPE_FULL_NAME=int ORDER=2
+  BLOCK CODE={return APPLY(-,a,b); } TYPE_FULL_NAME=void ORDER=3
+    RETURN CODE=return APPLY(-,a,b); ORDER=1
+      CALL NAME=APPLY CODE=APPLY(-,a,b) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=main.c:APPLY:ANY(3) SIGNATURE=ANY(3) ORDER=1 DISPATCH_TYPE=INLINED
+        IDENTIFIER NAME=b CODE=b TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=2
+        BLOCK TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+          CALL NAME=<operator>.subtraction CODE=(b) - a(b) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.subtraction ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+            IDENTIFIER NAME=b CODE=b TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+            CALL NAME=<operator>.pointerCall CODE=a(b) TYPE_FULL_NAME=int METHOD_FULL_NAME=<operator>.pointerCall ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=DYNAMIC_DISPATCH
+              IDENTIFIER NAME=a CODE=a TYPE_FULL_NAME=int ORDER=1
+              IDENTIFIER NAME=b CODE=b TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=4
+
+METHOD NAME=plus CODE=int plus(int a,int b) {return APPLY(+,a,b); } FULL_NAME=plus SIGNATURE=int(int,int) ORDER=1
+  METHOD_PARAMETER_IN NAME=a CODE=int a TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_OUT NAME=a CODE=int a TYPE_FULL_NAME=int ORDER=1
+  METHOD_PARAMETER_IN NAME=b CODE=int b TYPE_FULL_NAME=int ORDER=2
+  METHOD_PARAMETER_OUT NAME=b CODE=int b TYPE_FULL_NAME=int ORDER=2
+  BLOCK CODE={return APPLY(+,a,b); } TYPE_FULL_NAME=void ORDER=3
+    RETURN CODE=return APPLY(+,a,b); ORDER=1
+      CALL NAME=APPLY CODE=APPLY(+,a,b) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=main.c:APPLY:ANY(3) SIGNATURE=ANY(3) ORDER=1 DISPATCH_TYPE=INLINED
+        IDENTIFIER NAME=b CODE=b TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=2
+        BLOCK TYPE_FULL_NAME=ANY ORDER=2 ARGUMENT_INDEX=2
+          CALL NAME=<operator>.addition CODE=(b) + a(b) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=<operator>.addition ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+            IDENTIFIER NAME=b CODE=b TYPE_FULL_NAME=int ORDER=1 ARGUMENT_INDEX=1
+            CALL NAME=<operator>.pointerCall CODE=a(b) TYPE_FULL_NAME=int METHOD_FULL_NAME=<operator>.pointerCall ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=DYNAMIC_DISPATCH
+              IDENTIFIER NAME=a CODE=a TYPE_FULL_NAME=int ORDER=1
+              IDENTIFIER NAME=b CODE=b TYPE_FULL_NAME=int ORDER=2 ARGUMENT_INDEX=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=4
+
+NODES|META_DATA LANGUAGE=NEWC
+NODES|FILE NAME=<includes> ORDER=1
+NODES|FILE NAME=<unknown> ORDER=0
+NODES|FILE NAME=main.c ORDER=0
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<global> FILENAME=<unknown> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<includes>:<global> FILENAME=<includes> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|NAMESPACE NAME=<global>
+NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=bitand FULL_NAME=bitand CODE=bitand AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=<global> FULL_NAME=main.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=minus FULL_NAME=minus CODE=minus AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=plus FULL_NAME=plus CODE=plus AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+NODES|TYPE NAME=bitand FULL_NAME=bitand TYPE_DECL_FULL_NAME=bitand
+NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+NODES|TYPE NAME=minus FULL_NAME=minus TYPE_DECL_FULL_NAME=minus
+NODES|TYPE NAME=plus FULL_NAME=plus TYPE_DECL_FULL_NAME=plus
+NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+EDGES|ARGUMENT bitand#10 -> bitand#11
+EDGES|ARGUMENT bitand#10 -> bitand#12
+EDGES|ARGUMENT bitand#12 -> bitand#14
+EDGES|ARGUMENT bitand#6 -> bitand#7
+EDGES|ARGUMENT bitand#7 -> bitand#8
+EDGES|ARGUMENT minus#10 -> minus#11
+EDGES|ARGUMENT minus#10 -> minus#12
+EDGES|ARGUMENT minus#12 -> minus#14
+EDGES|ARGUMENT minus#6 -> minus#7
+EDGES|ARGUMENT minus#7 -> minus#8
+EDGES|ARGUMENT plus#10 -> plus#11
+EDGES|ARGUMENT plus#10 -> plus#12
+EDGES|ARGUMENT plus#12 -> plus#14
+EDGES|ARGUMENT plus#6 -> plus#7
+EDGES|ARGUMENT plus#7 -> plus#8
+EDGES|CALL bitand#10 -> <operator>.and#0
+EDGES|CALL bitand#7 -> main.c:APPLY:ANY(3)#0
+EDGES|CALL minus#10 -> <operator>.subtraction#0
+EDGES|CALL minus#7 -> main.c:APPLY:ANY(3)#0
+EDGES|CALL plus#10 -> <operator>.addition#0
+EDGES|CALL plus#7 -> main.c:APPLY:ANY(3)#0
+EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+EDGES|CFG <operator>.addition#0 -> <operator>.addition#5
+EDGES|CFG <operator>.and#0 -> <operator>.and#5
+EDGES|CFG <operator>.pointerCall#0 -> <operator>.pointerCall#4
+EDGES|CFG <operator>.subtraction#0 -> <operator>.subtraction#5
+EDGES|CFG bitand#0 -> bitand#8
+EDGES|CFG bitand#10 -> bitand#6
+EDGES|CFG bitand#11 -> bitand#13
+EDGES|CFG bitand#12 -> bitand#10
+EDGES|CFG bitand#13 -> bitand#14
+EDGES|CFG bitand#14 -> bitand#12
+EDGES|CFG bitand#6 -> bitand#15
+EDGES|CFG bitand#7 -> bitand#11
+EDGES|CFG bitand#7 -> bitand#6
+EDGES|CFG bitand#8 -> bitand#7
+EDGES|CFG main.c:<global>#0 -> main.c:<global>#50
+EDGES|CFG main.c:<global>#1 -> plus#8
+EDGES|CFG main.c:<global>#17 -> minus#8
+EDGES|CFG main.c:<global>#50 -> main.c:<global>#51
+EDGES|CFG main.c:<global>#51 -> main.c:<global>#52
+EDGES|CFG main.c:<global>#52 -> main.c:<global>#53
+EDGES|CFG main.c:APPLY:ANY(3)#0 -> main.c:APPLY:ANY(3)#8
+EDGES|CFG minus#10 -> minus#6
+EDGES|CFG minus#11 -> minus#13
+EDGES|CFG minus#12 -> minus#10
+EDGES|CFG minus#13 -> minus#14
+EDGES|CFG minus#14 -> minus#12
+EDGES|CFG minus#6 -> minus#15
+EDGES|CFG minus#7 -> minus#11
+EDGES|CFG minus#7 -> minus#6
+EDGES|CFG minus#8 -> minus#7
+EDGES|CFG plus#10 -> plus#6
+EDGES|CFG plus#11 -> plus#13
+EDGES|CFG plus#12 -> plus#10
+EDGES|CFG plus#13 -> plus#14
+EDGES|CFG plus#14 -> plus#12
+EDGES|CFG plus#6 -> plus#15
+EDGES|CFG plus#7 -> plus#11
+EDGES|CFG plus#7 -> plus#6
+EDGES|CFG plus#8 -> plus#7
+EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+EDGES|CONTAINS <operator>.addition#0 -> <operator>.addition#2
+EDGES|CONTAINS <operator>.and#0 -> <operator>.and#2
+EDGES|CONTAINS <operator>.pointerCall#0 -> <operator>.pointerCall#2
+EDGES|CONTAINS <operator>.subtraction#0 -> <operator>.subtraction#2
+EDGES|CONTAINS D:main.c:<global> -> D:bitand
+EDGES|CONTAINS D:main.c:<global> -> D:minus
+EDGES|CONTAINS D:main.c:<global> -> D:plus
+EDGES|CONTAINS D:main.c:<global> -> main.c:<global>#0
+EDGES|CONTAINS D:main.c:<global> -> main.c:APPLY:ANY(3)#0
+EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+EDGES|CONTAINS F:<includes> -> D:ANY
+EDGES|CONTAINS F:<includes> -> D:int
+EDGES|CONTAINS F:<includes> -> D:void
+EDGES|CONTAINS F:main.c -> D:main.c:<global>
+EDGES|CONTAINS bitand#0 -> bitand#10
+EDGES|CONTAINS bitand#0 -> bitand#11
+EDGES|CONTAINS bitand#0 -> bitand#12
+EDGES|CONTAINS bitand#0 -> bitand#13
+EDGES|CONTAINS bitand#0 -> bitand#14
+EDGES|CONTAINS bitand#0 -> bitand#5
+EDGES|CONTAINS bitand#0 -> bitand#6
+EDGES|CONTAINS bitand#0 -> bitand#7
+EDGES|CONTAINS bitand#0 -> bitand#8
+EDGES|CONTAINS bitand#0 -> bitand#9
+EDGES|CONTAINS main.c:<global>#0 -> bitand#0
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#1
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#17
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#49
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#50
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#51
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#52
+EDGES|CONTAINS main.c:<global>#1 -> plus#10
+EDGES|CONTAINS main.c:<global>#1 -> plus#11
+EDGES|CONTAINS main.c:<global>#1 -> plus#12
+EDGES|CONTAINS main.c:<global>#1 -> plus#13
+EDGES|CONTAINS main.c:<global>#1 -> plus#14
+EDGES|CONTAINS main.c:<global>#1 -> plus#5
+EDGES|CONTAINS main.c:<global>#1 -> plus#6
+EDGES|CONTAINS main.c:<global>#1 -> plus#7
+EDGES|CONTAINS main.c:<global>#1 -> plus#8
+EDGES|CONTAINS main.c:<global>#1 -> plus#9
+EDGES|CONTAINS main.c:<global>#17 -> minus#10
+EDGES|CONTAINS main.c:<global>#17 -> minus#11
+EDGES|CONTAINS main.c:<global>#17 -> minus#12
+EDGES|CONTAINS main.c:<global>#17 -> minus#13
+EDGES|CONTAINS main.c:<global>#17 -> minus#14
+EDGES|CONTAINS main.c:<global>#17 -> minus#5
+EDGES|CONTAINS main.c:<global>#17 -> minus#6
+EDGES|CONTAINS main.c:<global>#17 -> minus#7
+EDGES|CONTAINS main.c:<global>#17 -> minus#8
+EDGES|CONTAINS main.c:<global>#17 -> minus#9
+EDGES|CONTAINS main.c:APPLY:ANY(3)#0 -> main.c:APPLY:ANY(3)#7
+EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.addition#6 -> T:ANY
+EDGES|EVAL_TYPE <operator>.and#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.and#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.and#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.and#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.and#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.and#6 -> T:ANY
+EDGES|EVAL_TYPE <operator>.pointerCall#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.pointerCall#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.pointerCall#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.pointerCall#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.subtraction#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.subtraction#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.subtraction#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.subtraction#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.subtraction#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.subtraction#6 -> T:ANY
+EDGES|EVAL_TYPE bitand#1 -> T:int
+EDGES|EVAL_TYPE bitand#10 -> T:ANY
+EDGES|EVAL_TYPE bitand#11 -> T:int
+EDGES|EVAL_TYPE bitand#12 -> T:int
+EDGES|EVAL_TYPE bitand#13 -> T:int
+EDGES|EVAL_TYPE bitand#14 -> T:int
+EDGES|EVAL_TYPE bitand#15 -> T:int
+EDGES|EVAL_TYPE bitand#2 -> T:int
+EDGES|EVAL_TYPE bitand#3 -> T:int
+EDGES|EVAL_TYPE bitand#4 -> T:int
+EDGES|EVAL_TYPE bitand#5 -> T:void
+EDGES|EVAL_TYPE bitand#7 -> T:ANY
+EDGES|EVAL_TYPE bitand#8 -> T:int
+EDGES|EVAL_TYPE bitand#9 -> T:ANY
+EDGES|EVAL_TYPE main.c:<global>#49 -> T:ANY
+EDGES|EVAL_TYPE main.c:<global>#50 -> T:plus
+EDGES|EVAL_TYPE main.c:<global>#51 -> T:minus
+EDGES|EVAL_TYPE main.c:<global>#52 -> T:bitand
+EDGES|EVAL_TYPE main.c:<global>#53 -> T:ANY
+EDGES|EVAL_TYPE main.c:APPLY:ANY(3)#1 -> T:ANY
+EDGES|EVAL_TYPE main.c:APPLY:ANY(3)#2 -> T:ANY
+EDGES|EVAL_TYPE main.c:APPLY:ANY(3)#3 -> T:ANY
+EDGES|EVAL_TYPE main.c:APPLY:ANY(3)#4 -> T:ANY
+EDGES|EVAL_TYPE main.c:APPLY:ANY(3)#5 -> T:ANY
+EDGES|EVAL_TYPE main.c:APPLY:ANY(3)#6 -> T:ANY
+EDGES|EVAL_TYPE main.c:APPLY:ANY(3)#7 -> T:ANY
+EDGES|EVAL_TYPE main.c:APPLY:ANY(3)#8 -> T:ANY
+EDGES|EVAL_TYPE minus#1 -> T:int
+EDGES|EVAL_TYPE minus#10 -> T:ANY
+EDGES|EVAL_TYPE minus#11 -> T:int
+EDGES|EVAL_TYPE minus#12 -> T:int
+EDGES|EVAL_TYPE minus#13 -> T:int
+EDGES|EVAL_TYPE minus#14 -> T:int
+EDGES|EVAL_TYPE minus#15 -> T:int
+EDGES|EVAL_TYPE minus#2 -> T:int
+EDGES|EVAL_TYPE minus#3 -> T:int
+EDGES|EVAL_TYPE minus#4 -> T:int
+EDGES|EVAL_TYPE minus#5 -> T:void
+EDGES|EVAL_TYPE minus#7 -> T:ANY
+EDGES|EVAL_TYPE minus#8 -> T:int
+EDGES|EVAL_TYPE minus#9 -> T:ANY
+EDGES|EVAL_TYPE plus#1 -> T:int
+EDGES|EVAL_TYPE plus#10 -> T:ANY
+EDGES|EVAL_TYPE plus#11 -> T:int
+EDGES|EVAL_TYPE plus#12 -> T:int
+EDGES|EVAL_TYPE plus#13 -> T:int
+EDGES|EVAL_TYPE plus#14 -> T:int
+EDGES|EVAL_TYPE plus#15 -> T:int
+EDGES|EVAL_TYPE plus#2 -> T:int
+EDGES|EVAL_TYPE plus#3 -> T:int
+EDGES|EVAL_TYPE plus#4 -> T:int
+EDGES|EVAL_TYPE plus#5 -> T:void
+EDGES|EVAL_TYPE plus#7 -> T:ANY
+EDGES|EVAL_TYPE plus#8 -> T:int
+EDGES|EVAL_TYPE plus#9 -> T:ANY
+EDGES|PARAMETER_LINK <operator>.addition#1 -> <operator>.addition#3
+EDGES|PARAMETER_LINK <operator>.addition#4 -> <operator>.addition#6
+EDGES|PARAMETER_LINK <operator>.and#1 -> <operator>.and#3
+EDGES|PARAMETER_LINK <operator>.and#4 -> <operator>.and#6
+EDGES|PARAMETER_LINK <operator>.pointerCall#1 -> <operator>.pointerCall#3
+EDGES|PARAMETER_LINK <operator>.subtraction#1 -> <operator>.subtraction#3
+EDGES|PARAMETER_LINK <operator>.subtraction#4 -> <operator>.subtraction#6
+EDGES|PARAMETER_LINK bitand#1 -> bitand#2
+EDGES|PARAMETER_LINK bitand#3 -> bitand#4
+EDGES|PARAMETER_LINK main.c:APPLY:ANY(3)#1 -> main.c:APPLY:ANY(3)#2
+EDGES|PARAMETER_LINK main.c:APPLY:ANY(3)#3 -> main.c:APPLY:ANY(3)#4
+EDGES|PARAMETER_LINK main.c:APPLY:ANY(3)#5 -> main.c:APPLY:ANY(3)#6
+EDGES|PARAMETER_LINK minus#1 -> minus#2
+EDGES|PARAMETER_LINK minus#3 -> minus#4
+EDGES|PARAMETER_LINK plus#1 -> plus#2
+EDGES|PARAMETER_LINK plus#3 -> plus#4
+EDGES|REF NB:<global> -> NS:<global>
+EDGES|REF NB:<includes>:<global> -> NS:<global>
+EDGES|REF NB:main.c:<global> -> NS:<global>
+EDGES|REF T:ANY -> D:ANY
+EDGES|REF T:bitand -> D:bitand
+EDGES|REF T:int -> D:int
+EDGES|REF T:minus -> D:minus
+EDGES|REF T:plus -> D:plus
+EDGES|REF T:void -> D:void
+EDGES|REF bitand#11 -> bitand#3
+EDGES|REF bitand#13 -> bitand#1
+EDGES|REF bitand#14 -> bitand#3
+EDGES|REF main.c:<global>#50 -> main.c:<global>#1
+EDGES|REF main.c:<global>#51 -> main.c:<global>#17
+EDGES|REF main.c:<global>#52 -> bitand#0
+EDGES|REF minus#11 -> minus#3
+EDGES|REF minus#13 -> minus#1
+EDGES|REF minus#14 -> minus#3
+EDGES|REF plus#11 -> plus#3
+EDGES|REF plus#13 -> plus#1
+EDGES|REF plus#14 -> plus#3
+EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+EDGES|SOURCE_FILE D:ANY -> F:<includes>
+EDGES|SOURCE_FILE D:bitand -> F:main.c
+EDGES|SOURCE_FILE D:int -> F:<includes>
+EDGES|SOURCE_FILE D:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE D:minus -> F:main.c
+EDGES|SOURCE_FILE D:plus -> F:main.c
+EDGES|SOURCE_FILE D:void -> F:<includes>
+EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
+EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>
+EDGES|SOURCE_FILE NB:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE bitand#0 -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#0 -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#1 -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#17 -> F:main.c
+EDGES|SOURCE_FILE main.c:APPLY:ANY(3)#0 -> F:main.c
+FLOWS|REACHING_DEF[(b) & a(b)] bitand#10 -> bitand#15
+FLOWS|REACHING_DEF[(b) + a(b)] plus#10 -> plus#15
+FLOWS|REACHING_DEF[(b) - a(b)] minus#10 -> minus#15
+FLOWS|REACHING_DEF[<RET>] bitand#6 -> bitand#15
+FLOWS|REACHING_DEF[<RET>] minus#6 -> minus#15
+FLOWS|REACHING_DEF[<RET>] plus#6 -> plus#15
+FLOWS|REACHING_DEF[APPLY(&,a,b)] bitand#7 -> bitand#15
+FLOWS|REACHING_DEF[APPLY(&,a,b)] bitand#7 -> bitand#6
+FLOWS|REACHING_DEF[APPLY(+,a,b)] plus#7 -> plus#15
+FLOWS|REACHING_DEF[APPLY(+,a,b)] plus#7 -> plus#6
+FLOWS|REACHING_DEF[APPLY(-,a,b)] minus#7 -> minus#15
+FLOWS|REACHING_DEF[APPLY(-,a,b)] minus#7 -> minus#6
+FLOWS|REACHING_DEF[] <operator>.addition#0 -> <operator>.addition#1
+FLOWS|REACHING_DEF[] <operator>.addition#0 -> <operator>.addition#4
+FLOWS|REACHING_DEF[] <operator>.and#0 -> <operator>.and#1
+FLOWS|REACHING_DEF[] <operator>.and#0 -> <operator>.and#4
+FLOWS|REACHING_DEF[] <operator>.pointerCall#0 -> <operator>.pointerCall#1
+FLOWS|REACHING_DEF[] <operator>.subtraction#0 -> <operator>.subtraction#1
+FLOWS|REACHING_DEF[] <operator>.subtraction#0 -> <operator>.subtraction#4
+FLOWS|REACHING_DEF[] bitand#0 -> bitand#1
+FLOWS|REACHING_DEF[] bitand#0 -> bitand#11
+FLOWS|REACHING_DEF[] bitand#0 -> bitand#13
+FLOWS|REACHING_DEF[] bitand#0 -> bitand#14
+FLOWS|REACHING_DEF[] bitand#0 -> bitand#3
+FLOWS|REACHING_DEF[] bitand#0 -> bitand#8
+FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#50
+FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#51
+FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#52
+FLOWS|REACHING_DEF[] main.c:<global>#1 -> plus#1
+FLOWS|REACHING_DEF[] main.c:<global>#1 -> plus#11
+FLOWS|REACHING_DEF[] main.c:<global>#1 -> plus#13
+FLOWS|REACHING_DEF[] main.c:<global>#1 -> plus#14
+FLOWS|REACHING_DEF[] main.c:<global>#1 -> plus#3
+FLOWS|REACHING_DEF[] main.c:<global>#1 -> plus#8
+FLOWS|REACHING_DEF[] main.c:<global>#17 -> minus#1
+FLOWS|REACHING_DEF[] main.c:<global>#17 -> minus#11
+FLOWS|REACHING_DEF[] main.c:<global>#17 -> minus#13
+FLOWS|REACHING_DEF[] main.c:<global>#17 -> minus#14
+FLOWS|REACHING_DEF[] main.c:<global>#17 -> minus#3
+FLOWS|REACHING_DEF[] main.c:<global>#17 -> minus#8
+FLOWS|REACHING_DEF[] main.c:APPLY:ANY(3)#0 -> main.c:APPLY:ANY(3)#1
+FLOWS|REACHING_DEF[] main.c:APPLY:ANY(3)#0 -> main.c:APPLY:ANY(3)#3
+FLOWS|REACHING_DEF[] main.c:APPLY:ANY(3)#0 -> main.c:APPLY:ANY(3)#5
+FLOWS|REACHING_DEF[a(b)] bitand#12 -> bitand#10
+FLOWS|REACHING_DEF[a(b)] bitand#12 -> bitand#11
+FLOWS|REACHING_DEF[a(b)] bitand#12 -> bitand#15
+FLOWS|REACHING_DEF[a(b)] minus#12 -> minus#10
+FLOWS|REACHING_DEF[a(b)] minus#12 -> minus#11
+FLOWS|REACHING_DEF[a(b)] minus#12 -> minus#15
+FLOWS|REACHING_DEF[a(b)] plus#12 -> plus#10
+FLOWS|REACHING_DEF[a(b)] plus#12 -> plus#15
+FLOWS|REACHING_DEF[a] bitand#1 -> bitand#15
+FLOWS|REACHING_DEF[a] bitand#1 -> bitand#2
+FLOWS|REACHING_DEF[a] minus#1 -> minus#15
+FLOWS|REACHING_DEF[a] minus#1 -> minus#2
+FLOWS|REACHING_DEF[a] plus#1 -> plus#15
+FLOWS|REACHING_DEF[a] plus#1 -> plus#2
+FLOWS|REACHING_DEF[b] bitand#11 -> bitand#10
+FLOWS|REACHING_DEF[b] bitand#11 -> bitand#12
+FLOWS|REACHING_DEF[b] bitand#11 -> bitand#15
+FLOWS|REACHING_DEF[b] bitand#11 -> bitand#4
+FLOWS|REACHING_DEF[b] bitand#14 -> bitand#11
+FLOWS|REACHING_DEF[b] bitand#14 -> bitand#12
+FLOWS|REACHING_DEF[b] bitand#3 -> bitand#4
+FLOWS|REACHING_DEF[b] bitand#3 -> bitand#8
+FLOWS|REACHING_DEF[b] bitand#8 -> bitand#14
+FLOWS|REACHING_DEF[b] bitand#8 -> bitand#15
+FLOWS|REACHING_DEF[b] bitand#8 -> bitand#4
+FLOWS|REACHING_DEF[b] bitand#8 -> bitand#7
+FLOWS|REACHING_DEF[b] minus#11 -> minus#10
+FLOWS|REACHING_DEF[b] minus#11 -> minus#12
+FLOWS|REACHING_DEF[b] minus#11 -> minus#15
+FLOWS|REACHING_DEF[b] minus#11 -> minus#4
+FLOWS|REACHING_DEF[b] minus#14 -> minus#11
+FLOWS|REACHING_DEF[b] minus#14 -> minus#12
+FLOWS|REACHING_DEF[b] minus#3 -> minus#4
+FLOWS|REACHING_DEF[b] minus#3 -> minus#8
+FLOWS|REACHING_DEF[b] minus#8 -> minus#14
+FLOWS|REACHING_DEF[b] minus#8 -> minus#15
+FLOWS|REACHING_DEF[b] minus#8 -> minus#4
+FLOWS|REACHING_DEF[b] minus#8 -> minus#7
+FLOWS|REACHING_DEF[b] plus#11 -> plus#10
+FLOWS|REACHING_DEF[b] plus#11 -> plus#15
+FLOWS|REACHING_DEF[b] plus#11 -> plus#4
+FLOWS|REACHING_DEF[b] plus#14 -> plus#11
+FLOWS|REACHING_DEF[b] plus#14 -> plus#12
+FLOWS|REACHING_DEF[b] plus#3 -> plus#4
+FLOWS|REACHING_DEF[b] plus#3 -> plus#8
+FLOWS|REACHING_DEF[b] plus#8 -> plus#14
+FLOWS|REACHING_DEF[b] plus#8 -> plus#15
+FLOWS|REACHING_DEF[b] plus#8 -> plus#4
+FLOWS|REACHING_DEF[b] plus#8 -> plus#7
+FLOWS|REACHING_DEF[p1] <operator>.addition#1 -> <operator>.addition#3
+FLOWS|REACHING_DEF[p1] <operator>.addition#1 -> <operator>.addition#5
+FLOWS|REACHING_DEF[p1] <operator>.and#1 -> <operator>.and#3
+FLOWS|REACHING_DEF[p1] <operator>.and#1 -> <operator>.and#5
+FLOWS|REACHING_DEF[p1] <operator>.pointerCall#1 -> <operator>.pointerCall#3
+FLOWS|REACHING_DEF[p1] <operator>.pointerCall#1 -> <operator>.pointerCall#4
+FLOWS|REACHING_DEF[p1] <operator>.subtraction#1 -> <operator>.subtraction#3
+FLOWS|REACHING_DEF[p1] <operator>.subtraction#1 -> <operator>.subtraction#5
+FLOWS|REACHING_DEF[p1] main.c:APPLY:ANY(3)#1 -> main.c:APPLY:ANY(3)#2
+FLOWS|REACHING_DEF[p1] main.c:APPLY:ANY(3)#1 -> main.c:APPLY:ANY(3)#8
+FLOWS|REACHING_DEF[p2] <operator>.addition#4 -> <operator>.addition#5
+FLOWS|REACHING_DEF[p2] <operator>.addition#4 -> <operator>.addition#6
+FLOWS|REACHING_DEF[p2] <operator>.and#4 -> <operator>.and#5
+FLOWS|REACHING_DEF[p2] <operator>.and#4 -> <operator>.and#6
+FLOWS|REACHING_DEF[p2] <operator>.subtraction#4 -> <operator>.subtraction#5
+FLOWS|REACHING_DEF[p2] <operator>.subtraction#4 -> <operator>.subtraction#6
+FLOWS|REACHING_DEF[p2] main.c:APPLY:ANY(3)#3 -> main.c:APPLY:ANY(3)#4
+FLOWS|REACHING_DEF[p2] main.c:APPLY:ANY(3)#3 -> main.c:APPLY:ANY(3)#8
+FLOWS|REACHING_DEF[p3] main.c:APPLY:ANY(3)#5 -> main.c:APPLY:ANY(3)#6
+FLOWS|REACHING_DEF[p3] main.c:APPLY:ANY(3)#5 -> main.c:APPLY:ANY(3)#8

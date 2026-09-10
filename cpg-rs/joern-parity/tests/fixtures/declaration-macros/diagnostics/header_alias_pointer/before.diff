@@ -1,0 +1,134 @@
+--- joern
++++ before
+@@ -7,38 +7,38 @@
+     TYPE_DECL NAME=Item CODE=typedef int Item; FULL_NAME=Item ORDER=1
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+ 
+-METHOD NAME=f CODE=extern Item extern Item *(const char *, long unsigned); FULL_NAME=f SIGNATURE=Item*(char*,longunsigned) ORDER=1
++METHOD NAME=f CODE=API Item *f(const char *x, unsigned long n); FULL_NAME=f SIGNATURE=API*(char*,longunsigned) ORDER=1
+   METHOD_PARAMETER_IN NAME=x CODE=const char *x TYPE_FULL_NAME=char* ORDER=1
+   METHOD_PARAMETER_OUT NAME=x CODE=const char *x TYPE_FULL_NAME=char* ORDER=1
+   METHOD_PARAMETER_IN NAME=n CODE=unsigned long n TYPE_FULL_NAME=longunsigned ORDER=2
+   METHOD_PARAMETER_OUT NAME=n CODE=unsigned long n TYPE_FULL_NAME=longunsigned ORDER=2
+   BLOCK TYPE_FULL_NAME=ANY ORDER=3
+-  METHOD_RETURN CODE=RET TYPE_FULL_NAME=Item* ORDER=4
+-
+-METHOD NAME=g CODE=Item *g(const char *x, unsigned long n){return f(x,n);} FULL_NAME=g SIGNATURE=Item(char*,longunsigned) ORDER=1
++  METHOD_RETURN CODE=RET TYPE_FULL_NAME=API* ORDER=4
++
++METHOD NAME=g CODE=Item *g(const char *x, unsigned long n){return f(x,n);} FULL_NAME=g SIGNATURE=Item*(char*,longunsigned) ORDER=1
+   METHOD_PARAMETER_IN NAME=x CODE=const char *x TYPE_FULL_NAME=char* ORDER=1
+   METHOD_PARAMETER_OUT NAME=x CODE=const char *x TYPE_FULL_NAME=char* ORDER=1
+   METHOD_PARAMETER_IN NAME=n CODE=unsigned long n TYPE_FULL_NAME=longunsigned ORDER=2
+   METHOD_PARAMETER_OUT NAME=n CODE=unsigned long n TYPE_FULL_NAME=longunsigned ORDER=2
+   BLOCK CODE={return f(x,n);} TYPE_FULL_NAME=void ORDER=3
+     RETURN CODE=return f(x,n); ORDER=1
+-      CALL NAME=f CODE=f(x,n) TYPE_FULL_NAME=int* METHOD_FULL_NAME=f ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
++      CALL NAME=f CODE=f(x,n) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=f ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+         IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=char* ORDER=1 ARGUMENT_INDEX=1
+         IDENTIFIER NAME=n CODE=n TYPE_FULL_NAME=longunsigned ORDER=2 ARGUMENT_INDEX=2
+-  METHOD_RETURN CODE=RET TYPE_FULL_NAME=Item ORDER=4
++  METHOD_RETURN CODE=RET TYPE_FULL_NAME=Item* ORDER=4
+ 
+ METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1
+-  METHOD NAME=g CODE=Item *g(const char *x, unsigned long n){return f(x,n);} FULL_NAME=g SIGNATURE=Item(char*,longunsigned) ORDER=1
++  METHOD NAME=g CODE=Item *g(const char *x, unsigned long n){return f(x,n);} FULL_NAME=g SIGNATURE=Item*(char*,longunsigned) ORDER=1
+     METHOD_PARAMETER_IN NAME=x CODE=const char *x TYPE_FULL_NAME=char* ORDER=1
+     METHOD_PARAMETER_OUT NAME=x CODE=const char *x TYPE_FULL_NAME=char* ORDER=1
+     METHOD_PARAMETER_IN NAME=n CODE=unsigned long n TYPE_FULL_NAME=longunsigned ORDER=2
+     METHOD_PARAMETER_OUT NAME=n CODE=unsigned long n TYPE_FULL_NAME=longunsigned ORDER=2
+     BLOCK CODE={return f(x,n);} TYPE_FULL_NAME=void ORDER=3
+       RETURN CODE=return f(x,n); ORDER=1
+-        CALL NAME=f CODE=f(x,n) TYPE_FULL_NAME=int* METHOD_FULL_NAME=f ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
++        CALL NAME=f CODE=f(x,n) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=f ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+           IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=char* ORDER=1 ARGUMENT_INDEX=1
+           IDENTIFIER NAME=n CODE=n TYPE_FULL_NAME=longunsigned ORDER=2 ARGUMENT_INDEX=2
+-    METHOD_RETURN CODE=RET TYPE_FULL_NAME=Item ORDER=4
++    METHOD_RETURN CODE=RET TYPE_FULL_NAME=Item* ORDER=4
+   BLOCK TYPE_FULL_NAME=ANY ORDER=1
+     METHOD_REF CODE=g TYPE_FULL_NAME=g METHOD_FULL_NAME=g ORDER=1
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+@@ -54,23 +54,23 @@
+ NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+ NODES|NAMESPACE NAME=<global>
+ NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
++NODES|TYPE_DECL NAME=API* FULL_NAME=API* CODE=API* IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE_DECL NAME=Item FULL_NAME=Item CODE=typedef int Item; AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=api.h ORDER=1
+ NODES|TYPE_DECL NAME=Item* FULL_NAME=Item* CODE=Item* IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE_DECL NAME=<global> FULL_NAME=api.h:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=api.h:<global> FILENAME=api.h ORDER=1
+ NODES|TYPE_DECL NAME=char* FULL_NAME=char* CODE=char* IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE_DECL NAME=g FULL_NAME=g CODE=g AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+ NODES|TYPE_DECL NAME=int FULL_NAME=int CODE=int IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+-NODES|TYPE_DECL NAME=int* FULL_NAME=int* CODE=int* IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE_DECL NAME=longunsigned FULL_NAME=longunsigned CODE=longunsigned IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE_DECL NAME=<global> FULL_NAME=main.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=2
+ NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+ NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
++NODES|TYPE NAME=API* FULL_NAME=API* TYPE_DECL_FULL_NAME=API*
+ NODES|TYPE NAME=Item FULL_NAME=Item TYPE_DECL_FULL_NAME=Item
+ NODES|TYPE NAME=Item* FULL_NAME=Item* TYPE_DECL_FULL_NAME=Item*
+ NODES|TYPE NAME=char* FULL_NAME=char* TYPE_DECL_FULL_NAME=char*
+ NODES|TYPE NAME=g FULL_NAME=g TYPE_DECL_FULL_NAME=g
+ NODES|TYPE NAME=int FULL_NAME=int TYPE_DECL_FULL_NAME=int
+-NODES|TYPE NAME=int* FULL_NAME=int* TYPE_DECL_FULL_NAME=int*
+ NODES|TYPE NAME=longunsigned FULL_NAME=longunsigned TYPE_DECL_FULL_NAME=longunsigned
+ NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+ EDGES|ARGUMENT g#6 -> g#7
+@@ -94,10 +94,10 @@
+ EDGES|CONTAINS D:main.c:<global> -> main.c:<global>#0
+ EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+ EDGES|CONTAINS F:<includes> -> D:ANY
++EDGES|CONTAINS F:<includes> -> D:API*
+ EDGES|CONTAINS F:<includes> -> D:Item*
+ EDGES|CONTAINS F:<includes> -> D:char*
+ EDGES|CONTAINS F:<includes> -> D:int
+-EDGES|CONTAINS F:<includes> -> D:int*
+ EDGES|CONTAINS F:<includes> -> D:longunsigned
+ EDGES|CONTAINS F:<includes> -> D:void
+ EDGES|CONTAINS F:api.h -> D:api.h:<global>
+@@ -122,14 +122,14 @@
+ EDGES|EVAL_TYPE f#3 -> T:longunsigned
+ EDGES|EVAL_TYPE f#4 -> T:longunsigned
+ EDGES|EVAL_TYPE f#5 -> T:ANY
+-EDGES|EVAL_TYPE f#6 -> T:Item*
++EDGES|EVAL_TYPE f#6 -> T:API*
+ EDGES|EVAL_TYPE g#1 -> T:char*
+-EDGES|EVAL_TYPE g#10 -> T:Item
++EDGES|EVAL_TYPE g#10 -> T:Item*
+ EDGES|EVAL_TYPE g#2 -> T:char*
+ EDGES|EVAL_TYPE g#3 -> T:longunsigned
+ EDGES|EVAL_TYPE g#4 -> T:longunsigned
+ EDGES|EVAL_TYPE g#5 -> T:void
+-EDGES|EVAL_TYPE g#7 -> T:int*
++EDGES|EVAL_TYPE g#7 -> T:ANY
+ EDGES|EVAL_TYPE g#8 -> T:char*
+ EDGES|EVAL_TYPE g#9 -> T:longunsigned
+ EDGES|EVAL_TYPE main.c:<global>#12 -> T:ANY
+@@ -144,12 +144,12 @@
+ EDGES|REF NB:api.h:<global> -> NS:<global>
+ EDGES|REF NB:main.c:<global> -> NS:<global>
+ EDGES|REF T:ANY -> D:ANY
++EDGES|REF T:API* -> D:API*
+ EDGES|REF T:Item -> api.h:<global>#2
+ EDGES|REF T:Item* -> D:Item*
+ EDGES|REF T:char* -> D:char*
+ EDGES|REF T:g -> D:g
+ EDGES|REF T:int -> D:int
+-EDGES|REF T:int* -> D:int*
+ EDGES|REF T:longunsigned -> D:longunsigned
+ EDGES|REF T:void -> D:void
+ EDGES|REF g#8 -> g#1
+@@ -157,12 +157,12 @@
+ EDGES|REF main.c:<global>#13 -> g#0
+ EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+ EDGES|SOURCE_FILE D:ANY -> F:<includes>
++EDGES|SOURCE_FILE D:API* -> F:<includes>
+ EDGES|SOURCE_FILE D:Item* -> F:<includes>
+ EDGES|SOURCE_FILE D:api.h:<global> -> F:api.h
+ EDGES|SOURCE_FILE D:char* -> F:<includes>
+ EDGES|SOURCE_FILE D:g -> F:main.c
+ EDGES|SOURCE_FILE D:int -> F:<includes>
+-EDGES|SOURCE_FILE D:int* -> F:<includes>
+ EDGES|SOURCE_FILE D:longunsigned -> F:<includes>
+ EDGES|SOURCE_FILE D:main.c:<global> -> F:main.c
+ EDGES|SOURCE_FILE D:void -> F:<includes>

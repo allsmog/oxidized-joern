@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "status": "PARENT_APPROVED_PRIMITIVE_MEMBER_PRODUCER_RELEASE",
+  "producerHoldReleased": true,
+  "preparedManifestSha256": "23302c99c8e4a543b308c04f5f60e72be034b88530fd75638f9e0ff441169894",
+  "repository": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint",
+  "sourceCommit": "f235a0f898c4e19fda90998b903f57741b776ec7",
+  "documentationCommit": "f235a0f898c4e19fda90998b903f57741b776ec7",
+  "acceptance": {
+    "repositoryPath": "docs/conformance/astra-tenth-batch-acceptance.json",
+    "sha256": "17cecded0cef2621c2370dd89181c453ba51360ab65979ee40c77425630dc480"
+  },
+  "documentationBlobs": [
+    {
+      "repositoryPath": "docs/conformance/astra-tenth-batch-2026-09-08.md",
+      "sha256": "4ef48aa7b3596d11f86a41550d0b3357f5ba7a0d67409838011da0bb8274e0ed"
+    },
+    {
+      "repositoryPath": "docs/conformance/astra-tenth-batch-metrics.json",
+      "sha256": "30988a2e95591d4d26e701cb2f3df903c1a995d5989e5adb28ccf048dc52baea"
+    },
+    {
+      "repositoryPath": "cpg-rs/PROGRESS.md",
+      "sha256": "c0444f563e05fe47daa5b7d0ba076e2e4f41f6af53aaeb0a1b432349d862b413"
+    }
+  ],
+  "frozenBuild": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/tenth-batch/repaired-final-real-differential/bin/source-bindings.json",
+    "sha256": "d30ce5acfb3bf4e6edac654805d8a3dbab7bb28fca5d258a943d7f7d4fc99844"
+  },
+  "note": "Root releases this exact reviewed19-project/20-input batch against committed tenth source and documentation. Full references are admitted only on complete run, unchanged bindings and both complete anchor matches. This is test execution, not full-port acceptance.",
+  "approvedAtUtc": "2026-09-09T00:22:44.609756+00:00",
+  "staticReview": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/eleventh-batch/primitive-runner-review.json",
+    "sha256": "3a7cebfb493fd4e2100b52443a23d118c3d8a4275eb1b3694a361408d4275db5"
+  },
+  "acceptedCheckpointCloseout": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/tenth-batch/closeout.json",
+    "sha256": "f6bdd06f1faf68121b01ae42c0541525126fdf102ca00574f35244cc11e998d1"
+  }
+}

@@ -1,0 +1,61 @@
+{
+  "case": "unary_macro",
+  "status": "COMPLETE_PRODUCTION_COMPARISON",
+  "command": [
+    "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/tenth-batch/final-real-differential/bin/joern-parity",
+    "--production",
+    "main.c"
+  ],
+  "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/tenth-array-dimension-review/input/unary_macro",
+  "exitCode": 0,
+  "timedOut": false,
+  "seconds": 0.01888808299554512,
+  "inputBefore": {
+    "expected.txt": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/tenth-array-dimension-review/input/unary_macro/expected.txt",
+      "sha256": "3968d5812b22f0b914b5e242870383827592ec8ae04772a0efd6a0643e899f26",
+      "bytes": 33531
+    },
+    "main.c": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/tenth-array-dimension-review/input/unary_macro/main.c",
+      "sha256": "a70cfaa22d1ca206e7ac909f1d4916f6db91985e813446b54e34c6abd6545db6",
+      "bytes": 214
+    }
+  },
+  "inputAfter": {
+    "expected.txt": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/tenth-array-dimension-review/input/unary_macro/expected.txt",
+      "sha256": "3968d5812b22f0b914b5e242870383827592ec8ae04772a0efd6a0643e899f26",
+      "bytes": 33531
+    },
+    "main.c": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/tenth-array-dimension-review/input/unary_macro/main.c",
+      "sha256": "a70cfaa22d1ca206e7ac909f1d4916f6db91985e813446b54e34c6abd6545db6",
+      "bytes": 214
+    }
+  },
+  "expected": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/tenth-array-dimension-review/input/unary_macro/expected.txt",
+    "sha256": "3968d5812b22f0b914b5e242870383827592ec8ae04772a0efd6a0643e899f26",
+    "bytes": 33531
+  },
+  "actual": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/tenth-array-dimension-review/held-tenth-v2/unary_macro/actual.txt",
+    "sha256": "a55bb55ea2ac225b3d43f9509c9f7e92dab538d9bbd560a558742567cdbeb0b4",
+    "bytes": 33173
+  },
+  "stderr": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/tenth-array-dimension-review/held-tenth-v2/unary_macro/stderr.txt",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0
+  },
+  "completeDiff": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-existence/.local/tenth-array-dimension-review/held-tenth-v2/unary_macro/complete.diff",
+    "sha256": "424a0957bc06d2740acac2ec214646860a84df70fc27d3844d669fbe65f88510",
+    "bytes": 10855
+  },
+  "byteExact": false,
+  "matchingRecordMultiplicities": 475,
+  "missingRecordMultiplicities": 26,
+  "extraRecordMultiplicities": 21
+}

@@ -1,0 +1,53 @@
+{
+  "bindingsSha256": "e9087c8338d40cf192ffad1d906507c4113c7dc24f9533b330e5522d7fe4c59f",
+  "checks": [
+    {
+      "name": "origin-lines",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--manifest-path",
+        "cpg-rs/Cargo.toml",
+        "-p",
+        "cpg-lang-c",
+        "included_initializer_uses_header_lines_without_consuming_caller_calls",
+        "--",
+        "--nocapture"
+      ],
+      "exitCode": 0,
+      "sourceUnchanged": true,
+      "logSha256": "c7bc94d9ea95166592bb2e2ecac1000f813f08c0fe29497e7ca72e0a0490049e"
+    },
+    {
+      "name": "ninth-gates",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--manifest-path",
+        "cpg-rs/Cargo.toml",
+        "-p",
+        "joern-parity",
+        "--test",
+        "body_macro_state",
+        "--",
+        "--nocapture"
+      ],
+      "exitCode": 0,
+      "sourceUnchanged": true,
+      "logSha256": "a7ea7e59be9130f051f40e6195065a19fb355b5a90400ae2b31de82cd78da360"
+    },
+    {
+      "name": "main308",
+      "command": [
+        "bash",
+        "cpg-rs/joern-parity/check.sh",
+        "--committed-only"
+      ],
+      "exitCode": 0,
+      "sourceUnchanged": true,
+      "logSha256": "c105179d62065e9cbf9f398ff94754c29ec03add1206db7dff281cb4c07b6be6"
+    }
+  ]
+}

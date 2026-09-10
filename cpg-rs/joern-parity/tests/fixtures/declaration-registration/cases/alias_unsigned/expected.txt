@@ -1,0 +1,100 @@
+METHOD NAME=<global> CODE=<global> FULL_NAME=<includes>:<global> ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=registration CODE=void registration(void) { Byte *value; } FULL_NAME=registration SIGNATURE=void(void) ORDER=1
+  METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+  BLOCK CODE={ Byte *value; } TYPE_FULL_NAME=void ORDER=2
+    LOCAL NAME=value CODE=Byte *value TYPE_FULL_NAME=Byte* ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+
+METHOD NAME=<global> CODE=<global> FULL_NAME=registration.c:<global> ORDER=1
+  METHOD NAME=registration CODE=void registration(void) { Byte *value; } FULL_NAME=registration SIGNATURE=void(void) ORDER=1
+    METHOD_PARAMETER_IN NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    METHOD_PARAMETER_OUT NAME= CODE=void TYPE_FULL_NAME=void ORDER=1
+    BLOCK CODE={ Byte *value; } TYPE_FULL_NAME=void ORDER=2
+      LOCAL NAME=value CODE=Byte *value TYPE_FULL_NAME=Byte* ORDER=1
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=void ORDER=3
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+    TYPE_DECL NAME=Byte CODE=typedef unsigned char Byte; FULL_NAME=Byte ORDER=1
+    METHOD_REF CODE=registration TYPE_FULL_NAME=registration METHOD_FULL_NAME=registration ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+NODES|META_DATA LANGUAGE=NEWC
+NODES|FILE NAME=<includes> ORDER=1
+NODES|FILE NAME=<unknown> ORDER=0
+NODES|FILE NAME=registration.c ORDER=0
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<global> FILENAME=<unknown> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<includes>:<global> FILENAME=<includes> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=registration.c:<global> FILENAME=registration.c ORDER=1
+NODES|NAMESPACE NAME=<global>
+NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=Byte FULL_NAME=Byte CODE=typedef unsigned char Byte; AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=registration.c ORDER=1
+NODES|TYPE_DECL NAME=Byte* FULL_NAME=Byte* CODE=Byte* IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=registration FULL_NAME=registration CODE=registration AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=registration.c:<global> FILENAME=registration.c ORDER=1
+NODES|TYPE_DECL NAME=<global> FULL_NAME=registration.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=registration.c:<global> FILENAME=registration.c ORDER=1
+NODES|TYPE_DECL NAME=unsigned char FULL_NAME=unsigned char CODE=unsigned char IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+NODES|TYPE NAME=Byte FULL_NAME=Byte TYPE_DECL_FULL_NAME=Byte
+NODES|TYPE NAME=Byte* FULL_NAME=Byte* TYPE_DECL_FULL_NAME=Byte*
+NODES|TYPE NAME=registration FULL_NAME=registration TYPE_DECL_FULL_NAME=registration
+NODES|TYPE NAME=unsigned char FULL_NAME=unsigned char TYPE_DECL_FULL_NAME=unsigned char
+NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+EDGES|CFG registration#0 -> registration#5
+EDGES|CFG registration.c:<global>#0 -> registration.c:<global>#9
+EDGES|CFG registration.c:<global>#9 -> registration.c:<global>#10
+EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+EDGES|CONTAINS D:registration.c:<global> -> D:registration
+EDGES|CONTAINS D:registration.c:<global> -> registration.c:<global>#0
+EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+EDGES|CONTAINS F:<includes> -> D:ANY
+EDGES|CONTAINS F:<includes> -> D:Byte*
+EDGES|CONTAINS F:<includes> -> D:unsigned char
+EDGES|CONTAINS F:<includes> -> D:void
+EDGES|CONTAINS F:registration.c -> D:registration.c:<global>
+EDGES|CONTAINS registration#0 -> registration#3
+EDGES|CONTAINS registration.c:<global>#0 -> registration#0
+EDGES|CONTAINS registration.c:<global>#0 -> registration.c:<global>#7
+EDGES|CONTAINS registration.c:<global>#0 -> registration.c:<global>#8
+EDGES|CONTAINS registration.c:<global>#0 -> registration.c:<global>#9
+EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+EDGES|EVAL_TYPE registration#1 -> T:void
+EDGES|EVAL_TYPE registration#2 -> T:void
+EDGES|EVAL_TYPE registration#3 -> T:void
+EDGES|EVAL_TYPE registration#4 -> T:Byte*
+EDGES|EVAL_TYPE registration#5 -> T:void
+EDGES|EVAL_TYPE registration.c:<global>#10 -> T:ANY
+EDGES|EVAL_TYPE registration.c:<global>#7 -> T:ANY
+EDGES|EVAL_TYPE registration.c:<global>#9 -> T:registration
+EDGES|PARAMETER_LINK registration#1 -> registration#2
+EDGES|REF NB:<global> -> NS:<global>
+EDGES|REF NB:<includes>:<global> -> NS:<global>
+EDGES|REF NB:registration.c:<global> -> NS:<global>
+EDGES|REF T:ANY -> D:ANY
+EDGES|REF T:Byte -> registration.c:<global>#8
+EDGES|REF T:Byte* -> D:Byte*
+EDGES|REF T:registration -> D:registration
+EDGES|REF T:unsigned char -> D:unsigned char
+EDGES|REF T:void -> D:void
+EDGES|REF registration.c:<global>#9 -> registration#0
+EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+EDGES|SOURCE_FILE D:ANY -> F:<includes>
+EDGES|SOURCE_FILE D:Byte* -> F:<includes>
+EDGES|SOURCE_FILE D:registration -> F:registration.c
+EDGES|SOURCE_FILE D:registration.c:<global> -> F:registration.c
+EDGES|SOURCE_FILE D:unsigned char -> F:<includes>
+EDGES|SOURCE_FILE D:void -> F:<includes>
+EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
+EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>
+EDGES|SOURCE_FILE NB:registration.c:<global> -> F:registration.c
+EDGES|SOURCE_FILE registration#0 -> F:registration.c
+EDGES|SOURCE_FILE registration.c:<global>#0 -> F:registration.c
+EDGES|SOURCE_FILE registration.c:<global>#8 -> F:registration.c
+FLOWS|REACHING_DEF[] registration#0 -> registration#1
+FLOWS|REACHING_DEF[] registration#1 -> registration#2
+FLOWS|REACHING_DEF[] registration#1 -> registration#5
+FLOWS|REACHING_DEF[] registration.c:<global>#0 -> registration.c:<global>#9

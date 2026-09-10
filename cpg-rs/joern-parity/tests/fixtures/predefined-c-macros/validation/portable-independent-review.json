@@ -1,0 +1,61 @@
+{
+  "status": "PASS_BOUNDED_PORTABLE_PACKAGES",
+  "packages": {
+    "predefined-c-macros": {
+      "name": "predefined-c-macros",
+      "sourceSha256": "f76191e4fee9544ec76c1c8b47f1432e53a6ad31690e8e810e2385eca5b07d9f",
+      "binarySha256": "85a2deceeff00ed146ec3bdb76a19dcfcf6e6c905a8bb12c5fb0d9c8ec3619de",
+      "baselineBinarySha256": "3c1ab1cb3d6833086b06105355f908a86be573f230fdbedc1bdc87faea979e17",
+      "measurementSha256": "9d7819d29eda7ec61ca3b6d18694340797b616335f1c1daa6fa06be43bb87112",
+      "totals": {
+        "projects": 25,
+        "baselineExact": 11,
+        "candidateExact": 25,
+        "canonicalLines": 5344,
+        "nonemptySelectedRecords": 5192
+      },
+      "checksPassed": 379,
+      "status": "PASS_BOUNDED_PACKAGE_AND_FULL_REPLAY"
+    },
+    "numeric-macro-roots": {
+      "name": "numeric-macro-roots",
+      "sourceSha256": "f5145824ea7d79df9d4044989e103e88ca2b43dbcc0bd261860c0a2b74534a09",
+      "binarySha256": "5be22651687ad7c5f1b4b0ee3dfcc39eed5831c68e1ac1d97c9edf84c22a8af1",
+      "baselineBinarySha256": "3c1ab1cb3d6833086b06105355f908a86be573f230fdbedc1bdc87faea979e17",
+      "measurementSha256": "823c14372ff4e75460b4fe224fca29b686fd99283167a68612d405e01ef9cf10",
+      "totals": {
+        "projects": 26,
+        "baselineExact": 4,
+        "candidateExact": 20,
+        "canonicalLines": 3392,
+        "nonemptySelectedRecords": 3284,
+        "exactCanonicalLines": 2630,
+        "exactNonemptySelectedRecords": 2546
+      },
+      "checksPassed": 371,
+      "status": "PASS_BOUNDED_PACKAGE_AND_FULL_REPLAY"
+    }
+  },
+  "checksPassed": 980,
+  "frozenFullBinaryReplays": 102,
+  "originalSourceBytesMatchPackagedInputs": true,
+  "completeRawCaseExtraction": true,
+  "completeDiffHunksVerified": true,
+  "testInventory": {
+    "predefined": 25,
+    "numeric": 20,
+    "numericFullDiagnostics": 6
+  },
+  "diagnosticVerification": "All6 unsigned numeric cases differ only by one retained missing CFG edge on a spaced macro method full name; no expected record removed.",
+  "jarEvidenceHashesVerified": true,
+  "limits": [
+    "Standalone frozen f761 and f514 packages validated; this does not approve final integrated source or whole-project acceptance.",
+    "Root reported2 newly missing positive numeric macro stubs in whole zlib; frontend owns that separate active repair.",
+    "Selected canonical projection is not full Joern schema/runtime compatibility."
+  ],
+  "evidence": {
+    "predefined-c-macros/review.json": "af468f9c45f8c0ab3beefd7cf08dbf539a53598bdda19835ea272aa214d8582c",
+    "numeric-macro-roots/review.json": "821862756f941428c1b294e0c08eb2888013e35f05635b2357a0d2e05ee52964"
+  },
+  "reviewerActions": "No source edits or builds. Read-only frozen-binary replays plus ignored review receipts."
+}

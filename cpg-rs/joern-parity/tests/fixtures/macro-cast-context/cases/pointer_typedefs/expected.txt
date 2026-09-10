@@ -1,0 +1,305 @@
+METHOD NAME=<global> CODE=<global> FULL_NAME=<includes>:<global> ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=<operator>.cast FULL_NAME=<operator>.cast ORDER=0
+  METHOD_PARAMETER_IN NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1 ARGUMENT_INDEX=1
+  METHOD_PARAMETER_OUT NAME=p1 CODE=p1 TYPE_FULL_NAME=ANY ORDER=1
+  METHOD_PARAMETER_IN NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+  METHOD_PARAMETER_OUT NAME=p2 CODE=p2 TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=first CODE=P first(void *x){return (P)(x);} FULL_NAME=first SIGNATURE=P(void*) ORDER=1
+  METHOD_PARAMETER_IN NAME=x CODE=void *x TYPE_FULL_NAME=void* ORDER=1
+  METHOD_PARAMETER_OUT NAME=x CODE=void *x TYPE_FULL_NAME=void* ORDER=1
+  BLOCK CODE={return (P)(x);} TYPE_FULL_NAME=void ORDER=2
+    RETURN CODE=return (P)(x); ORDER=1
+      CALL NAME=<operator>.cast CODE=(P)(x) TYPE_FULL_NAME=P METHOD_FULL_NAME=<operator>.cast ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+        TYPE_REF CODE=P TYPE_FULL_NAME=P ORDER=1 ARGUMENT_INDEX=1
+        IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=void* ORDER=2 ARGUMENT_INDEX=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=P ORDER=3
+
+METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1
+  METHOD NAME=first CODE=P first(void *x){return (P)(x);} FULL_NAME=first SIGNATURE=P(void*) ORDER=1
+    METHOD_PARAMETER_IN NAME=x CODE=void *x TYPE_FULL_NAME=void* ORDER=1
+    METHOD_PARAMETER_OUT NAME=x CODE=void *x TYPE_FULL_NAME=void* ORDER=1
+    BLOCK CODE={return (P)(x);} TYPE_FULL_NAME=void ORDER=2
+      RETURN CODE=return (P)(x); ORDER=1
+        CALL NAME=<operator>.cast CODE=(P)(x) TYPE_FULL_NAME=P METHOD_FULL_NAME=<operator>.cast ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+          TYPE_REF CODE=P TYPE_FULL_NAME=P ORDER=1 ARGUMENT_INDEX=1
+          IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=void* ORDER=2 ARGUMENT_INDEX=2
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=P ORDER=3
+  METHOD NAME=second CODE=PP second(void *x){return (PP)(x);} FULL_NAME=second SIGNATURE=PP(void*) ORDER=1
+    METHOD_PARAMETER_IN NAME=x CODE=void *x TYPE_FULL_NAME=void* ORDER=1
+    METHOD_PARAMETER_OUT NAME=x CODE=void *x TYPE_FULL_NAME=void* ORDER=1
+    BLOCK CODE={return (PP)(x);} TYPE_FULL_NAME=void ORDER=2
+      RETURN CODE=return (PP)(x); ORDER=1
+        CALL NAME=<operator>.cast CODE=(PP)(x) TYPE_FULL_NAME=PP METHOD_FULL_NAME=<operator>.cast ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+          TYPE_REF CODE=PP TYPE_FULL_NAME=PP ORDER=1 ARGUMENT_INDEX=1
+          IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=void* ORDER=2 ARGUMENT_INDEX=2
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=PP ORDER=3
+  METHOD NAME=third CODE=CP third(void *x){return (CP)(x);} FULL_NAME=third SIGNATURE=CP(void*) ORDER=1
+    METHOD_PARAMETER_IN NAME=x CODE=void *x TYPE_FULL_NAME=void* ORDER=1
+    METHOD_PARAMETER_OUT NAME=x CODE=void *x TYPE_FULL_NAME=void* ORDER=1
+    BLOCK CODE={return (CP)(x);} TYPE_FULL_NAME=void ORDER=2
+      RETURN CODE=return (CP)(x); ORDER=1
+        CALL NAME=<operator>.cast CODE=(CP)(x) TYPE_FULL_NAME=CP METHOD_FULL_NAME=<operator>.cast ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+          TYPE_REF CODE=CP TYPE_FULL_NAME=CP ORDER=1 ARGUMENT_INDEX=1
+          IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=void* ORDER=2 ARGUMENT_INDEX=2
+    METHOD_RETURN CODE=RET TYPE_FULL_NAME=CP ORDER=3
+  BLOCK TYPE_FULL_NAME=ANY ORDER=1
+    TYPE_DECL NAME=P CODE=typedef int *P, **PP; FULL_NAME=P ORDER=1
+    TYPE_DECL NAME=PP CODE=typedef int *P, **PP; FULL_NAME=PP ORDER=2
+    TYPE_DECL NAME=CP CODE=typedef const int *CP; FULL_NAME=CP ORDER=3
+    METHOD_REF CODE=first TYPE_FULL_NAME=first METHOD_FULL_NAME=first ORDER=4
+    METHOD_REF CODE=second TYPE_FULL_NAME=second METHOD_FULL_NAME=second ORDER=5
+    METHOD_REF CODE=third TYPE_FULL_NAME=third METHOD_FULL_NAME=third ORDER=6
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+
+METHOD NAME=second CODE=PP second(void *x){return (PP)(x);} FULL_NAME=second SIGNATURE=PP(void*) ORDER=1
+  METHOD_PARAMETER_IN NAME=x CODE=void *x TYPE_FULL_NAME=void* ORDER=1
+  METHOD_PARAMETER_OUT NAME=x CODE=void *x TYPE_FULL_NAME=void* ORDER=1
+  BLOCK CODE={return (PP)(x);} TYPE_FULL_NAME=void ORDER=2
+    RETURN CODE=return (PP)(x); ORDER=1
+      CALL NAME=<operator>.cast CODE=(PP)(x) TYPE_FULL_NAME=PP METHOD_FULL_NAME=<operator>.cast ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+        TYPE_REF CODE=PP TYPE_FULL_NAME=PP ORDER=1 ARGUMENT_INDEX=1
+        IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=void* ORDER=2 ARGUMENT_INDEX=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=PP ORDER=3
+
+METHOD NAME=third CODE=CP third(void *x){return (CP)(x);} FULL_NAME=third SIGNATURE=CP(void*) ORDER=1
+  METHOD_PARAMETER_IN NAME=x CODE=void *x TYPE_FULL_NAME=void* ORDER=1
+  METHOD_PARAMETER_OUT NAME=x CODE=void *x TYPE_FULL_NAME=void* ORDER=1
+  BLOCK CODE={return (CP)(x);} TYPE_FULL_NAME=void ORDER=2
+    RETURN CODE=return (CP)(x); ORDER=1
+      CALL NAME=<operator>.cast CODE=(CP)(x) TYPE_FULL_NAME=CP METHOD_FULL_NAME=<operator>.cast ORDER=1 DISPATCH_TYPE=STATIC_DISPATCH
+        TYPE_REF CODE=CP TYPE_FULL_NAME=CP ORDER=1 ARGUMENT_INDEX=1
+        IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=void* ORDER=2 ARGUMENT_INDEX=2
+  METHOD_RETURN CODE=RET TYPE_FULL_NAME=CP ORDER=3
+
+NODES|META_DATA LANGUAGE=NEWC
+NODES|FILE NAME=<includes> ORDER=1
+NODES|FILE NAME=<unknown> ORDER=0
+NODES|FILE NAME=main.c ORDER=0
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<global> FILENAME=<unknown> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=<includes>:<global> FILENAME=<includes> ORDER=1
+NODES|NAMESPACE_BLOCK NAME=<global> FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|NAMESPACE NAME=<global>
+NODES|TYPE_DECL NAME=ANY FULL_NAME=ANY CODE=ANY IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=CP FULL_NAME=CP CODE=typedef const int *CP; AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=main.c ORDER=3
+NODES|TYPE_DECL NAME=P FULL_NAME=P CODE=typedef int *P, **PP; AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=PP FULL_NAME=PP CODE=typedef int *P, **PP; AST_PARENT_TYPE= AST_PARENT_FULL_NAME= FILENAME=main.c ORDER=2
+NODES|TYPE_DECL NAME=first FULL_NAME=first CODE=first AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=int* FULL_NAME=int* CODE=int* IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=int** FULL_NAME=int** CODE=int** IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=<global> FULL_NAME=main.c:<global> CODE=<global> AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=second FULL_NAME=second CODE=second AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=third FULL_NAME=third CODE=third AST_PARENT_TYPE=TYPE_DECL AST_PARENT_FULL_NAME=main.c:<global> FILENAME=main.c ORDER=1
+NODES|TYPE_DECL NAME=void FULL_NAME=void CODE=void IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE_DECL NAME=void* FULL_NAME=void* CODE=void* IS_EXTERNAL=true AST_PARENT_TYPE=NAMESPACE_BLOCK AST_PARENT_FULL_NAME=<includes>:<global> FILENAME=<includes>
+NODES|TYPE NAME=ANY FULL_NAME=ANY TYPE_DECL_FULL_NAME=ANY
+NODES|TYPE NAME=CP FULL_NAME=CP TYPE_DECL_FULL_NAME=CP
+NODES|TYPE NAME=P FULL_NAME=P TYPE_DECL_FULL_NAME=P
+NODES|TYPE NAME=PP FULL_NAME=PP TYPE_DECL_FULL_NAME=PP
+NODES|TYPE NAME=first FULL_NAME=first TYPE_DECL_FULL_NAME=first
+NODES|TYPE NAME=int* FULL_NAME=int* TYPE_DECL_FULL_NAME=int*
+NODES|TYPE NAME=int** FULL_NAME=int** TYPE_DECL_FULL_NAME=int**
+NODES|TYPE NAME=second FULL_NAME=second TYPE_DECL_FULL_NAME=second
+NODES|TYPE NAME=third FULL_NAME=third TYPE_DECL_FULL_NAME=third
+NODES|TYPE NAME=void FULL_NAME=void TYPE_DECL_FULL_NAME=void
+NODES|TYPE NAME=void* FULL_NAME=void* TYPE_DECL_FULL_NAME=void*
+EDGES|ARGUMENT first#4 -> first#5
+EDGES|ARGUMENT first#5 -> first#6
+EDGES|ARGUMENT first#5 -> first#7
+EDGES|ARGUMENT second#4 -> second#5
+EDGES|ARGUMENT second#5 -> second#6
+EDGES|ARGUMENT second#5 -> second#7
+EDGES|ARGUMENT third#4 -> third#5
+EDGES|ARGUMENT third#5 -> third#6
+EDGES|ARGUMENT third#5 -> third#7
+EDGES|CALL first#5 -> <operator>.cast#0
+EDGES|CALL second#5 -> <operator>.cast#0
+EDGES|CALL third#5 -> <operator>.cast#0
+EDGES|CFG <includes>:<global>#0 -> <includes>:<global>#2
+EDGES|CFG <operator>.cast#0 -> <operator>.cast#5
+EDGES|CFG first#0 -> first#6
+EDGES|CFG first#4 -> first#8
+EDGES|CFG first#5 -> first#4
+EDGES|CFG first#6 -> first#7
+EDGES|CFG first#7 -> first#5
+EDGES|CFG main.c:<global>#0 -> main.c:<global>#32
+EDGES|CFG main.c:<global>#10 -> second#6
+EDGES|CFG main.c:<global>#19 -> third#6
+EDGES|CFG main.c:<global>#32 -> main.c:<global>#33
+EDGES|CFG main.c:<global>#33 -> main.c:<global>#34
+EDGES|CFG main.c:<global>#34 -> main.c:<global>#35
+EDGES|CFG second#4 -> second#8
+EDGES|CFG second#5 -> second#4
+EDGES|CFG second#6 -> second#7
+EDGES|CFG second#7 -> second#5
+EDGES|CFG third#4 -> third#8
+EDGES|CFG third#5 -> third#4
+EDGES|CFG third#6 -> third#7
+EDGES|CFG third#7 -> third#5
+EDGES|CONTAINS <includes>:<global>#0 -> <includes>:<global>#1
+EDGES|CONTAINS <operator>.cast#0 -> <operator>.cast#2
+EDGES|CONTAINS D:main.c:<global> -> D:first
+EDGES|CONTAINS D:main.c:<global> -> D:second
+EDGES|CONTAINS D:main.c:<global> -> D:third
+EDGES|CONTAINS D:main.c:<global> -> main.c:<global>#0
+EDGES|CONTAINS F:<includes> -> <includes>:<global>#0
+EDGES|CONTAINS F:<includes> -> D:ANY
+EDGES|CONTAINS F:<includes> -> D:int*
+EDGES|CONTAINS F:<includes> -> D:int**
+EDGES|CONTAINS F:<includes> -> D:void
+EDGES|CONTAINS F:<includes> -> D:void*
+EDGES|CONTAINS F:main.c -> D:main.c:<global>
+EDGES|CONTAINS first#0 -> first#3
+EDGES|CONTAINS first#0 -> first#4
+EDGES|CONTAINS first#0 -> first#5
+EDGES|CONTAINS first#0 -> first#6
+EDGES|CONTAINS first#0 -> first#7
+EDGES|CONTAINS main.c:<global>#0 -> first#0
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#10
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#19
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#28
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#29
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#30
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#31
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#32
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#33
+EDGES|CONTAINS main.c:<global>#0 -> main.c:<global>#34
+EDGES|CONTAINS main.c:<global>#10 -> second#3
+EDGES|CONTAINS main.c:<global>#10 -> second#4
+EDGES|CONTAINS main.c:<global>#10 -> second#5
+EDGES|CONTAINS main.c:<global>#10 -> second#6
+EDGES|CONTAINS main.c:<global>#10 -> second#7
+EDGES|CONTAINS main.c:<global>#19 -> third#3
+EDGES|CONTAINS main.c:<global>#19 -> third#4
+EDGES|CONTAINS main.c:<global>#19 -> third#5
+EDGES|CONTAINS main.c:<global>#19 -> third#6
+EDGES|CONTAINS main.c:<global>#19 -> third#7
+EDGES|EVAL_TYPE <includes>:<global>#1 -> T:ANY
+EDGES|EVAL_TYPE <includes>:<global>#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.cast#1 -> T:ANY
+EDGES|EVAL_TYPE <operator>.cast#2 -> T:ANY
+EDGES|EVAL_TYPE <operator>.cast#3 -> T:ANY
+EDGES|EVAL_TYPE <operator>.cast#4 -> T:ANY
+EDGES|EVAL_TYPE <operator>.cast#5 -> T:ANY
+EDGES|EVAL_TYPE <operator>.cast#6 -> T:ANY
+EDGES|EVAL_TYPE first#1 -> T:void*
+EDGES|EVAL_TYPE first#2 -> T:void*
+EDGES|EVAL_TYPE first#3 -> T:void
+EDGES|EVAL_TYPE first#5 -> T:P
+EDGES|EVAL_TYPE first#6 -> T:P
+EDGES|EVAL_TYPE first#7 -> T:void*
+EDGES|EVAL_TYPE first#8 -> T:P
+EDGES|EVAL_TYPE main.c:<global>#28 -> T:ANY
+EDGES|EVAL_TYPE main.c:<global>#32 -> T:first
+EDGES|EVAL_TYPE main.c:<global>#33 -> T:second
+EDGES|EVAL_TYPE main.c:<global>#34 -> T:third
+EDGES|EVAL_TYPE main.c:<global>#35 -> T:ANY
+EDGES|EVAL_TYPE second#1 -> T:void*
+EDGES|EVAL_TYPE second#2 -> T:void*
+EDGES|EVAL_TYPE second#3 -> T:void
+EDGES|EVAL_TYPE second#5 -> T:PP
+EDGES|EVAL_TYPE second#6 -> T:PP
+EDGES|EVAL_TYPE second#7 -> T:void*
+EDGES|EVAL_TYPE second#8 -> T:PP
+EDGES|EVAL_TYPE third#1 -> T:void*
+EDGES|EVAL_TYPE third#2 -> T:void*
+EDGES|EVAL_TYPE third#3 -> T:void
+EDGES|EVAL_TYPE third#5 -> T:CP
+EDGES|EVAL_TYPE third#6 -> T:CP
+EDGES|EVAL_TYPE third#7 -> T:void*
+EDGES|EVAL_TYPE third#8 -> T:CP
+EDGES|PARAMETER_LINK <operator>.cast#1 -> <operator>.cast#3
+EDGES|PARAMETER_LINK <operator>.cast#4 -> <operator>.cast#6
+EDGES|PARAMETER_LINK first#1 -> first#2
+EDGES|PARAMETER_LINK second#1 -> second#2
+EDGES|PARAMETER_LINK third#1 -> third#2
+EDGES|REF NB:<global> -> NS:<global>
+EDGES|REF NB:<includes>:<global> -> NS:<global>
+EDGES|REF NB:main.c:<global> -> NS:<global>
+EDGES|REF T:ANY -> D:ANY
+EDGES|REF T:CP -> main.c:<global>#31
+EDGES|REF T:P -> main.c:<global>#29
+EDGES|REF T:PP -> main.c:<global>#30
+EDGES|REF T:first -> D:first
+EDGES|REF T:int* -> D:int*
+EDGES|REF T:int** -> D:int**
+EDGES|REF T:second -> D:second
+EDGES|REF T:third -> D:third
+EDGES|REF T:void -> D:void
+EDGES|REF T:void* -> D:void*
+EDGES|REF first#7 -> first#1
+EDGES|REF main.c:<global>#32 -> first#0
+EDGES|REF main.c:<global>#33 -> main.c:<global>#10
+EDGES|REF main.c:<global>#34 -> main.c:<global>#19
+EDGES|REF second#7 -> second#1
+EDGES|REF third#7 -> third#1
+EDGES|SOURCE_FILE <includes>:<global>#0 -> F:<includes>
+EDGES|SOURCE_FILE D:ANY -> F:<includes>
+EDGES|SOURCE_FILE D:first -> F:main.c
+EDGES|SOURCE_FILE D:int* -> F:<includes>
+EDGES|SOURCE_FILE D:int** -> F:<includes>
+EDGES|SOURCE_FILE D:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE D:second -> F:main.c
+EDGES|SOURCE_FILE D:third -> F:main.c
+EDGES|SOURCE_FILE D:void -> F:<includes>
+EDGES|SOURCE_FILE D:void* -> F:<includes>
+EDGES|SOURCE_FILE NB:<global> -> F:<unknown>
+EDGES|SOURCE_FILE NB:<includes>:<global> -> F:<includes>
+EDGES|SOURCE_FILE NB:main.c:<global> -> F:main.c
+EDGES|SOURCE_FILE first#0 -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#0 -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#10 -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#19 -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#29 -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#30 -> F:main.c
+EDGES|SOURCE_FILE main.c:<global>#31 -> F:main.c
+FLOWS|REACHING_DEF[(CP)(x)] third#5 -> third#4
+FLOWS|REACHING_DEF[(CP)(x)] third#5 -> third#8
+FLOWS|REACHING_DEF[(P)(x)] first#5 -> first#4
+FLOWS|REACHING_DEF[(P)(x)] first#5 -> first#8
+FLOWS|REACHING_DEF[(PP)(x)] second#5 -> second#4
+FLOWS|REACHING_DEF[(PP)(x)] second#5 -> second#8
+FLOWS|REACHING_DEF[<RET>] first#4 -> first#8
+FLOWS|REACHING_DEF[<RET>] second#4 -> second#8
+FLOWS|REACHING_DEF[<RET>] third#4 -> third#8
+FLOWS|REACHING_DEF[CP] third#6 -> third#5
+FLOWS|REACHING_DEF[PP] second#6 -> second#5
+FLOWS|REACHING_DEF[P] first#6 -> first#5
+FLOWS|REACHING_DEF[] <operator>.cast#0 -> <operator>.cast#1
+FLOWS|REACHING_DEF[] <operator>.cast#0 -> <operator>.cast#4
+FLOWS|REACHING_DEF[] first#0 -> first#1
+FLOWS|REACHING_DEF[] first#0 -> first#6
+FLOWS|REACHING_DEF[] first#0 -> first#7
+FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#32
+FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#33
+FLOWS|REACHING_DEF[] main.c:<global>#0 -> main.c:<global>#34
+FLOWS|REACHING_DEF[] main.c:<global>#10 -> second#1
+FLOWS|REACHING_DEF[] main.c:<global>#10 -> second#6
+FLOWS|REACHING_DEF[] main.c:<global>#10 -> second#7
+FLOWS|REACHING_DEF[] main.c:<global>#19 -> third#1
+FLOWS|REACHING_DEF[] main.c:<global>#19 -> third#6
+FLOWS|REACHING_DEF[] main.c:<global>#19 -> third#7
+FLOWS|REACHING_DEF[p1] <operator>.cast#1 -> <operator>.cast#3
+FLOWS|REACHING_DEF[p1] <operator>.cast#1 -> <operator>.cast#5
+FLOWS|REACHING_DEF[p2] <operator>.cast#4 -> <operator>.cast#5
+FLOWS|REACHING_DEF[p2] <operator>.cast#4 -> <operator>.cast#6
+FLOWS|REACHING_DEF[x] first#1 -> first#2
+FLOWS|REACHING_DEF[x] first#1 -> first#7
+FLOWS|REACHING_DEF[x] first#7 -> first#2
+FLOWS|REACHING_DEF[x] first#7 -> first#5
+FLOWS|REACHING_DEF[x] first#7 -> first#8
+FLOWS|REACHING_DEF[x] second#1 -> second#2
+FLOWS|REACHING_DEF[x] second#1 -> second#7
+FLOWS|REACHING_DEF[x] second#7 -> second#2
+FLOWS|REACHING_DEF[x] second#7 -> second#5
+FLOWS|REACHING_DEF[x] second#7 -> second#8
+FLOWS|REACHING_DEF[x] third#1 -> third#2
+FLOWS|REACHING_DEF[x] third#1 -> third#7
+FLOWS|REACHING_DEF[x] third#7 -> third#2
+FLOWS|REACHING_DEF[x] third#7 -> third#5
+FLOWS|REACHING_DEF[x] third#7 -> third#8

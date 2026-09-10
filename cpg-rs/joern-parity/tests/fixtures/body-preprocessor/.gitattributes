@@ -1,0 +1,6 @@
+# Preserve reference/diagnostic bytes, including whitespace-only AST separators.
+*.txt -whitespace
+*.diff -whitespace
+*.stdout -whitespace
+*.stderr -whitespace
+*.log -whitespace

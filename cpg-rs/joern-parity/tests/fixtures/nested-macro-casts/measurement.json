@@ -1,0 +1,614 @@
+{
+  "baselineCommit": "862e54ee5a4cd6efaff156bb0f844090ebce5e89",
+  "baselineExactSha256": "a119ea282666e7e969c4b4ad3a830f4ca4e57f8b19ead52f026a4dcba0dce5ec",
+  "beforeBinarySha256": "ab77742564b959d53d492d9228b27cf02ee4182c208ddd1f11da83ddc15c7324",
+  "joernVersion": "4.0.555",
+  "officialArchiveSha256": "12989883d6b5aeacc97b2dc0ecc4e2951bf50e48cb244f8c8f333d11a8be0c7e",
+  "oracleSha256": "bd2e18fab06ecd7897d796f5b31dac6669dc45ecf70c54fb1d5cc0fe29f3c1ab",
+  "actualLuaCompleteOutputs": [
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/nested-casts/real/after-full.txt",
+      "sha256": "70dc2252e3eb87e011f68b20f4345a9f0f4f2279d099bdf17ab263f87de040b2"
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/nested-casts/real/run.json",
+      "sha256": "0ec6de78d88065b46733d2b099375683f0b5e89af229765635529ee44d6f7826"
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/fourth-batch/final-real-differential-v2/lua-5.4.7-full/rust-canonical.txt",
+      "sha256": "26fe7144c80493a7b388a1ac3313002fbe9c58981c26c55c0be1f3aa27f5bc73"
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/fourth-batch/final-real-differential-v2/lua-5.4.7-full/live-canonical.txt",
+      "sha256": "aaaf1f5a82b683701881b2afa06c834690b86644e4322d93f9e6f5f1c0598b27"
+    }
+  ],
+  "actualLuaMethodExcerpts": "diagnostics contains complete method AST excerpts, not complete project graphs; full unfiltered outputs are bound above. Remaining sizeof spelling and l_noret/luaS_newlstr return types are not repaired.",
+  "recordedAtUtc": "2026-09-08T13:38:32.036148+00:00",
+  "candidateExactSha256": "0015245bb067f2c5b46cb43aae54ff658f562554f08fba7e44d3db4b6833b7bc",
+  "candidateBinarySha256": "364f2f7462bf5e12c7f085ea38fa4a997bd8d664828b16bd022d42eb77134f6c",
+  "frozenCandidate": {
+    "source": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/nested-casts/reviewed-exact.rs",
+      "sha256": "0015245bb067f2c5b46cb43aae54ff658f562554f08fba7e44d3db4b6833b7bc"
+    },
+    "binary": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/nested-casts/reviewed-joern-parity",
+      "sha256": "364f2f7462bf5e12c7f085ea38fa4a997bd8d664828b16bd022d42eb77134f6c"
+    }
+  },
+  "sourcePatch": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/nested-casts/reviewed-source.patch",
+    "sha256": "6d44e105f07628d733c3d1e63000c87b19da3b26dc90ac2a0d22d50c0f87f543"
+  },
+  "projects": [
+    {
+      "name": "nested",
+      "source": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/cpg-rs/joern-parity/tests/fixtures/nested-macro-casts/cases/nested/casts.c",
+        "sha256": "9aa4229cabeac6ce8c3c7d4bd8465539056be5991c4a73ef59aa9b82527cf690"
+      },
+      "expected": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/cpg-rs/joern-parity/tests/fixtures/nested-macro-casts/cases/nested/expected.txt",
+        "sha256": "d6d39fa09775dc5994a661ef9378882917c2102e2a5c2e614f067085fc1a392d"
+      },
+      "canonicalLinesIncludingSeparators": 536,
+      "nonemptySelectedRecords": 524,
+      "beforeExact": false,
+      "afterExact": true,
+      "beforeDiffLines": 515,
+      "oracle": {
+        "live.stdout": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/cpg-rs/joern-parity/tests/fixtures/nested-macro-casts/oracle/nested/live.stdout",
+          "sha256": "4284896911a4416ca1f461c942acf9d4b3cc3ee20b291b4abba97da2ec864c3e"
+        },
+        "live.stderr": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/cpg-rs/joern-parity/tests/fixtures/nested-macro-casts/oracle/nested/live.stderr",
+          "sha256": "686ce03ad7ffeb4068f7f9dc784505b10ccc85cdeaae83d243d311ce30ada3a8"
+        },
+        "run.json": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/cpg-rs/joern-parity/tests/fixtures/nested-macro-casts/oracle/nested/run.json",
+          "sha256": "b74de22a519b14f01f0eea55d44a61d5210e6c336e6e7893efcc8b0b9d2ca4ff"
+        }
+      }
+    },
+    {
+      "name": "types",
+      "source": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/cpg-rs/joern-parity/tests/fixtures/nested-macro-casts/cases/types/types.c",
+        "sha256": "3e8f3c3f8bb8ead0bb35e33c0d18d4c15d9b7d6d8f487d183d68e95288bab6bc"
+      },
+      "expected": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/cpg-rs/joern-parity/tests/fixtures/nested-macro-casts/cases/types/expected.txt",
+        "sha256": "4500750dbd9d197fdefd53715d3201ff71ae7d4f72162e445786a86fa24e7a37"
+      },
+      "canonicalLinesIncludingSeparators": 1079,
+      "nonemptySelectedRecords": 1058,
+      "beforeExact": false,
+      "afterExact": true,
+      "beforeDiffLines": 1304,
+      "oracle": {
+        "live.stdout": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/cpg-rs/joern-parity/tests/fixtures/nested-macro-casts/oracle/types/live.stdout",
+          "sha256": "d60f83ea38aadd320470c198497897bf6e2d866c84ed279a4615663ff5ce79de"
+        },
+        "live.stderr": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/cpg-rs/joern-parity/tests/fixtures/nested-macro-casts/oracle/types/live.stderr",
+          "sha256": "e2680bfe9a73e3d302e8e103b8ca726ce1105362ceda31dc653ee84d2d86e735"
+        },
+        "run.json": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/cpg-rs/joern-parity/tests/fixtures/nested-macro-casts/oracle/types/run.json",
+          "sha256": "fbcc9c4bceefed213694d1a99fbfbe50524df6cc171e149f3283a80bd382d381"
+        }
+      }
+    },
+    {
+      "name": "boundaries",
+      "source": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/cpg-rs/joern-parity/tests/fixtures/nested-macro-casts/cases/boundaries/boundaries.c",
+        "sha256": "55e75a047cd923e7e14a32e76bf95171515d4d764704d8b16f3d15717dec490e"
+      },
+      "expected": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/cpg-rs/joern-parity/tests/fixtures/nested-macro-casts/cases/boundaries/expected.txt",
+        "sha256": "e2c6b718b3a6df03763286144b0b02f268940dbe5683595f6d9541800b401254"
+      },
+      "canonicalLinesIncludingSeparators": 621,
+      "nonemptySelectedRecords": 607,
+      "beforeExact": false,
+      "afterExact": true,
+      "beforeDiffLines": 561,
+      "oracle": {
+        "live.stdout": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/cpg-rs/joern-parity/tests/fixtures/nested-macro-casts/oracle/boundaries/live.stdout",
+          "sha256": "5befd8772f5b506e666089e11459783fad37a3ae0b03409f2c8f018db59248b6"
+        },
+        "live.stderr": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/cpg-rs/joern-parity/tests/fixtures/nested-macro-casts/oracle/boundaries/live.stderr",
+          "sha256": "93229529e404241e622e748bf984fbe8a1a099d5b579c9da136c542abdb0d1f2"
+        },
+        "run.json": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/cpg-rs/joern-parity/tests/fixtures/nested-macro-casts/oracle/boundaries/run.json",
+          "sha256": "40f5aa46549fd188161b1e46edb5653656a7cb663bdc7a102f4849270a53fed8"
+        }
+      }
+    },
+    {
+      "name": "unicode",
+      "source": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/cpg-rs/joern-parity/tests/fixtures/nested-macro-casts/cases/unicode/probe.c",
+        "sha256": "e88c069592e61a68bafeb2edae652045045a3b948095b82696a1908c6140561d"
+      },
+      "expected": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/cpg-rs/joern-parity/tests/fixtures/nested-macro-casts/cases/unicode/expected.txt",
+        "sha256": "7c42dcf02523f94e55624471f9a8378ad0463a5c26ecaca0b11a66e8da2698f1"
+      },
+      "canonicalLinesIncludingSeparators": 170,
+      "nonemptySelectedRecords": 165,
+      "beforeExact": true,
+      "afterExact": true,
+      "beforeDiffLines": 0,
+      "oracle": {
+        "live.stdout": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/cpg-rs/joern-parity/tests/fixtures/nested-macro-casts/oracle/unicode/live.stdout",
+          "sha256": "b25d2799e2a9072766e86ccd7a87c6958d0cefff560fbdaf4abb996035a05cf2"
+        },
+        "live.stderr": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/cpg-rs/joern-parity/tests/fixtures/nested-macro-casts/oracle/unicode/live.stderr",
+          "sha256": "03e5e8b56ab3573308a556a623b1516d1f9120f27389a912aedc3e029be8f873"
+        },
+        "run.json": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/cpg-rs/joern-parity/tests/fixtures/nested-macro-casts/oracle/unicode/run.json",
+          "sha256": "b8d72ea9f09999b64aa2931f336415278580e3ef47ebaec8a74d1fdabb86d0d8"
+        }
+      }
+    },
+    {
+      "name": "composite",
+      "source": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/cpg-rs/joern-parity/tests/fixtures/nested-macro-casts/cases/composite/probe.c",
+        "sha256": "c316e5882cdecd2fc2904871ab8307cca26293de5155f75d975c393f75453848"
+      },
+      "expected": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/cpg-rs/joern-parity/tests/fixtures/nested-macro-casts/cases/composite/expected.txt",
+        "sha256": "2c71b6a5905cff0f8a47cc41dbb04fe9579b917f84eeddad820e9a0454bd408d"
+      },
+      "canonicalLinesIncludingSeparators": 751,
+      "nonemptySelectedRecords": 736,
+      "beforeExact": false,
+      "afterExact": true,
+      "beforeDiffLines": 184,
+      "oracle": {
+        "live.stdout": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/cpg-rs/joern-parity/tests/fixtures/nested-macro-casts/oracle/composite/live.stdout",
+          "sha256": "f9c95b41d057a587040182479ee019ed35b87a9ee9885ff7308994aea5bfe17e"
+        },
+        "live.stderr": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/cpg-rs/joern-parity/tests/fixtures/nested-macro-casts/oracle/composite/live.stderr",
+          "sha256": "af775ea3c8c879d1677e12e2758c7b5657a2704b39d7da72e2b979e47891d53e"
+        },
+        "run.json": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/cpg-rs/joern-parity/tests/fixtures/nested-macro-casts/oracle/composite/run.json",
+          "sha256": "941d80f9ad09d681bc16caf286981a06541931cd4691d62f2a169ae094c519b6"
+        }
+      }
+    }
+  ],
+  "reviewRegressions": [
+    {
+      "name": "unicode",
+      "directory": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/cpg-rs/joern-parity/tests/fixtures/nested-macro-casts/diagnostics/review-unicode",
+      "beforeExitCode": 0,
+      "afterExitCode": 0,
+      "afterExact": true,
+      "afterDiffLines": 0,
+      "files": [
+        {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/cpg-rs/joern-parity/tests/fixtures/nested-macro-casts/diagnostics/review-unicode/accepted-baseline.diff",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/cpg-rs/joern-parity/tests/fixtures/nested-macro-casts/diagnostics/review-unicode/accepted-baseline.stderr",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/cpg-rs/joern-parity/tests/fixtures/nested-macro-casts/diagnostics/review-unicode/accepted-baseline.txt",
+          "sha256": "7c42dcf02523f94e55624471f9a8378ad0463a5c26ecaca0b11a66e8da2698f1"
+        },
+        {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/cpg-rs/joern-parity/tests/fixtures/nested-macro-casts/diagnostics/review-unicode/after.diff",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/cpg-rs/joern-parity/tests/fixtures/nested-macro-casts/diagnostics/review-unicode/after.stderr",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/cpg-rs/joern-parity/tests/fixtures/nested-macro-casts/diagnostics/review-unicode/after.txt",
+          "sha256": "7c42dcf02523f94e55624471f9a8378ad0463a5c26ecaca0b11a66e8da2698f1"
+        },
+        {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/cpg-rs/joern-parity/tests/fixtures/nested-macro-casts/diagnostics/review-unicode/before.diff",
+          "sha256": "ff2938f9bb6e04a2324b7a7e698af02848ad6375a83a6feca486b95968c532db"
+        },
+        {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/cpg-rs/joern-parity/tests/fixtures/nested-macro-casts/diagnostics/review-unicode/candidate-before.stderr",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/cpg-rs/joern-parity/tests/fixtures/nested-macro-casts/diagnostics/review-unicode/candidate-before.txt",
+          "sha256": "483826792d99fced0b1cc6526b5e5b13189fb2889b1bad4aab234ed591c9f1cb"
+        },
+        {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/cpg-rs/joern-parity/tests/fixtures/nested-macro-casts/diagnostics/review-unicode/candidate-repaired.stderr",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/cpg-rs/joern-parity/tests/fixtures/nested-macro-casts/diagnostics/review-unicode/candidate-repaired.txt",
+          "sha256": "7c42dcf02523f94e55624471f9a8378ad0463a5c26ecaca0b11a66e8da2698f1"
+        },
+        {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/cpg-rs/joern-parity/tests/fixtures/nested-macro-casts/diagnostics/review-unicode/expected.txt",
+          "sha256": "7c42dcf02523f94e55624471f9a8378ad0463a5c26ecaca0b11a66e8da2698f1"
+        },
+        {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/cpg-rs/joern-parity/tests/fixtures/nested-macro-casts/diagnostics/review-unicode/live.stderr",
+          "sha256": "03e5e8b56ab3573308a556a623b1516d1f9120f27389a912aedc3e029be8f873"
+        },
+        {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/cpg-rs/joern-parity/tests/fixtures/nested-macro-casts/diagnostics/review-unicode/live.stdout",
+          "sha256": "b25d2799e2a9072766e86ccd7a87c6958d0cefff560fbdaf4abb996035a05cf2"
+        },
+        {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/cpg-rs/joern-parity/tests/fixtures/nested-macro-casts/diagnostics/review-unicode/probe.c",
+          "sha256": "e88c069592e61a68bafeb2edae652045045a3b948095b82696a1908c6140561d"
+        },
+        {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/cpg-rs/joern-parity/tests/fixtures/nested-macro-casts/diagnostics/review-unicode/repaired.diff",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/cpg-rs/joern-parity/tests/fixtures/nested-macro-casts/diagnostics/review-unicode/run.json",
+          "sha256": "b8d72ea9f09999b64aa2931f336415278580e3ef47ebaec8a74d1fdabb86d0d8"
+        }
+      ]
+    },
+    {
+      "name": "composite",
+      "directory": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/cpg-rs/joern-parity/tests/fixtures/nested-macro-casts/diagnostics/review-composite",
+      "beforeExitCode": 0,
+      "afterExitCode": 0,
+      "afterExact": false,
+      "afterDiffLines": 89,
+      "files": [
+        {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/cpg-rs/joern-parity/tests/fixtures/nested-macro-casts/diagnostics/review-composite/accepted-baseline.diff",
+          "sha256": "10a33bd12604da12503b57c87524f8b03c0a6501f637a2adc8294a114109b573"
+        },
+        {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/cpg-rs/joern-parity/tests/fixtures/nested-macro-casts/diagnostics/review-composite/accepted-baseline.stderr",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/cpg-rs/joern-parity/tests/fixtures/nested-macro-casts/diagnostics/review-composite/accepted-baseline.txt",
+          "sha256": "e85ca65f516b94a9f7c65541213c9373f8582621670fe8fba8a7df0b4048d06c"
+        },
+        {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/cpg-rs/joern-parity/tests/fixtures/nested-macro-casts/diagnostics/review-composite/after.diff",
+          "sha256": "23b2f92d7b363aee974e27d492911bf901359f25522ee15a539ff315e41c3b57"
+        },
+        {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/cpg-rs/joern-parity/tests/fixtures/nested-macro-casts/diagnostics/review-composite/after.stderr",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/cpg-rs/joern-parity/tests/fixtures/nested-macro-casts/diagnostics/review-composite/after.txt",
+          "sha256": "aaec409ee6c8776b6ad53d8b4368b7dce23e7070c6ad9566c44d087b4d30adf1"
+        },
+        {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/cpg-rs/joern-parity/tests/fixtures/nested-macro-casts/diagnostics/review-composite/before.diff",
+          "sha256": "bd253db103ff0d24258fa8ee20b94296e2ebf4d8f73afa554e69ceba713b1b68"
+        },
+        {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/cpg-rs/joern-parity/tests/fixtures/nested-macro-casts/diagnostics/review-composite/candidate-before.stderr",
+          "sha256": "4eb362dfb92e84fb13f7b6ce0ae99357b3cf75195f02040d3891e7d37372fad7"
+        },
+        {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/cpg-rs/joern-parity/tests/fixtures/nested-macro-casts/diagnostics/review-composite/candidate-before.txt",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/cpg-rs/joern-parity/tests/fixtures/nested-macro-casts/diagnostics/review-composite/candidate-repaired.stderr",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/cpg-rs/joern-parity/tests/fixtures/nested-macro-casts/diagnostics/review-composite/candidate-repaired.txt",
+          "sha256": "aaec409ee6c8776b6ad53d8b4368b7dce23e7070c6ad9566c44d087b4d30adf1"
+        },
+        {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/cpg-rs/joern-parity/tests/fixtures/nested-macro-casts/diagnostics/review-composite/expected.txt",
+          "sha256": "582e99915ed671767768b0e0c46cc347898b55de39ffe67e356961fa07b2e2ac"
+        },
+        {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/cpg-rs/joern-parity/tests/fixtures/nested-macro-casts/diagnostics/review-composite/live.stderr",
+          "sha256": "f33436adafdb30d0b43bb58aa802385dec63600fa4e3e461cf41defda8aea2f2"
+        },
+        {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/cpg-rs/joern-parity/tests/fixtures/nested-macro-casts/diagnostics/review-composite/live.stdout",
+          "sha256": "754e9a4585e785a14f6269dacf1558ab4fe89d8d59ea53be4d62fd541fd6443a"
+        },
+        {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/cpg-rs/joern-parity/tests/fixtures/nested-macro-casts/diagnostics/review-composite/probe.c",
+          "sha256": "edba70f4e1bce1bd694efaac520cc938817c590b0201d39f6dd42bc8d8e8ebc0"
+        },
+        {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/cpg-rs/joern-parity/tests/fixtures/nested-macro-casts/diagnostics/review-composite/repaired.diff",
+          "sha256": "23b2f92d7b363aee974e27d492911bf901359f25522ee15a539ff315e41c3b57"
+        },
+        {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/cpg-rs/joern-parity/tests/fixtures/nested-macro-casts/diagnostics/review-composite/run.json",
+          "sha256": "2f966dae527be638042a7723ec39c7484b53ef6a86684fab335ddf348131097b"
+        }
+      ]
+    },
+    {
+      "name": "expanded",
+      "directory": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/cpg-rs/joern-parity/tests/fixtures/nested-macro-casts/diagnostics/review-expanded",
+      "beforeExitCode": 0,
+      "afterExitCode": 0,
+      "afterExact": false,
+      "afterDiffLines": 116,
+      "files": [
+        {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/cpg-rs/joern-parity/tests/fixtures/nested-macro-casts/diagnostics/review-expanded/accepted-baseline.diff",
+          "sha256": "8e7ce215ce87a3b9b3fc876a382edde3a9744e2392773b71208608b2870fed11"
+        },
+        {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/cpg-rs/joern-parity/tests/fixtures/nested-macro-casts/diagnostics/review-expanded/accepted-baseline.stderr",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/cpg-rs/joern-parity/tests/fixtures/nested-macro-casts/diagnostics/review-expanded/accepted-baseline.txt",
+          "sha256": "0c1ea9d2bd06949ca905a3e73177b769e7fbfcde679f5cdaa05474e803f1d51d"
+        },
+        {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/cpg-rs/joern-parity/tests/fixtures/nested-macro-casts/diagnostics/review-expanded/after.diff",
+          "sha256": "f4914cf14514f0193b1656ff7b2aa22f66ea471c874383ef27f5c6d4c04d1ba2"
+        },
+        {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/cpg-rs/joern-parity/tests/fixtures/nested-macro-casts/diagnostics/review-expanded/after.stderr",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/cpg-rs/joern-parity/tests/fixtures/nested-macro-casts/diagnostics/review-expanded/after.txt",
+          "sha256": "1f368779df63c2a95d7d441541429ff7e8d9e66ddcbf953fdcc2de68c594bd78"
+        },
+        {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/cpg-rs/joern-parity/tests/fixtures/nested-macro-casts/diagnostics/review-expanded/candidate-repaired.stderr",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/cpg-rs/joern-parity/tests/fixtures/nested-macro-casts/diagnostics/review-expanded/candidate-repaired.txt",
+          "sha256": "ab223b562ab0e97c8175a340980c5de3e33da8efb2d51a1f8dc20b35b91d3cf1"
+        },
+        {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/cpg-rs/joern-parity/tests/fixtures/nested-macro-casts/diagnostics/review-expanded/expected.txt",
+          "sha256": "768f0209f53b3263a0c2b1bb707ea151f03ef8c454dfc36a5a907262d58cef4e"
+        },
+        {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/cpg-rs/joern-parity/tests/fixtures/nested-macro-casts/diagnostics/review-expanded/live.stderr",
+          "sha256": "4804fea35a0c04ac708bddc703c656b3b721b0134c65b3936777e1e26679ff82"
+        },
+        {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/cpg-rs/joern-parity/tests/fixtures/nested-macro-casts/diagnostics/review-expanded/live.stdout",
+          "sha256": "7796bc8701dd52a7eda871c263412dea2ee805adc4072fd72dd37bbcd3b0fda0"
+        },
+        {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/cpg-rs/joern-parity/tests/fixtures/nested-macro-casts/diagnostics/review-expanded/probe.c",
+          "sha256": "03ccd9c0e892288d170e682de2ce91768a817a2ee88d36c9e5396ab135dfdca6"
+        },
+        {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/cpg-rs/joern-parity/tests/fixtures/nested-macro-casts/diagnostics/review-expanded/repaired.diff",
+          "sha256": "472eafd876825a8e07ab330e6762baab1ca17e2c38e8678bdba4639c9b67e933"
+        },
+        {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/cpg-rs/joern-parity/tests/fixtures/nested-macro-casts/diagnostics/review-expanded/run.json",
+          "sha256": "9233aa35e537fbc4e4c3cbe9fc1628a092de84b8d9826f060c10f5088a50b906"
+        }
+      ]
+    }
+  ],
+  "historicalCounts": {
+    "firstThreeProjectsCanonicalLinesIncludingSeparators": 2236,
+    "firstThreeProjectsNonemptySelectedRecords": 2189
+  },
+  "totals": {
+    "completeProjects": 5,
+    "sourceFunctions": 24,
+    "canonicalLinesIncludingSeparators": 3157,
+    "nonemptySelectedRecords": 3090,
+    "baselineExactProjects": 1,
+    "candidateExactProjects": 5
+  },
+  "failedAndIntermediateReceipts": [
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/nested-casts/focused-tests.log",
+      "sha256": "acbcad61cbe387cd1c2ec5fd212f75adfa52b26b80f20c6578853e1915d42eb0"
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/nested-casts/focused-repaired-tests.log",
+      "sha256": "fd0d5a3196fbed0c6be19ada48cfc3f1fa2cf3b6bdfa4143df22a1a0545ea788"
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/nested-casts/final-exact.rs",
+      "sha256": "5618e58f92cf03bc1c695c77399467ab4fafc5f054bd7c994ba0f1027cc3cff6"
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/nested-casts/final-joern-parity",
+      "sha256": "7a367c8f781b60e129361be559c3f11029b92386cdca2f7f4553b06915aea24d"
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/nested-casts/review-build.log",
+      "sha256": "e0c80ac05e97ac1b5d05f3a3dba0831ee08b3e65c41772d79701319c8274542a"
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/nested-casts/review-expanded-oracle/repaired.diff",
+      "sha256": "472eafd876825a8e07ab330e6762baab1ca17e2c38e8678bdba4639c9b67e933"
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/nested-casts/prior-measurement.json",
+      "sha256": "4cf36691053b1257cca02c1a0809cb8c0f6b16faa74f3f7abf048d1d37cec246"
+    }
+  ],
+  "verification": {
+    "status": "PASS",
+    "workspaceTests": 417,
+    "focusedProductionTests": 5,
+    "mainCommittedBlocks": 308,
+    "mainFreshLiveBlocks": 308,
+    "checks": [
+      {
+        "name": "workspace",
+        "command": [
+          "cargo",
+          "test",
+          "--locked",
+          "--manifest-path",
+          "cpg-rs/Cargo.toml",
+          "--workspace"
+        ],
+        "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts",
+        "target": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/target",
+        "exitCode": 0,
+        "wallSeconds": 18.68511733300693,
+        "log": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/nested-casts/reviewed-workspace.log",
+          "sha256": "63b050c4e185d187c66307d5e3eb64b8ebdc68fee7542756da8676e0e6082207"
+        },
+        "passedTests": 417
+      },
+      {
+        "name": "fmt",
+        "command": [
+          "cargo",
+          "fmt",
+          "--manifest-path",
+          "cpg-rs/Cargo.toml",
+          "--all",
+          "--check"
+        ],
+        "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts",
+        "target": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/target",
+        "exitCode": 0,
+        "wallSeconds": 0.2737113750044955,
+        "log": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/nested-casts/reviewed-fmt.log",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      {
+        "name": "clippy",
+        "command": [
+          "cargo",
+          "clippy",
+          "--locked",
+          "--manifest-path",
+          "cpg-rs/Cargo.toml",
+          "--workspace",
+          "--all-targets",
+          "--",
+          "-D",
+          "warnings"
+        ],
+        "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts",
+        "target": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/target",
+        "exitCode": 0,
+        "wallSeconds": 1.246214582992252,
+        "log": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/nested-casts/reviewed-clippy.log",
+          "sha256": "bf04ba914a8e5c802008ea277cb4400fd6bbb600b8400ee874daa409d78311f9"
+        }
+      },
+      {
+        "name": "committed",
+        "command": [
+          "bash",
+          "cpg-rs/joern-parity/check.sh",
+          "--committed-only"
+        ],
+        "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts",
+        "target": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/target",
+        "exitCode": 0,
+        "wallSeconds": 2.3671728750050534,
+        "log": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/nested-casts/reviewed-committed.log",
+          "sha256": "c105179d62065e9cbf9f398ff94754c29ec03add1206db7dff281cb4c07b6be6"
+        }
+      },
+      {
+        "name": "live",
+        "command": [
+          "bash",
+          "cpg-rs/joern-parity/check.sh",
+          "--live"
+        ],
+        "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts",
+        "target": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/target",
+        "exitCode": 0,
+        "wallSeconds": 5.649365624994971,
+        "log": {
+          "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/nested-casts/reviewed-live.log",
+          "sha256": "715e0c188ca0e7a744ace60c9fa451649f34143022f2a1a163bd46303772dd68"
+        }
+      }
+    ],
+    "receipt": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/nested-casts/reviewed-validation.json",
+      "sha256": "1a52118fdcbf0c5132af1b08973c84db67493906381240ab64ab5e1013604b9c"
+    },
+    "releaseBuildLog": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/nested-casts/review-qualifiers-build.log",
+      "sha256": "9562b54444ffd2bbc23fb25c0343300d59a0474ca49470e2c2371f64921d4af9"
+    }
+  },
+  "finalWholeLuaReplay": {
+    "completeOutput": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/nested-casts/real/reviewed-after-full.txt",
+      "sha256": "0ab5ca1426275be964958ed137183dfd90be8f342e1e407c2c3a1599796be48b"
+    },
+    "commandAndInputHashes": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/nested-casts/real/reviewed-run.json",
+      "sha256": "68379837712d20df78512b5932138cc959ac329fa17e09ec2e70a9919eb188ce"
+    },
+    "stderr": {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/.local/nested-casts/real/reviewed-after.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "status": "producer PASS; complete projection remains nonexact; target AST differences retain sizeof spelling and declaration/return context only",
+    "methodAstExcerpts": [
+      {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/cpg-rs/joern-parity/tests/fixtures/nested-macro-casts/diagnostics/luaD_seterrorobj-reviewed-after.txt",
+        "sha256": "ee3728da1546aa170732ca884080027de4e9181c9054472b22878fcd0bd0678a"
+      },
+      {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/cpg-rs/joern-parity/tests/fixtures/nested-macro-casts/diagnostics/luaD_seterrorobj-reviewed-after.diff",
+        "sha256": "e3304d7333303042f92a59040b2daf887e8e0ebd80417654d6fb185735aca559"
+      },
+      {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/cpg-rs/joern-parity/tests/fixtures/nested-macro-casts/diagnostics/luaG_concaterror-reviewed-after.txt",
+        "sha256": "6f9760582fa9d7b0984481320fabb5ef17c4081aa5e309d84a606645ad08fc63"
+      },
+      {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/cpg-rs/joern-parity/tests/fixtures/nested-macro-casts/diagnostics/luaG_concaterror-reviewed-after.diff",
+        "sha256": "69b8eaed31cd7ee27c0e485015c4e97fce4e6e22103d3dacdcb234942cb3a6c9"
+      }
+    ]
+  },
+  "tests": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/cpg-rs/joern-parity/tests/nested_macro_casts.rs",
+    "sha256": "5f60b40ff7290c19ca37268274494c45d5e128e6e0fb413987b7766475a1f910"
+  },
+  "ppNumberReviewFollowup": {
+    "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-nested-casts/cpg-rs/joern-parity/tests/fixtures/nested-macro-casts/diagnostics/ppnumbers/measurement.json",
+    "sha256": "170d07c348e2095c87b3a05d434bc6b80b801bc323b6fba59842fd3cb680cad0"
+  }
+}

@@ -1,0 +1,158 @@
+{
+  "task": "Read-only pinned Joern macro wrapper typing review; scratch fixture and receipts only, no compiler source edits.",
+  "joernVersion": "4.0.555",
+  "runtime": "/Users/shayaunnejad/vibe-code/joern-oxidized/.local/astra-sprint/oracle/runtime/joern-cli/joern",
+  "jdk": "/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home",
+  "execution": {
+    "exitCode": 0,
+    "cwd": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/fourth-batch/header-macros/pi-type-review/run",
+    "script": "../oracle.sc",
+    "inputPath": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/fourth-batch/header-macros/pi-type-review/input"
+  },
+  "files": {
+    "input/types.c": {
+      "sha256": "e2ee93058b496b46878451dda3ade4f75c435f20cbf849cbd83dc30a9681a1f6",
+      "bytes": 1048
+    },
+    "oracle.sc": {
+      "sha256": "bd2e18fab06ecd7897d796f5b31dac6669dc45ecf70c54fb1d5cc0fe29f3c1ab",
+      "bytes": 4487
+    },
+    "live.stdout": {
+      "sha256": "e803a0f76dc0011bf12e3e8faea53f06f1442b5b511cb823246604424a754cc0",
+      "bytes": 87961
+    },
+    "live.stderr": {
+      "sha256": "20a7c4d06badf1eb7c0da59e1b436426e8b09d864731fa600e44f263e8d714a9",
+      "bytes": 1208
+    },
+    "live-canonical.txt": {
+      "sha256": "b45ceab2e7d97bbfdf7ea3040e70c96d11b3ea9f29295725d327ce8ea19b129f",
+      "bytes": 76752
+    },
+    "TypeNameProvider.scala": {
+      "sha256": "cb1e8b8ecdb6e7455e30c04b7a49e4db871ab148363c811d3f95afcd79e6748b",
+      "bytes": 21722
+    },
+    "AstCreatorHelper.scala": {
+      "sha256": "1c3514cb3e006b8c8bf1bb6b5cee072969416a8c94353d185a5ebacbe00e92f2",
+      "bytes": 10106
+    },
+    "ASTTypeUtil.javap.txt": {
+      "sha256": "d3f5bc248b27c70b33d3fd5352059b3f0d062abbfe5dcd013747f598ce3a6c48",
+      "bytes": 111859
+    }
+  },
+  "canonicalRecordCounts": {
+    "AST": 430,
+    "NODES": 49,
+    "EDGES": 654,
+    "FLOWS": 183
+  },
+  "observations": [
+    {
+      "method": "casted",
+      "record": "AST|      CALL NAME=CAST CODE=CAST TYPE_FULL_NAME=ANY METHOD_FULL_NAME=types.c:CAST:ANY(0) SIGNATURE=ANY(0) ORDER=1 DISPATCH_TYPE=INLINED"
+    },
+    {
+      "method": "direct",
+      "record": "AST|      CALL NAME=DIRECT CODE=DIRECT TYPE_FULL_NAME=ANY METHOD_FULL_NAME=types.c:DIRECT:ANY(0) SIGNATURE=ANY(0) ORDER=1 DISPATCH_TYPE=INLINED"
+    },
+    {
+      "method": "direct_id",
+      "record": "AST|      CALL NAME=ID CODE=ID(3.14) TYPE_FULL_NAME=double METHOD_FULL_NAME=types.c:ID:double(1) SIGNATURE=double(1) ORDER=1 DISPATCH_TYPE=INLINED"
+    },
+    {
+      "method": "direct_idp",
+      "record": "AST|      CALL NAME=IDP CODE=IDP(3.14) TYPE_FULL_NAME=ANY METHOD_FULL_NAME=types.c:IDP:ANY(1) SIGNATURE=ANY(1) ORDER=1 DISPATCH_TYPE=INLINED"
+    },
+    {
+      "method": "direct_raw",
+      "record": "AST|      CALL NAME=DIRECT_RAW CODE=DIRECT_RAW TYPE_FULL_NAME=double METHOD_FULL_NAME=types.c:DIRECT_RAW:double(0) SIGNATURE=double(0) ORDER=1 DISPATCH_TYPE=INLINED"
+    },
+    {
+      "method": "expression_statement",
+      "record": "AST|    CALL NAME=PI CODE=PI TYPE_FULL_NAME=ANY METHOD_FULL_NAME=types.c:PI:ANY(0) SIGNATURE=ANY(0) ORDER=1 DISPATCH_TYPE=INLINED"
+    },
+    {
+      "method": "function_alias",
+      "record": "AST|      CALL NAME=PI_SECOND CODE=PI_SECOND TYPE_FULL_NAME=ANY METHOD_FULL_NAME=types.c:PI_SECOND:ANY(0) SIGNATURE=ANY(0) ORDER=1 DISPATCH_TYPE=INLINED"
+    },
+    {
+      "method": "initializer",
+      "record": "AST|      CALL NAME=PI CODE=PI TYPE_FULL_NAME=ANY METHOD_FULL_NAME=types.c:PI:ANY(0) SIGNATURE=ANY(0) ORDER=2 ARGUMENT_INDEX=2 DISPATCH_TYPE=INLINED"
+    },
+    {
+      "method": "nested_objects",
+      "record": "AST|      CALL NAME=OBJECT_A CODE=OBJECT_A TYPE_FULL_NAME=ANY METHOD_FULL_NAME=types.c:OBJECT_A:ANY(0) SIGNATURE=ANY(0) ORDER=1 DISPATCH_TYPE=INLINED"
+    },
+    {
+      "method": "nested_paren",
+      "record": "AST|      CALL NAME=NEST CODE=NEST TYPE_FULL_NAME=ANY METHOD_FULL_NAME=types.c:NEST:ANY(0) SIGNATURE=ANY(0) ORDER=1 DISPATCH_TYPE=INLINED"
+    },
+    {
+      "method": "nested_raw",
+      "record": "AST|      CALL NAME=PI_NOP CODE=PI_NOP TYPE_FULL_NAME=double METHOD_FULL_NAME=types.c:PI_NOP:double(0) SIGNATURE=double(0) ORDER=1 DISPATCH_TYPE=INLINED"
+    },
+    {
+      "method": "object_chain",
+      "record": "AST|      CALL NAME=A CODE=A TYPE_FULL_NAME=int METHOD_FULL_NAME=types.c:A:int(0) SIGNATURE=int(0) ORDER=1 DISPATCH_TYPE=INLINED"
+    },
+    {
+      "method": "object_paren",
+      "record": "AST|      CALL NAME=AP CODE=AP TYPE_FULL_NAME=ANY METHOD_FULL_NAME=types.c:AP:ANY(0) SIGNATURE=ANY(0) ORDER=1 DISPATCH_TYPE=INLINED"
+    },
+    {
+      "method": "operation",
+      "record": "AST|      CALL NAME=OP CODE=OP TYPE_FULL_NAME=ANY METHOD_FULL_NAME=types.c:OP:ANY(0) SIGNATURE=ANY(0) ORDER=1 DISPATCH_TYPE=INLINED"
+    },
+    {
+      "method": "pi",
+      "record": "AST|      CALL NAME=PI CODE=PI TYPE_FULL_NAME=ANY METHOD_FULL_NAME=types.c:PI:ANY(0) SIGNATURE=ANY(0) ORDER=1 DISPATCH_TYPE=INLINED"
+    },
+    {
+      "method": "zero_arg",
+      "record": "AST|      CALL NAME=FNOBJ CODE=FNOBJ TYPE_FULL_NAME=double METHOD_FULL_NAME=types.c:FNOBJ:double(0) SIGNATURE=double(0) ORDER=1 DISPATCH_TYPE=INLINED"
+    }
+  ],
+  "conclusion": "Fresh bounded evidence supports preserving recursive expansion and treating a resulting parenthesized expression as ANY for wrapper typing, instead of unwrapping to its child. Do not infer types from unexpanded macro bodies: A->B->17 is int and PI_NOP->ID(3.14)->3.14 is double. Child literal types remain independent.",
+  "sourceEvidence": [
+    {
+      "file": "upstream/MacroHandler.scala",
+      "line": 99,
+      "claim": "Macro wrapper type uses typeFor(original CDT node)."
+    },
+    {
+      "file": "TypeNameProvider.scala",
+      "line": 247,
+      "claim": "Literal node type is safeGetType(l.getExpressionType)."
+    },
+    {
+      "file": "TypeNameProvider.scala",
+      "line": 248,
+      "claim": "Other expression nodes use safeGetNodeType."
+    },
+    {
+      "file": "TypeNameProvider.scala",
+      "line": 373,
+      "claim": "safeGetNodeType delegates ASTTypeUtil.getNodeType and falls back to ANY."
+    },
+    {
+      "file": "TypeNameProvider.scala",
+      "line": 100,
+      "claim": "cleanType maps empty type string to ANY."
+    }
+  ],
+  "limits": [
+    "Sixteen reduced functions and saved full Lua PI evidence; not a complete replacement for CDT type resolution.",
+    "No Rust candidate was built or compared for this read-only probe.",
+    "Complete selected canonical projection retained; no failing graph facts removed or expected values hand-edited."
+  ],
+  "pinnedCdtBytecode": {
+    "jarPath": "/Users/shayaunnejad/vibe-code/joern-oxidized/.local/astra-sprint/oracle/runtime/joern-cli/frontends/c2cpg/lib/io.joern.eclipse-cdt-core-9.2.100.202507101054+1.jar",
+    "jarSha256": "14f94a408d2e780378e7d4c9c431dd44f408d56704fd58a216c620abd5aed250",
+    "command": "javap -c -p -classpath <jarPath> org.eclipse.cdt.core.dom.ast.ASTTypeUtil",
+    "method": "getNodeType(IASTNode)",
+    "evidence": "Checks IASTDeclarator, IASTName variable/function/type bindings, and IASTTypeId; otherwise returns empty string at bytecode154. Joern cleanType maps empty to ANY. Parenthesized generic expression is not a literal specialcase."
+  }
+}

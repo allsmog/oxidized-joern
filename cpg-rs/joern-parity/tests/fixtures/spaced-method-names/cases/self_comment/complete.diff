@@ -1,0 +1,26 @@
+--- joern
++++ actual
+@@ -2,19 +2,19 @@
+   BLOCK TYPE_FULL_NAME=ANY ORDER=1
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=ANY ORDER=2
+ 
+-METHOD NAME=invoke CODE=int invoke(int x){ /* FULL_NAME=invoke */ return x; } FULL_NAME=invoke SIGNATURE=int(int) ORDER=1
++METHOD NAME=invoke CODE=int invoke(int x){ /* FULL_NAME=invoke SIGNATURE=int(int) ORDER=1
+   METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+   METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+-  BLOCK CODE={ /* FULL_NAME=invoke */ return x; } TYPE_FULL_NAME=void ORDER=2
++  BLOCK CODE={ /* TYPE_FULL_NAME=void FULL_NAME=invoke */ return x; } ORDER=2
+     RETURN CODE=return x; ORDER=1
+       IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1
+   METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3
+ 
+ METHOD NAME=<global> CODE=<global> FULL_NAME=main.c:<global> ORDER=1
+-  METHOD NAME=invoke CODE=int invoke(int x){ /* FULL_NAME=invoke */ return x; } FULL_NAME=invoke SIGNATURE=int(int) ORDER=1
++  METHOD NAME=invoke CODE=int invoke(int x){ /* FULL_NAME=invoke SIGNATURE=int(int) ORDER=1
+     METHOD_PARAMETER_IN NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+     METHOD_PARAMETER_OUT NAME=x CODE=int x TYPE_FULL_NAME=int ORDER=1
+-    BLOCK CODE={ /* FULL_NAME=invoke */ return x; } TYPE_FULL_NAME=void ORDER=2
++    BLOCK CODE={ /* TYPE_FULL_NAME=void FULL_NAME=invoke */ return x; } ORDER=2
+       RETURN CODE=return x; ORDER=1
+         IDENTIFIER NAME=x CODE=x TYPE_FULL_NAME=int ORDER=1
+     METHOD_RETURN CODE=RET TYPE_FULL_NAME=int ORDER=3

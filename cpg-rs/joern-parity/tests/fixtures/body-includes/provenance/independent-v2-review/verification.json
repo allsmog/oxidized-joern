@@ -1,0 +1,745 @@
+{
+  "checks": 299,
+  "checkLabels": [
+    "immutable source1b23",
+    "immutable binary589a",
+    "frozen or accepted unchanged source astgen-rs/abap2cpg/Cargo.lock",
+    "frozen or accepted unchanged source astgen-rs/abap2cpg/Cargo.toml",
+    "frozen or accepted unchanged source astgen-rs/abap2cpg/crates/abapastgen-cli/Cargo.toml",
+    "frozen or accepted unchanged source astgen-rs/abap2cpg/crates/abapastgen-cli/src/main.rs",
+    "frozen or accepted unchanged source astgen-rs/abap2cpg/crates/abapastgen-cli/tests/coverage.rs",
+    "frozen or accepted unchanged source astgen-rs/abap2cpg/crates/abapastgen-cli/tests/differential_json.rs",
+    "frozen or accepted unchanged source astgen-rs/abap2cpg/crates/abapastgen-core/Cargo.toml",
+    "frozen or accepted unchanged source astgen-rs/abap2cpg/crates/abapastgen-core/src/lib.rs",
+    "frozen or accepted unchanged source astgen-rs/csharpsrc2cpg/Cargo.lock",
+    "frozen or accepted unchanged source astgen-rs/csharpsrc2cpg/Cargo.toml",
+    "frozen or accepted unchanged source astgen-rs/csharpsrc2cpg/crates/dotnetastgen-cli/Cargo.toml",
+    "frozen or accepted unchanged source astgen-rs/csharpsrc2cpg/crates/dotnetastgen-cli/src/main.rs",
+    "frozen or accepted unchanged source astgen-rs/csharpsrc2cpg/crates/dotnetastgen-cli/tests/coverage.rs",
+    "frozen or accepted unchanged source astgen-rs/csharpsrc2cpg/crates/dotnetastgen-cli/tests/differential_json.rs",
+    "frozen or accepted unchanged source astgen-rs/csharpsrc2cpg/crates/dotnetastgen-core/Cargo.toml",
+    "frozen or accepted unchanged source astgen-rs/csharpsrc2cpg/crates/dotnetastgen-core/src/lib.rs",
+    "frozen or accepted unchanged source astgen-rs/javasrc2cpg/Cargo.lock",
+    "frozen or accepted unchanged source astgen-rs/javasrc2cpg/Cargo.toml",
+    "frozen or accepted unchanged source astgen-rs/javasrc2cpg/crates/javaastgen-cli/Cargo.toml",
+    "frozen or accepted unchanged source astgen-rs/javasrc2cpg/crates/javaastgen-cli/src/main.rs",
+    "frozen or accepted unchanged source astgen-rs/javasrc2cpg/crates/javaastgen-cli/tests/cli_contract.rs",
+    "frozen or accepted unchanged source astgen-rs/javasrc2cpg/crates/javaastgen-cli/tests/coverage.rs",
+    "frozen or accepted unchanged source astgen-rs/javasrc2cpg/crates/javaastgen-core/Cargo.toml",
+    "frozen or accepted unchanged source astgen-rs/javasrc2cpg/crates/javaastgen-core/src/lib.rs",
+    "frozen or accepted unchanged source astgen-rs/jimple2cpg/Cargo.lock",
+    "frozen or accepted unchanged source astgen-rs/jimple2cpg/Cargo.toml",
+    "frozen or accepted unchanged source astgen-rs/jimple2cpg/crates/jimpleastgen-cli/Cargo.toml",
+    "frozen or accepted unchanged source astgen-rs/jimple2cpg/crates/jimpleastgen-cli/src/main.rs",
+    "frozen or accepted unchanged source astgen-rs/jimple2cpg/crates/jimpleastgen-cli/tests/cli_contract.rs",
+    "frozen or accepted unchanged source astgen-rs/jimple2cpg/crates/jimpleastgen-core/Cargo.toml",
+    "frozen or accepted unchanged source astgen-rs/jimple2cpg/crates/jimpleastgen-core/src/lib.rs",
+    "frozen or accepted unchanged source astgen-rs/kotlin2cpg/Cargo.lock",
+    "frozen or accepted unchanged source astgen-rs/kotlin2cpg/Cargo.toml",
+    "frozen or accepted unchanged source astgen-rs/kotlin2cpg/crates/kotlinastgen-cli/Cargo.toml",
+    "frozen or accepted unchanged source astgen-rs/kotlin2cpg/crates/kotlinastgen-cli/src/main.rs",
+    "frozen or accepted unchanged source astgen-rs/kotlin2cpg/crates/kotlinastgen-cli/tests/cli_contract.rs",
+    "frozen or accepted unchanged source astgen-rs/kotlin2cpg/crates/kotlinastgen-cli/tests/coverage.rs",
+    "frozen or accepted unchanged source astgen-rs/kotlin2cpg/crates/kotlinastgen-core/Cargo.toml",
+    "frozen or accepted unchanged source astgen-rs/kotlin2cpg/crates/kotlinastgen-core/src/lib.rs",
+    "frozen or accepted unchanged source astgen-rs/php2cpg/Cargo.lock",
+    "frozen or accepted unchanged source astgen-rs/php2cpg/Cargo.toml",
+    "frozen or accepted unchanged source astgen-rs/php2cpg/crates/phpastgen-cli/Cargo.toml",
+    "frozen or accepted unchanged source astgen-rs/php2cpg/crates/phpastgen-cli/src/main.rs",
+    "frozen or accepted unchanged source astgen-rs/php2cpg/crates/phpastgen-cli/tests/coverage.rs",
+    "frozen or accepted unchanged source astgen-rs/php2cpg/crates/phpastgen-cli/tests/differential_json.rs",
+    "frozen or accepted unchanged source astgen-rs/php2cpg/crates/phpastgen-core/Cargo.toml",
+    "frozen or accepted unchanged source astgen-rs/php2cpg/crates/phpastgen-core/src/lib.rs",
+    "frozen or accepted unchanged source astgen-rs/swiftsrc2cpg/Cargo.lock",
+    "frozen or accepted unchanged source astgen-rs/swiftsrc2cpg/Cargo.toml",
+    "frozen or accepted unchanged source astgen-rs/swiftsrc2cpg/crates/swiftastgen-cli/Cargo.toml",
+    "frozen or accepted unchanged source astgen-rs/swiftsrc2cpg/crates/swiftastgen-cli/src/main.rs",
+    "frozen or accepted unchanged source astgen-rs/swiftsrc2cpg/crates/swiftastgen-cli/tests/cli_contract.rs",
+    "frozen or accepted unchanged source astgen-rs/swiftsrc2cpg/crates/swiftastgen-cli/tests/coverage.rs",
+    "frozen or accepted unchanged source astgen-rs/swiftsrc2cpg/crates/swiftastgen-cli/tests/differential_json.rs",
+    "frozen or accepted unchanged source astgen-rs/swiftsrc2cpg/crates/swiftastgen-core/Cargo.toml",
+    "frozen or accepted unchanged source astgen-rs/swiftsrc2cpg/crates/swiftastgen-core/src/lib.rs",
+    "frozen or accepted unchanged source cpg-rs/Cargo.lock",
+    "frozen or accepted unchanged source cpg-rs/Cargo.toml",
+    "frozen or accepted unchanged source cpg-rs/conformance/Cargo.toml",
+    "frozen or accepted unchanged source cpg-rs/conformance/src/lib.rs",
+    "frozen or accepted unchanged source cpg-rs/cpg-analysis/Cargo.toml",
+    "frozen or accepted unchanged source cpg-rs/cpg-analysis/src/authz.rs",
+    "frozen or accepted unchanged source cpg-rs/cpg-analysis/src/callgraph.rs",
+    "frozen or accepted unchanged source cpg-rs/cpg-analysis/src/cfg.rs",
+    "frozen or accepted unchanged source cpg-rs/cpg-analysis/src/entries.rs",
+    "frozen or accepted unchanged source cpg-rs/cpg-analysis/src/lib.rs",
+    "frozen or accepted unchanged source cpg-rs/cpg-analysis/src/middleware.rs",
+    "frozen or accepted unchanged source cpg-rs/cpg-analysis/src/pass.rs",
+    "frozen or accepted unchanged source cpg-rs/cpg-analysis/src/provenance.rs",
+    "frozen or accepted unchanged source cpg-rs/cpg-analysis/src/query.rs",
+    "frozen or accepted unchanged source cpg-rs/cpg-analysis/src/reaching_def.rs",
+    "frozen or accepted unchanged source cpg-rs/cpg-analysis/src/relations.rs",
+    "frozen or accepted unchanged source cpg-rs/cpg-analysis/src/return_flow.rs",
+    "frozen or accepted unchanged source cpg-rs/cpg-analysis/src/scan.rs",
+    "frozen or accepted unchanged source cpg-rs/cpg-analysis/src/structural.rs",
+    "frozen or accepted unchanged source cpg-rs/cpg-analysis/src/summaries.rs",
+    "frozen or accepted unchanged source cpg-rs/cpg-analysis/src/symbols.rs",
+    "frozen or accepted unchanged source cpg-rs/cpg-analysis/src/taint.rs",
+    "frozen or accepted unchanged source cpg-rs/cpg-analysis/src/value_flow.rs",
+    "frozen or accepted unchanged source cpg-rs/cpg-analysis/tests/canonical_c_array_initializers.rs",
+    "frozen or accepted unchanged source cpg-rs/cpg-analysis/tests/canonical_c_braceless_if.rs",
+    "frozen or accepted unchanged source cpg-rs/cpg-analysis/tests/canonical_c_braceless_loops.rs",
+    "frozen or accepted unchanged source cpg-rs/cpg-analysis/tests/canonical_c_flow.rs",
+    "frozen or accepted unchanged source cpg-rs/cpg-analysis/tests/canonical_c_preprocessor.rs",
+    "frozen or accepted unchanged source cpg-rs/cpg-analysis/tests/canonical_c_standalone_blocks.rs",
+    "frozen or accepted unchanged source cpg-rs/cpg-analysis/tests/direct_c_flow.rs",
+    "frozen or accepted unchanged source cpg-rs/cpg-analysis/tests/taint_sanitizers.rs",
+    "frozen or accepted unchanged source cpg-rs/cpg-cli/Cargo.toml",
+    "frozen or accepted unchanged source cpg-rs/cpg-cli/src/apis.rs",
+    "frozen or accepted unchanged source cpg-rs/cpg-cli/src/coverage.rs",
+    "frozen or accepted unchanged source cpg-rs/cpg-cli/src/export.rs",
+    "frozen or accepted unchanged source cpg-rs/cpg-cli/src/lib.rs",
+    "frozen or accepted unchanged source cpg-rs/cpg-cli/src/main.rs",
+    "frozen or accepted unchanged source cpg-rs/cpg-cli/src/mcp.rs",
+    "frozen or accepted unchanged source cpg-rs/cpg-cli/src/merge.rs",
+    "frozen or accepted unchanged source cpg-rs/cpg-cli/src/play.rs",
+    "frozen or accepted unchanged source cpg-rs/cpg-cli/src/rules.rs",
+    "frozen or accepted unchanged source cpg-rs/cpg-cli/src/sarif.rs",
+    "frozen or accepted unchanged source cpg-rs/cpg-cli/src/scan.rs",
+    "frozen or accepted unchanged source cpg-rs/cpg-cli/src/slice.rs",
+    "frozen or accepted unchanged source cpg-rs/cpg-cli/src/thrift.rs",
+    "frozen or accepted unchanged source cpg-rs/cpg-cli/src/vectors.rs",
+    "frozen or accepted unchanged source cpg-rs/cpg-cli/src/workspace.rs",
+    "frozen or accepted unchanged source cpg-rs/cpg-cli/tests/c_format_positions.rs",
+    "frozen or accepted unchanged source cpg-rs/cpg-cli/tests/cli_metadata.rs",
+    "frozen or accepted unchanged source cpg-rs/cpg-cli/tests/mcp_stdio.rs",
+    "frozen or accepted unchanged source cpg-rs/cpg-cli/tests/scan_sarif.rs",
+    "frozen or accepted unchanged source cpg-rs/cpg-cli/tests/source_idents.rs",
+    "frozen or accepted unchanged source cpg-rs/cpg-cli/tests/thrift_stitch.rs",
+    "frozen or accepted unchanged source cpg-rs/cpg-cli/tests/tools_parity.rs",
+    "frozen or accepted unchanged source cpg-rs/cpg-core/Cargo.toml",
+    "frozen or accepted unchanged source cpg-rs/cpg-core/src/builder.rs",
+    "frozen or accepted unchanged source cpg-rs/cpg-core/src/freeze.rs",
+    "frozen or accepted unchanged source cpg-rs/cpg-core/src/graph.rs",
+    "frozen or accepted unchanged source cpg-rs/cpg-core/src/intern.rs",
+    "frozen or accepted unchanged source cpg-rs/cpg-core/src/lib.rs",
+    "frozen or accepted unchanged source cpg-rs/cpg-core/src/persist.rs",
+    "frozen or accepted unchanged source cpg-rs/cpg-core/src/schema.rs",
+    "frozen or accepted unchanged source cpg-rs/cpg-core/src/segments.rs",
+    "frozen or accepted unchanged source cpg-rs/cpg-core/src/traversal.rs",
+    "frozen or accepted unchanged source cpg-rs/cpg-frontend/Cargo.toml",
+    "frozen or accepted unchanged source cpg-rs/cpg-frontend/src/lib.rs",
+    "frozen or accepted unchanged source cpg-rs/cpg-incremental/Cargo.toml",
+    "frozen or accepted unchanged source cpg-rs/cpg-incremental/examples/scale.rs",
+    "frozen or accepted unchanged source cpg-rs/cpg-incremental/src/lib.rs",
+    "frozen or accepted unchanged source cpg-rs/cpg-lang-c/Cargo.toml",
+    "frozen or accepted unchanged source cpg-rs/cpg-lang-c/src/exact.rs",
+    "frozen or accepted unchanged source cpg-rs/cpg-lang-c/src/import.rs",
+    "frozen or accepted unchanged source cpg-rs/cpg-lang-c/src/lib.rs",
+    "frozen or accepted unchanged source cpg-rs/cpg-lang-c/tests/control_truth.rs",
+    "frozen or accepted unchanged source cpg-rs/cpg-lang-c/tests/declaration_shapes.rs",
+    "frozen or accepted unchanged source cpg-rs/cpg-lang-c/tests/method_address_definitions.rs",
+    "frozen or accepted unchanged source cpg-rs/cpg-lang-python/Cargo.toml",
+    "frozen or accepted unchanged source cpg-rs/cpg-lang-python/src/lib.rs",
+    "frozen or accepted unchanged source cpg-rs/cpg-lang-ts/Cargo.toml",
+    "frozen or accepted unchanged source cpg-rs/cpg-lang-ts/src/engine.rs",
+    "frozen or accepted unchanged source cpg-rs/cpg-lang-ts/src/lib.rs",
+    "frozen or accepted unchanged source cpg-rs/cpg-lang-ts/src/spec.rs",
+    "frozen or accepted unchanged source cpg-rs/cpg-lang-ts/tests/robustness.rs",
+    "frozen or accepted unchanged source cpg-rs/joern-parity/Cargo.toml",
+    "frozen or accepted unchanged source cpg-rs/joern-parity/src/main.rs",
+    "frozen or accepted unchanged source cpg-rs/joern-parity/src/production.rs",
+    "frozen or accepted unchanged source cpg-rs/joern-parity/tests/array_declarations.rs",
+    "frozen or accepted unchanged source cpg-rs/joern-parity/tests/array_initializers.rs",
+    "frozen or accepted unchanged source cpg-rs/joern-parity/tests/body_macro_state.rs",
+    "frozen or accepted unchanged source cpg-rs/joern-parity/tests/body_preprocessor.rs",
+    "frozen or accepted unchanged source cpg-rs/joern-parity/tests/combined_c_types.rs",
+    "frozen or accepted unchanged source cpg-rs/joern-parity/tests/concatenated_strings.rs",
+    "frozen or accepted unchanged source cpg-rs/joern-parity/tests/declaration_macros.rs",
+    "frozen or accepted unchanged source cpg-rs/joern-parity/tests/declaration_registration.rs",
+    "frozen or accepted unchanged source cpg-rs/joern-parity/tests/direct_field_macros.rs",
+    "frozen or accepted unchanged source cpg-rs/joern-parity/tests/direct_macro_arguments.rs",
+    "frozen or accepted unchanged source cpg-rs/joern-parity/tests/external_functions.rs",
+    "frozen or accepted unchanged source cpg-rs/joern-parity/tests/field_cast_interactions.rs",
+    "frozen or accepted unchanged source cpg-rs/joern-parity/tests/field_macros.rs",
+    "frozen or accepted unchanged source cpg-rs/joern-parity/tests/fixtures/body-macro-state/provenance/before-exact.rs",
+    "frozen or accepted unchanged source cpg-rs/joern-parity/tests/fixtures/body-macro-state/provenance/candidate-v1/exact.rs",
+    "frozen or accepted unchanged source cpg-rs/joern-parity/tests/fixtures/body-macro-state/provenance/candidate-v2/exact.rs",
+    "frozen or accepted unchanged source cpg-rs/joern-parity/tests/fixtures/body-macro-state/provenance/candidate-v3/exact.rs",
+    "frozen or accepted unchanged source cpg-rs/joern-parity/tests/fixtures/body-macro-state/provenance/candidate-v4/exact.rs",
+    "frozen or accepted unchanged source cpg-rs/joern-parity/tests/fixtures/body-macro-state/provenance/candidate-v5/exact.rs",
+    "frozen or accepted unchanged source cpg-rs/joern-parity/tests/fixtures/body-macro-state/provenance/candidate-v6/exact.rs",
+    "frozen or accepted unchanged source cpg-rs/joern-parity/tests/fixtures/body-macro-state/provenance/candidate-v7/exact.rs",
+    "frozen or accepted unchanged source cpg-rs/joern-parity/tests/fixtures/body-macro-state/provenance/candidate-v8/exact.rs",
+    "frozen or accepted unchanged source cpg-rs/joern-parity/tests/header_macro_locations.rs",
+    "frozen or accepted unchanged source cpg-rs/joern-parity/tests/header_macros.rs",
+    "frozen or accepted unchanged source cpg-rs/joern-parity/tests/header_return_bindings.rs",
+    "frozen or accepted unchanged source cpg-rs/joern-parity/tests/inactive_declaration_context.rs",
+    "frozen or accepted unchanged source cpg-rs/joern-parity/tests/macro_cast_context.rs",
+    "frozen or accepted unchanged source cpg-rs/joern-parity/tests/macro_definitions.rs",
+    "frozen or accepted unchanged source cpg-rs/joern-parity/tests/macro_recovery.rs",
+    "frozen or accepted unchanged source cpg-rs/joern-parity/tests/nested_macro_casts.rs",
+    "frozen or accepted unchanged source cpg-rs/joern-parity/tests/numeric_literals.rs",
+    "frozen or accepted unchanged source cpg-rs/joern-parity/tests/numeric_macro_roots.rs",
+    "frozen or accepted unchanged source cpg-rs/joern-parity/tests/predefined_c_macros.rs",
+    "frozen or accepted unchanged source cpg-rs/joern-parity/tests/primitive_roles.rs",
+    "frozen or accepted unchanged source cpg-rs/joern-parity/tests/rd_scheduling.rs",
+    "frozen or accepted unchanged source cpg-rs/joern-parity/tests/sixth_context_interactions.rs",
+    "frozen or accepted unchanged source cpg-rs/joern-parity/tests/sixth_integration_promotions.rs",
+    "frozen or accepted unchanged source cpg-rs/joern-parity/tests/sizeof_expansion.rs",
+    "frozen or accepted unchanged source cpg-rs/joern-parity/tests/spaced_method_names.rs",
+    "frozen or accepted unchanged source cpg-rs/joern-parity/tests/standalone_blocks.rs",
+    "frozen or accepted unchanged source cpg-rs/joern-parity/tests/statement_macros.rs",
+    "frozen or accepted unchanged source cpg-rs/joern-parity/tests/static_modifiers.rs",
+    "frozen or accepted unchanged source cpg-rs/joern-parity/tests/typedef_aggregates.rs",
+    "frozen or accepted unchanged source cpg-rs/joern-parity/tests/typedef_existence.rs",
+    "frozen or accepted unchanged source oxidized/Cargo.lock",
+    "frozen or accepted unchanged source oxidized/Cargo.toml",
+    "frozen or accepted unchanged source oxidized/crates/cpg-schema/Cargo.toml",
+    "frozen or accepted unchanged source oxidized/crates/cpg-schema/src/lib.rs",
+    "build log",
+    "build success",
+    "replay exact frozen binding",
+    "live receipt",
+    "accepted source",
+    "body_include_macro_only exit0",
+    "body_include_macro_only expected unchanged",
+    "body_include_macro_only actual bound",
+    "body_include_macro_only stderr bound",
+    "body_include_macro_only full diff bound",
+    "body_include_macro_only full exact claimed",
+    "body_include_macro_only/api.h inputs",
+    "body_include_macro_only/main.c inputs",
+    "guarded_nested_relative_include exit0",
+    "guarded_nested_relative_include expected unchanged",
+    "guarded_nested_relative_include actual bound",
+    "guarded_nested_relative_include stderr bound",
+    "guarded_nested_relative_include full diff bound",
+    "guarded_nested_relative_include full exact claimed",
+    "guarded_nested_relative_include/main.c inputs",
+    "guarded_nested_relative_include/headers/api.h inputs",
+    "guarded_nested_relative_include/headers/leaf values.h inputs",
+    "inactive_body_include exit0",
+    "inactive_body_include expected unchanged",
+    "inactive_body_include actual bound",
+    "inactive_body_include stderr bound",
+    "inactive_body_include full diff bound",
+    "inactive_body_include full exact claimed",
+    "inactive_body_include/main.c inputs",
+    "inactive_body_include/inactive.h inputs",
+    "nested_scope_typedef_macro exit0",
+    "nested_scope_typedef_macro expected unchanged",
+    "nested_scope_typedef_macro actual bound",
+    "nested_scope_typedef_macro stderr bound",
+    "nested_scope_typedef_macro full diff bound",
+    "nested_scope_typedef_macro full exact claimed",
+    "nested_scope_typedef_macro/main.c inputs",
+    "nested_scope_typedef_macro/scope.h inputs",
+    "primitive_static_array_include exit0",
+    "primitive_static_array_include expected unchanged",
+    "primitive_static_array_include actual bound",
+    "primitive_static_array_include stderr bound",
+    "primitive_static_array_include full diff bound",
+    "primitive_static_array_include full exact claimed",
+    "primitive_static_array_include/main.c inputs",
+    "primitive_static_array_include/table.h inputs",
+    "primitive_static_array_inline exit0",
+    "primitive_static_array_inline expected unchanged",
+    "primitive_static_array_inline actual bound",
+    "primitive_static_array_inline stderr bound",
+    "primitive_static_array_inline full diff bound",
+    "primitive_static_array_inline full exact claimed",
+    "primitive_static_array_inline/main.c inputs",
+    "repeated_include_context exit0",
+    "repeated_include_context expected unchanged",
+    "repeated_include_context actual bound",
+    "repeated_include_context stderr bound",
+    "repeated_include_context full diff bound",
+    "repeated_include_context full exact claimed",
+    "repeated_include_context/repeat.h inputs",
+    "repeated_include_context/main.c inputs",
+    "repeated_include_context/nested/table.h inputs",
+    "tiny_fixedtables_include exit0",
+    "tiny_fixedtables_include expected unchanged",
+    "tiny_fixedtables_include actual bound",
+    "tiny_fixedtables_include stderr bound",
+    "tiny_fixedtables_include full diff bound",
+    "tiny_fixedtables_include full exact claimed",
+    "tiny_fixedtables_include/fixed.h inputs",
+    "tiny_fixedtables_include/main.c inputs",
+    "tiny_fixedtables_inline exit0",
+    "tiny_fixedtables_inline expected unchanged",
+    "tiny_fixedtables_inline actual bound",
+    "tiny_fixedtables_inline stderr bound",
+    "tiny_fixedtables_inline full diff bound",
+    "tiny_fixedtables_inline full exact claimed",
+    "tiny_fixedtables_inline/main.c inputs",
+    "unresolved_header_controls exit0",
+    "unresolved_header_controls expected unchanged",
+    "unresolved_header_controls actual bound",
+    "unresolved_header_controls stderr bound",
+    "unresolved_header_controls full diff bound",
+    "unresolved_header_controls full exact claimed",
+    "unresolved_header_controls/main.c inputs",
+    "unresolved_header_controls/decoys/missing-system.h inputs",
+    "unresolved_header_controls/decoys/missing.h inputs",
+    "used_scalar_include exit0",
+    "used_scalar_include expected unchanged",
+    "used_scalar_include actual bound",
+    "used_scalar_include stderr bound",
+    "used_scalar_include full diff bound",
+    "used_scalar_include full exact claimed",
+    "used_scalar_include/value.h inputs",
+    "used_scalar_include/main.c inputs",
+    "used_scalar_inline exit0",
+    "used_scalar_inline expected unchanged",
+    "used_scalar_inline actual bound",
+    "used_scalar_inline stderr bound",
+    "used_scalar_inline full diff bound",
+    "used_scalar_inline full exact claimed",
+    "used_scalar_inline/main.c inputs",
+    "12 cases and8exact",
+    "two baseline exact retained",
+    "same complete macro method",
+    "restored owner EDGES|CONTAINS D:nested/table.h:<global> -> nested/table.h:N:int(0)#0",
+    "restored owner EDGES|SOURCE_FILE nested/table.h:N:int(0)#0 -> F:nested/table.h",
+    "first complete method now exact"
+  ],
+  "sourceSha256": "1b23a6834a9c68ae7c1639c3d5f92116bf2eaeb496af2b9ee32acc6e0605b750",
+  "binarySha256": "589ad4d85fb44e8b0b54c71731bb412bcf9aee271a84a1721d41dc8489c81fb4",
+  "projects": 12,
+  "baselineExact": 2,
+  "candidateExact": 8,
+  "formerlyExactLost": 0,
+  "rawMatchingGained": 1201,
+  "rawMatchingLost": 2,
+  "rows": [
+    {
+      "case": "body_include_macro_only",
+      "baselineExact": false,
+      "candidateExact": true,
+      "matchingGained": 25,
+      "matchingLost": 0,
+      "allAdded": 25,
+      "allRemoved": 22,
+      "live": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-include-diagnosis-v4/runs/first-complete-reference-batch/expected/body_include_macro_only/expected.txt",
+        "sha256": "c158364df1717bdc80e6d94d22b9567689d8c7d8d8517a96eabc44b8a993f49a",
+        "bytes": 6675
+      },
+      "baseline": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/tenth-batch/frozen-baseline-v1/body_include_macro_only/actual.txt",
+        "sha256": "18fe1622a2ea7cfa96c304ef51aca49fc29abfa0c14be8a6f03765147c84ea77",
+        "bytes": 6495
+      },
+      "candidate": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/replay-v2/body_include_macro_only/actual.txt",
+        "sha256": "c158364df1717bdc80e6d94d22b9567689d8c7d8d8517a96eabc44b8a993f49a",
+        "bytes": 6675
+      },
+      "fullCandidateDiff": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/replay-v2/body_include_macro_only/complete.diff",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "independentRecordDelta": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/tenth-body-include-v2-review/body_include_macro_only.record-delta.json",
+        "sha256": "59b9485869578a06f2aece462bcc6fca811b9cc222a9d98fd555c4b96abeae7d",
+        "bytes": 4029
+      }
+    },
+    {
+      "case": "guarded_nested_relative_include",
+      "baselineExact": false,
+      "candidateExact": true,
+      "matchingGained": 70,
+      "matchingLost": 0,
+      "allAdded": 70,
+      "allRemoved": 45,
+      "live": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-include-diagnosis-v4/runs/first-complete-reference-batch/expected/guarded_nested_relative_include/expected.txt",
+        "sha256": "43156ea80dd53d452190969c4a313d5cc2a295a77806a8329511ca71885aa5cb",
+        "bytes": 19895
+      },
+      "baseline": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/tenth-batch/frozen-baseline-v1/guarded_nested_relative_include/actual.txt",
+        "sha256": "be2cd15fb5087ad64c9c402d23b23c56541e831983a961d9d03f2bc5ae27afc5",
+        "bytes": 18581
+      },
+      "candidate": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/replay-v2/guarded_nested_relative_include/actual.txt",
+        "sha256": "43156ea80dd53d452190969c4a313d5cc2a295a77806a8329511ca71885aa5cb",
+        "bytes": 19895
+      },
+      "fullCandidateDiff": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/replay-v2/guarded_nested_relative_include/complete.diff",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "independentRecordDelta": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/tenth-body-include-v2-review/guarded_nested_relative_include.record-delta.json",
+        "sha256": "cd09c824985a79668b8f3cfc59ac781cc9933bf054e48c0b97744b0623533fce",
+        "bytes": 10871
+      }
+    },
+    {
+      "case": "inactive_body_include",
+      "baselineExact": false,
+      "candidateExact": true,
+      "matchingGained": 1,
+      "matchingLost": 0,
+      "allAdded": 1,
+      "allRemoved": 1,
+      "live": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-include-diagnosis-v4/runs/first-complete-reference-batch/expected/inactive_body_include/expected.txt",
+        "sha256": "dee62aa4096c4c46c16ebb0a91c5906c1f6786a8b5483d6508ad2837a6a80f3e",
+        "bytes": 16102
+      },
+      "baseline": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/tenth-batch/frozen-baseline-v1/inactive_body_include/actual.txt",
+        "sha256": "cbbcf32a5e206bd6fca3c2b6ca4cd4c4d2a10b7833395a471ab5b642a91b61fe",
+        "bytes": 16102
+      },
+      "candidate": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/replay-v2/inactive_body_include/actual.txt",
+        "sha256": "dee62aa4096c4c46c16ebb0a91c5906c1f6786a8b5483d6508ad2837a6a80f3e",
+        "bytes": 16102
+      },
+      "fullCandidateDiff": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/replay-v2/inactive_body_include/complete.diff",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "independentRecordDelta": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/tenth-body-include-v2-review/inactive_body_include.record-delta.json",
+        "sha256": "70b5e80718605a0df6656f0965e98e414dd120c4fb86d8f59215cad10e2af30a",
+        "bytes": 603
+      }
+    },
+    {
+      "case": "nested_scope_typedef_macro",
+      "baselineExact": false,
+      "candidateExact": true,
+      "matchingGained": 150,
+      "matchingLost": 0,
+      "allAdded": 150,
+      "allRemoved": 110,
+      "live": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-include-diagnosis-v4/runs/first-complete-reference-batch/expected/nested_scope_typedef_macro/expected.txt",
+        "sha256": "e73d9af14f883513c4f5f343a0a0c84257d4e0d700186565927958f9c4bb66a1",
+        "bytes": 26908
+      },
+      "baseline": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/tenth-batch/frozen-baseline-v1/nested_scope_typedef_macro/actual.txt",
+        "sha256": "6c2d6bafbe692e3d1cfa5bd02f7ee1f08a75371cd08fd4b574cb0572e7b5dff2",
+        "bytes": 24795
+      },
+      "candidate": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/replay-v2/nested_scope_typedef_macro/actual.txt",
+        "sha256": "e73d9af14f883513c4f5f343a0a0c84257d4e0d700186565927958f9c4bb66a1",
+        "bytes": 26908
+      },
+      "fullCandidateDiff": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/replay-v2/nested_scope_typedef_macro/complete.diff",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "independentRecordDelta": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/tenth-body-include-v2-review/nested_scope_typedef_macro.record-delta.json",
+        "sha256": "8365387200aad0246b4d4d6268703f86e5e17cb42fd38404b605381a863d40c1",
+        "bytes": 24976
+      }
+    },
+    {
+      "case": "primitive_static_array_include",
+      "baselineExact": false,
+      "candidateExact": true,
+      "matchingGained": 143,
+      "matchingLost": 0,
+      "allAdded": 143,
+      "allRemoved": 36,
+      "live": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-include-diagnosis-v4/runs/first-complete-reference-batch/expected/primitive_static_array_include/expected.txt",
+        "sha256": "7a413043d5f75a93899094c5efd86725bad67c504e81b463d5530af182c8759c",
+        "bytes": 21379
+      },
+      "baseline": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/tenth-batch/frozen-baseline-v1/primitive_static_array_include/actual.txt",
+        "sha256": "5cf358788ddb5b9a516fa01dc203241b1f9f0c276739df9febd3ba0f18e0b7fd",
+        "bytes": 15243
+      },
+      "candidate": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/replay-v2/primitive_static_array_include/actual.txt",
+        "sha256": "7a413043d5f75a93899094c5efd86725bad67c504e81b463d5530af182c8759c",
+        "bytes": 21379
+      },
+      "fullCandidateDiff": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/replay-v2/primitive_static_array_include/complete.diff",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "independentRecordDelta": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/tenth-body-include-v2-review/primitive_static_array_include.record-delta.json",
+        "sha256": "1c059b765d3160c296c7edc5466f9cf6e94f926fb72f7d3109519a3d6c149fc3",
+        "bytes": 20004
+      }
+    },
+    {
+      "case": "primitive_static_array_inline",
+      "baselineExact": true,
+      "candidateExact": true,
+      "matchingGained": 0,
+      "matchingLost": 0,
+      "allAdded": 0,
+      "allRemoved": 0,
+      "live": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-include-diagnosis-v4/runs/first-complete-reference-batch/expected/primitive_static_array_inline/expected.txt",
+        "sha256": "d709ab346526f395dbab7d12c694fe3f16b6f05dc0c288d4cfc05b6da32a3a70",
+        "bytes": 18012
+      },
+      "baseline": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/tenth-batch/frozen-baseline-v1/primitive_static_array_inline/actual.txt",
+        "sha256": "d709ab346526f395dbab7d12c694fe3f16b6f05dc0c288d4cfc05b6da32a3a70",
+        "bytes": 18012
+      },
+      "candidate": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/replay-v2/primitive_static_array_inline/actual.txt",
+        "sha256": "d709ab346526f395dbab7d12c694fe3f16b6f05dc0c288d4cfc05b6da32a3a70",
+        "bytes": 18012
+      },
+      "fullCandidateDiff": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/replay-v2/primitive_static_array_inline/complete.diff",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "independentRecordDelta": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/tenth-body-include-v2-review/primitive_static_array_inline.record-delta.json",
+        "sha256": "e72c2b840c589f86797aea6974684b5eb65851d48a548e0df6803b23c5dfcf9a",
+        "bytes": 87
+      }
+    },
+    {
+      "case": "repeated_include_context",
+      "baselineExact": false,
+      "candidateExact": false,
+      "matchingGained": 424,
+      "matchingLost": 2,
+      "allAdded": 585,
+      "allRemoved": 132,
+      "live": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-include-diagnosis-v4/runs/first-complete-reference-batch/expected/repeated_include_context/expected.txt",
+        "sha256": "febd4ffe0c249f8dbd0f4fac596f35b065914292f1d1e886f1d691a1c87ffaba",
+        "bytes": 55359
+      },
+      "baseline": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/tenth-batch/frozen-baseline-v1/repeated_include_context/actual.txt",
+        "sha256": "805fc908e10878d4feeb9fe59dc7dad936541d1c97da1ffb201cbc11ffaa8a23",
+        "bytes": 29655
+      },
+      "candidate": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/replay-v2/repeated_include_context/actual.txt",
+        "sha256": "308c876d33cccfc46676406966a5b2ce7d4b2d0dbb02e2019c6393415901295e",
+        "bytes": 56548
+      },
+      "fullCandidateDiff": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/replay-v2/repeated_include_context/complete.diff",
+        "sha256": "bea072e5d7bf37d83d3221a0a459de864f1e04f13f1511ca76077471080cfa4f",
+        "bytes": 32421
+      },
+      "independentRecordDelta": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/tenth-body-include-v2-review/repeated_include_context.record-delta.json",
+        "sha256": "03776f26b15fe50c11c962d40dea57bae6467744bdb02713556546b65c7638ec",
+        "bytes": 74804
+      }
+    },
+    {
+      "case": "tiny_fixedtables_include",
+      "baselineExact": false,
+      "candidateExact": false,
+      "matchingGained": 337,
+      "matchingLost": 0,
+      "allAdded": 337,
+      "allRemoved": 82,
+      "live": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-include-diagnosis-v4/runs/first-complete-reference-batch/expected/tiny_fixedtables_include/expected.txt",
+        "sha256": "fc4a1360d6f10152edb364c346a47ae73d2df2460fe5ef12da2d2e79cbb7dd3f",
+        "bytes": 48334
+      },
+      "baseline": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/tenth-batch/frozen-baseline-v1/tiny_fixedtables_include/actual.txt",
+        "sha256": "651cc81c2b575285ad1e5c569884b00ed4f65d38d3c7eec762cc6633159c8223",
+        "bytes": 31710
+      },
+      "candidate": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/replay-v2/tiny_fixedtables_include/actual.txt",
+        "sha256": "3b15e5adbaa6fba426e00c4b695cafb905e530dc4627573646e3388279393796",
+        "bytes": 48346
+      },
+      "fullCandidateDiff": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/replay-v2/tiny_fixedtables_include/complete.diff",
+        "sha256": "e3fdc72c09e81e89999191e20cab3755d63d210dd7a179ab2c06c8165b905611",
+        "bytes": 4525
+      },
+      "independentRecordDelta": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/tenth-body-include-v2-review/tiny_fixedtables_include.record-delta.json",
+        "sha256": "0290f1aabc1e701d6f9e14c6c34a9f4ad2cc93669954fbeaa33af5c61b825b3a",
+        "bytes": 53867
+      }
+    },
+    {
+      "case": "tiny_fixedtables_inline",
+      "baselineExact": false,
+      "candidateExact": false,
+      "matchingGained": 0,
+      "matchingLost": 0,
+      "allAdded": 0,
+      "allRemoved": 0,
+      "live": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-include-diagnosis-v4/runs/first-complete-reference-batch/expected/tiny_fixedtables_inline/expected.txt",
+        "sha256": "6d613c7085ab54541cc1d9fa83494748e33fe70bfc5c541ee39f12aa8046cadd",
+        "bytes": 38652
+      },
+      "baseline": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/tenth-batch/frozen-baseline-v1/tiny_fixedtables_inline/actual.txt",
+        "sha256": "7fc32775a3481703dbe3d002b091e4c68c04bea03c0b2d808c6711e06307fb55",
+        "bytes": 38664
+      },
+      "candidate": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/replay-v2/tiny_fixedtables_inline/actual.txt",
+        "sha256": "7fc32775a3481703dbe3d002b091e4c68c04bea03c0b2d808c6711e06307fb55",
+        "bytes": 38664
+      },
+      "fullCandidateDiff": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/replay-v2/tiny_fixedtables_inline/complete.diff",
+        "sha256": "e3aebb9ba0e778322b3cfd241bae057485d0a2a8f231a435deddaed3edda5642",
+        "bytes": 4484
+      },
+      "independentRecordDelta": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/tenth-body-include-v2-review/tiny_fixedtables_inline.record-delta.json",
+        "sha256": "e72c2b840c589f86797aea6974684b5eb65851d48a548e0df6803b23c5dfcf9a",
+        "bytes": 87
+      }
+    },
+    {
+      "case": "unresolved_header_controls",
+      "baselineExact": false,
+      "candidateExact": false,
+      "matchingGained": 1,
+      "matchingLost": 0,
+      "allAdded": 1,
+      "allRemoved": 1,
+      "live": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-include-diagnosis-v4/runs/first-complete-reference-batch/expected/unresolved_header_controls/expected.txt",
+        "sha256": "11f5a05e9c4c5f9ed1420f7ddd69e503c800596a00374b71f6c6adabbbdd9635",
+        "bytes": 14984
+      },
+      "baseline": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/tenth-batch/frozen-baseline-v1/unresolved_header_controls/actual.txt",
+        "sha256": "589abaef9124c91d8974e91bb34749994bf3e0b23fdccd3eb573e24dbe5964a5",
+        "bytes": 13451
+      },
+      "candidate": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/replay-v2/unresolved_header_controls/actual.txt",
+        "sha256": "c6de4af73fa85060da17bdb4a33a1d50614b906e92d4b5c2c3307b011017bb43",
+        "bytes": 13451
+      },
+      "fullCandidateDiff": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/replay-v2/unresolved_header_controls/complete.diff",
+        "sha256": "dc479c6cf0a335c3b6112680867e4a4e35c9917722bbf06b60add72fc540cd95",
+        "bytes": 10030
+      },
+      "independentRecordDelta": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/tenth-body-include-v2-review/unresolved_header_controls.record-delta.json",
+        "sha256": "70b5e80718605a0df6656f0965e98e414dd120c4fb86d8f59215cad10e2af30a",
+        "bytes": 603
+      }
+    },
+    {
+      "case": "used_scalar_include",
+      "baselineExact": false,
+      "candidateExact": true,
+      "matchingGained": 50,
+      "matchingLost": 0,
+      "allAdded": 50,
+      "allRemoved": 25,
+      "live": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-include-diagnosis-v4/runs/first-complete-reference-batch/expected/used_scalar_include/expected.txt",
+        "sha256": "a0e7f199b0f8c6f197508cc6f998f509ea515ff368cbe3048f8eb021fbee14ad",
+        "bytes": 10852
+      },
+      "baseline": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/tenth-batch/frozen-baseline-v1/used_scalar_include/actual.txt",
+        "sha256": "bd13f304ea9a2cef3cf073ede4592411062d9a6ae8dc375d00f7950b57f4487a",
+        "bytes": 9526
+      },
+      "candidate": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/replay-v2/used_scalar_include/actual.txt",
+        "sha256": "a0e7f199b0f8c6f197508cc6f998f509ea515ff368cbe3048f8eb021fbee14ad",
+        "bytes": 10852
+      },
+      "fullCandidateDiff": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/replay-v2/used_scalar_include/complete.diff",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "independentRecordDelta": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/tenth-body-include-v2-review/used_scalar_include.record-delta.json",
+        "sha256": "e478f0d626541facde6b8a75fddc2f5a0fe843f508915498b297953078757a72",
+        "bytes": 7742
+      }
+    },
+    {
+      "case": "used_scalar_inline",
+      "baselineExact": true,
+      "candidateExact": true,
+      "matchingGained": 0,
+      "matchingLost": 0,
+      "allAdded": 0,
+      "allRemoved": 0,
+      "live": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-macro-state/.local/body-include-diagnosis-v4/runs/first-complete-reference-batch/expected/used_scalar_inline/expected.txt",
+        "sha256": "f4104faa7c7c5d9b0d23a34be8e6834d3e7a5a72b2f7312c43c2e8b78aea7dc6",
+        "bytes": 8420
+      },
+      "baseline": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-sprint/.local/astra-sprint/tenth-batch/frozen-baseline-v1/used_scalar_inline/actual.txt",
+        "sha256": "f4104faa7c7c5d9b0d23a34be8e6834d3e7a5a72b2f7312c43c2e8b78aea7dc6",
+        "bytes": 8420
+      },
+      "candidate": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/replay-v2/used_scalar_inline/actual.txt",
+        "sha256": "f4104faa7c7c5d9b0d23a34be8e6834d3e7a5a72b2f7312c43c2e8b78aea7dc6",
+        "bytes": 8420
+      },
+      "fullCandidateDiff": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/replay-v2/used_scalar_inline/complete.diff",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "independentRecordDelta": {
+        "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/tenth-body-include-v2-review/used_scalar_inline.record-delta.json",
+        "sha256": "e72c2b840c589f86797aea6974684b5eb65851d48a548e0df6803b23c5dfcf9a",
+        "bytes": 87
+      }
+    }
+  ],
+  "bindings": [
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/frozen-v2/bindings.json",
+      "sha256": "e9087c8338d40cf192ffad1d906507c4113c7dc24f9533b330e5522d7fe4c59f",
+      "bytes": 23383
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/replay-v2/replay.json",
+      "sha256": "c5479392804894a0cf06fcaae41973fd9eb38f5598d661439970c2cecd62cd7c",
+      "bytes": 38444
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-body-includes/.local/body-includes/frozen-v2/build.log",
+      "sha256": "0952941b5a2bdcfd7e5b1ca94b6d46ee885d2b046445eedd0756bc894a4c6669",
+      "bytes": 342
+    },
+    {
+      "path": "/Users/shayaunnejad/vibe-code/.codex-worktrees/joern-oxidized-astra-typedef-aggregates/.local/tenth-body-include-v2-review/ownership-closure.json",
+      "sha256": "b2ba3ddfa1ace7e52cf18d595fb64503052f26fd61d7e9546d697e5c8ff8673f",
+      "bytes": 30683
+    }
+  ],
+  "noProducersOrBuilds": true
+}

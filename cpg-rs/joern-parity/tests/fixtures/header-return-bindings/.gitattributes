@@ -1,0 +1,6 @@
+# Byte-exact diagnostic and producer transcripts may include whitespace markers.
+*.diff -whitespace
+*.stderr -whitespace
+*.log -whitespace
+# Fresh metadata transcript includes empty CODE locations with a trailing space.
+provenance/review/live.stdout -whitespace
